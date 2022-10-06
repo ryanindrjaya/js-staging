@@ -179,7 +179,14 @@ const Pembelian = ({ props }) => {
     const res = await req.json();
 
     if (req.status === 200) {
-      router.reload();
+      const response = await fetchData(cookies);
+      setPurchase(response);
+
+      openNotificationWithIcon(
+        "success",
+        "Status berhasil dirubah",
+        "Status berhasil dirubah. Silahkan cek detail order pembelian"
+      );
     } else {
       openNotificationWithIcon(
         "error",
@@ -194,6 +201,22 @@ const Pembelian = ({ props }) => {
       message: title,
       description: message,
     });
+  };
+
+  const fetchData = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_DB + "/purchases?populate=deep";
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = req.json();
+
+    return res;
   };
 
   return (

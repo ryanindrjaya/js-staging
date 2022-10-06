@@ -5,7 +5,6 @@ import {
   EditOutlined,
   PrinterOutlined,
   UnorderedListOutlined,
-  SmallDashOutlined,
 } from "@ant-design/icons";
 import { useRouter } from "next/router";
 
@@ -17,6 +16,7 @@ export default function ReactDataTable({
   onChangeStatusPengiriman,
   onChangeStatus,
 }) {
+
   const router = useRouter();
   const { Option } = Select;
 
@@ -215,7 +215,7 @@ export default function ReactDataTable({
       customStyles={customStyles}
       onChangePage={onPageChange}
       paginationRowsPerPageOptions={[10]}
-      paginationTotalRows={data?.meta?.pagination.total}
+      paginationTotalRows={data?.meta?.pagination?.total}
       columns={columns}
       data={data.data}
       pagination

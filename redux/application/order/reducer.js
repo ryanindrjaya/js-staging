@@ -4,7 +4,6 @@ const initState = {
   productList: [],
   productInfo: {},
 };
-const productInfo = {};
 
 export default function Reducer(state = initState, action) {
   switch (action.type) {
