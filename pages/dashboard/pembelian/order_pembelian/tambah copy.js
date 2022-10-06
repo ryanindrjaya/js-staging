@@ -23,8 +23,6 @@ import {
   notification,
 } from "antd";
 
-const { addproduct } = action;
-
 const Tambah = ({ props }) => {
   var locations = props.locations.data;
   const [selectedLocations, setSelectedLocations] = useState();
@@ -60,13 +58,13 @@ const Tambah = ({ props }) => {
   var totalPurchases = String(
     props.purchases?.meta?.pagination.total + 1
   ).padStart(3, "0");
-
   var today = new Date();
   var dd = String(today.getDate()).padStart(2, "0");
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
 
   const mapPriceList = {};
+
   const { TextArea } = Input;
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -400,11 +398,11 @@ const Tambah = ({ props }) => {
   return (
     <>
       <Head>
-        <title>Tambahkan Pembelian Barang</title>
+        <title>Tambahkan Order Pembelian</title>
       </Head>
       <DashboardLayout>
         <LayoutWrapper style={{}}>
-          <TitlePage titleText={"Tambah Pembelian Barang"} />
+          <TitlePage titleText={"Tambah Order Pembelian"} />
           <LayoutContent>
             <Form
               form={form}
@@ -421,7 +419,7 @@ const Tambah = ({ props }) => {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="no_po"
-                    initialValue={`PB/ET/${totalPurchases}/${mm}/${yyyy}`}
+                    initialValue={`PO/ET/${totalPurchases}/${mm}/${yyyy}`}
                     rules={[
                       {
                         required: true,
@@ -443,7 +441,7 @@ const Tambah = ({ props }) => {
                     ]}
                   >
                     <DatePicker
-                      placeholder="Tanggal Pembelian"
+                      placeholder="Tanggal Pesanan"
                       size="large"
                       format={"DD/MM/YYYY"}
                       style={{ width: "100%" }}
@@ -451,49 +449,27 @@ const Tambah = ({ props }) => {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="status" initialValue={"Diproses"}>
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                    >
-                      <Select.Option value="Diproses">Diproses</Select.Option>
-                      <Select.Option value="Selesai">Selesai</Select.Option>
-                    </Select>
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-2/4 px-3 mb-2 md:mb-0">
-                  <p className="font-bold m-0">Alamat Supplier : </p>
-                  <p className="m-0"> {supplier?.attributes.address}</p>
-                  <p> {supplier?.attributes.phone}</p>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    name="location"
+                    name="delivery_date"
                     rules={[
                       {
                         required: true,
-                        message: "Lokasi tidak boleh kosong!",
+                        message: "Tanggal tidak boleh kosong!",
                       },
                     ]}
                   >
-                    <Select
-                      placeholder="Pilih Lokasi"
+                    <DatePicker
+                      placeholder="Tanggal Pengiriman"
                       size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                    >
-                      {locations.map((element) => {
-                        return (
-                          <Select.Option value={element.id}>
-                            {element.attributes.name}
-                          </Select.Option>
-                        );
-                      })}
-                    </Select>
+                      format={"DD/MM/YYYY"}
+                      style={{ width: "100%" }}
+                    />
                   </Form.Item>
+                </div>
+                <div className="w-full md:w-3/4 px-3 mb-2 md:mb-0">
+                  <p className="font-bold m-0">Alamat Supplier : </p>
+                  <p className="m-0"> {supplier?.attributes.address}</p>
+                  <p> {supplier?.attributes.phone}</p>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Input.Group compact>
@@ -555,41 +531,11 @@ const Tambah = ({ props }) => {
               </div>
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
-                  <Form.Item name="disc_type">
-                    <Select
-                      placeholder="Pilih Jenis Diskon"
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                    >
-                      <Select.Option value="Tetap">Tetap</Select.Option>
-                      <Select.Option value="Persentase">
-                        Persentase
-                      </Select.Option>
-                    </Select>
+                  <Form.Item name="delivery_details">
+                    <TextArea rows={4} placeholder="Detail Pengiriman" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
-                  <Form.Item name="disc_value" noStyle>
-                    <InputNumber
-                      size="large"
-                      placeholder="Diskon"
-                      style={{ width: "100%" }}
-                    />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
-                  <Form.Item name="delivery_fee" noStyle>
-                    <InputNumber
-                      size="large"
-                      placeholder="Biaya Pengiriman"
-                      style={{ width: "100%" }}
-                    />
-                  </Form.Item>
-                </div>
-
-                {/* <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item name="delivery_address">
                     <TextArea rows={4} placeholder="Alamat Pengiriman" />
                   </Form.Item>
@@ -618,8 +564,33 @@ const Tambah = ({ props }) => {
                       <Select.Option value="Terkirim">Terkirim</Select.Option>
                     </Select>
                   </Form.Item>
-                </div> */}
-                {/* <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0"></div>
+                </div>
+                <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
+                  <Form.Item
+                    name="location"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Lokasi tidak boleh kosong!",
+                      },
+                    ]}
+                  >
+                    <Select
+                      size="large"
+                      style={{
+                        width: "100%",
+                      }}
+                    >
+                      {locations.map((element) => {
+                        return (
+                          <Select.Option value={element.id}>
+                            {element.attributes.name}
+                          </Select.Option>
+                        );
+                      })}
+                    </Select>
+                  </Form.Item>
+                </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 mt-5 md:mb-0">
                   <Upload>
                     <Button
@@ -631,7 +602,7 @@ const Tambah = ({ props }) => {
                       Upload Dokumen
                     </Button>
                   </Upload>
-                </div> */}
+                </div>
               </div>
               <div className="flex justify-end font-bold w-full mb-3 md:w-3/4">
                 <p>Biaya Tambahan Lain-lain</p>
@@ -738,10 +709,8 @@ const Tambah = ({ props }) => {
                   </div>
                 ) : (
                   <Button
-                    onClick={() => {
-                      dispatch(addproduct());
-                    }}
-                    // htmlType="submit"
+                    onClick={validateError}
+                    htmlType="submit"
                     className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
                   >
                     Tambah
@@ -790,7 +759,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchDataPurchases = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/purchasings";
+  const endpoint = process.env.NEXT_PUBLIC_DB + "/purchases";
   const options = {
     method: "GET",
     headers: {
