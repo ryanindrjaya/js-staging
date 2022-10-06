@@ -11,9 +11,27 @@ import { toast } from "react-toastify";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
 import OrderTable from "@iso/components/Form/AddOrder/OrderTable";
+<<<<<<< HEAD
 import { Form, Button, Spin, Input, DatePicker, Select, InputNumber, Upload, notification } from "antd";
+=======
+import { useDispatch, useSelector } from "react-redux";
+import {
+  Form,
+  Button,
+  Spin,
+  Input,
+  DatePicker,
+  Select,
+  InputNumber,
+  Upload,
+  notification,
+} from "antd";
+>>>>>>> 4c9eedfa69a10539013f113f6eaa6d17a0ba2407
 
 const Tambah = ({ props }) => {
+  const dispatch = useDispatch();
+  const products = useSelector((state) => state.Order);
+
   var locations = props.locations.data;
   const [selectedLocations, setSelectedLocations] = useState();
   const [form] = Form.useForm();
@@ -31,6 +49,8 @@ const Tambah = ({ props }) => {
   const [tempoDays, setTempoDays] = useState(0);
   const [tempoOption, setTempoOption] = useState("Hari");
   const [doneCreateDetail, setDoneCreateDetail] = useState(false);
+  const [productTotalPrice, setProductTotalPrice] = useState({});
+  const [productSubTotal, setProductSubTotal] = useState({});
   const router = useRouter();
 
   // temp
@@ -39,6 +59,7 @@ const Tambah = ({ props }) => {
 
   const cookies = nookies.get(null, "token");
   const tempList = [];
+
   var tempListId = [];
   var tempProductListId = [];
   var tempSupplierId = 0;
@@ -67,18 +88,25 @@ const Tambah = ({ props }) => {
   };
 
   const createDetailOrder = async () => {
-    if (mapPrice) {
-      productList.forEach((element) => {
-        const id = element.id;
-        var qty = parseInt(dataValues.jumlah_qty[id] ?? 1);
-        var unit = "";
-        var unitPrice = 0;
-        var unitPriceAfterDisc = 0;
-        var subTotal = 0;
+    products.productList.forEach((element) => {
+      // default value
+      var qty = 1;
+      var disc = 0;
+      var unit = element.attributes.unit_1;
+      var unitPrice = element.attributes.buy_price_1;
+      var unitPriceAfterDisc = element.attributes.buy_price_1;
+      var subTotal = unitPriceAfterDisc * qty;
+      const id = element.id;
 
-        if (mapPrice[id]) {
-          var priceDisc = dataValues.disc_rp[id] ?? 0;
+      qty = products.productInfo[id]?.qty ?? 1;
+      disc = products.productInfo[id]?.disc ?? 0;
+      unit = products.productInfo[id]?.unit ?? element.attributes.unit_1;
+      unitPrice =
+        products.productInfo?.[id]?.priceUnit ?? element.attributes.buy_price_1;
+      unitPriceAfterDisc = productTotalPrice?.[id];
+      subTotal = productSubTotal?.[id];
 
+<<<<<<< HEAD
           unitPrice = mapPrice[id]?.priceUnit;
           subTotal = mapPrice[id]?.priceUnit - priceDisc;
 
@@ -113,21 +141,44 @@ const Tambah = ({ props }) => {
     var disc = 0;
     if (price) if (price[productId]) disc = price[productId] === null ? 0 : price[productId].price_1st;
 
+=======
+      // console.log(qty, disc, unit, unitPrice, unitPriceAfterDisc, subTotal, id);
+      POSTPurchaseDetail(
+        qty,
+        disc,
+        unit,
+        unitPrice,
+        unitPriceAfterDisc,
+        subTotal,
+        id
+      );
+    });
+  };
+
+  const POSTPurchaseDetail = async (
+    qty,
+    disc,
+    unit,
+    unitPrice,
+    unitPriceAfterDisc,
+    subTotal,
+    id
+  ) => {
+>>>>>>> 4c9eedfa69a10539013f113f6eaa6d17a0ba2407
     var data = {
       data: {
         total_order: String(qty),
         unit_order: unit,
-        unit_price: priceUnit,
-        unit_price_after_disc: parseInt(priceUnitAfterDisc),
+        unit_price: unitPrice,
+        unit_price_after_disc: parseInt(unitPriceAfterDisc),
         sub_total: parseInt(subTotal),
-        products: { id: productId },
+        products: { id: id },
         disc: parseInt(disc),
       },
     };
 
     const endpoint = process.env.NEXT_PUBLIC_DB + "/purchase-details";
     const JSONdata = JSON.stringify(data);
-
     const options = {
       method: "POST",
       headers: {
@@ -142,7 +193,7 @@ const Tambah = ({ props }) => {
 
     if (req.status === 200) {
       tempListId.push(res.data?.id);
-      if (tempListId.length === productList.length) {
+      if (tempListId.length === products.productList.length) {
         setListId(tempListId);
       }
     }
@@ -269,15 +320,6 @@ const Tambah = ({ props }) => {
     }
   };
 
-  const sumTotalPrice = () => {
-    var total = 0;
-    for (var key in mapPriceList) {
-      total = total + mapPriceList[key];
-    }
-
-    setTotalPrice(total);
-  };
-
   const sumDeliveryPrice = (price) => {
     setBiayaPengiriman(price);
   };
@@ -293,13 +335,47 @@ const Tambah = ({ props }) => {
     setBiayaTambahan(newTotal);
   };
 
-  const changeQty = (values, data) => {
-    setQty({
-      ...qty,
-      [data.id]: {
-        qty: values,
-      },
-    });
+  const calculatePriceAfterDisc = (row) => {
+    var priceUnit = row.attributes[`buy_price_1`];
+    var qty = 1;
+    var disc = 0;
+
+    const defaultDp1 = row.attributes?.unit_1_dp1;
+    const defaultDp2 = row.attributes?.unit_1_dp2;
+    const defaultDp3 = row.attributes?.unit_1_dp3;
+
+    // check if price changed
+    if (products.productInfo[row.id]?.priceUnit) {
+      priceUnit =
+        products.productInfo[row.id].priceUnit ?? row.attributes[`buy_price_1`];
+    }
+
+    // check if qty changed
+    if (products.productInfo[row.id]?.qty) {
+      qty = products.productInfo[row.id]?.qty ?? 1;
+    }
+
+    // check if disc changed
+    if (products.productInfo[row.id]?.disc) {
+      disc = products.productInfo[row.id]?.disc ?? 0;
+    }
+
+    priceUnit = priceUnit - disc;
+    var price1 = calculatePercentage(priceUnit, defaultDp1);
+    var price2 = calculatePercentage(price1, defaultDp2);
+    var price3 = calculatePercentage(price2, defaultDp3);
+
+    // set product price after disc & sub total
+    productTotalPrice[row.id] = price3;
+    productSubTotal[row.id] = price3 * qty;
+
+    // set all product total
+    var total = 0;
+    for (var key in productSubTotal) {
+      total = total + productSubTotal[key];
+    }
+    setTotalPrice(total);
+    return formatter.format(productTotalPrice[row.id]);
   };
 
   const calculatePercentage = (value, percent) => {
@@ -326,8 +402,11 @@ const Tambah = ({ props }) => {
   }, [dataValues]);
 
   useEffect(() => {
-    // console.log(price);
-  }, [price]);
+    var total = 0;
+    for (var key in productTotalPrice) {
+      total = total + productTotalPrice[key];
+    }
+  }, [totalPrice]);
 
   const openNotificationWithIcon = (type) => {
     if (type === "error") {
@@ -453,22 +532,19 @@ const Tambah = ({ props }) => {
                 </div>
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0">
                   <OrderTable
-                    data={productList}
-                    setData={setProductList}
                     mapPrice={mapPrice}
-                    setMapPrice={setMapPrice}
-                    mapPriceList={mapPriceList}
-                    sumTotalPrice={sumTotalPrice}
-                    qty={qty}
-                    changeQty={changeQty}
-                    price={price}
-                    setPrice={setPrice}
+                    productTotalPrice={productTotalPrice}
+                    setProductTotalPrice={setProductTotalPrice}
+                    calculatePriceAfterDisc={calculatePriceAfterDisc}
+                    productSubTotal={productSubTotal}
                   />
                 </div>
               </div>
 
               <div className="flex justify-end">
-                <p className="font-bold">Total Item : {productList.length} </p>
+                <p className="font-bold">
+                  Total Item : {products.productList.length}{" "}
+                </p>
               </div>
               <div className="flex justify-end">
                 <p className="font-bold">Total Harga : {formatter.format(totalPrice)} </p>
