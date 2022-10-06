@@ -1,41 +1,21 @@
 import React, { useState } from "react";
 import { Form, Select } from "antd";
 import { CaretDownOutlined } from "@ant-design/icons";
-import { useRouter } from "next/router";
-
-
 import nookies from "nookies";
+import action from "@iso/redux/application/order/action";
+import { useDispatch } from "react-redux";
+
+const { addProduct } = action;
 
 export default function SearchBar({ form, tempList, onChange }) {
+  const dispatch = useDispatch();
+
   const [product, setProduct] = useState();
   const [data, setData] = useState([]);
   const cookies = nookies.get(null, "token");
   const productList = [];
 
-  const handleChange = async (id) => {
-    // console.log(id);
-    // const endpoint = process.env.NEXT_PUBLIC_DB + `/products/${id}`;
-    // const options = {
-    //   method: "GET",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     Authorization: "Bearer " + cookies.token,
-    //   },
-    // };
-    // const req = await fetch(endpoint, options);
-    // const res = await req.json();
-    // if (res) {
-    //   setProduct();
-    //   productList.push(res.data);
-    //   console.log(productList);
-    //   //   onSetProductList(productList);
-    //   form.setFieldsValue({ products: undefined });
-    //   toast.success("Produk berhasil ditambahkan!", {
-    //     position: toast.POSITION.TOP_RIGHT,
-    //     autoClose: 1000,
-    //   });
-    // }
-  };
+  const handleChange = async (id) => {};
 
   const handleSelect = async (id) => {
     const endpoint = process.env.NEXT_PUBLIC_DB + `/products/${id}`;
@@ -50,9 +30,7 @@ export default function SearchBar({ form, tempList, onChange }) {
     const res = await req.json();
 
     if (res) {
-      setProduct();
-      tempList.push(res.data);
-      onChange();
+      dispatch({ type: "ADD_PRODUCT", product: res.data });
       form.setFieldsValue({ products: undefined });
     }
   };

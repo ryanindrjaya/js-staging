@@ -2,86 +2,96 @@ import { useState } from "react";
 import DataTable from "react-data-table-component";
 import AlertDialog from "../../Alert/Alert";
 import { InputNumber, Select, Form, Row } from "antd";
+import { useDispatch, useSelector } from "react-redux";
+import action from "@iso/redux/application/order/action";
 
-export default function ReactDataTable({
-  data,
-  setData,
-  mapPrice,
-  setMapPrice,
-  mapPriceList,
-  sumTotalPrice,
-  qty,
-  changeQty,
-  price,
-  setPrice,
-}) {
+const { changeProductUnit } = action;
+
+export default function ReactDataTable({ mapPrice }) {
+  const dispatch = useDispatch();
+  const products = useSelector((state) => state.Order);
+
   let defaultPrice = 0;
-  var defaultPriceAfterDisc = 0;
-  var defaultSubTotal = 0;
   var defaultDp1 = 0;
   var defaultDp2 = 0;
   var defaultDp3 = 0;
 
   var tempMapPrice = {};
+
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
     maximumFractionDigits: 0,
   });
 
-  const onChangeUnit = (value, data) => {
-    const priceUnit = data.attributes[`buy_price_${value}`];
-    var defaultDisc1 = data.attributes[`unit_${value}_dp1`];
-    var defaultDisc2 = data.attributes[`unit_${value}_dp2`];
-    var defaultDisc3 = data.attributes[`unit_${value}_dp3`];
-    var selectedUnit = data.attributes[`unit_${value}`];
+  const onDeleteProduct = (value) => {
+    console.log("do redux");
+    dispatch({ type: "REMOVE_PRODUCT", index: value });
+  };
 
-    setMapPrice({
-      ...mapPrice,
-      [data.id]: {
-        defaultUnit: selectedUnit,
-        priceUnit: priceUnit,
-        dp1: defaultDisc1,
-        dp2: defaultDisc2,
-        dp3: defaultDisc3,
-      },
+  const onChangeUnit = (value, data) => {
+    dispatch({ type: "CHANGE_PRODUCT_UNIT", index: value, product: data });
+  };
+
+  const onChangeQty = (value, data) => {
+    dispatch({
+      type: "CHANGE_PRODUCT_QTY",
+      qty: value,
+      product: data,
     });
   };
 
-  const changePrice = (values, data) => {
-    setPrice({
-      ...price,
-      [data.id]: {
-        price_1st: values,
-      },
+  const onChangeDisc = (value, data) => {
+    dispatch({
+      type: "CHANGE_PRODUCT_DISC",
+      disc: value,
+      product: data,
+    });
+  };
+
+  const setPriceAfterDisc = (value, data) => {
+    dispatch({
+      type: "SET_PRICE_AFTER_DISC",
+      price: value,
+      product: data,
+    });
+  };
+
+  const setSubTotal = (value, data) => {
+    dispatch({
+      type: "SET_SUBTOTAL",
+      subTotal: value,
+      product: data,
     });
   };
 
   const calculatePriceAfterDisc = (row) => {
-    defaultPriceAfterDisc = row.attributes[`buy_price_1`];
-    if (mapPrice[row.id]) {
-      defaultPriceAfterDisc = mapPrice[row.id].priceUnit;
+    var priceUnit = row.attributes[`buy_price_1`];
+    var qty = 1;
+    var disc = 0;
+
+    // check if price changed
+    if (products.productInfo[row.id]?.priceUnit) {
+      priceUnit =
+        products.productInfo[row.id].priceUnit ?? row.attributes[`buy_price_1`];
     }
 
-    if (price) {
-      if (price[row.id]) {
-        defaultPriceAfterDisc =
-          defaultPriceAfterDisc - price[row.id]?.price_1st ?? 0;
-
-        var price1 = calculatePercentage(defaultPriceAfterDisc, defaultDp1);
-        var price2 = calculatePercentage(price1, defaultDp2);
-        var price3 = calculatePercentage(price2, defaultDp3);
-        defaultPriceAfterDisc = price3;
-      }
-    } else {
-      defaultPriceAfterDisc = defaultPriceAfterDisc - 0;
-      var price1 = calculatePercentage(defaultPriceAfterDisc, defaultDp1);
-      var price2 = calculatePercentage(price1, defaultDp2);
-      var price3 = calculatePercentage(price2, defaultDp3);
-      defaultPriceAfterDisc = price3;
+    // check if qty changed
+    if (products.productInfo[row.id]?.qty) {
+      qty = products.productInfo[row.id]?.qty ?? 1;
     }
 
-    return formatter.format(defaultPriceAfterDisc);
+    // check if disc changed
+    if (products.productInfo[row.id]?.disc) {
+      disc = products.productInfo[row.id]?.disc ?? 0;
+    }
+
+    priceUnit = priceUnit - disc;
+    var price1 = calculatePercentage(priceUnit, defaultDp1);
+    var price2 = calculatePercentage(price1, defaultDp2);
+    var price3 = calculatePercentage(price2, defaultDp3);
+
+    return formatter.format(price3);
   };
 
   const calculatePercentage = (value, percent) => {
@@ -89,24 +99,42 @@ export default function ReactDataTable({
     return newValue;
   };
 
-  const calculateSubTotal = (data) => {
-    defaultSubTotal = defaultPriceAfterDisc;
-    if (qty) {
-      if (qty[data.id]) {
-        defaultSubTotal = defaultPriceAfterDisc * qty[data.id].qty;
-      }
+  const calculateSubTotal = (row) => {
+    var priceUnit = row.attributes[`buy_price_1`];
+    var qty = 1;
+    var disc = 0;
+
+    // check if price changed
+    if (products.productInfo[row.id]?.priceUnit) {
+      priceUnit =
+        products.productInfo[row.id].priceUnit ?? row.attributes[`buy_price_1`];
     }
 
-    mapPriceList[data.id] = defaultSubTotal;
-    sumTotalPrice();
-    return formatter.format(defaultSubTotal);
+    // check if qty changed
+    if (products.productInfo[row.id]?.qty) {
+      qty = products.productInfo[row.id]?.qty ?? 1;
+    }
+
+    // check if disc changed
+    if (products.productInfo[row.id]?.disc) {
+      disc = products.productInfo[row.id]?.disc ?? 0;
+    }
+
+    priceUnit = priceUnit - disc;
+    var price1 = calculatePercentage(priceUnit, defaultDp1);
+    var price2 = calculatePercentage(price1, defaultDp2);
+    var price3 = calculatePercentage(price2, defaultDp3);
+
+    return formatter.format(price3 * qty);
   };
 
   const onConfirm = (id) => {
-    for (let index = 0; index < data.length; index++) {
-      const element = data[index];
+    for (let index = 0; index < products.productList.length; index++) {
+      const element = products.productList[index];
       if (element.id === id) {
-        setData(data.filter((data, index) => data.id !== id));
+        // setData(data.filter((data, index) => data.id !== id));
+
+        onDeleteProduct(index);
       }
     }
   };
@@ -132,26 +160,21 @@ export default function ReactDataTable({
     },
     {
       name: "Harga Satuan",
-      width: "250px",
+      width: "150px",
       selector: (row) => {
-        var selectedData = {};
-        defaultPrice = row.attributes?.buy_price_1;
-        tempMapPrice = {
-          ...tempMapPrice,
-          [row.id]: defaultPrice,
-        };
-
-        var currentPrice = tempMapPrice[row.id];
-        if (mapPrice[row.id]) {
-          currentPrice = mapPrice[row.id].priceUnit;
+        var priceUnit = row.attributes?.buy_price_1;
+        if (products.productInfo[row.id]) {
+          if (products.productInfo[row.id].priceUnit) {
+            priceUnit = products.productInfo[row.id].priceUnit;
+          }
         }
 
-        return formatter.format(currentPrice);
+        return formatter.format(priceUnit);
       },
     },
     {
       name: "Jumlah Pesanan",
-      width: "250px",
+      width: "220px",
       selector: (row) => {
         var defaultQty = 1;
         var defaultOption = row.attributes?.unit_1;
@@ -166,7 +189,7 @@ export default function ReactDataTable({
               >
                 <InputNumber
                   defaultValue={defaultQty}
-                  onChange={(e) => changeQty(e, row)}
+                  onChange={(e) => onChangeQty(e, row)}
                   rules={[
                     {
                       required: true,
@@ -271,7 +294,7 @@ export default function ReactDataTable({
                 max={currentPrice}
                 min={0}
                 defaultValue={0}
-                onChange={(e) => changePrice(e, row)}
+                onChange={(e) => onChangeDisc(e, row)}
                 style={{
                   width: "100px",
                   marginRight: "10px",
@@ -284,7 +307,7 @@ export default function ReactDataTable({
     },
     {
       name: "",
-      width: "350px",
+      width: "250px",
       selector: (row) => {
         defaultDp1 = row.attributes?.unit_1_dp1;
         defaultDp2 = row.attributes?.unit_1_dp2;
@@ -337,17 +360,17 @@ export default function ReactDataTable({
     },
     {
       name: "Harga Satuan Setelah Diskon",
-      width: "250px",
+      width: "200px",
       selector: (row) => calculatePriceAfterDisc(row),
     },
     {
       name: "Subtotal",
-      width: "250px",
+      width: "200px",
       selector: (row) => calculateSubTotal(row),
     },
     {
       name: "Hapus",
-      width: "250px",
+      width: "150px",
       selector: (row) => (
         <AlertDialog
           onCancel={onCancel}
@@ -365,8 +388,8 @@ export default function ReactDataTable({
       customStyles={customStyles}
       paginationRowsPerPageOptions={[50]}
       columns={columns}
-      data={data}
-      noDataComponent="--Belum ada produk--"
+      data={products.productList}
+      noDataComponent={`--Belum ada produk-- ${products.productList.length}`}
     />
   );
 }

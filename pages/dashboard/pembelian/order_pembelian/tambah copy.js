@@ -11,7 +11,6 @@ import { toast } from "react-toastify";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
 import OrderTable from "@iso/components/Form/AddOrder/OrderTable";
-import { useDispatch, useSelector } from "react-redux";
 import {
   Form,
   Button,
@@ -25,8 +24,6 @@ import {
 } from "antd";
 
 const Tambah = ({ props }) => {
-  const products = useSelector((state) => state.Order);
-
   var locations = props.locations.data;
   const [selectedLocations, setSelectedLocations] = useState();
   const [form] = Form.useForm();
@@ -509,14 +506,23 @@ const Tambah = ({ props }) => {
                   />
                 </div>
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0">
-                  <OrderTable mapPrice={mapPrice} />
+                  <OrderTable
+                    data={productList}
+                    setData={setProductList}
+                    mapPrice={mapPrice}
+                    setMapPrice={setMapPrice}
+                    mapPriceList={mapPriceList}
+                    sumTotalPrice={sumTotalPrice}
+                    qty={qty}
+                    changeQty={changeQty}
+                    price={price}
+                    setPrice={setPrice}
+                  />
                 </div>
               </div>
 
               <div className="flex justify-end">
-                <p className="font-bold">
-                  Total Item : {products.productList.length}{" "}
-                </p>
+                <p className="font-bold">Total Item : {productList.length} </p>
               </div>
               <div className="flex justify-end">
                 <p className="font-bold">
