@@ -18,8 +18,6 @@ const Lokasi = ({ props }) => {
     router.push("/dashboard/lokasi/tambah");
   };
 
- 
-
   const handleDelete = async (id) => {
     const endpoint = process.env.NEXT_PUBLIC_DB + "/locations/" + id;
     const cookies = nookies.get(null, "token");
@@ -53,12 +51,10 @@ const Lokasi = ({ props }) => {
             <button
               onClick={handleAddUser}
               type="button"
-             className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+              className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
             >
               <div className="text-white text-center text-sm font-bold">
-                <a className="text-white no-underline text-xs sm:text-xs">
-                  + Tambah
-                </a>
+                <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
               </div>
             </button>
 

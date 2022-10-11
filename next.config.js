@@ -9,6 +9,7 @@ const withBundleAnalyzer = require("@zeit/next-bundle-analyzer");
 const nextConfig = {
   env: {
     BASE_URL: process.env.BASE_URL,
+    NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL,
     BACKEND_URL: "https://localhost:8080",
     STAKEHOLDER_NAME: "APOTEK JAYA SEHAT",
   },
@@ -42,9 +43,7 @@ module.exports = withPlugins(
       withBundleAnalyzer,
       {
         analyzeServer: ["server", "both"].includes(process.env.BUNDLE_ANALYZE),
-        analyzeBrowser: ["browser", "both"].includes(
-          process.env.BUNDLE_ANALYZE
-        ),
+        analyzeBrowser: ["browser", "both"].includes(process.env.BUNDLE_ANALYZE),
         bundleAnalyzerConfig: {
           server: {
             analyzerMode: "static",

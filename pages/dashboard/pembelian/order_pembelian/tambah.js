@@ -107,9 +107,7 @@ function Tambah({ props }) {
   var tempLocationId;
 
   // NO PO
-  var totalPurchases = String(
-    props.purchases?.meta?.pagination.total + 1
-  ).padStart(3, "0");
+  var totalPurchases = String(props.purchases?.meta?.pagination.total + 1).padStart(3, "0");
   var today = new Date();
   var dd = String(today.getDate()).padStart(2, "0");
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
@@ -226,10 +224,6 @@ function Tambah({ props }) {
     // return formatter.format(productTotalPrice[row.id]);
   };
 
-  const calculatePercentage = (value, percent) => {
-    var newValue = value - (value * percent) / 100;
-    return newValue;
-  };
 
   useEffect(() => {
     setGrandTotal(totalPrice + biayaPengiriman + biayaTambahan);
@@ -264,14 +258,12 @@ function Tambah({ props }) {
     if (type === "error") {
       notification[type]({
         message: "Gagal menambahkan data",
-        description:
-          "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
+        description: "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
       });
     } else if (type === "success") {
       notification[type]({
         message: "Berhasil menambahkan data",
-        description:
-          "Produk berhasil ditambahkan. Silahkan cek pada halaman Order Pembelian",
+        description: "Produk berhasil ditambahkan. Silahkan cek pada halaman Order Pembelian",
       });
     }
   };
@@ -333,12 +325,7 @@ function Tambah({ props }) {
                       },
                     ]}
                   >
-                    <DatePicker
-                      placeholder="Tanggal Pesanan"
-                      size="large"
-                      format={"DD/MM/YYYY"}
-                      style={{ width: "100%" }}
-                    />
+                    <DatePicker placeholder="Tanggal Pesanan" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -351,12 +338,7 @@ function Tambah({ props }) {
                       },
                     ]}
                   >
-                    <DatePicker
-                      placeholder="Tanggal Pengiriman"
-                      size="large"
-                      format={"DD/MM/YYYY"}
-                      style={{ width: "100%" }}
-                    />
+                    <DatePicker placeholder="Tanggal Pengiriman" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-3/4 px-3 mb-2 md:mb-0">
@@ -415,9 +397,7 @@ function Tambah({ props }) {
                 </p>
               </div>
               <div className="flex justify-end">
-                <p className="font-bold">
-                  Total Harga : {formatter.format(totalPrice)}{" "}
-                </p>
+                <p className="font-bold">Total Harga : {formatter.format(totalPrice)} </p>
               </div>
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
@@ -432,12 +412,7 @@ function Tambah({ props }) {
                 </div>
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item name="delivery_fee">
-                    <InputNumber
-                      onChange={sumDeliveryPrice}
-                      size="large"
-                      placeholder="Biaya Pengiriman"
-                      style={{ width: "100%" }}
-                    />
+                    <InputNumber onChange={sumDeliveryPrice} size="large" placeholder="Biaya Pengiriman" style={{ width: "100%" }} />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 mt-5 md:mb-0">
@@ -472,23 +447,14 @@ function Tambah({ props }) {
                       }}
                     >
                       {locations.map((element) => {
-                        return (
-                          <Select.Option value={element.id}>
-                            {element.attributes.name}
-                          </Select.Option>
-                        );
+                        return <Select.Option value={element.id}>{element.attributes.name}</Select.Option>;
                       })}
                     </Select>
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 mt-5 md:mb-0">
                   <Upload>
-                    <Button
-                      className="text-gray-500"
-                      style={{ width: "100%" }}
-                      size="large"
-                      icon={<UploadOutlined />}
-                    >
+                    <Button className="text-gray-500" style={{ width: "100%" }} size="large" icon={<UploadOutlined />}>
                       Upload Dokumen
                     </Button>
                   </Upload>
@@ -582,10 +548,7 @@ function Tambah({ props }) {
               </div>
               <div>
                 <p className="font-bold flex justify-end">
-                  Total Biaya :{" "}
-                  {grandTotal === 0
-                    ? formatter.format(totalPrice)
-                    : formatter.format(grandTotal)}
+                  Total Biaya : {grandTotal === 0 ? formatter.format(totalPrice) : formatter.format(grandTotal)}
                 </p>
               </div>
               <Form.Item name="additional_note">
@@ -598,11 +561,7 @@ function Tambah({ props }) {
                     <Spin />
                   </div>
                 ) : (
-                  <Button
-                    onClick={validateError}
-                    htmlType="submit"
-                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
-                  >
+                  <Button onClick={validateError} htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
                     Tambah
                   </Button>
                 )}
