@@ -1,8 +1,7 @@
-import actions from "./action";
-
 const initState = {
   productList: [],
   productInfo: {},
+  preorderData: {},
 };
 
 export default function Reducer(state = initState, action) {
@@ -101,6 +100,39 @@ export default function Reducer(state = initState, action) {
           },
         },
       };
+
+    case "SET_INITIAL_PRODUCT":
+      state.productList.push(action.product);
+      var id = action.product.id;
+
+      return {
+        ...state,
+        productList: [...state.productList],
+        productInfo: {
+          ...state.productInfo,
+          [id]: {
+            qty: action.qty,
+            unit: action.unit,
+            unitIndex: action.unitIndex,
+            priceUnit: action.priceUnit,
+            disc: action.disc,
+            priceAfterDisc: action.priceAfterDisc,
+            subTotal: action.subTotal,
+          },
+        },
+      };
+
+    case "SET_PREORDER_DATA":
+      return {
+        ...state,
+        preorderData: {
+          data: action.data,
+        },
+      };
+
+    case "CLEAR_DATA":
+      state = { productList: [], productInfo: {}, preorderData: {} };
+      return state;
 
     default:
       return state;

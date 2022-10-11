@@ -3,13 +3,41 @@ import React, { useState } from "react";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
-import PurchasesOrderTable from "../../../../components/ReactDataTable/Purchases/PurchasesOrderTable";
 import { useRouter } from "next/router";
 import { Input, notification } from "antd";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
+import PurchasingTable from "../../../../components/ReactDataTable/Purchases/PurchasesOrderTable";
 import nookies from "nookies";
 
-const Pembelian = ({ props }) => {
+Pembelian.getInitialProps = async (context) => {
+  const cookies = nookies.get(context);
+  let data;
+
+  const req = await fetchData(cookies);
+  data = await req.json();
+
+  return {
+    props: {
+      data,
+    },
+  };
+};
+
+const fetchData = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_DB + "/purchasings?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+function Pembelian({ props }) {
   const data = props.data;
   const [purchase, setPurchase] = useState(data);
   const [isSearching, setIsSearching] = useState(false);
@@ -128,66 +156,71 @@ const Pembelian = ({ props }) => {
   };
 
   const onChangeStatusPengiriman = (status, row) => {
-    row.attributes.delivery_status = status;
-    handleChangeStatus(row, row.id);
+    openNotificationWithIcon(
+      "info",
+      "Work In Progress",
+      "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
+    );
+    // row.attributes.delivery_status = status;
+    // handleChangeStatus(row, row.id);
   };
 
-  const handleChangeStatus = async (values, id) => {
-    // clean object
-    for (var key in values.attributes) {
-      if (
-        values.attributes[key] === null ||
-        values.attributes[key] === undefined
-      ) {
-        delete values.attributes[key];
-      }
-    }
+  // const handleChangeStatus = async (values, id) => {
+  //   // clean object
+  //   for (var key in values.attributes) {
+  //     if (
+  //       values.attributes[key] === null ||
+  //       values.attributes[key] === undefined
+  //     ) {
+  //       delete values.attributes[key];
+  //     }
+  //   }
 
-    if (
-      values.attributes?.document?.data === null ||
-      values.attributes?.document?.data === undefined
-    ) {
-      delete values.attributes?.document;
-    }
+  //   if (
+  //     values.attributes?.document?.data === null ||
+  //     values.attributes?.document?.data === undefined
+  //   ) {
+  //     delete values.attributes?.document;
+  //   }
 
-    var purchase_details = [];
-    values.attributes.purchase_details.data.forEach((element) => {
-      purchase_details.push({ id: element.id });
-    });
-    values.attributes.supplier = { id: values.attributes.supplier.data.id };
-    values.attributes.location = { id: values.attributes.location.data.id };
-    values.attributes.purchase_details = purchase_details;
+  //   var purchase_details = [];
+  //   values.attributes.purchase_details.data.forEach((element) => {
+  //     purchase_details.push({ id: element.id });
+  //   });
+  //   values.attributes.supplier = { id: values.attributes.supplier.data.id };
+  //   values.attributes.location = { id: values.attributes.location.data.id };
+  //   values.attributes.purchase_details = purchase_details;
 
-    const newValues = {
-      data: values.attributes,
-    };
+  //   const newValues = {
+  //     data: values.attributes,
+  //   };
 
-    const JSONdata = JSON.stringify(newValues);
-    const cookies = nookies.get(null, "token");
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/purchases/" + id;
+  //   const JSONdata = JSON.stringify(newValues);
+  //   const cookies = nookies.get(null, "token");
+  //   const endpoint = process.env.NEXT_PUBLIC_DB + "/purchases/" + id;
 
-    const options = {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-      body: JSONdata,
-    };
+  //   const options = {
+  //     method: "PUT",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: "Bearer " + cookies.token,
+  //     },
+  //     body: JSONdata,
+  //   };
 
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
+  //   const req = await fetch(endpoint, options);
+  //   const res = await req.json();
 
-    if (req.status === 200) {
-      router.reload();
-    } else {
-      openNotificationWithIcon(
-        "error",
-        "Status gagal dirubah",
-        "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah"
-      );
-    }
-  };
+  //   if (req.status === 200) {
+  //     router.reload();
+  //   } else {
+  //     openNotificationWithIcon(
+  //       "error",
+  //       "Status gagal dirubah",
+  //       "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah"
+  //     );
+  //   }
+  // };
 
   const openNotificationWithIcon = (type, title, message) => {
     notification[type]({
@@ -228,47 +261,19 @@ const Pembelian = ({ props }) => {
               </button>
             </div>
 
-            {/* <PurchasesOrderTable
+            <PurchasingTable
               data={purchase}
               onUpdate={handleUpdate}
               onDelete={handleDelete}
               onPageChange={handlePageChange}
               onChangeStatus={onChangeStatus}
               onChangeStatusPengiriman={onChangeStatusPengiriman}
-            /> */}
+            />
           </LayoutContent>
         </LayoutWrapper>
       </DashboardLayout>
     </>
   );
-};
-
-Pembelian.getInitialProps = async (context) => {
-  const cookies = nookies.get(context);
-  let data;
-
-  const req = await fetchData(cookies);
-  data = await req.json();
-
-  return {
-    props: {
-      data,
-    },
-  };
-};
-
-const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/purchases?populate=deep";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
-
-  const req = await fetch(endpoint, options);
-  return req;
-};
+}
 
 export default Pembelian;

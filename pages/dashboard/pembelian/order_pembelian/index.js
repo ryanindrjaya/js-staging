@@ -9,7 +9,35 @@ import { Input, notification } from "antd";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
 import nookies from "nookies";
 
-const Pembelian = ({ props }) => {
+Pembelian.getInitialProps = async (context) => {
+  const cookies = nookies.get(context);
+  let data;
+
+  const req = await fetchData(cookies);
+  data = await req.json();
+
+  return {
+    props: {
+      data,
+    },
+  };
+};
+
+const fetchData = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_DB + "/purchases?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+function Pembelian({ props }) {
   const data = props.data;
   const [purchase, setPurchase] = useState(data);
   const [isSearching, setIsSearching] = useState(false);
@@ -264,34 +292,6 @@ const Pembelian = ({ props }) => {
       </DashboardLayout>
     </>
   );
-};
-
-Pembelian.getInitialProps = async (context) => {
-  const cookies = nookies.get(context);
-  let data;
-
-  const req = await fetchData(cookies);
-  data = await req.json();
-
-  return {
-    props: {
-      data,
-    },
-  };
-};
-
-const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/purchases?populate=deep";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
-
-  const req = await fetch(endpoint, options);
-  return req;
-};
+}
 
 export default Pembelian;

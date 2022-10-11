@@ -1,28 +1,18 @@
-import { useState, useEffect } from "react";
 import DataTable from "react-data-table-component";
 import AlertDialog from "../../Alert/Alert";
 import { InputNumber, Select, Form, Row } from "antd";
-import { useDispatch, useSelector, useStore } from "react-redux";
-import action from "@iso/redux/application/order/action";
-
-const { changeProductUnit } = action;
+import { useDispatch } from "react-redux";
 
 export default function ReactDataTable({
-  mapPrice,
-  setProductTotalPrice,
-  productTotalPrice,
   calculatePriceAfterDisc,
   productSubTotal,
+  products,
 }) {
   const dispatch = useDispatch();
-  const products = useSelector((state) => state.Order);
 
-  let defaultPrice = 0;
   var defaultDp1 = 0;
   var defaultDp2 = 0;
   var defaultDp3 = 0;
-
-  var tempMapPrice = {};
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -31,7 +21,6 @@ export default function ReactDataTable({
   });
 
   const onDeleteProduct = (value) => {
-    console.log("do redux");
     dispatch({ type: "REMOVE_PRODUCT", index: value });
   };
 
@@ -53,20 +42,6 @@ export default function ReactDataTable({
       disc: value,
       product: data,
     });
-  };
-
-  const setSubTotal = (value, data) => {
-    dispatch({
-      type: "SET_SUBTOTAL",
-      subTotal: value,
-      product: data,
-    });
-  };
-
-  const calculatePercentage = (value, percent) => {
-    var newValue = value - (value * percent) / 100;
-
-    return newValue;
   };
 
   const onConfirm = (id) => {
@@ -117,13 +92,22 @@ export default function ReactDataTable({
       selector: (row) => {
         var defaultQty = 1;
         var defaultOption = row.attributes?.unit_1;
+        var defaultIndex = 1;
+
+        if (products.productInfo[row.id]?.qty) {
+          defaultQty = products.productInfo[row.id].qty;
+        }
+
+        if (products.productInfo[row.id]?.unitIndex) {
+          defaultIndex = products.productInfo[row.id].unitIndex;
+        }
 
         return (
           <>
             <Row>
               <Form.Item
-                initialValue={1}
                 name={["jumlah_qty", `${row.id}`]}
+                // initialValue={products.productInfo[row.id]?.qty ?? 1}
                 noStyle
               >
                 <InputNumber
@@ -143,11 +127,11 @@ export default function ReactDataTable({
 
               <Form.Item
                 name={["jumlah_option", `${row.id}`]}
-                initialValue={defaultOption}
+                // initialValue={defaultOption}
                 noStyle
               >
                 <Select
-                  defaultValue={defaultOption}
+                  defaultValue={defaultIndex}
                   onChange={(value) => onChangeUnit(value, row)}
                   name="jumlah_option"
                   style={{
@@ -215,24 +199,17 @@ export default function ReactDataTable({
       name: "Diskon",
       width: "150px",
       selector: (row) => {
-        defaultPrice = row.attributes?.buy_price_1;
-        tempMapPrice = {
-          ...tempMapPrice,
-          [row.id]: defaultPrice,
-        };
-
-        var currentPrice = tempMapPrice[row.id];
-        if (mapPrice[row.id]) {
-          currentPrice = mapPrice[row.id].priceUnit;
+        var defaultDisc = 0;
+        if (products.productInfo[row.id]?.disc) {
+          defaultDisc = products.productInfo[row.id].disc;
         }
 
         return (
           <Row align="bottom" justify="center">
             <Form.Item name={["disc_rp", `${row.id}`]} noStyle>
               <InputNumber
-                max={currentPrice}
+                defaultValue={defaultDisc}
                 min={0}
-                defaultValue={0}
                 onChange={(e) => onChangeDisc(e, row)}
                 style={{
                   width: "100px",
@@ -251,12 +228,6 @@ export default function ReactDataTable({
         defaultDp1 = row.attributes?.unit_1_dp1;
         defaultDp2 = row.attributes?.unit_1_dp2;
         defaultDp3 = row.attributes?.unit_1_dp3;
-
-        if (mapPrice[row.id]) {
-          defaultDp1 = mapPrice[row.id]?.dp1;
-          defaultDp2 = mapPrice[row.id]?.dp2;
-          defaultDp3 = mapPrice[row.id]?.dp3;
-        }
 
         return (
           <div className="grid grid-cols-3 gap-2 disabled:bg-white">

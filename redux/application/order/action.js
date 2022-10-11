@@ -41,4 +41,25 @@ const actions = {
     subTotal,
     product,
   }),
+
+  setInitialProduct: (product) => ({
+    type: "SET_INITIAL_PRODUCT",
+    product,
+    qty,
+    unit,
+    unitIndex,
+    priceUnit,
+    disc,
+    priceAfterDisc,
+    subTotal,
+  }),
+
+  setPreOrderData: (data) => ({
+    type: "SET_PREORDER_DATA",
+    data,
+  }),
+
+  clearValue: () => ({
+    type: "CLEAR_DATA",
+  }),
 };

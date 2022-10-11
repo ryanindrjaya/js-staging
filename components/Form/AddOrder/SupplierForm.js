@@ -1,13 +1,14 @@
 import React, { useState } from "react";
-import { Form, Select, Button, Input } from "antd";
-import { CaretDownOutlined, PlusOutlined } from "@ant-design/icons";
-import { useRouter } from "next/router";
+import { Form, Select } from "antd";
+import { CaretDownOutlined } from "@ant-design/icons";
+import { useSelector } from "react-redux";
 
 import nookies from "nookies";
 
-export default function Supplier({ onChangeSupplier, initialValue }) {
+export default function Supplier({ onChangeSupplier }) {
   const [data, setData] = useState([]);
   const cookies = nookies.get(null, "token");
+  const order = useSelector((state) => state.Order);
 
   const handleChange = async (id) => {
     const endpoint = process.env.NEXT_PUBLIC_DB + `/suppliers/${id}`;
@@ -73,11 +74,6 @@ export default function Supplier({ onChangeSupplier, initialValue }) {
     <>
       <div className="w-full md:w-full mb-2 md:mb-0">
         <Form.Item
-          initialValue={
-            initialValue
-              ? `${initialValue?.data?.attributes?.id_supplier} - ${initialValue?.data.attributes.name}`
-              : null
-          }
           name="supplier_id"
           style={{ width: "100%" }}
           rules={[

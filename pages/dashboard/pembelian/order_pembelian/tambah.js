@@ -10,8 +10,8 @@ import nookies from "nookies";
 import { toast } from "react-toastify";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
-import OrderTable from "@iso/components/Form/AddOrder/OrderTable";
-import { useDispatch, useSelector } from "react-redux";
+import OrderTable from "@iso/components/ReactDataTable/Purchases/OrderTable";
+import { useSelector, useDispatch } from "react-redux";
 import {
   Form,
   Button,
@@ -23,28 +23,73 @@ import {
   Upload,
   notification,
 } from "antd";
+import createDetail from "../utility/createDetail";
+import createOrderFunc from "../utility/createOrder";
+import calculatePrice from "../utility/calculatePrice";
 
-const Tambah = ({ props }) => {
+Tambah.getInitialProps = async (context) => {
+  const cookies = nookies.get(context);
+  let locations;
+  let purchases;
+
+  const req = await fetchData(cookies);
+  locations = await req.json();
+
+  const req2 = await fetchDataPurchases(cookies);
+  purchases = await req2.json();
+
+  return {
+    props: {
+      purchases,
+      locations,
+    },
+  };
+};
+
+const fetchData = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_DB + "/locations";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchDataPurchases = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_DB + "/purchases";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+function Tambah({ props }) {
+  var products = useSelector((state) => state.Order);
   const dispatch = useDispatch();
-  const products = useSelector((state) => state.Order);
 
   var locations = props.locations.data;
-  const [selectedLocations, setSelectedLocations] = useState();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [mapPrice, setMapPrice] = useState({});
   const [productList, setProductList] = useState([]);
   const [supplier, setSupplier] = useState();
   const [totalPrice, setTotalPrice] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
   const [additionalFee, setAdditionalFee] = useState();
-  const [qty, setQty] = useState();
   const [listId, setListId] = useState([]);
-  const [price, setPrice] = useState();
   const [dataValues, setDataValues] = useState();
   const [tempoDays, setTempoDays] = useState(0);
   const [tempoOption, setTempoOption] = useState("Hari");
-  const [doneCreateDetail, setDoneCreateDetail] = useState(false);
   const [productTotalPrice, setProductTotalPrice] = useState({});
   const [productSubTotal, setProductSubTotal] = useState({});
   const router = useRouter();
@@ -70,8 +115,6 @@ const Tambah = ({ props }) => {
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
 
-  const mapPriceList = {};
-
   const { TextArea } = Input;
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -86,182 +129,17 @@ const Tambah = ({ props }) => {
   };
 
   const createDetailOrder = async () => {
-    products.productList.forEach((element) => {
-      // default value
-      var qty = 1;
-      var disc = 0;
-      var unit = element.attributes.unit_1;
-      var unitPrice = element.attributes.buy_price_1;
-      var unitPriceAfterDisc = element.attributes.buy_price_1;
-      var subTotal = unitPriceAfterDisc * qty;
-      const id = element.id;
-
-      qty = products.productInfo[id]?.qty ?? 1;
-      disc = products.productInfo[id]?.disc ?? 0;
-      unit = products.productInfo[id]?.unit ?? element.attributes.unit_1;
-      unitPrice =
-        products.productInfo?.[id]?.priceUnit ?? element.attributes.buy_price_1;
-      unitPriceAfterDisc = productTotalPrice?.[id];
-      subTotal = productSubTotal?.[id];
-
-      // console.log(qty, disc, unit, unitPrice, unitPriceAfterDisc, subTotal, id);
-      POSTPurchaseDetail(
-        qty,
-        disc,
-        unit,
-        unitPrice,
-        unitPriceAfterDisc,
-        subTotal,
-        id
-      );
-    });
-  };
-
-  const POSTPurchaseDetail = async (
-    qty,
-    disc,
-    unit,
-    unitPrice,
-    unitPriceAfterDisc,
-    subTotal,
-    id
-  ) => {
-    var data = {
-      data: {
-        total_order: String(qty),
-        unit_order: unit,
-        unit_price: unitPrice,
-        unit_price_after_disc: parseInt(unitPriceAfterDisc),
-        sub_total: parseInt(subTotal),
-        products: { id: id },
-        disc: parseInt(disc),
-      },
-    };
-
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/purchase-details";
-    const JSONdata = JSON.stringify(data);
-    const options = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-      body: JSONdata,
-    };
-
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
-
-    if (req.status === 200) {
-      tempListId.push(res.data?.id);
-      if (tempListId.length === products.productList.length) {
-        setListId(tempListId);
-      }
-    }
+    createDetail(
+      products,
+      productTotalPrice,
+      productSubTotal,
+      setListId,
+      "/purchase-details"
+    );
   };
 
   const createOrder = async (values) => {
-    var orderDate = new Date(values.order_date);
-    var deliveryDate = new Date(values.delivery_date);
-    var supplierId = { id: parseInt(values.supplier_id) };
-
-    tempSupplierId = parseInt(values.supplier_id);
-    tempLocationId = parseInt(values.location);
-
-    listId.forEach((element) => {
-      tempProductListId.push({ id: element });
-    });
-
-    values.order_date = orderDate;
-    values.delivery_date = deliveryDate;
-    values.supplier_id = supplierId;
-    values.status = "Dipesan";
-    values.delivery_total =
-      grandTotal === 0 ? parseInt(totalPrice) : parseInt(grandTotal);
-    values.purchase_details = null;
-    values.supplier_id = null;
-
-    var data = {
-      data: values,
-    };
-
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/purchases";
-    const JSONdata = JSON.stringify(data);
-
-    const options = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-      body: JSONdata,
-    };
-
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
-
-    if (req.status === 200) {
-      await putRelationOrder(res.data.id, res.data.attributes);
-    } else {
-      openNotificationWithIcon("error");
-    }
-  };
-
-  const putRelationOrder = async (id, value) => {
-    const user = await getUserMe();
-    const dataOrder = {
-      data: value,
-    };
-
-    dataOrder.data.supplier = { id: tempSupplierId };
-    dataOrder.data.purchase_details = tempProductListId;
-    dataOrder.data.added_by = user.name;
-    dataOrder.data.locations = { id: tempLocationId };
-
-    // clean object
-    for (var key in dataOrder) {
-      if (dataOrder[key] === null || dataOrder[key] === undefined) {
-        delete dataOrder[key];
-      }
-    }
-
-    const JSONdata = JSON.stringify(dataOrder);
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/purchases/" + id;
-    const options = {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-      body: JSONdata,
-    };
-
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
-
-    if (req.status === 200) {
-      form.resetFields();
-      router.replace("/dashboard/pembelian/order_pembelian");
-      openNotificationWithIcon("success");
-    } else {
-      openNotificationWithIcon("error");
-    }
-  };
-
-  const getUserMe = async () => {
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/users/me";
-    const options = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-    };
-
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
-
-    return res;
+    createOrderFunc(grandTotal, totalPrice, values, listId, form, router);
   };
 
   const onChange = async () => {
@@ -293,51 +171,59 @@ const Tambah = ({ props }) => {
       newTotal = newTotal + additionalFee[key];
     }
 
-    var test = totalPrice + newTotal;
     setBiayaTambahan(newTotal);
   };
 
   const calculatePriceAfterDisc = (row) => {
-    var priceUnit = row.attributes[`buy_price_1`];
-    var qty = 1;
-    var disc = 0;
+    const total = calculatePrice(
+      row,
+      products,
+      productTotalPrice,
+      productSubTotal,
+      setTotalPrice
+    );
 
-    const defaultDp1 = row.attributes?.unit_1_dp1;
-    const defaultDp2 = row.attributes?.unit_1_dp2;
-    const defaultDp3 = row.attributes?.unit_1_dp3;
+    return formatter.format(total);
+    // var priceUnit = row.attributes[`buy_price_1`];
+    // var qty = 1;
+    // var disc = 0;
 
-    // check if price changed
-    if (products.productInfo[row.id]?.priceUnit) {
-      priceUnit =
-        products.productInfo[row.id].priceUnit ?? row.attributes[`buy_price_1`];
-    }
+    // const defaultDp1 = row.attributes?.unit_1_dp1;
+    // const defaultDp2 = row.attributes?.unit_1_dp2;
+    // const defaultDp3 = row.attributes?.unit_1_dp3;
 
-    // check if qty changed
-    if (products.productInfo[row.id]?.qty) {
-      qty = products.productInfo[row.id]?.qty ?? 1;
-    }
+    // // check if price changed
+    // if (products.productInfo[row.id]?.priceUnit) {
+    //   priceUnit =
+    //     products.productInfo[row.id].priceUnit ?? row.attributes[`buy_price_1`];
+    // }
 
-    // check if disc changed
-    if (products.productInfo[row.id]?.disc) {
-      disc = products.productInfo[row.id]?.disc ?? 0;
-    }
+    // // check if qty changed
+    // if (products.productInfo[row.id]?.qty) {
+    //   qty = products.productInfo[row.id]?.qty ?? 1;
+    // }
 
-    priceUnit = priceUnit - disc;
-    var price1 = calculatePercentage(priceUnit, defaultDp1);
-    var price2 = calculatePercentage(price1, defaultDp2);
-    var price3 = calculatePercentage(price2, defaultDp3);
+    // // check if disc changed
+    // if (products.productInfo[row.id]?.disc) {
+    //   disc = products.productInfo[row.id]?.disc ?? 0;
+    // }
 
-    // set product price after disc & sub total
-    productTotalPrice[row.id] = price3;
-    productSubTotal[row.id] = price3 * qty;
+    // priceUnit = priceUnit - disc;
+    // var price1 = calculatePercentage(priceUnit, defaultDp1);
+    // var price2 = calculatePercentage(price1, defaultDp2);
+    // var price3 = calculatePercentage(price2, defaultDp3);
 
-    // set all product total
-    var total = 0;
-    for (var key in productSubTotal) {
-      total = total + productSubTotal[key];
-    }
-    setTotalPrice(total);
-    return formatter.format(productTotalPrice[row.id]);
+    // // set product price after disc & sub total
+    // productTotalPrice[row.id] = price3;
+    // productSubTotal[row.id] = price3 * qty;
+
+    // // set all product total
+    // var total = 0;
+    // for (var key in productSubTotal) {
+    //   total = total + productSubTotal[key];
+    // }
+    // setTotalPrice(total);
+    // return formatter.format(productTotalPrice[row.id]);
   };
 
   const calculatePercentage = (value, percent) => {
@@ -369,6 +255,10 @@ const Tambah = ({ props }) => {
       total = total + productTotalPrice[key];
     }
   }, [totalPrice]);
+
+  useEffect(() => {
+    dispatch({ type: "CLEAR_DATA" });
+  }, []);
 
   const openNotificationWithIcon = (type) => {
     if (type === "error") {
@@ -501,16 +391,16 @@ const Tambah = ({ props }) => {
                   </Input.Group>
                 </div>
 
-                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0">
+                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
                   <SearchBar
                     form={form}
                     tempList={tempList}
                     onChange={onChange}
                   />
                 </div>
-                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0">
+                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
                   <OrderTable
-                    mapPrice={mapPrice}
+                    products={products}
                     productTotalPrice={productTotalPrice}
                     setProductTotalPrice={setProductTotalPrice}
                     calculatePriceAfterDisc={calculatePriceAfterDisc}
@@ -723,53 +613,6 @@ const Tambah = ({ props }) => {
       </DashboardLayout>
     </>
   );
-};
-
-Tambah.getInitialProps = async (context) => {
-  const cookies = nookies.get(context);
-  let locations;
-  let purchases;
-
-  const req = await fetchData(cookies);
-  locations = await req.json();
-
-  const req2 = await fetchDataPurchases(cookies);
-  purchases = await req2.json();
-
-  return {
-    props: {
-      purchases,
-      locations,
-    },
-  };
-};
-
-const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/locations";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
-
-  const req = await fetch(endpoint, options);
-  return req;
-};
-
-const fetchDataPurchases = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/purchases";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
-
-  const req = await fetch(endpoint, options);
-  return req;
-};
+}
 
 export default Tambah;

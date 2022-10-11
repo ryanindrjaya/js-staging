@@ -16,6 +16,7 @@ export default function ReactDataTable({
   onChangeStatusPengiriman,
   onChangeStatus,
 }) {
+
   const router = useRouter();
   const { Option } = Select;
 
@@ -43,12 +44,6 @@ export default function ReactDataTable({
   function formatMyDate(value, locale = "id-ID") {
     return new Date(value).toLocaleDateString(locale);
   }
-
-  var formatter = new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  });
 
   const content = (row) => (
     <div>
@@ -104,100 +99,95 @@ export default function ReactDataTable({
 
   const columns = [
     {
-      name: "NO LPB",
-      width: "180px",
-      sortable: true,
-      selector: (row) => row.attributes?.no_purchasing ?? "-",
-    },
-    {
-      name: "Supplier",
-      width: "180px",
-      sortable: true,
-      selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
-    },
-    {
       name: "Tanggal",
       width: "100px",
       sortable: true,
-      selector: (row) => formatMyDate(row.attributes?.date_purchasing),
+      selector: (row) => formatMyDate(row.attributes?.order_date),
+    },
+    {
+      name: "NO PO",
+      width: "180px",
+      sortable: true,
+      selector: (row) => row.attributes?.no_po ?? "-",
     },
     {
       name: "Lokasi",
       width: "200px",
-      selector: (row) => row.attributes?.location.data.attributes.name,
+      selector: (row) => {
+        return (
+          <div>
+            <Row align="middle" justify="center">
+              {row.attributes?.location?.data?.attributes.name}
+            </Row>
+          </div>
+        );
+      },
     },
-    // {
-    //   name: "Status Pengiriman",
-    //   width: "150px",
-    //   selector: (row) => {
-    //     return (
-    //       <>
-    //         <Select
-    //           defaultValue={row.attributes.status}
-    //           bordered={false}
-    //           disabled={row.attributes.delivery_status === "Terkirim"}
-    //           onChange={(e) => onChangeStatusPengiriman(e, row)}
-    //         >
-    //           <Option value="Loading">
-    //             {" "}
-    //             <span className="rounded-full bg-slate-400 px-2 py-1 text-white text-xs">
-    //               Loading
-    //             </span>{" "}
-    //           </Option>
-    //           <Option value="Pending">
-    //             <span className="rounded-full bg-yellow-400 px-2 py-1 text-black text-xs">
-    //               Pending
-    //             </span>{" "}
-    //           </Option>
-    //           <Option value="Antrian">
-    //             <span className="rounded-full bg-blue-400 px-2 py-1 text-white text-xs">
-    //               Antrian
-    //             </span>{" "}
-    //           </Option>
-    //           <Option value="Terkirim">
-    //             {" "}
-    //             <span className="rounded-full bg-green-400 px-2 py-1 text-white text-xs">
-    //               Terkirim
-    //             </span>{" "}
-    //           </Option>
-    //         </Select>
-    //       </>
-    //     );
-    //   },
-    // },
-    // {
-    //   name: <div className="ml-6">Status</div>,
-    //   width: "150px",
-    //   selector: (row) => {
-    //     return (
-    //       <Select
-    //         defaultValue={row.attributes.status}
-    //         bordered={false}
-    //         disabled={row.attributes.status === "Diterima"}
-    //         onChange={(e) => onChangeStatus(e, row)}
-    //       >
-    //         <Option value="Dipesan">
-    //           {" "}
-    //           <span className="rounded-full bg-yellow-400 px-2 py-1 text-black text-xs">
-    //             Dipesan
-    //           </span>{" "}
-    //         </Option>
-    //         <Option value="Diterima">
-    //           {" "}
-    //           <span className="rounded-full bg-green-400 px-2 py-1 text-white text-xs">
-    //             Diterima
-    //           </span>{" "}
-    //         </Option>
-    //       </Select>
-    //     );
-    //   },
-    // },
     {
-      name: "Total Beli",
+      name: "Status Pengiriman",
       width: "150px",
-      sortable: true,
-      selector: (row) =>
-        formatter.format(row.attributes?.total_purchasing ?? 0),
+      selector: (row) => {
+        return (
+          <>
+            <Select
+              defaultValue={row.attributes.delivery_status}
+              bordered={false}
+              disabled={row.attributes.delivery_status === "Terkirim"}
+              onChange={(e) => onChangeStatusPengiriman(e, row)}
+            >
+              <Option value="Loading">
+                {" "}
+                <span className="rounded-full bg-slate-400 px-2 py-1 text-white text-xs">
+                  Loading
+                </span>{" "}
+              </Option>
+              <Option value="Pending">
+                <span className="rounded-full bg-yellow-400 px-2 py-1 text-black text-xs">
+                  Pending
+                </span>{" "}
+              </Option>
+              <Option value="Antrian">
+                <span className="rounded-full bg-blue-400 px-2 py-1 text-white text-xs">
+                  Antrian
+                </span>{" "}
+              </Option>
+              <Option value="Terkirim">
+                {" "}
+                <span className="rounded-full bg-green-400 px-2 py-1 text-white text-xs">
+                  Terkirim
+                </span>{" "}
+              </Option>
+            </Select>
+          </>
+        );
+      },
+    },
+    {
+      name: <div className="ml-6">Status</div>,
+      width: "150px",
+      selector: (row) => {
+        return (
+          <Select
+            defaultValue={row.attributes.status}
+            bordered={false}
+            disabled={row.attributes.status === "Diterima"}
+            onChange={(e) => onChangeStatus(e, row)}
+          >
+            <Option value="Dipesan">
+              {" "}
+              <span className="rounded-full bg-yellow-400 px-2 py-1 text-black text-xs">
+                Dipesan
+              </span>{" "}
+            </Option>
+            <Option value="Diterima">
+              {" "}
+              <span className="rounded-full bg-green-400 px-2 py-1 text-white text-xs">
+                Diterima
+              </span>{" "}
+            </Option>
+          </Select>
+        );
+      },
     },
     {
       name: "Ditambahkan Oleh",

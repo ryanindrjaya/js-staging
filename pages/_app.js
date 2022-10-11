@@ -12,15 +12,20 @@ import "../style/global.css";
 import "bootstrap/dist/css/bootstrap.css";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
+import { useSelector, useDispatch } from "react-redux";
+import Router from "next/router";
 
 class CustomApp extends App {
   render() {
     const { Component, pageProps, store } = this.props;
+
     return (
       <Provider store={store}>
         <ThemeProvider>
           <Component {...pageProps} />
-        <ToastContainer toastStyle={{ backgroundColor: "black", color:"white" }}  />
+          <ToastContainer
+            toastStyle={{ backgroundColor: "black", color: "white" }}
+          />
         </ThemeProvider>
       </Provider>
     );

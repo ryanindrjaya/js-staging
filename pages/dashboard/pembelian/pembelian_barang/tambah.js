@@ -5,12 +5,14 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import { UploadOutlined } from "@ant-design/icons";
 import nookies from "nookies";
 import { toast } from "react-toastify";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
-import OrderTable from "@iso/components/Form/AddOrder/OrderTable";
+import OrderTable from "@iso/components/ReactDataTable/Purchases/OrderTable";
+import { useSelector, useDispatch } from "react-redux";
+import LoadingAnimations from "@iso/components/Animations/Loading";
+import moment from "moment";
 import {
   Form,
   Button,
@@ -19,31 +21,114 @@ import {
   DatePicker,
   Select,
   InputNumber,
-  Upload,
-  notification,
+  Row,
 } from "antd";
+import createDetailPurchasing from "../utility/createDetail";
+import createPurchasing from "../utility/createPurchasing";
+import calculatePrice from "../utility/calculatePrice";
 
-const { addproduct } = action;
+Tambah.getInitialProps = async (context) => {
+  const cookies = nookies.get(context);
+  let locations;
+  let purchases;
+  let order;
 
-const Tambah = ({ props }) => {
+  const req = await fetchData(cookies);
+  locations = await req.json();
+
+  const req2 = await fetchDataPurchasing(cookies);
+  purchases = await req2.json();
+
+  const req3 = await fetchDataPurchase(cookies);
+  order = await req3.json();
+
+  return {
+    props: {
+      order,
+      purchases,
+      locations,
+    },
+  };
+};
+
+const fetchData = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_DB + "/locations";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchDataPurchasing = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_DB + "/purchasings";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchDataPurchase = async (cookies) => {
+  const endpoint =
+    process.env.NEXT_PUBLIC_DB +
+    "/purchases/?populate=deep&filters[delivery_status][$eq]=Terkirim";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+function Tambah({ props }) {
+  const products = useSelector((state) => state.Order);
+  const dispatch = useDispatch();
+
   var locations = props.locations.data;
-  const [selectedLocations, setSelectedLocations] = useState();
+  var deliveredOrder = props.order.data;
+
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [mapPrice, setMapPrice] = useState({});
   const [productList, setProductList] = useState([]);
   const [supplier, setSupplier] = useState();
   const [totalPrice, setTotalPrice] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
   const [additionalFee, setAdditionalFee] = useState();
-  const [qty, setQty] = useState();
+  const [isFetchinData, setIsFetchingData] = useState(false);
   const [listId, setListId] = useState([]);
-  const [price, setPrice] = useState();
   const [dataValues, setDataValues] = useState();
+  const [discType, setDiscType] = useState();
+  const [discPrice, setDiscPrice] = useState(0);
   const [tempoDays, setTempoDays] = useState(0);
   const [tempoOption, setTempoOption] = useState("Hari");
-  const [doneCreateDetail, setDoneCreateDetail] = useState(false);
+  const [productTotalPrice, setProductTotalPrice] = useState({});
+  const [productSubTotal, setProductSubTotal] = useState({});
+  const [preorderData, setPreOrderData] = useState();
   const router = useRouter();
+  const { TextArea } = Input;
+  var today = new Date();
+  var dd = String(today.getDate()).padStart(2, "0");
+  var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
+  var yyyy = today.getFullYear();
+
+  // DPP & PPN
+  const dpp = 1.11;
+  var ppn = 0;
 
   // temp
   const [biayaTambahan, setBiayaTambahan] = useState(0);
@@ -51,23 +136,12 @@ const Tambah = ({ props }) => {
 
   const cookies = nookies.get(null, "token");
   const tempList = [];
-  var tempListId = [];
-  var tempProductListId = [];
-  var tempSupplierId = 0;
-  var tempLocationId;
 
   // NO PO
   var totalPurchases = String(
     props.purchases?.meta?.pagination.total + 1
   ).padStart(3, "0");
 
-  var today = new Date();
-  var dd = String(today.getDate()).padStart(2, "0");
-  var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
-  var yyyy = today.getFullYear();
-
-  const mapPriceList = {};
-  const { TextArea } = Input;
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
@@ -81,214 +155,26 @@ const Tambah = ({ props }) => {
   };
 
   const createDetailOrder = async () => {
-    if (mapPrice) {
-      productList.forEach((element) => {
-        const id = element.id;
-        var qty = parseInt(dataValues.jumlah_qty[id] ?? 1);
-        var unit = "";
-        var unitPrice = 0;
-        var unitPriceAfterDisc = 0;
-        var subTotal = 0;
-
-        if (mapPrice[id]) {
-          var priceDisc = dataValues.disc_rp[id] ?? 0;
-
-          unitPrice = mapPrice[id]?.priceUnit;
-          subTotal = mapPrice[id]?.priceUnit - priceDisc;
-
-          var price1 = calculatePercentage(subTotal, mapPrice[id].dp1);
-          var price2 = calculatePercentage(price1, mapPrice[id].dp2);
-          var price3 = calculatePercentage(price2, mapPrice[id].dp3);
-
-          unitPriceAfterDisc = price3;
-          unit = mapPrice[id].defaultUnit;
-          subTotal = price3 * qty;
-          //
-        } else {
-          //
-          unitPrice = element.attributes.buy_price_1;
-          subTotal = element.attributes.buy_price_1 - 0;
-
-          var price1 = calculatePercentage(
-            subTotal,
-            element.attributes.unit_1_dp1
-          );
-          var price2 = calculatePercentage(
-            price1,
-            element.attributes.unit_1_dp2
-          );
-          var price3 = calculatePercentage(
-            price2,
-            element.attributes.unit_1_dp3
-          );
-
-          unitPriceAfterDisc = price3;
-          unit = element.attributes.unit_1;
-          subTotal = price3 * qty;
-        }
-
-        POSTPurchaseDetail(
-          qty,
-          unit,
-          unitPrice,
-          unitPriceAfterDisc,
-          subTotal,
-          id
-        );
-      });
-    }
-  };
-
-  const POSTPurchaseDetail = async (
-    qty,
-    unit,
-    priceUnit,
-    priceUnitAfterDisc,
-    subTotal,
-    productId
-  ) => {
-    var disc = 0;
-    if (price)
-      if (price[productId])
-        disc = price[productId] === null ? 0 : price[productId].price_1st;
-
-    var data = {
-      data: {
-        total_order: String(qty),
-        unit_order: unit,
-        unit_price: priceUnit,
-        unit_price_after_disc: parseInt(priceUnitAfterDisc),
-        sub_total: parseInt(subTotal),
-        products: { id: productId },
-        disc: parseInt(disc),
-      },
-    };
-
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/purchase-details";
-    const JSONdata = JSON.stringify(data);
-
-    const options = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-      body: JSONdata,
-    };
-
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
-
-    if (req.status === 200) {
-      tempListId.push(res.data?.id);
-      if (tempListId.length === productList.length) {
-        setListId(tempListId);
-      }
-    }
+    createDetailPurchasing(
+      products,
+      productTotalPrice,
+      productSubTotal,
+      setListId,
+      '/purchasing-details'
+    );
   };
 
   const createOrder = async (values) => {
-    var orderDate = new Date(values.order_date);
-    var deliveryDate = new Date(values.delivery_date);
-    var supplierId = { id: parseInt(values.supplier_id) };
-
-    tempSupplierId = parseInt(values.supplier_id);
-    tempLocationId = parseInt(values.location);
-
-    listId.forEach((element) => {
-      tempProductListId.push({ id: element });
-    });
-
-    values.order_date = orderDate;
-    values.delivery_date = deliveryDate;
-    values.supplier_id = supplierId;
-    values.status = "Dipesan";
-    values.delivery_total =
-      grandTotal === 0 ? parseInt(totalPrice) : parseInt(grandTotal);
-    values.purchase_details = null;
-    values.supplier_id = null;
-
-    var data = {
-      data: values,
-    };
-
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/purchases";
-    const JSONdata = JSON.stringify(data);
-
-    const options = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-      body: JSONdata,
-    };
-
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
-
-    if (req.status === 200) {
-      await putRelationOrder(res.data.id, res.data.attributes);
-    } else {
-      openNotificationWithIcon("error");
-    }
-  };
-
-  const putRelationOrder = async (id, value) => {
-    const user = await getUserMe();
-    const dataOrder = {
-      data: value,
-    };
-
-    dataOrder.data.supplier = { id: tempSupplierId };
-    dataOrder.data.purchase_details = tempProductListId;
-    dataOrder.data.added_by = user.name;
-    dataOrder.data.locations = { id: tempLocationId };
-
-    // clean object
-    for (var key in dataOrder) {
-      if (dataOrder[key] === null || dataOrder[key] === undefined) {
-        delete dataOrder[key];
-      }
-    }
-
-    const JSONdata = JSON.stringify(dataOrder);
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/purchases/" + id;
-    const options = {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-      body: JSONdata,
-    };
-
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
-
-    if (req.status === 200) {
-      form.resetFields();
-      router.replace("/dashboard/pembelian/order_pembelian");
-      openNotificationWithIcon("success");
-    } else {
-      openNotificationWithIcon("error");
-    }
-  };
-
-  const getUserMe = async () => {
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/users/me";
-    const options = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-    };
-
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
-
-    return res;
+    await createPurchasing(
+      products,
+      grandTotal,
+      totalPrice,
+      values,
+      listId,
+      discPrice,
+      form,
+      router
+    );
   };
 
   const onChange = async () => {
@@ -309,17 +195,16 @@ const Tambah = ({ props }) => {
     }
   };
 
-  const sumTotalPrice = () => {
-    var total = 0;
-    for (var key in mapPriceList) {
-      total = total + mapPriceList[key];
-    }
+  const calculatePriceAfterDisc = (row) => {
+    const total = calculatePrice(
+      row,
+      products,
+      productTotalPrice,
+      productSubTotal,
+      setTotalPrice
+    );
 
-    setTotalPrice(total);
-  };
-
-  const sumDeliveryPrice = (price) => {
-    setBiayaPengiriman(price);
+    return formatter.format(total);
   };
 
   const sumAdditionalPrice = () => {
@@ -333,23 +218,186 @@ const Tambah = ({ props }) => {
     setBiayaTambahan(newTotal);
   };
 
-  const changeQty = (values, data) => {
-    setQty({
-      ...qty,
-      [data.id]: {
-        qty: values,
+  const fetchPOdata = async (id) => {
+    clearData();
+    setIsFetchingData(true);
+
+    const endpoint =
+      process.env.NEXT_PUBLIC_DB + `/purchases/${id}?populate=deep`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
       },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    const dataPO = res.data.attributes;
+    const purchase_details = dataPO.purchase_details.data;
+    const supplier = dataPO.supplier.data;
+
+    setDiscPrice(0);
+    setPreOrderData(res.data);
+    setSupplier(supplier);
+    setGrandTotal(dataPO.delivery_total);
+    setBiayaPengiriman(dataPO.delivery_fee);
+
+    var dateString = dataPO.order_date;
+    var momentObj = moment(dateString, "YYYY-MM-DD");
+    var momentString = momentObj.format("DD-MM-YYYY");
+
+    form.setFieldsValue({
+      supplier_id: `${supplier.attributes.id_supplier} - ${supplier.attributes.name}`,
+      order_date: moment(momentString),
+      location: dataPO.location.data.attributes.name,
+      tempo_days: dataPO.tempo_days,
+      tempo_time: dataPO.tempo_time,
+      additional_fee_1_desc: dataPO.additional_fee_1_desc,
+      additional_fee_2_desc: dataPO.additional_fee_2_desc,
+      additional_fee_3_desc: dataPO.additional_fee_3_desc,
+      additional_fee_4_desc: dataPO.additional_fee_4_desc,
+      additional_fee_5_desc: dataPO.additional_fee_5_desc,
+      additional_fee_1_sub: dataPO.additional_fee_1_sub,
+      additional_fee_2_sub: dataPO.additional_fee_2_sub,
+      additional_fee_3_sub: dataPO.additional_fee_3_sub,
+      additional_fee_4_sub: dataPO.additional_fee_4_sub,
+      additional_fee_5_sub: dataPO.additional_fee_5_sub,
+      additional_note: dataPO.additional_note,
+      delivery_fee: dataPO.delivery_fee,
+      disc_type: null,
+      disc_value: null,
+      DPP_active: null,
+      PPN_active: null,
     });
+
+    setNewGrandTotal(dataPO);
+
+    dispatch({
+      type: "SET_PREORDER_DATA",
+      data: res.data,
+    });
+
+    purchase_details.forEach((element) => {
+      var indexUnit = 1;
+      var unitOrder = element.attributes.unit_order;
+      var productUnit = element.attributes.products.data[0].attributes;
+
+      for (let index = 1; index < 6; index++) {
+        if (unitOrder === productUnit[`unit_${index}`]) {
+          indexUnit = index;
+        }
+      }
+
+      const productId = element.attributes.products.data[0].id;
+
+      form.setFieldsValue({
+        disc_rp: {
+          [productId]: element.attributes.disc,
+        },
+        jumlah_option: {
+          [productId]: element.attributes.unit_order,
+        },
+        jumlah_qty: {
+          [productId]: element.attributes.total_order,
+        },
+      });
+
+      const test = form.getFieldsValue([
+        "disc_rp",
+        "jumlah_option",
+        "jumlah_qty",
+      ]);
+
+      // SET INITIAL PRODUCT
+      dispatch({
+        type: "SET_INITIAL_PRODUCT",
+        product: element.attributes.products.data[0],
+        qty: element.attributes.total_order,
+        unit: element.attributes.unit_order,
+        unitIndex: indexUnit,
+        priceUnit: element.attributes.unit_price,
+        disc: element.attributes.disc,
+        priceAfterDisc: element.attributes.unit_price_after_disc,
+        subTotal: element.attributes.sub_total,
+      });
+    });
+
+    setTimeout(() => {
+      setIsFetchingData(false);
+    }, 3000);
   };
 
-  const calculatePercentage = (value, percent) => {
-    var newValue = value - (value * percent) / 100;
-    return newValue;
+  const setNewGrandTotal = (data) => {
+    var additionalPrice = 0;
+    const additionalPricePO = form.getFieldsValue([
+      "additional_fee_1_sub",
+      "additional_fee_2_sub",
+      "additional_fee_3_sub",
+      "additional_fee_4_sub",
+      "additional_fee_5_sub",
+    ]);
+
+    for (const key in additionalPricePO) {
+      additionalPrice = additionalPrice + additionalPricePO[key];
+    }
+
+    setBiayaTambahan(additionalPrice);
+  };
+
+  const setTotalWithDisc = () => {
+    const disc = form.getFieldsValue(["disc_type", "disc_value"]);
+
+    if (disc.disc_type === "Tetap") {
+      setTotalPriceWithFixedDisc(disc);
+    } else {
+      setTotalPriceWithPercentDisc(disc);
+    }
+  };
+
+  const setTotalPriceWithFixedDisc = (disc) => {
+    var newTotal = 0;
+
+    newTotal = totalPrice - disc.disc_value;
+    setDiscPrice(newTotal);
+  };
+
+  const setTotalPriceWithPercentDisc = (disc) => {
+    var newTotal = 0;
+
+    newTotal = totalPrice - (totalPrice * disc.disc_value) / 100;
+    if (newTotal < 0) newTotal = 0;
+    setDiscPrice(newTotal);
+  };
+
+  const setDPPActive = (value) => {
+    if (value) {
+      // fungsi gak guna karena balik lagi
+      form.setFieldsValue({ PPN_active: "PPN" });
+      var newTotal = grandTotal;
+      var afterDPP = newTotal / dpp;
+      ppn = newTotal - afterDPP;
+      // var total = afterDPP + ppn;
+    }
+  };
+
+  const clearData = () => {
+    dispatch({ type: "CLEAR_DATA" });
+    setTotalPrice(0);
   };
 
   useEffect(() => {
-    setGrandTotal(totalPrice + biayaPengiriman + biayaTambahan);
-  }, [biayaPengiriman, biayaTambahan, totalPrice]);
+    // this one is used for checking the price if the old price is same with new one.
+    // if both are same then we should not set new price for grand total.
+    // if they are not, then set new grand total
+    if (discPrice !== totalPrice && discPrice !== 0) {
+      setGrandTotal(discPrice + biayaPengiriman + biayaTambahan);
+    } else {
+      setGrandTotal(totalPrice + biayaPengiriman + biayaTambahan);
+    }
+  }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
 
   useEffect(() => {
     sumAdditionalPrice();
@@ -366,36 +414,9 @@ const Tambah = ({ props }) => {
   }, [dataValues]);
 
   useEffect(() => {
-    // console.log(price);
-  }, [price]);
-
-  const openNotificationWithIcon = (type) => {
-    if (type === "error") {
-      notification[type]({
-        message: "Gagal menambahkan data",
-        description:
-          "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
-      });
-    } else if (type === "success") {
-      notification[type]({
-        message: "Berhasil menambahkan data",
-        description:
-          "Produk berhasil ditambahkan. Silahkan cek pada halaman Order Pembelian",
-      });
-    }
-  };
-
-  const validateError = () => {
-    var listError = form.getFieldsError();
-    listError.forEach((element) => {
-      if (element.errors[0]) {
-        notification["error"]({
-          message: "Field Kosong",
-          description: element.errors[0],
-        });
-      }
-    });
-  };
+    // used to reset redux from value before
+    clearData();
+  }, []);
 
   return (
     <>
@@ -420,7 +441,7 @@ const Tambah = ({ props }) => {
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    name="no_po"
+                    name="no_purchasing"
                     initialValue={`PB/ET/${totalPurchases}/${mm}/${yyyy}`}
                     rules={[
                       {
@@ -458,8 +479,12 @@ const Tambah = ({ props }) => {
                         width: "100%",
                       }}
                     >
-                      <Select.Option value="Diproses">Diproses</Select.Option>
-                      <Select.Option value="Selesai">Selesai</Select.Option>
+                      <Select.Option value="Diproses" key={"Diproses"}>
+                        Diproses
+                      </Select.Option>
+                      <Select.Option value="Selesai" key={"Selesai"}>
+                        Selesai
+                      </Select.Option>
                     </Select>
                   </Form.Item>
                 </div>
@@ -487,7 +512,10 @@ const Tambah = ({ props }) => {
                     >
                       {locations.map((element) => {
                         return (
-                          <Select.Option value={element.id}>
+                          <Select.Option
+                            value={element.id}
+                            key={element.attributes.name}
+                          >
                             {element.attributes.name}
                           </Select.Option>
                         );
@@ -515,56 +543,115 @@ const Tambah = ({ props }) => {
                           width: "100%",
                         }}
                       >
-                        <Select.Option value="Hari">Hari</Select.Option>
-                        <Select.Option value="Bulan">Bulan</Select.Option>
+                        <Select.Option value="Hari" key="Hari">
+                          Hari
+                        </Select.Option>
+                        <Select.Option value="Bulan" key="Bulan">
+                          Bulan
+                        </Select.Option>
                       </Select>
                     </Form.Item>
                   </Input.Group>
                 </div>
 
-                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0">
+                <div className="w-full md:w-1/4 px-3 mb-2 mt-5 md:mb-0">
+                  <Form.Item name="no_po">
+                    <Select
+                      placeholder="Pilih Nomor PO"
+                      size="large"
+                      onChange={(e) => fetchPOdata(e)}
+                      style={{
+                        width: "100%",
+                      }}
+                    >
+                      {deliveredOrder.map((element) => {
+                        return (
+                          <Select.Option value={element.id} key={element.id}>
+                            {element.attributes.no_po}
+                          </Select.Option>
+                        );
+                      })}
+                    </Select>
+                  </Form.Item>
+                </div>
+                <div className="w-full md:w-1/4 px-3 mb-2 mt-5 md:mb-0">
+                  <Form.Item name="nota_supplier">
+                    <Input placeholder="No. Nota Supplier" size="large" />
+                  </Form.Item>
+                </div>
+
+                <div className="w-full md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
                   <SearchBar
                     form={form}
                     tempList={tempList}
                     onChange={onChange}
                   />
                 </div>
-                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0">
-                  <OrderTable
-                    data={productList}
-                    setData={setProductList}
-                    mapPrice={mapPrice}
-                    setMapPrice={setMapPrice}
-                    mapPriceList={mapPriceList}
-                    sumTotalPrice={sumTotalPrice}
-                    qty={qty}
-                    changeQty={changeQty}
-                    price={price}
-                    setPrice={setPrice}
-                  />
-                </div>
+                {isFetchinData ? (
+                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
+                    <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
+                      <LoadingAnimations />
+                    </div>
+                    <div className="text-sm align-middle text-center animate-pulse text-slate-400">
+                      Sedang Mengambil Data
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
+                    <OrderTable
+                      products={products}
+                      productTotalPrice={productTotalPrice}
+                      setProductTotalPrice={setProductTotalPrice}
+                      calculatePriceAfterDisc={calculatePriceAfterDisc}
+                      productSubTotal={productSubTotal}
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-end">
-                <p className="font-bold">Total Item : {productList.length} </p>
-              </div>
-              <div className="flex justify-end">
                 <p className="font-bold">
-                  Total Harga : {formatter.format(totalPrice)}{" "}
+                  Total Item : {products.productList.length}{" "}
                 </p>
               </div>
+              <div className="flex justify-end transition-all">
+                <Row>
+                  <p className="font-bold">Total Harga :</p>
+                  {discPrice === 0 ? (
+                    <p></p>
+                  ) : (
+                    <p className="font-bold text-red-500 ml-2">
+                      {formatter.format(discPrice)}
+                    </p>
+                  )}
+                  {discPrice === 0 ? (
+                    <p className="font-bold ml-2">
+                      {formatter.format(totalPrice)}
+                    </p>
+                  ) : (
+                    <p className="font-bold line-through ml-2 ">
+                      {formatter.format(totalPrice)}
+                    </p>
+                  )}
+                </Row>
+              </div>
+
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item name="disc_type">
                     <Select
+                      disabled={products.productList.length === 0}
+                      onChange={setDiscType}
                       placeholder="Pilih Jenis Diskon"
                       size="large"
                       style={{
                         width: "100%",
                       }}
                     >
-                      <Select.Option value="Tetap">Tetap</Select.Option>
-                      <Select.Option value="Persentase">
+                      <Select.Option value="Tetap" key={"Tetap"}>
+                        Tetap
+                      </Select.Option>
+                      <Select.Option value="Persentase" key={"Persentase"}>
                         Persentase
                       </Select.Option>
                     </Select>
@@ -573,7 +660,10 @@ const Tambah = ({ props }) => {
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item name="disc_value" noStyle>
                     <InputNumber
+                      disabled={products.productList.length === 0}
+                      onChange={setTotalWithDisc}
                       size="large"
+                      min={0}
                       placeholder="Diskon"
                       style={{ width: "100%" }}
                     />
@@ -582,56 +672,46 @@ const Tambah = ({ props }) => {
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item name="delivery_fee" noStyle>
                     <InputNumber
+                      onChange={(e) => setBiayaPengiriman(e)}
                       size="large"
                       placeholder="Biaya Pengiriman"
                       style={{ width: "100%" }}
                     />
-                  </Form.Item>
-                </div>
-
-                {/* <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
-                  <Form.Item name="delivery_address">
-                    <TextArea rows={4} placeholder="Alamat Pengiriman" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
-                  <Form.Item name="delivery_fee">
-                    <InputNumber
-                      onChange={sumDeliveryPrice}
-                      size="large"
-                      placeholder="Biaya Pengiriman"
-                      style={{ width: "100%" }}
-                    />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/3 px-3 mb-2 mt-5 md:mb-0">
-                  <Form.Item name="delivery_status" initialValue={"Loading"}>
+                  <Form.Item name="DPP_active">
                     <Select
+                      disabled={products.productList.length === 0}
+                      placeholder="Pakai DPP"
+                      onChange={setDPPActive}
                       size="large"
                       style={{
                         width: "100%",
                       }}
                     >
-                      <Select.Option value="Loading">Loading</Select.Option>
-                      <Select.Option value="Pending">Pending</Select.Option>
-                      <Select.Option value="Antrian">Antrian</Select.Option>
-                      <Select.Option value="Terkirim">Terkirim</Select.Option>
+                      <Select.Option value="DPP" key={"DPP"}>
+                        DPP
+                      </Select.Option>
                     </Select>
                   </Form.Item>
-                </div> */}
-                {/* <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0"></div>
-                <div className="w-full md:w-1/3 px-3 mb-2 mt-5 md:mb-0">
-                  <Upload>
-                    <Button
-                      className="text-gray-500"
-                      style={{ width: "100%" }}
+                </div>
+                <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
+                  <Form.Item name="PPN_active">
+                    <Select
+                      disabled={true}
+                      placeholder="Pakai PPN"
                       size="large"
-                      icon={<UploadOutlined />}
+                      style={{
+                        width: "100%",
+                      }}
                     >
-                      Upload Dokumen
-                    </Button>
-                  </Upload>
-                </div> */}
+                      <Select.Option value="PPN" key={"PPN"}>
+                        PPN
+                      </Select.Option>
+                    </Select>
+                  </Form.Item>
+                </div>
               </div>
               <div className="flex justify-end font-bold w-full mb-3 md:w-3/4">
                 <p>Biaya Tambahan Lain-lain</p>
@@ -738,10 +818,8 @@ const Tambah = ({ props }) => {
                   </div>
                 ) : (
                   <Button
-                    onClick={() => {
-                      dispatch(addproduct());
-                    }}
-                    // htmlType="submit"
+                    onClick={() => {}}
+                    htmlType="submit"
                     className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
                   >
                     Tambah
@@ -754,53 +832,6 @@ const Tambah = ({ props }) => {
       </DashboardLayout>
     </>
   );
-};
-
-Tambah.getInitialProps = async (context) => {
-  const cookies = nookies.get(context);
-  let locations;
-  let purchases;
-
-  const req = await fetchData(cookies);
-  locations = await req.json();
-
-  const req2 = await fetchDataPurchases(cookies);
-  purchases = await req2.json();
-
-  return {
-    props: {
-      purchases,
-      locations,
-    },
-  };
-};
-
-const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/locations";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
-
-  const req = await fetch(endpoint, options);
-  return req;
-};
-
-const fetchDataPurchases = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/purchasings";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
-
-  const req = await fetch(endpoint, options);
-  return req;
-};
+}
 
 export default Tambah;
