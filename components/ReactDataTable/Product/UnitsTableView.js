@@ -251,13 +251,13 @@ export default function UnitsTableView({
     },
     {
       name: "Diskon Pembelian",
-      width: "200px",
+      width: "170px",
 
       selector: (row) => (
         <InputNumber
           disabled
           style={{
-            width: 150,
+            width: 120,
             backgroundColor: "#ffffff",
           }}
           size="large"
@@ -329,7 +329,7 @@ export default function UnitsTableView({
 
     {
       name: "Harga Jual",
-      width: "250px",
+      width: "170px",
       style: {
         backgroundColor: "#fff",
       },
@@ -337,7 +337,7 @@ export default function UnitsTableView({
         <InputNumber
           disabled
           style={{
-            width: 200,
+            width: 120,
             backgroundColor: "#ffffff",
           }}
           size="large"
@@ -348,7 +348,7 @@ export default function UnitsTableView({
     },
     {
       name: "Disc 1%",
-      width: "150px",
+      width: "170px",
       style: {
         backgroundColor: "#fff",
       },
@@ -356,7 +356,7 @@ export default function UnitsTableView({
         <InputNumber
           disabled
           style={{
-            width: 100,
+            width: 120,
             backgroundColor: "#ffffff",
           }}
           size="large"

@@ -169,7 +169,7 @@ export default function UnitsTable({
   const columns = [
     {
       name: "Unit",
-      width: "250px",
+      width: "150px",
       style: {
         backgroundColor: "#f4f4f4",
       },
@@ -185,7 +185,7 @@ export default function UnitsTable({
     },
     {
       name: "Isi",
-      width: "250px",
+      width: "150px",
       style: {
         backgroundColor: "#f4f4f4",
       },
@@ -197,7 +197,7 @@ export default function UnitsTable({
         >
           <InputNumber
             style={{
-              width: 200,
+              width: 100,
             }}
             size="large"
             placeholder={`Isi ${row.idx}`}
@@ -208,7 +208,7 @@ export default function UnitsTable({
 
     {
       name: "Harga Pembelian",
-      width: "250px",
+      width: "170px",
       style: {
         backgroundColor: "#f4f4f4",
       },
@@ -219,18 +219,21 @@ export default function UnitsTable({
           initialValue={buyPrice[row.idx - 1]}
         >
           <InputNumber
+            formatter={(value) =>
+              `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            }
+            parser={(value) => value.replace(/\Rp\s?|(,*)/g, "")}
             style={{
-              width: 200,
+              width: 120,
             }}
             size="large"
-            placeholder={`Harga Pembelian ${row.idx}`}
           />
         </Form.Item>
       ),
     },
     {
       name: "Diskon Pembelian",
-      width: "200px",
+      width: "150px",
       style: {
         backgroundColor: "#036B82",
       },
@@ -238,14 +241,17 @@ export default function UnitsTable({
         <Form.Item
           className="mt-4"
           name={`purchase_discount_${[row.idx]}`}
-          initialValue={purchaseDiscount[row.idx - 1] ?? "-"}
+          initialValue={purchaseDiscount[row.idx - 1] ?? 0}
         >
           <InputNumber
+            formatter={(value) =>
+              `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            }
+            parser={(value) => value.replace(/\Rp\s?|(,*)/g, "")}
             style={{
-              width: "100%",
+              width: 120,
             }}
             size="large"
-            placeholder="Diskon Pembelian"
           />
         </Form.Item>
       ),
@@ -269,7 +275,6 @@ export default function UnitsTable({
               width: 50,
             }}
             size="large"
-            placeholder="D1"
           />
         </Form.Item>
       ),
@@ -292,7 +297,6 @@ export default function UnitsTable({
               width: 200,
             }}
             size="large"
-            placeholder="D2"
           />
         </Form.Item>
       ),
@@ -315,14 +319,13 @@ export default function UnitsTable({
               width: 60,
             }}
             size="large"
-            placeholder="D3"
           />
         </Form.Item>
       ),
     },
     {
       name: "Harga Jual",
-      width: "250px",
+      width: "150px",
       style: {
         backgroundColor: "#f4f4f4",
       },
@@ -333,18 +336,21 @@ export default function UnitsTable({
           initialValue={soldPrice[row.idx - 1]}
         >
           <InputNumber
+            formatter={(value) =>
+              `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            }
+            parser={(value) => value.replace(/\Rp\s?|(,*)/g, "")}
             style={{
-              width: 200,
+              width: 110,
             }}
             size="large"
-            placeholder={`Harga Jual ${row.idx}`}
           />
         </Form.Item>
       ),
     },
     {
       name: "Disc Jual Persen",
-      width: "250px",
+      width: "170px",
       style: {
         backgroundColor: "#f4f4f4",
       },
@@ -356,10 +362,9 @@ export default function UnitsTable({
         >
           <InputNumber
             style={{
-              width: 200,
+              width: 120,
             }}
             size="large"
-            placeholder={`Harga Disc ${row.idx}`}
           />
         </Form.Item>
       ),
