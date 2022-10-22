@@ -24,7 +24,7 @@ const Role = ({ props }) => {
 
   const handleDelete = async (id) => {
     const endpoint =
-      process.env.NEXT_PUBLIC_DB + "/users-permissions/roles/" + id;
+      process.env.NEXT_PUBLIC_URL + "/users-permissions/roles/" + id;
     const cookies = nookies.get(null, "token");
 
     const options = {
@@ -94,7 +94,7 @@ Role.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/users-permissions/roles";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users-permissions/roles";
   const options = {
     method: "GET",
     headers: {

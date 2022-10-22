@@ -8,4 +8,10 @@ module.exports = {
     extend: {},
   },
   plugins: [],
+  screens: {
+    // ml stands for 'mobile landscape'
+    ml: {
+      raw: '(min-width: 480px) and (max-width: 960px) and (max-height: 480px)',
+    },
+  },
 };

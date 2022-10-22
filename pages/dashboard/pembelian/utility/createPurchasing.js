@@ -1,6 +1,7 @@
 import React from "react";
 import nookies from "nookies";
 import { notification } from "antd";
+import * as moment from "moment";
 
 const cookies = nookies.get(null, "token");
 
@@ -15,7 +16,13 @@ const CreateOrder = async (
   router
 ) => {
   // CLEANING DATA
-  var orderDate = new Date(values.order_date);
+  var date = new Date(values.order_date);
+  var newDate = moment
+    .utc(date)
+    .utcOffset(7 * 60)
+    .format();
+  var orderDate = newDate;
+
   const supplier = products.preorderData.data.attributes.supplier.data;
   const location = products.preorderData.data.attributes.location.data;
   var tempProductListId = [];
@@ -55,7 +62,7 @@ const CreateOrder = async (
   values.supplier_id = supplierId;
   values.date_purchasing = orderDate;
   values.supplier_id = supplierId;
-  values.status = "Belum Lunas";
+  values.status_pembayaran = "Belum Lunas";
   values.total_purchasing =
     grandTotal === 0 ? parseInt(totalPrice) : parseInt(grandTotal);
 
@@ -80,7 +87,7 @@ const CreateOrder = async (
 };
 
 const createData = async (data) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/purchasings";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings";
   const JSONdata = JSON.stringify(data);
 
   const options = {
@@ -117,7 +124,7 @@ const putRelationOrder = async (id, value, values, form, router) => {
   }
 
   const JSONdata = JSON.stringify(dataOrder);
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/purchasings/" + id;
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings/" + id;
   const options = {
     method: "PUT",
     headers: {
@@ -140,7 +147,7 @@ const putRelationOrder = async (id, value, values, form, router) => {
 };
 
 const getUserMe = async () => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/users/me";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me";
   const options = {
     method: "GET",
     headers: {

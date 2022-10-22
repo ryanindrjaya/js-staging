@@ -34,7 +34,7 @@ const SubKategori = ({ props }) => {
 
   const searchQuery = async (keywords) => {
     const endpoint =
-      process.env.NEXT_PUBLIC_DB +
+      process.env.NEXT_PUBLIC_URL +
       "/sub-categories?filters[$or][0][name][$contains]=" +
       keywords +
       "&filters[$or][1][sub_id][$contains]=" +
@@ -63,7 +63,7 @@ const SubKategori = ({ props }) => {
   };
 
   const handleDelete = async (id) => {
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/sub-categories/" + id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/sub-categories/" + id;
     const cookies = nookies.get(null, "token");
 
     const options = {
@@ -87,7 +87,7 @@ const SubKategori = ({ props }) => {
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
     const endpoint =
-      process.env.NEXT_PUBLIC_DB + "/sub-categories?pagination[page]=" + page;
+      process.env.NEXT_PUBLIC_URL + "/sub-categories?pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -185,7 +185,7 @@ SubKategori.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/sub-categories?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/sub-categories?populate=*";
   const options = {
     method: "GET",
     headers: {

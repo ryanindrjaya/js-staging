@@ -35,7 +35,7 @@ const Golongan = ({ props }) => {
 
   const searchQuery = async (keywords) => {
     const endpoint =
-      process.env.NEXT_PUBLIC_DB +
+      process.env.NEXT_PUBLIC_URL +
       "/groups?filters[$or][0][name][$contains]=" +
       keywords +
       "&filters[$or][1][code][$contains]=" +
@@ -65,7 +65,7 @@ const Golongan = ({ props }) => {
   };
 
   const handleDelete = async (id) => {
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/groups/" + id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/groups/" + id;
     const cookies = nookies.get(null, "token");
 
     const options = {
@@ -89,7 +89,7 @@ const Golongan = ({ props }) => {
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
     const endpoint =
-      process.env.NEXT_PUBLIC_DB + "/groups?pagination[page]=" + page;
+      process.env.NEXT_PUBLIC_URL + "/groups?pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -187,7 +187,7 @@ Golongan.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/groups?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/groups?populate=*";
   const options = {
     method: "GET",
     headers: {

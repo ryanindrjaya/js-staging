@@ -17,7 +17,7 @@ const Tambah = () => {
   const onFinish = async (values) => {
     setLoading(true);
 
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/users-permissions/roles";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/users-permissions/roles";
     const JSONdata = JSON.stringify(values);
 
     const options = {

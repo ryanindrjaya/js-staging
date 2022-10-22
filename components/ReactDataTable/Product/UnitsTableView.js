@@ -9,9 +9,6 @@ export default function UnitsTableView({
   onPageChange,
   initialValue,
 }) {
-
-
-
   const onConfirm = (id) => {
     onDelete(id);
   };
@@ -112,6 +109,12 @@ export default function UnitsTableView({
     initialValue?.unit_5_dp5,
   ];
 
+  var formatter = new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  });
+
   // const unit_1_dp1
 
   const content = (row) => (
@@ -189,13 +192,12 @@ export default function UnitsTableView({
   const columns = [
     {
       name: "Unit",
-      width: "250px",
+      width: "150px",
       style: {
         backgroundColor: "#fff",
       },
 
       selector: (row) => {
-        console.log(row);
         return (
           <Input
             value={unit[row.idx - 1] ?? "-"}
@@ -209,7 +211,7 @@ export default function UnitsTableView({
     },
     {
       name: "Isi",
-      width: "250px",
+      width: "150px",
       style: {
         backgroundColor: "#fff",
       },
@@ -218,7 +220,7 @@ export default function UnitsTableView({
         <InputNumber
           disabled
           style={{
-            width: 200,
+            width: 100,
             backgroundColor: "#ffffff",
           }}
           size="large"
@@ -234,7 +236,6 @@ export default function UnitsTableView({
       style: {
         backgroundColor: "#fff",
       },
-
       selector: (row) => (
         <InputNumber
           disabled
@@ -243,7 +244,7 @@ export default function UnitsTableView({
             backgroundColor: "#ffffff",
           }}
           size="large"
-          value={buyPrice[row.idx - 1] ?? "-"}
+          value={formatter.format(buyPrice[row.idx - 1] ?? 0)}
           placeholder={`Isi ${row.idx}`}
         />
       ),
@@ -260,7 +261,7 @@ export default function UnitsTableView({
             backgroundColor: "#ffffff",
           }}
           size="large"
-          value={purchaseDiscount[row.idx - 1] ?? "-"}
+          value={formatter.format(purchaseDiscount[row.idx - 1] ?? 0)}
           placeholder="Diskon Pembelian"
         />
       ),
@@ -341,13 +342,13 @@ export default function UnitsTableView({
           }}
           size="large"
           placeholder={`Harga Jual ${row.idx}`}
-          value={soldPrice[row.idx - 1] ?? "-"}
+          value={formatter.format(soldPrice[row.idx - 1] ?? 0)}
         />
       ),
     },
     {
       name: "Disc 1%",
-      width: "250px",
+      width: "150px",
       style: {
         backgroundColor: "#fff",
       },
@@ -355,12 +356,12 @@ export default function UnitsTableView({
         <InputNumber
           disabled
           style={{
-            width: 200,
+            width: 100,
             backgroundColor: "#ffffff",
           }}
           size="large"
           placeholder={`Harga Disc ${row.idx}`}
-          value={disc[row.idx - 1] ?? "-"}
+          value={formatter.format(disc[row.idx - 1] ?? 0)}
         />
       ),
     },

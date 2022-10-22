@@ -20,7 +20,7 @@ const Edit = ({ props }) => {
   const onFinish = async (values) => {
     setLoading(true);
     const data = { data: values };
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/locations/" + location.id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/locations/" + location.id;
     const JSONdata = JSON.stringify(data);
 
     const options = {
@@ -183,7 +183,7 @@ Edit.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/locations/" + id;
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations/" + id;
   const options = {
     method: "GET",
     headers: {

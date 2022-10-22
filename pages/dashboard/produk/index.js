@@ -1,5 +1,5 @@
 import Head from "next/head";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import { useRouter } from "next/router";
@@ -14,11 +14,13 @@ import UnitTableView from "../../../components/ReactDataTable/Product/UnitsTable
 
 const Product = ({ props }) => {
   const data = props.data;
+  const [isLoading, setIsLoading] = useState(false);
   const [product, setProduct] = useState(data);
   const [modalProduct, setModalProduct] = useState();
   const [isSearching, setIsSearching] = useState(false);
   const [visible, setVisible] = useState(false);
   const router = useRouter();
+  const [inventory, setInventory] = useState();
   const { Search } = Input;
 
   const onSearch = async (e) => {
@@ -38,7 +40,7 @@ const Product = ({ props }) => {
 
   const searchQuery = async (keywords) => {
     const endpoint =
-      process.env.NEXT_PUBLIC_DB +
+      process.env.NEXT_PUBLIC_URL +
       "/products?filters[$or][0][name][$contains]=" +
       keywords +
       "&filters[$or][1][SKU][$contains]=" +
@@ -73,7 +75,7 @@ const Product = ({ props }) => {
   };
 
   const handleDelete = async (id) => {
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/products/" + id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/products/" + id;
     const cookies = nookies.get(null, "token");
 
     const options = {
@@ -97,7 +99,7 @@ const Product = ({ props }) => {
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
     const endpoint =
-      process.env.NEXT_PUBLIC_DB + "/products?pagination[page]=" + page;
+      process.env.NEXT_PUBLIC_URL + "/products?pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -134,6 +136,41 @@ const Product = ({ props }) => {
 
     return filteredArr;
   };
+
+  const fetchInventory = async (data) => {
+    setIsLoading(true);
+    const cookies = nookies.get(null, "token");
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL +
+      `/inventories?filters[products][id][$eq]=${data.id}&populate=locations`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+    // return req;
+    // console.log(res);
+
+    setInventory(res.data);
+
+    //
+  };
+
+  const openModal = async (e, data) => {
+    // console.log("test", data);
+    setVisible(e);
+    fetchInventory(data);
+  };
+
+  useEffect(() => {
+    console.log("inventory", inventory);
+    setIsLoading(false);
+  }, [inventory]);
 
   return (
     <>
@@ -184,7 +221,11 @@ const Product = ({ props }) => {
               }}
               footer={null}
             >
-              <ProductModal data={modalProduct} />
+              <ProductModal
+                data={modalProduct}
+                isLoading={isLoading}
+                inventory={inventory}
+              />
             </Modal>
 
             <ProductTable
@@ -192,7 +233,7 @@ const Product = ({ props }) => {
               onDelete={handleDelete}
               onUpdate={handleUpdate}
               onPageChange={handlePageChange}
-              setIsVisible={setVisible}
+              setIsVisible={openModal}
               setViewModalProduct={setModalProduct}
             />
           </LayoutContent>
@@ -217,7 +258,7 @@ Product.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/products?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/products?populate=*";
   const options = {
     method: "GET",
     headers: {

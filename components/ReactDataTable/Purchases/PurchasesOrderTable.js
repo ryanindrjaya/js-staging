@@ -1,6 +1,6 @@
 import DataTable from "react-data-table-component";
 import AlertDialog from "../../Alert/Alert";
-import { Popover, Select, Row } from "antd";
+import { Popover, Select, Row, Tag } from "antd";
 import {
   EditOutlined,
   PrinterOutlined,
@@ -104,100 +104,71 @@ export default function ReactDataTable({
 
   const columns = [
     {
-      name: "NO LPB",
-      width: "180px",
-      sortable: true,
-      selector: (row) => row.attributes?.no_purchasing ?? "-",
-    },
-    {
-      name: "Supplier",
-      width: "180px",
-      sortable: true,
-      selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
-    },
-    {
       name: "Tanggal",
-      width: "100px",
-      sortable: true,
-      selector: (row) => formatMyDate(row.attributes?.date_purchasing),
+      width: "150px",
+      selector: (row) => formatMyDate(row.attributes?.order_date),
     },
+    {
+      name: "NO PO",
+      width: "180px",
+      selector: (row) => row.attributes?.no_po ?? "-",
+    },
+
     {
       name: "Lokasi",
       width: "200px",
       selector: (row) => row.attributes?.location.data.attributes.name,
     },
-    // {
-    //   name: "Status Pengiriman",
-    //   width: "150px",
-    //   selector: (row) => {
-    //     return (
-    //       <>
-    //         <Select
-    //           defaultValue={row.attributes.status}
-    //           bordered={false}
-    //           disabled={row.attributes.delivery_status === "Terkirim"}
-    //           onChange={(e) => onChangeStatusPengiriman(e, row)}
-    //         >
-    //           <Option value="Loading">
-    //             {" "}
-    //             <span className="rounded-full bg-slate-400 px-2 py-1 text-white text-xs">
-    //               Loading
-    //             </span>{" "}
-    //           </Option>
-    //           <Option value="Pending">
-    //             <span className="rounded-full bg-yellow-400 px-2 py-1 text-black text-xs">
-    //               Pending
-    //             </span>{" "}
-    //           </Option>
-    //           <Option value="Antrian">
-    //             <span className="rounded-full bg-blue-400 px-2 py-1 text-white text-xs">
-    //               Antrian
-    //             </span>{" "}
-    //           </Option>
-    //           <Option value="Terkirim">
-    //             {" "}
-    //             <span className="rounded-full bg-green-400 px-2 py-1 text-white text-xs">
-    //               Terkirim
-    //             </span>{" "}
-    //           </Option>
-    //         </Select>
-    //       </>
-    //     );
-    //   },
-    // },
-    // {
-    //   name: <div className="ml-6">Status</div>,
-    //   width: "150px",
-    //   selector: (row) => {
-    //     return (
-    //       <Select
-    //         defaultValue={row.attributes.status}
-    //         bordered={false}
-    //         disabled={row.attributes.status === "Diterima"}
-    //         onChange={(e) => onChangeStatus(e, row)}
-    //       >
-    //         <Option value="Dipesan">
-    //           {" "}
-    //           <span className="rounded-full bg-yellow-400 px-2 py-1 text-black text-xs">
-    //             Dipesan
-    //           </span>{" "}
-    //         </Option>
-    //         <Option value="Diterima">
-    //           {" "}
-    //           <span className="rounded-full bg-green-400 px-2 py-1 text-white text-xs">
-    //             Diterima
-    //           </span>{" "}
-    //         </Option>
-    //       </Select>
-    //     );
-    //   },
-    // },
     {
-      name: "Total Beli",
+      name: <div className="ml-6">Status</div>,
       width: "150px",
-      sortable: true,
-      selector: (row) =>
-        formatter.format(row.attributes?.total_purchasing ?? 0),
+      selector: (row) => {
+        return (
+          <Select
+            defaultValue={row.attributes.status}
+            bordered={false}
+            disabled={row.attributes.status === "Diterima"}
+            onChange={(e) => onChangeStatus(e, row)}
+          >
+            <Option value="Dipesan">
+             
+              <Tag color="default">Dipesan</Tag>
+            </Option>
+            <Option value="Diterima">
+            <Tag color="success">Diterima</Tag>
+            </Option>
+          </Select>
+        );
+      },
+    },
+    {
+      name: "Status Pengiriman",
+      width: "150px",
+      selector: (row) => {
+        return (
+          <>
+            <Select
+              defaultValue={row.attributes.delivery_status}
+              bordered={false}
+              disabled={row.attributes.delivery_status === "Terkirim"}
+              onChange={(e) => onChangeStatusPengiriman(e, row)}
+            >
+              <Option value="Loading">
+                <Tag color="default">Loading</Tag>
+              </Option>
+              <Option value="Pending">
+                <Tag color="warning">Pending</Tag>
+              </Option>
+              <Option value="Antrian">
+                <Tag color="processing">Antrian</Tag>
+              </Option>
+              <Option value="Terkirim">
+                <Tag color="success">Terkirim</Tag>
+              </Option>
+            </Select>
+          </>
+        );
+      },
     },
     {
       name: "Ditambahkan Oleh",

@@ -19,7 +19,7 @@ const Tambah = () => {
     setLoading(true);
 
     const data = { data: values };
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/groups";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/groups";
     const JSONdata = JSON.stringify(data);
 
     const options = {

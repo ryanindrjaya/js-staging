@@ -21,7 +21,7 @@ const Tambah = ({ props }) => {
     const role = await getRole(values.role_id);
     const data = { ...values, role, deleteAble: true };
 
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/auth/local/register";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/auth/local/register";
     const JSONdata = JSON.stringify(data);
 
     const options = {
@@ -55,7 +55,7 @@ const Tambah = ({ props }) => {
 
   const getRole = async (roleId) => {
     const endpoint =
-      process.env.NEXT_PUBLIC_DB + "/users-permissions/roles/" + roleId;
+      process.env.NEXT_PUBLIC_URL + "/users-permissions/roles/" + roleId;
     const options = {
       method: "GET",
       headers: {
@@ -264,7 +264,7 @@ Tambah.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/users-permissions/roles";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users-permissions/roles";
   const options = {
     method: "GET",
     headers: {

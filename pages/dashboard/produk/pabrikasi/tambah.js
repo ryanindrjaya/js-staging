@@ -21,7 +21,7 @@ const Tambah = () => {
 
    
     const data = {data : values };
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/manufactures";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/manufactures";
     const JSONdata = JSON.stringify(data);
 
 

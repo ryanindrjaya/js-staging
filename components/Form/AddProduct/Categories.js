@@ -16,7 +16,7 @@ export default function Categories({
 
   const fetchSubCategoriesById = async (id) => {
     const endpoint =
-      process.env.NEXT_PUBLIC_DB +
+      process.env.NEXT_PUBLIC_URL +
       `/sub-categories?populate[category][filters][id][$eq]=${id}&populate=*`;
 
     const options = {
@@ -65,7 +65,7 @@ export default function Categories({
     } else {
       try {
         const endpoint =
-          process.env.NEXT_PUBLIC_DB +
+          process.env.NEXT_PUBLIC_URL +
           `/categories?filters[$or][0][name][$contains]=${query}&filters[$or][1][category_id][$contains]=${query}`;
         const options = {
           method: "GET",

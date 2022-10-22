@@ -1,12 +1,12 @@
-import styled from 'styled-components';
-import { palette } from 'styled-theme';
-import { transition, borderRadius } from '@iso/lib/helpers/style_utils';
-import WithDirection from '@iso/lib/helpers/rtl';
+import styled from "styled-components";
+import { palette } from "styled-theme";
+import { transition, borderRadius } from "@iso/lib/helpers/style_utils";
+import WithDirection from "@iso/lib/helpers/rtl";
 
 const SidebarWrapper = styled.div`
   .isomorphicSidebar {
     z-index: 1000;
-    background: ${palette('secondary', 0)};
+    background: ${palette("secondary", 0)};
     width: 280px;
     flex: 0 0 280px;
 
@@ -30,7 +30,7 @@ const SidebarWrapper = styled.div`
 
     .isoLogoWrapper {
       height: 70px;
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(17, 17, 17, 0.9);
       margin: 0;
       padding: 0 10px;
       text-align: center;
@@ -44,7 +44,7 @@ const SidebarWrapper = styled.div`
           line-height: 70px;
           letter-spacing: 3px;
           text-transform: uppercase;
-          color: ${palette('grayscale', 6)};
+          color: ${palette("grayscale", 6)};
           display: block;
           text-decoration: none;
         }
@@ -105,7 +105,7 @@ const SidebarWrapper = styled.div`
         svg {
           color: inherit;
           margin: ${(props) =>
-            props['data-rtl'] === 'rtl' ? '0 0 0 30px' : '0 30px 0 0'};
+            props["data-rtl"] === "rtl" ? "0 0 0 30px" : "0 30px 0 0"};
           ${transition()};
         }
       }
@@ -150,7 +150,7 @@ const SidebarWrapper = styled.div`
     }
 
     .ant-menu-dark .ant-menu-inline.ant-menu-sub {
-      background: ${palette('secondary', 5)};
+      background: ${palette("secondary", 5)};
     }
 
     .ant-menu-submenu-inline,
@@ -167,8 +167,8 @@ const SidebarWrapper = styled.div`
         }
 
         .ant-menu-submenu-arrow {
-          left: ${(props) => (props['data-rtl'] === 'rtl' ? '25px' : 'auto')};
-          right: ${(props) => (props['data-rtl'] === 'rtl' ? 'auto' : '25px')};
+          left: ${(props) => (props["data-rtl"] === "rtl" ? "25px" : "auto")};
+          right: ${(props) => (props["data-rtl"] === "rtl" ? "auto" : "25px")};
 
           &:before,
           &:after {
@@ -184,7 +184,8 @@ const SidebarWrapper = styled.div`
             transform: rotate(45deg) translateX(-3px);
           }
 
-          ${'' /* &:after {
+          ${
+            "" /* &:after {
             content: '\f123';
             font-family: 'Ionicons' !important;
             font-size: 16px;
@@ -192,7 +193,8 @@ const SidebarWrapper = styled.div`
             left: ${props => (props['data-rtl'] === 'rtl' ? '16px' : 'auto')};
             right: ${props => (props['data-rtl'] === 'rtl' ? 'auto' : '16px')};
             ${transition()};
-          } */};
+          } */
+          };
         }
 
         &:hover {
@@ -209,9 +211,9 @@ const SidebarWrapper = styled.div`
       .ant-menu-submenu-vertical {
         > li:not(.ant-menu-item-group) {
           padding-left: ${(props) =>
-            props['data-rtl'] === 'rtl' ? '0px !important' : '74px !important'};
+            props["data-rtl"] === "rtl" ? "0px !important" : "74px !important"};
           padding-right: ${(props) =>
-            props['data-rtl'] === 'rtl' ? '74px !important' : '0px !important'};
+            props["data-rtl"] === "rtl" ? "74px !important" : "0px !important"};
           font-size: 13px;
           font-weight: 400;
           margin: 0;

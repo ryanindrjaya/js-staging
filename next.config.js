@@ -7,11 +7,16 @@ const withBundleAnalyzer = require("@zeit/next-bundle-analyzer");
 
 // next.js custom configuration goes here
 const nextConfig = {
+  reactStrictMode: true,
   env: {
     BASE_URL: process.env.BASE_URL,
-    NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL,
+    NEXT_PUBLIC_URL: "http://localhost:1337/api",
     BACKEND_URL: "https://localhost:8080",
     STAKEHOLDER_NAME: "APOTEK JAYA SEHAT",
+    MAIN_COLOR: "#056A81",
+    TAG_RED: "#F50",
+    TAG_ORANGE: "#F4B042",
+    TAG_GREEN: "#87D068",
   },
   webpack: (config, options) => {
     config.resolve.alias = {
@@ -29,11 +34,6 @@ const nextConfig = {
   webpack5: false,
 };
 
-// fix: prevents error when .css files are required by node
-// if (typeof require !== 'undefined') {
-//   require.extensions['.css'] = file => {};
-// }
-
 module.exports = withPlugins(
   [
     withTM,
@@ -43,7 +43,9 @@ module.exports = withPlugins(
       withBundleAnalyzer,
       {
         analyzeServer: ["server", "both"].includes(process.env.BUNDLE_ANALYZE),
-        analyzeBrowser: ["browser", "both"].includes(process.env.BUNDLE_ANALYZE),
+        analyzeBrowser: ["browser", "both"].includes(
+          process.env.BUNDLE_ANALYZE
+        ),
         bundleAnalyzerConfig: {
           server: {
             analyzerMode: "static",

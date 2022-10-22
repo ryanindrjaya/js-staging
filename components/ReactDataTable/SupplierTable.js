@@ -25,18 +25,12 @@ export default function ReactDataTable({
   const content = (row) => (
     <div>
       <div>
-        <button
-          onClick={() => openModal(row)}
-          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-        >
+        <button className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md ">
           <BarsOutlined className="mr-2 mt-0.5 float float-left" />
           Lihat
         </button>
       </div>
-      <button
-        onClick={() => onEdit(row.id)}
-        className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-      >
+      <button className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md ">
         <EditOutlined className="mr-2 mt-0.5 float float-left" />
         Edit
       </button>

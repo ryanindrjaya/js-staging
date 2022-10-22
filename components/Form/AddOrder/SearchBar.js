@@ -18,7 +18,7 @@ export default function SearchBar({ form, tempList, onChange }) {
   const handleChange = async (id) => {};
 
   const handleSelect = async (id) => {
-    const endpoint = process.env.NEXT_PUBLIC_DB + `/products/${id}`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/products/${id}`;
     const options = {
       method: "GET",
       headers: {
@@ -53,7 +53,7 @@ export default function SearchBar({ form, tempList, onChange }) {
     } else {
       try {
         const endpoint =
-          process.env.NEXT_PUBLIC_DB +
+          process.env.NEXT_PUBLIC_URL +
           `/products?filters[$or][0][name][$contains]=${query}&filters[$or][1][SKU][$contains]=${query}`;
         const options = {
           method: "GET",

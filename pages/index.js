@@ -1,30 +1,29 @@
 import React, { useState } from "react";
-import Link from "next/link";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/router";
 import Input from "@iso/components/uielements/input";
-import Checkbox from "@iso/components/uielements/checkbox";
 import Button from "@iso/components/uielements/button";
 import IntlMessages from "@iso/components/utility/intlMessages";
-import jwtConfig from "@iso/config/jwt.config";
-import FirebaseLogin from "@iso/containers/FirebaseForm/FirebaseForm";
-import Auth0 from "../authentication/Auth0";
 import authActions from "../authentication/actions";
 import SignInStyleWrapper from "../styled/SignIn.styles";
-import { Spin, Alert } from "antd";
+import { Spin, Alert, Form } from "antd";
 import nookies from "nookies";
 
 const { login } = authActions;
 
 export default function SignInPage(props) {
   const dispatch = useDispatch();
+  const [form] = Form.useForm();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [failedLogin, setFailedLogin] = useState(false);
-  const [failedLoginMsg, setfailedLoginMsg] = useState("Username atau Password salah");
+  const [failedLoginMsg, setfailedLoginMsg] = useState(
+    "Username atau Password salah"
+  );
   const [field, setField] = useState({});
 
   const handleLogin = async (e) => {
+
     e.preventDefault();
     setFailedLogin(false);
     setLoading(true);
@@ -35,7 +34,7 @@ export default function SignInPage(props) {
     };
 
     const JSONdata = JSON.stringify(credentials);
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/auth/local";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/auth/local";
 
     const options = {
       method: "POST",
@@ -48,13 +47,14 @@ export default function SignInPage(props) {
     try {
       const req = await fetch(endpoint, options);
       const res = await req.json();
+      console.log(res);
 
       if (res.jwt) {
         // set new token
         nookies.set(null, "token", res.jwt, {
           maxAge: 30 * 24 * 60 * 60,
           path: "/",
-          secure: process.env.NEXT_PUBLIC_DB !== "development",
+          secure: process.env.NEXT_PUBLIC_URL !== "development",
           sameSite: "strict",
         });
 
@@ -63,7 +63,7 @@ export default function SignInPage(props) {
         nookies.set(null, "role", role, {
           maxAge: 30 * 24 * 60 * 60,
           path: "/",
-          secure: process.env.NEXT_PUBLIC_DB !== "development",
+          secure: process.env.NEXT_PUBLIC_URL !== "development",
           sameSite: "strict",
         });
 
@@ -81,7 +81,7 @@ export default function SignInPage(props) {
   };
 
   const getUserInformation = async (jwt) => {
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/users/me?populate=role";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=role";
 
     const options = {
       method: "GET",
@@ -115,41 +115,72 @@ export default function SignInPage(props) {
   // =========================== UI ===========================
 
   return (
-    <SignInStyleWrapper className="isoSignInPage">
-      <div className="isoLoginContentWrapper">
-        <div className="isoLoginContent">
-          <div className="isoLogoWrapper">
-            <IntlMessages id="KEELOLA" />
-          </div>
+    <Form
+      form={form}
+      name="add_order"
+      initialValues={{
+        remember: true,
+      }}
+      onFinish={handleLogin}
+    >
+      <SignInStyleWrapper className="isoSignInPage">
+        <div className="isoLoginContentWrapper">
+          <div className="isoLoginContent">
+            <div className="isoSignInForm">
+              <div className="font-bold text-lg p-3">
+                <center>LOGIN</center>
+              </div>
+              <div className="isoInputWrapper">
+                <Input
+                  onChange={setValue}
+                  name="username"
+                  id="inputUserName"
+                  size="large"
+                  placeholder="Username"
+                />
+              </div>
 
-          <div className="isoSignInForm">
-            <div className="isoInputWrapper">
-              <Input onChange={setValue} name="username" id="inputUserName" size="large" placeholder="Username" />
-            </div>
+              <div className="isoInputWrapper">
+                <Input
+                  onChange={setValue}
+                  id="inpuPassword"
+                  size="large"
+                  name="password"
+                  type="password"
+                  placeholder="Password"
+                />
+              </div>
 
-            <div className="isoInputWrapper">
-              <Input onChange={setValue} id="inpuPassword" size="large" name="password" type="password" placeholder="Password" />
-            </div>
-
-            <div className="isoInputWrapper isoLeftRightComponent">
-              {loading ? (
-                <div className="center">
-                  <Spin />
-                </div>
+              <div className="isoInputWrapper isoLeftRightComponent">
+                {loading ? (
+                  <div className="center">
+                    <Spin />
+                  </div>
+                ) : (
+                  <Button
+                    htmlType="submit"
+                    className="bg-blue-400 text-white w-full hover:bg-blue-600"
+                    onClick={handleLogin}
+                  >
+                    <IntlMessages id="page.signInButton" />
+                  </Button>
+                )}
+              </div>
+              {failedLogin ? (
+                <Alert
+                  message="Login Error"
+                  description="Username atau Password salah"
+                  type="error"
+                  closable
+                  onClose={onClose}
+                />
               ) : (
-                <Button type="primary" onClick={handleLogin}>
-                  <IntlMessages id="page.signInButton" />
-                </Button>
+                <div></div>
               )}
             </div>
-            {failedLogin ? (
-              <Alert message="Login Error" description="Username atau Password salah" type="error" closable onClose={onClose} />
-            ) : (
-              <div></div>
-            )}
           </div>
         </div>
-      </div>
-    </SignInStyleWrapper>
+      </SignInStyleWrapper>
+    </Form>
   );
 }

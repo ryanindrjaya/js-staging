@@ -31,7 +31,7 @@ const Tambah = ({ props }) => {
     delete values.category_id;
     const dataValues = { ...values, category: categoryID };
     const data = { data: dataValues };
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/sub-categories";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/sub-categories";
     const JSONdata = JSON.stringify(data);
 
     const options = {
@@ -74,7 +74,7 @@ const Tambah = ({ props }) => {
     } else {
       try {
         const endpoint =
-          process.env.NEXT_PUBLIC_DB +
+          process.env.NEXT_PUBLIC_URL +
           `/categories?filters[$or][0][name][$contains]=${query}&filters[$or][1][category_id][$contains]=${query}`;
         const options = {
           method: "GET",
@@ -227,7 +227,7 @@ Tambah.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/categories";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/categories";
   const options = {
     method: "GET",
     headers: {

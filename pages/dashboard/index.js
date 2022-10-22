@@ -1,7 +1,6 @@
 import React from "react";
 import Head from "next/head";
-import Image from "next/image";
-import { withAuthSync } from "../../authentication/auth.utils";
+import Maintenance from "../../components/Illustration/Maintenance";
 import DashboardLayout from "../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 
@@ -13,15 +12,13 @@ const Dashboard = () => {
       </Head>
       <DashboardLayout>
         <LayoutWrapper>
-          {/* main content */}
-          {/* <div >
-          <Image
-          src="/assets/images/illustration/developer.png"
-          alt="incoming page"
-          width={300}
-          height={300}
-        />
-        </div> */}
+          <div className="h-full w-full">
+            <center>
+              <div className="mt-5"></div>
+              <Maintenance width={"600"} height={"300"} />
+              <p className="font-bold p-4 text-zinc-600">Sedang Dalam Pengembangan..</p>
+            </center>
+          </div>
         </LayoutWrapper>
       </DashboardLayout>
     </>

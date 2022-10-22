@@ -1,7 +1,7 @@
 export default {
   siteName: 'ISOMORPHIC',
   siteIcon: 'ion-flash',
-  footerText: `Isomorphic @ ${new Date().getFullYear()} Created by RedQ, Inc`,
+  footerText: `ERP @ 2022 Created Keelola Teams`,
   enableAnimatedRoute: false,
   apiUrl: 'http://yoursite.com/api/',
   google: {

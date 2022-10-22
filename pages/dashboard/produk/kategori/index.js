@@ -36,7 +36,7 @@ const Kategori = ({ props }) => {
 
   const searchQuery = async (keywords) => {
     const endpoint =
-      process.env.NEXT_PUBLIC_DB +
+      process.env.NEXT_PUBLIC_URL +
       "/categories?filters[$or][0][name][$contains]=" +
       keywords +
       "&filters[$or][1][category_id][$contains]=" +
@@ -65,7 +65,7 @@ const Kategori = ({ props }) => {
   };
 
   const handleDelete = async (id) => {
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/categories/" + id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/categories/" + id;
     const cookies = nookies.get(null, "token");
 
     const options = {
@@ -89,7 +89,7 @@ const Kategori = ({ props }) => {
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
     const endpoint =
-      process.env.NEXT_PUBLIC_DB + "/categories?pagination[page]=" + page;
+      process.env.NEXT_PUBLIC_URL + "/categories?pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -187,7 +187,7 @@ Kategori.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/categories";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/categories";
   const options = {
     method: "GET",
     headers: {

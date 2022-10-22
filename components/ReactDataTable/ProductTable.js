@@ -12,12 +12,12 @@ export default function ReactDataTable({
   setViewModalProduct,
 }) {
   const openModal = (row) => {
-    setIsVisible(true);
+    setIsVisible(true, row);
     setViewModalProduct(row);
   };
 
   const onConfirm = (id) => {
-    console.log(id);
+    // console.log(id);
     onDelete(id);
   };
 

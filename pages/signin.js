@@ -32,7 +32,7 @@ export default function SignInPage(props) {
     };
 
     const JSONdata = JSON.stringify(credentials);
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/auth/local";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/auth/local";
 
     const options = {
       method: "POST",
@@ -51,7 +51,7 @@ export default function SignInPage(props) {
         nookies.set(null, "token", res.jwt, {
           maxAge: 30 * 24 * 60 * 60,
           path: "/",
-          secure: process.env.NEXT_PUBLIC_DB !== "development",
+          secure: process.env.NEXT_PUBLIC_URL !== "development",
           sameSite: "strict",
         });
 
@@ -60,7 +60,7 @@ export default function SignInPage(props) {
         nookies.set(null, "role", role, {
           maxAge: 30 * 24 * 60 * 60,
           path: "/",
-          secure: process.env.NEXT_PUBLIC_DB !== "development",
+          secure: process.env.NEXT_PUBLIC_URL !== "development",
           sameSite: "strict",
         });
 
@@ -78,7 +78,7 @@ export default function SignInPage(props) {
   };
 
   const getUserInformation = async (jwt) => {
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/users/me?populate=role";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=role";
 
     const options = {
       method: "GET",

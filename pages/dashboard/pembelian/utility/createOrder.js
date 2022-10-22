@@ -51,7 +51,7 @@ const CreateOrder = async (
 };
 
 const createData = async (data) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/purchases";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases";
   const JSONdata = JSON.stringify(data);
 
   const options = {
@@ -87,7 +87,7 @@ const putRelationOrder = async (id, value, form, router) => {
   }
 
   const JSONdata = JSON.stringify(dataOrder);
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/purchases/" + id;
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/" + id;
   const options = {
     method: "PUT",
     headers: {
@@ -111,7 +111,7 @@ const putRelationOrder = async (id, value, form, router) => {
 };
 
 const getUserMe = async () => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/users/me";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me";
   const options = {
     method: "GET",
     headers: {

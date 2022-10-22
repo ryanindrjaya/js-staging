@@ -45,7 +45,7 @@ const FormAddHewan = () => {
     console.log(data);
 
     const JSONdata = JSON.stringify(data);
-    const endpoint = process.env.NEXT_PUBLIC_DB + "owners";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "owners";
 
     const options = {
       method: "POST",
@@ -89,7 +89,7 @@ const FormAddHewan = () => {
     } else {
       try {
         const endpoint =
-          process.env.NEXT_PUBLIC_DB +
+          process.env.NEXT_PUBLIC_URL +
           `owners?filters[$or][0][name][$contains]=${query}`;
 
         const options = {

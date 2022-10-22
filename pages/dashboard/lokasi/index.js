@@ -19,7 +19,7 @@ const Lokasi = ({ props }) => {
   };
 
   const handleDelete = async (id) => {
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/locations/" + id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/locations/" + id;
     const cookies = nookies.get(null, "token");
 
     const options = {
@@ -81,7 +81,7 @@ Lokasi.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/locations";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
   const options = {
     method: "GET",
     headers: {

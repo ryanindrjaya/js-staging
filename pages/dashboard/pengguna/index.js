@@ -24,7 +24,7 @@ const Pengguna = ({ props }) => {
   };
 
   const handleDelete = async (id) => {
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/users/" + id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/users/" + id;
     const cookies = nookies.get(null, "token");
 
     const options = {
@@ -93,7 +93,7 @@ Pengguna.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/users?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users?populate=*";
   const options = {
     method: "GET",
     headers: {

@@ -23,7 +23,7 @@ const Supplier = ({ props }) => {
   };
 
   const handleDelete = async (id) => {
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/suppliers/" + id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/suppliers/" + id;
     const cookies = nookies.get(null, "token");
 
     const options = {
@@ -47,7 +47,7 @@ const Supplier = ({ props }) => {
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
     const endpoint =
-      process.env.NEXT_PUBLIC_DB + "/suppliers?pagination[page]=" + page;
+      process.env.NEXT_PUBLIC_URL + "/suppliers?pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -90,7 +90,7 @@ const Supplier = ({ props }) => {
 
   const searchQuery = async (keywords) => {
     const endpoint =
-      process.env.NEXT_PUBLIC_DB +
+      process.env.NEXT_PUBLIC_URL +
       "/suppliers?filters[$or][0][name][$contains]=" +
       keywords +
       "&filters[$or][1][id_supplier][$contains]=" +
@@ -169,7 +169,7 @@ Supplier.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/suppliers?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/suppliers?populate=*";
   const options = {
     method: "GET",
     headers: {

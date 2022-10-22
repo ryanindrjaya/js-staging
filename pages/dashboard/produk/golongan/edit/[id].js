@@ -22,7 +22,7 @@ const Edit = ({ props }) => {
     setLoading(true);
 
     const data = { data: values };
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/groups/" + golongan.id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/groups/" + golongan.id;
     const JSONdata = JSON.stringify(data);
 
     const options = {
@@ -165,7 +165,7 @@ Edit.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/groups/" + id;
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/groups/" + id;
   const options = {
     method: "GET",
     headers: {

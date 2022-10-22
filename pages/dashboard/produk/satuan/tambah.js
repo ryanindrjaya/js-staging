@@ -17,7 +17,7 @@ const Tambah = () => {
   const onFinish = async (values) => {
     setLoading(true);
     const data = { data: values };
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/units";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/units";
     const JSONdata = JSON.stringify(data);
 
     const options = {

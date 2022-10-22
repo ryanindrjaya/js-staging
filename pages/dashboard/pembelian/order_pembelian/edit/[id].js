@@ -140,7 +140,7 @@ const Edit = ({ props }) => {
       },
     };
 
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/purchase-details";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchase-details";
     const JSONdata = JSON.stringify(data);
 
     const options = {
@@ -187,7 +187,7 @@ const Edit = ({ props }) => {
       data: values,
     };
 
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/purchases";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases";
     const JSONdata = JSON.stringify(data);
 
     const options = {
@@ -228,7 +228,7 @@ const Edit = ({ props }) => {
     }
 
     const JSONdata = JSON.stringify(dataOrder);
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/purchases/" + id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/" + id;
     const options = {
       method: "PUT",
       headers: {
@@ -251,7 +251,7 @@ const Edit = ({ props }) => {
   };
 
   const getUserMe = async () => {
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/users/me";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me";
     const options = {
       method: "GET",
       headers: {
@@ -757,7 +757,7 @@ Edit.getInitialProps = async (context) => {
   const id = context.query.id;
 
   const endpoint =
-    process.env.NEXT_PUBLIC_DB + "/purchases/" + id + "?populate=deep";
+    process.env.NEXT_PUBLIC_URL + "/purchases/" + id + "?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -780,7 +780,7 @@ Edit.getInitialProps = async (context) => {
 };
 
 const fetchDataLocation = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/locations";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
   const options = {
     method: "GET",
     headers: {

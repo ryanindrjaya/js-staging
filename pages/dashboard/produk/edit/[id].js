@@ -83,7 +83,7 @@ const Edit = ({ props }) => {
 
     async onChange(info) {
       if (info.fileList.length === 1) {
-        const endpoint = process.env.NEXT_PUBLIC_DB + "/upload";
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/upload";
         const file = info.file.originFileObj;
         const data = new FormData();
         data.append("files", file);
@@ -208,6 +208,11 @@ const Edit = ({ props }) => {
       ...putData,
     };
 
+    for (let index = 1; index < 6; index++) {
+      if (data[`purchase_discount_${index}`] === "-")
+        delete data[`purchase_discount_${index}`];
+    }
+
     const dataPut = { data: data };
     const JSONdata = JSON.stringify(dataPut);
 
@@ -220,9 +225,13 @@ const Edit = ({ props }) => {
       body: JSONdata,
     };
 
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/products/" + productId;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/products/" + productId;
     const req = await fetch(endpoint, options);
     const res = await req.json();
+
+    console.log("dataput ", dataPut);
+    console.log(req);
+    console.log(res);
 
     if (req.status === 200) {
       toast.success("Produk berhasil diperbarui!", {
@@ -411,7 +420,7 @@ Edit.getInitialProps = async (context) => {
 const fetchProduct = async (cookies, context) => {
   const id = context.query.id;
   const endpoint =
-    process.env.NEXT_PUBLIC_DB + "/products/" + id + "?populate=*";
+    process.env.NEXT_PUBLIC_URL + "/products/" + id + "?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -425,7 +434,7 @@ const fetchProduct = async (cookies, context) => {
 };
 
 const fetchDataCategories = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/categories";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/categories";
   const options = {
     method: "GET",
     headers: {
@@ -439,7 +448,7 @@ const fetchDataCategories = async (cookies) => {
 };
 
 const fetchDataManufactures = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/manufactures";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/manufactures";
   const options = {
     method: "GET",
     headers: {
@@ -454,7 +463,7 @@ const fetchDataManufactures = async (cookies) => {
 
 const fetchDataSubCategories = async (cookies, categoryId) => {
   const endpoint =
-    process.env.NEXT_PUBLIC_DB +
+    process.env.NEXT_PUBLIC_URL +
     "/sub-categories?populate[category][filters][id][$eq]=" +
     categoryId;
   const options = {
@@ -470,7 +479,7 @@ const fetchDataSubCategories = async (cookies, categoryId) => {
 };
 
 const fetchDataGroups = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/groups";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/groups";
   const options = {
     method: "GET",
     headers: {
@@ -484,7 +493,7 @@ const fetchDataGroups = async (cookies) => {
 };
 
 const fetchDataLocations = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/locations";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
   const options = {
     method: "GET",
     headers: {

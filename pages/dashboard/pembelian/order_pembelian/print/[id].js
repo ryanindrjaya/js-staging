@@ -261,7 +261,7 @@ Print.getInitialProps = async (context) => {
   const id = context.query.id;
 
   const endpoint =
-    process.env.NEXT_PUBLIC_DB + "/purchases/" + id + "?populate=deep";
+    process.env.NEXT_PUBLIC_URL + "/purchases/" + id + "?populate=deep";
   const options = {
     method: "GET",
     headers: {

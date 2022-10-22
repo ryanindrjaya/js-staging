@@ -1,33 +1,28 @@
 import React from "react";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
-import clone from "clone";
 import { Layout } from "antd";
 import Scrollbars from "@iso/components/utility/customScrollBar";
 import Menu from "@iso/components/uielements/menu";
-import IntlMessages from "@iso/components/utility/intlMessages";
-
 import appActions from "@iso/redux/app/actions";
 import Logo from "@iso/components/utility/Logo.next";
 import SidebarWrapper from "./Sidebar.styles";
 import SidebarMenu from "./SidebarMenu";
 import SIDEBAR_MENU_OPTIONS from "./sidebar.navigations";
-import {
-  SidebarMenuLevelIcon,
-  SidebarPersonIcon,
-} from "@iso/config/icon.config";
+import { SidebarPersonIcon } from "@iso/config/icon.config";
 import {
   SidebarContactIcon,
   SidebarEcommerceIcon,
   SidebarPurchasesIcon,
-  SidebarReceiptIcon,
 } from "../../config/icon.config";
+import { IoIosArrowRoundUp } from "react-icons/io";
 
 const SubMenu = Menu.SubMenu;
 const MenuItemGroup = Menu.ItemGroup;
 const { Sider } = Layout;
 const { toggleOpenDrawer, changeOpenKeys, changeCurrent, toggleCollapsed } =
   appActions;
+
 export default function Sidebar(props) {
   const { view, openKeys, collapsed, openDrawer, height, current } =
     useSelector((state) => state.App);
@@ -68,28 +63,35 @@ export default function Sidebar(props) {
   const isCollapsed = collapsed && !openDrawer;
   const mode = isCollapsed === true ? "vertical" : "inline";
   // const scrollheight = height;
+
   const styling = {
-    backgroundColor: sidebarTheme.backgroundColor,
+    // backgroundColor: process.env.MAIN_COLOR,
+    backgroundColor: "#1a6677",
   };
+
   const submenuStyle = {
-    backgroundColor: "rgba(0,0,0,0.3)",
+    backgroundColor: "rgba(0,0,0,0)",
     color: sidebarTheme.textColor,
   };
+
   const submenuColor = {
-    color: sidebarTheme.textColor,
+    color: "white",
   };
+
   const onMouseEnter = () => {
     if (collapsed && openDrawer === false) {
       dispatch(toggleOpenDrawer());
     }
     return;
   };
+
   const onMouseLeave = () => {
     if (collapsed && openDrawer === true) {
       dispatch(toggleOpenDrawer());
     }
     return;
   };
+
   return (
     <SidebarWrapper>
       <Sider
@@ -163,11 +165,6 @@ export default function Sidebar(props) {
                   <a>Supplier</a>
                 </Link>
               </Menu.Item>
-              {/* <Menu.Item style={submenuStyle} key="pelanggan">
-                <Link href="/dashboard/pelanggan">
-                  <a>Pelanggan</a>
-                </Link>
-              </Menu.Item> */}
             </SubMenu>
 
             {/* PRODUK */}
@@ -225,6 +222,38 @@ export default function Sidebar(props) {
               <Menu.Item style={submenuStyle} key="pembelian_barang">
                 <Link href="/dashboard/pembelian/pembelian_barang">
                   <a>Pembelian Barang</a>
+                </Link>
+              </Menu.Item>
+              <Menu.Item style={submenuStyle} key="retur_pembelian">
+                <Link href="/dashboard/pembelian/retur">
+                  <a>Retur Pembelian</a>
+                </Link>
+              </Menu.Item>
+            </SubMenu>
+
+            {/* PENJUALAN  */}
+            <SubMenu
+              key="penjualan"
+              title={
+                <span className="isoMenuHolder" style={submenuColor}>
+                  <IoIosArrowRoundUp size={18} />
+                  <span className="nav-text">Penjualan</span>
+                </span>
+              }
+            >
+              <Menu.Item style={submenuStyle} key="penjualan_toko">
+                <Link href="/dashboard/penjualan/toko">
+                  <a>Penjualan Toko</a>
+                </Link>
+              </Menu.Item>
+              <Menu.Item style={submenuStyle} key="penjualan_sales">
+                <Link href="/dashboard/penjualan/sales">
+                  <a>Penjualan Sales</a>
+                </Link>
+              </Menu.Item>
+              <Menu.Item style={submenuStyle} key="penjualan_non_panel">
+                <Link href="/dashboard/penjualan/non_panel">
+                  <a>Penjualan Non Panel</a>
                 </Link>
               </Menu.Item>
             </SubMenu>

@@ -26,7 +26,7 @@ const Edit = ({ props }) => {
     const role = await getRole(values.role_id);
     const data = { ...values, role, deleteAble: true };
 
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/users/" + user.id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/users/" + user.id;
     const JSONdata = JSON.stringify(data);
 
     const options = {
@@ -59,7 +59,7 @@ const Edit = ({ props }) => {
 
   const getRole = async (roleId) => {
     const endpoint =
-      process.env.NEXT_PUBLIC_DB + "/users-permissions/roles/" + roleId;
+      process.env.NEXT_PUBLIC_URL + "/users-permissions/roles/" + roleId;
     const options = {
       method: "GET",
       headers: {
@@ -208,7 +208,7 @@ Edit.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/users/" + id + "?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/" + id + "?populate=*";
 
   const options = {
     method: "GET",
@@ -232,7 +232,7 @@ Edit.getInitialProps = async (context) => {
 };
 
 const fetchRole = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/users-permissions/roles";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users-permissions/roles";
   const options = {
     method: "GET",
     headers: {

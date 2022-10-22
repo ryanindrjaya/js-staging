@@ -9,7 +9,7 @@ import nookies from "nookies";
 import { toast } from "react-toastify";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
-import OrderTable from "@iso/components/ReactDataTable/Purchases/OrderTable";
+import LPBTable from "@iso/components/ReactDataTable/Purchases/LPBTable";
 import { useSelector, useDispatch } from "react-redux";
 import LoadingAnimations from "@iso/components/Animations/Loading";
 import moment from "moment";
@@ -21,6 +21,7 @@ import {
   DatePicker,
   Select,
   InputNumber,
+  notification,
   Row,
 } from "antd";
 import createDetailPurchasing from "../utility/createDetail";
@@ -52,7 +53,7 @@ Tambah.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/locations";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
   const options = {
     method: "GET",
     headers: {
@@ -66,7 +67,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchDataPurchasing = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/purchasings";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings";
   const options = {
     method: "GET",
     headers: {
@@ -81,7 +82,7 @@ const fetchDataPurchasing = async (cookies) => {
 
 const fetchDataPurchase = async (cookies) => {
   const endpoint =
-    process.env.NEXT_PUBLIC_DB +
+    process.env.NEXT_PUBLIC_URL +
     "/purchases/?populate=deep&filters[delivery_status][$eq]=Terkirim";
   const options = {
     method: "GET",
@@ -156,11 +157,12 @@ function Tambah({ props }) {
 
   const createDetailOrder = async () => {
     createDetailPurchasing(
+      dataValues,
       products,
       productTotalPrice,
       productSubTotal,
       setListId,
-      '/purchasing-details'
+      "/purchasing-details"
     );
   };
 
@@ -223,7 +225,7 @@ function Tambah({ props }) {
     setIsFetchingData(true);
 
     const endpoint =
-      process.env.NEXT_PUBLIC_DB + `/purchases/${id}?populate=deep`;
+      process.env.NEXT_PUBLIC_URL + `/purchases/${id}?populate=deep`;
     const options = {
       method: "GET",
       headers: {
@@ -247,7 +249,7 @@ function Tambah({ props }) {
 
     var dateString = dataPO.order_date;
     var momentObj = moment(dateString, "YYYY-MM-DD");
-    var momentString = momentObj.format("DD-MM-YYYY");
+    var momentString = momentObj.format("MM-DD-YYYY");
 
     form.setFieldsValue({
       supplier_id: `${supplier.attributes.id_supplier} - ${supplier.attributes.name}`,
@@ -271,6 +273,15 @@ function Tambah({ props }) {
       disc_value: null,
       DPP_active: null,
       PPN_active: null,
+    });
+
+    setAdditionalFee({
+      ...additionalFee,
+      additional_fee_1_sub: dataPO.additional_fee_1_sub,
+      additional_fee_2_sub: dataPO.additional_fee_2_sub,
+      additional_fee_3_sub: dataPO.additional_fee_3_sub,
+      additional_fee_4_sub: dataPO.additional_fee_4_sub,
+      additional_fee_5_sub: dataPO.additional_fee_5_sub,
     });
 
     setNewGrandTotal(dataPO);
@@ -418,6 +429,19 @@ function Tambah({ props }) {
     clearData();
   }, []);
 
+  const onFinishFailed = () => {
+    const error = form.getFieldsError();
+    error.forEach((element) => {
+      if (element.errors.length > 0) {
+        console.log();
+        notification["error"]({
+          message: "Field Kosong",
+          description: element.errors[0],
+        });
+      }
+    });
+  };
+
   return (
     <>
       <Head>
@@ -425,7 +449,7 @@ function Tambah({ props }) {
       </Head>
       <DashboardLayout>
         <LayoutWrapper style={{}}>
-          <TitlePage titleText={"Tambah Pembelian Barang"} />
+          <TitlePage titleText={"Tambah Lembar Pembelian Barang"} />
           <LayoutContent>
             <Form
               form={form}
@@ -434,6 +458,7 @@ function Tambah({ props }) {
                 remember: true,
               }}
               onFinish={onFinish}
+              onFinishFailed={onFinishFailed}
             >
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -524,34 +549,32 @@ function Tambah({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Input.Group compact>
-                    <Form.Item name="tempo_days" initialValue={0}>
-                      <Input
-                        size="large"
-                        style={{
-                          width: "100%",
-                        }}
-                        onChange={setTempoDays}
-                      />
-                    </Form.Item>
+                  <Form.Item name="tempo_days" initialValue={0} noStyle>
+                    <Input
+                      size="large"
+                      style={{
+                        width: "50%",
+                      }}
+                      onChange={setTempoDays}
+                    />
+                  </Form.Item>
 
-                    <Form.Item name="tempo_time" initialValue={"Hari"}>
-                      <Select
-                        size="large"
-                        onChange={setTempoOption}
-                        style={{
-                          width: "100%",
-                        }}
-                      >
-                        <Select.Option value="Hari" key="Hari">
-                          Hari
-                        </Select.Option>
-                        <Select.Option value="Bulan" key="Bulan">
-                          Bulan
-                        </Select.Option>
-                      </Select>
-                    </Form.Item>
-                  </Input.Group>
+                  <Form.Item name="tempo_time" initialValue={"Hari"} noStyle>
+                    <Select
+                      size="large"
+                      onChange={setTempoOption}
+                      style={{
+                        width: "50%",
+                      }}
+                    >
+                      <Select.Option value="Hari" key="Hari">
+                        Hari
+                      </Select.Option>
+                      <Select.Option value="Bulan" key="Bulan">
+                        Bulan
+                      </Select.Option>
+                    </Select>
+                  </Form.Item>
                 </div>
 
                 <div className="w-full md:w-1/4 px-3 mb-2 mt-5 md:mb-0">
@@ -575,7 +598,7 @@ function Tambah({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 mt-5 md:mb-0">
-                  <Form.Item name="nota_supplier">
+                  <Form.Item name="no_nota_suppplier">
                     <Input placeholder="No. Nota Supplier" size="large" />
                   </Form.Item>
                 </div>
@@ -598,12 +621,13 @@ function Tambah({ props }) {
                   </div>
                 ) : (
                   <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                    <OrderTable
+                    <LPBTable
                       products={products}
                       productTotalPrice={productTotalPrice}
                       setProductTotalPrice={setProductTotalPrice}
                       calculatePriceAfterDisc={calculatePriceAfterDisc}
                       productSubTotal={productSubTotal}
+                      locations={locations}
                     />
                   </div>
                 )}
@@ -818,7 +842,6 @@ function Tambah({ props }) {
                   </div>
                 ) : (
                   <Button
-                    onClick={() => {}}
                     htmlType="submit"
                     className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
                   >

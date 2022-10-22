@@ -29,7 +29,7 @@ const FormAddKlien = () => {
     };
 
     const JSONdata = JSON.stringify(data);
-    const endpoint = process.env.NEXT_PUBLIC_DB + "owners";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "owners";
 
     const options = {
       method: "POST",

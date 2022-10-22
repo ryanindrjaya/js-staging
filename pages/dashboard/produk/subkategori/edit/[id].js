@@ -36,7 +36,7 @@ const Edit = ({ props }) => {
     const dataValues = { ...values, category: categoryID };
     const data = { data: dataValues };
     const endpoint =
-      process.env.NEXT_PUBLIC_DB + "/sub-categories/" + subCategory.id;
+      process.env.NEXT_PUBLIC_URL + "/sub-categories/" + subCategory.id;
     const JSONdata = JSON.stringify(data);
 
     const options = {
@@ -78,7 +78,7 @@ const Edit = ({ props }) => {
     } else {
       try {
         const endpoint =
-          process.env.NEXT_PUBLIC_DB +
+          process.env.NEXT_PUBLIC_URL +
           `/categories?filters[$or][0][name][$contains]=${query}&filters[$or][1][category_id][$contains]=${query}`;
         const options = {
           method: "GET",
@@ -227,7 +227,7 @@ Edit.getInitialProps = async (context) => {
   const id = context.query.id;
 
   const endpoint =
-    process.env.NEXT_PUBLIC_DB + "/sub-categories/" + id + "?populate=*";
+    process.env.NEXT_PUBLIC_URL + "/sub-categories/" + id + "?populate=*";
 
   const options = {
     method: "GET",
@@ -251,7 +251,7 @@ Edit.getInitialProps = async (context) => {
 };
 
 const fetchCategory = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/categories?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/categories?populate=*";
   const options = {
     method: "GET",
     headers: {

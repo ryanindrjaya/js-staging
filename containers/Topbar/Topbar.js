@@ -9,7 +9,7 @@ import TopbarUser from "./TopbarUser";
 import TopbarAddtoCart from "./TopbarAddToCart";
 import TopbarWrapper from "./Topbar.styles";
 import { TopbarMenuIcon } from "@iso/config/icon.config";
-import TagWrapper from '../UIElements/Tag/Tag.styles';
+import TagWrapper from "../UIElements/Tag/Tag.styles";
 
 import Tags from "@iso/components/uielements/tag";
 
@@ -54,7 +54,7 @@ class Topbar extends Component {
 
           <ul className="isoRight">
             <li>
-              <Tag color="#2db7f5">Alpha Version v0.1</Tag>
+              <Tag color={process.env.MAIN_COLOR}>DEV 0.1</Tag>
             </li>
 
             <li

@@ -63,7 +63,7 @@ const Tambah = ({ props }) => {
 
     async onChange(info) {
       if (info.fileList.length === 1) {
-        const endpoint = process.env.NEXT_PUBLIC_DB + "/upload";
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/upload";
         const file = info.file.originFileObj;
         const data = new FormData();
         data.append("files", file);
@@ -158,7 +158,7 @@ const Tambah = ({ props }) => {
   };
 
   const handlePostData = async (data) => {
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/products";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/products";
     const dataPost = { data: data };
     const JSONdata = JSON.stringify(dataPost);
     const options = {
@@ -177,7 +177,7 @@ const Tambah = ({ props }) => {
   };
 
   const handlePutData = async (id, data) => {
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/products/" + id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/products/" + id;
 
     for (const key in data) {
       if (data[key].id === undefined || data[key].id === NaN) {
@@ -371,7 +371,7 @@ Tambah.getInitialProps = async (context) => {
 };
 
 const fetchDataCategories = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/categories";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/categories";
   const options = {
     method: "GET",
     headers: {
@@ -385,7 +385,7 @@ const fetchDataCategories = async (cookies) => {
 };
 
 const fetchDataManufactures = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/manufactures";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/manufactures";
   const options = {
     method: "GET",
     headers: {
@@ -399,7 +399,7 @@ const fetchDataManufactures = async (cookies) => {
 };
 
 const fetchDataSubCategories = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/sub-categories";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/sub-categories";
   const options = {
     method: "GET",
     headers: {
@@ -413,7 +413,7 @@ const fetchDataSubCategories = async (cookies) => {
 };
 
 const fetchDataGroups = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/groups";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/groups";
   const options = {
     method: "GET",
     headers: {
@@ -427,7 +427,7 @@ const fetchDataGroups = async (cookies) => {
 };
 
 const fetchDataLocations = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/locations";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
   const options = {
     method: "GET",
     headers: {

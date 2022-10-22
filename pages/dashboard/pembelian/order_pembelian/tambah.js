@@ -8,8 +8,8 @@ import TitlePage from "@iso/components/TitlePage/TitlePage";
 import { UploadOutlined } from "@ant-design/icons";
 import nookies from "nookies";
 import { toast } from "react-toastify";
-import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
+import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import OrderTable from "@iso/components/ReactDataTable/Purchases/OrderTable";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -23,7 +23,7 @@ import {
   Upload,
   notification,
 } from "antd";
-import createDetail from "../utility/createDetail";
+import createDetailOrderFunc from "../utility/createOrderDetail";
 import createOrderFunc from "../utility/createOrder";
 import calculatePrice from "../utility/calculatePrice";
 
@@ -47,7 +47,7 @@ Tambah.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/locations";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
   const options = {
     method: "GET",
     headers: {
@@ -61,7 +61,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchDataPurchases = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/purchases";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases";
   const options = {
     method: "GET",
     headers: {
@@ -107,7 +107,9 @@ function Tambah({ props }) {
   var tempLocationId;
 
   // NO PO
-  var totalPurchases = String(props.purchases?.meta?.pagination.total + 1).padStart(3, "0");
+  var totalPurchases = String(
+    props.purchases?.meta?.pagination.total + 1
+  ).padStart(3, "0");
   var today = new Date();
   var dd = String(today.getDate()).padStart(2, "0");
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
@@ -127,7 +129,8 @@ function Tambah({ props }) {
   };
 
   const createDetailOrder = async () => {
-    createDetail(
+    console.log("info total", productTotalPrice, productSubTotal);
+    createDetailOrderFunc(
       products,
       productTotalPrice,
       productSubTotal,
@@ -182,48 +185,7 @@ function Tambah({ props }) {
     );
 
     return formatter.format(total);
-    // var priceUnit = row.attributes[`buy_price_1`];
-    // var qty = 1;
-    // var disc = 0;
-
-    // const defaultDp1 = row.attributes?.unit_1_dp1;
-    // const defaultDp2 = row.attributes?.unit_1_dp2;
-    // const defaultDp3 = row.attributes?.unit_1_dp3;
-
-    // // check if price changed
-    // if (products.productInfo[row.id]?.priceUnit) {
-    //   priceUnit =
-    //     products.productInfo[row.id].priceUnit ?? row.attributes[`buy_price_1`];
-    // }
-
-    // // check if qty changed
-    // if (products.productInfo[row.id]?.qty) {
-    //   qty = products.productInfo[row.id]?.qty ?? 1;
-    // }
-
-    // // check if disc changed
-    // if (products.productInfo[row.id]?.disc) {
-    //   disc = products.productInfo[row.id]?.disc ?? 0;
-    // }
-
-    // priceUnit = priceUnit - disc;
-    // var price1 = calculatePercentage(priceUnit, defaultDp1);
-    // var price2 = calculatePercentage(price1, defaultDp2);
-    // var price3 = calculatePercentage(price2, defaultDp3);
-
-    // // set product price after disc & sub total
-    // productTotalPrice[row.id] = price3;
-    // productSubTotal[row.id] = price3 * qty;
-
-    // // set all product total
-    // var total = 0;
-    // for (var key in productSubTotal) {
-    //   total = total + productSubTotal[key];
-    // }
-    // setTotalPrice(total);
-    // return formatter.format(productTotalPrice[row.id]);
   };
-
 
   useEffect(() => {
     setGrandTotal(totalPrice + biayaPengiriman + biayaTambahan);
@@ -258,12 +220,14 @@ function Tambah({ props }) {
     if (type === "error") {
       notification[type]({
         message: "Gagal menambahkan data",
-        description: "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
+        description:
+          "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
       });
     } else if (type === "success") {
       notification[type]({
         message: "Berhasil menambahkan data",
-        description: "Produk berhasil ditambahkan. Silahkan cek pada halaman Order Pembelian",
+        description:
+          "Produk berhasil ditambahkan. Silahkan cek pada halaman Order Pembelian",
       });
     }
   };
@@ -325,7 +289,12 @@ function Tambah({ props }) {
                       },
                     ]}
                   >
-                    <DatePicker placeholder="Tanggal Pesanan" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
+                    <DatePicker
+                      placeholder="Tanggal Pesanan"
+                      size="large"
+                      format={"DD/MM/YYYY"}
+                      style={{ width: "100%" }}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -338,7 +307,12 @@ function Tambah({ props }) {
                       },
                     ]}
                   >
-                    <DatePicker placeholder="Tanggal Pengiriman" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
+                    <DatePicker
+                      placeholder="Tanggal Pengiriman"
+                      size="large"
+                      format={"DD/MM/YYYY"}
+                      style={{ width: "100%" }}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-3/4 px-3 mb-2 md:mb-0">
@@ -347,30 +321,32 @@ function Tambah({ props }) {
                   <p> {supplier?.attributes.phone}</p>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Input.Group compact>
-                    <Form.Item name="tempo_days" initialValue={0}>
-                      <Input
-                        size="large"
-                        style={{
-                          width: "100%",
-                        }}
-                        onChange={setTempoDays}
-                      />
-                    </Form.Item>
+                  <Form.Item name="tempo_days" initialValue={0} noStyle>
+                    <Input
+                      size="large"
+                      style={{
+                        width: "50%",
+                      }}
+                      onChange={setTempoDays}
+                    />
+                  </Form.Item>
 
-                    <Form.Item name="tempo_time" initialValue={"Hari"}>
-                      <Select
-                        size="large"
-                        onChange={setTempoOption}
-                        style={{
-                          width: "100%",
-                        }}
-                      >
-                        <Select.Option value="Hari">Hari</Select.Option>
-                        <Select.Option value="Bulan">Bulan</Select.Option>
-                      </Select>
-                    </Form.Item>
-                  </Input.Group>
+                  <Form.Item name="tempo_time" initialValue={"Hari"} noStyle>
+                    <Select
+                      size="large"
+                      onChange={setTempoOption}
+                      style={{
+                        width: "50%",
+                      }}
+                    >
+                      <Select.Option value="Hari" key="Hari">
+                        Hari
+                      </Select.Option>
+                      <Select.Option value="Bulan" key="Bulan">
+                        Bulan
+                      </Select.Option>
+                    </Select>
+                  </Form.Item>
                 </div>
 
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
@@ -397,7 +373,9 @@ function Tambah({ props }) {
                 </p>
               </div>
               <div className="flex justify-end">
-                <p className="font-bold">Total Harga : {formatter.format(totalPrice)} </p>
+                <p className="font-bold">
+                  Total Harga : {formatter.format(totalPrice)}{" "}
+                </p>
               </div>
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
@@ -412,7 +390,12 @@ function Tambah({ props }) {
                 </div>
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item name="delivery_fee">
-                    <InputNumber onChange={sumDeliveryPrice} size="large" placeholder="Biaya Pengiriman" style={{ width: "100%" }} />
+                    <InputNumber
+                      onChange={sumDeliveryPrice}
+                      size="large"
+                      placeholder="Biaya Pengiriman"
+                      style={{ width: "100%" }}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 mt-5 md:mb-0">
@@ -447,14 +430,23 @@ function Tambah({ props }) {
                       }}
                     >
                       {locations.map((element) => {
-                        return <Select.Option value={element.id}>{element.attributes.name}</Select.Option>;
+                        return (
+                          <Select.Option value={element.id}>
+                            {element.attributes.name}
+                          </Select.Option>
+                        );
                       })}
                     </Select>
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 mt-5 md:mb-0">
                   <Upload>
-                    <Button className="text-gray-500" style={{ width: "100%" }} size="large" icon={<UploadOutlined />}>
+                    <Button
+                      className="text-gray-500"
+                      style={{ width: "100%" }}
+                      size="large"
+                      icon={<UploadOutlined />}
+                    >
                       Upload Dokumen
                     </Button>
                   </Upload>
@@ -548,7 +540,10 @@ function Tambah({ props }) {
               </div>
               <div>
                 <p className="font-bold flex justify-end">
-                  Total Biaya : {grandTotal === 0 ? formatter.format(totalPrice) : formatter.format(grandTotal)}
+                  Total Biaya :{" "}
+                  {grandTotal === 0
+                    ? formatter.format(totalPrice)
+                    : formatter.format(grandTotal)}
                 </p>
               </div>
               <Form.Item name="additional_note">
@@ -561,7 +556,11 @@ function Tambah({ props }) {
                     <Spin />
                   </div>
                 ) : (
-                  <Button onClick={validateError} htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
+                  <Button
+                    onClick={validateError}
+                    htmlType="submit"
+                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
+                  >
                     Tambah
                   </Button>
                 )}

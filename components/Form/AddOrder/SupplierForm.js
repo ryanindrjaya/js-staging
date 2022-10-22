@@ -11,7 +11,7 @@ export default function Supplier({ onChangeSupplier }) {
   const order = useSelector((state) => state.Order);
 
   const handleChange = async (id) => {
-    const endpoint = process.env.NEXT_PUBLIC_DB + `/suppliers/${id}`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/suppliers/${id}`;
     const options = {
       method: "GET",
       headers: {
@@ -43,7 +43,7 @@ export default function Supplier({ onChangeSupplier }) {
     } else {
       try {
         const endpoint =
-          process.env.NEXT_PUBLIC_DB +
+          process.env.NEXT_PUBLIC_URL +
           `/suppliers?filters[$or][0][name][$contains]=${query}&filters[$or][1][id_supplier][$contains]=${query}`;
         const options = {
           method: "GET",

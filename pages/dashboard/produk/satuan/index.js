@@ -20,7 +20,7 @@ const Satuan = ({ props }) => {
   };
 
   const handleDelete = async (id) => {
-    const endpoint = process.env.NEXT_PUBLIC_DB + "/units/" + id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/units/" + id;
     const cookies = nookies.get(null, "token");
 
     const options = {
@@ -84,7 +84,7 @@ Satuan.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_DB + "/units";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/units";
   const options = {
     method: "GET",
     headers: {
