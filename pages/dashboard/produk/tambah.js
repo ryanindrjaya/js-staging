@@ -150,7 +150,7 @@ const Tambah = ({ props }) => {
 
     // POST DATA
     const postRes = await handlePostData(postData);
-
+    console.log(postRes);
     // PUT DATA
     await handlePutData(postRes?.data?.id, putData);
 
@@ -184,6 +184,8 @@ const Tambah = ({ props }) => {
         delete data[key];
       }
     }
+
+    console.log(endpoint);
 
     const dataPut = { data: data };
     const JSONdata = JSON.stringify(dataPut);
