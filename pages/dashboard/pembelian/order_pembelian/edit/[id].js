@@ -11,19 +11,8 @@ import { toast } from "react-toastify";
 import moment from "moment";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
-import EditOrderTable from "@iso/components/Form/AddOrder/EditOrderTable";
-import {
-  Row,
-  Form,
-  Button,
-  Spin,
-  Input,
-  DatePicker,
-  Select,
-  InputNumber,
-  Upload,
-  notification,
-} from "antd";
+// import EditOrderTable from "@iso/components/Form/AddOrder/EditOrderTable";
+import { Row, Form, Button, Spin, Input, DatePicker, Select, InputNumber, Upload, notification } from "antd";
 
 const Edit = ({ props }) => {
   const data = props.data;
@@ -42,9 +31,7 @@ const Edit = ({ props }) => {
   const [mapPrice, setMapPrice] = useState({});
   const [productList, setProductList] = useState(initialProducts);
   const [supplier, setSupplier] = useState(data.data.attributes.supplier.data);
-  const [totalPrice, setTotalPrice] = useState(
-    data.data.attributes.delivery_total
-  );
+  const [totalPrice, setTotalPrice] = useState(data.data.attributes.delivery_total);
   const [grandTotal, setGrandTotal] = useState(0);
   const [additionalFee, setAdditionalFee] = useState();
   const [qty, setQty] = useState();
@@ -105,18 +92,9 @@ const Edit = ({ props }) => {
           (unit = mapPrice[id].defaultUnit), (subTotal = price3 * qty);
         } else {
           subTotal = element.attributes.buy_price_1 - 0;
-          var price1 = calculatePercentage(
-            subTotal,
-            element.attributes.unit_1_dp1
-          );
-          var price2 = calculatePercentage(
-            price1,
-            element.attributes.unit_1_dp2
-          );
-          var price3 = calculatePercentage(
-            price2,
-            element.attributes.unit_1_dp3
-          );
+          var price1 = calculatePercentage(subTotal, element.attributes.unit_1_dp1);
+          var price2 = calculatePercentage(price1, element.attributes.unit_1_dp2);
+          var price3 = calculatePercentage(price2, element.attributes.unit_1_dp3);
 
           (unit = element.attributes.unit_1), (subTotal = price3 * qty);
         }
@@ -178,8 +156,7 @@ const Edit = ({ props }) => {
     values.delivery_date = deliveryDate;
     values.supplier_id = supplierId;
     values.status = "Dipesan";
-    values.delivery_total =
-      grandTotal === 0 ? parseInt(totalPrice) : parseInt(grandTotal);
+    values.delivery_total = grandTotal === 0 ? parseInt(totalPrice) : parseInt(grandTotal);
     values.purchase_details = null;
     values.supplier_id = null;
 
@@ -380,14 +357,12 @@ const Edit = ({ props }) => {
     if (type === "error") {
       notification[type]({
         message: "Gagal menambahkan data",
-        description:
-          "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
+        description: "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
       });
     } else if (type === "success") {
       notification[type]({
         message: "Berhasil menambahkan data",
-        description:
-          "Produk berhasil ditambahkan. Silahkan cek pada halaman Order Pembelian",
+        description: "Produk berhasil ditambahkan. Silahkan cek pada halaman Order Pembelian",
       });
     }
   };
@@ -423,10 +398,7 @@ const Edit = ({ props }) => {
             >
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Supplier
-                    onChangeSupplier={setSupplier}
-                    initialValue={data.data.attributes.supplier}
-                  />
+                  <Supplier onChangeSupplier={setSupplier} initialValue={data.data.attributes.supplier} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
@@ -439,11 +411,7 @@ const Edit = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input
-                      disabled
-                      style={{ height: "40px" }}
-                      placeholder="No.PO"
-                    />
+                    <Input disabled style={{ height: "40px" }} placeholder="No.PO" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -457,12 +425,7 @@ const Edit = ({ props }) => {
                       },
                     ]}
                   >
-                    <DatePicker
-                      placeholder="Tanggal Pesanan"
-                      size="large"
-                      format={"DD/MM/YYYY"}
-                      style={{ width: "100%" }}
-                    />
+                    <DatePicker placeholder="Tanggal Pesanan" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -476,12 +439,7 @@ const Edit = ({ props }) => {
                       },
                     ]}
                   >
-                    <DatePicker
-                      placeholder="Tanggal Pengiriman"
-                      size="large"
-                      format={"DD/MM/YYYY"}
-                      style={{ width: "100%" }}
-                    />
+                    <DatePicker placeholder="Tanggal Pengiriman" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-3/4 px-3 mb-2 md:mb-0">
@@ -491,10 +449,7 @@ const Edit = ({ props }) => {
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Input.Group compact>
-                    <Form.Item
-                      name="tempo_days"
-                      initialValue={data.data.attributes.tempo_days}
-                    >
+                    <Form.Item name="tempo_days" initialValue={data.data.attributes.tempo_days}>
                       <Input
                         size="large"
                         style={{
@@ -503,10 +458,7 @@ const Edit = ({ props }) => {
                         onChange={setTempoDays}
                       />
                     </Form.Item>
-                    <Form.Item
-                      name="tempo_time"
-                      initialValue={data.data.attributes.tempo_time}
-                    >
+                    <Form.Item name="tempo_time" initialValue={data.data.attributes.tempo_time}>
                       <Select
                         size="large"
                         onChange={setTempoOption}
@@ -522,14 +474,10 @@ const Edit = ({ props }) => {
                 </div>
 
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0">
-                  <SearchBar
-                    form={form}
-                    tempList={tempList}
-                    onChange={onChange}
-                  />
+                  <SearchBar form={form} tempList={tempList} onChange={onChange} />
                 </div>
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0">
-                  <EditOrderTable
+                  {/* <EditOrderTable
                     initialValue={products}
                     data={productList}
                     setData={setProductList}
@@ -541,7 +489,7 @@ const Edit = ({ props }) => {
                     changeQty={changeQty}
                     price={price}
                     setPrice={setPrice}
-                  />
+                  /> */}
                 </div>
               </div>
 
@@ -549,9 +497,7 @@ const Edit = ({ props }) => {
                 <p className="font-bold">Total Item : {productList.length} </p>
               </div>
               <div className="flex justify-end">
-                <p className="font-bold">
-                  Total Harga : {formatter.format(totalPrice)}{" "}
-                </p>
+                <p className="font-bold">Total Harga : {formatter.format(totalPrice)} </p>
               </div>
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
@@ -566,12 +512,7 @@ const Edit = ({ props }) => {
                 </div>
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item name="delivery_fee">
-                    <InputNumber
-                      onChange={sumDeliveryPrice}
-                      size="large"
-                      placeholder="Biaya Pengiriman"
-                      style={{ width: "100%" }}
-                    />
+                    <InputNumber onChange={sumDeliveryPrice} size="large" placeholder="Biaya Pengiriman" style={{ width: "100%" }} />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 mt-5 md:mb-0">
@@ -592,9 +533,7 @@ const Edit = ({ props }) => {
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item
                     name="location"
-                    initialValue={
-                      data.data.attributes.location.data.attributes.name
-                    }
+                    initialValue={data.data.attributes.location.data.attributes.name}
                     rules={[
                       {
                         required: true,
@@ -609,23 +548,14 @@ const Edit = ({ props }) => {
                       }}
                     >
                       {locations.data.map((element) => {
-                        return (
-                          <Select.Option value={element.id}>
-                            {element.attributes.name}
-                          </Select.Option>
-                        );
+                        return <Select.Option value={element.id}>{element.attributes.name}</Select.Option>;
                       })}
                     </Select>
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 mt-5 md:mb-0">
                   <Upload>
-                    <Button
-                      className="text-gray-500"
-                      style={{ width: "100%" }}
-                      size="large"
-                      icon={<UploadOutlined />}
-                    >
+                    <Button className="text-gray-500" style={{ width: "100%" }} size="large" icon={<UploadOutlined />}>
                       Upload Dokumen
                     </Button>
                   </Upload>
@@ -719,10 +649,7 @@ const Edit = ({ props }) => {
               </div>
               <div>
                 <p className="font-bold flex justify-end">
-                  Total Biaya :{" "}
-                  {grandTotal === 0
-                    ? formatter.format(totalPrice)
-                    : formatter.format(grandTotal)}
+                  Total Biaya : {grandTotal === 0 ? formatter.format(totalPrice) : formatter.format(grandTotal)}
                 </p>
               </div>
               <Form.Item name="additional_note">
@@ -735,11 +662,7 @@ const Edit = ({ props }) => {
                     <Spin />
                   </div>
                 ) : (
-                  <Button
-                    onClick={validateError}
-                    htmlType="submit"
-                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
-                  >
+                  <Button onClick={validateError} htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
                     Tambah
                   </Button>
                 )}
@@ -756,8 +679,7 @@ Edit.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/purchases/" + id + "?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/" + id + "?populate=deep";
   const options = {
     method: "GET",
     headers: {

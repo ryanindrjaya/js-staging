@@ -14,6 +14,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import { useSelector, useDispatch } from "react-redux";
 import Router from "next/router";
+import Middleware from "../components/Middleware";
 
 class CustomApp extends App {
   render() {
@@ -22,10 +23,10 @@ class CustomApp extends App {
     return (
       <Provider store={store}>
         <ThemeProvider>
-          <Component {...pageProps} />
-          <ToastContainer
-            toastStyle={{ backgroundColor: "black", color: "white" }}
-          />
+          <Middleware>
+            <Component {...pageProps} />
+          </Middleware>
+          <ToastContainer toastStyle={{ backgroundColor: "black", color: "white" }} />
         </ThemeProvider>
       </Provider>
     );

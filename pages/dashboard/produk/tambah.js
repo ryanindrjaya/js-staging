@@ -17,6 +17,8 @@ import { useRouter } from "next/router";
 import Image from "next/image";
 import UnitTable from "../../../components/ReactDataTable/Product/UnitsTable";
 import { FileImageOutlined } from "@ant-design/icons";
+import setDiskonValue from "./utility/setDiskonValue";
+import setHargaValue from "./utility/setHargaValue";
 
 const Tambah = ({ props }) => {
   const [image, setImage] = useState();
@@ -25,6 +27,7 @@ const Tambah = ({ props }) => {
   const [fileList, setFileList] = useState([]);
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [firstInput, setFirstInputDiskon] = useState(true);
   const cookies = nookies.get(null, "token");
   const router = useRouter();
 
@@ -213,20 +216,26 @@ const Tambah = ({ props }) => {
       } else {
         res?.error?.details?.errors.map((error) => {
           const ErrorMsg = error.path[0];
-          toast.error(
-            ErrorMsg === "SKU"
-              ? "SKU sudah digunakan"
-              : "Tidak dapat menambahkan Produk",
-            {
-              position: toast.POSITION.TOP_RIGHT,
-            }
-          );
+          toast.error(ErrorMsg === "SKU" ? "SKU sudah digunakan" : "Tidak dapat menambahkan Produk", {
+            position: toast.POSITION.TOP_RIGHT,
+          });
         });
       }
     } catch (error) {
       toast.error("Tidak dapat menambahkan Produk", {
         position: toast.POSITION.TOP_RIGHT,
       });
+    }
+  };
+
+  const handleValueChange = (changedValues, allValues) => {
+    const fieldName = Object.keys(changedValues)[0];
+    const unit = fieldName.split("_")[1];
+
+    // jika user input unit 2,3,4, dan 5
+    if (unit > 1) {
+      setDiskonValue(form, changedValues, allValues, fieldName, firstInput);
+      setHargaValue(form, changedValues, allValues, fieldName, firstInput);
     }
   };
 
@@ -246,6 +255,7 @@ const Tambah = ({ props }) => {
                 remember: true,
               }}
               onFinish={onFinish}
+              onValuesChange={handleValueChange}
             >
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
@@ -258,10 +268,7 @@ const Tambah = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "40px" }}
-                      placeholder="Nama Produk"
-                    />
+                    <Input style={{ height: "40px" }} placeholder="Nama Produk" />
                   </Form.Item>
                   <Categories
                     selectedCategory={category}
@@ -270,23 +277,13 @@ const Tambah = ({ props }) => {
                     setSelectedSubCategory={setSelectedSubCategory}
                     selectedSubCategory={selectedSubCategory}
                   />
-                  <SubCategories
-                    subCategories={subCategories}
-                    onSelect={setSelectedSubCategory}
-                    selectedSubCategory={selectedSubCategory}
-                  />
+                  <SubCategories subCategories={subCategories} onSelect={setSelectedSubCategory} selectedSubCategory={selectedSubCategory} />
                   <Form.Item name="description">
                     <TextArea rows={4} placeholder="Deskripsi" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
-                  <Form.Item name="SKU">
-                    <Input style={{ height: "40px" }} placeholder="SKU" />
-                  </Form.Item>
-                  <Manufactures
-                    data={manufactures.data}
-                    onSelect={setSelectedManufactures}
-                  />
+                  <Manufactures data={manufactures.data} onSelect={setSelectedManufactures} />
                   <Groups data={groups} onSelect={setSelectedGroup} />
                   <Locations data={locations} onSelect={setSelectLocation} />
                 </div>
@@ -298,19 +295,11 @@ const Tambah = ({ props }) => {
                         <p className="ant-upload-drag-icon">
                           <FileImageOutlined />
                         </p>
-                        <p className="ant-upload-text">
-                          Klik atau tarik gambar ke kotak ini
-                        </p>
-                        <p className="ant-upload-hint  m-3">
-                          Gambar akan digunakan sebagai contoh tampilan produk
-                        </p>
+                        <p className="ant-upload-text">Klik atau tarik gambar ke kotak ini</p>
+                        <p className="ant-upload-hint  m-3">Gambar akan digunakan sebagai contoh tampilan produk</p>
                       </>
                     ) : (
-                      <Image
-                        layout="fill"
-                        loader={imageLoader}
-                        src={process.env.BASE_URL + image?.url}
-                      />
+                      <Image layout="fill" loader={imageLoader} src={process.env.BASE_URL + image?.url} />
                     )}
                   </Dragger>
                 </div>
@@ -327,10 +316,7 @@ const Tambah = ({ props }) => {
                     <Spin />
                   </div>
                 ) : (
-                  <Button
-                    htmlType="submit"
-                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
-                  >
+                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
                     Simpan
                   </Button>
                 )}
