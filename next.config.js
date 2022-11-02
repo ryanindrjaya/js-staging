@@ -10,7 +10,7 @@ const nextConfig = {
   reactStrictMode: true,
   env: {
     BASE_URL: process.env.BASE_URL,
-    NEXT_PUBLIC_URL: "http://localhost:1337/api",
+    NEXT_PUBLIC_URL: "https://js-strapi.keelola.net/api",
     BACKEND_URL: "https://localhost:8080",
     STAKEHOLDER_NAME: "APOTEK JAYA SEHAT",
     MAIN_COLOR: "#056A81",

@@ -1,0 +1,1 @@
+{"ast":null,"code":"const modalActions = {\n  SHOW_MODAL: 'SHOW_MODAL',\n  HIDE_MODAL: 'HIDE_MODAL',\n  openModal: payload => ({\n    type: modalActions.SHOW_MODAL,\n    payload\n  }),\n  closeModal: () => ({\n    type: modalActions.HIDE_MODAL\n  })\n};\nexport default modalActions;","map":null,"metadata":{},"sourceType":"module"}

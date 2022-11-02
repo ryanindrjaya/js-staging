@@ -1,0 +1,1 @@
+{"ast":null,"code":"\"use strict\";\n\nObject.defineProperty(exports, \"__esModule\", {\n  value: true\n});\nexports.toBase64 = toBase64;\n\nfunction toBase64(str) {\n  if (false) {\n    return Buffer.from(str).toString('base64');\n  } else {\n    return window.btoa(str);\n  }\n}","map":null,"metadata":{},"sourceType":"script"}

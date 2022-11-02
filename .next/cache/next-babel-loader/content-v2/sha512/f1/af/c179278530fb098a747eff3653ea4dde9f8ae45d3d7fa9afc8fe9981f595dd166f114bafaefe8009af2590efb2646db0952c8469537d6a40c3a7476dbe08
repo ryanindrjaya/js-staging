@@ -1,0 +1,1 @@
+{"ast":null,"code":"import _Checkbox from \"antd/lib/checkbox\";\nimport AntCheckbox from './styles/checkbox.style';\nconst checkbox = AntCheckbox(_Checkbox);\nconst CheckboxGroup = _Checkbox.Group;\nexport default checkbox;\nexport { CheckboxGroup };","map":null,"metadata":{},"sourceType":"module"}

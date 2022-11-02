@@ -1,0 +1,1 @@
+{"ast":null,"code":"export var isServer = false;","map":{"version":3,"sources":["/Users/yudiananta/Development/NextJS/ERP Dev/JS Deploy/ERP-Sejati/library/helpers/isServer.js"],"names":["isServer"],"mappings":"AAAA,OAAO,IAAMA,QAAQ,QAAd","sourcesContent":["export const isServer = typeof window === 'undefined';\n"]},"metadata":{},"sourceType":"module"}
