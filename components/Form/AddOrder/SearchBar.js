@@ -71,8 +71,10 @@ export default function SearchBar({ form, tempList, onChange, selectedProduct, u
 
           // product based on user location
           const filteredProductByLocation = filteredProduct.filter((item) =>
-            item.attributes.locations.data.some((location) => user.locations.some((userLocation) => userLocation.id == location.id))
+            item.attributes.locations.data.some((location) => user.locations.some((userLocation) => userLocation.id === location.id))
           );
+
+          console.log(filteredProductByLocation);
 
           const products = filteredProductByLocation.map((product) => ({
             label: `${product.attributes.name}`,
