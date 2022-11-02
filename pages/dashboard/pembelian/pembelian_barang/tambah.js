@@ -597,6 +597,7 @@ function Tambah({ props }) {
                     <LPBTable
                       products={products}
                       productTotalPrice={productTotalPrice}
+                      setTotalPrice={setTotalPrice}
                       setProductTotalPrice={setProductTotalPrice}
                       calculatePriceAfterDisc={calculatePriceAfterDisc}
                       productSubTotal={productSubTotal}

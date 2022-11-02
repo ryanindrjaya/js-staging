@@ -3,12 +3,7 @@ import AlertDialog from "../../Alert/Alert";
 import { Input, InputNumber, Select, Form, Row, DatePicker } from "antd";
 import { useDispatch } from "react-redux";
 
-export default function ReactDataTable({
-  calculatePriceAfterDisc,
-  productSubTotal,
-  products,
-  locations,
-}) {
+export default function ReactDataTable({ calculatePriceAfterDisc, productSubTotal, products, locations, setTotalPrice }) {
   const dispatch = useDispatch();
 
   var defaultDp1 = 0;
@@ -46,6 +41,9 @@ export default function ReactDataTable({
   };
 
   const onConfirm = (id) => {
+    const subtotal = productSubTotal[id];
+    setTotalPrice((prev) => prev - subtotal);
+
     for (let index = 0; index < products.productList.length; index++) {
       const element = products.productList[index];
       if (element.id === id) {
@@ -106,10 +104,7 @@ export default function ReactDataTable({
         return (
           <>
             <Row>
-              <Form.Item
-                name={["jumlah_qty", `${row.id}`]}
-                noStyle
-              >
+              <Form.Item name={["jumlah_qty", `${row.id}`]} noStyle>
                 <InputNumber
                   defaultValue={defaultQty}
                   onChange={(e) => onChangeQty(e, row)}
@@ -125,10 +120,7 @@ export default function ReactDataTable({
                 />
               </Form.Item>
 
-              <Form.Item
-                name={["jumlah_option", `${row.id}`]}
-                noStyle
-              >
+              <Form.Item name={["jumlah_option", `${row.id}`]} noStyle>
                 <Select
                   defaultValue={defaultIndex}
                   onChange={(value) => onChangeUnit(value, row)}
@@ -140,50 +132,35 @@ export default function ReactDataTable({
                   {row.attributes?.unit_1 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_1 === null}
-                      value={1}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_1 === null} value={1}>
                       {row.attributes?.unit_1}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_2 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_2 === null}
-                      value={2}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_2 === null} value={2}>
                       {row.attributes?.unit_2}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_3 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_3 === null}
-                      value={3}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_3 === null} value={3}>
                       {row.attributes?.unit_3}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_4 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_4 === null}
-                      value={4}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_4 === null} value={4}>
                       {row.attributes?.unit_4}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_5 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_5 === null}
-                      value={5}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_5 === null} value={5}>
                       {row.attributes?.unit_5}
                     </Select.Option>
                   )}
@@ -295,10 +272,7 @@ export default function ReactDataTable({
               >
                 {locations.map((element) => {
                   return (
-                    <Select.Option
-                      value={element.id}
-                      key={element.attributes.name}
-                    >
+                    <Select.Option value={element.id} key={element.attributes.name}>
                       {element.attributes.name}
                     </Select.Option>
                   );
@@ -327,11 +301,7 @@ export default function ReactDataTable({
               ]}
               noStyle
             >
-              <DatePicker
-                placeholder="EXP. Date"
-                size="normal"
-                format={"DD/MM/YYYY"}
-              />
+              <DatePicker placeholder="EXP. Date" size="normal" format={"DD/MM/YYYY"} />
             </Form.Item>
           </>
         );
