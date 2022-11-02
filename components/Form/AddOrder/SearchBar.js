@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 
 const { addProduct } = action;
 
-export default function SearchBar({ form, tempList, onChange, selectedProduct, user }) {
+export default function SearchBar({ form, tempList, onChange, selectedProduct, user, isBasedOnLocation = true }) {
   const dispatch = useDispatch();
 
   const [product, setProduct] = useState();

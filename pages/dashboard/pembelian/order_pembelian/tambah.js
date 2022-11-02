@@ -12,25 +12,17 @@ import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import OrderTable from "@iso/components/ReactDataTable/Purchases/OrderTable";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  Form,
-  Button,
-  Spin,
-  Input,
-  DatePicker,
-  Select,
-  InputNumber,
-  Upload,
-  notification,
-} from "antd";
+import { Form, Button, Spin, Input, DatePicker, Select, InputNumber, Upload, notification } from "antd";
 import createDetailOrderFunc from "../utility/createOrderDetail";
 import createOrderFunc from "../utility/createOrder";
 import calculatePrice from "../utility/calculatePrice";
+import setDiskonValue from "../../produk/utility/setDiskonValue";
 
 Tambah.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   let locations;
   let purchases;
+  let user;
 
   const req = await fetchData(cookies);
   locations = await req.json();
@@ -38,16 +30,34 @@ Tambah.getInitialProps = async (context) => {
   const req2 = await fetchDataPurchases(cookies);
   purchases = await req2.json();
 
+  const req3 = await fetchUser(cookies);
+  user = await req3.json();
+
   return {
     props: {
       purchases,
       locations,
+      user,
     },
   };
 };
 
 const fetchData = async (cookies) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchUser = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -76,9 +86,11 @@ const fetchDataPurchases = async (cookies) => {
 
 function Tambah({ props }) {
   var products = useSelector((state) => state.Order);
+  var selectedProduct = products?.productList;
   const dispatch = useDispatch();
 
   var locations = props.locations.data;
+  const user = props.user;
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [productList, setProductList] = useState([]);
@@ -107,9 +119,7 @@ function Tambah({ props }) {
   var tempLocationId;
 
   // NO PO
-  var totalPurchases = String(
-    props.purchases?.meta?.pagination.total + 1
-  ).padStart(3, "0");
+  var totalPurchases = String(props.purchases?.meta?.pagination.total + 1).padStart(3, "0");
   var today = new Date();
   var dd = String(today.getDate()).padStart(2, "0");
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
@@ -130,13 +140,7 @@ function Tambah({ props }) {
 
   const createDetailOrder = async () => {
     console.log("info total", productTotalPrice, productSubTotal);
-    createDetailOrderFunc(
-      products,
-      productTotalPrice,
-      productSubTotal,
-      setListId,
-      "/purchase-details"
-    );
+    createDetailOrderFunc(products, productTotalPrice, productSubTotal, setListId, "/purchase-details");
   };
 
   const createOrder = async (values) => {
@@ -176,13 +180,7 @@ function Tambah({ props }) {
   };
 
   const calculatePriceAfterDisc = (row) => {
-    const total = calculatePrice(
-      row,
-      products,
-      productTotalPrice,
-      productSubTotal,
-      setTotalPrice
-    );
+    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
 
     return formatter.format(total);
   };
@@ -220,14 +218,12 @@ function Tambah({ props }) {
     if (type === "error") {
       notification[type]({
         message: "Gagal menambahkan data",
-        description:
-          "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
+        description: "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
       });
     } else if (type === "success") {
       notification[type]({
         message: "Berhasil menambahkan data",
-        description:
-          "Produk berhasil ditambahkan. Silahkan cek pada halaman Order Pembelian",
+        description: "Produk berhasil ditambahkan. Silahkan cek pada halaman Order Pembelian",
       });
     }
   };
@@ -289,12 +285,7 @@ function Tambah({ props }) {
                       },
                     ]}
                   >
-                    <DatePicker
-                      placeholder="Tanggal Pesanan"
-                      size="large"
-                      format={"DD/MM/YYYY"}
-                      style={{ width: "100%" }}
-                    />
+                    <DatePicker placeholder="Tanggal Pesanan" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -307,12 +298,7 @@ function Tambah({ props }) {
                       },
                     ]}
                   >
-                    <DatePicker
-                      placeholder="Tanggal Pengiriman"
-                      size="large"
-                      format={"DD/MM/YYYY"}
-                      style={{ width: "100%" }}
-                    />
+                    <DatePicker placeholder="Tanggal Pengiriman" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-3/4 px-3 mb-2 md:mb-0">
@@ -350,32 +336,25 @@ function Tambah({ props }) {
                 </div>
 
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                  <SearchBar
-                    form={form}
-                    tempList={tempList}
-                    onChange={onChange}
-                  />
+                  <SearchBar form={form} tempList={tempList} onChange={onChange} selectedProduct={selectedProduct} user={user} />
                 </div>
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
                   <OrderTable
                     products={products}
                     productTotalPrice={productTotalPrice}
-                    setProductTotalPrice={setProductTotalPrice}
+                    setTotalPrice={setTotalPrice}
                     calculatePriceAfterDisc={calculatePriceAfterDisc}
                     productSubTotal={productSubTotal}
+                    formObj={form}
                   />
                 </div>
               </div>
 
               <div className="flex justify-end">
-                <p className="font-bold">
-                  Total Item : {products.productList.length}{" "}
-                </p>
+                <p className="font-bold">Total Item : {products.productList.length} </p>
               </div>
               <div className="flex justify-end">
-                <p className="font-bold">
-                  Total Harga : {formatter.format(totalPrice)}{" "}
-                </p>
+                <p className="font-bold">Total Harga : {formatter.format(totalPrice)} </p>
               </div>
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
@@ -390,12 +369,7 @@ function Tambah({ props }) {
                 </div>
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item name="delivery_fee">
-                    <InputNumber
-                      onChange={sumDeliveryPrice}
-                      size="large"
-                      placeholder="Biaya Pengiriman"
-                      style={{ width: "100%" }}
-                    />
+                    <InputNumber onChange={sumDeliveryPrice} size="large" placeholder="Biaya Pengiriman" style={{ width: "100%" }} />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 mt-5 md:mb-0">
@@ -430,23 +404,14 @@ function Tambah({ props }) {
                       }}
                     >
                       {locations.map((element) => {
-                        return (
-                          <Select.Option value={element.id}>
-                            {element.attributes.name}
-                          </Select.Option>
-                        );
+                        return <Select.Option value={element.id}>{element.attributes.name}</Select.Option>;
                       })}
                     </Select>
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 mt-5 md:mb-0">
                   <Upload>
-                    <Button
-                      className="text-gray-500"
-                      style={{ width: "100%" }}
-                      size="large"
-                      icon={<UploadOutlined />}
-                    >
+                    <Button className="text-gray-500" style={{ width: "100%" }} size="large" icon={<UploadOutlined />}>
                       Upload Dokumen
                     </Button>
                   </Upload>
@@ -540,10 +505,7 @@ function Tambah({ props }) {
               </div>
               <div>
                 <p className="font-bold flex justify-end">
-                  Total Biaya :{" "}
-                  {grandTotal === 0
-                    ? formatter.format(totalPrice)
-                    : formatter.format(grandTotal)}
+                  Total Biaya : {grandTotal === 0 ? formatter.format(totalPrice) : formatter.format(grandTotal)}
                 </p>
               </div>
               <Form.Item name="additional_note">
@@ -556,11 +518,7 @@ function Tambah({ props }) {
                     <Spin />
                   </div>
                 ) : (
-                  <Button
-                    onClick={validateError}
-                    htmlType="submit"
-                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
-                  >
+                  <Button onClick={validateError} htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
                     Tambah
                   </Button>
                 )}
