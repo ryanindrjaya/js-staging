@@ -169,6 +169,9 @@ export default function Reducer(state = initState, action) {
             disc: action.disc,
             priceAfterDisc: action.priceAfterDisc,
             subTotal: action.subTotal,
+            d1: action.d1,
+            d2: action.d2,
+            d3: action.d3,
           },
         },
       };
