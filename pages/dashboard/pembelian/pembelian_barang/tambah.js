@@ -313,6 +313,9 @@ function Tambah({ props }) {
         disc: element.attributes.disc,
         priceAfterDisc: element.attributes.unit_price_after_disc,
         subTotal: element.attributes.sub_total,
+        d1: element.attributes.products.data[0].attributes.unit_1_dp1,
+        d2: element.attributes.products.data[0].attributes.unit_1_dp2,
+        d3: element.attributes.products.data[0].attributes.unit_1_dp3,
       });
     });
 
