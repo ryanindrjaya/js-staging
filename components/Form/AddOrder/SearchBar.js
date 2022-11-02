@@ -7,7 +7,14 @@ import { useDispatch } from "react-redux";
 
 const { addProduct } = action;
 
-export default function SearchBar({ form, tempList, onChange, selectedProduct, user, isBasedOnLocation = true }) {
+export default function SearchBar({
+  form,
+  tempList,
+  onChange,
+  selectedProduct,
+  user,
+  isBasedOnLocation = true,
+}) {
   const dispatch = useDispatch();
 
   const [product, setProduct] = useState();
@@ -35,6 +42,31 @@ export default function SearchBar({ form, tempList, onChange, selectedProduct, u
     }
   };
 
+  const getUserInfo = async () => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/users/me?populate=*`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    var queryLocations = "";
+
+    res.locations.forEach((location) => {
+      queryLocations =
+        queryLocations +
+        "filters[locations][name][$contains]=" +
+        location.name +
+        "&";
+    });
+    // console.log("querylocation " + queryLocations);
+    return queryLocations;
+  };
+
   const handleSearch = (newValue) => {
     if (newValue) {
       fetchProduct(newValue, setData);
@@ -43,15 +75,20 @@ export default function SearchBar({ form, tempList, onChange, selectedProduct, u
     }
   };
 
-  const options = data.map((d) => <Select.Option key={d.value}>{d.label}</Select.Option>);
+  const options = data.map((d) => (
+    <Select.Option key={d.value}>{d.label}</Select.Option>
+  ));
 
   const fetchProduct = async (query, callback) => {
     if (!query) {
       callback([]);
     } else {
       try {
+        let queryLocations = await getUserInfo();
+
         const endpoint =
-          process.env.NEXT_PUBLIC_URL + `/products?populate=*&filters[$or][0][name][$contains]=${query}&filters[$or][1][SKU][$contains]=${query}`;
+          process.env.NEXT_PUBLIC_URL +
+          `/products?populate=locations&filters[name][$contains]=${query}&${queryLocations}`;
         const options = {
           method: "GET",
           headers: {
@@ -59,22 +96,27 @@ export default function SearchBar({ form, tempList, onChange, selectedProduct, u
             Authorization: "Bearer " + cookies.token,
           },
         };
+        console.log(endpoint);
 
         const req = await fetch(endpoint, options);
         const res = await req.json();
 
         if (req.status == 200) {
           // filter product that already added
-          const filteredProduct = res.data.filter((item) => {
-            return !selectedProduct?.some((temp) => temp.id == item.id);
-          });
+          // const filteredProduct = res.data.filter((item) => {
+          //   return !selectedProduct?.some((temp) => temp.id == item.id);
+          // });
 
-          // product based on user location
-          const filteredProductByLocation = filteredProduct.filter((item) =>
-            item.attributes.locations.data.some((location) => user.locations.some((userLocation) => userLocation.id == location.id))
-          );
+          // // product based on user location
+          // const filteredProductByLocation = filteredProduct.filter((item) =>
+          //   item.attributes.locations.data.some((location) =>
+          //     user.locations.some(
+          //       (userLocation) => userLocation.id == location.id
+          //     )
+          //   )
+          // );
 
-          const products = filteredProductByLocation.map((product) => ({
+          const products = res.data.map((product) => ({
             label: `${product.attributes.name}`,
             value: product.id,
           }));
