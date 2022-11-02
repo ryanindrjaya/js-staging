@@ -1,0 +1,50 @@
+import {
+  SidebarBussinesIcon,
+  SidebarPersonIcon,
+  SidebarContactIcon,
+  SidebarEmailIcon,
+  SidebarChatIcon,
+  SidebarEcommerceIcon,
+  SidebarMapsIcon,
+  SidebarProfileIcon,
+  SidebarScrumBoardIcon,
+  SidebarInvoiceIcon,
+  SidebarCalendarIcon,
+  SidebarNotesIcon,
+  SidebarToDosIcon,
+  SidebarFireStoreIcon,
+  SidebarContactsIcon,
+  SidebarShuffleIcon,
+  SidebarChartsIcon,
+  SidebarFormsIcon,
+  SidebarUIIcon,
+  SidebarAdvancedIcon,
+  SidebarFeedbackIcon,
+  SidebarTablesIcon,
+  SidebarPagesIcon,
+  SidebarGithubIcon,
+  SidebarBlankIcon,
+} from "@iso/config/icon.config";
+import {
+  SidebarAccountPayment,
+  SidebarAdjustmentIcon,
+  SidebarProductIcon,
+  SidebarPurchasesIcon,
+  SidebarReceiptIcon,
+  SidebarReportIcon,
+  SidebarSaleIcon,
+  SidebarSettingsIcon,
+} from "../../config/icon.config";
+
+export default [
+  {
+    key: "",
+    label: "sidebar.dashboard",
+    leftIcon: <SidebarShuffleIcon size={19} />,
+  },
+  {
+    key: "lokasi",
+    label: "sidebar.location",
+    leftIcon: <SidebarBussinesIcon size={19} />,
+  },
+];
