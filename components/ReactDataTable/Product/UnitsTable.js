@@ -2,13 +2,9 @@ import DataTable from "react-data-table-component";
 import AlertDialog from "../../Alert/Alert";
 import { Input, Form, InputNumber } from "antd";
 import { EditOutlined } from "@ant-design/icons";
+import { useState } from "react";
 
-export default function UnitsTable({
-  onDelete,
-  onUpdate,
-  onPageChange,
-  initialValue,
-}) {
+export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialValue }) {
   console.log(initialValue);
 
   const onConfirm = (id) => {
@@ -23,29 +19,11 @@ export default function UnitsTable({
     onUpdate(id);
   };
 
-  const unit = [
-    initialValue?.unit_1,
-    initialValue?.unit_2,
-    initialValue?.unit_3,
-    initialValue?.unit_4,
-    initialValue?.unit_5,
-  ];
+  const unit = [initialValue?.unit_1, initialValue?.unit_2, initialValue?.unit_3, initialValue?.unit_4, initialValue?.unit_5];
 
-  const qty = [
-    initialValue?.qty_1,
-    initialValue?.qty_2,
-    initialValue?.qty_3,
-    initialValue?.qty_4,
-    initialValue?.qty_5,
-  ];
+  const qty = [initialValue?.qty_1, initialValue?.qty_2, initialValue?.qty_3, initialValue?.qty_4, initialValue?.qty_5];
 
-  const disc = [
-    initialValue?.disc_1_1,
-    initialValue?.disc_1_2,
-    initialValue?.disc_1_3,
-    initialValue?.disc_1_4,
-    initialValue?.disc_1_5,
-  ];
+  const disc = [initialValue?.disc_1_1, initialValue?.disc_1_2, initialValue?.disc_1_3, initialValue?.disc_1_4, initialValue?.disc_1_5];
 
   const soldPrice = [
     initialValue?.sold_price_1,
@@ -53,6 +31,14 @@ export default function UnitsTable({
     initialValue?.sold_price_3,
     initialValue?.sold_price_4,
     initialValue?.sold_price_5,
+  ];
+
+  const pricelist = [
+    initialValue?.pricelist_1,
+    initialValue?.pricelist_2,
+    initialValue?.pricelist_3,
+    initialValue?.pricelist_4,
+    initialValue?.pricelist_5,
   ];
 
   const buyPrice = [
@@ -71,54 +57,21 @@ export default function UnitsTable({
     initialValue?.purchase_discount_5,
   ];
 
-  const diskon1 = [
-    initialValue?.unit_1_dp1,
-    initialValue?.unit_2_dp1,
-    initialValue?.unit_3_dp1,
-    initialValue?.unit_4_dp1,
-    initialValue?.unit_5_dp1,
-  ];
+  const diskon1 = [initialValue?.unit_1_dp1, initialValue?.unit_2_dp1, initialValue?.unit_3_dp1, initialValue?.unit_4_dp1, initialValue?.unit_5_dp1];
 
-  const diskon2 = [
-    initialValue?.unit_1_dp2,
-    initialValue?.unit_2_dp2,
-    initialValue?.unit_3_dp2,
-    initialValue?.unit_4_dp2,
-    initialValue?.unit_5_dp2,
-  ];
+  const diskon2 = [initialValue?.unit_1_dp2, initialValue?.unit_2_dp2, initialValue?.unit_3_dp2, initialValue?.unit_4_dp2, initialValue?.unit_5_dp2];
 
-  const diskon3 = [
-    initialValue?.unit_1_dp3,
-    initialValue?.unit_2_dp3,
-    initialValue?.unit_3_dp3,
-    initialValue?.unit_4_dp3,
-    initialValue?.unit_5_dp3,
-  ];
+  const diskon3 = [initialValue?.unit_1_dp3, initialValue?.unit_2_dp3, initialValue?.unit_3_dp3, initialValue?.unit_4_dp3, initialValue?.unit_5_dp3];
 
-  const diskon4 = [
-    initialValue?.unit_1_dp4,
-    initialValue?.unit_2_dp4,
-    initialValue?.unit_3_dp4,
-    initialValue?.unit_4_dp4,
-    initialValue?.unit_5_dp4,
-  ];
+  const diskon4 = [initialValue?.unit_1_dp4, initialValue?.unit_2_dp4, initialValue?.unit_3_dp4, initialValue?.unit_4_dp4, initialValue?.unit_5_dp4];
 
-  const diskon5 = [
-    initialValue?.unit_1_dp5,
-    initialValue?.unit_2_dp5,
-    initialValue?.unit_3_dp5,
-    initialValue?.unit_4_dp5,
-    initialValue?.unit_5_dp5,
-  ];
+  const diskon5 = [initialValue?.unit_1_dp5, initialValue?.unit_2_dp5, initialValue?.unit_3_dp5, initialValue?.unit_4_dp5, initialValue?.unit_5_dp5];
 
   // const unit_1_dp1
 
   const content = (row) => (
     <div>
-      <button
-        onClick={() => onEdit(row.id)}
-        className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-      >
+      <button onClick={() => onEdit(row.id)} className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md ">
         <EditOutlined className="mr-2 mt-0.5 float float-left" />
         Edit
       </button>
@@ -174,11 +127,7 @@ export default function UnitsTable({
         backgroundColor: "#f4f4f4",
       },
       selector: (row) => (
-        <Form.Item
-          className="mt-4"
-          name={`unit_${row.idx}`}
-          initialValue={unit[row.idx - 1]}
-        >
+        <Form.Item className="mt-4" name={`unit_${row.idx}`} initialValue={unit[row.idx - 1]}>
           <Input size="large" placeholder={`Nama Unit ${row.idx}`} />
         </Form.Item>
       ),
@@ -190,11 +139,7 @@ export default function UnitsTable({
         backgroundColor: "#f4f4f4",
       },
       selector: (row) => (
-        <Form.Item
-          className="mt-4"
-          name={`qty_${row.idx}`}
-          initialValue={qty[row.idx - 1]}
-        >
+        <Form.Item className="mt-4" name={`qty_${row.idx}`} initialValue={qty[row.idx - 1]}>
           <InputNumber
             style={{
               width: 100,
@@ -210,18 +155,12 @@ export default function UnitsTable({
       name: "Harga Pembelian",
       width: "170px",
       style: {
-        backgroundColor: "#f4f4f4",
+        backgroundColor: "#036B82",
       },
       selector: (row) => (
-        <Form.Item
-          className="mt-4"
-          name={`buy_price_${row.idx}`}
-          initialValue={buyPrice[row.idx - 1]}
-        >
+        <Form.Item className="mt-4" name={`buy_price_${row.idx}`} initialValue={buyPrice[row.idx - 1]}>
           <InputNumber
-            formatter={(value) =>
-              `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-            }
+            formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
             parser={(value) => value.replace(/\Rp\s?|(,*)/g, "")}
             style={{
               width: 120,
@@ -238,15 +177,9 @@ export default function UnitsTable({
         backgroundColor: "#036B82",
       },
       selector: (row) => (
-        <Form.Item
-          className="mt-4"
-          name={`purchase_discount_${[row.idx]}`}
-          initialValue={purchaseDiscount[row.idx - 1] ?? 0}
-        >
+        <Form.Item className="mt-4" name={`purchase_discount_${[row.idx]}`} initialValue={purchaseDiscount[row.idx - 1] ?? 0}>
           <InputNumber
-            formatter={(value) =>
-              `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-            }
+            formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
             parser={(value) => value.replace(/\Rp\s?|(,*)/g, "")}
             style={{
               width: 120,
@@ -324,21 +257,34 @@ export default function UnitsTable({
       ),
     },
     {
+      name: "Pricelist",
+      width: "150px",
+      style: {
+        backgroundColor: "#f4f4f4",
+      },
+      selector: (row) => (
+        <Form.Item className="mt-4" name={`pricelist_${row.idx}`} initialValue={pricelist[row.idx - 1]}>
+          <InputNumber
+            formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+            parser={(value) => value.replace(/\Rp\s?|(,*)/g, "")}
+            style={{
+              width: 110,
+            }}
+            size="large"
+          />
+        </Form.Item>
+      ),
+    },
+    {
       name: "Harga Jual",
       width: "150px",
       style: {
         backgroundColor: "#f4f4f4",
       },
       selector: (row) => (
-        <Form.Item
-          className="mt-4"
-          name={`sold_price_${row.idx}`}
-          initialValue={soldPrice[row.idx - 1]}
-        >
+        <Form.Item className="mt-4" name={`sold_price_${row.idx}`} initialValue={soldPrice[row.idx - 1]}>
           <InputNumber
-            formatter={(value) =>
-              `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-            }
+            formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
             parser={(value) => value.replace(/\Rp\s?|(,*)/g, "")}
             style={{
               width: 110,
@@ -355,11 +301,7 @@ export default function UnitsTable({
         backgroundColor: "#f4f4f4",
       },
       selector: (row) => (
-        <Form.Item
-          className="mt-4"
-          name={`disc_1_${row.idx}`}
-          initialValue={disc[row.idx - 1]}
-        >
+        <Form.Item className="mt-4" name={`disc_1_${row.idx}`} initialValue={disc[row.idx - 1]}>
           <InputNumber
             style={{
               width: 120,
@@ -373,12 +315,7 @@ export default function UnitsTable({
 
   return (
     <>
-      <DataTable
-        customStyles={customStyles}
-        onChangePage={onPageChange}
-        columns={columns}
-        data={data}
-      />
+      <DataTable customStyles={customStyles} onChangePage={onPageChange} columns={columns} data={data} />
       <p className="mt-3">Keterangan Unit : 1 CTN 5 BOX 10 STRP</p>
     </>
   );

@@ -51,11 +51,7 @@ function Pembelian({ props }) {
 
   const handleUpdate = (id) => {
     // router.push("/dashboard/pembelian/order_pembelian/edit/" + id);
-    openNotificationWithIcon(
-      "info",
-      "Work In Progress",
-      "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
-    );
+    openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
   };
 
   const handleDelete = async (id) => {
@@ -73,8 +69,7 @@ function Pembelian({ props }) {
     const req = await fetch(endpoint, options);
     const res = await req.json();
     if (res) {
-      const req = await fetchData(cookies);
-      const res = await req.json();
+      const res = await fetchData(cookies);
       openNotificationWithIcon(
         "success",
         "Berhasil menghapus data",
@@ -86,8 +81,7 @@ function Pembelian({ props }) {
 
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/purchases?pagination[page]=" + page;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases?pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -163,18 +157,12 @@ function Pembelian({ props }) {
   const handleChangeStatus = async (values, id) => {
     // clean object
     for (var key in values.attributes) {
-      if (
-        values.attributes[key] === null ||
-        values.attributes[key] === undefined
-      ) {
+      if (values.attributes[key] === null || values.attributes[key] === undefined) {
         delete values.attributes[key];
       }
     }
 
-    if (
-      values.attributes?.document?.data === null ||
-      values.attributes?.document?.data === undefined
-    ) {
+    if (values.attributes?.document?.data === null || values.attributes?.document?.data === undefined) {
       delete values.attributes?.document;
     }
 
@@ -210,17 +198,9 @@ function Pembelian({ props }) {
       const response = await fetchData(cookies);
       setPurchase(response);
 
-      openNotificationWithIcon(
-        "success",
-        "Status berhasil dirubah",
-        "Status berhasil dirubah. Silahkan cek detail order pembelian"
-      );
+      openNotificationWithIcon("success", "Status berhasil dirubah", "Status berhasil dirubah. Silahkan cek detail order pembelian");
     } else {
-      openNotificationWithIcon(
-        "error",
-        "Status gagal dirubah",
-        "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah"
-      );
+      openNotificationWithIcon("error", "Status gagal dirubah", "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah");
     }
   };
 
@@ -266,15 +246,9 @@ function Pembelian({ props }) {
                   width: 200,
                 }}
               />
-              <button
-                onClick={handleAdd}
-                type="button"
-                className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
-              >
+              <button onClick={handleAdd} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5">
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    + Tambah
-                  </a>
+                  <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
                 </div>
               </button>
             </div>

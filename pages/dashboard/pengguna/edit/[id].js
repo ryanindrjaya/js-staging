@@ -10,16 +10,20 @@ import { Button, Select, Form, Input } from "antd";
 import { toast } from "react-toastify";
 import { Spin } from "antd";
 import { useRouter } from "next/router";
+import Locations from "../../../../components/Form/Locations";
 
 const Edit = ({ props }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [selectLocations, setSelectLocation] = useState({});
   const cookies = nookies.get(null, "token");
   const router = useRouter();
 
   const role = props?.role?.roles;
   const user = props?.user;
   const userRole = props?.user.role;
+  const userLocation = props?.user.locations;
+  const locations = props?.locations;
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -58,8 +62,7 @@ const Edit = ({ props }) => {
   };
 
   const getRole = async (roleId) => {
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/users-permissions/roles/" + roleId;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/users-permissions/roles/" + roleId;
     const options = {
       method: "GET",
       headers: {
@@ -106,12 +109,7 @@ const Edit = ({ props }) => {
                     <Input
                       disabled
                       style={{ height: "50px" }}
-                      prefix={
-                        <UserOutlined
-                          style={{ fontSize: "150%" }}
-                          className="site-form-item-icon mr-5"
-                        />
-                      }
+                      prefix={<UserOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
                       placeholder="Username"
                     />
                   </Form.Item>
@@ -129,12 +127,7 @@ const Edit = ({ props }) => {
                   >
                     <Input
                       style={{ height: "50px" }}
-                      prefix={
-                        <UserOutlined
-                          style={{ fontSize: "150%" }}
-                          className="site-form-item-icon mr-5"
-                        />
-                      }
+                      prefix={<UserOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
                       placeholder="Nama"
                     />
                   </Form.Item>
@@ -152,23 +145,16 @@ const Edit = ({ props }) => {
                   >
                     <Input
                       style={{ height: "50px" }}
-                      prefix={
-                        <MailOutlined
-                          style={{ fontSize: "150%" }}
-                          className="site-form-item-icon mr-5"
-                        />
-                      }
+                      prefix={<MailOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
                       placeholder="Email"
                     />
                   </Form.Item>
                 </div>
               </div>
 
-              <Form.Item
-                name="role_id"
-                className="w-1/4 mb-5 ml-1"
-                initialValue={userRole.id}
-              >
+              <Locations data={locations} onSelect={setSelectLocation} initialValue={userLocation} errMsg={"Harap pilih lokasi user"} required />
+
+              <Form.Item name="role_id" className="w-1/4 mb-5 ml-1" initialValue={userRole.id}>
                 <Select placeholder="Role">
                   {role.map((role) =>
                     role.name === "Authenticated" || role.name === "Public" ? (
@@ -188,10 +174,7 @@ const Edit = ({ props }) => {
                     <Spin />
                   </div>
                 ) : (
-                 <Button
-                    htmlType="submit"
-                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
-                  >
+                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
                     Submit
                   </Button>
                 )}
@@ -223,16 +206,34 @@ Edit.getInitialProps = async (context) => {
   const resRole = await fetchRole(cookies);
   const role = await resRole.json();
 
+  const reqLocations = await fetchDataLocation(cookies, "/locations");
+  const resLocations = await reqLocations.json();
+
   return {
     props: {
       user,
       role,
+      locations: resLocations,
     },
   };
 };
 
 const fetchRole = async (cookies) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/users-permissions/roles";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchDataLocation = async (cookies, url) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + url;
   const options = {
     method: "GET",
     headers: {

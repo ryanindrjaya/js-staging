@@ -33,6 +33,9 @@ export default function Reducer(state = initState, action) {
             ...state.productInfo[id],
             priceUnit: data[`buy_price_${index}`],
             unit: data[`unit_${index}`],
+            d1: data[`unit_${index}_dp1`],
+            d2: data[`unit_${index}_dp2`],
+            d3: data[`unit_${index}_dp3`],
           },
         },
       };
@@ -49,6 +52,54 @@ export default function Reducer(state = initState, action) {
           [id]: {
             ...state.productInfo[id],
             qty: qty,
+          },
+        },
+      };
+
+    case "CHANGE_PRODUCT_D1":
+      var d1 = action.d1;
+      var id = action.product.id;
+      var data = action.product.attributes;
+
+      return {
+        ...state,
+        productInfo: {
+          ...state.productInfo,
+          [id]: {
+            ...state.productInfo[id],
+            d1: d1,
+          },
+        },
+      };
+
+    case "CHANGE_PRODUCT_D2":
+      var d2 = action.d2;
+      var id = action.product.id;
+      var data = action.product.attributes;
+
+      return {
+        ...state,
+        productInfo: {
+          ...state.productInfo,
+          [id]: {
+            ...state.productInfo[id],
+            d2: d2,
+          },
+        },
+      };
+
+    case "CHANGE_PRODUCT_D3":
+      var d3 = action.d3;
+      var id = action.product.id;
+      var data = action.product.attributes;
+
+      return {
+        ...state,
+        productInfo: {
+          ...state.productInfo,
+          [id]: {
+            ...state.productInfo[id],
+            d3: d3,
           },
         },
       };
@@ -118,6 +169,9 @@ export default function Reducer(state = initState, action) {
             disc: action.disc,
             priceAfterDisc: action.priceAfterDisc,
             subTotal: action.subTotal,
+            d1: action.d1,
+            d2: action.d2,
+            d3: action.d3,
           },
         },
       };

@@ -9,17 +9,24 @@ import { Button, Select, Form, Input } from "antd";
 import nookies from "nookies";
 import { toast } from "react-toastify";
 import { Spin } from "antd";
+import Locations from "../../../components/Form/Locations";
 
 const Tambah = ({ props }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [selectLocations, setSelectLocation] = useState({});
   const cookies = nookies.get(null, "token");
   const role = props?.data?.roles;
+  const locations = props?.locations;
 
   const onFinish = async (values) => {
     setLoading(true);
     const role = await getRole(values.role_id);
-    const data = { ...values, role, deleteAble: true };
+    const locationsID = [];
+    for (let index = 0; index < values.locations.length; index++) {
+      locationsID.push({ id: values.locations[index] });
+    }
+    const data = { ...values, role, locations: locationsID, deleteAble: true };
 
     const endpoint = process.env.NEXT_PUBLIC_URL + "/auth/local/register";
     const JSONdata = JSON.stringify(data);
@@ -54,8 +61,7 @@ const Tambah = ({ props }) => {
   };
 
   const getRole = async (roleId) => {
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/users-permissions/roles/" + roleId;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/users-permissions/roles/" + roleId;
     const options = {
       method: "GET",
       headers: {
@@ -100,12 +106,7 @@ const Tambah = ({ props }) => {
                   >
                     <Input
                       style={{ height: "50px" }}
-                      prefix={
-                        <UserOutlined
-                          style={{ fontSize: "150%" }}
-                          className="site-form-item-icon mr-5"
-                        />
-                      }
+                      prefix={<UserOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
                       placeholder="Username"
                     />
                   </Form.Item>
@@ -122,12 +123,7 @@ const Tambah = ({ props }) => {
                   >
                     <Input
                       style={{ height: "50px" }}
-                      prefix={
-                        <UserOutlined
-                          style={{ fontSize: "150%" }}
-                          className="site-form-item-icon mr-5"
-                        />
-                      }
+                      prefix={<UserOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
                       placeholder="Nama"
                     />
                   </Form.Item>
@@ -144,12 +140,7 @@ const Tambah = ({ props }) => {
                   >
                     <Input
                       style={{ height: "50px" }}
-                      prefix={
-                        <MailOutlined
-                          style={{ fontSize: "150%" }}
-                          className="site-form-item-icon mr-5"
-                        />
-                      }
+                      prefix={<MailOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
                       placeholder="Email"
                     />
                   </Form.Item>
@@ -166,12 +157,7 @@ const Tambah = ({ props }) => {
                   >
                     <Input.Password
                       style={{ height: "50px" }}
-                      prefix={
-                        <LockOutlined
-                          style={{ fontSize: "150%" }}
-                          className="site-form-item-icon mr-5"
-                        />
-                      }
+                      prefix={<LockOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
                       placeholder="Kata Sandi"
                     />
                   </Form.Item>
@@ -192,26 +178,21 @@ const Tambah = ({ props }) => {
                             return Promise.resolve();
                           }
 
-                          return Promise.reject(
-                            new Error("Kata Sandi tidak cocok!")
-                          );
+                          return Promise.reject(new Error("Kata Sandi tidak cocok!"));
                         },
                       }),
                     ]}
                   >
                     <Input.Password
                       style={{ height: "50px" }}
-                      prefix={
-                        <LockOutlined
-                          style={{ fontSize: "150%" }}
-                          className="site-form-item-icon mr-5"
-                        />
-                      }
+                      prefix={<LockOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
                       placeholder="Konfirmasi Kata Sandi"
                     />
                   </Form.Item>
                 </div>
               </div>
+
+              <Locations data={locations} onSelect={setSelectLocation} errMsg={"Harap pilih lokasi user"} required />
 
               <Form.Item name="role_id" className="w-1/4 mb-5 ml-1">
                 <Select size="large" placeholder="Role">
@@ -233,10 +214,7 @@ const Tambah = ({ props }) => {
                     <Spin />
                   </div>
                 ) : (
-                 <Button
-                    htmlType="submit"
-                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
-                  >
+                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
                     Submit
                   </Button>
                 )}
@@ -253,18 +231,22 @@ Tambah.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   let data;
 
-  const req = await fetchData(cookies);
+  const req = await fetchData(cookies, "/users-permissions/roles");
   data = await req.json();
+
+  const reqLocations = await fetchData(cookies, "/locations");
+  const resLocations = await reqLocations.json();
 
   return {
     props: {
       data,
+      locations: resLocations,
     },
   };
 };
 
-const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/users-permissions/roles";
+const fetchData = async (cookies, url) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + url;
   const options = {
     method: "GET",
     headers: {

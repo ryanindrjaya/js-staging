@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 
 const { addProduct } = action;
 
-export default function SearchBar({ form, tempList, onChange }) {
+export default function SearchBar({ form, tempList, onChange, selectedProduct, user, isBasedOnLocation = true }) {
   const dispatch = useDispatch();
 
   const [product, setProduct] = useState();
@@ -43,9 +43,7 @@ export default function SearchBar({ form, tempList, onChange }) {
     }
   };
 
-  const options = data.map((d) => (
-    <Select.Option key={d.value}>{d.label}</Select.Option>
-  ));
+  const options = data.map((d) => <Select.Option key={d.value}>{d.label}</Select.Option>);
 
   const fetchProduct = async (query, callback) => {
     if (!query) {
@@ -53,8 +51,7 @@ export default function SearchBar({ form, tempList, onChange }) {
     } else {
       try {
         const endpoint =
-          process.env.NEXT_PUBLIC_URL +
-          `/products?filters[$or][0][name][$contains]=${query}&filters[$or][1][SKU][$contains]=${query}`;
+          process.env.NEXT_PUBLIC_URL + `/products?populate=*&filters[$or][0][name][$contains]=${query}&filters[$or][1][SKU][$contains]=${query}`;
         const options = {
           method: "GET",
           headers: {
@@ -67,8 +64,18 @@ export default function SearchBar({ form, tempList, onChange }) {
         const res = await req.json();
 
         if (req.status == 200) {
-          const products = res.data.map((product) => ({
-            label: `${product.attributes.name} (${product.attributes.SKU})`,
+          // filter product that already added
+          const filteredProduct = res.data.filter((item) => {
+            return !selectedProduct?.some((temp) => temp.id == item.id);
+          });
+
+          // product based on user location
+          const filteredProductByLocation = filteredProduct.filter((item) =>
+            item.attributes.locations.data.some((location) => user.locations.some((userLocation) => userLocation.id == location.id))
+          );
+
+          const products = filteredProductByLocation.map((product) => ({
+            label: `${product.attributes.name}`,
             value: product.id,
           }));
 

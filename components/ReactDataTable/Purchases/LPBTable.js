@@ -3,12 +3,7 @@ import AlertDialog from "../../Alert/Alert";
 import { Input, InputNumber, Select, Form, Row, DatePicker } from "antd";
 import { useDispatch } from "react-redux";
 
-export default function ReactDataTable({
-  calculatePriceAfterDisc,
-  productSubTotal,
-  products,
-  locations,
-}) {
+export default function ReactDataTable({ calculatePriceAfterDisc, productSubTotal, products, locations, setTotalPrice }) {
   const dispatch = useDispatch();
 
   var defaultDp1 = 0;
@@ -45,7 +40,38 @@ export default function ReactDataTable({
     });
   };
 
+  const onChangeD1D2D3 = (value, data, type) => {
+    switch (type) {
+      case "d1":
+        dispatch({
+          type: "CHANGE_PRODUCT_D1",
+          d1: value,
+          product: data,
+        });
+        break;
+      case "d2":
+        dispatch({
+          type: "CHANGE_PRODUCT_D2",
+          d2: value,
+          product: data,
+        });
+        break;
+      case "d3":
+        dispatch({
+          type: "CHANGE_PRODUCT_D3",
+          d3: value,
+          product: data,
+        });
+        break;
+      default:
+        break;
+    }
+  };
+
   const onConfirm = (id) => {
+    const subtotal = productSubTotal[id];
+    setTotalPrice((prev) => prev - subtotal);
+
     for (let index = 0; index < products.productList.length; index++) {
       const element = products.productList[index];
       if (element.id === id) {
@@ -106,10 +132,7 @@ export default function ReactDataTable({
         return (
           <>
             <Row>
-              <Form.Item
-                name={["jumlah_qty", `${row.id}`]}
-                noStyle
-              >
+              <Form.Item name={["jumlah_qty", `${row.id}`]} noStyle>
                 <InputNumber
                   defaultValue={defaultQty}
                   onChange={(e) => onChangeQty(e, row)}
@@ -125,10 +148,7 @@ export default function ReactDataTable({
                 />
               </Form.Item>
 
-              <Form.Item
-                name={["jumlah_option", `${row.id}`]}
-                noStyle
-              >
+              <Form.Item name={["jumlah_option", `${row.id}`]} noStyle>
                 <Select
                   defaultValue={defaultIndex}
                   onChange={(value) => onChangeUnit(value, row)}
@@ -140,50 +160,35 @@ export default function ReactDataTable({
                   {row.attributes?.unit_1 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_1 === null}
-                      value={1}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_1 === null} value={1}>
                       {row.attributes?.unit_1}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_2 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_2 === null}
-                      value={2}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_2 === null} value={2}>
                       {row.attributes?.unit_2}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_3 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_3 === null}
-                      value={3}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_3 === null} value={3}>
                       {row.attributes?.unit_3}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_4 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_4 === null}
-                      value={4}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_4 === null} value={4}>
                       {row.attributes?.unit_4}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_5 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_5 === null}
-                      value={5}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_5 === null} value={5}>
                       {row.attributes?.unit_5}
                     </Select.Option>
                   )}
@@ -221,46 +226,98 @@ export default function ReactDataTable({
       },
     },
     {
-      name: "",
-      width: "250px",
+      name: "D1",
+      width: "100px",
       selector: (row) => {
-        defaultDp1 = row.attributes?.unit_1_dp1;
-        defaultDp2 = row.attributes?.unit_1_dp2;
-        defaultDp3 = row.attributes?.unit_1_dp3;
+        defaultDp1 = row.attributes?.unit_1_dp1 || 0;
+        if (products.productInfo[row.id]?.d1) {
+          defaultDp1 = products.productInfo[row.id].d1;
+        }
+
+        if (products.productInfo[row.id]) {
+          if (products.productInfo[row.id].unit) {
+            defaultDp1 = products.productInfo[row.id].d1;
+          }
+        }
 
         return (
-          <div className="grid grid-cols-3 gap-2 disabled:bg-white">
+          <div className="disabled:bg-white">
             <InputNumber
-              disabled
+              controls={false}
+              formatter={(value) => `${value}%`}
               max={100}
               min={0}
-              name="disc_rp1"
               value={defaultDp1}
+              name={`disc_rp1_${row.id}`}
+              onChange={(e) => onChangeD1D2D3(e, row, "d1")}
               style={{
                 width: "60px",
-                backgroundColor: "#f4f4f4",
               }}
             />
+          </div>
+        );
+      },
+    },
+    {
+      name: "D2",
+      width: "100px",
+      selector: (row) => {
+        defaultDp2 = row.attributes?.unit_1_dp2 || 0;
+        if (products.productInfo[row.id]?.d2) {
+          defaultDp2 = products.productInfo[row.id].d2;
+        }
+
+        if (products.productInfo[row.id]) {
+          if (products.productInfo[row.id].unit) {
+            defaultDp2 = products.productInfo[row.id].d2;
+          }
+        }
+
+        return (
+          <div className="disabled:bg-white">
             <InputNumber
-              disabled
+              controls={false}
+              formatter={(value) => `${value}%`}
               max={100}
               min={0}
+              name={["disc_rp2", `${row.id}`]}
               value={defaultDp2}
-              name="disc_rp2"
+              onChange={(e) => onChangeD1D2D3(e, row, "d2")}
               style={{
                 width: "60px",
-                marginRight: "10px",
               }}
             />
+          </div>
+        );
+      },
+    },
+    {
+      name: "D3",
+      width: "100px",
+      selector: (row) => {
+        defaultDp3 = row.attributes?.unit_1_dp3 || 0;
+        if (products.productInfo[row.id]?.d3) {
+          defaultDp3 = products.productInfo[row.id].d3;
+        }
+
+        if (products.productInfo[row.id]) {
+          if (products.productInfo[row.id].unit) {
+            defaultDp3 = products.productInfo[row.id].d3;
+          }
+        }
+
+        return (
+          <div className="disabled:bg-white">
             <InputNumber
-              disabled
+              controls={false}
+              formatter={(value) => `${value}%`}
               max={100}
               min={0}
+              name={["disc_rp3", `${row.id}`]}
               value={defaultDp3}
-              name="disc_rp3"
+              onChange={(e) => onChangeD1D2D3(e, row, "d3")}
               style={{
                 width: "60px",
-                marginRight: "10px",
               }}
             />
           </div>
@@ -295,10 +352,7 @@ export default function ReactDataTable({
               >
                 {locations.map((element) => {
                   return (
-                    <Select.Option
-                      value={element.id}
-                      key={element.attributes.name}
-                    >
+                    <Select.Option value={element.id} key={element.attributes.name}>
                       {element.attributes.name}
                     </Select.Option>
                   );
@@ -327,11 +381,7 @@ export default function ReactDataTable({
               ]}
               noStyle
             >
-              <DatePicker
-                placeholder="EXP. Date"
-                size="normal"
-                format={"DD/MM/YYYY"}
-              />
+              <DatePicker placeholder="EXP. Date" size="normal" format={"DD/MM/YYYY"} />
             </Form.Item>
           </>
         );

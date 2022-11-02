@@ -24,6 +24,24 @@ const actions = {
     product,
   }),
 
+  changeProductD1: (d1, product) => ({
+    type: "CHANGE_PRODUCT_D1",
+    d1,
+    product,
+  }),
+
+  changeProductD2: (d2, product) => ({
+    type: "CHANGE_PRODUCT_D2",
+    d2,
+    product,
+  }),
+
+  changeProductD3: (d3, product) => ({
+    type: "CHANGE_PRODUCT_D3",
+    d3,
+    product,
+  }),
+
   changeProductDisc: (disc, product) => ({
     type: "CHANGE_PRODUCT_DISC",
     disc,

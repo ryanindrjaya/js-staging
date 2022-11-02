@@ -3,14 +3,7 @@ import AlertDialog from "../Alert/Alert";
 import { Popover } from "antd";
 import { EditOutlined, BarsOutlined } from "@ant-design/icons";
 
-export default function ReactDataTable({
-  data,
-  onDelete,
-  onUpdate,
-  onPageChange,
-  setIsVisible,
-  setViewModalProduct,
-}) {
+export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange, setIsVisible, setViewModalProduct }) {
   const openModal = (row) => {
     setIsVisible(true, row);
     setViewModalProduct(row);
@@ -32,18 +25,12 @@ export default function ReactDataTable({
   const content = (row) => (
     <div>
       <div>
-        <button
-          onClick={() => openModal(row)}
-          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-        >
+        <button onClick={() => openModal(row)} className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md ">
           <BarsOutlined className="mr-2 mt-0.5 float float-left" />
           Lihat
         </button>
       </div>
-      <button
-        onClick={() => onEdit(row.id)}
-        className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-      >
+      <button onClick={() => onEdit(row.id)} className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md ">
         <EditOutlined className="mr-2 mt-0.5 float float-left" />
         Edit
       </button>
@@ -67,12 +54,6 @@ export default function ReactDataTable({
   };
 
   const columns = [
-    {
-      name: "SKU",
-      width: "200px",
-      sortable: true,
-      selector: (row) => row.attributes?.SKU,
-    },
     {
       name: "Nama Produk",
       width: "250px",
@@ -103,9 +84,7 @@ export default function ReactDataTable({
       selector: (row) => (
         <>
           <Popover content={content(row)} placement="bottom">
-            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
-              Tindakan
-            </button>
+            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">Tindakan</button>
           </Popover>
         </>
       ),
