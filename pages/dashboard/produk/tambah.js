@@ -127,10 +127,7 @@ const Tambah = ({ props }) => {
       id: values?.groups,
     };
 
-    const locationsID = [];
-    for (let index = 0; index < values.locations.length; index++) {
-      locationsID.push({ id: values.locations[index] });
-    }
+    const locationsID = values.locations.map((locationId) => locationId);
 
     delete values.locations;
     delete values.category_id;
@@ -140,6 +137,7 @@ const Tambah = ({ props }) => {
 
     const postData = {
       ...values,
+      locations: locationsID,
     };
 
     const putData = {
@@ -150,6 +148,8 @@ const Tambah = ({ props }) => {
       locations: locationsID,
       image: { id: image?.id },
     };
+
+    console.log("put data", putData);
 
     // POST DATA
     const postRes = await handlePostData(postData);

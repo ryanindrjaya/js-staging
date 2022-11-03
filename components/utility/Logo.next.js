@@ -21,7 +21,7 @@ export default function LogoNext({ collapsed }) {
       ) : (
         <h3>
           <Link href="/dashboard">
-            <a  className="text-black"> JAYA SEHAT </a>
+            <a>KEELOLA</a>
           </Link>
         </h3>
       )}
