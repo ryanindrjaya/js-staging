@@ -27,7 +27,11 @@ const Edit = ({ props }) => {
   const initCategory = product?.attributes?.category?.data;
   const subCategory = product?.attributes?.sub_category?.data;
 
-  const [image, setImage] = useState(product.attributes?.image?.data ? product.attributes?.image?.data[0].attributes : null);
+  const [image, setImage] = useState(
+    product.attributes?.image?.data
+      ? product.attributes?.image?.data[0].attributes
+      : null
+  );
 
   const [category, setCategory] = useState();
   const [idCategory, setIdCategory] = useState(initCategory.id);
@@ -115,7 +119,10 @@ const Edit = ({ props }) => {
   };
 
   const categoryChecker = (values) => {
-    if (values.category_id === `${initCategory.attributes.category_id} - ${initCategory.attributes.name}`) {
+    if (
+      values.category_id ===
+      `${initCategory.attributes.category_id} - ${initCategory.attributes.name}`
+    ) {
       console.log("category tidak berubah. jadikan id");
       values.category_id = idCategory;
     } else {
@@ -127,9 +134,12 @@ const Edit = ({ props }) => {
   };
 
   const subCategoryChecker = (values) => {
-    if (values.subCategories === subCategory.attributes.name) {
+    console.log("checker ", values.subCategories, subCategory);
+    if (values.subCategories === subCategory?.attributes.name) {
       console.log("sub category tidak berubah. jadikan id");
       values.subCategories = subCategory.id;
+    } else if (!subCategory) {
+      console.log("tidak ada datanya cuy");
     } else {
       console.log("sub category berubah. jadikan tipe int");
       values.subCategories = parseInt(values.subCategories);
@@ -149,7 +159,7 @@ const Edit = ({ props }) => {
     };
 
     const subCategoryID = {
-      id: values?.subCategories,
+      id: values?.subCategories ?? null,
     };
 
     const manufacturesID = {
@@ -174,6 +184,12 @@ const Edit = ({ props }) => {
       image: { id: image?.id },
     };
 
+    if (putData.sub_category.id === "") {
+      delete putData.sub_category;
+    }
+
+    console.log("tester", putData);
+
     // remove undefined or null value from data
     for (const key in values) {
       if (values[key] === undefined || values[key] === null) {
@@ -196,7 +212,8 @@ const Edit = ({ props }) => {
     console.log("data", data);
 
     for (let index = 1; index < 6; index++) {
-      if (data[`purchase_discount_${index}`] === "-") delete data[`purchase_discount_${index}`];
+      if (data[`purchase_discount_${index}`] === "-")
+        delete data[`purchase_discount_${index}`];
     }
 
     const dataPut = { data: data };
@@ -262,7 +279,10 @@ const Edit = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input style={{ height: "40px" }} placeholder="Nama Produk" />
+                    <Input
+                      style={{ height: "40px" }}
+                      placeholder="Nama Produk"
+                    />
                   </Form.Item>
                   <Categories
                     initialValue={`${initCategory.attributes.category_id} - ${initCategory.attributes.name}`}
@@ -276,14 +296,23 @@ const Edit = ({ props }) => {
                     subCategories={subCategories}
                     onSelect={setSelectedSubCategory}
                     selectedSubCategory={selectedSubCategory}
-                    initialValue={`${product.attributes?.sub_category?.data?.attributes.name ?? ""}`}
+                    initialValue={`${
+                      product.attributes?.sub_category?.data?.attributes.name ??
+                      ""
+                    }`}
                   />
-                  <Form.Item name="description" initialValue={product.attributes?.description ?? ""}>
+                  <Form.Item
+                    name="description"
+                    initialValue={product.attributes?.description ?? ""}
+                  >
                     <TextArea rows={4} placeholder="Deskripsi" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
-                  <Form.Item name="SKU" initialValue={product.attributes?.SKU ?? ""}>
+                  <Form.Item
+                    name="SKU"
+                    initialValue={product.attributes?.SKU ?? ""}
+                  >
                     <Input style={{ height: "40px" }} placeholder="SKU" />
                   </Form.Item>
                   <Manufactures
@@ -291,8 +320,16 @@ const Edit = ({ props }) => {
                     initialValue={product.attributes?.manufacture?.data?.id}
                     onSelect={setSelectedManufactures}
                   />
-                  <Groups data={groups} onSelect={setSelectedGroup} initialValue={product.attributes?.group?.data?.id} />
-                  <Locations data={locations} onSelect={setSelectLocation} initialValue={product.attributes?.locations.data} />
+                  <Groups
+                    data={groups}
+                    onSelect={setSelectedGroup}
+                    initialValue={product.attributes?.group?.data?.id}
+                  />
+                  <Locations
+                    data={locations}
+                    onSelect={setSelectLocation}
+                    initialValue={product.attributes?.locations.data}
+                  />
                 </div>
 
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
@@ -302,11 +339,19 @@ const Edit = ({ props }) => {
                         <p className="ant-upload-drag-icon">
                           <FileImageOutlined />
                         </p>
-                        <p className="ant-upload-text">Klik atau tarik gambar ke kotak ini</p>
-                        <p className="ant-upload-hint  m-3">Gambar akan digunakan sebagai contoh tampilan produk</p>
+                        <p className="ant-upload-text">
+                          Klik atau tarik gambar ke kotak ini
+                        </p>
+                        <p className="ant-upload-hint  m-3">
+                          Gambar akan digunakan sebagai contoh tampilan produk
+                        </p>
                       </>
                     ) : (
-                      <Image layout="fill" loader={imageLoader} src={process.env.BASE_URL + image?.url} />
+                      <Image
+                        layout="fill"
+                        loader={imageLoader}
+                        src={process.env.BASE_URL + image?.url}
+                      />
                     )}
                   </Dragger>
                 </div>
@@ -324,7 +369,10 @@ const Edit = ({ props }) => {
                     <Spin />
                   </div>
                 ) : (
-                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
+                  <Button
+                    htmlType="submit"
+                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
+                  >
                     Simpan
                   </Button>
                 )}
@@ -374,7 +422,8 @@ Edit.getInitialProps = async (context) => {
 
 const fetchProduct = async (cookies, context) => {
   const id = context.query.id;
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/products/" + id + "?populate=*";
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL + "/products/" + id + "?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -416,7 +465,10 @@ const fetchDataManufactures = async (cookies) => {
 };
 
 const fetchDataSubCategories = async (cookies, categoryId) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/sub-categories?populate[category][filters][id][$eq]=" + categoryId;
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL +
+    "/sub-categories?populate[category][filters][id][$eq]=" +
+    categoryId;
   const options = {
     method: "GET",
     headers: {
