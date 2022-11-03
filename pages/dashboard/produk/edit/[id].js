@@ -19,7 +19,6 @@ import Locations from "../../../../components/Form/AddProduct/Locations";
 import UnitTable from "../../../../components/ReactDataTable/Product/UnitsTable";
 
 const Edit = ({ props }) => {
-  console.log(props);
   const productId = props?.product.data.id;
   const product = props?.product?.data;
   const manufactures = props?.manufactures;
@@ -135,9 +134,12 @@ const Edit = ({ props }) => {
   };
 
   const subCategoryChecker = (values) => {
-    if (values.subCategories === subCategory.attributes.name) {
+    console.log("checker ", values.subCategories, subCategory);
+    if (values.subCategories === subCategory?.attributes.name) {
       console.log("sub category tidak berubah. jadikan id");
       values.subCategories = subCategory.id;
+    } else if (!subCategory) {
+      console.log("tidak ada datanya cuy");
     } else {
       console.log("sub category berubah. jadikan tipe int");
       values.subCategories = parseInt(values.subCategories);
@@ -148,7 +150,7 @@ const Edit = ({ props }) => {
 
   const onFinish = async (values) => {
     setLoading(true);
-    console.log(values);
+    console.log("values submit location", values.locations);
     values = categoryChecker(values);
     values = subCategoryChecker(values);
 
@@ -157,7 +159,7 @@ const Edit = ({ props }) => {
     };
 
     const subCategoryID = {
-      id: values?.subCategories,
+      id: values?.subCategories ?? null,
     };
 
     const manufacturesID = {
@@ -168,12 +170,6 @@ const Edit = ({ props }) => {
       id: values?.groups,
     };
 
-    const locationsID = [];
-    for (let index = 0; index < values.locations.length; index++) {
-      locationsID.push({ id: values.locations[index] });
-    }
-
-    delete values.locations;
     delete values.category_id;
     delete values.subCategories;
     delete values.manufactures;
@@ -185,9 +181,14 @@ const Edit = ({ props }) => {
       sub_category: subCategoryID,
       manufacture: manufacturesID,
       group: groupID,
-      locations: locationsID,
       image: { id: image?.id },
     };
+
+    if (putData.sub_category.id === "") {
+      delete putData.sub_category;
+    }
+
+    console.log("tester", putData);
 
     // remove undefined or null value from data
     for (const key in values) {
@@ -207,6 +208,8 @@ const Edit = ({ props }) => {
       ...values,
       ...putData,
     };
+
+    console.log("data", data);
 
     for (let index = 1; index < 6; index++) {
       if (data[`purchase_discount_${index}`] === "-")
@@ -325,7 +328,7 @@ const Edit = ({ props }) => {
                   <Locations
                     data={locations}
                     onSelect={setSelectLocation}
-                    initialValue={locationsList()}
+                    initialValue={product.attributes?.locations.data}
                   />
                 </div>
 
