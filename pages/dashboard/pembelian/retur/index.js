@@ -6,7 +6,7 @@ import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import { useRouter } from "next/router";
 import { Input, notification } from "antd";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
-import PurchasingTable from "../../../../components/ReactDataTable/Purchases/PurchasingTable";
+import PurchasesReturTable from "../../../../components/ReactDataTable/Purchases/PurchasesReturTable";
 import nookies from "nookies";
 
 Retur.getInitialProps = async (context) => {
@@ -57,6 +57,31 @@ function Retur({ props }) {
       "Work In Progress",
       "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
     );
+  };
+
+  const handleDelete = async (id) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/" + id;
+    const cookies = nookies.get(null, "token");
+
+    const options = {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+    if (res) {
+      const res = await fetchData(cookies);
+      openNotificationWithIcon(
+        "success",
+        "Berhasil menghapus data",
+        "Order Pembelian yang dipilih telah berhasil dihapus. Silahkan cek kembali Order Pembelian"
+      );
+      setPurchase(res);
+    }
   };
 
   const handlePageChange = async (page) => {
@@ -154,11 +179,20 @@ function Retur({ props }) {
               >
                 <div className="text-white text-center text-sm font-bold">
                   <a className="text-white no-underline text-xs sm:text-xs">
-                    + Tambah
+                    + Tambah Retur
                   </a>
                 </div>
               </button>
             </div>
+
+            <PurchasesReturTable
+              data={purchase}
+              onUpdate={handleUpdate}
+              onDelete={handleDelete}
+              onPageChange={handlePageChange}
+              onChangeStatus={onChangeStatus}
+            />
+
           </LayoutContent>
         </LayoutWrapper>
       </DashboardLayout>
