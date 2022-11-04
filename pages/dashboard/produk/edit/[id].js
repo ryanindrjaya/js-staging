@@ -163,6 +163,15 @@ const Edit = ({ props }) => {
       id: values?.groups,
     };
 
+    values.locations =
+      values?.locations?.map((location) => {
+        if (location.value) {
+          return { id: location.value };
+        }
+
+        return { id: location };
+      }) || [];
+
     delete values.category_id;
     delete values.subCategories;
     delete values.manufactures;
