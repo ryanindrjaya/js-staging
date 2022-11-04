@@ -283,8 +283,19 @@ const Tambah = ({ props }) => {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
-                  <Manufactures data={manufactures.data} onSelect={setSelectedManufactures} />
-                  <Groups data={groups} onSelect={setSelectedGroup} />
+                  <Form.Item
+                    name="SKU"
+                    rules={[
+                      {
+                        required: true,
+                        message: "SKU tidak boleh kosong!",
+                      },
+                    ]}
+                  >
+                    <Input style={{ height: "40px" }} placeholder="SKU" />
+                  </Form.Item>
+                  <Manufactures data={manufactures.data} selectedManufactures={selectedManufactures} onSelect={setSelectedManufactures} />
+                  <Groups data={groups} selectedGroups={selectedGroups} onSelect={setSelectedGroup} />
                   <Locations data={locations} onSelect={setSelectLocation} />
                 </div>
 

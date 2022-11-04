@@ -55,6 +55,12 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange,
 
   const columns = [
     {
+      name: "SKU",
+      width: "150px",
+      sortable: true,
+      selector: (row) => row.attributes?.SKU,
+    },
+    {
       name: "Nama Produk",
       width: "250px",
       sortable: true,

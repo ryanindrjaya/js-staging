@@ -293,6 +293,18 @@ const Edit = ({ props }) => {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
+                  <Form.Item
+                    name="SKU"
+                    rules={[
+                      {
+                        required: true,
+                        message: "SKU tidak boleh kosong!",
+                      },
+                    ]}
+                    initialValue={product.attributes?.SKU ?? ""}
+                  >
+                    <Input style={{ height: "40px" }} placeholder="SKU" />
+                  </Form.Item>
                   <Manufactures
                     data={manufactures.data}
                     initialValue={product.attributes?.manufacture?.data?.id}

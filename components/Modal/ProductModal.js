@@ -20,6 +20,8 @@ export default function ProductModal({ data, isLoading, inventory }) {
         <div className="grid grid-cols-2 gap-2">
           <div className="...">NAMA</div>
           <div className="...">{product?.name}</div>
+          <div className="...">SKU</div>
+          <div className="...">{product?.SKU}</div>
           <div className="...">KATEGORI</div>
           <div className="...">{`${product?.category?.data?.attributes?.name ?? "-"} (${
             product?.category?.data?.attributes?.category_id ?? ""
@@ -37,9 +39,12 @@ export default function ProductModal({ data, isLoading, inventory }) {
           <div className="...">DESKRIPSI</div>
           <div className="...">{`${product?.description}`}</div>
         </div>
-        <div className="flex flex-wrap -mx-3 mb-6">
-          <QRCodeSVG className="ml-5" height={80} width={80} value={product?.SKU} />
-        </div>
+        {product?.SKU && (
+          <div className="flex flex-wrap -mx-3 mb-6">
+            <Barcode value={product?.SKU} options={{ format: "code128", width: "2px", height: "50px" }} renderer="svg" />
+            <QRCodeSVG className="ml-5" height={80} width={80} value={product?.SKU} />
+          </div>
+        )}
       </div>
       <UnitTableView initialValue={product} />
       {isLoading ? (
