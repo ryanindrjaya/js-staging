@@ -7,13 +7,17 @@ import { toast } from "react-toastify";
 import nookies from "nookies";
 import DashboardLayout from "../../../containers/DashboardLayout/DashboardLayout";
 import TitlePage from "../../../components/TitlePage/TitlePage";
-import { Input, Modal } from "antd";
+import { Input, Modal, Select } from "antd";
 import ProductTable from "../../../components/ReactDataTable/ProductTable";
 import ProductModal from "../../../components/Modal/ProductModal";
 import UnitTableView from "../../../components/ReactDataTable/Product/UnitsTableView";
+import Manufactures from "../../../components/Form/AddProduct/Manufactures";
 
 const Product = ({ props }) => {
   const data = props.data;
+  const manufactures = props.manufactures;
+  const categories = props.categories;
+  const locations = props.locations;
   const [isLoading, setIsLoading] = useState(false);
   const [product, setProduct] = useState(data);
   const [modalProduct, setModalProduct] = useState();
@@ -21,44 +25,106 @@ const Product = ({ props }) => {
   const [visible, setVisible] = useState(false);
   const router = useRouter();
   const [inventory, setInventory] = useState();
+  const [searchParameters, setSearchParameters] = useState({
+    namaSKU: "",
+    manufacture: "",
+    location: [],
+    category: "",
+  });
+  const [searchOptionData, setSearchOptionData] = useState({
+    manufactures: manufactures,
+    categories: categories,
+    locations: locations,
+  });
   const { Search } = Input;
 
-  const onSearch = async (e) => {
-    if (e.target.value.length >= 2) {
-      setIsSearching(true);
+  const handleSearch = (newValue, category) => {
+    if (newValue) {
+      fetchSearchOption(newValue, category);
+    } else {
+      setSearchOptionData({
+        manufactures: manufactures,
+        categories: categories,
+        locations: locations,
+      });
+    }
+  };
 
-      const req = await searchQuery(e.target.value);
+  const fetchSearchOption = async (query, category) => {
+    const cookies = nookies.get(null);
+    try {
+      const endpoint =
+        process.env.NEXT_PUBLIC_URL + `/${category}?filters[$or][0][name][$containsi]=${query}&filters[$or][1][code][$containsi]=${query}`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+      };
+
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
+
+      if (req.status == 200) {
+        const resData = res.data.map((item) => ({
+          name: `${item.attributes.name}`,
+          value: item.id,
+          id: item.id,
+        }));
+
+        setSearchOptionData({ ...searchOptionData, [category]: resData });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // search query
+  useEffect(() => {
+    const searchQuery = async () => {
+      setIsSearching(true);
+      var query = "filters[$or][0][name][$contains]=" + searchParameters.namaSKU + "&filters[$or][1][SKU][$contains]=" + searchParameters.namaSKU;
+      var locationQuery = "";
+
+      if (searchParameters.manufacture) {
+        query += "&filters[$and][2][manufacture][id][$eq]=";
+        query += searchParameters.manufacture;
+      }
+
+      if (searchParameters.category) {
+        query += "&filters[$and][3][category][id][$eq]=";
+        query += searchParameters.category;
+      }
+
+      if (searchParameters.location.length > 0) {
+        searchParameters.location.forEach((item, idx) => {
+          locationQuery += "&filters[$and][" + (idx + 4) + "][locations][id][$eq]=" + item;
+        });
+      } else {
+        locationQuery = "";
+      }
+
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/products?populate=*&" + query + locationQuery;
+
+      const cookies = nookies.get(null, "token");
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+      };
+
+      const req = await fetch(endpoint, options);
       const res = await req.json();
 
       setProduct(res);
       setIsSearching(false);
-    } else {
-      setProduct(data);
-      setIsSearching(false);
-    }
-  };
-
-  const searchQuery = async (keywords) => {
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL +
-      "/products?filters[$or][0][name][$contains]=" +
-      keywords +
-      "&filters[$or][1][SKU][$contains]=" +
-      keywords +
-      "&populate=*";
-
-    const cookies = nookies.get(null, "token");
-    const options = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
     };
 
-    const req = await fetch(endpoint, options);
-    return req;
-  };
+    searchQuery();
+  }, [searchParameters]);
 
   const handleAdd = () => {
     console.log("");
@@ -98,8 +164,7 @@ const Product = ({ props }) => {
 
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/products?pagination[page]=" + page;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/products?pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -140,9 +205,7 @@ const Product = ({ props }) => {
   const fetchInventory = async (data) => {
     setIsLoading(true);
     const cookies = nookies.get(null, "token");
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL +
-      `/inventories?filters[products][id][$eq]=${data.id}&populate=locations`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/inventories?filters[products][id][$eq]=${data.id}&populate=locations`;
     const options = {
       method: "GET",
       headers: {
@@ -181,25 +244,70 @@ const Product = ({ props }) => {
         <LayoutWrapper style={{}}>
           <TitlePage titleText={"Produk"} />
           <LayoutContent>
-            <div className="w-full flex justify-between">
-              <Search
-                className=""
-                loading={isSearching}
-                onChange={(e) => onSearch(e)}
-                placeholder="Cari Produk"
-                style={{
-                  width: 200,
-                }}
-              />
-              <button
-                onClick={handleAdd}
-                type="button"
-                className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
-              >
+            <div className="w-full flex justify-between mb-3">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                <Select
+                  size="large"
+                  allowClear
+                  showSearch
+                  showArrow={false}
+                  filterOption={false}
+                  notFoundContent={null}
+                  placeholder="PABRIKASI"
+                  onSelect={(e) => setSearchParameters({ ...searchParameters, manufacture: e })}
+                  onClear={() => setSearchParameters({ ...searchParameters, manufacture: "" })}
+                  onSearch={(e) => handleSearch(e, "manufactures")}
+                >
+                  {searchOptionData.manufactures.map((item) => (
+                    <Select.Option key={item?.id} value={item?.id}>
+                      {item.name}
+                    </Select.Option>
+                  ))}
+                </Select>{" "}
+                <Select
+                  size="large"
+                  allowClear
+                  showSearch
+                  showArrow={false}
+                  filterOption={false}
+                  notFoundContent={null}
+                  placeholder="KATEGORI"
+                  onSelect={(e) => setSearchParameters({ ...searchParameters, category: e })}
+                  onClear={() => setSearchParameters({ ...searchParameters, category: "" })}
+                  onSearch={(e) => handleSearch(e, "categories")}
+                >
+                  {searchOptionData.categories.map((item) => (
+                    <Select.Option key={item?.id} value={item?.id}>
+                      {item.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+                <Select
+                  mode="multiple"
+                  size="large"
+                  placeholder="LOKASI"
+                  allowClear
+                  onChange={(e) => setSearchParameters({ ...searchParameters, location: e })}
+                  onClear={() => setSearchParameters({ ...searchParameters, location: [] })}
+                  onSearch={(e) => handleSearch(e, "locations")}
+                >
+                  {locations.map((data) => (
+                    <Select.Option key={data.id} value={data.id}>
+                      {data.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+                <Search
+                  className=""
+                  loading={isSearching}
+                  onChange={(e) => setSearchParameters({ ...searchParameters, namaSKU: e.target.value })}
+                  placeholder="NAMA PRODUK / SKU"
+                  size="large"
+                />
+              </div>
+              <button onClick={handleAdd} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5">
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    + Tambah
-                  </a>
+                  <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
                 </div>
               </button>
             </div>
@@ -221,11 +329,7 @@ const Product = ({ props }) => {
               }}
               footer={null}
             >
-              <ProductModal
-                data={modalProduct}
-                isLoading={isLoading}
-                inventory={inventory}
-              />
+              <ProductModal data={modalProduct} isLoading={isLoading} inventory={inventory} />
             </Modal>
 
             <ProductTable
@@ -250,11 +354,30 @@ Product.getInitialProps = async (context) => {
   const req = await fetchData(cookies);
   data = await req.json();
 
+  const manufactures = await fetchSearchParametersData(cookies, "manufactures");
+  const categories = await fetchSearchParametersData(cookies, "categories");
+  const locations = await fetchSearchParametersData(cookies, "locations");
+
   return {
     props: {
       data,
+      manufactures,
+      categories,
+      locations,
     },
   };
+};
+
+const formatData = (data) => {
+  const formattedData = data.map((item) => {
+    return {
+      name: `${item.attributes.name}`,
+      value: item.id,
+      id: item.id,
+    };
+  });
+
+  return formattedData;
 };
 
 const fetchData = async (cookies) => {
@@ -269,6 +392,22 @@ const fetchData = async (cookies) => {
 
   const req = await fetch(endpoint, options);
   return req;
+};
+
+const fetchSearchParametersData = async (cookies, url) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + `/${url}?pagination[limit]=10`;
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  const res = await req.json();
+
+  return formatData(res.data) || [];
 };
 
 export default Product;
