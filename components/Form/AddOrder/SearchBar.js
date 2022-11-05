@@ -35,6 +35,27 @@ export default function SearchBar({ form, tempList, onChange, selectedProduct, u
     }
   };
 
+  const getUserInfo = async () => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/users/me?populate=*`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    var queryLocations = "";
+
+    res.locations.forEach((location) => {
+      queryLocations = queryLocations + "filters[locations][name][$contains]=" + location.name + "&";
+    });
+    // console.log("querylocation " + queryLocations);
+    return queryLocations;
+  };
+
   const handleSearch = (newValue) => {
     if (newValue) {
       fetchProduct(newValue, setData);
@@ -50,8 +71,9 @@ export default function SearchBar({ form, tempList, onChange, selectedProduct, u
       callback([]);
     } else {
       try {
-        const endpoint =
-          process.env.NEXT_PUBLIC_URL + `/products?populate=*&filters[$or][0][name][$contains]=${query}&filters[$or][1][SKU][$contains]=${query}`;
+        let queryLocations = await getUserInfo();
+
+        const endpoint = process.env.NEXT_PUBLIC_URL + `/products?populate=locations&filters[name][$contains]=${query}&${queryLocations}`;
         const options = {
           method: "GET",
           headers: {
@@ -59,15 +81,16 @@ export default function SearchBar({ form, tempList, onChange, selectedProduct, u
             Authorization: "Bearer " + cookies.token,
           },
         };
+        console.log(endpoint);
 
         const req = await fetch(endpoint, options);
         const res = await req.json();
 
         if (req.status == 200) {
           // filter product that already added
-          const filteredProduct = res.data.filter((item) => {
-            return !selectedProduct?.some((temp) => temp.id == item.id);
-          });
+          // const filteredProduct = res.data.filter((item) => {
+          //   return !selectedProduct?.some((temp) => temp.id == item.id);
+          // });
 
           // product based on user location
           const filteredProductByLocation = filteredProduct.filter((item) =>

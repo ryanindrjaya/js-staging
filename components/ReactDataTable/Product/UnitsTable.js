@@ -128,7 +128,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
       },
       selector: (row) => (
         <Form.Item className="mt-4" name={`unit_${row.idx}`} initialValue={unit[row.idx - 1]}>
-          <Input size="large" placeholder={`Nama Unit ${row.idx}`} />
+          <Input size="small" placeholder={`Nama Unit ${row.idx}`} />
         </Form.Item>
       ),
     },
@@ -144,7 +144,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
             style={{
               width: 100,
             }}
-            size="large"
+            size="small"
             placeholder={`Isi ${row.idx}`}
           />
         </Form.Item>
@@ -165,7 +165,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
             style={{
               width: 120,
             }}
-            size="large"
+            size="small"
           />
         </Form.Item>
       ),
@@ -184,7 +184,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
             style={{
               width: 120,
             }}
-            size="large"
+            size="small"
           />
         </Form.Item>
       ),
@@ -207,7 +207,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
             style={{
               width: 50,
             }}
-            size="large"
+            size="small"
           />
         </Form.Item>
       ),
@@ -229,7 +229,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
             style={{
               width: 200,
             }}
-            size="large"
+            size="small"
           />
         </Form.Item>
       ),
@@ -251,7 +251,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
             style={{
               width: 60,
             }}
-            size="large"
+            size="small"
           />
         </Form.Item>
       ),
@@ -270,7 +270,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
             style={{
               width: 110,
             }}
-            size="large"
+            size="small"
           />
         </Form.Item>
       ),
@@ -289,7 +289,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
             style={{
               width: 110,
             }}
-            size="large"
+            size="small"
           />
         </Form.Item>
       ),
@@ -306,7 +306,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
             style={{
               width: 120,
             }}
-            size="large"
+            size="small"
           />
         </Form.Item>
       ),

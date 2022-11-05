@@ -113,7 +113,7 @@ export default function SignInPage(props) {
     <SignInStyleWrapper className="isoSignInPage">
       <div className="isoLoginContentWrapper">
         <div className="isoLoginContent">
-          <div className="isoLogoWrapper">KEELOLA</div>
+          <div className="isoLogoWrapper">JAYA SEHAT</div>
 
           <div className="isoSignInForm">
             <div className="isoInputWrapper">

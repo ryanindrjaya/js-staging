@@ -3,7 +3,14 @@ import AlertDialog from "../Alert/Alert";
 import { Popover } from "antd";
 import { EditOutlined, BarsOutlined } from "@ant-design/icons";
 
-export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange, setIsVisible, setViewModalProduct }) {
+export default function ReactDataTable({
+  data,
+  onDelete,
+  onUpdate,
+  onPageChange,
+  setIsVisible,
+  setViewModalProduct,
+}) {
   const openModal = (row) => {
     setIsVisible(true, row);
     setViewModalProduct(row);
@@ -25,12 +32,18 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange,
   const content = (row) => (
     <div>
       <div>
-        <button onClick={() => openModal(row)} className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md ">
+        <button
+          onClick={() => openModal(row)}
+          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+        >
           <BarsOutlined className="mr-2 mt-0.5 float float-left" />
           Lihat
         </button>
       </div>
-      <button onClick={() => onEdit(row.id)} className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md ">
+      <button
+        onClick={() => onEdit(row.id)}
+        className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+      >
         <EditOutlined className="mr-2 mt-0.5 float float-left" />
         Edit
       </button>
@@ -62,35 +75,37 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange,
     },
     {
       name: "Nama Produk",
-      width: "250px",
+      width: "w-1/5",
       sortable: true,
       selector: (row) => row.attributes?.name,
     },
     {
       name: "Kategori",
-      width: "200px",
+      width: "w-1/5",
       sortable: true,
       selector: (row) => row.attributes?.category?.data?.attributes?.name,
     },
     {
       name: "Pabrikasi",
-      width: "200px",
+      width: "w-1/5",
       sortable: true,
       selector: (row) => row.attributes?.manufacture?.data?.attributes?.name,
     },
     {
       name: "Deskripsi",
-      width: "200px",
+      width: "w-1/5",
       sortable: true,
       selector: (row) => row.attributes?.description,
     },
     {
-      name: "Tindakan",
-      width: "150px",
+      name: "",
+      width: "w-1/5",
       selector: (row) => (
         <>
           <Popover content={content(row)} placement="bottom">
-            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">Tindakan</button>
+            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
+              Tindakan
+            </button>
           </Popover>
         </>
       ),
