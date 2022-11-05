@@ -53,8 +53,7 @@ const Product = ({ props }) => {
   const fetchSearchOption = async (query, category) => {
     const cookies = nookies.get(null);
     try {
-      const endpoint =
-        process.env.NEXT_PUBLIC_URL + `/${category}?filters[$or][0][name][$containsi]=${query}&filters[$or][1][code][$containsi]=${query}`;
+      const endpoint = process.env.NEXT_PUBLIC_URL + `/${category}?filters[name][$containsi]=${query}`;
       const options = {
         method: "GET",
         headers: {
@@ -291,7 +290,7 @@ const Product = ({ props }) => {
                   onClear={() => setSearchParameters({ ...searchParameters, location: [] })}
                   onSearch={(e) => handleSearch(e, "locations")}
                 >
-                  {locations.map((data) => (
+                  {searchOptionData.locations.map((data) => (
                     <Select.Option key={data.id} value={data.id}>
                       {data.name}
                     </Select.Option>
