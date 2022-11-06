@@ -10,8 +10,11 @@ import TitlePage from "../../../components/TitlePage/TitlePage";
 import { Input, Modal, Select } from "antd";
 import ProductTable from "../../../components/ReactDataTable/ProductTable";
 import ProductModal from "../../../components/Modal/ProductModal";
+import * as XLSX from "xlsx";
 import UnitTableView from "../../../components/ReactDataTable/Product/UnitsTableView";
 import Manufactures from "../../../components/Form/AddProduct/Manufactures";
+import DownloadTemplate from "../../../components/Form/DownloadTemplate";
+import ExportProduk from "../../../components/Form/ExportProduk";
 
 const Product = ({ props }) => {
   const data = props.data;
@@ -234,6 +237,37 @@ const Product = ({ props }) => {
     setIsLoading(false);
   }, [inventory]);
 
+  const convertToJson = (headers, data) => {
+    const rows = [];
+    data.forEach(async (row) => {
+      let rowData = {};
+      row.forEach(async (element, index) => {
+        rowData[headers[index]] = element;
+      });
+      console.log("rowData", rowData);
+      rows.push(rowData);
+    });
+    console.log("rows", rows);
+    return rows;
+  };
+
+  const importExcel = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const bstr = event.target.result;
+      const workbook = XLSX.read(bstr, { type: "binary" });
+      const workSheetName = workbook.SheetNames[0];
+      const workSheet = workbook.Sheets[workSheetName];
+      const fileData = XLSX.utils.sheet_to_json(workSheet, { header: 1 });
+      const headers = fileData[0];
+      const heads = headers.map((head) => ({ title: head, field: head }));
+      fileData.splice(0, 1);
+      convertToJson(headers, fileData);
+    };
+    reader.readAsBinaryString(file);
+  };
+
   return (
     <>
       <Head>
@@ -243,8 +277,8 @@ const Product = ({ props }) => {
         <LayoutWrapper style={{}}>
           <TitlePage titleText={"Produk"} />
           <LayoutContent>
-            <div className="w-full flex justify-between mb-3">
-              <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+            <div className="w-full flex justify-between gap-x-32 mb-3">
+              <div className="w-full md:w-1/2 grid grid-cols-2 gap-x-4 gap-y-3">
                 <Select
                   size="large"
                   allowClear
@@ -304,11 +338,27 @@ const Product = ({ props }) => {
                   size="large"
                 />
               </div>
-              <button onClick={handleAdd} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5">
-                <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
+              <div className="w-full flex flex-col gap-y-3 gap-x-4 md:w-1/2">
+                <div
+                  onClick={handleAdd}
+                  className="bg-cyan-700 w-full cursor-pointer rounded px-5 h-10 hover:bg-cyan-800 shadow-sm flex items-center justify-center float-right"
+                >
+                  <div className="text-white text-center text-sm font-bold">
+                    <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
+                  </div>
                 </div>
-              </button>
+                <div className="grid grid-cols-3 gap-x-4 w-full">
+                  <label
+                    htmlFor="upload_file"
+                    className="bg-cyan-700 cursor-pointer text-xs font-bold text-white w-full rounded h-10 hover:bg-cyan-800  shadow-sm flex items-center justify-center float-right"
+                  >
+                    Upload
+                  </label>
+                  <input onChange={importExcel} type="file" id="upload_file" hidden />
+                  <ExportProduk data={product.data} setProduct={setProduct} />
+                  <DownloadTemplate />
+                </div>
+              </div>
             </div>
 
             <Modal
@@ -321,10 +371,11 @@ const Product = ({ props }) => {
               onCancel={() => setVisible(false)}
               bodyStyle={{
                 borderRadius: "20px",
-                backgroundColor: "#fff",
+                backgroundColor: "#E8F2F2",
               }}
               style={{
-                backgroundColor: "#fff",
+                backgroundColor: "#E8F2F2",
+                border: "2px solid #000",
               }}
               footer={null}
             >
