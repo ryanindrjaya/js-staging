@@ -17,7 +17,7 @@ export default function ProductModal({ data, isLoading, inventory }) {
   return (
     <div>
       <div>
-        <h5 className="text-center font-bold mb-5">LIHAT PRODUK</h5>
+        <h5 className="text-center font-bold mb-5 text-[#036B82]">LIHAT PRODUK</h5>
       </div>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:mt-5">
         <div className="grid grid-cols-2 gap-2">
