@@ -119,6 +119,47 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
     },
   ];
 
+  const locale = "en-us";
+
+  const rupiahFormatter = (value) => {
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: "IDR",
+    }).format(value);
+  };
+
+  const currencyParser = (val) => {
+    try {
+      // for when the input gets clears
+      if (typeof val === "string" && !val.length) {
+        val = "0.0";
+      }
+
+      // detecting and parsing between comma and dot
+      var group = new Intl.NumberFormat(locale).format(1111).replace(/1/g, "");
+      var decimal = new Intl.NumberFormat(locale).format(1.1).replace(/1/g, "");
+      var reversedVal = val.replace(new RegExp("\\" + group, "g"), "");
+      reversedVal = reversedVal.replace(new RegExp("\\" + decimal, "g"), ".");
+      //  => 1232.21 €
+
+      // removing everything except the digits and dot
+      reversedVal = reversedVal.replace(/[^0-9.]/g, "");
+      //  => 1232.21
+
+      // appending digits properly
+      const digitsAfterDecimalCount = (reversedVal.split(".")[1] || []).length;
+      const needsDigitsAppended = digitsAfterDecimalCount > 2;
+
+      if (needsDigitsAppended) {
+        reversedVal = reversedVal * Math.pow(10, digitsAfterDecimalCount - 2);
+      }
+
+      return Number.isNaN(reversedVal) ? 0 : reversedVal;
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const columns = [
     {
       name: "Unit",
@@ -160,8 +201,8 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
       selector: (row) => (
         <Form.Item className="mt-4" name={`buy_price_${row.idx}`} initialValue={buyPrice[row.idx - 1]}>
           <InputNumber
-            formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-            parser={(value) => value.replace(/\Rp\s?|(,*)/g, "")}
+            formatter={rupiahFormatter}
+            parser={currencyParser}
             style={{
               width: 120,
             }}
@@ -179,8 +220,8 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
       selector: (row) => (
         <Form.Item className="mt-4" name={`purchase_discount_${[row.idx]}`} initialValue={purchaseDiscount[row.idx - 1] ?? 0}>
           <InputNumber
-            formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-            parser={(value) => value.replace(/\Rp\s?|(,*)/g, "")}
+            formatter={rupiahFormatter}
+            parser={currencyParser}
             style={{
               width: 120,
             }}
@@ -265,8 +306,8 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
       selector: (row) => (
         <Form.Item className="mt-4" name={`pricelist_${row.idx}`} initialValue={pricelist[row.idx - 1]}>
           <InputNumber
-            formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-            parser={(value) => value.replace(/\Rp\s?|(,*)/g, "")}
+            formatter={rupiahFormatter}
+            parser={currencyParser}
             style={{
               width: 110,
             }}
@@ -284,8 +325,8 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
       selector: (row) => (
         <Form.Item className="mt-4" name={`sold_price_${row.idx}`} initialValue={soldPrice[row.idx - 1]}>
           <InputNumber
-            formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-            parser={(value) => value.replace(/\Rp\s?|(,*)/g, "")}
+            formatter={rupiahFormatter}
+            parser={currencyParser}
             style={{
               width: 110,
             }}

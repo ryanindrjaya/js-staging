@@ -64,13 +64,46 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
 
   const diskon5 = [initialValue?.unit_1_dp5, initialValue?.unit_2_dp5, initialValue?.unit_3_dp5, initialValue?.unit_4_dp5, initialValue?.unit_5_dp5];
 
-  var formatter = new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  });
+  const locale = "en-us";
 
-  // const unit_1_dp1
+  const rupiahFormatter = (value) => {
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: "IDR",
+    }).format(value);
+  };
+
+  const currencyParser = (val) => {
+    try {
+      // for when the input gets clears
+      if (typeof val === "string" && !val.length) {
+        val = "0.0";
+      }
+
+      // detecting and parsing between comma and dot
+      var group = new Intl.NumberFormat(locale).format(1111).replace(/1/g, "");
+      var decimal = new Intl.NumberFormat(locale).format(1.1).replace(/1/g, "");
+      var reversedVal = val.replace(new RegExp("\\" + group, "g"), "");
+      reversedVal = reversedVal.replace(new RegExp("\\" + decimal, "g"), ".");
+      //  => 1232.21 €
+
+      // removing everything except the digits and dot
+      reversedVal = reversedVal.replace(/[^0-9.]/g, "");
+      //  => 1232.21
+
+      // appending digits properly
+      const digitsAfterDecimalCount = (reversedVal.split(".")[1] || []).length;
+      const needsDigitsAppended = digitsAfterDecimalCount > 2;
+
+      if (needsDigitsAppended) {
+        reversedVal = reversedVal * Math.pow(10, digitsAfterDecimalCount - 2);
+      }
+
+      return Number.isNaN(reversedVal) ? 0 : reversedVal;
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const content = (row) => (
     <div>
@@ -184,13 +217,15 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
       },
       selector: (row) => (
         <InputNumber
+          formatter={rupiahFormatter}
+          parser={currencyParser}
           disabled
           style={{
             width: 200,
             backgroundColor: "#ffffff",
           }}
           size="large"
-          value={formatter.format(buyPrice[row.idx - 1] ?? 0)}
+          defaultValue={buyPrice[row.idx - 1] ?? 0}
           placeholder={`Isi ${row.idx}`}
         />
       ),
@@ -201,13 +236,15 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
 
       selector: (row) => (
         <InputNumber
+          formatter={rupiahFormatter}
+          parser={currencyParser}
           disabled
           style={{
             width: 120,
             backgroundColor: "#ffffff",
           }}
           size="large"
-          value={formatter.format(purchaseDiscount[row.idx - 1] ?? 0)}
+          defaultValue={purchaseDiscount[row.idx - 1] ?? 0}
           placeholder="Diskon Pembelian"
         />
       ),
@@ -280,6 +317,8 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
       },
       selector: (row) => (
         <InputNumber
+          formatter={rupiahFormatter}
+          parser={currencyParser}
           disabled
           style={{
             width: 120,
@@ -287,7 +326,7 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
           }}
           size="large"
           placeholder={`Pricelist ${row.idx}`}
-          value={formatter.format(pricelist[row.idx - 1] ?? 0)}
+          defaultValue={pricelist[row.idx - 1] ?? 0}
         />
       ),
     },
@@ -299,6 +338,8 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
       },
       selector: (row) => (
         <InputNumber
+          formatter={rupiahFormatter}
+          parser={currencyParser}
           disabled
           style={{
             width: 120,
@@ -306,7 +347,7 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
           }}
           size="large"
           placeholder={`Harga Jual ${row.idx}`}
-          value={formatter.format(soldPrice[row.idx - 1] ?? 0)}
+          defaultValue={soldPrice[row.idx - 1] ?? 0}
         />
       ),
     },
@@ -325,7 +366,7 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
           }}
           size="large"
           placeholder={`Harga Disc ${row.idx}`}
-          value={formatter.format(disc[row.idx - 1] ?? 0)}
+          value={disc[row.idx - 1] ?? 0}
         />
       ),
     },
