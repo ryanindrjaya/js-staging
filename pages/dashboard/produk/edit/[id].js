@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
@@ -17,6 +17,7 @@ import SubCategories from "../../../../components/Form/AddProduct/subCategories"
 import Groups from "../../../../components/Form/AddProduct/Groups";
 import Locations from "../../../../components/Form/AddProduct/Locations";
 import UnitTable from "../../../../components/ReactDataTable/Product/UnitsTable";
+import ConfirmDialog from "../../../../components/Alert/ConfirmDialog";
 
 const Edit = ({ props }) => {
   const productId = props?.product.data.id;
@@ -37,6 +38,7 @@ const Edit = ({ props }) => {
   const [loading, setLoading] = useState(false);
   const cookies = nookies.get(null, "token");
   const router = useRouter();
+  const submitBtn = useRef();
 
   const { Dragger } = Upload;
   const { TextArea } = Input;
@@ -142,8 +144,8 @@ const Edit = ({ props }) => {
   };
 
   const onFinish = async (values) => {
+    console.log("values", values);
     setLoading(true);
-    console.log("values submit location", values.locations);
     values = categoryChecker(values);
     values = subCategoryChecker(values);
 
@@ -346,15 +348,22 @@ const Edit = ({ props }) => {
 
               <UnitTable initialValue={product.attributes} />
 
-              <Form.Item className="mt-5">
+              <Form.Item>
                 {loading ? (
                   <div className=" flex float-left ml-3 ">
                     <Spin />
                   </div>
                 ) : (
-                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
-                    Simpan
-                  </Button>
+                  <>
+                    <ConfirmDialog
+                      onConfirm={() => submitBtn?.current?.click()}
+                      onCancel={() => {}}
+                      title="Edit Produk"
+                      message="Apakah anda yakin ingin mengedit produk ini?"
+                      component={<Button className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">Simpan</Button>}
+                    />
+                    <Button htmlType="submit" ref={submitBtn}></Button>
+                  </>
                 )}
               </Form.Item>
             </Form>

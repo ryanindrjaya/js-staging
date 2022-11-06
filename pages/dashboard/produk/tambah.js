@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
@@ -19,6 +19,7 @@ import UnitTable from "../../../components/ReactDataTable/Product/UnitsTable";
 import { FileImageOutlined } from "@ant-design/icons";
 import setDiskonValue from "./utility/setDiskonValue";
 import setHargaValue from "./utility/setHargaValue";
+import ConfirmDialog from "../../../components/Alert/ConfirmDialog";
 
 const Tambah = ({ props }) => {
   const [image, setImage] = useState();
@@ -30,6 +31,7 @@ const Tambah = ({ props }) => {
   const [firstInput, setFirstInputDiskon] = useState(true);
   const cookies = nookies.get(null, "token");
   const router = useRouter();
+  const submitBtn = useRef();
 
   const { Dragger } = Upload;
   const { TextArea } = Input;
@@ -327,9 +329,16 @@ const Tambah = ({ props }) => {
                     <Spin />
                   </div>
                 ) : (
-                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
-                    Simpan
-                  </Button>
+                  <>
+                    <ConfirmDialog
+                      onConfirm={() => submitBtn?.current?.click()}
+                      onCancel={() => {}}
+                      title="Tambah Produk"
+                      message="Apakah anda yakin ingin menambahkan produk ini?"
+                      component={<Button className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">Simpan</Button>}
+                    />
+                    <Button htmlType="submit" ref={submitBtn}></Button>
+                  </>
                 )}
               </Form.Item>
             </Form>
