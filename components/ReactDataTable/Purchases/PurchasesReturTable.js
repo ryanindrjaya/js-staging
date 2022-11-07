@@ -15,7 +15,7 @@ export default function ReactDataTable({
   onChangeStatusPengiriman,
   onChangeStatus,
 }) {
-  const router = useRouter(); console.log("Mulai"); console.log(data); console.log(onDelete); console.log(onPageChange); console.log(onChangeStatus);
+  const router = useRouter(); //console.log("Mulai"); console.log(data); console.log(onDelete); console.log(onPageChange); console.log(onChangeStatus);
   const { Option } = Select;
 
   const openNotificationWithIcon = (type, title, message) => {
@@ -33,6 +33,11 @@ export default function ReactDataTable({
   const lihat = (row) => {
     openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
     //router.push("order_pembelian/print/" + row.id);
+  };
+
+  const returLpb = (row) => {
+    //openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
+    router.push("retur/returLpb");
   };
 
   const onConfirm = (id) => {
@@ -74,6 +79,15 @@ export default function ReactDataTable({
           Lihat
         </button>
       </div>
+      <div>
+        <button
+          onClick={() => returLpb(row)}
+          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+        >
+          <EditOutlined className="mr-2 mt-0.5 float float-left" />
+          Retur LPB
+        </button>
+      </div>
 
       <AlertDialog
         onCancel={onCancel}
@@ -99,7 +113,7 @@ export default function ReactDataTable({
     {
       name: "Tanggal",
       width: "150px",
-      selector: (row) => formatMyDate(row.attributes?.order_date),
+      selector: (row) => formatMyDate(row.attributes?.tanggal_retur, console.log(row)),
     },
     //{
     //  name: "NO PO",
@@ -109,12 +123,12 @@ export default function ReactDataTable({
     {
       name: "NO Retur",
       width: "180px",
-      //selector: (row) => row.attributes?.no_po ?? "-",
+      selector: (row) => row.attributes?.no_retur ?? "-",
     },
     {
       name: "NO LPB",
       width: "180px",
-      //selector: (row) => row.attributes?.no_po ?? "-",
+      selector: (row) => row.attributes?.no_lpb ?? "-",
     },
     {
       name: "Lokasi",
@@ -124,54 +138,54 @@ export default function ReactDataTable({
     {
       name: "Supplier",
       width: "180px",
-      selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
+      selector: (row) => row.attributes?.suppliers.data[0].attributes.name ?? "-",
     },
-    {
-      name: "Status Pembayaran",
-      width: "150px",
-      selector: (row) => {
-        var tempoDate = new Date(row.attributes?.date_purchasing);
-        var tempoTime = parseInt(row.attributes?.tempo_days ?? 0);
-        var today = new Date();
-        var isTempo = false;
-        var statusPembayaran = row.attributes?.status_pembayaran;
-        var purchasingHistory = row.attributes?.purchasing_payments.data;
+    //{
+    //  name: "Status Pembayaran",
+    //  width: "150px",
+    //  selector: (row) => {
+    //    var tempoDate = new Date(row.attributes?.date_purchasing);
+    //    var tempoTime = parseInt(row.attributes?.tempo_days ?? 0);
+    //    var today = new Date();
+    //    var isTempo = false;
+    //    var statusPembayaran = row.attributes?.status_pembayaran;
+    //    var purchasingHistory = row.attributes?.purchasing_payments.data;
 
-        if (row.attributes?.tempo_time === "Hari") {
-          tempoDate.setDate(tempoDate.getDate() + tempoTime);
-        } else {
-          tempoDate.setDate(tempoDate.getMonth() + tempoTime);
-        }
+    //    if (row.attributes?.tempo_time === "Hari") {
+    //      tempoDate.setDate(tempoDate.getDate() + tempoTime);
+    //    } else {
+    //      tempoDate.setDate(tempoDate.getMonth() + tempoTime);
+    //    }
 
-        if (tempoDate < today) {
-          isTempo = true;
-        }
+    //    if (tempoDate < today) {
+    //      isTempo = true;
+    //    }
 
-        if (isTempo) {
-          if (statusPembayaran === "Belum Lunas") {
-            return <Tag color="red">Tempo</Tag>;
-          } else if (statusPembayaran === "Lunas") {
-            return <Tag color="green">Lunas</Tag>;
-          }
-        } else {
-          if (
-            statusPembayaran === "Belum Lunas" &&
-            purchasingHistory.length > 0
-          ) {
-            return <Tag color={tagRed}>Tempo</Tag>;
-          } else if (
-            statusPembayaran === "Lunas" &&
-            purchasingHistory.length > 0
-          ) {
-            return <Tag color={tagGreen}>Lunas</Tag>;
-          } else {
-            return <Tag color={tagOrange}>Menunggu</Tag>;
-          }
-        }
+    //    if (isTempo) {
+    //      if (statusPembayaran === "Belum Lunas") {
+    //        return <Tag color="red">Tempo</Tag>;
+    //      } else if (statusPembayaran === "Lunas") {
+    //        return <Tag color="green">Lunas</Tag>;
+    //      }
+    //    } else {
+    //      if (
+    //        statusPembayaran === "Belum Lunas" &&
+    //        purchasingHistory.length > 0
+    //      ) {
+    //        return <Tag color={tagRed}>Tempo</Tag>;
+    //      } else if (
+    //        statusPembayaran === "Lunas" &&
+    //        purchasingHistory.length > 0
+    //      ) {
+    //        return <Tag color={tagGreen}>Lunas</Tag>;
+    //      } else {
+    //        return <Tag color={tagOrange}>Menunggu</Tag>;
+    //      }
+    //    }
 
-        return <Tag color={tagOrange}>Menunggu</Tag>;
-      },
-    },
+    //    return <Tag color={tagOrange}>Menunggu</Tag>;
+    //  },
+    //},
     {
       name: "Grand Total",
       width: "180px",
@@ -233,12 +247,6 @@ export default function ReactDataTable({
     //    );
     //  },
     //},
-    {
-      name: "Ditambahkan Oleh",
-      width: "150px",
-      sortable: true,
-      selector: (row) => row.attributes?.added_by ?? "-",
-    },
     {
       name: "Tindakan",
       width: "250px",

@@ -36,7 +36,7 @@ const fetchData = async (cookies, id) => {
   return req;
 };
 
-function Retur({ props }) {
+function ReturLpb({ props }) {
   console.log(props);
   const data = props.data.data.attributes;
   const noLPB = data.no_purchasing;
@@ -121,4 +121,4 @@ function Retur({ props }) {
   );
 }
 
-export default Retur;
+export default ReturLpb;

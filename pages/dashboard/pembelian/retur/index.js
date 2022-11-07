@@ -24,7 +24,7 @@ Retur.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -40,9 +40,9 @@ const fetchData = async (cookies) => {
 
 function Retur({ props }) {
   const data = props.data;
-  const [purchase, setPurchase] = useState(data);
+  const [retur, setRetur] = useState(data);
   const [isSearching, setIsSearching] = useState(false);
-
+    //console.log("retur"); console.log(data);
   const { Search } = Input;
   const router = useRouter();
 
@@ -60,7 +60,7 @@ function Retur({ props }) {
   };
 
   const handleDelete = async (id) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/" + id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/returs/" + id;
     const cookies = nookies.get(null, "token");
 
     const options = {
@@ -80,14 +80,14 @@ function Retur({ props }) {
         "Berhasil menghapus data",
         "Order Pembelian yang dipilih telah berhasil dihapus. Silahkan cek kembali Order Pembelian"
       );
-      setPurchase(res);
+      setRetur(res);
     }
   };
 
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
     const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/purchases?pagination[page]=" + page;
+      process.env.NEXT_PUBLIC_URL + "/returs?pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -101,7 +101,7 @@ function Retur({ props }) {
       const req = await fetch(endpoint, options);
       const res = await req.json();
       if (res) {
-        setPurchase((prevData) => ({
+        setRetur((prevData) => ({
           data: filterDuplicateData(prevData.data.concat(res.data)),
           meta: prevData.meta,
         }));
@@ -161,7 +161,7 @@ function Retur({ props }) {
       description: message,
     });
   };
-
+    //console.log("atas"); console.log(props); console.log(data);
   return (
     <>
       <Head>
@@ -186,7 +186,7 @@ function Retur({ props }) {
             </div>
 
             <PurchasesReturTable
-              data={purchase}
+              data={retur}
               onUpdate={handleUpdate}
               onDelete={handleDelete}
               onPageChange={handlePageChange}

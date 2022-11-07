@@ -7,7 +7,7 @@ var tempProductListId = [];
 var tempSupplierId = 0;
 var tempLocationId;
 
-const CreateOrder = async (
+const CreateRetur = async (
   grandTotal,
   totalPrice,
   values,
@@ -16,8 +16,8 @@ const CreateOrder = async (
   router
 ) => {
   // CLEANING DATA
-  var returDate = new Date(values.order_date);
-  var deliveryReturDate = new Date(values.delivery_date);
+  var returDate = new Date(values.tanggal_retur); console.log("nilai"); console.log(values);
+  //var deliveryReturDate = new Date(values.delivery_date);
   var supplierId = { id: parseInt(values.supplier_id) };
 
   tempSupplierId = parseInt(values.supplier_id);
@@ -27,13 +27,13 @@ const CreateOrder = async (
     tempProductListId.push({ id: element });
   });
 
-  values.order_date = returDate;
-  values.delivery_date = deliveryReturDate;
+  values.tanggal_retur = returDate;
+  //values.delivery_date = deliveryReturDate;
   values.supplier_id = supplierId;
-  values.status = "Dipesan";
-  values.delivery_total =
+  //values.status = "Dipesan";
+  //values.delivery_total =
     grandTotal === 0 ? parseInt(totalPrice) : parseInt(grandTotal);
-  values.purchase_details = null;
+  values.retur_details = null;
   values.supplier_id = null;
 
   var data = {
@@ -44,14 +44,14 @@ const CreateOrder = async (
   const res = await req.json();
 
   if (req.status === 200) {
-    await putRelationOrder(res.data.id, res.data.attributes, form, router);
+    await putRelationRetur(res.data.id, res.data.attributes, form, router);
   } else {
     openNotificationWithIcon("error");
   }
 };
 
 const createData = async (data) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs";
   const JSONdata = JSON.stringify(data);
 
   const options = {
@@ -68,47 +68,47 @@ const createData = async (data) => {
   return req;
 };
 
-//const putRelationOrder = async (id, value, form, router) => {
-//  const user = await getUserMe();
-//  const dataOrder = {
-//    data: value,
-//  };
+const putRelationRetur = async (id, value, form, router) => {
+  const user = await getUserMe();
+  const dataRetur = {
+    data: value,
+  };
 
-//  dataOrder.data.supplier = { id: tempSupplierId };
-//  dataOrder.data.purchase_details = tempProductListId;
-//  dataOrder.data.added_by = user.name;
-//  dataOrder.data.locations = { id: tempLocationId };
+  dataRetur.data.supplier = { id: tempSupplierId };
+  dataRetur.data.retur_details = tempProductListId;
+  //dataRetur.data.added_by = user.name;
+  dataRetur.data.locations = { id: tempLocationId };
 
-//  // clean object
-//  for (var key in dataOrder) {
-//    if (dataOrder[key] === null || dataOrder[key] === undefined) {
-//      delete dataOrder[key];
-//    }
-//  }
+  // clean object
+  for (var key in dataRetur) {
+    if (dataRetur[key] === null || dataRetur[key] === undefined) {
+      delete dataRetur[key];
+    }
+  }
 
-//  const JSONdata = JSON.stringify(dataOrder);
-//  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/" + id;
-//  const options = {
-//    method: "PUT",
-//    headers: {
-//      "Content-Type": "application/json",
-//      Authorization: "Bearer " + cookies.token,
-//    },
-//    body: JSONdata,
-//  };
+  const JSONdata = JSON.stringify(dataRetur);
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs/" + id;
+  const options = {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+    body: JSONdata,
+  };
 
 
-//  const req = await fetch(endpoint, options);
-//  const res = await req.json();
+  const req = await fetch(endpoint, options);
+  const res = await req.json();
 
-//  if (req.status === 200) {
-//    form.resetFields();
-//    router.replace("/dashboard/pembelian/order_pembelian");
-//    openNotificationWithIcon("success");
-//  } else {
-//    openNotificationWithIcon("error");
-//  }
-//};
+  if (req.status === 200) {
+    form.resetFields();
+    router.replace("/dashboard/pembelian/retur");
+    openNotificationWithIcon("success");
+  } else {
+    openNotificationWithIcon("error");
+  }
+};
 
 const getUserMe = async () => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me";
@@ -131,15 +131,15 @@ const openNotificationWithIcon = (type) => {
     notification[type]({
       message: "Gagal menambahkan data",
       description:
-        "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
+        "Retur gagal ditambahkan. Silahkan cek NO Retur atau kelengkapan data lainnya",
     });
   } else if (type === "success") {
     notification[type]({
       message: "Berhasil menambahkan data",
       description:
-        "Produk berhasil ditambahkan. Silahkan cek pada halaman Pembelian Barang",
+        "Retur berhasil ditambahkan. Silahkan cek pada halaman Retur Pembelian",
     });
   }
 };
 
-export default CreateOrder;
+export default CreateRetur;

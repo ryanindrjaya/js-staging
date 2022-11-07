@@ -7,6 +7,7 @@ export default function ReactDataTable({
   calculatePriceAfterDisc,
   productSubTotal,
   products,
+  setTotalPrice,
 }) {
   const dispatch = useDispatch();
 
