@@ -41,9 +41,7 @@ export default function ConfirmDialog({ onConfirm, onCancel, title, component, m
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancel}>Tidak</Button>
-          <Button onClick={handleConfirm} className="text-red-500">
-            Ya
-          </Button>
+          <Button onClick={handleConfirm}>Ya</Button>
         </DialogActions>
       </Dialog>
     </div>

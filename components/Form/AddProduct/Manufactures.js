@@ -2,7 +2,7 @@ import { Form, Select, Spin } from "antd";
 import nookies from "nookies";
 import { useState } from "react";
 
-export default function Manufactures({ onSelect, initialValue, selectedManufacures }) {
+export default function Manufactures({ onSelect, initialValue, selectedManufacures, label }) {
   const [manufactures, setSelectedManufactures] = useState(selectedManufacures);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -59,10 +59,11 @@ export default function Manufactures({ onSelect, initialValue, selectedManufacur
   };
   return (
     <div className="w-full md:w-full mb-2 md:mb-0">
-      <Form.Item name="manufactures" initialValue={initialValue} className="w-1/1">
+      <Form.Item name="manufactures" className="w-1/1">
         <Select
           value={manufactures}
           size="large"
+          defaultValue={{ value: initialValue.id, label: initialValue.attributes.name }}
           showSearch
           showArrow={false}
           filterOption={false}

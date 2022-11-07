@@ -12,10 +12,10 @@ export default function setHargaValue(form, changedValues, allValues, fieldName,
     const hargaPricelist_unit2 = hargaPricelist_unit1 / qty_unit2;
 
     form.setFieldsValue({
-      buy_price_2: changedValues.qty_2 !== null ? Math.round(hargaPembelian_unit2) : null,
-      purchase_discount_2: changedValues.qty_2 !== null ? Math.round(diskonPembelian_unit2) : null,
-      sold_price_2: changedValues.qty_2 !== null ? Math.round(hargaJual_unit2) : null,
-      pricelist_2: changedValues.qty_2 !== null ? Math.round(hargaPricelist_unit2) : null,
+      buy_price_2: changedValues.qty_2 !== null ? hargaPembelian_unit2 : null,
+      purchase_discount_2: changedValues.qty_2 !== null ? diskonPembelian_unit2 : null,
+      sold_price_2: changedValues.qty_2 !== null ? hargaJual_unit2 : null,
+      pricelist_2: changedValues.qty_2 !== null ? hargaPricelist_unit2 : null,
     });
   } else if (fieldName === "qty_3" && firstInput) {
     const hargaPembelian_unit2 = changedValues.buy_price_2 || allValues.buy_price_2 || 0;
@@ -30,10 +30,10 @@ export default function setHargaValue(form, changedValues, allValues, fieldName,
     const hargaPricelist_unit3 = hargaPricelist_unit2 / qty_unit3;
 
     form.setFieldsValue({
-      buy_price_3: changedValues.qty_3 !== null ? Math.round(hargaPembelian_unit3) : null,
-      purchase_discount_3: changedValues.qty_3 !== null ? Math.round(diskonPembelian_unit3) : null,
-      sold_price_3: changedValues.qty_3 !== null ? Math.round(hargaJual_unit3) : null,
-      pricelist_3: changedValues.qty_3 !== null ? Math.round(hargaPricelist_unit3) : null,
+      buy_price_3: changedValues.qty_3 !== null ? hargaPembelian_unit3 : null,
+      purchase_discount_3: changedValues.qty_3 !== null ? diskonPembelian_unit3 : null,
+      sold_price_3: changedValues.qty_3 !== null ? hargaJual_unit3 : null,
+      pricelist_3: changedValues.qty_3 !== null ? hargaPricelist_unit3 : null,
     });
   } else if (fieldName === "qty_4" && firstInput) {
     const hargaPembelian_unit3 = changedValues.buy_price_3 || allValues.buy_price_3 || 0;
@@ -48,10 +48,10 @@ export default function setHargaValue(form, changedValues, allValues, fieldName,
     const hargaPricelist_unit4 = hargaPricelist_unit3 / qty_unit4;
 
     form.setFieldsValue({
-      buy_price_4: changedValues.qty_4 !== null ? Math.round(hargaPembelian_unit4) : null,
-      purchase_discount_4: changedValues.qty_4 !== null ? Math.round(diskonPembelian_unit4) : null,
+      buy_price_4: changedValues.qty_4 !== null ? hargaPembelian_unit4 : null,
+      purchase_discount_4: changedValues.qty_4 !== null ? diskonPembelian_unit4 : null,
       sold_price_4: changedValues.qty_4 !== null ? hargaJual_unit4 : null,
-      pricelist_4: changedValues.qty_4 !== null ? Math.round(hargaPricelist_unit4) : null,
+      pricelist_4: changedValues.qty_4 !== null ? hargaPricelist_unit4 : null,
     });
   } else if (fieldName === "qty_5" && firstInput) {
     const hargaPembelian_unit4 = changedValues.buy_price_4 || allValues.buy_price_4 || 0;
@@ -66,10 +66,10 @@ export default function setHargaValue(form, changedValues, allValues, fieldName,
     const hargaPricelist_unit5 = hargaPricelist_unit4 / qty_unit5;
 
     form.setFieldsValue({
-      buy_price_5: changedValues.qty_5 !== null ? Math.round(hargaPembelian_unit5) : null,
-      purchase_discount_5: changedValues.qty_5 !== null ? Math.round(diskonPembelian_unit5) : null,
-      sold_price_5: changedValues.qty_5 !== null ? Math.round(hargaJual_unit5) : null,
-      pricelist_5: changedValues.qty_5 !== null ? Math.round(hargaPricelist_unit5) : null,
+      buy_price_5: changedValues.qty_5 !== null ? hargaPembelian_unit5 : null,
+      purchase_discount_5: changedValues.qty_5 !== null ? diskonPembelian_unit5 : null,
+      sold_price_5: changedValues.qty_5 !== null ? hargaJual_unit5 : null,
+      pricelist_5: changedValues.qty_5 !== null ? hargaPricelist_unit5 : null,
     });
   }
 }

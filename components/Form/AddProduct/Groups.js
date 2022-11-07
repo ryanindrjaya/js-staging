@@ -59,10 +59,11 @@ export default function Groups({ onSelect, selectedGroups, initialValue }) {
 
   return (
     <div className="w-full md:w-full mb-2 md:mb-0">
-      <Form.Item name="groups" className="w-1/1" initialValue={initialValue}>
+      <Form.Item name="groups" className="w-1/1">
         <Select
           size="large"
           value={groups}
+          defaultValue={{ value: initialValue.id, label: initialValue.attributes.name }}
           showSearch
           showArrow={false}
           filterOption={false}

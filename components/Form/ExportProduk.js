@@ -2,7 +2,7 @@ import { Spin } from "antd";
 import moment from "moment";
 import React, { useState } from "react";
 import writeXlsxFile from "write-excel-file";
-import { HEADER_ROW_1, HEADER_ROW_2, columnsWidth } from "./ExcelStyles";
+import { HEADER_ROW_1, HEADER_ROW_2, columnsWidth } from "./utils/ExcelStyles";
 
 export default function ExportProduk({ data = [], setProduct }) {
   const [loading, setLoading] = useState(false);

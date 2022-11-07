@@ -1,6 +1,6 @@
 import React from "react";
 import writeXlsxFile from "write-excel-file";
-import { HEADER_ROW_1, HEADER_ROW_2, columnsWidth } from "./ExcelStyles.js";
+import { HEADER_ROW_1, HEADER_ROW_2, columnsWidth } from "./utils/ExcelStyles.js";
 
 function DownloadTemplate() {
   const data = [HEADER_ROW_1, HEADER_ROW_2];

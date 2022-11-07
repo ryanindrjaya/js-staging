@@ -316,12 +316,8 @@ const Edit = ({ props }) => {
                   >
                     <Input style={{ height: "40px" }} placeholder="SKU" />
                   </Form.Item>
-                  <Manufactures
-                    data={manufactures.data}
-                    initialValue={product.attributes?.manufacture?.data?.id}
-                    onSelect={setSelectedManufactures}
-                  />
-                  <Groups data={groups} onSelect={setSelectedGroup} initialValue={product.attributes?.group?.data?.id} />
+                  <Manufactures data={manufactures.data} initialValue={product.attributes?.manufacture?.data} onSelect={setSelectedManufactures} />
+                  <Groups data={groups} onSelect={setSelectedGroup} initialValue={product.attributes?.group?.data} />
                   <Locations data={locations} onSelect={setSelectLocation} initialValue={product.attributes?.locations.data} />
                 </div>
 
