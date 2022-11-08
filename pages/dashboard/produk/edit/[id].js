@@ -18,6 +18,8 @@ import Groups from "../../../../components/Form/AddProduct/Groups";
 import Locations from "../../../../components/Form/AddProduct/Locations";
 import UnitTable from "../../../../components/ReactDataTable/Product/UnitsTable";
 import ConfirmDialog from "../../../../components/Alert/ConfirmDialog";
+import setHargaValue from "../utility/setHargaValue";
+import setDiskonValue from "../utility/setDiskonValue";
 
 const Edit = ({ props }) => {
   const productId = props?.product.data.id;
@@ -34,6 +36,7 @@ const Edit = ({ props }) => {
   const [idCategory, setIdCategory] = useState(initCategory.id);
   const [uploadedOnce, setUploadedOnce] = useState(true);
   const [fileList, setFileList] = useState([]);
+  const [firstInput, setFirstInputDiskon] = useState(true);
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const cookies = nookies.get(null, "token");
@@ -254,6 +257,15 @@ const Edit = ({ props }) => {
     setLoading(false);
   };
 
+  const handleValueChange = (changedValues, allValues) => {
+    const fieldName = Object.keys(changedValues)[0];
+    const unitArr = fieldName.split("_");
+    const unit = unitArr[unitArr.length - 1];
+
+    setDiskonValue(form, changedValues, allValues, fieldName, firstInput);
+    setHargaValue(form, changedValues, allValues, unit, firstInput);
+  };
+
   return (
     <>
       <Head>
@@ -270,6 +282,7 @@ const Edit = ({ props }) => {
                 remember: true,
               }}
               onFinish={onFinish}
+              onValuesChange={handleValueChange}
             >
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">

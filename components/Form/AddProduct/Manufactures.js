@@ -63,7 +63,7 @@ export default function Manufactures({ onSelect, initialValue, selectedManufacur
         <Select
           value={manufactures}
           size="large"
-          defaultValue={{ value: initialValue.id, label: initialValue.attributes.name }}
+          defaultValue={initialValue && { value: initialValue?.id, label: initialValue?.attributes?.name }}
           showSearch
           showArrow={false}
           filterOption={false}

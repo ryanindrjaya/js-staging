@@ -63,7 +63,7 @@ export default function Groups({ onSelect, selectedGroups, initialValue }) {
         <Select
           size="large"
           value={groups}
-          defaultValue={{ value: initialValue.id, label: initialValue.attributes.name }}
+          defaultValue={initialValue && { value: initialValue?.id, label: initialValue?.attributes?.name }}
           showSearch
           showArrow={false}
           filterOption={false}

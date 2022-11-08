@@ -232,13 +232,11 @@ const Tambah = ({ props }) => {
 
   const handleValueChange = (changedValues, allValues) => {
     const fieldName = Object.keys(changedValues)[0];
-    const unit = fieldName.split("_")[1];
+    const unitArr = fieldName.split("_");
+    const unit = unitArr[unitArr.length - 1];
 
-    // jika user input unit 2,3,4, dan 5
-    if (unit > 1) {
-      setDiskonValue(form, changedValues, allValues, fieldName, firstInput);
-      setHargaValue(form, changedValues, allValues, fieldName, firstInput);
-    }
+    setDiskonValue(form, changedValues, allValues, fieldName, firstInput);
+    setHargaValue(form, changedValues, allValues, unit, firstInput);
   };
 
   return (
