@@ -1,5 +1,4 @@
 export default function setHargaValue(form, changedValues, allValues, unit, firstInput) {
-  console.log("unit", unit);
   if (unit == "1") {
     const hargaPembelian_unit1 = changedValues.buy_price_1 || allValues.buy_price_1 || null;
     const hargaDiskon_unit1 = changedValues.purchase_discount_1 || allValues.purchase_discount_1 || null;

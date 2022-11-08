@@ -20,12 +20,17 @@ import { FileImageOutlined } from "@ant-design/icons";
 import setDiskonValue from "./utility/setDiskonValue";
 import setHargaValue from "./utility/setHargaValue";
 import ConfirmDialog from "../../../components/Alert/ConfirmDialog";
+import debounce from "./utility/debounce";
 
 const Tambah = ({ props }) => {
   const [image, setImage] = useState();
   const [category, setCategory] = useState();
   const [uploadedOnce, setUploadedOnce] = useState(true);
   const [fileList, setFileList] = useState([]);
+  const [statusSKU, setStatusSKU] = useState({
+    status: "",
+    message: "",
+  });
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [firstInput, setFirstInputDiskon] = useState(true);
@@ -230,10 +235,42 @@ const Tambah = ({ props }) => {
     }
   };
 
-  const handleValueChange = (changedValues, allValues) => {
+  const checkSKU = async (value) => {
+    setStatusSKU({ status: "validating", message: "" });
+
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/products?filters[SKU][$eq]=" + value;
+    const options = {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    if (req.status === 200) {
+      if (res.data.length > 0) {
+        setStatusSKU({ status: "error", message: "SKU sudah digunakan" });
+      } else {
+        setStatusSKU({ status: "success", message: "" });
+      }
+    } else {
+      setStatusSKU({ status: "error", message: "Error ketika mengambil data SKU" });
+    }
+  };
+
+  const handleValueChange = async (changedValues, allValues) => {
     const fieldName = Object.keys(changedValues)[0];
     const unitArr = fieldName.split("_");
     const unit = unitArr[unitArr.length - 1];
+
+    // check SKU
+    if (fieldName === "SKU" && allValues.SKU !== "") {
+      debounce(checkSKU, 1000)(allValues.SKU);
+    } else if (fieldName === "SKU" && allValues.SKU === "") {
+      setStatusSKU({ status: "error", message: "SKU tidak boleh kosong" });
+    }
 
     setDiskonValue(form, changedValues, allValues, fieldName, firstInput);
     setHargaValue(form, changedValues, allValues, unit, firstInput);
@@ -285,6 +322,9 @@ const Tambah = ({ props }) => {
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="SKU"
+                    hasFeedback
+                    validateStatus={statusSKU.status}
+                    help={statusSKU.message}
                     rules={[
                       {
                         required: true,
