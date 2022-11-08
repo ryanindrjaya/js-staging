@@ -12,6 +12,8 @@ export default function UploadProduk({ setProduct }) {
   const [error, setError] = useState(null);
   const [status, setStatus] = useState("");
 
+  console.log("percent", percent);
+
   const postData = (data) => {
     let increment = 100 / data.length;
     console.log("increment", increment);
@@ -20,7 +22,6 @@ export default function UploadProduk({ setProduct }) {
 
     try {
       data.forEach(async (row, idx) => {
-        setPercent((prev) => prev + increment);
         const data = {
           data: row,
         };
@@ -39,6 +40,8 @@ export default function UploadProduk({ setProduct }) {
           const req = await fetch(endpoint, options);
           const res = await req.json();
 
+          setPercent((prev) => Math.round(prev + increment));
+
           if (req.status == 200) {
             const endpointProduct = process.env.NEXT_PUBLIC_URL + "/products?populate=*";
 
@@ -56,14 +59,13 @@ export default function UploadProduk({ setProduct }) {
             setProduct(resProduct);
           }
         } catch (err) {
-          setStatus("exception");
           console.log(err);
         }
       });
     } catch (err) {
       toast.error("Gagal mengunggah data");
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const convertToJson = async (data) => {
@@ -134,10 +136,13 @@ export default function UploadProduk({ setProduct }) {
   };
 
   useEffect(() => {
-    if (percent === 100) {
+    if (percent >= 100) {
+      toast.success("Berhasil mengunggah data");
       setLoading(false);
     }
+  }, [percent]);
 
+  useEffect(() => {
     if (error !== null) {
       toast.error(error);
       setTimeout(() => {
@@ -147,7 +152,9 @@ export default function UploadProduk({ setProduct }) {
   }, [error]);
 
   return loading ? (
-    <Progress type="circle" percent={percent} status={status} />
+    <div className="flex flex-col items-center justify-center w-full">
+      <Progress type="circle" width={35} percent={percent} status={status} />
+    </div>
   ) : (
     <>
       <label
