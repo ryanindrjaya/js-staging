@@ -63,6 +63,7 @@ function Retur({ props }) {
 
   const tempList = [];
 
+  var totalReturs = String(props.purchases?.meta?.pagination.total + 1).padStart(3, "0"); //console.log("data baru"); console.log(listId.length);
   var today = new Date();
   var dd = String(today.getDate()).padStart(2, "0");
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
@@ -86,7 +87,7 @@ function Retur({ props }) {
     createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-details");
   };
 
-  const createRetur = async (values) => {
+  const createRetur = async (values) => { //console.log("Retur"); //console.log("masuk");
     createReturFunc(grandTotal, totalPrice, values, listId, form, router);
   };
 
@@ -131,10 +132,10 @@ function Retur({ props }) {
     }
   }, [totalPrice]);
 
-  useEffect(() => {
+  useEffect(() => { //console.log("listId 1:"); console.log(listId);
     if (listId.length > 0) {
-      createRetur(dataValues);
-    }
+      createRetur(dataValues); console.log("listId 2:"); console.log(dataValues);
+    } console.log("listId 3:"); console.log(listId);
   }, [listId]);
 
   useEffect(() => {
@@ -199,7 +200,8 @@ function Retur({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="no_retur"
-                    initialValue={`Retur/ET/${dd}/${mm}/${yyyy}`}
+                    initialValue={`Retur/ET/${totalReturs}/${mm}/${yyyy}`}
+                    //initialValue="1"
                     rules={[
                       {
                         required: true,
@@ -210,24 +212,19 @@ function Retur({ props }) {
                     <Input style={{ height: "40px" }} placeholder="No.Retur" />
                   </Form.Item>
                 </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="retur_date"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Tanggal tidak boleh kosong!",
-                      },
-                    ]}
-                  >
-                    <DatePicker
-                      placeholder="Tanggal Retur"
-                      size="large"
-                      format={"DD/MM/YYYY"}
-                      style={{ width: "100%" }}
-                    />
-                  </Form.Item>
-                </div>
+                    <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
+                      <Form.Item
+                        name="tanggal_retur"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Tanggal tidak boleh kosong!",
+                          },
+                        ]}
+                      >
+                        <DatePicker placeholder="Tanggal Retur" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
+                      </Form.Item>
+                    </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Upload {...data}>
                     <Button size="large" icon={<UploadOutlined />}>

@@ -74,7 +74,7 @@ export default function Supplier({ onChangeLpb }) {
         <>
             <div className="w-full md:w-full mb-2 md:mb-0">
                 <Form.Item
-                    name="lpb_id"
+                    name="no_lpb"
                     style={{ width: "100%" }}
                     rules={[
                         {

@@ -37,7 +37,7 @@ export default function ReactDataTable({
 
   const returLpb = (row) => {
     //openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
-    router.push("retur/returLpb");
+    router.push("retur/returLpb/" + row.id);
   };
 
   const onConfirm = (id) => {
@@ -138,7 +138,7 @@ export default function ReactDataTable({
     {
       name: "Supplier",
       width: "180px",
-      selector: (row) => row.attributes?.suppliers.data[0].attributes.name ?? "-",
+      //selector: (row) => row.attributes?.suppliers.data[0].attributes.name ?? "-",
     },
     //{
     //  name: "Status Pembayaran",

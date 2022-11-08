@@ -16,7 +16,7 @@ const CreateRetur = async (
   router
 ) => {
   // CLEANING DATA
-  var returDate = new Date(values.tanggal_retur); console.log("nilai"); console.log(values);
+  //var returDate = new Date(values.tanggal_retur); //console.log("nilai"); console.log(values); //console.log(values.tanggal_retur._d)
   //var deliveryReturDate = new Date(values.delivery_date);
   var supplierId = { id: parseInt(values.supplier_id) };
 
@@ -27,11 +27,13 @@ const CreateRetur = async (
     tempProductListId.push({ id: element });
   });
 
-  values.tanggal_retur = returDate;
+  values.tanggal_retur = values.tanggal_retur;
+  values.tanggal_pembelian = values.tanggal_retur;
   //values.delivery_date = deliveryReturDate;
   values.supplier_id = supplierId;
   //values.status = "Dipesan";
   //values.delivery_total =
+  values.no_nota_supplier = "kosong";
     grandTotal === 0 ? parseInt(totalPrice) : parseInt(grandTotal);
   values.retur_details = null;
   values.supplier_id = null;
@@ -39,10 +41,10 @@ const CreateRetur = async (
   var data = {
     data: values,
   };
-
-  const req = await createData(data);
+    
+  const req = await createData(data); 
   const res = await req.json();
-
+    console.log("ini data 1 : "); console.log(data); console.log(req);
   if (req.status === 200) {
     await putRelationRetur(res.data.id, res.data.attributes, form, router);
   } else {
@@ -52,8 +54,8 @@ const CreateRetur = async (
 
 const createData = async (data) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/returs";
-  const JSONdata = JSON.stringify(data);
-
+    const JSONdata = JSON.stringify(data);
+    console.log("ini data "); console.log(data)
   const options = {
     method: "POST",
     headers: {
@@ -64,12 +66,12 @@ const createData = async (data) => {
   };
 
   const req = await fetch(endpoint, options);
-
+  //const res = await req.json(); console.log(res)
   return req;
 };
 
 const putRelationRetur = async (id, value, form, router) => {
-  const user = await getUserMe();
+  const user = await getUserMe(); console.log("masuk put relation")
   const dataRetur = {
     data: value,
   };

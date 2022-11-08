@@ -25,8 +25,6 @@ const createDetailRetur = (
   url
 ) => {
   products.productList.forEach((element) => {
-    console.log(products);
-    console.log(products.productInfo);
     console.log("productTotalPrice", productTotalPrice);
     console.log("productSubTotal", productSubTotal);
 
@@ -43,7 +41,7 @@ const createDetailRetur = (
 
     console.log(qty, disc, unit, unitPrice, unitPriceAfterDisc, subTotal);
 
-    POSTPurchaseDetail(
+    POSTReturDetail(
       qty,
       disc,
       unit,
@@ -58,7 +56,7 @@ const createDetailRetur = (
   });
 };
 
-const POSTPurchaseDetail = async (
+const POSTReturDetail = async (
   qty,
   disc,
   unit,
@@ -72,13 +70,13 @@ const POSTPurchaseDetail = async (
 ) => {
   var data = {
     data: {
-      total_order: String(qty),
-      unit_order: unit,
-      unit_price: parseInt(unitPrice),
-      unit_price_after_disc: parseInt(unitPriceAfterDisc),
+      qty: String(qty),
+      unit: unit,
+      harga_satuan: parseInt(unitPrice),
+      //unit_price_after_disc: parseInt(unitPriceAfterDisc),
       sub_total: parseInt(subTotal),
       products: { id: id },
-      disc: parseInt(disc),
+      //disc: parseInt(disc),
     },
   };
 
@@ -96,13 +94,13 @@ const POSTPurchaseDetail = async (
   const req = await fetch(endpoint, options);
   const res = await req.json();
 
-  console.log(data);
-  console.log(res);
+  console.log("req : ");
+  console.log(req);
 
   if (req.status === 200) {
     tempListId.push(res.data?.id);
     if (tempListId.length === products.productList.length) {
-      setListId(tempListId);
+      setListId(tempListId); console.log(tempListId)
     }
   }
 };
