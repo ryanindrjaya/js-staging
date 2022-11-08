@@ -93,7 +93,7 @@ export default function SearchBar({ form, tempList, onChange, selectedProduct, u
           // });
 
           // product based on user location
-          const filteredProductByLocation = filteredProduct.filter((item) =>
+          const filteredProductByLocation = res.data.filter((item) =>
             item.attributes.locations.data.some((location) => user.locations.some((userLocation) => userLocation.id === location.id))
           );
 
