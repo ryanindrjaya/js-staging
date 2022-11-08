@@ -139,6 +139,7 @@ export default function UploadProduk({ setProduct }) {
     if (percent >= 100) {
       toast.success("Berhasil mengunggah data");
       setLoading(false);
+      setPercent(0);
     }
   }, [percent]);
 
