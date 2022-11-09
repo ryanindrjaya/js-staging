@@ -17,37 +17,60 @@ import createDetailReturFunc from "../../utility/createReturDetail";
 import createReturFunc from "../../utility/createRetur";
 import { useRouter } from "next/router";
 
-ReturLpb.getInitialProps = async (context) => {
-    const cookies = nookies.get(context);
-    const reqLocation = await fetchLocation(cookies);
-    const location = await reqLocation.json();
+Edit.getInitialProps = async (context) => {
+  const cookies = nookies.get(context);
+  const id = context.query.id;
 
-    return {
-        props: {
-            location,
-        },
-    };
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings/" + id + "?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+  const res = await fetch(endpoint, options);
+  const data = await res.json();
+
+  const req = await fetchDataLocation(cookies);
+  const locations = await req.json();
+
+  return {
+    props: {
+      data,
+      locations,
+    },
+  };
 };
 
-const fetchLocation = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/locations?populate=deep";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
+const fetchDataLocation = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
 
-    const req = await fetch(endpoint, options);
-    return req;
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
-function ReturLpb({ props }) {
-    const locations = props.location.data;
-    var products = useSelector((state) => state.Order);
+function Edit({ props }) {
+    //const locations = props.location.data;
+    const data = props.data.data; 
+    var products = useSelector((state) => state.Order); //console.log("props nih:"); console.log(props)
     var selectedProduct = products?.productList;
     const dispatch = useDispatch();
+    // Set data for show in table
+    const productList = data.attributes.purchasing_details.data;
+    products.productList.length = productList.length;
+    productList.forEach((element) => {
+       //console.log("element baru"); console.log(productList.length)
+       products.productList.push(element.attributes.product.data);
+    }); console.log("product list baru"); console.log(productList)
+    console.log(products)
 
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
@@ -63,11 +86,13 @@ function ReturLpb({ props }) {
 
     const tempList = [];
 
-    var totalReturs = String(props.purchases?.meta?.pagination.total + 1).padStart(3, "0"); console.log(props)
+    var totalReturs = String(props.purchases?.meta?.pagination.total + 1).padStart(3, "0");
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, "0");
     var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
     var yyyy = today.getFullYear();
+
+
 
     const { TextArea } = Input;
     var formatter = new Intl.NumberFormat("id-ID", {
@@ -82,15 +107,15 @@ function ReturLpb({ props }) {
         setLoading(false);
     };
 
-    const createDetailRetur = async () => {
-        console.log("info total", productTotalPrice, productSubTotal);
-        createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-details");
-    };
+    //const createDetailRetur = async () => {
+    //    console.log("info total", productTotalPrice, productSubTotal);
+    //    createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-details");
+    //};
 
-    const createRetur = async (values) => {
-        console.log("Retur");
-        createReturFunc(grandTotal, totalPrice, values, listId, form, router);
-    };
+    //const createRetur = async (values) => {
+    //    console.log("Retur");
+    //    createReturFunc(grandTotal, totalPrice, values, listId, form, router);
+    //};
 
     const onChangeProduct = async () => {
         var isDuplicatedData = false;
@@ -136,7 +161,7 @@ function ReturLpb({ props }) {
     useEffect(() => {
         //console.log("listId 1:"); console.log(listId);
         if (listId.length > 0) {
-            createRetur(dataValues); console.log("listId 2:"); console.log(listId);
+            createRetur(dataValues); //console.log("listId 2:"); console.log(listId);
         } //console.log("listId 3:"); console.log(listId);
     }, [listId]);
 
@@ -163,11 +188,11 @@ function ReturLpb({ props }) {
     return (
         <>
             <Head>
-                <title>Retur Pembelian LPB</title>
+                <title>Edit</title>
             </Head>
             <DashboardLayout>
                 <LayoutWrapper style={{}}>
-                    <TitlePage titleText={"Retur Pembelian LPB"} />
+                    <TitlePage titleText={"Edit Pembelian Barang"} />
                     <LayoutContent>
                         <Form
                             form={form}
@@ -211,9 +236,9 @@ function ReturLpb({ props }) {
                                     </Form.Item>
                                 </div>
                                 <div className="w-full md:w-2/4 px-3 mb-2 md:mb-0">
-                                    <p className="font-bold m-0">No LPB : </p>
-                                    <p className="font-bold m-0">No Nota Supplier : </p>
-                                    <p className="font-bold m-0">Tanggal Pembelian : </p>
+                                    <p className="font-bold m-0">No LPB : {data.attributes.no_purchasing}</p>
+                                    <p className="font-bold m-0">No Nota Supplier : {data.attributes.no_nota_suppplier}</p>
+                                    <p className="font-bold m-0">Tanggal Pembelian : {data.attributes.date_purchasing}</p>
                                     {/*<p className="m-0"> {supplier?.attributes.address}</p>*/}
                                     {/*<p> {supplier?.attributes.phone}</p>*/}
                                 </div>
@@ -289,7 +314,7 @@ function ReturLpb({ props }) {
                                     </div>
                                 ) : (
                                     <Button onClick={validateError} htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
-                                        Tambah
+                                        Edit
                                     </Button>
                                 )}
                             </Form.Item>
@@ -301,4 +326,4 @@ function ReturLpb({ props }) {
     );
 }
 
-export default ReturLpb;
+export default Edit;

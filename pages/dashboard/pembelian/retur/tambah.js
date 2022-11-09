@@ -21,10 +21,13 @@ Retur.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const reqLocation = await fetchLocation(cookies);
   const location = await reqLocation.json();
+  const reqDataRetur = await fetchDataRetur(cookies);
+  const returs = await reqDataRetur.json();
 
   return {
     props: {
       location,
+      returs,
     },
   };
 };
@@ -41,6 +44,20 @@ const fetchLocation = async (cookies) => {
 
   const req = await fetch(endpoint, options);
   return req;
+};
+
+const fetchDataRetur = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/returs?populate=deep";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
 };
 
 function Retur({ props }) {
@@ -63,7 +80,7 @@ function Retur({ props }) {
 
   const tempList = [];
 
-  var totalReturs = String(props.purchases?.meta?.pagination.total + 1).padStart(3, "0"); //console.log("data baru"); console.log(listId.length);
+  var totalReturs = String(props.returs?.meta?.pagination.total + 1).padStart(3, "0");
   var today = new Date();
   var dd = String(today.getDate()).padStart(2, "0");
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
@@ -132,10 +149,10 @@ function Retur({ props }) {
     }
   }, [totalPrice]);
 
-  useEffect(() => { //console.log("listId 1:"); console.log(listId);
+  useEffect(() => {
     if (listId.length > 0) {
-      createRetur(dataValues); console.log("listId 2:"); console.log(dataValues);
-    } console.log("listId 3:"); console.log(listId);
+      createRetur(dataValues);
+    }
   }, [listId]);
 
   useEffect(() => {
@@ -201,7 +218,6 @@ function Retur({ props }) {
                   <Form.Item
                     name="no_retur"
                     initialValue={`Retur/ET/${totalReturs}/${mm}/${yyyy}`}
-                    //initialValue="1"
                     rules={[
                       {
                         required: true,
