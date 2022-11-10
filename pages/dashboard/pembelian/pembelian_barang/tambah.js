@@ -277,7 +277,7 @@ function Tambah({ props }) {
 
     purchase_details.forEach((element) => {
       var indexUnit = 1;
-      var unitOrder = element.attributes.unit_order;
+      var unitOrder = element.attributes.unit_order; console.log("product :"); console.log(element.attributes.products)
       var productUnit = element.attributes.products.data[0].attributes;
 
       for (let index = 1; index < 6; index++) {

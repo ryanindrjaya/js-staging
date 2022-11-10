@@ -12,7 +12,7 @@ import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import Lpb from "@iso/components/Form/AddRetur/LpbForm";
 import { useSelector, useDispatch } from "react-redux";
 import calculatePrice from "../../utility/calculatePrice";
-import OrderTable from "@iso/components/ReactDataTable/Purchases/OrderTable";
+import ReturLPBTable from "@iso/components/ReactDataTable/Purchases/ReturLPBTable";
 import createDetailReturFunc from "../../utility/createReturDetail";
 import createReturFunc from "../../utility/createRetur";
 import { useRouter } from "next/router";
@@ -65,12 +65,12 @@ function Edit({ props }) {
     const dispatch = useDispatch();
     // Set data for show in table
     const productList = data.attributes.purchasing_details.data;
-    products.productList.length = productList.length;
+    products.productList.length = null;
     productList.forEach((element) => {
        //console.log("element baru"); console.log(productList.length)
        products.productList.push(element.attributes.product.data);
-    }); console.log("product list baru"); console.log(productList)
-    console.log(products)
+    }); //console.log("product list baru"); console.log(productList)
+    //console.log(products)
 
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
@@ -256,13 +256,14 @@ function Edit({ props }) {
                                     />
                                 </div>
                                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                                    <OrderTable
+                                    <ReturLPBTable
                                         products={products}
                                         productTotalPrice={productTotalPrice}
                                         setTotalPrice={setTotalPrice}
                                         calculatePriceAfterDisc={calculatePriceAfterDisc}
                                         productSubTotal={productSubTotal}
                                         formObj={form}
+                                        productList={productList}
                                     />
                                 </div>
                             </div>
