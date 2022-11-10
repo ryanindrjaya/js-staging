@@ -134,8 +134,12 @@ const Edit = ({ props }) => {
   const subCategoryChecker = (values) => {
     console.log("checker ", values.subCategories, subCategory);
     if (values.subCategories === subCategory?.attributes.name) {
+    console.log("checker ", values.subCategories, subCategory);
+    if (values.subCategories === subCategory?.attributes.name) {
       console.log("sub category tidak berubah. jadikan id");
       values.subCategories = subCategory.id;
+    } else if (!subCategory) {
+      console.log("tidak ada datanya cuy");
     } else if (!subCategory) {
       console.log("tidak ada datanya cuy");
     } else {
@@ -157,6 +161,7 @@ const Edit = ({ props }) => {
     };
 
     const subCategoryID = {
+      id: values?.subCategories ?? null,
       id: values?.subCategories ?? null,
     };
 
@@ -197,6 +202,12 @@ const Edit = ({ props }) => {
 
     console.log("tester", putData);
 
+    if (putData.sub_category.id === "") {
+      delete putData.sub_category;
+    }
+
+    console.log("tester", putData);
+
     // remove undefined or null value from data
     for (const key in values) {
       if (values[key] === undefined || values[key] === null) {
@@ -215,6 +226,8 @@ const Edit = ({ props }) => {
       ...values,
       ...putData,
     };
+
+    console.log("data", data);
 
     console.log("data", data);
 
