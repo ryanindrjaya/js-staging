@@ -56,7 +56,9 @@ const Product = ({ props }) => {
   const fetchSearchOption = async (query, category) => {
     const cookies = nookies.get(null);
     try {
-      const endpoint = process.env.NEXT_PUBLIC_URL + `/${category}?filters[name][$containsi]=${query}`;
+      const endpoint =
+        process.env.NEXT_PUBLIC_URL +
+        `/${category}?filters[name][$containsi]=${query}`;
       const options = {
         method: "GET",
         headers: {
@@ -86,7 +88,11 @@ const Product = ({ props }) => {
   useEffect(() => {
     const searchQuery = async () => {
       setIsSearching(true);
-      var query = "filters[$or][0][name][$contains]=" + searchParameters.namaSKU + "&filters[$or][1][SKU][$contains]=" + searchParameters.namaSKU;
+      var query =
+        "filters[$or][0][name][$contains]=" +
+        searchParameters.namaSKU +
+        "&filters[$or][1][SKU][$contains]=" +
+        searchParameters.namaSKU;
       var locationQuery = "";
 
       if (searchParameters.manufacture) {
@@ -101,13 +107,18 @@ const Product = ({ props }) => {
 
       if (searchParameters.location.length > 0) {
         searchParameters.location.forEach((item, idx) => {
-          locationQuery += "&filters[$and][" + (idx + 4) + "][locations][id][$eq]=" + item;
+          locationQuery +=
+            "&filters[$and][" + (idx + 4) + "][locations][id][$eq]=" + item;
         });
       } else {
         locationQuery = "";
       }
 
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/products?populate=*&" + query + locationQuery;
+      const endpoint =
+        process.env.NEXT_PUBLIC_URL +
+        "/products?populate=*&" +
+        query +
+        locationQuery;
 
       const cookies = nookies.get(null, "token");
       const options = {
@@ -166,7 +177,8 @@ const Product = ({ props }) => {
 
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/products?pagination[page]=" + page;
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL + "/products?pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -207,7 +219,9 @@ const Product = ({ props }) => {
   const fetchInventory = async (data) => {
     setIsLoading(true);
     const cookies = nookies.get(null, "token");
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/inventories?filters[products][id][$eq]=${data.id}&populate=locations`;
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL +
+      `/inventories?filters[products][id][$eq]=${data.id}&populate=locations`;
     const options = {
       method: "GET",
       headers: {
@@ -249,15 +263,22 @@ const Product = ({ props }) => {
             <div className="w-full flex justify-between gap-x-32 mb-3">
               <div className="w-full md:w-1/2 grid grid-cols-2 gap-x-4 gap-y-3">
                 <Select
-                  size="large"
+                  size="middle"
                   allowClear
                   showSearch
                   showArrow={false}
                   filterOption={false}
                   notFoundContent={null}
                   placeholder="PABRIKASI"
-                  onSelect={(e) => setSearchParameters({ ...searchParameters, manufacture: e })}
-                  onClear={() => setSearchParameters({ ...searchParameters, manufacture: "" })}
+                  onSelect={(e) =>
+                    setSearchParameters({ ...searchParameters, manufacture: e })
+                  }
+                  onClear={() =>
+                    setSearchParameters({
+                      ...searchParameters,
+                      manufacture: "",
+                    })
+                  }
                   onSearch={(e) => handleSearch(e, "manufactures")}
                 >
                   {searchOptionData.manufactures.map((item) => (
@@ -267,15 +288,19 @@ const Product = ({ props }) => {
                   ))}
                 </Select>{" "}
                 <Select
-                  size="large"
+                  size="middle"
                   allowClear
                   showSearch
                   showArrow={false}
                   filterOption={false}
                   notFoundContent={null}
                   placeholder="KATEGORI"
-                  onSelect={(e) => setSearchParameters({ ...searchParameters, category: e })}
-                  onClear={() => setSearchParameters({ ...searchParameters, category: "" })}
+                  onSelect={(e) =>
+                    setSearchParameters({ ...searchParameters, category: e })
+                  }
+                  onClear={() =>
+                    setSearchParameters({ ...searchParameters, category: "" })
+                  }
                   onSearch={(e) => handleSearch(e, "categories")}
                 >
                   {searchOptionData.categories.map((item) => (
@@ -286,11 +311,15 @@ const Product = ({ props }) => {
                 </Select>
                 <Select
                   mode="multiple"
-                  size="large"
+                  size="middle"
                   placeholder="LOKASI"
                   allowClear
-                  onChange={(e) => setSearchParameters({ ...searchParameters, location: e })}
-                  onClear={() => setSearchParameters({ ...searchParameters, location: [] })}
+                  onChange={(e) =>
+                    setSearchParameters({ ...searchParameters, location: e })
+                  }
+                  onClear={() =>
+                    setSearchParameters({ ...searchParameters, location: [] })
+                  }
                   onSearch={(e) => handleSearch(e, "locations")}
                 >
                   {searchOptionData.locations.map((data) => (
@@ -302,9 +331,14 @@ const Product = ({ props }) => {
                 <Search
                   className=""
                   loading={isSearching}
-                  onChange={(e) => setSearchParameters({ ...searchParameters, namaSKU: e.target.value })}
+                  onChange={(e) =>
+                    setSearchParameters({
+                      ...searchParameters,
+                      namaSKU: e.target.value,
+                    })
+                  }
                   placeholder="NAMA PRODUK / SKU"
-                  size="large"
+                  size="middle"
                 />
               </div>
               <div className="w-full flex flex-col gap-y-3 gap-x-4 md:w-1/2">
@@ -313,7 +347,9 @@ const Product = ({ props }) => {
                   className="bg-cyan-700 w-full cursor-pointer rounded px-5 h-10 hover:bg-cyan-800 shadow-sm flex items-center justify-center float-right"
                 >
                   <div className="text-white text-center text-sm font-bold">
-                    <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
+                    <a className="text-white no-underline text-xs sm:text-xs">
+                      + Tambah
+                    </a>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-x-4 w-full">
@@ -342,7 +378,11 @@ const Product = ({ props }) => {
               }}
               footer={null}
             >
-              <ProductModal data={modalProduct} isLoading={isLoading} inventory={inventory} />
+              <ProductModal
+                data={modalProduct}
+                isLoading={isLoading}
+                inventory={inventory}
+              />
             </Modal>
 
             <ProductTable
@@ -419,6 +459,8 @@ const fetchSearchParametersData = async (cookies, url) => {
 
   const req = await fetch(endpoint, options);
   const res = await req.json();
+
+  console.log("response", res);
 
   return formatData(res.data) || [];
 };

@@ -17,10 +17,10 @@ export default function ExportProduk({ data = [], setProduct }) {
         const { attributes } = product;
 
         // kategori, golongan, lokasi, pabrikasi, sub kategori
-        const kategori = `${attributes.category.data.attributes.category_id} - ${attributes.category.data.attributes.name}` || "";
-        const golongan = `${attributes.group.data.attributes.alias} - ${attributes.group.data.attributes.name}` || "";
-        const pabrikasi = `${attributes.manufacture.data.attributes.code} - ${attributes.manufacture.data.attributes.name}` || "";
-        const subKategori = `${attributes.sub_category.data.attributes.sub_id} - ${attributes.sub_category.data.attributes.name}` || "";
+        const kategori = `${attributes.category.data?.attributes.category_id} - ${attributes.category.data?.attributes.name}` || "";
+        const golongan = `${attributes.group.data?.attributes.alias} - ${attributes.group.data?.attributes.name}` || "";
+        const pabrikasi = `${attributes.manufacture.data?.attributes.code} - ${attributes.manufacture.data?.attributes.name}` || "";
+        const subKategori = `${attributes.sub_category.data?.attributes.sub_id} - ${attributes.sub_category.data?.attributes.name}` ?? "";
         // proses data lokasi
         const dataLokasi =
           attributes.locations.data.map((location) => {
