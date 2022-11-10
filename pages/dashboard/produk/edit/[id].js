@@ -400,13 +400,10 @@ const Edit = ({ props }) => {
                     </Dragger>
                   </div>
                 </div>
-
                 <div>
                   <h6 className="">HARGA</h6>
                 </div>
-
                 <UnitTable initialValue={product.attributes} />
-
                 <Form.Item>
                   {loading ? (
                     <div className=" flex float-left ml-3 ">
