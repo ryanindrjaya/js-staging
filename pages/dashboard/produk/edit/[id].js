@@ -141,421 +141,412 @@ const Edit = ({ props }) => {
   const subCategoryChecker = (values) => {
     console.log("checker ", values.subCategories, subCategory);
     if (values.subCategories === subCategory?.attributes.name) {
-      console.log("checker ", values.subCategories, subCategory);
-      if (values.subCategories === subCategory?.attributes.name) {
-        console.log("sub category tidak berubah. jadikan id");
-        values.subCategories = subCategory.id;
-      } else if (!subCategory) {
-        console.log("tidak ada datanya cuy");
-      } else if (!subCategory) {
-        console.log("tidak ada datanya cuy");
-      } else {
-        console.log("sub category berubah. jadikan tipe int");
-        values.subCategories = parseInt(values.subCategories);
-      }
-
-      return values;
+      console.log("sub category tidak berubah. jadikan id");
+      values.subCategories = subCategory.id;
+    } else if (!subCategory) {
+      console.log("tidak ada datanya cuy");
+    } else {
+      console.log("sub category berubah. jadikan tipe int");
+      values.subCategories = parseInt(values.subCategories);
     }
 
-    const onFinish = async (values) => {
-      console.log("values", values);
-      setLoading(true);
-      values = categoryChecker(values);
-      values = subCategoryChecker(values);
+    return values;
+  };
 
-      const categoryID = {
-        id: parseInt(values?.category_id),
-      };
+  const onFinish = async (values) => {
+    console.log("values", values);
+    setLoading(true);
+    values = categoryChecker(values);
+    values = subCategoryChecker(values);
 
-      const subCategoryID = {
-        id: values?.subCategories ?? null,
-        id: values?.subCategories ?? null,
-      };
+    const categoryID = {
+      id: parseInt(values?.category_id),
+    };
 
-      const manufacturesID = {
-        id: values?.manufactures,
-      };
+    const subCategoryID = {
+      id: values?.subCategories ?? null,
+    };
 
-      const groupID = {
-        id: values?.groups,
-      };
+    const manufacturesID = {
+      id: values?.manufactures,
+    };
 
-      values.locations =
-        values?.locations?.map((location) => {
-          if (location.value) {
-            return { id: location.value };
-          }
+    const groupID = {
+      id: values?.groups,
+    };
 
-          return { id: location };
-        }) || [];
-
-      delete values.category_id;
-      delete values.subCategories;
-      delete values.manufactures;
-      delete values.groups;
-
-      const putData = {
-        // ...values,
-        category: categoryID,
-        sub_category: subCategoryID,
-        manufacture: manufacturesID,
-        group: groupID,
-        image: { id: image?.id },
-      };
-
-      if (putData.sub_category.id === "") {
-        delete putData.sub_category;
-      }
-
-      console.log("tester", putData);
-
-      if (putData.sub_category.id === "") {
-        delete putData.sub_category;
-      }
-
-      console.log("tester", putData);
-
-      // remove undefined or null value from data
-      for (const key in values) {
-        if (values[key] === undefined || values[key] === null) {
-          delete values[key];
+    values.locations =
+      values?.locations?.map((location) => {
+        if (location.value) {
+          return { id: location.value };
         }
+
+        return { id: location };
+      }) || [];
+
+    delete values.category_id;
+    delete values.subCategories;
+    delete values.manufactures;
+    delete values.groups;
+
+    const putData = {
+      // ...values,
+      category: categoryID,
+      sub_category: subCategoryID,
+      manufacture: manufacturesID,
+      group: groupID,
+      image: { id: image?.id },
+    };
+
+    if (putData.sub_category.id === "") {
+      delete putData.sub_category;
+    }
+
+    console.log("tester", putData);
+
+    // remove undefined or null value from data
+    for (const key in values) {
+      if (values[key] === undefined || values[key] === null) {
+        delete values[key];
       }
+    }
 
-      // remove undefined or null value from data
-      for (const key in putData) {
-        if (putData[key].id === undefined || putData[key].id === NaN) {
-          delete putData[key];
-        }
+    // remove undefined or null value from data
+    for (const key in putData) {
+      if (putData[key].id === undefined || putData[key].id === NaN) {
+        delete putData[key];
       }
+    }
 
-      const data = {
-        ...values,
-        ...putData,
-      };
+    const data = {
+      ...values,
+      ...putData,
+    };
 
-      console.log("data", data);
+    console.log("data", data);
 
-      console.log("data", data);
+    for (let index = 1; index < 6; index++) {
+      if (data[`purchase_discount_${index}`] === "-")
+        delete data[`purchase_discount_${index}`];
+    }
 
-      for (let index = 1; index < 6; index++) {
-        if (data[`purchase_discount_${index}`] === "-")
-          delete data[`purchase_discount_${index}`];
-      }
+    const dataPut = { data: data };
+    const JSONdata = JSON.stringify(dataPut);
 
-      const dataPut = { data: data };
-      const JSONdata = JSON.stringify(dataPut);
+    const options = {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+      body: JSONdata,
+    };
 
-      const options = {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + cookies.token,
-        },
-        body: JSONdata,
-      };
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/products/" + productId;
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
 
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/products/" + productId;
-      const req = await fetch(endpoint, options);
-      const res = await req.json();
+    console.log("dataput ", dataPut);
+    console.log(req);
+    console.log(res);
 
-      console.log("dataput ", dataPut);
-      console.log(req);
+    if (req.status === 200) {
+      toast.success("Produk berhasil diperbarui!", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
+      router.push("/dashboard/produk");
+    } else {
       console.log(res);
+      toast.error("Tidak dapat memperbarui Produk", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
+    }
 
-      if (req.status === 200) {
-        toast.success("Produk berhasil diperbarui!", {
-          position: toast.POSITION.TOP_RIGHT,
-        });
-        router.push("/dashboard/produk");
-      } else {
-        console.log(res);
-        toast.error("Tidak dapat memperbarui Produk", {
-          position: toast.POSITION.TOP_RIGHT,
-        });
-      }
+    setLoading(false);
+  };
 
-      setLoading(false);
-    };
+  const handleValueChange = (changedValues, allValues) => {
+    const fieldName = Object.keys(changedValues)[0];
+    const unitArr = fieldName.split("_");
+    const unit = unitArr[unitArr.length - 1];
 
-    const handleValueChange = (changedValues, allValues) => {
-      const fieldName = Object.keys(changedValues)[0];
-      const unitArr = fieldName.split("_");
-      const unit = unitArr[unitArr.length - 1];
+    setDiskonValue(form, changedValues, allValues, fieldName, firstInput);
+    setHargaValue(form, changedValues, allValues, unit, firstInput);
+  };
 
-      setDiskonValue(form, changedValues, allValues, fieldName, firstInput);
-      setHargaValue(form, changedValues, allValues, unit, firstInput);
-    };
-
-    return (
-      <>
-        <Head>
-          <title>Edit Produk</title>
-        </Head>
-        <DashboardLayout>
-          <LayoutWrapper style={{}}>
-            <TitlePage titleText={"Edit Produk"} />
-            <LayoutContent>
-              <Form
-                form={form}
-                name="edit_product"
-                initialValues={{
-                  remember: true,
-                }}
-                onFinish={onFinish}
-                onValuesChange={handleValueChange}
-              >
-                <div className="flex flex-wrap -mx-3 mb-3">
-                  <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
-                    <Form.Item
-                      name="name"
-                      initialValue={product?.attributes?.name}
-                      rules={[
-                        {
-                          required: true,
-                          message: "Nama Produk tidak boleh kosong!",
-                        },
-                      ]}
-                    >
-                      <Input
-                        style={{ height: "40px" }}
-                        placeholder="Nama Produk"
-                      />
-                    </Form.Item>
-                    <Categories
-                      initialValue={`${initCategory.attributes.category_id} - ${initCategory.attributes.name}`}
-                      selectedCategory={category}
-                      onSelectCategory={setCategory}
-                      setSubCategories={setSubCategories}
-                      setSelectedSubCategory={setSelectedSubCategory}
-                      selectedSubCategory={selectedSubCategory}
+  return (
+    <>
+      <Head>
+        <title>Edit Produk</title>
+      </Head>
+      <DashboardLayout>
+        <LayoutWrapper style={{}}>
+          <TitlePage titleText={"Edit Produk"} />
+          <LayoutContent>
+            <Form
+              form={form}
+              name="edit_product"
+              initialValues={{
+                remember: true,
+              }}
+              onFinish={onFinish}
+              onValuesChange={handleValueChange}
+            >
+              <div className="flex flex-wrap -mx-3 mb-3">
+                <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
+                  <Form.Item
+                    name="name"
+                    initialValue={product?.attributes?.name}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Nama Produk tidak boleh kosong!",
+                      },
+                    ]}
+                  >
+                    <Input
+                      style={{ height: "40px" }}
+                      placeholder="Nama Produk"
                     />
-                    <SubCategories
-                      subCategories={subCategories}
-                      onSelect={setSelectedSubCategory}
-                      selectedSubCategory={selectedSubCategory}
-                      initialValue={`${
-                        product.attributes?.sub_category?.data?.attributes
-                          .name ?? ""
-                      }`}
-                    />
-                    <Form.Item
-                      name="description"
-                      initialValue={product.attributes?.description ?? ""}
-                    >
-                      <TextArea rows={4} placeholder="Deskripsi" />
-                    </Form.Item>
-                  </div>
-                  <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
-                    <Form.Item
-                      name="SKU"
-                      rules={[
-                        {
-                          required: true,
-                          message: "SKU tidak boleh kosong!",
-                        },
-                      ]}
-                      initialValue={product.attributes?.SKU ?? ""}
-                    >
-                      <Input style={{ height: "40px" }} placeholder="SKU" />
-                    </Form.Item>
-                    <Manufactures
-                      data={manufactures.data}
-                      initialValue={product.attributes?.manufacture?.data}
-                      onSelect={setSelectedManufactures}
-                    />
-                    <Groups
-                      data={groups}
-                      onSelect={setSelectedGroup}
-                      initialValue={product.attributes?.group?.data}
-                    />
-                    <Locations
-                      data={locations}
-                      onSelect={setSelectLocation}
-                      initialValue={product.attributes?.locations.data}
-                    />
-                  </div>
-
-                  <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
-                    <Dragger {...propsDagger}>
-                      {image == null ? (
-                        <>
-                          <p className="ant-upload-drag-icon">
-                            <FileImageOutlined />
-                          </p>
-                          <p className="ant-upload-text">
-                            Klik atau tarik gambar ke kotak ini
-                          </p>
-                          <p className="ant-upload-hint  m-3">
-                            Gambar akan digunakan sebagai contoh tampilan produk
-                          </p>
-                        </>
-                      ) : (
-                        <Image
-                          layout="fill"
-                          loader={imageLoader}
-                          src={process.env.BASE_URL + image?.url}
-                        />
-                      )}
-                    </Dragger>
-                  </div>
+                  </Form.Item>
+                  <Categories
+                    initialValue={`${initCategory.attributes.category_id} - ${initCategory.attributes.name}`}
+                    selectedCategory={category}
+                    onSelectCategory={setCategory}
+                    setSubCategories={setSubCategories}
+                    setSelectedSubCategory={setSelectedSubCategory}
+                    selectedSubCategory={selectedSubCategory}
+                  />
+                  <SubCategories
+                    subCategories={subCategories}
+                    onSelect={setSelectedSubCategory}
+                    selectedSubCategory={selectedSubCategory}
+                    initialValue={`${
+                      product.attributes?.sub_category?.data?.attributes.name ??
+                      ""
+                    }`}
+                  />
+                  <Form.Item
+                    name="description"
+                    initialValue={product.attributes?.description ?? ""}
+                  >
+                    <TextArea rows={4} placeholder="Deskripsi" />
+                  </Form.Item>
                 </div>
-                <div>
-                  <h6 className="">HARGA</h6>
+                <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
+                  <Form.Item
+                    name="SKU"
+                    rules={[
+                      {
+                        required: true,
+                        message: "SKU tidak boleh kosong!",
+                      },
+                    ]}
+                    initialValue={product.attributes?.SKU ?? ""}
+                  >
+                    <Input style={{ height: "40px" }} placeholder="SKU" />
+                  </Form.Item>
+                  <Manufactures
+                    data={manufactures.data}
+                    initialValue={product.attributes?.manufacture?.data}
+                    onSelect={setSelectedManufactures}
+                  />
+                  <Groups
+                    data={groups}
+                    onSelect={setSelectedGroup}
+                    initialValue={product.attributes?.group?.data}
+                  />
+                  <Locations
+                    data={locations}
+                    onSelect={setSelectLocation}
+                    initialValue={product.attributes?.locations.data}
+                  />
                 </div>
-                <UnitTable initialValue={product.attributes} />
-                <Form.Item>
-                  {loading ? (
-                    <div className=" flex float-left ml-3 ">
-                      <Spin />
-                    </div>
-                  ) : (
-                    <>
-                      <ConfirmDialog
-                        onConfirm={() => submitBtn?.current?.click()}
-                        onCancel={() => {}}
-                        title="Edit Produk"
-                        message="Apakah anda yakin ingin mengedit produk ini?"
-                        component={
-                          <Button className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
-                            Simpan
-                          </Button>
-                        }
+
+                <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
+                  <Dragger {...propsDagger}>
+                    {image == null ? (
+                      <>
+                        <p className="ant-upload-drag-icon">
+                          <FileImageOutlined />
+                        </p>
+                        <p className="ant-upload-text">
+                          Klik atau tarik gambar ke kotak ini
+                        </p>
+                        <p className="ant-upload-hint  m-3">
+                          Gambar akan digunakan sebagai contoh tampilan produk
+                        </p>
+                      </>
+                    ) : (
+                      <Image
+                        layout="fill"
+                        loader={imageLoader}
+                        src={process.env.BASE_URL + image?.url}
                       />
-                      <Button htmlType="submit" ref={submitBtn}></Button>
-                    </>
-                  )}
-                </Form.Item>
-              </Form>
-            </LayoutContent>
-          </LayoutWrapper>
-        </DashboardLayout>
-      </>
-    );
-  };
+                    )}
+                  </Dragger>
+                </div>
+              </div>
 
-  Edit.getInitialProps = async (context) => {
-    const cookies = nookies.get(context);
+              <div>
+                <h6 className="">HARGA</h6>
+              </div>
 
-    const reqProduct = await fetchProduct(cookies, context);
-    const product = await reqProduct.json();
+              <UnitTable initialValue={product.attributes} />
 
-    const categoryId = product.data.attributes.category.data?.id;
+              <Form.Item>
+                {loading ? (
+                  <div className=" flex float-left ml-3 ">
+                    <Spin />
+                  </div>
+                ) : (
+                  <>
+                    <ConfirmDialog
+                      onConfirm={() => submitBtn?.current?.click()}
+                      onCancel={() => {}}
+                      title="Edit Produk"
+                      message="Apakah anda yakin ingin mengedit produk ini?"
+                      component={
+                        <Button className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
+                          Simpan
+                        </Button>
+                      }
+                    />
+                    <Button htmlType="submit" ref={submitBtn}></Button>
+                  </>
+                )}
+              </Form.Item>
+            </Form>
+          </LayoutContent>
+        </LayoutWrapper>
+      </DashboardLayout>
+    </>
+  );
+};
 
-    const reqCategories = await fetchDataCategories(cookies);
-    const categories = await reqCategories.json();
+Edit.getInitialProps = async (context) => {
+  const cookies = nookies.get(context);
 
-    const reqGroups = await fetchDataGroups(cookies);
-    const groups = await reqGroups.json();
+  const reqProduct = await fetchProduct(cookies, context);
+  const product = await reqProduct.json();
 
-    const reqLocations = await fetchDataLocations(cookies);
-    const locations = await reqLocations.json();
+  console.log({ product });
+  const categoryId = product.data.attributes.category.data?.id;
 
-    const reqManufactures = await fetchDataManufactures(cookies);
-    const manufactures = await reqManufactures.json();
+  const reqCategories = await fetchDataCategories(cookies);
+  const categories = await reqCategories.json();
 
-    const reqSubCategories = await fetchDataSubCategories(cookies, categoryId);
-    const subCategories = await reqSubCategories.json();
+  const reqGroups = await fetchDataGroups(cookies);
+  const groups = await reqGroups.json();
 
-    return {
-      props: {
-        product,
-        categories,
-        groups,
-        locations,
-        manufactures,
-        subCategories,
-      },
-    };
-  };
+  const reqLocations = await fetchDataLocations(cookies);
+  const locations = await reqLocations.json();
 
-  const fetchProduct = async (cookies, context) => {
-    const id = context.query.id;
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/products/" + id + "?populate=*";
-    const options = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-    };
-    const req = await fetch(endpoint, options);
+  const reqManufactures = await fetchDataManufactures(cookies);
+  const manufactures = await reqManufactures.json();
 
-    return req;
-  };
+  const reqSubCategories = await fetchDataSubCategories(cookies, categoryId);
+  const subCategories = await reqSubCategories.json();
 
-  const fetchDataCategories = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/categories";
-    const options = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-    };
-
-    const req = await fetch(endpoint, options);
-    return req;
-  };
-
-  const fetchDataManufactures = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/manufactures";
-    const options = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-    };
-
-    const req = await fetch(endpoint, options);
-    return req;
-  };
-
-  const fetchDataSubCategories = async (cookies, categoryId) => {
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL +
-      "/sub-categories?populate[category][filters][id][$eq]=" +
-      categoryId;
-    const options = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-    };
-
-    const req = await fetch(endpoint, options);
-    return req;
-  };
-
-  const fetchDataGroups = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/groups";
-    const options = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-    };
-
-    const req = await fetch(endpoint, options);
-    return req;
-  };
-
-  const fetchDataLocations = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
-    const options = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-    };
-
-    const req = await fetch(endpoint, options);
-    return req;
+  return {
+    props: {
+      product,
+      categories,
+      groups,
+      locations,
+      manufactures,
+      subCategories,
+    },
   };
 };
+
+const fetchProduct = async (cookies, context) => {
+  const id = context.query.id;
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL + "/products/" + id + "?populate=*";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+  const req = await fetch(endpoint, options);
+
+  return req;
+};
+
+const fetchDataCategories = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/categories";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchDataManufactures = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/manufactures";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchDataSubCategories = async (cookies, categoryId) => {
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL +
+    "/sub-categories?populate[category][filters][id][$eq]=" +
+    categoryId;
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchDataGroups = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/groups";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchDataLocations = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
 export default Edit;

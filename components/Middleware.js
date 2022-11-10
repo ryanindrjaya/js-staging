@@ -10,11 +10,11 @@ function Middleware({ children }) {
   useEffect(async () => {
     const firstPath = router.pathname.split("/")[1];
 
-    let isValid = await istokenValid(token);
+    // let isValid = await istokenValid(token);
 
-    if (!isValid) {
-      router.push("/");
-    }
+    // if (!isValid) {
+    //   router.push("/");
+    // }
 
     if (firstPath === "dashboard" && !token) {
       router.push("/");
