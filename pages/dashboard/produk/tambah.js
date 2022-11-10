@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
@@ -19,17 +19,24 @@ import UnitTable from "../../../components/ReactDataTable/Product/UnitsTable";
 import { FileImageOutlined } from "@ant-design/icons";
 import setDiskonValue from "./utility/setDiskonValue";
 import setHargaValue from "./utility/setHargaValue";
+import ConfirmDialog from "../../../components/Alert/ConfirmDialog";
+import debounce from "./utility/debounce";
 
 const Tambah = ({ props }) => {
   const [image, setImage] = useState();
   const [category, setCategory] = useState();
   const [uploadedOnce, setUploadedOnce] = useState(true);
   const [fileList, setFileList] = useState([]);
+  const [statusSKU, setStatusSKU] = useState({
+    status: "",
+    message: "",
+  });
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [firstInput, setFirstInputDiskon] = useState(true);
   const cookies = nookies.get(null, "token");
   const router = useRouter();
+  const submitBtn = useRef();
 
   const { Dragger } = Upload;
   const { TextArea } = Input;
@@ -228,15 +235,45 @@ const Tambah = ({ props }) => {
     }
   };
 
-  const handleValueChange = (changedValues, allValues) => {
-    const fieldName = Object.keys(changedValues)[0];
-    const unit = fieldName.split("_")[1];
+  const checkSKU = async (value) => {
+    setStatusSKU({ status: "validating", message: "" });
 
-    // jika user input unit 2,3,4, dan 5
-    if (unit > 1) {
-      setDiskonValue(form, changedValues, allValues, fieldName, firstInput);
-      setHargaValue(form, changedValues, allValues, fieldName, firstInput);
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/products?filters[SKU][$eq]=" + value;
+    const options = {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    if (req.status === 200) {
+      if (res.data.length > 0) {
+        setStatusSKU({ status: "error", message: "SKU sudah digunakan" });
+      } else {
+        setStatusSKU({ status: "success", message: "" });
+      }
+    } else {
+      setStatusSKU({ status: "error", message: "Error ketika mengambil data SKU" });
     }
+  };
+
+  const handleValueChange = async (changedValues, allValues) => {
+    const fieldName = Object.keys(changedValues)[0];
+    const unitArr = fieldName.split("_");
+    const unit = unitArr[unitArr.length - 1];
+
+    // check SKU
+    if (fieldName === "SKU" && allValues.SKU !== "") {
+      debounce(checkSKU, 1000)(allValues.SKU);
+    } else if (fieldName === "SKU" && allValues.SKU === "") {
+      setStatusSKU({ status: "error", message: "SKU tidak boleh kosong" });
+    }
+
+    setDiskonValue(form, changedValues, allValues, fieldName, firstInput);
+    setHargaValue(form, changedValues, allValues, unit, firstInput);
   };
 
   return (
@@ -283,8 +320,22 @@ const Tambah = ({ props }) => {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
-                  <Manufactures data={manufactures.data} onSelect={setSelectedManufactures} />
-                  <Groups data={groups} onSelect={setSelectedGroup} />
+                  <Form.Item
+                    name="SKU"
+                    hasFeedback
+                    validateStatus={statusSKU.status}
+                    help={statusSKU.message}
+                    rules={[
+                      {
+                        required: true,
+                        message: "SKU tidak boleh kosong!",
+                      },
+                    ]}
+                  >
+                    <Input style={{ height: "40px" }} placeholder="SKU" />
+                  </Form.Item>
+                  <Manufactures data={manufactures.data} selectedManufactures={selectedManufactures} onSelect={setSelectedManufactures} />
+                  <Groups data={groups} selectedGroups={selectedGroups} onSelect={setSelectedGroup} />
                   <Locations data={locations} onSelect={setSelectLocation} />
                 </div>
 
@@ -316,9 +367,16 @@ const Tambah = ({ props }) => {
                     <Spin />
                   </div>
                 ) : (
-                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
-                    Simpan
-                  </Button>
+                  <>
+                    <ConfirmDialog
+                      onConfirm={() => submitBtn?.current?.click()}
+                      onCancel={() => {}}
+                      title="Tambah Produk"
+                      message="Apakah anda yakin ingin menambahkan produk ini?"
+                      component={<Button className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">Simpan</Button>}
+                    />
+                    <Button htmlType="submit" ref={submitBtn}></Button>
+                  </>
                 )}
               </Form.Item>
             </Form>

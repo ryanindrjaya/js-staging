@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
@@ -17,6 +17,9 @@ import SubCategories from "../../../../components/Form/AddProduct/subCategories"
 import Groups from "../../../../components/Form/AddProduct/Groups";
 import Locations from "../../../../components/Form/AddProduct/Locations";
 import UnitTable from "../../../../components/ReactDataTable/Product/UnitsTable";
+import ConfirmDialog from "../../../../components/Alert/ConfirmDialog";
+import setHargaValue from "../utility/setHargaValue";
+import setDiskonValue from "../utility/setDiskonValue";
 
 const Edit = ({ props }) => {
   const productId = props?.product.data.id;
@@ -27,20 +30,18 @@ const Edit = ({ props }) => {
   const initCategory = product?.attributes?.category?.data;
   const subCategory = product?.attributes?.sub_category?.data;
 
-  const [image, setImage] = useState(
-    product.attributes?.image?.data
-      ? product.attributes?.image?.data[0].attributes
-      : null
-  );
+  const [image, setImage] = useState(product.attributes?.image?.data ? product.attributes?.image?.data[0].attributes : null);
 
   const [category, setCategory] = useState();
   const [idCategory, setIdCategory] = useState(initCategory.id);
   const [uploadedOnce, setUploadedOnce] = useState(true);
   const [fileList, setFileList] = useState([]);
+  const [firstInput, setFirstInputDiskon] = useState(true);
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const cookies = nookies.get(null, "token");
   const router = useRouter();
+  const submitBtn = useRef();
 
   const { Dragger } = Upload;
   const { TextArea } = Input;
@@ -119,10 +120,7 @@ const Edit = ({ props }) => {
   };
 
   const categoryChecker = (values) => {
-    if (
-      values.category_id ===
-      `${initCategory.attributes.category_id} - ${initCategory.attributes.name}`
-    ) {
+    if (values.category_id === `${initCategory.attributes.category_id} - ${initCategory.attributes.name}`) {
       console.log("category tidak berubah. jadikan id");
       values.category_id = idCategory;
     } else {
@@ -149,8 +147,8 @@ const Edit = ({ props }) => {
   };
 
   const onFinish = async (values) => {
+    console.log("values", values);
     setLoading(true);
-    console.log("values submit location", values.locations);
     values = categoryChecker(values);
     values = subCategoryChecker(values);
 
@@ -169,6 +167,15 @@ const Edit = ({ props }) => {
     const groupID = {
       id: values?.groups,
     };
+
+    values.locations =
+      values?.locations?.map((location) => {
+        if (location.value) {
+          return { id: location.value };
+        }
+
+        return { id: location };
+      }) || [];
 
     delete values.category_id;
     delete values.subCategories;
@@ -212,8 +219,7 @@ const Edit = ({ props }) => {
     console.log("data", data);
 
     for (let index = 1; index < 6; index++) {
-      if (data[`purchase_discount_${index}`] === "-")
-        delete data[`purchase_discount_${index}`];
+      if (data[`purchase_discount_${index}`] === "-") delete data[`purchase_discount_${index}`];
     }
 
     const dataPut = { data: data };
@@ -242,12 +248,22 @@ const Edit = ({ props }) => {
       });
       router.push("/dashboard/produk");
     } else {
+      console.log(res);
       toast.error("Tidak dapat memperbarui Produk", {
         position: toast.POSITION.TOP_RIGHT,
       });
     }
 
     setLoading(false);
+  };
+
+  const handleValueChange = (changedValues, allValues) => {
+    const fieldName = Object.keys(changedValues)[0];
+    const unitArr = fieldName.split("_");
+    const unit = unitArr[unitArr.length - 1];
+
+    setDiskonValue(form, changedValues, allValues, fieldName, firstInput);
+    setHargaValue(form, changedValues, allValues, unit, firstInput);
   };
 
   return (
@@ -266,6 +282,7 @@ const Edit = ({ props }) => {
                 remember: true,
               }}
               onFinish={onFinish}
+              onValuesChange={handleValueChange}
             >
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
@@ -279,10 +296,7 @@ const Edit = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "40px" }}
-                      placeholder="Nama Produk"
-                    />
+                    <Input style={{ height: "40px" }} placeholder="Nama Produk" />
                   </Form.Item>
                   <Categories
                     initialValue={`${initCategory.attributes.category_id} - ${initCategory.attributes.name}`}
@@ -296,40 +310,28 @@ const Edit = ({ props }) => {
                     subCategories={subCategories}
                     onSelect={setSelectedSubCategory}
                     selectedSubCategory={selectedSubCategory}
-                    initialValue={`${
-                      product.attributes?.sub_category?.data?.attributes.name ??
-                      ""
-                    }`}
+                    initialValue={`${product.attributes?.sub_category?.data?.attributes.name ?? ""}`}
                   />
-                  <Form.Item
-                    name="description"
-                    initialValue={product.attributes?.description ?? ""}
-                  >
+                  <Form.Item name="description" initialValue={product.attributes?.description ?? ""}>
                     <TextArea rows={4} placeholder="Deskripsi" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="SKU"
+                    rules={[
+                      {
+                        required: true,
+                        message: "SKU tidak boleh kosong!",
+                      },
+                    ]}
                     initialValue={product.attributes?.SKU ?? ""}
                   >
                     <Input style={{ height: "40px" }} placeholder="SKU" />
                   </Form.Item>
-                  <Manufactures
-                    data={manufactures.data}
-                    initialValue={product.attributes?.manufacture?.data?.id}
-                    onSelect={setSelectedManufactures}
-                  />
-                  <Groups
-                    data={groups}
-                    onSelect={setSelectedGroup}
-                    initialValue={product.attributes?.group?.data?.id}
-                  />
-                  <Locations
-                    data={locations}
-                    onSelect={setSelectLocation}
-                    initialValue={product.attributes?.locations.data}
-                  />
+                  <Manufactures data={manufactures.data} initialValue={product.attributes?.manufacture?.data} onSelect={setSelectedManufactures} />
+                  <Groups data={groups} onSelect={setSelectedGroup} initialValue={product.attributes?.group?.data} />
+                  <Locations data={locations} onSelect={setSelectLocation} initialValue={product.attributes?.locations.data} />
                 </div>
 
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
@@ -339,19 +341,11 @@ const Edit = ({ props }) => {
                         <p className="ant-upload-drag-icon">
                           <FileImageOutlined />
                         </p>
-                        <p className="ant-upload-text">
-                          Klik atau tarik gambar ke kotak ini
-                        </p>
-                        <p className="ant-upload-hint  m-3">
-                          Gambar akan digunakan sebagai contoh tampilan produk
-                        </p>
+                        <p className="ant-upload-text">Klik atau tarik gambar ke kotak ini</p>
+                        <p className="ant-upload-hint  m-3">Gambar akan digunakan sebagai contoh tampilan produk</p>
                       </>
                     ) : (
-                      <Image
-                        layout="fill"
-                        loader={imageLoader}
-                        src={process.env.BASE_URL + image?.url}
-                      />
+                      <Image layout="fill" loader={imageLoader} src={process.env.BASE_URL + image?.url} />
                     )}
                   </Dragger>
                 </div>
@@ -363,18 +357,22 @@ const Edit = ({ props }) => {
 
               <UnitTable initialValue={product.attributes} />
 
-              <Form.Item className="mt-5">
+              <Form.Item>
                 {loading ? (
                   <div className=" flex float-left ml-3 ">
                     <Spin />
                   </div>
                 ) : (
-                  <Button
-                    htmlType="submit"
-                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
-                  >
-                    Simpan
-                  </Button>
+                  <>
+                    <ConfirmDialog
+                      onConfirm={() => submitBtn?.current?.click()}
+                      onCancel={() => {}}
+                      title="Edit Produk"
+                      message="Apakah anda yakin ingin mengedit produk ini?"
+                      component={<Button className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">Simpan</Button>}
+                    />
+                    <Button htmlType="submit" ref={submitBtn}></Button>
+                  </>
                 )}
               </Form.Item>
             </Form>
@@ -422,8 +420,7 @@ Edit.getInitialProps = async (context) => {
 
 const fetchProduct = async (cookies, context) => {
   const id = context.query.id;
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/products/" + id + "?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/products/" + id + "?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -465,10 +462,7 @@ const fetchDataManufactures = async (cookies) => {
 };
 
 const fetchDataSubCategories = async (cookies, categoryId) => {
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL +
-    "/sub-categories?populate[category][filters][id][$eq]=" +
-    categoryId;
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/sub-categories?populate[category][filters][id][$eq]=" + categoryId;
   const options = {
     method: "GET",
     headers: {

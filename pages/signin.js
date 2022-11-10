@@ -16,9 +16,7 @@ export default function SignInPage(props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [failedLogin, setFailedLogin] = useState(false);
-  const [failedLoginMsg, setfailedLoginMsg] = useState(
-    "Username atau Password salah"
-  );
+  const [failedLoginMsg, setfailedLoginMsg] = useState("Username atau Password salah");
   const [field, setField] = useState({});
 
   const handleLogin = async (e) => {
@@ -91,7 +89,7 @@ export default function SignInPage(props) {
     const req = await fetch(endpoint, options);
     const res = await req.json();
     console.log(res);
-    return res;
+    return res.role.name;
   };
 
   const onClose = (e) => {
@@ -115,30 +113,15 @@ export default function SignInPage(props) {
     <SignInStyleWrapper className="isoSignInPage">
       <div className="isoLoginContentWrapper">
         <div className="isoLoginContent">
-          <div className="isoLogoWrapper">
-            KEELOLA
-          </div>
+          <div className="isoLogoWrapper">JAYA SEHAT</div>
 
           <div className="isoSignInForm">
             <div className="isoInputWrapper">
-              <Input
-                onChange={setValue}
-                name="username"
-                id="inputUserName"
-                size="large"
-                placeholder="Username"
-              />
+              <Input onChange={setValue} name="username" id="inputUserName" size="large" placeholder="Username" />
             </div>
 
             <div className="isoInputWrapper">
-              <Input
-                onChange={setValue}
-                id="inpuPassword"
-                size="large"
-                name="password"
-                type="password"
-                placeholder="Password"
-              />
+              <Input onChange={setValue} id="inpuPassword" size="large" name="password" type="password" placeholder="Password" />
             </div>
 
             <div className="isoInputWrapper isoLeftRightComponent">
@@ -153,13 +136,7 @@ export default function SignInPage(props) {
               )}
             </div>
             {failedLogin ? (
-              <Alert
-                message="Login Error"
-                description="Username atau Password salah"
-                type="error"
-                closable
-                onClose={onClose}
-              />
+              <Alert message="Login Error" description="Username atau Password salah" type="error" closable onClose={onClose} />
             ) : (
               <div></div>
             )}
