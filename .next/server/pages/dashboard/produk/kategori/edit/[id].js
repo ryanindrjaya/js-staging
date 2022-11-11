@@ -2519,22 +2519,6 @@ const Edit = ({
               children: [/*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__["jsx"])("div", {
                 className: "w-full md:w-1/2 px-3 mb-2 md:mb-0",
                 children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_3___default.a.Item, {
-                  initialValue: categories.attributes.name,
-                  name: "name",
-                  rules: [{
-                    required: true,
-                    message: "Nama Satuan tidak boleh kosong!"
-                  }],
-                  children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__["jsx"])(antd_lib_input__WEBPACK_IMPORTED_MODULE_2___default.a, {
-                    style: {
-                      height: "50px"
-                    },
-                    placeholder: "Nama Kategori"
-                  })
-                })
-              }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__["jsx"])("div", {
-                className: "w-full md:w-1/2 px-3 mb-2 md:mb-0",
-                children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_3___default.a.Item, {
                   name: "category_id",
                   initialValue: categories.attributes.category_id,
                   rules: [{
@@ -2546,6 +2530,22 @@ const Edit = ({
                       height: "50px"
                     },
                     placeholder: "ID Kategori"
+                  })
+                })
+              }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__["jsx"])("div", {
+                className: "w-full md:w-1/2 px-3 mb-2 md:mb-0",
+                children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_3___default.a.Item, {
+                  initialValue: categories.attributes.name,
+                  name: "name",
+                  rules: [{
+                    required: true,
+                    message: "Nama Kategori tidak boleh kosong!"
+                  }],
+                  children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__["jsx"])(antd_lib_input__WEBPACK_IMPORTED_MODULE_2___default.a, {
+                    style: {
+                      height: "50px"
+                    },
+                    placeholder: "Nama Kategori"
                   })
                 })
               }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__["jsx"])("div", {

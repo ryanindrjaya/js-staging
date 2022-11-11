@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
-import { Button, Form, Input, message, Upload, Space } from "antd";
+import { Button, Form, Input, message, Upload, notification } from "antd";
 import nookies from "nookies";
 import { toast } from "react-toastify";
 import { Spin, Row } from "antd";
@@ -51,6 +51,8 @@ const Tambah = ({ props }) => {
 
   const [subCategories, setSubCategories] = useState([]);
   const [selectedSubCategory, setSelectedSubCategory] = useState();
+
+  const [descUnit, setDescUnit] = useState();
 
   const imageLoader = ({ src }) => {
     return process.env.BASE_URL + image?.url;
@@ -195,8 +197,6 @@ const Tambah = ({ props }) => {
       }
     }
 
-    console.log(endpoint);
-
     const dataPut = { data: data };
     const JSONdata = JSON.stringify(dataPut);
 
@@ -223,9 +223,14 @@ const Tambah = ({ props }) => {
       } else {
         res?.error?.details?.errors.map((error) => {
           const ErrorMsg = error.path[0];
-          toast.error(ErrorMsg === "SKU" ? "SKU sudah digunakan" : "Tidak dapat menambahkan Produk", {
-            position: toast.POSITION.TOP_RIGHT,
-          });
+          toast.error(
+            ErrorMsg === "SKU"
+              ? "SKU sudah digunakan"
+              : "Tidak dapat menambahkan Produk",
+            {
+              position: toast.POSITION.TOP_RIGHT,
+            }
+          );
         });
       }
     } catch (error) {
@@ -238,7 +243,8 @@ const Tambah = ({ props }) => {
   const checkSKU = async (value) => {
     setStatusSKU({ status: "validating", message: "" });
 
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/products?filters[SKU][$eq]=" + value;
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL + "/products?filters[SKU][$eq]=" + value;
     const options = {
       method: "GET",
       headers: {
@@ -256,7 +262,10 @@ const Tambah = ({ props }) => {
         setStatusSKU({ status: "success", message: "" });
       }
     } else {
-      setStatusSKU({ status: "error", message: "Error ketika mengambil data SKU" });
+      setStatusSKU({
+        status: "error",
+        message: "Error ketika mengambil data SKU",
+      });
     }
   };
 
@@ -276,6 +285,43 @@ const Tambah = ({ props }) => {
     setHargaValue(form, changedValues, allValues, unit, firstInput);
   };
 
+  const getDescriptionUnit = () => {
+    const unitText = form.getFieldsValue([
+      "unit_1",
+      "qty_1",
+      "unit_2",
+      "qty_2",
+      "unit_3",
+      "qty_3",
+      "unit_4",
+      "qty_4",
+      "unit_5",
+      "qty_5",
+    ]);
+
+    let unit1 = `${unitText.qty_1 ?? ""} ${unitText.unit_1 ?? ""} `;
+    let unit2 = `${unitText.qty_2 ?? ""} ${unitText.unit_2 ?? ""} `;
+    let unit3 = `${unitText.qty_3 ?? ""} ${unitText.unit_3 ?? ""} `;
+    let unit4 = `${unitText.qty_4 ?? ""} ${unitText.unit_4 ?? ""} `;
+    let unit5 = `${unitText.qty_5 ?? ""} ${unitText.unit_5 ?? ""} `;
+
+    let descUnit = unit1 + unit2 + unit3 + unit4 + unit5;
+    setDescUnit(descUnit);
+  };
+
+  const onFinishFailed = () => {
+    const error = form.getFieldsError();
+    error.forEach((value) => {
+      if (value.errors.length !== 0) {
+        let errorMsg = value.errors[0];
+        notification["error"]({
+          message: "Field Masih Kosong",
+          description: errorMsg,
+        });
+      }
+    });
+  };
+
   return (
     <>
       <Head>
@@ -291,6 +337,7 @@ const Tambah = ({ props }) => {
               initialValues={{
                 remember: true,
               }}
+              onFinishFailed={onFinishFailed}
               onFinish={onFinish}
               onValuesChange={handleValueChange}
             >
@@ -305,7 +352,10 @@ const Tambah = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input style={{ height: "40px" }} placeholder="Nama Produk" />
+                    <Input
+                      style={{ height: "40px" }}
+                      placeholder="Nama Produk"
+                    />
                   </Form.Item>
                   <Categories
                     selectedCategory={category}
@@ -314,7 +364,11 @@ const Tambah = ({ props }) => {
                     setSelectedSubCategory={setSelectedSubCategory}
                     selectedSubCategory={selectedSubCategory}
                   />
-                  <SubCategories subCategories={subCategories} onSelect={setSelectedSubCategory} selectedSubCategory={selectedSubCategory} />
+                  <SubCategories
+                    subCategories={subCategories}
+                    onSelect={setSelectedSubCategory}
+                    selectedSubCategory={selectedSubCategory}
+                  />
                   <Form.Item name="description">
                     <TextArea rows={4} placeholder="Deskripsi" />
                   </Form.Item>
@@ -334,9 +388,17 @@ const Tambah = ({ props }) => {
                   >
                     <Input style={{ height: "40px" }} placeholder="SKU" />
                   </Form.Item>
-                  <Manufactures data={manufactures.data} selectedManufactures={selectedManufactures} onSelect={setSelectedManufactures} />
-                  <Groups data={groups} selectedGroups={selectedGroups} onSelect={setSelectedGroup} />
-                  <Locations data={locations} onSelect={setSelectLocation} />
+                  <Manufactures
+                    data={manufactures.data}
+                    selectedManufactures={selectedManufactures}
+                    onSelect={setSelectedManufactures}
+                  />
+                  <Groups
+                    data={groups}
+                    selectedGroups={selectedGroups}
+                    onSelect={setSelectedGroup}
+                  />
+                  <Locations data={locations} onSelect={setSelectLocation} required={true} />
                 </div>
 
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
@@ -346,11 +408,19 @@ const Tambah = ({ props }) => {
                         <p className="ant-upload-drag-icon">
                           <FileImageOutlined />
                         </p>
-                        <p className="ant-upload-text">Klik atau tarik gambar ke kotak ini</p>
-                        <p className="ant-upload-hint  m-3">Gambar akan digunakan sebagai contoh tampilan produk</p>
+                        <p className="ant-upload-text">
+                          Klik atau tarik gambar ke kotak ini
+                        </p>
+                        <p className="ant-upload-hint  m-3">
+                          Gambar akan digunakan sebagai contoh tampilan produk
+                        </p>
                       </>
                     ) : (
-                      <Image layout="fill" loader={imageLoader} src={process.env.BASE_URL + image?.url} />
+                      <Image
+                        layout="fill"
+                        loader={imageLoader}
+                        src={process.env.BASE_URL + image?.url}
+                      />
                     )}
                   </Dragger>
                 </div>
@@ -359,7 +429,7 @@ const Tambah = ({ props }) => {
               <div>
                 <h6 className="">HARGA</h6>
               </div>
-              <UnitTable />
+              <UnitTable getDescUnit={getDescriptionUnit} descUnit={descUnit} />
 
               <Form.Item className="mt-5">
                 {loading ? (
@@ -373,7 +443,11 @@ const Tambah = ({ props }) => {
                       onCancel={() => {}}
                       title="Tambah Produk"
                       message="Apakah anda yakin ingin menambahkan produk ini?"
-                      component={<Button className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">Simpan</Button>}
+                      component={
+                        <Button className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
+                          Simpan
+                        </Button>
+                      }
                     />
                     <Button htmlType="submit" ref={submitBtn}></Button>
                   </>

@@ -8,7 +8,9 @@ export default function Groups({ onSelect, selectedGroups, initialValue }) {
   const [loading, setLoading] = useState(false);
   const cookies = nookies.get(null, "token");
 
-  const options = data?.map((d) => <Select.Option key={d.value}>{d.label}</Select.Option>);
+  const options = data?.map((d) => (
+    <Select.Option key={d.value}>{d.label}</Select.Option>
+  ));
 
   const handleSearchGroups = (newValue) => {
     if (newValue) {
@@ -30,7 +32,8 @@ export default function Groups({ onSelect, selectedGroups, initialValue }) {
       setLoading(true);
       try {
         const endpoint =
-          process.env.NEXT_PUBLIC_URL + `/groups?filters[$or][0][name][$containsi]=${query}&filters[$or][1][code][$containsi]=${query}`;
+          process.env.NEXT_PUBLIC_URL +
+          `/groups?filters[$or][0][name][$containsi]=${query}&filters[$or][1][code][$containsi]=${query}`;
         const options = {
           method: "GET",
           headers: {
@@ -59,11 +62,20 @@ export default function Groups({ onSelect, selectedGroups, initialValue }) {
 
   return (
     <div className="w-full md:w-full mb-2 md:mb-0">
-      <Form.Item name="groups" className="w-1/1">
+      <Form.Item
+        name="groups"
+        className="w-1/1"
+        initialValue={initialValue?.attributes.name}
+      >
         <Select
           size="large"
-          value={groups}
-          defaultValue={initialValue && { value: initialValue?.id, label: initialValue?.attributes?.name }}
+          value={groups ?? initialValue?.attributes.name}
+          defaultValue={
+            initialValue && {
+              value: initialValue?.id,
+              label: initialValue?.attributes?.name,
+            }
+          }
           showSearch
           showArrow={false}
           filterOption={false}

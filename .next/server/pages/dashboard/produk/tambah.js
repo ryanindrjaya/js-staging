@@ -216,9 +216,10 @@ function Groups({
     children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_0___default.a.Item, {
       name: "groups",
       className: "w-1/1",
+      initialValue: initialValue === null || initialValue === void 0 ? void 0 : initialValue.attributes.name,
       children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__["jsx"])(antd_lib_select__WEBPACK_IMPORTED_MODULE_1___default.a, {
         size: "large",
-        value: groups,
+        value: groups !== null && groups !== void 0 ? groups : initialValue === null || initialValue === void 0 ? void 0 : initialValue.attributes.name,
         defaultValue: initialValue && {
           value: initialValue === null || initialValue === void 0 ? void 0 : initialValue.id,
           label: initialValue === null || initialValue === void 0 ? void 0 : (_initialValue$attribu = initialValue.attributes) === null || _initialValue$attribu === void 0 ? void 0 : _initialValue$attribu.name
@@ -2712,26 +2713,58 @@ module.exports = require("antd/lib/input-number");
 
 /***/ }),
 
+/***/ "Gss8":
+/***/ (function(module, exports) {
+
+module.exports = require("antd/lib/notification");
+
+/***/ }),
+
 /***/ "HAFu":
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return UnitsTable; });
-/* harmony import */ var antd_lib_input_number__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("GqX/");
-/* harmony import */ var antd_lib_input_number__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(antd_lib_input_number__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var antd_lib_form__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("foLw");
-/* harmony import */ var antd_lib_form__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(antd_lib_form__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var antd_lib_input__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("Uqqx");
-/* harmony import */ var antd_lib_input__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(antd_lib_input__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _ant_design_icons_lib_icons_EditOutlined__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("x0cy");
-/* harmony import */ var _ant_design_icons_lib_icons_EditOutlined__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_ant_design_icons_lib_icons_EditOutlined__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var react_data_table_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("rFaA");
-/* harmony import */ var react_data_table_component__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(react_data_table_component__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var _Alert_Alert__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("AVMw");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("cDcd");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("F5FC");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__);
+
+// EXPORTS
+__webpack_require__.d(__webpack_exports__, "a", function() { return /* binding */ UnitsTable; });
+
+// EXTERNAL MODULE: external "antd/lib/input-number"
+var input_number_ = __webpack_require__("GqX/");
+var input_number_default = /*#__PURE__*/__webpack_require__.n(input_number_);
+
+// EXTERNAL MODULE: external "antd/lib/form"
+var form_ = __webpack_require__("foLw");
+var form_default = /*#__PURE__*/__webpack_require__.n(form_);
+
+// EXTERNAL MODULE: external "antd/lib/input"
+var input_ = __webpack_require__("Uqqx");
+var input_default = /*#__PURE__*/__webpack_require__.n(input_);
+
+// EXTERNAL MODULE: external "@ant-design/icons/lib/icons/EditOutlined"
+var EditOutlined_ = __webpack_require__("x0cy");
+var EditOutlined_default = /*#__PURE__*/__webpack_require__.n(EditOutlined_);
+
+// EXTERNAL MODULE: external "react-data-table-component"
+var external_react_data_table_component_ = __webpack_require__("rFaA");
+var external_react_data_table_component_default = /*#__PURE__*/__webpack_require__.n(external_react_data_table_component_);
+
+// EXTERNAL MODULE: ./components/Alert/Alert.js
+var Alert = __webpack_require__("AVMw");
+
+// CONCATENATED MODULE: ./components/Formatter/CurrencyFormatter.js
+// formatter and parser input number
+const formatterNumber = val => {
+  if (!val) return 0;
+  return `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",").replace(/\.(?=\d{0,2}$)/g, ".");
+};
+const parserNumber = val => {
+  if (!val) return 0;
+  return Number.parseFloat(val.replace(/\$\s?|(\,*)/g, "").replace(/(\,{1})/g, ",")).toFixed(2);
+};
+// EXTERNAL MODULE: external "react/jsx-runtime"
+var jsx_runtime_ = __webpack_require__("F5FC");
+
+// CONCATENATED MODULE: ./components/ReactDataTable/Product/UnitsTable.js
 
 
 
@@ -2746,10 +2779,10 @@ function UnitsTable({
   onDelete,
   onUpdate,
   onPageChange,
-  initialValue
+  initialValue,
+  getDescUnit,
+  descUnit
 }) {
-  console.log(initialValue);
-
   const onConfirm = id => {
     onDelete(id);
   };
@@ -2775,14 +2808,14 @@ function UnitsTable({
   const diskon4 = [initialValue === null || initialValue === void 0 ? void 0 : initialValue.unit_1_dp4, initialValue === null || initialValue === void 0 ? void 0 : initialValue.unit_2_dp4, initialValue === null || initialValue === void 0 ? void 0 : initialValue.unit_3_dp4, initialValue === null || initialValue === void 0 ? void 0 : initialValue.unit_4_dp4, initialValue === null || initialValue === void 0 ? void 0 : initialValue.unit_5_dp4];
   const diskon5 = [initialValue === null || initialValue === void 0 ? void 0 : initialValue.unit_1_dp5, initialValue === null || initialValue === void 0 ? void 0 : initialValue.unit_2_dp5, initialValue === null || initialValue === void 0 ? void 0 : initialValue.unit_3_dp5, initialValue === null || initialValue === void 0 ? void 0 : initialValue.unit_4_dp5, initialValue === null || initialValue === void 0 ? void 0 : initialValue.unit_5_dp5]; // const unit_1_dp1
 
-  const content = row => /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsxs"])("div", {
-    children: [/*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsxs"])("button", {
+  const content = row => /*#__PURE__*/Object(jsx_runtime_["jsxs"])("div", {
+    children: [/*#__PURE__*/Object(jsx_runtime_["jsxs"])("button", {
       onClick: () => onEdit(row.id),
       className: " hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md ",
-      children: [/*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(_ant_design_icons_lib_icons_EditOutlined__WEBPACK_IMPORTED_MODULE_3___default.a, {
+      children: [/*#__PURE__*/Object(jsx_runtime_["jsx"])(EditOutlined_default.a, {
         className: "mr-2 mt-0.5 float float-left"
       }), "Edit"]
-    }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(_Alert_Alert__WEBPACK_IMPORTED_MODULE_5__[/* default */ "a"], {
+    }), /*#__PURE__*/Object(jsx_runtime_["jsx"])(Alert["a" /* default */], {
       onCancel: onCancel,
       onConfirm: onConfirm,
       title: "Hapus Kategori",
@@ -2874,13 +2907,14 @@ function UnitsTable({
     style: {
       backgroundColor: "#f4f4f4"
     },
-    selector: row => /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_1___default.a.Item, {
+    selector: row => /*#__PURE__*/Object(jsx_runtime_["jsx"])(form_default.a.Item, {
       className: "mt-4",
       name: `unit_${row.idx}`,
       initialValue: unit[row.idx - 1],
-      children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(antd_lib_input__WEBPACK_IMPORTED_MODULE_2___default.a, {
+      children: /*#__PURE__*/Object(jsx_runtime_["jsx"])(input_default.a, {
         size: "small",
-        placeholder: `Nama Unit ${row.idx}`
+        placeholder: `Nama Unit ${row.idx}`,
+        onChange: getDescUnit
       })
     })
   }, {
@@ -2889,16 +2923,17 @@ function UnitsTable({
     style: {
       backgroundColor: "#f4f4f4"
     },
-    selector: row => /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_1___default.a.Item, {
+    selector: row => /*#__PURE__*/Object(jsx_runtime_["jsx"])(form_default.a.Item, {
       className: "mt-4",
       name: `qty_${row.idx}`,
       initialValue: qty[row.idx - 1],
-      children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(antd_lib_input_number__WEBPACK_IMPORTED_MODULE_0___default.a, {
+      children: /*#__PURE__*/Object(jsx_runtime_["jsx"])(input_number_default.a, {
         style: {
           width: 100
         },
         size: "small",
-        placeholder: `Isi ${row.idx}`
+        placeholder: `Isi ${row.idx}`,
+        onChange: getDescUnit
       })
     })
   }, {
@@ -2907,13 +2942,13 @@ function UnitsTable({
     style: {
       backgroundColor: "#036B82"
     },
-    selector: row => /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_1___default.a.Item, {
+    selector: row => /*#__PURE__*/Object(jsx_runtime_["jsx"])(form_default.a.Item, {
       className: "mt-4",
       name: `buy_price_${row.idx}`,
       initialValue: buyPrice[row.idx - 1],
-      children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(antd_lib_input_number__WEBPACK_IMPORTED_MODULE_0___default.a, {
-        formatter: rupiahFormatter,
-        parser: currencyParser,
+      children: /*#__PURE__*/Object(jsx_runtime_["jsx"])(input_number_default.a, {
+        formatter: formatterNumber,
+        parser: parserNumber,
         style: {
           width: 120
         },
@@ -2929,13 +2964,13 @@ function UnitsTable({
     selector: row => {
       var _purchaseDiscount;
 
-      return /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_1___default.a.Item, {
+      return /*#__PURE__*/Object(jsx_runtime_["jsx"])(form_default.a.Item, {
         className: "mt-4",
         name: `purchase_discount_${[row.idx]}`,
         initialValue: (_purchaseDiscount = purchaseDiscount[row.idx - 1]) !== null && _purchaseDiscount !== void 0 ? _purchaseDiscount : 0,
-        children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(antd_lib_input_number__WEBPACK_IMPORTED_MODULE_0___default.a, {
-          formatter: rupiahFormatter,
-          parser: currencyParser,
+        children: /*#__PURE__*/Object(jsx_runtime_["jsx"])(input_number_default.a, {
+          formatter: formatterNumber,
+          parser: parserNumber,
           style: {
             width: 120
           },
@@ -2949,7 +2984,7 @@ function UnitsTable({
     style: {
       backgroundColor: "#036B82"
     },
-    selector: row => /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_1___default.a.Item, {
+    selector: row => /*#__PURE__*/Object(jsx_runtime_["jsx"])(form_default.a.Item, {
       className: "mt-4",
       name: `unit_${row.idx}_dp1`,
       rules: [{
@@ -2958,7 +2993,7 @@ function UnitsTable({
         message: "Melebihi ketentuan"
       }],
       initialValue: diskon1[row.idx - 1],
-      children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(antd_lib_input_number__WEBPACK_IMPORTED_MODULE_0___default.a, {
+      children: /*#__PURE__*/Object(jsx_runtime_["jsx"])(input_number_default.a, {
         style: {
           width: 50
         },
@@ -2971,7 +3006,7 @@ function UnitsTable({
     style: {
       backgroundColor: "#036B82"
     },
-    selector: row => /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_1___default.a.Item, {
+    selector: row => /*#__PURE__*/Object(jsx_runtime_["jsx"])(form_default.a.Item, {
       className: "mt-4",
       name: `unit_${row.idx}_dp2`,
       rules: [{
@@ -2980,7 +3015,7 @@ function UnitsTable({
         message: "Melebihi ketentuan"
       }],
       initialValue: diskon2[row.idx - 1],
-      children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(antd_lib_input_number__WEBPACK_IMPORTED_MODULE_0___default.a, {
+      children: /*#__PURE__*/Object(jsx_runtime_["jsx"])(input_number_default.a, {
         style: {
           width: 200
         },
@@ -2993,7 +3028,7 @@ function UnitsTable({
     style: {
       backgroundColor: "#036B82"
     },
-    selector: row => /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_1___default.a.Item, {
+    selector: row => /*#__PURE__*/Object(jsx_runtime_["jsx"])(form_default.a.Item, {
       className: "mt-4",
       name: `unit_${row.idx}_dp3`,
       rules: [{
@@ -3002,7 +3037,7 @@ function UnitsTable({
         message: "Melebihi ketentuan"
       }],
       initialValue: diskon3[row.idx - 1],
-      children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(antd_lib_input_number__WEBPACK_IMPORTED_MODULE_0___default.a, {
+      children: /*#__PURE__*/Object(jsx_runtime_["jsx"])(input_number_default.a, {
         style: {
           width: 60
         },
@@ -3015,13 +3050,13 @@ function UnitsTable({
     style: {
       backgroundColor: "#f4f4f4"
     },
-    selector: row => /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_1___default.a.Item, {
+    selector: row => /*#__PURE__*/Object(jsx_runtime_["jsx"])(form_default.a.Item, {
       className: "mt-4",
       name: `pricelist_${row.idx}`,
       initialValue: pricelist[row.idx - 1],
-      children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(antd_lib_input_number__WEBPACK_IMPORTED_MODULE_0___default.a, {
-        formatter: rupiahFormatter,
-        parser: currencyParser,
+      children: /*#__PURE__*/Object(jsx_runtime_["jsx"])(input_number_default.a, {
+        formatter: formatterNumber,
+        parser: parserNumber,
         style: {
           width: 110
         },
@@ -3034,13 +3069,13 @@ function UnitsTable({
     style: {
       backgroundColor: "#f4f4f4"
     },
-    selector: row => /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_1___default.a.Item, {
+    selector: row => /*#__PURE__*/Object(jsx_runtime_["jsx"])(form_default.a.Item, {
       className: "mt-4",
       name: `sold_price_${row.idx}`,
       initialValue: soldPrice[row.idx - 1],
-      children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(antd_lib_input_number__WEBPACK_IMPORTED_MODULE_0___default.a, {
-        formatter: rupiahFormatter,
-        parser: currencyParser,
+      children: /*#__PURE__*/Object(jsx_runtime_["jsx"])(input_number_default.a, {
+        formatter: formatterNumber,
+        parser: parserNumber,
         style: {
           width: 110
         },
@@ -3053,11 +3088,11 @@ function UnitsTable({
     style: {
       backgroundColor: "#f4f4f4"
     },
-    selector: row => /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_1___default.a.Item, {
+    selector: row => /*#__PURE__*/Object(jsx_runtime_["jsx"])(form_default.a.Item, {
       className: "mt-4",
       name: `disc_1_${row.idx}`,
       initialValue: disc[row.idx - 1],
-      children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(antd_lib_input_number__WEBPACK_IMPORTED_MODULE_0___default.a, {
+      children: /*#__PURE__*/Object(jsx_runtime_["jsx"])(input_number_default.a, {
         style: {
           width: 120
         },
@@ -3065,15 +3100,28 @@ function UnitsTable({
       })
     })
   }];
-  return /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsxs"])(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["Fragment"], {
-    children: [/*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])(react_data_table_component__WEBPACK_IMPORTED_MODULE_4___default.a, {
+
+  const getInitialDescUnit = () => {
+    var _initialValue$qty_, _initialValue$unit_, _initialValue$qty_2, _initialValue$unit_2, _initialValue$qty_3, _initialValue$unit_3, _initialValue$qty_4, _initialValue$unit_4, _initialValue$qty_5, _initialValue$unit_5;
+
+    let unit1 = `${(_initialValue$qty_ = initialValue === null || initialValue === void 0 ? void 0 : initialValue.qty_1) !== null && _initialValue$qty_ !== void 0 ? _initialValue$qty_ : ""} ${(_initialValue$unit_ = initialValue === null || initialValue === void 0 ? void 0 : initialValue.unit_1) !== null && _initialValue$unit_ !== void 0 ? _initialValue$unit_ : ""} `;
+    let unit2 = `${(_initialValue$qty_2 = initialValue === null || initialValue === void 0 ? void 0 : initialValue.qty_2) !== null && _initialValue$qty_2 !== void 0 ? _initialValue$qty_2 : ""} ${(_initialValue$unit_2 = initialValue === null || initialValue === void 0 ? void 0 : initialValue.unit_2) !== null && _initialValue$unit_2 !== void 0 ? _initialValue$unit_2 : ""} `;
+    let unit3 = `${(_initialValue$qty_3 = initialValue === null || initialValue === void 0 ? void 0 : initialValue.qty_3) !== null && _initialValue$qty_3 !== void 0 ? _initialValue$qty_3 : ""} ${(_initialValue$unit_3 = initialValue === null || initialValue === void 0 ? void 0 : initialValue.unit_3) !== null && _initialValue$unit_3 !== void 0 ? _initialValue$unit_3 : ""} `;
+    let unit4 = `${(_initialValue$qty_4 = initialValue === null || initialValue === void 0 ? void 0 : initialValue.qty_4) !== null && _initialValue$qty_4 !== void 0 ? _initialValue$qty_4 : ""} ${(_initialValue$unit_4 = initialValue === null || initialValue === void 0 ? void 0 : initialValue.unit_4) !== null && _initialValue$unit_4 !== void 0 ? _initialValue$unit_4 : ""} `;
+    let unit5 = `${(_initialValue$qty_5 = initialValue === null || initialValue === void 0 ? void 0 : initialValue.qty_5) !== null && _initialValue$qty_5 !== void 0 ? _initialValue$qty_5 : ""} ${(_initialValue$unit_5 = initialValue === null || initialValue === void 0 ? void 0 : initialValue.unit_5) !== null && _initialValue$unit_5 !== void 0 ? _initialValue$unit_5 : ""} `;
+    let descUnit = unit1 + unit2 + unit3 + unit4 + unit5;
+    return descUnit;
+  };
+
+  return /*#__PURE__*/Object(jsx_runtime_["jsxs"])(jsx_runtime_["Fragment"], {
+    children: [/*#__PURE__*/Object(jsx_runtime_["jsx"])(external_react_data_table_component_default.a, {
       customStyles: customStyles,
       onChangePage: onPageChange,
       columns: columns,
       data: data
-    }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__["jsx"])("p", {
+    }), /*#__PURE__*/Object(jsx_runtime_["jsxs"])("p", {
       className: "mt-3",
-      children: "Keterangan Unit : 1 CTN 5 BOX 10 STRP"
+      children: ["Keterangan Unit : ", descUnit !== null && descUnit !== void 0 ? descUnit : getInitialDescUnit()]
     })]
   });
 }
@@ -4733,7 +4781,7 @@ function Locations({
       className: "w-1/1",
       rules: [{
         required: required,
-        message: errMsg
+        message: 'Lokasi Produk tidak boleh kosong!'
       }],
       children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__["jsx"])(antd_lib_select__WEBPACK_IMPORTED_MODULE_1___default.a, {
         mode: "multiple",
@@ -6237,15 +6285,21 @@ function Manufactures({
         console.log(error);
       }
     }
-  };
+  }; // console.log(manufactures ?? initialValue.attributes.name);
+
 
   return /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__["jsx"])("div", {
     className: "w-full md:w-full mb-2 md:mb-0",
     children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_0___default.a.Item, {
+      initialValue: initialValue === null || initialValue === void 0 ? void 0 : initialValue.attributes.name,
       name: "manufactures",
       className: "w-1/1",
+      rules: [{
+        required: true,
+        message: "Pabrikasi tidak boleh kosong!"
+      }],
       children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__["jsx"])(antd_lib_select__WEBPACK_IMPORTED_MODULE_1___default.a, {
-        value: manufactures,
+        value: manufactures !== null && manufactures !== void 0 ? manufactures : initialValue === null || initialValue === void 0 ? void 0 : initialValue.attributes.name,
         size: "large",
         defaultValue: initialValue && {
           value: initialValue === null || initialValue === void 0 ? void 0 : initialValue.id,
@@ -6772,42 +6826,45 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var antd_lib_spin__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(antd_lib_spin__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _ant_design_icons_lib_icons_FileImageOutlined__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("u56z");
 /* harmony import */ var _ant_design_icons_lib_icons_FileImageOutlined__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_ant_design_icons_lib_icons_FileImageOutlined__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var antd_lib_message__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("3PsY");
-/* harmony import */ var antd_lib_message__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(antd_lib_message__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var antd_lib_input__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("Uqqx");
-/* harmony import */ var antd_lib_input__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(antd_lib_input__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var antd_lib_upload__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("TfTO");
-/* harmony import */ var antd_lib_upload__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(antd_lib_upload__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var antd_lib_form__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("foLw");
-/* harmony import */ var antd_lib_form__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(antd_lib_form__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("cDcd");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_7__);
-/* harmony import */ var next_head__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__("xnum");
-/* harmony import */ var next_head__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(next_head__WEBPACK_IMPORTED_MODULE_8__);
-/* harmony import */ var _iso_components_utility_layoutContent__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__("kM/w");
-/* harmony import */ var _iso_components_utility_layoutWrapper_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__("PKTO");
-/* harmony import */ var nookies__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__("kG9d");
-/* harmony import */ var nookies__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(nookies__WEBPACK_IMPORTED_MODULE_11__);
-/* harmony import */ var react_toastify__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__("oAEb");
-/* harmony import */ var react_toastify__WEBPACK_IMPORTED_MODULE_12___default = /*#__PURE__*/__webpack_require__.n(react_toastify__WEBPACK_IMPORTED_MODULE_12__);
-/* harmony import */ var _containers_DashboardLayout_DashboardLayout__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__("0Jbt");
-/* harmony import */ var _components_TitlePage_TitlePage__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__("xBBV");
-/* harmony import */ var _components_Form_AddProduct_Categories__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__("zf01");
-/* harmony import */ var _components_Form_AddProduct_Manufactures__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__("ml6N");
-/* harmony import */ var _components_Form_AddProduct_subCategories__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__("k1kd");
-/* harmony import */ var _components_Form_AddProduct_Groups__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__("+zqw");
-/* harmony import */ var _components_Form_AddProduct_Locations__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__("Sqsd");
-/* harmony import */ var next_router__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__("4Q3z");
-/* harmony import */ var next_router__WEBPACK_IMPORTED_MODULE_20___default = /*#__PURE__*/__webpack_require__.n(next_router__WEBPACK_IMPORTED_MODULE_20__);
-/* harmony import */ var next_image__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__("Aiso");
-/* harmony import */ var next_image__WEBPACK_IMPORTED_MODULE_21___default = /*#__PURE__*/__webpack_require__.n(next_image__WEBPACK_IMPORTED_MODULE_21__);
-/* harmony import */ var _components_ReactDataTable_Product_UnitsTable__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__("HAFu");
-/* harmony import */ var _utility_setDiskonValue__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__("RnN9");
-/* harmony import */ var _utility_setHargaValue__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__("lzg3");
-/* harmony import */ var _components_Alert_ConfirmDialog__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__("n6RN");
-/* harmony import */ var _utility_debounce__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__("12ph");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__("F5FC");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__);
+/* harmony import */ var antd_lib_notification__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("Gss8");
+/* harmony import */ var antd_lib_notification__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(antd_lib_notification__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var antd_lib_message__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("3PsY");
+/* harmony import */ var antd_lib_message__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(antd_lib_message__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var antd_lib_input__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("Uqqx");
+/* harmony import */ var antd_lib_input__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(antd_lib_input__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var antd_lib_upload__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("TfTO");
+/* harmony import */ var antd_lib_upload__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(antd_lib_upload__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var antd_lib_form__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("foLw");
+/* harmony import */ var antd_lib_form__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(antd_lib_form__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__("cDcd");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_8__);
+/* harmony import */ var next_head__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__("xnum");
+/* harmony import */ var next_head__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(next_head__WEBPACK_IMPORTED_MODULE_9__);
+/* harmony import */ var _iso_components_utility_layoutContent__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__("kM/w");
+/* harmony import */ var _iso_components_utility_layoutWrapper_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__("PKTO");
+/* harmony import */ var nookies__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__("kG9d");
+/* harmony import */ var nookies__WEBPACK_IMPORTED_MODULE_12___default = /*#__PURE__*/__webpack_require__.n(nookies__WEBPACK_IMPORTED_MODULE_12__);
+/* harmony import */ var react_toastify__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__("oAEb");
+/* harmony import */ var react_toastify__WEBPACK_IMPORTED_MODULE_13___default = /*#__PURE__*/__webpack_require__.n(react_toastify__WEBPACK_IMPORTED_MODULE_13__);
+/* harmony import */ var _containers_DashboardLayout_DashboardLayout__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__("0Jbt");
+/* harmony import */ var _components_TitlePage_TitlePage__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__("xBBV");
+/* harmony import */ var _components_Form_AddProduct_Categories__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__("zf01");
+/* harmony import */ var _components_Form_AddProduct_Manufactures__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__("ml6N");
+/* harmony import */ var _components_Form_AddProduct_subCategories__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__("k1kd");
+/* harmony import */ var _components_Form_AddProduct_Groups__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__("+zqw");
+/* harmony import */ var _components_Form_AddProduct_Locations__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__("Sqsd");
+/* harmony import */ var next_router__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__("4Q3z");
+/* harmony import */ var next_router__WEBPACK_IMPORTED_MODULE_21___default = /*#__PURE__*/__webpack_require__.n(next_router__WEBPACK_IMPORTED_MODULE_21__);
+/* harmony import */ var next_image__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__("Aiso");
+/* harmony import */ var next_image__WEBPACK_IMPORTED_MODULE_22___default = /*#__PURE__*/__webpack_require__.n(next_image__WEBPACK_IMPORTED_MODULE_22__);
+/* harmony import */ var _components_ReactDataTable_Product_UnitsTable__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__("HAFu");
+/* harmony import */ var _utility_setDiskonValue__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__("RnN9");
+/* harmony import */ var _utility_setHargaValue__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__("lzg3");
+/* harmony import */ var _components_Alert_ConfirmDialog__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__("n6RN");
+/* harmony import */ var _utility_debounce__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__("12ph");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__("F5FC");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__);
+
 
 
 
@@ -6852,69 +6909,73 @@ const Tambah = ({
   const {
     0: image,
     1: setImage
-  } = Object(react__WEBPACK_IMPORTED_MODULE_7__["useState"])();
+  } = Object(react__WEBPACK_IMPORTED_MODULE_8__["useState"])();
   const {
     0: category,
     1: setCategory
-  } = Object(react__WEBPACK_IMPORTED_MODULE_7__["useState"])();
+  } = Object(react__WEBPACK_IMPORTED_MODULE_8__["useState"])();
   const {
     0: uploadedOnce,
     1: setUploadedOnce
-  } = Object(react__WEBPACK_IMPORTED_MODULE_7__["useState"])(true);
+  } = Object(react__WEBPACK_IMPORTED_MODULE_8__["useState"])(true);
   const {
     0: fileList,
     1: setFileList
-  } = Object(react__WEBPACK_IMPORTED_MODULE_7__["useState"])([]);
+  } = Object(react__WEBPACK_IMPORTED_MODULE_8__["useState"])([]);
   const {
     0: statusSKU,
     1: setStatusSKU
-  } = Object(react__WEBPACK_IMPORTED_MODULE_7__["useState"])({
+  } = Object(react__WEBPACK_IMPORTED_MODULE_8__["useState"])({
     status: "",
     message: ""
   });
 
-  const [form] = antd_lib_form__WEBPACK_IMPORTED_MODULE_6___default.a.useForm();
+  const [form] = antd_lib_form__WEBPACK_IMPORTED_MODULE_7___default.a.useForm();
 
   const {
     0: loading,
     1: setLoading
-  } = Object(react__WEBPACK_IMPORTED_MODULE_7__["useState"])(false);
+  } = Object(react__WEBPACK_IMPORTED_MODULE_8__["useState"])(false);
   const {
     0: firstInput,
     1: setFirstInputDiskon
-  } = Object(react__WEBPACK_IMPORTED_MODULE_7__["useState"])(true);
-  const cookies = nookies__WEBPACK_IMPORTED_MODULE_11___default.a.get(null, "token");
-  const router = Object(next_router__WEBPACK_IMPORTED_MODULE_20__["useRouter"])();
-  const submitBtn = Object(react__WEBPACK_IMPORTED_MODULE_7__["useRef"])();
+  } = Object(react__WEBPACK_IMPORTED_MODULE_8__["useState"])(true);
+  const cookies = nookies__WEBPACK_IMPORTED_MODULE_12___default.a.get(null, "token");
+  const router = Object(next_router__WEBPACK_IMPORTED_MODULE_21__["useRouter"])();
+  const submitBtn = Object(react__WEBPACK_IMPORTED_MODULE_8__["useRef"])();
   const {
     Dragger
-  } = antd_lib_upload__WEBPACK_IMPORTED_MODULE_5___default.a;
+  } = antd_lib_upload__WEBPACK_IMPORTED_MODULE_6___default.a;
   const {
     TextArea
-  } = antd_lib_input__WEBPACK_IMPORTED_MODULE_4___default.a;
+  } = antd_lib_input__WEBPACK_IMPORTED_MODULE_5___default.a;
   const manufactures = props.manufactures;
   const groups = props.groups;
   const locations = props.locations;
   const {
     0: selectedManufactures,
     1: setSelectedManufactures
-  } = Object(react__WEBPACK_IMPORTED_MODULE_7__["useState"])({});
+  } = Object(react__WEBPACK_IMPORTED_MODULE_8__["useState"])({});
   const {
     0: selectedGroups,
     1: setSelectedGroup
-  } = Object(react__WEBPACK_IMPORTED_MODULE_7__["useState"])({});
+  } = Object(react__WEBPACK_IMPORTED_MODULE_8__["useState"])({});
   const {
     0: selectLocations,
     1: setSelectLocation
-  } = Object(react__WEBPACK_IMPORTED_MODULE_7__["useState"])({});
+  } = Object(react__WEBPACK_IMPORTED_MODULE_8__["useState"])({});
   const {
     0: subCategories,
     1: setSubCategories
-  } = Object(react__WEBPACK_IMPORTED_MODULE_7__["useState"])([]);
+  } = Object(react__WEBPACK_IMPORTED_MODULE_8__["useState"])([]);
   const {
     0: selectedSubCategory,
     1: setSelectedSubCategory
-  } = Object(react__WEBPACK_IMPORTED_MODULE_7__["useState"])();
+  } = Object(react__WEBPACK_IMPORTED_MODULE_8__["useState"])();
+  const {
+    0: descUnit,
+    1: setDescUnit
+  } = Object(react__WEBPACK_IMPORTED_MODULE_8__["useState"])();
 
   const imageLoader = ({
     src
@@ -6960,15 +7021,15 @@ const Tambah = ({
           if (req.status === 200) {
             setImage(res[0]);
 
-            antd_lib_message__WEBPACK_IMPORTED_MODULE_3___default.a.success(`${info.file.name} berhasil diupload`);
+            antd_lib_message__WEBPACK_IMPORTED_MODULE_4___default.a.success(`${info.file.name} berhasil diupload`);
           } else {
-            antd_lib_message__WEBPACK_IMPORTED_MODULE_3___default.a.error(`${info.file.name} gagal upload`);
+            antd_lib_message__WEBPACK_IMPORTED_MODULE_4___default.a.error(`${info.file.name} gagal upload`);
           }
         }
       } else if (info.fileList.length === 0) {
-        antd_lib_message__WEBPACK_IMPORTED_MODULE_3___default.a.info(`Gambar berhasil dihapus`);
+        antd_lib_message__WEBPACK_IMPORTED_MODULE_4___default.a.info(`Gambar berhasil dihapus`);
       } else {
-        antd_lib_message__WEBPACK_IMPORTED_MODULE_3___default.a.error(`Hanya dapat menambahkan 1 gambar`);
+        antd_lib_message__WEBPACK_IMPORTED_MODULE_4___default.a.error(`Hanya dapat menambahkan 1 gambar`);
       }
     }
 
@@ -7053,7 +7114,6 @@ const Tambah = ({
       }
     }
 
-    console.log(endpoint);
     const dataPut = {
       data: data
     };
@@ -7074,8 +7134,8 @@ const Tambah = ({
       if (req.status === 200) {
         setImage();
         form.resetFields();
-        react_toastify__WEBPACK_IMPORTED_MODULE_12__["toast"].success("Produk berhasil ditambahkan!", {
-          position: react_toastify__WEBPACK_IMPORTED_MODULE_12__["toast"].POSITION.TOP_RIGHT
+        react_toastify__WEBPACK_IMPORTED_MODULE_13__["toast"].success("Produk berhasil ditambahkan!", {
+          position: react_toastify__WEBPACK_IMPORTED_MODULE_13__["toast"].POSITION.TOP_RIGHT
         });
         router.reload();
       } else {
@@ -7083,14 +7143,14 @@ const Tambah = ({
 
         res === null || res === void 0 ? void 0 : (_res$error = res.error) === null || _res$error === void 0 ? void 0 : (_res$error$details = _res$error.details) === null || _res$error$details === void 0 ? void 0 : _res$error$details.errors.map(error => {
           const ErrorMsg = error.path[0];
-          react_toastify__WEBPACK_IMPORTED_MODULE_12__["toast"].error(ErrorMsg === "SKU" ? "SKU sudah digunakan" : "Tidak dapat menambahkan Produk", {
-            position: react_toastify__WEBPACK_IMPORTED_MODULE_12__["toast"].POSITION.TOP_RIGHT
+          react_toastify__WEBPACK_IMPORTED_MODULE_13__["toast"].error(ErrorMsg === "SKU" ? "SKU sudah digunakan" : "Tidak dapat menambahkan Produk", {
+            position: react_toastify__WEBPACK_IMPORTED_MODULE_13__["toast"].POSITION.TOP_RIGHT
           });
         });
       }
     } catch (error) {
-      react_toastify__WEBPACK_IMPORTED_MODULE_12__["toast"].error("Tidak dapat menambahkan Produk", {
-        position: react_toastify__WEBPACK_IMPORTED_MODULE_12__["toast"].POSITION.TOP_RIGHT
+      react_toastify__WEBPACK_IMPORTED_MODULE_13__["toast"].error("Tidak dapat menambahkan Produk", {
+        position: react_toastify__WEBPACK_IMPORTED_MODULE_13__["toast"].POSITION.TOP_RIGHT
       });
     }
   };
@@ -7136,7 +7196,7 @@ const Tambah = ({
     const unit = unitArr[unitArr.length - 1]; // check SKU
 
     if (fieldName === "SKU" && allValues.SKU !== "") {
-      Object(_utility_debounce__WEBPACK_IMPORTED_MODULE_26__["default"])(checkSKU, 1000)(allValues.SKU);
+      Object(_utility_debounce__WEBPACK_IMPORTED_MODULE_27__["default"])(checkSKU, 1000)(allValues.SKU);
     } else if (fieldName === "SKU" && allValues.SKU === "") {
       setStatusSKU({
         status: "error",
@@ -7144,65 +7204,93 @@ const Tambah = ({
       });
     }
 
-    Object(_utility_setDiskonValue__WEBPACK_IMPORTED_MODULE_23__["default"])(form, changedValues, allValues, fieldName, firstInput);
-    Object(_utility_setHargaValue__WEBPACK_IMPORTED_MODULE_24__["default"])(form, changedValues, allValues, unit, firstInput);
+    Object(_utility_setDiskonValue__WEBPACK_IMPORTED_MODULE_24__["default"])(form, changedValues, allValues, fieldName, firstInput);
+    Object(_utility_setHargaValue__WEBPACK_IMPORTED_MODULE_25__["default"])(form, changedValues, allValues, unit, firstInput);
   };
 
-  return /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsxs"])(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["Fragment"], {
-    children: [/*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(next_head__WEBPACK_IMPORTED_MODULE_8___default.a, {
-      children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])("title", {
+  const getDescriptionUnit = () => {
+    var _unitText$qty_, _unitText$unit_, _unitText$qty_2, _unitText$unit_2, _unitText$qty_3, _unitText$unit_3, _unitText$qty_4, _unitText$unit_4, _unitText$qty_5, _unitText$unit_5;
+
+    const unitText = form.getFieldsValue(["unit_1", "qty_1", "unit_2", "qty_2", "unit_3", "qty_3", "unit_4", "qty_4", "unit_5", "qty_5"]);
+    let unit1 = `${(_unitText$qty_ = unitText.qty_1) !== null && _unitText$qty_ !== void 0 ? _unitText$qty_ : ""} ${(_unitText$unit_ = unitText.unit_1) !== null && _unitText$unit_ !== void 0 ? _unitText$unit_ : ""} `;
+    let unit2 = `${(_unitText$qty_2 = unitText.qty_2) !== null && _unitText$qty_2 !== void 0 ? _unitText$qty_2 : ""} ${(_unitText$unit_2 = unitText.unit_2) !== null && _unitText$unit_2 !== void 0 ? _unitText$unit_2 : ""} `;
+    let unit3 = `${(_unitText$qty_3 = unitText.qty_3) !== null && _unitText$qty_3 !== void 0 ? _unitText$qty_3 : ""} ${(_unitText$unit_3 = unitText.unit_3) !== null && _unitText$unit_3 !== void 0 ? _unitText$unit_3 : ""} `;
+    let unit4 = `${(_unitText$qty_4 = unitText.qty_4) !== null && _unitText$qty_4 !== void 0 ? _unitText$qty_4 : ""} ${(_unitText$unit_4 = unitText.unit_4) !== null && _unitText$unit_4 !== void 0 ? _unitText$unit_4 : ""} `;
+    let unit5 = `${(_unitText$qty_5 = unitText.qty_5) !== null && _unitText$qty_5 !== void 0 ? _unitText$qty_5 : ""} ${(_unitText$unit_5 = unitText.unit_5) !== null && _unitText$unit_5 !== void 0 ? _unitText$unit_5 : ""} `;
+    let descUnit = unit1 + unit2 + unit3 + unit4 + unit5;
+    setDescUnit(descUnit);
+  };
+
+  const onFinishFailed = () => {
+    const error = form.getFieldsError();
+    error.forEach(value => {
+      if (value.errors.length !== 0) {
+        let errorMsg = value.errors[0];
+
+        antd_lib_notification__WEBPACK_IMPORTED_MODULE_3___default.a["error"]({
+          message: "Field Masih Kosong",
+          description: errorMsg
+        });
+      }
+    });
+  };
+
+  return /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsxs"])(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["Fragment"], {
+    children: [/*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(next_head__WEBPACK_IMPORTED_MODULE_9___default.a, {
+      children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])("title", {
         children: "Tambahkan Produk"
       })
-    }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(_containers_DashboardLayout_DashboardLayout__WEBPACK_IMPORTED_MODULE_13__[/* default */ "a"], {
-      children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsxs"])(_iso_components_utility_layoutWrapper_js__WEBPACK_IMPORTED_MODULE_10__[/* default */ "a"], {
+    }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(_containers_DashboardLayout_DashboardLayout__WEBPACK_IMPORTED_MODULE_14__[/* default */ "a"], {
+      children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsxs"])(_iso_components_utility_layoutWrapper_js__WEBPACK_IMPORTED_MODULE_11__[/* default */ "a"], {
         style: {},
-        children: [/*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(_components_TitlePage_TitlePage__WEBPACK_IMPORTED_MODULE_14__[/* default */ "a"], {
+        children: [/*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(_components_TitlePage_TitlePage__WEBPACK_IMPORTED_MODULE_15__[/* default */ "a"], {
           titleText: "Tambahkan Produk"
-        }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(_iso_components_utility_layoutContent__WEBPACK_IMPORTED_MODULE_9__[/* default */ "a"], {
-          children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsxs"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_6___default.a, {
+        }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(_iso_components_utility_layoutContent__WEBPACK_IMPORTED_MODULE_10__[/* default */ "a"], {
+          children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsxs"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_7___default.a, {
             form: form,
             name: "add_product",
             initialValues: {
               remember: true
             },
+            onFinishFailed: onFinishFailed,
             onFinish: onFinish,
             onValuesChange: handleValueChange,
-            children: [/*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsxs"])("div", {
+            children: [/*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsxs"])("div", {
               className: "flex flex-wrap -mx-3 mb-3",
-              children: [/*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsxs"])("div", {
+              children: [/*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsxs"])("div", {
                 className: "w-full md:w-1/3 px-3 mb-2 md:mb-0",
-                children: [/*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_6___default.a.Item, {
+                children: [/*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_7___default.a.Item, {
                   name: "name",
                   rules: [{
                     required: true,
                     message: "Nama Produk tidak boleh kosong!"
                   }],
-                  children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(antd_lib_input__WEBPACK_IMPORTED_MODULE_4___default.a, {
+                  children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(antd_lib_input__WEBPACK_IMPORTED_MODULE_5___default.a, {
                     style: {
                       height: "40px"
                     },
                     placeholder: "Nama Produk"
                   })
-                }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(_components_Form_AddProduct_Categories__WEBPACK_IMPORTED_MODULE_15__[/* default */ "a"], {
+                }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(_components_Form_AddProduct_Categories__WEBPACK_IMPORTED_MODULE_16__[/* default */ "a"], {
                   selectedCategory: category,
                   onSelectCategory: setCategory,
                   setSubCategories: setSubCategories,
                   setSelectedSubCategory: setSelectedSubCategory,
                   selectedSubCategory: selectedSubCategory
-                }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(_components_Form_AddProduct_subCategories__WEBPACK_IMPORTED_MODULE_17__[/* default */ "a"], {
+                }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(_components_Form_AddProduct_subCategories__WEBPACK_IMPORTED_MODULE_18__[/* default */ "a"], {
                   subCategories: subCategories,
                   onSelect: setSelectedSubCategory,
                   selectedSubCategory: selectedSubCategory
-                }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_6___default.a.Item, {
+                }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_7___default.a.Item, {
                   name: "description",
-                  children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(TextArea, {
+                  children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(TextArea, {
                     rows: 4,
                     placeholder: "Deskripsi"
                   })
                 })]
-              }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsxs"])("div", {
+              }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsxs"])("div", {
                 className: "w-full md:w-1/3 px-3 mb-2 md:mb-0",
-                children: [/*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_6___default.a.Item, {
+                children: [/*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_7___default.a.Item, {
                   name: "SKU",
                   hasFeedback: true,
                   validateStatus: statusSKU.status,
@@ -7211,57 +7299,61 @@ const Tambah = ({
                     required: true,
                     message: "SKU tidak boleh kosong!"
                   }],
-                  children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(antd_lib_input__WEBPACK_IMPORTED_MODULE_4___default.a, {
+                  children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(antd_lib_input__WEBPACK_IMPORTED_MODULE_5___default.a, {
                     style: {
                       height: "40px"
                     },
                     placeholder: "SKU"
                   })
-                }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(_components_Form_AddProduct_Manufactures__WEBPACK_IMPORTED_MODULE_16__[/* default */ "a"], {
+                }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(_components_Form_AddProduct_Manufactures__WEBPACK_IMPORTED_MODULE_17__[/* default */ "a"], {
                   data: manufactures.data,
                   selectedManufactures: selectedManufactures,
                   onSelect: setSelectedManufactures
-                }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(_components_Form_AddProduct_Groups__WEBPACK_IMPORTED_MODULE_18__[/* default */ "a"], {
+                }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(_components_Form_AddProduct_Groups__WEBPACK_IMPORTED_MODULE_19__[/* default */ "a"], {
                   data: groups,
                   selectedGroups: selectedGroups,
                   onSelect: setSelectedGroup
-                }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(_components_Form_AddProduct_Locations__WEBPACK_IMPORTED_MODULE_19__[/* default */ "a"], {
+                }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(_components_Form_AddProduct_Locations__WEBPACK_IMPORTED_MODULE_20__[/* default */ "a"], {
                   data: locations,
-                  onSelect: setSelectLocation
+                  onSelect: setSelectLocation,
+                  required: true
                 })]
-              }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])("div", {
+              }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])("div", {
                 className: "w-full md:w-1/3 px-3 mb-2 md:mb-0",
-                children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(Dragger, _objectSpread(_objectSpread({}, propsDagger), {}, {
-                  children: image == null ? /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsxs"])(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["Fragment"], {
-                    children: [/*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])("p", {
+                children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(Dragger, _objectSpread(_objectSpread({}, propsDagger), {}, {
+                  children: image == null ? /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsxs"])(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["Fragment"], {
+                    children: [/*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])("p", {
                       className: "ant-upload-drag-icon",
-                      children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(_ant_design_icons_lib_icons_FileImageOutlined__WEBPACK_IMPORTED_MODULE_2___default.a, {})
-                    }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])("p", {
+                      children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(_ant_design_icons_lib_icons_FileImageOutlined__WEBPACK_IMPORTED_MODULE_2___default.a, {})
+                    }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])("p", {
                       className: "ant-upload-text",
                       children: "Klik atau tarik gambar ke kotak ini"
-                    }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])("p", {
+                    }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])("p", {
                       className: "ant-upload-hint  m-3",
                       children: "Gambar akan digunakan sebagai contoh tampilan produk"
                     })]
-                  }) : /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(next_image__WEBPACK_IMPORTED_MODULE_21___default.a, {
+                  }) : /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(next_image__WEBPACK_IMPORTED_MODULE_22___default.a, {
                     layout: "fill",
                     loader: imageLoader,
                     src: process.env.BASE_URL + (image === null || image === void 0 ? void 0 : image.url)
                   })
                 }))
               })]
-            }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])("div", {
-              children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])("h6", {
+            }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])("div", {
+              children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])("h6", {
                 className: "",
                 children: "HARGA"
               })
-            }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(_components_ReactDataTable_Product_UnitsTable__WEBPACK_IMPORTED_MODULE_22__[/* default */ "a"], {}), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_6___default.a.Item, {
+            }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(_components_ReactDataTable_Product_UnitsTable__WEBPACK_IMPORTED_MODULE_23__[/* default */ "a"], {
+              getDescUnit: getDescriptionUnit,
+              descUnit: descUnit
+            }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_7___default.a.Item, {
               className: "mt-5",
-              children: loading ? /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])("div", {
+              children: loading ? /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])("div", {
                 className: " flex float-left ml-3 ",
-                children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(antd_lib_spin__WEBPACK_IMPORTED_MODULE_1___default.a, {})
-              }) : /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsxs"])(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["Fragment"], {
-                children: [/*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(_components_Alert_ConfirmDialog__WEBPACK_IMPORTED_MODULE_25__[/* default */ "a"], {
+                children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(antd_lib_spin__WEBPACK_IMPORTED_MODULE_1___default.a, {})
+              }) : /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsxs"])(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["Fragment"], {
+                children: [/*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(_components_Alert_ConfirmDialog__WEBPACK_IMPORTED_MODULE_26__[/* default */ "a"], {
                   onConfirm: () => {
                     var _submitBtn$current;
 
@@ -7270,11 +7362,11 @@ const Tambah = ({
                   onCancel: () => {},
                   title: "Tambah Produk",
                   message: "Apakah anda yakin ingin menambahkan produk ini?",
-                  component: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(antd_lib_button__WEBPACK_IMPORTED_MODULE_0___default.a, {
+                  component: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(antd_lib_button__WEBPACK_IMPORTED_MODULE_0___default.a, {
                     className: " hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1",
                     children: "Simpan"
                   })
-                }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(antd_lib_button__WEBPACK_IMPORTED_MODULE_0___default.a, {
+                }), /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__["jsx"])(antd_lib_button__WEBPACK_IMPORTED_MODULE_0___default.a, {
                   htmlType: "submit",
                   ref: submitBtn
                 })]
@@ -7288,7 +7380,7 @@ const Tambah = ({
 };
 
 Tambah.getInitialProps = async context => {
-  const cookies = nookies__WEBPACK_IMPORTED_MODULE_11___default.a.get(context);
+  const cookies = nookies__WEBPACK_IMPORTED_MODULE_12___default.a.get(context);
   const reqCategories = await fetchDataCategories(cookies);
   const categories = await reqCategories.json();
   const reqGroups = await fetchDataGroups(cookies);

@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
-import { Button, Form, Input, message, Upload, Space } from "antd";
+import { Button, Form, Input, message, Upload, notification } from "antd";
 import nookies from "nookies";
 import { toast } from "react-toastify";
 import { Spin, Row } from "antd";
@@ -29,6 +29,8 @@ const Edit = ({ props }) => {
   const locations = props?.locations;
   const initCategory = product?.attributes?.category?.data;
   const subCategory = product?.attributes?.sub_category?.data;
+  const initManufacture = product?.attributes?.manufacture?.data;
+  const initGroup = product?.attributes?.group?.data;
 
   const [image, setImage] = useState(
     product.attributes?.image?.data
@@ -38,6 +40,7 @@ const Edit = ({ props }) => {
 
   const [category, setCategory] = useState();
   const [idCategory, setIdCategory] = useState(initCategory.id);
+  const [idManufacture, setIdManufacture] = useState(initManufacture.id);
   const [uploadedOnce, setUploadedOnce] = useState(true);
   const [fileList, setFileList] = useState([]);
   const [firstInput, setFirstInputDiskon] = useState(true);
@@ -57,6 +60,8 @@ const Edit = ({ props }) => {
   const [subCategories, setSubCategories] = useState([]);
   const [selectedSubCategory, setSelectedSubCategory] = useState();
 
+  const [descUnit, setDescUnit] = useState();
+
   function locationsList() {
     const locationNameList = [];
     locations.data.forEach((element) => {
@@ -67,7 +72,7 @@ const Edit = ({ props }) => {
   }
 
   const imageLoader = ({ src }) => {
-    return process.env.BASE_URL + image?.url;
+    return process.env.NEXT_PUBLIC_URL + image?.url;
   };
 
   const propsDagger = {
@@ -128,10 +133,8 @@ const Edit = ({ props }) => {
       values.category_id ===
       `${initCategory.attributes.category_id} - ${initCategory.attributes.name}`
     ) {
-      console.log("category tidak berubah. jadikan id");
       values.category_id = idCategory;
     } else {
-      console.log("category berubah. jadikan tipe int");
       values.category_id = parseInt(values.category_id);
     }
 
@@ -139,41 +142,65 @@ const Edit = ({ props }) => {
   };
 
   const subCategoryChecker = (values) => {
-    console.log("checker ", values.subCategories, subCategory);
     if (values.subCategories === subCategory?.attributes.name) {
-      console.log("sub category tidak berubah. jadikan id");
       values.subCategories = subCategory.id;
     } else if (!subCategory) {
-      console.log("tidak ada datanya cuy");
     } else {
-      console.log("sub category berubah. jadikan tipe int");
       values.subCategories = parseInt(values.subCategories);
     }
 
     return values;
   };
 
+  const manufactureChecker = (values) => {
+    if (values.manufactures === initManufacture?.attributes.name) {
+      values.manufactures = initManufacture.id;
+    } else if (!initManufacture) {
+    } else {
+      values.manufactures = parseInt(values.manufactures);
+    }
+
+    return values;
+  };
+
+  const groupChecker = (values) => {
+    if (values.groups === initGroup?.attributes.name) {
+      values.groups = initGroup.id;
+    } else if (!initGroup) {
+    } else {
+      values.groups = parseInt(values.groups);
+    }
+
+   
+    return values;
+  };
+
   const onFinish = async (values) => {
     console.log("values", values);
+
     setLoading(true);
     values = categoryChecker(values);
     values = subCategoryChecker(values);
+    values = manufactureChecker(values);
+    values = groupChecker(values);
 
     const categoryID = {
       id: parseInt(values?.category_id),
     };
 
     const subCategoryID = {
-      id: values?.subCategories ?? null,
+      id: parseInt(values?.subCategories) ?? null,
     };
 
     const manufacturesID = {
-      id: values?.manufactures,
+      id: parseInt(values?.manufactures),
     };
 
     const groupID = {
-      id: values?.groups,
+      id: parseInt(values?.groups),
     };
+
+    console.log(" checker", values);
 
     values.locations =
       values?.locations?.map((location) => {
@@ -223,8 +250,6 @@ const Edit = ({ props }) => {
       ...putData,
     };
 
-    console.log("data", data);
-
     for (let index = 1; index < 6; index++) {
       if (data[`purchase_discount_${index}`] === "-")
         delete data[`purchase_discount_${index}`];
@@ -242,25 +267,27 @@ const Edit = ({ props }) => {
       body: JSONdata,
     };
 
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/products/" + productId;
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
+    console.log(dataPut);
 
-    console.log("dataput ", dataPut);
-    console.log(req);
-    console.log(res);
+    // const endpoint = process.env.NEXT_PUBLIC_URL + "/products/" + productId;
+    // const req = await fetch(endpoint, options);
+    // const res = await req.json();
 
-    if (req.status === 200) {
-      toast.success("Produk berhasil diperbarui!", {
-        position: toast.POSITION.TOP_RIGHT,
-      });
-      router.push("/dashboard/produk");
-    } else {
-      console.log(res);
-      toast.error("Tidak dapat memperbarui Produk", {
-        position: toast.POSITION.TOP_RIGHT,
-      });
-    }
+    // console.log("dataput ", dataPut);
+    // console.log(req);
+    // console.log(res);
+
+    // if (req.status === 200) {
+    //   toast.success("Produk berhasil diperbarui!", {
+    //     position: toast.POSITION.TOP_RIGHT,
+    //   });
+    //   router.push("/dashboard/produk");
+    // } else {
+    //   console.log(res);
+    //   toast.error("Tidak dapat memperbarui Produk", {
+    //     position: toast.POSITION.TOP_RIGHT,
+    //   });
+    // }
 
     setLoading(false);
   };
@@ -272,6 +299,43 @@ const Edit = ({ props }) => {
 
     setDiskonValue(form, changedValues, allValues, fieldName, firstInput);
     setHargaValue(form, changedValues, allValues, unit, firstInput);
+  };
+
+  const getDescriptionUnit = () => {
+    const unitText = form.getFieldsValue([
+      "unit_1",
+      "qty_1",
+      "unit_2",
+      "qty_2",
+      "unit_3",
+      "qty_3",
+      "unit_4",
+      "qty_4",
+      "unit_5",
+      "qty_5",
+    ]);
+
+    let unit1 = `${unitText.qty_1 ?? ""} ${unitText.unit_1 ?? ""} `;
+    let unit2 = `${unitText.qty_2 ?? ""} ${unitText.unit_2 ?? ""} `;
+    let unit3 = `${unitText.qty_3 ?? ""} ${unitText.unit_3 ?? ""} `;
+    let unit4 = `${unitText.qty_4 ?? ""} ${unitText.unit_4 ?? ""} `;
+    let unit5 = `${unitText.qty_5 ?? ""} ${unitText.unit_5 ?? ""} `;
+
+    let descUnit = unit1 + unit2 + unit3 + unit4 + unit5;
+    setDescUnit(descUnit);
+  };
+
+  const onFinishFailed = () => {
+    const error = form.getFieldsError();
+    error.forEach((value) => {
+      if (value.errors.length !== 0) {
+        let errorMsg = value.errors[0];
+        notification["error"]({
+          message: "Field Masih Kosong",
+          description: errorMsg,
+        });
+      }
+    });
   };
 
   return (
@@ -290,6 +354,7 @@ const Edit = ({ props }) => {
                 remember: true,
               }}
               onFinish={onFinish}
+              onFinishFailed={onFinishFailed}
               onValuesChange={handleValueChange}
             >
               <div className="flex flex-wrap -mx-3 mb-3">
@@ -357,6 +422,7 @@ const Edit = ({ props }) => {
                     initialValue={product.attributes?.group?.data}
                   />
                   <Locations
+                    required={true}
                     data={locations}
                     onSelect={setSelectLocation}
                     initialValue={product.attributes?.locations.data}
@@ -381,7 +447,7 @@ const Edit = ({ props }) => {
                       <Image
                         layout="fill"
                         loader={imageLoader}
-                        src={process.env.BASE_URL + image?.url}
+                        src={process.env.NEXT_PUBLIC_URL + image?.url}
                       />
                     )}
                   </Dragger>
@@ -392,7 +458,11 @@ const Edit = ({ props }) => {
                 <h6 className="">HARGA</h6>
               </div>
 
-              <UnitTable initialValue={product.attributes} />
+              <UnitTable
+                initialValue={product.attributes}
+                getDescUnit={getDescriptionUnit}
+                descUnit={descUnit}
+              />
 
               <Form.Item>
                 {loading ? (
@@ -430,7 +500,6 @@ Edit.getInitialProps = async (context) => {
   const reqProduct = await fetchProduct(cookies, context);
   const product = await reqProduct.json();
 
-  console.log({ product });
   const categoryId = product.data.attributes.category.data?.id;
 
   const reqCategories = await fetchDataCategories(cookies);

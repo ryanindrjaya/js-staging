@@ -2532,7 +2532,7 @@ const Tambah = () => {
                   name: "alias",
                   rules: [{
                     required: true,
-                    message: "Singkatan Sub tidak boleh kosong!"
+                    message: "Singkatan Pabrik boleh kosong!"
                   }],
                   children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__["jsx"])(antd_lib_input__WEBPACK_IMPORTED_MODULE_2___default.a, {
                     style: {

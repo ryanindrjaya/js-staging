@@ -76,22 +76,6 @@ const Tambah = () => {
               <div className="flex flex-wrap -mx-3 mb-6">
                 <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    name="name"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Nama Satuan tidak boleh kosong!",
-                      },
-                    ]}
-                  >
-                    <Input
-                      style={{ height: "50px" }}
-                      placeholder="Nama Kategori"
-                    />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
-                  <Form.Item
                     name="category_id"
                     rules={[
                       {
@@ -106,6 +90,23 @@ const Tambah = () => {
                     />
                   </Form.Item>
                 </div>
+                <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
+                  <Form.Item
+                    name="name"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Nama Kategori tidak boleh kosong!",
+                      },
+                    ]}
+                  >
+                    <Input
+                      style={{ height: "50px" }}
+                      placeholder="Nama Kategori"
+                    />
+                  </Form.Item>
+                </div>
+
                 <div className="w-full md:w-full px-3 mb-2 md:mb-0">
                   <Form.Item name="description">
                     <TextArea rows={4} placeholder="Deskripsi" />

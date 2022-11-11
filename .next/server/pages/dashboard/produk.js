@@ -7023,15 +7023,21 @@ function Manufactures({
         console.log(error);
       }
     }
-  };
+  }; // console.log(manufactures ?? initialValue.attributes.name);
+
 
   return /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__["jsx"])("div", {
     className: "w-full md:w-full mb-2 md:mb-0",
     children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__["jsx"])(antd_lib_form__WEBPACK_IMPORTED_MODULE_0___default.a.Item, {
+      initialValue: initialValue === null || initialValue === void 0 ? void 0 : initialValue.attributes.name,
       name: "manufactures",
       className: "w-1/1",
+      rules: [{
+        required: true,
+        message: "Pabrikasi tidak boleh kosong!"
+      }],
       children: /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__["jsx"])(antd_lib_select__WEBPACK_IMPORTED_MODULE_1___default.a, {
-        value: manufactures,
+        value: manufactures !== null && manufactures !== void 0 ? manufactures : initialValue === null || initialValue === void 0 ? void 0 : initialValue.attributes.name,
         size: "large",
         defaultValue: initialValue && {
           value: initialValue === null || initialValue === void 0 ? void 0 : initialValue.id,
