@@ -55,7 +55,7 @@ const Tambah = ({ props }) => {
   const [descUnit, setDescUnit] = useState();
 
   const imageLoader = ({ src }) => {
-    return process.env.BASE_URL + image?.url;
+    return process.env.NEXT_PUBLIC_URL + image?.url;
   };
 
   const propsDagger = {
@@ -419,7 +419,7 @@ const Tambah = ({ props }) => {
                       <Image
                         layout="fill"
                         loader={imageLoader}
-                        src={process.env.BASE_URL + image?.url}
+                        src={process.env.NEXT_PUBLIC_URL + image?.url}
                       />
                     )}
                   </Dragger>
