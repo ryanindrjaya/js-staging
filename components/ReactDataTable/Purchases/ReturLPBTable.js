@@ -9,7 +9,8 @@ export default function ReactDataTable({
     productSubTotal,
     products,
     setTotalPrice,
-    productList
+    productList,
+    //qty
 }) {
 
   const [qty, setQty] = useState([]);
@@ -19,6 +20,15 @@ export default function ReactDataTable({
   var defaultDp1 = 0;
   var defaultDp2 = 0;
   var defaultDp3 = 0;
+
+    //productList.forEach(element => {
+    //    console.log("elemen"); console.log(element);
+    //    if (element.attributes.unit_order == element.attributes.product.data.attributes.unit_2) { console.log("masuk") }
+    //    qty.push(element.attributes.total_order);
+    //    unit.push(element.attributes.unit_order);
+    //    //onChangeQty(element.attributes.total_order, element.attributes.product.data);
+    //    //onChangeUnit(element.attributes.unit_order, element.attributes.product.data);
+    //});
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -83,10 +93,10 @@ export default function ReactDataTable({
     setTotalPrice((prev) => prev - subtotal);
 
     for (let index = 0; index < products.productList.length; index++) {
-      const element = products.productList[index];
-      if (element.id === id) {
-        onDeleteProduct(index);
-      }
+        const element = products.productList[index];
+        if (element.id === id) {
+            onDeleteProduct(index);
+        }
     }
   };
 
@@ -114,7 +124,7 @@ export default function ReactDataTable({
     //console.log("product"); console.log(products.productInfo.length)
   //console.log(products)
 
-  useEffect(() => {
+  //useEffect(() => {
     //qty.length = productList.length;
     //if(products.productInfo.length == undefined){ 
         //productList.forEach(element => {
@@ -137,7 +147,7 @@ export default function ReactDataTable({
         //}
     //} 
       //console.log("product qty and unit"); console.log(qty); console.log(unit);
-  }, [products.productList]);
+  //}, [products.productList]);
 
   useEffect(() => {
     //productList.forEach(element => {
@@ -151,13 +161,14 @@ export default function ReactDataTable({
         //onChangeQty(element.attributes.total_order, element.attributes.product.data);
         //onChangeUnit(element.attributes.unit_order, element.attributes.product.data);
     });
-      console.log("product qty and unit"); console.log(qty); console.log(unit); console.log("product :"); console.log(products);
+      console.log("product qty and unit"); console.log(qty); //console.log(unit);
+      console.log("product :"); console.log(products);
     for (let index = 0; index < products.productList.length; index++) {
       onChangeQty(qty[index], products.productList[index]);
-      onChangeUnit(unit[index], products.productList[index]);
+      //onChangeUnit(unit[index], products.productList[index]);
       //console.log("unit :"); console.log(products.productList[index].attributes.unit_1);
     }
-  }, []);
+  }, [productList]);
 
   const customStyles = {
     headCells: {
@@ -200,9 +211,9 @@ export default function ReactDataTable({
           defaultQty = products.productInfo[row.id].qty;
         }
           //console.log("jmlh pesanan :"); console.log(products.productInfo[82]);
-        if (products.productInfo[row.id]?.unit) {
-          defaultIndex = products.productInfo[row.id].unit;
-        }
+        //if (products.productInfo[row.id]?.unit) {
+        //  defaultIndex = products.productInfo[row.id].unit;
+        //}
 
         return (
           <>
