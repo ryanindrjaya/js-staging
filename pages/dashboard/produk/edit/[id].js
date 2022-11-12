@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
-import { Button, Form, Input, message, Upload, Space } from "antd";
+import { Button, Form, Input, message, Upload, notification } from "antd";
 import nookies from "nookies";
 import { toast } from "react-toastify";
 import { Spin, Row } from "antd";
@@ -29,11 +29,18 @@ const Edit = ({ props }) => {
   const locations = props?.locations;
   const initCategory = product?.attributes?.category?.data;
   const subCategory = product?.attributes?.sub_category?.data;
+  const initManufacture = product?.attributes?.manufacture?.data;
+  const initGroup = product?.attributes?.group?.data;
 
-  const [image, setImage] = useState(product.attributes?.image?.data ? product.attributes?.image?.data[0].attributes : null);
+  const [image, setImage] = useState(
+    product.attributes?.image?.data
+      ? product.attributes?.image?.data[0].attributes
+      : null
+  );
 
   const [category, setCategory] = useState();
   const [idCategory, setIdCategory] = useState(initCategory.id);
+  const [idManufacture, setIdManufacture] = useState(initManufacture.id);
   const [uploadedOnce, setUploadedOnce] = useState(true);
   const [fileList, setFileList] = useState([]);
   const [firstInput, setFirstInputDiskon] = useState(true);
@@ -53,6 +60,8 @@ const Edit = ({ props }) => {
   const [subCategories, setSubCategories] = useState([]);
   const [selectedSubCategory, setSelectedSubCategory] = useState();
 
+  const [descUnit, setDescUnit] = useState();
+
   function locationsList() {
     const locationNameList = [];
     locations.data.forEach((element) => {
@@ -63,7 +72,7 @@ const Edit = ({ props }) => {
   }
 
   const imageLoader = ({ src }) => {
-    return process.env.BASE_URL + image?.url;
+    return process.env.NEXT_PUBLIC_URL + image?.url;
   };
 
   const propsDagger = {
@@ -120,11 +129,12 @@ const Edit = ({ props }) => {
   };
 
   const categoryChecker = (values) => {
-    if (values.category_id === `${initCategory.attributes.category_id} - ${initCategory.attributes.name}`) {
-      console.log("category tidak berubah. jadikan id");
+    if (
+      values.category_id ===
+      `${initCategory.attributes.category_id} - ${initCategory.attributes.name}`
+    ) {
       values.category_id = idCategory;
     } else {
-      console.log("category berubah. jadikan tipe int");
       values.category_id = parseInt(values.category_id);
     }
 
@@ -132,15 +142,33 @@ const Edit = ({ props }) => {
   };
 
   const subCategoryChecker = (values) => {
-    console.log("checker ", values.subCategories, subCategory);
     if (values.subCategories === subCategory?.attributes.name) {
-      console.log("sub category tidak berubah. jadikan id");
       values.subCategories = subCategory.id;
     } else if (!subCategory) {
-      console.log("tidak ada datanya cuy");
     } else {
-      console.log("sub category berubah. jadikan tipe int");
       values.subCategories = parseInt(values.subCategories);
+    }
+
+    return values;
+  };
+
+  const manufactureChecker = (values) => {
+    if (values.manufactures === initManufacture?.attributes.name) {
+      values.manufactures = initManufacture.id;
+    } else if (!initManufacture) {
+    } else {
+      values.manufactures = parseInt(values.manufactures);
+    }
+
+    return values;
+  };
+
+  const groupChecker = (values) => {
+    if (values.groups === initGroup?.attributes.name) {
+      values.groups = initGroup.id;
+    } else if (!initGroup) {
+    } else {
+      values.groups = parseInt(values.groups);
     }
 
     return values;
@@ -148,24 +176,27 @@ const Edit = ({ props }) => {
 
   const onFinish = async (values) => {
     console.log("values", values);
+
     setLoading(true);
     values = categoryChecker(values);
     values = subCategoryChecker(values);
+    values = manufactureChecker(values);
+    values = groupChecker(values);
 
     const categoryID = {
       id: parseInt(values?.category_id),
     };
 
     const subCategoryID = {
-      id: values?.subCategories ?? null,
+      id: parseInt(values?.subCategories) ?? null,
     };
 
     const manufacturesID = {
-      id: values?.manufactures,
+      id: parseInt(values?.manufactures),
     };
 
     const groupID = {
-      id: values?.groups,
+      id: parseInt(values?.groups),
     };
 
     values.locations =
@@ -195,8 +226,6 @@ const Edit = ({ props }) => {
       delete putData.sub_category;
     }
 
-    console.log("tester", putData);
-
     // remove undefined or null value from data
     for (const key in values) {
       if (values[key] === undefined || values[key] === null) {
@@ -206,7 +235,7 @@ const Edit = ({ props }) => {
 
     // remove undefined or null value from data
     for (const key in putData) {
-      if (putData[key].id === undefined || putData[key].id === NaN) {
+      if (putData[key]?.id === null || isNaN(putData[key]?.id)) {
         delete putData[key];
       }
     }
@@ -216,14 +245,17 @@ const Edit = ({ props }) => {
       ...putData,
     };
 
-    console.log("data", data);
-
     for (let index = 1; index < 6; index++) {
-      if (data[`purchase_discount_${index}`] === "-") delete data[`purchase_discount_${index}`];
+      if (data[`purchase_discount_${index}`] === "-")
+        delete data[`purchase_discount_${index}`];
     }
 
     const dataPut = { data: data };
     const JSONdata = JSON.stringify(dataPut);
+
+    console.log("tester", putData);
+
+   
 
     const options = {
       method: "PUT",
@@ -237,10 +269,6 @@ const Edit = ({ props }) => {
     const endpoint = process.env.NEXT_PUBLIC_URL + "/products/" + productId;
     const req = await fetch(endpoint, options);
     const res = await req.json();
-
-    console.log("dataput ", dataPut);
-    console.log(req);
-    console.log(res);
 
     if (req.status === 200) {
       toast.success("Produk berhasil diperbarui!", {
@@ -266,6 +294,43 @@ const Edit = ({ props }) => {
     setHargaValue(form, changedValues, allValues, unit, firstInput);
   };
 
+  const getDescriptionUnit = () => {
+    const unitText = form.getFieldsValue([
+      "unit_1",
+      "qty_1",
+      "unit_2",
+      "qty_2",
+      "unit_3",
+      "qty_3",
+      "unit_4",
+      "qty_4",
+      "unit_5",
+      "qty_5",
+    ]);
+
+    let unit1 = `${unitText.qty_1 ?? ""} ${unitText.unit_1 ?? ""} `;
+    let unit2 = `${unitText.qty_2 ?? ""} ${unitText.unit_2 ?? ""} `;
+    let unit3 = `${unitText.qty_3 ?? ""} ${unitText.unit_3 ?? ""} `;
+    let unit4 = `${unitText.qty_4 ?? ""} ${unitText.unit_4 ?? ""} `;
+    let unit5 = `${unitText.qty_5 ?? ""} ${unitText.unit_5 ?? ""} `;
+
+    let descUnit = unit1 + unit2 + unit3 + unit4 + unit5;
+    setDescUnit(descUnit);
+  };
+
+  const onFinishFailed = () => {
+    const error = form.getFieldsError();
+    error.forEach((value) => {
+      if (value.errors.length !== 0) {
+        let errorMsg = value.errors[0];
+        notification["error"]({
+          message: "Field Masih Kosong",
+          description: errorMsg,
+        });
+      }
+    });
+  };
+
   return (
     <>
       <Head>
@@ -282,6 +347,7 @@ const Edit = ({ props }) => {
                 remember: true,
               }}
               onFinish={onFinish}
+              onFinishFailed={onFinishFailed}
               onValuesChange={handleValueChange}
             >
               <div className="flex flex-wrap -mx-3 mb-3">
@@ -296,7 +362,10 @@ const Edit = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input style={{ height: "40px" }} placeholder="Nama Produk" />
+                    <Input
+                      style={{ height: "40px" }}
+                      placeholder="Nama Produk"
+                    />
                   </Form.Item>
                   <Categories
                     initialValue={`${initCategory.attributes.category_id} - ${initCategory.attributes.name}`}
@@ -310,9 +379,15 @@ const Edit = ({ props }) => {
                     subCategories={subCategories}
                     onSelect={setSelectedSubCategory}
                     selectedSubCategory={selectedSubCategory}
-                    initialValue={`${product.attributes?.sub_category?.data?.attributes.name ?? ""}`}
+                    initialValue={`${
+                      product.attributes?.sub_category?.data?.attributes.name ??
+                      ""
+                    }`}
                   />
-                  <Form.Item name="description" initialValue={product.attributes?.description ?? ""}>
+                  <Form.Item
+                    name="description"
+                    initialValue={product.attributes?.description ?? ""}
+                  >
                     <TextArea rows={4} placeholder="Deskripsi" />
                   </Form.Item>
                 </div>
@@ -329,9 +404,22 @@ const Edit = ({ props }) => {
                   >
                     <Input style={{ height: "40px" }} placeholder="SKU" />
                   </Form.Item>
-                  <Manufactures data={manufactures.data} initialValue={product.attributes?.manufacture?.data} onSelect={setSelectedManufactures} />
-                  <Groups data={groups} onSelect={setSelectedGroup} initialValue={product.attributes?.group?.data} />
-                  <Locations data={locations} onSelect={setSelectLocation} initialValue={product.attributes?.locations.data} />
+                  <Manufactures
+                    data={manufactures.data}
+                    initialValue={product.attributes?.manufacture?.data}
+                    onSelect={setSelectedManufactures}
+                  />
+                  <Groups
+                    data={groups}
+                    onSelect={setSelectedGroup}
+                    initialValue={product.attributes?.group?.data}
+                  />
+                  <Locations
+                    required={true}
+                    data={locations}
+                    onSelect={setSelectLocation}
+                    initialValue={product.attributes?.locations.data}
+                  />
                 </div>
 
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
@@ -341,11 +429,19 @@ const Edit = ({ props }) => {
                         <p className="ant-upload-drag-icon">
                           <FileImageOutlined />
                         </p>
-                        <p className="ant-upload-text">Klik atau tarik gambar ke kotak ini</p>
-                        <p className="ant-upload-hint  m-3">Gambar akan digunakan sebagai contoh tampilan produk</p>
+                        <p className="ant-upload-text">
+                          Klik atau tarik gambar ke kotak ini
+                        </p>
+                        <p className="ant-upload-hint  m-3">
+                          Gambar akan digunakan sebagai contoh tampilan produk
+                        </p>
                       </>
                     ) : (
-                      <Image layout="fill" loader={imageLoader} src={process.env.BASE_URL + image?.url} />
+                      <Image
+                        layout="fill"
+                        loader={imageLoader}
+                        src={process.env.NEXT_PUBLIC_URL + image?.url}
+                      />
                     )}
                   </Dragger>
                 </div>
@@ -355,7 +451,11 @@ const Edit = ({ props }) => {
                 <h6 className="">HARGA</h6>
               </div>
 
-              <UnitTable initialValue={product.attributes} />
+              <UnitTable
+                initialValue={product.attributes}
+                getDescUnit={getDescriptionUnit}
+                descUnit={descUnit}
+              />
 
               <Form.Item>
                 {loading ? (
@@ -369,7 +469,11 @@ const Edit = ({ props }) => {
                       onCancel={() => {}}
                       title="Edit Produk"
                       message="Apakah anda yakin ingin mengedit produk ini?"
-                      component={<Button className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">Simpan</Button>}
+                      component={
+                        <Button className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
+                          Simpan
+                        </Button>
+                      }
                     />
                     <Button htmlType="submit" ref={submitBtn}></Button>
                   </>
@@ -420,7 +524,8 @@ Edit.getInitialProps = async (context) => {
 
 const fetchProduct = async (cookies, context) => {
   const id = context.query.id;
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/products/" + id + "?populate=*";
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL + "/products/" + id + "?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -462,7 +567,10 @@ const fetchDataManufactures = async (cookies) => {
 };
 
 const fetchDataSubCategories = async (cookies, categoryId) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/sub-categories?populate[category][filters][id][$eq]=" + categoryId;
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL +
+    "/sub-categories?populate[category][filters][id][$eq]=" +
+    categoryId;
   const options = {
     method: "GET",
     headers: {

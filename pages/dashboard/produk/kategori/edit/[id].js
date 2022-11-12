@@ -82,23 +82,6 @@ const Edit = ({ props }) => {
               <div className="flex flex-wrap -mx-3 mb-6">
                 <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    initialValue={categories.attributes.name}
-                    name="name"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Nama Satuan tidak boleh kosong!",
-                      },
-                    ]}
-                  >
-                    <Input
-                      style={{ height: "50px" }}
-                      placeholder="Nama Kategori"
-                    />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
-                  <Form.Item
                     name="category_id"
                     initialValue={categories.attributes.category_id}
                     rules={[
@@ -111,6 +94,23 @@ const Edit = ({ props }) => {
                     <Input
                       style={{ height: "50px" }}
                       placeholder="ID Kategori"
+                    />
+                  </Form.Item>
+                </div>
+                <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
+                  <Form.Item
+                    initialValue={categories.attributes.name}
+                    name="name"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Nama Kategori tidak boleh kosong!",
+                      },
+                    ]}
+                  >
+                    <Input
+                      style={{ height: "50px" }}
+                      placeholder="Nama Kategori"
                     />
                   </Form.Item>
                 </div>
@@ -130,7 +130,7 @@ const Edit = ({ props }) => {
                     <Spin />
                   </div>
                 ) : (
-                 <Button
+                  <Button
                     htmlType="submit"
                     className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
                   >

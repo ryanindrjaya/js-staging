@@ -22,7 +22,7 @@ export default function Locations({ data, onSelect, initialValue, errMsg, requir
         rules={[
           {
             required: required,
-            message: errMsg,
+            message: 'Lokasi Produk tidak boleh kosong!',
           },
         ]}
       >
