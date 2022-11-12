@@ -1,0 +1,1 @@
+{"ast":null,"code":"import _Tag from \"antd/lib/tag\";\nexport default _Tag;","map":{"version":3,"sources":["/Users/yudiananta/Development/NextJS/ERP Dev/JS Deploy/JS-Deploy/components/uielements/tag.js"],"names":[],"mappings":";AAEA","sourcesContent":["import { Tag } from 'antd';\n\nexport default Tag;\n"]},"metadata":{},"sourceType":"module"}

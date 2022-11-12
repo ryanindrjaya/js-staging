@@ -178,12 +178,18 @@ export default function UnitsTable({
     },
   ];
 
-  const locale = "en-us";
+  // var formatter = new Intl.NumberFormat("id-ID", {
+  //   style: "currency",
+  //   currency: "IDR",
+  //   maximumFractionDigits: 0,
+  // });
 
+  const locale = "id-ID";
   const rupiahFormatter = (value) => {
     return new Intl.NumberFormat(locale, {
       style: "currency",
       currency: "IDR",
+      maximumFractionDigits: 2,
     }).format(value);
   };
 
@@ -277,7 +283,7 @@ export default function UnitsTable({
           initialValue={buyPrice[row.idx - 1]}
         >
           <InputNumber
-            formatter={formatterNumber}
+            formatter={(val) => formatterNumber(val, `buy_price_${row.idx}`)}
             parser={parserNumber}
             style={{
               width: 120,
@@ -300,7 +306,9 @@ export default function UnitsTable({
           initialValue={purchaseDiscount[row.idx - 1] ?? 0}
         >
           <InputNumber
-            formatter={formatterNumber}
+            formatter={(val) =>
+              formatterNumber(val, `purchase_discount_${row.idx}`)
+            }
             parser={parserNumber}
             style={{
               width: 120,
@@ -390,7 +398,7 @@ export default function UnitsTable({
           initialValue={pricelist[row.idx - 1]}
         >
           <InputNumber
-            formatter={formatterNumber}
+            formatter={(val) => formatterNumber(val, `pricelist_${row.idx}`)}
             parser={parserNumber}
             style={{
               width: 110,
@@ -413,7 +421,7 @@ export default function UnitsTable({
           initialValue={soldPrice[row.idx - 1]}
         >
           <InputNumber
-            formatter={formatterNumber}
+            formatter={(val) => formatterNumber(val, `sold_price_${row.idx}`)}
             parser={parserNumber}
             style={{
               width: 110,

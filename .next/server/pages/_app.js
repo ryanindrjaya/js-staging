@@ -8001,10 +8001,12 @@ function Middleware({
   const token = cookies.token;
   const router = Object(router_["useRouter"])();
   Object(external_react_["useEffect"])(async () => {
-    const firstPath = router.pathname.split("/")[1]; // let isValid = await istokenValid(token);
-    // if (!isValid) {
-    //   router.push("/");
-    // }
+    const firstPath = router.pathname.split("/")[1];
+    let isValid = await istokenValid(token);
+
+    if (!isValid) {
+      router.push("/");
+    }
 
     if (firstPath === "dashboard" && !token) {
       router.push("/");

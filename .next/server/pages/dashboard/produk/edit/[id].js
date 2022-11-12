@@ -2729,14 +2729,39 @@ var Alert = __webpack_require__("AVMw");
 
 // CONCATENATED MODULE: ./components/Formatter/CurrencyFormatter.js
 // formatter and parser input number
-const formatterNumber = val => {
-  if (!val) return 0;
-  return `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",").replace(/\.(?=\d{0,2}$)/g, ".");
-};
+// export const formatterNumber = (val) => {
+//   const newValue = Number(val).toFixed(2);
+//   if (!val) return 0;
+//   return `${newValue}`
+//     .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+//     .replace(/\.(?=\d{0,2}$)/g, ".");
+// };
 const parserNumber = val => {
+  let newValue = Number.parseFloat(val.replace(/\$\s?|(\,*)/g, "").replace(/(\,{1})/g, ".")).toFixed(2);
+  let rounded = Number(newValue).toFixed(2);
   if (!val) return 0;
-  return Number.parseFloat(val.replace(/\$\s?|(\,*)/g, "").replace(/(\,{1})/g, ",")).toFixed(2);
-};
+  return rounded;
+}; // formatter and parser input number
+
+const formatterNumber = (val, unit) => {
+  if (!val) return 0;
+  const newValue = `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",").replace(/\.(?=\d{0,2}$)/g, ".");
+  let test = Number.parseFloat(newValue.replace(/\$\s?|(\,*)/g, "").replace(/(\,{1})/g, ".")).toFixed(2);
+  let rounded = Number(test).toFixed(2);
+  console.log("formatter", rounded, newValue);
+
+  if (unit === "buy_price_1" || unit === "purchase_discount_1" || unit === "pricelist_1" || unit === "sold_price_1") {
+    return newValue;
+  } else {
+    const newRounded = `${rounded}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",").replace(/\.(?=\d{0,2}$)/g, ".");
+    return newRounded;
+  }
+}; // export const parserNumber = (val) => {
+//   if (!val) return 0;
+//   return Number.parseFloat(
+//     val.replace(/\$\s?|(\,*)/g, "").replace(/(\,{1})/g, ",")
+//   ).toFixed(2);
+// };
 // EXTERNAL MODULE: external "react/jsx-runtime"
 var jsx_runtime_ = __webpack_require__("F5FC");
 
@@ -2837,13 +2862,19 @@ function UnitsTable({
     qty: "",
     price: "",
     priceList: ""
-  }];
-  const locale = "en-us";
+  }]; // var formatter = new Intl.NumberFormat("id-ID", {
+  //   style: "currency",
+  //   currency: "IDR",
+  //   maximumFractionDigits: 0,
+  // });
+
+  const locale = "id-ID";
 
   const rupiahFormatter = value => {
     return new Intl.NumberFormat(locale, {
       style: "currency",
-      currency: "IDR"
+      currency: "IDR",
+      maximumFractionDigits: 2
     }).format(value);
   };
 
@@ -2923,7 +2954,7 @@ function UnitsTable({
       name: `buy_price_${row.idx}`,
       initialValue: buyPrice[row.idx - 1],
       children: /*#__PURE__*/Object(jsx_runtime_["jsx"])(input_number_default.a, {
-        formatter: formatterNumber,
+        formatter: val => formatterNumber(val, `buy_price_${row.idx}`),
         parser: parserNumber,
         style: {
           width: 120
@@ -2945,7 +2976,7 @@ function UnitsTable({
         name: `purchase_discount_${[row.idx]}`,
         initialValue: (_purchaseDiscount = purchaseDiscount[row.idx - 1]) !== null && _purchaseDiscount !== void 0 ? _purchaseDiscount : 0,
         children: /*#__PURE__*/Object(jsx_runtime_["jsx"])(input_number_default.a, {
-          formatter: formatterNumber,
+          formatter: val => formatterNumber(val, `purchase_discount_${row.idx}`),
           parser: parserNumber,
           style: {
             width: 120
@@ -3031,7 +3062,7 @@ function UnitsTable({
       name: `pricelist_${row.idx}`,
       initialValue: pricelist[row.idx - 1],
       children: /*#__PURE__*/Object(jsx_runtime_["jsx"])(input_number_default.a, {
-        formatter: formatterNumber,
+        formatter: val => formatterNumber(val, `pricelist_${row.idx}`),
         parser: parserNumber,
         style: {
           width: 110
@@ -3050,7 +3081,7 @@ function UnitsTable({
       name: `sold_price_${row.idx}`,
       initialValue: soldPrice[row.idx - 1],
       children: /*#__PURE__*/Object(jsx_runtime_["jsx"])(input_number_default.a, {
-        formatter: formatterNumber,
+        formatter: val => formatterNumber(val, `sold_price_${row.idx}`),
         parser: parserNumber,
         style: {
           width: 110
@@ -5187,7 +5218,6 @@ const Edit = ({
     const groupID = {
       id: parseInt((_values4 = values) === null || _values4 === void 0 ? void 0 : _values4.groups)
     };
-    console.log(" checker", values);
     values.locations = ((_values5 = values) === null || _values5 === void 0 ? void 0 : (_values5$locations = _values5.locations) === null || _values5$locations === void 0 ? void 0 : _values5$locations.map(location => {
       if (location.value) {
         return {
@@ -5216,9 +5246,8 @@ const Edit = ({
 
     if (putData.sub_category.id === "") {
       delete putData.sub_category;
-    }
+    } // remove undefined or null value from data
 
-    console.log("tester", putData); // remove undefined or null value from data
 
     for (const key in values) {
       if (values[key] === undefined || values[key] === null) {
@@ -5228,7 +5257,9 @@ const Edit = ({
 
 
     for (const key in putData) {
-      if (putData[key].id === undefined || putData[key].id === NaN) {
+      var _putData$key, _putData$key2;
+
+      if (((_putData$key = putData[key]) === null || _putData$key === void 0 ? void 0 : _putData$key.id) === null || isNaN((_putData$key2 = putData[key]) === null || _putData$key2 === void 0 ? void 0 : _putData$key2.id)) {
         delete putData[key];
       }
     }
@@ -5243,6 +5274,7 @@ const Edit = ({
       data: data
     };
     const JSONdata = JSON.stringify(dataPut);
+    console.log("tester", putData);
     const options = {
       method: "PUT",
       headers: {
@@ -5251,23 +5283,21 @@ const Edit = ({
       },
       body: JSONdata
     };
-    console.log(dataPut); // const endpoint = process.env.NEXT_PUBLIC_URL + "/products/" + productId;
-    // const req = await fetch(endpoint, options);
-    // const res = await req.json();
-    // console.log("dataput ", dataPut);
-    // console.log(req);
-    // console.log(res);
-    // if (req.status === 200) {
-    //   toast.success("Produk berhasil diperbarui!", {
-    //     position: toast.POSITION.TOP_RIGHT,
-    //   });
-    //   router.push("/dashboard/produk");
-    // } else {
-    //   console.log(res);
-    //   toast.error("Tidak dapat memperbarui Produk", {
-    //     position: toast.POSITION.TOP_RIGHT,
-    //   });
-    // }
+    const endpoint = "https://js-strapi.keelola.net/api" + "/products/" + productId;
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    if (req.status === 200) {
+      react_toastify__WEBPACK_IMPORTED_MODULE_13__["toast"].success("Produk berhasil diperbarui!", {
+        position: react_toastify__WEBPACK_IMPORTED_MODULE_13__["toast"].POSITION.TOP_RIGHT
+      });
+      router.push("/dashboard/produk");
+    } else {
+      console.log(res);
+      react_toastify__WEBPACK_IMPORTED_MODULE_13__["toast"].error("Tidak dapat memperbarui Produk", {
+        position: react_toastify__WEBPACK_IMPORTED_MODULE_13__["toast"].POSITION.TOP_RIGHT
+      });
+    }
 
     setLoading(false);
   };
@@ -6581,18 +6611,18 @@ function setHargaValue(form, changedValues, allValues, unit, firstInput) {
     const diskonPembelian_unit2 = hargaDiskon_unit1 / qty_unit2;
     const hargaJual_unit2 = hargaJual_unit1 / qty_unit2;
     const hargaPricelist_unit2 = hargaPricelist_unit1 / qty_unit2;
-    const hargaPembelian_unit3 = hargaPembelian_unit2 / qty_unit3;
-    const diskonPembelian_unit3 = diskonPembelian_unit2 / qty_unit3;
-    const hargaJual_unit3 = hargaJual_unit2 / qty_unit3;
-    const hargaPricelist_unit3 = hargaPricelist_unit2 / qty_unit3;
-    const hargaPembelian_unit4 = hargaPembelian_unit3 / qty_unit4;
-    const diskonPembelian_unit4 = diskonPembelian_unit3 / qty_unit4;
-    const hargaJual_unit4 = hargaJual_unit3 / qty_unit4;
+    const hargaPembelian_unit3 = hargaPembelian_unit1 / qty_unit3;
+    const diskonPembelian_unit3 = hargaDiskon_unit1 / qty_unit3;
+    const hargaJual_unit3 = hargaJual_unit1 / qty_unit3;
+    const hargaPricelist_unit3 = hargaPricelist_unit1 / qty_unit3;
+    const hargaPembelian_unit4 = hargaPembelian_unit1 / qty_unit4;
+    const diskonPembelian_unit4 = hargaDiskon_unit1 / qty_unit4;
+    const hargaJual_unit4 = hargaJual_unit1 / qty_unit4;
     const hargaPricelist_unit4 = hargaPricelist_unit3 / qty_unit4;
-    const hargaPembelian_unit5 = hargaPembelian_unit4 / qty_unit5;
-    const diskonPembelian_unit5 = diskonPembelian_unit4 / qty_unit5;
-    const hargaJual_unit5 = hargaJual_unit4 / qty_unit5;
-    const hargaPricelist_unit5 = hargaPricelist_unit4 / qty_unit5;
+    const hargaPembelian_unit5 = hargaPembelian_unit1 / qty_unit5;
+    const diskonPembelian_unit5 = hargaDiskon_unit1 / qty_unit5;
+    const hargaJual_unit5 = hargaJual_unit1 / qty_unit5;
+    const hargaPricelist_unit5 = hargaPricelist_unit1 / qty_unit5;
     form.setFieldsValue({
       buy_price_1: changedValues.qty_1 !== null ? hargaPembelian_unit1 : null,
       purchase_discount_1: changedValues.qty_1 !== null ? hargaDiskon_unit1 : null,
@@ -6638,8 +6668,8 @@ function setHargaValue(form, changedValues, allValues, unit, firstInput) {
   }
 
   if (unit == "2") {
-    const hargaPembelian_unit1 = changedValues.buy_price_1 || allValues.buy_price_1 || null;
     const qty_unit2 = changedValues.qty_2 || allValues.qty_2 || null;
+    const hargaPembelian_unit1 = changedValues.buy_price_1 || allValues.buy_price_1 || null;
     const hargaDiskon_unit1 = changedValues.purchase_discount_1 || allValues.purchase_discount_1 || null;
     const hargaJual_unit1 = changedValues.sold_price_1 || allValues.sold_price_1 || null;
     const hargaPricelist_unit1 = changedValues.pricelist_1 || allValues.pricelist_1 || null;
@@ -6657,15 +6687,15 @@ function setHargaValue(form, changedValues, allValues, unit, firstInput) {
       });
     }
   } else if (unit === "3" && firstInput) {
-    const hargaPembelian_unit2 = changedValues.buy_price_2 || allValues.buy_price_2 || null;
     const qty_unit3 = changedValues.qty_3 || allValues.qty_3 || null;
-    const hargaDiskon_unit2 = changedValues.purchase_discount_2 || allValues.purchase_discount_2 || null;
-    const hargaJual_unit2 = changedValues.sold_price_2 || allValues.sold_price_2 || null;
-    const hargaPricelist_unit2 = changedValues.pricelist_2 || allValues.pricelist_2 || null;
-    const hargaPembelian_unit3 = hargaPembelian_unit2 / qty_unit3;
-    const diskonPembelian_unit3 = hargaDiskon_unit2 / qty_unit3;
-    const hargaJual_unit3 = hargaJual_unit2 / qty_unit3;
-    const hargaPricelist_unit3 = hargaPricelist_unit2 / qty_unit3;
+    const hargaPembelian_unit1 = changedValues.buy_price_1 || allValues.buy_price_1 || null;
+    const hargaDiskon_unit1 = changedValues.purchase_discount_1 || allValues.purchase_discount_1 || null;
+    const hargaJual_unit1 = changedValues.sold_price_1 || allValues.sold_price_1 || null;
+    const hargaPricelist_unit1 = changedValues.pricelist_1 || allValues.pricelist_1 || null;
+    const hargaPembelian_unit3 = hargaPembelian_unit1 / qty_unit3;
+    const diskonPembelian_unit3 = hargaDiskon_unit1 / qty_unit3;
+    const hargaJual_unit3 = hargaJual_unit1 / qty_unit3;
+    const hargaPricelist_unit3 = hargaPricelist_unit1 / qty_unit3;
 
     if (qty_unit3) {
       form.setFieldsValue({
@@ -6676,15 +6706,15 @@ function setHargaValue(form, changedValues, allValues, unit, firstInput) {
       });
     }
   } else if (unit === "4" && firstInput) {
-    const hargaPembelian_unit3 = changedValues.buy_price_3 || allValues.buy_price_3 || null;
     const qty_unit4 = changedValues.qty_4 || allValues.qty_4 || null;
-    const hargaDiskon_unit3 = changedValues.purchase_discount_3 || allValues.purchase_discount_3 || null;
-    const hargaJual_unit3 = changedValues.sold_price_3 || allValues.sold_price_3 || null;
-    const hargaPricelist_unit3 = changedValues.pricelist_3 || allValues.pricelist_3 || null;
-    const hargaPembelian_unit4 = hargaPembelian_unit3 / qty_unit4;
-    const diskonPembelian_unit4 = hargaDiskon_unit3 / qty_unit4;
-    const hargaJual_unit4 = hargaJual_unit3 / qty_unit4;
-    const hargaPricelist_unit4 = hargaPricelist_unit3 / qty_unit4;
+    const hargaPembelian_unit1 = changedValues.buy_price_1 || allValues.buy_price_1 || null;
+    const hargaDiskon_unit1 = changedValues.purchase_discount_1 || allValues.purchase_discount_1 || null;
+    const hargaJual_unit1 = changedValues.sold_price_1 || allValues.sold_price_1 || null;
+    const hargaPricelist_unit1 = changedValues.pricelist_1 || allValues.pricelist_1 || null;
+    const hargaPembelian_unit4 = hargaPembelian_unit1 / qty_unit4;
+    const diskonPembelian_unit4 = hargaDiskon_unit1 / qty_unit4;
+    const hargaJual_unit4 = hargaJual_unit1 / qty_unit4;
+    const hargaPricelist_unit4 = hargaPricelist_unit1 / qty_unit4;
 
     if (qty_unit4) {
       form.setFieldsValue({
@@ -6695,15 +6725,15 @@ function setHargaValue(form, changedValues, allValues, unit, firstInput) {
       });
     }
   } else if (unit === "5" && firstInput) {
-    const hargaPembelian_unit4 = changedValues.buy_price_4 || allValues.buy_price_4 || null;
     const qty_unit5 = changedValues.qty_5 || allValues.qty_5 || null;
-    const hargaDiskon_unit4 = changedValues.purchase_discount_4 || allValues.purchase_discount_4 || null;
-    const hargaJual_unit4 = changedValues.sold_price_4 || allValues.sold_price_4 || null;
-    const hargaPricelist_unit4 = changedValues.pricelist_4 || allValues.pricelist_4 || null;
-    const hargaPembelian_unit5 = hargaPembelian_unit4 / qty_unit5;
-    const diskonPembelian_unit5 = hargaDiskon_unit4 / qty_unit5;
-    const hargaJual_unit5 = hargaJual_unit4 / qty_unit5;
-    const hargaPricelist_unit5 = hargaPricelist_unit4 / qty_unit5;
+    const hargaPembelian_unit1 = changedValues.buy_price_1 || allValues.buy_price_1 || null;
+    const hargaDiskon_unit1 = changedValues.purchase_discount_1 || allValues.purchase_discount_1 || null;
+    const hargaJual_unit1 = changedValues.sold_price_1 || allValues.sold_price_1 || null;
+    const hargaPricelist_unit1 = changedValues.pricelist_1 || allValues.pricelist_1 || null;
+    const hargaPembelian_unit5 = hargaPembelian_unit1 / qty_unit5;
+    const diskonPembelian_unit5 = hargaDiskon_unit1 / qty_unit5;
+    const hargaJual_unit5 = hargaJual_unit1 / qty_unit5;
+    const hargaPricelist_unit5 = hargaPricelist_unit1 / qty_unit5;
 
     if (qty_unit5) {
       form.setFieldsValue({

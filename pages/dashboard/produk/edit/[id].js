@@ -171,7 +171,6 @@ const Edit = ({ props }) => {
       values.groups = parseInt(values.groups);
     }
 
-   
     return values;
   };
 
@@ -200,8 +199,6 @@ const Edit = ({ props }) => {
       id: parseInt(values?.groups),
     };
 
-    console.log(" checker", values);
-
     values.locations =
       values?.locations?.map((location) => {
         if (location.value) {
@@ -229,8 +226,6 @@ const Edit = ({ props }) => {
       delete putData.sub_category;
     }
 
-    console.log("tester", putData);
-
     // remove undefined or null value from data
     for (const key in values) {
       if (values[key] === undefined || values[key] === null) {
@@ -240,7 +235,7 @@ const Edit = ({ props }) => {
 
     // remove undefined or null value from data
     for (const key in putData) {
-      if (putData[key].id === undefined || putData[key].id === NaN) {
+      if (putData[key]?.id === null || isNaN(putData[key]?.id)) {
         delete putData[key];
       }
     }
@@ -258,6 +253,10 @@ const Edit = ({ props }) => {
     const dataPut = { data: data };
     const JSONdata = JSON.stringify(dataPut);
 
+    console.log("tester", putData);
+
+   
+
     const options = {
       method: "PUT",
       headers: {
@@ -267,27 +266,21 @@ const Edit = ({ props }) => {
       body: JSONdata,
     };
 
-    console.log(dataPut);
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/products/" + productId;
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
 
-    // const endpoint = process.env.NEXT_PUBLIC_URL + "/products/" + productId;
-    // const req = await fetch(endpoint, options);
-    // const res = await req.json();
-
-    // console.log("dataput ", dataPut);
-    // console.log(req);
-    // console.log(res);
-
-    // if (req.status === 200) {
-    //   toast.success("Produk berhasil diperbarui!", {
-    //     position: toast.POSITION.TOP_RIGHT,
-    //   });
-    //   router.push("/dashboard/produk");
-    // } else {
-    //   console.log(res);
-    //   toast.error("Tidak dapat memperbarui Produk", {
-    //     position: toast.POSITION.TOP_RIGHT,
-    //   });
-    // }
+    if (req.status === 200) {
+      toast.success("Produk berhasil diperbarui!", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
+      router.push("/dashboard/produk");
+    } else {
+      console.log(res);
+      toast.error("Tidak dapat memperbarui Produk", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
+    }
 
     setLoading(false);
   };

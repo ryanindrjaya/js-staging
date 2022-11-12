@@ -5,8 +5,8 @@
   "devFiles": [],
   "ampDevFiles": [],
   "lowPriorityFiles": [
-    "static/u6Ba-eO70IMloOYKNH8rA/_buildManifest.js",
-    "static/u6Ba-eO70IMloOYKNH8rA/_ssgManifest.js"
+    "static/tbaMd89cd9Mhk8wUktPdc/_buildManifest.js",
+    "static/tbaMd89cd9Mhk8wUktPdc/_ssgManifest.js"
   ],
   "pages": {
     "/": [
@@ -67,7 +67,7 @@
       "static/chunks/27aebe391aed4568048ffcffa5c5cdbf8098a30e.f4927b7f37f992399f09.js",
       "static/chunks/4717478d546f632b45eb05e3d1ab56d1a421559c.2004a39415788ec86481.js",
       "static/css/7af045dab07829b876bd.css",
-      "static/chunks/pages/_app-704390200b264670295c.js"
+      "static/chunks/pages/_app-b0c77ddf3c3e6f84a67c.js"
     ],
     "/_error": [
       "static/chunks/webpack-7e827f325576e682ac28.js",
@@ -690,8 +690,8 @@
       "static/chunks/1af60ea354344d56609bdcb040b5cd2d3d1bfb32.920a354739b4c30d923a.js",
       "static/chunks/cf8f80a9f8a1363e1084075ad2a9ec00240a3d84.574ecc674540fd08fe24.js",
       "static/chunks/858a30e83a0c94c75ded92d5e3b6c7c1b6d2aa10.0560b535d4a103586ac1.js",
-      "static/chunks/5def539ef78ebe3a3f3c4a1e74926d53199660e1.20aecb6d8add8b1303f7.js",
-      "static/chunks/pages/dashboard/produk/edit/[id]-d525f7584a802be3aaa1.js"
+      "static/chunks/5def539ef78ebe3a3f3c4a1e74926d53199660e1.e33d77a1fe5ef2307ad3.js",
+      "static/chunks/pages/dashboard/produk/edit/[id]-cbbe569ab469a1b19ea0.js"
     ],
     "/dashboard/produk/golongan": [
       "static/chunks/webpack-7e827f325576e682ac28.js",
@@ -1037,7 +1037,7 @@
       "static/chunks/1af60ea354344d56609bdcb040b5cd2d3d1bfb32.920a354739b4c30d923a.js",
       "static/chunks/cf8f80a9f8a1363e1084075ad2a9ec00240a3d84.574ecc674540fd08fe24.js",
       "static/chunks/858a30e83a0c94c75ded92d5e3b6c7c1b6d2aa10.0560b535d4a103586ac1.js",
-      "static/chunks/5def539ef78ebe3a3f3c4a1e74926d53199660e1.20aecb6d8add8b1303f7.js",
+      "static/chunks/5def539ef78ebe3a3f3c4a1e74926d53199660e1.e33d77a1fe5ef2307ad3.js",
       "static/chunks/pages/dashboard/produk/tambah-1876f23fe6fec2a09c9f.js"
     ],
     "/dashboard/produk/utility/debounce": [
@@ -1062,7 +1062,7 @@
       "static/chunks/309124b48abbb123215a61aabec7776900fde9b2.774d684142cd6048b675.js",
       "static/chunks/364ceef2842f86c9156398398a144affd28234a0.2815614f17e51a60f4e0.js",
       "static/chunks/main-0d81da0d3ea90e4d9887.js",
-      "static/chunks/pages/dashboard/produk/utility/setHargaValue-730e19251c3b6e8fe3bd.js"
+      "static/chunks/pages/dashboard/produk/utility/setHargaValue-8452b8d3bef76bed793e.js"
     ],
     "/dashboard/role": [
       "static/chunks/webpack-7e827f325576e682ac28.js",
