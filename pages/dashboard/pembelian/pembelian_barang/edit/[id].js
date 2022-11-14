@@ -119,11 +119,12 @@ function Edit({ props }) {
 
     const createDetailRetur = async () => {
         console.log("info total", productTotalPrice, productSubTotal);
-        createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-details");
+        createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-lpb-details");
+        console.log("List id :"); console.log(listId);
     };
 
     const createRetur = async (values) => {
-        console.log("Retur");
+        console.log("Retur"); console.log(values);
         createReturLPBFunc(grandTotal, totalPrice, values, listId, form, router);
     };
 
@@ -173,15 +174,15 @@ function Edit({ props }) {
     }, [totalPrice]);
 
     useEffect(() => {
-        //console.log("listId 1:"); console.log(listId);
+        console.log("createRetur :"); console.log(dataValues);
         if (listId.length > 0) {
-            createRetur(dataValues); //console.log("listId 2:"); console.log(listId);
+            createRetur(dataValues);
         } //console.log("listId 3:"); console.log(listId);
     }, [listId]);
 
-    //useEffect(() => { console.log("data value : "); console.log(dataValues)
-    //  if (dataValues) createDetailRetur();
-    //}, [dataValues]);
+    useEffect(() => { //console.log("data value : "); console.log(dataValues)
+      if (dataValues) createDetailRetur();
+    }, [dataValues]);
 
     useEffect(() => {
         dispatch({ type: "CLEAR_DATA" });
@@ -219,7 +220,7 @@ function Edit({ props }) {
                             <div className="flex flex-wrap -mx-3 mb-3">
                                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                                     <Form.Item
-                                        name="no_retur"
+                                        name="no_retur_LPB"
                                         initialValue={`RB/${totalReturs}/${mm}/${yyyy}`}
                                         rules={[
                                             {
@@ -233,7 +234,7 @@ function Edit({ props }) {
                                 </div>
                                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                                     <Form.Item
-                                        name="retur_date"
+                                        name="tanggal_retur"
                                         rules={[
                                             {
                                                 required: true,
@@ -241,12 +242,7 @@ function Edit({ props }) {
                                             },
                                         ]}
                                     >
-                                        <DatePicker
-                                            placeholder="Tanggal Retur"
-                                            size="large"
-                                            format={"DD/MM/YYYY"}
-                                            style={{ width: "100%" }}
-                                        />
+                                        <DatePicker placeholder="Tanggal Retur" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
                                     </Form.Item>
                                 </div>
                                 <div className="w-full md:w-2/4 px-3 mb-2 md:mb-0">
@@ -287,7 +283,7 @@ function Edit({ props }) {
                                         setTotalPrice={setTotalPrice}
                                         calculatePriceAfterDisc={calculatePriceAfterDisc}
                                         productSubTotal={productSubTotal}
-                                        formObj={form}
+                                        formObj={form} 
                                     />
                                 </div>
                             </div>

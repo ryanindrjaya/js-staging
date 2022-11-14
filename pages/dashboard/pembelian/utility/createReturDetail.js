@@ -17,7 +17,7 @@ const getUnitPrice = (data, unit) => {
   return selectedUnit;
 };
 
-const createDetailRetur = (
+const createReturDetail = (
   products,
   productTotalPrice,
   productSubTotal,
@@ -105,4 +105,4 @@ const POSTReturDetail = async (
   }
 };
 
-export default createDetailRetur;
+export default createReturDetail;

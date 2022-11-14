@@ -16,16 +16,17 @@ const CreateReturLPB = async (
   router
 ) => {
   // CLEANING DATA
-  //var returDate = new Date(values.tanggal_retur); //console.log("nilai"); console.log(values); //console.log(values.tanggal_retur._d)
+  //var returDate = new Date(values.tanggal_retur); console.log("nilai"); console.log(values); //console.log(values.tanggal_retur._d)
   //var deliveryReturDate = new Date(values.delivery_date);
-  var supplierId = { id: parseInt(values.supplier_id) }; console.log("Masuk LPB");
+  //var supplierId = { id: parseInt(values.supplier_id) }; 
+    console.log("Masuk LPB");
 
-  tempSupplierId = parseInt(values.supplier_id);
-  tempLocationId = parseInt(values.location);
+  //tempSupplierId = parseInt(values.supplier_id);
+  //tempLocationId = parseInt(values.location);
 
-  listId.forEach((element) => {
-    tempProductListId.push({ id: element });
-  });
+  //listId.forEach((element) => {
+  //  tempProductListId.push({ id: element });
+  //});
 
   //values.tanggal_retur = values.tanggal_retur;
   //values.tanggal_pembelian = values.tanggal_retur;
@@ -38,22 +39,25 @@ const CreateReturLPB = async (
   //values.retur_details = null;
   //values.supplier_id = null;
 
-  var data = {
+  var data = { 
     data: values,
-  };
+  };  console.log("ini data 1 : "); console.log(data);
     
   const req = await createData(data); 
   const res = await req.json();
-    console.log("ini data 1 : "); console.log(data); console.log(req);
-  if (req.status === 200) {
-    await putRelationReturLPB(res.data.id, res.data.attributes, form, router);
+    //console.log("ini data 1 : "); console.log(data); //console.log(req);
+  if (req.status === 200) { console.log("200 nih");
+    //await putRelationReturLPB(res.data.id, res.data.attributes, form, router);
+      console.log("res :"); console.log(res.data.id); console.log(res.data.attributes);
+      console.log("form :"); console.log(form); console.log(router);
+    //router.replace("/dashboard/pembelian/pembelian_barang");
   } else {
     openNotificationWithIcon("error");
   }
 };
 
-const createData = async (data) => { console.log("create data masuk, data :"); console.log(data)
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs-lpbs";
+const createData = async (data) => { console.log("create data masuk, data :");
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-lpbs";
     const JSONdata = JSON.stringify(data);
     console.log("ini data LPB"); console.log(data)
   const options = {
@@ -66,7 +70,7 @@ const createData = async (data) => { console.log("create data masuk, data :"); c
   };
 
   const req = await fetch(endpoint, options);
-  //const res = await req.json(); console.log(res)
+  const res = await req.json(); console.log("res :");console.log(res)
   return req;
 };
 
@@ -89,7 +93,7 @@ const putRelationReturLPB = async (id, value, form, router) => {
   }
 
   const JSONdata = JSON.stringify(dataRetur);
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs-lpbs/" + id;
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-lpbs/" + id;
   const options = {
     method: "PUT",
     headers: {
