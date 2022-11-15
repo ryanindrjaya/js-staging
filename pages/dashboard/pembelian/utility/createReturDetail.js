@@ -94,9 +94,6 @@ const POSTReturDetail = async (
   const req = await fetch(endpoint, options);
   const res = await req.json();
 
-  console.log("req : ");
-  console.log(req);
-
   if (req.status === 200) {
     tempListId.push(res.data?.id);
     if (tempListId.length === products.productList.length) {

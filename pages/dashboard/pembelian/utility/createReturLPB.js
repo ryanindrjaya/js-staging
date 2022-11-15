@@ -24,9 +24,9 @@ const CreateReturLPB = async (
   //tempSupplierId = parseInt(values.supplier_id);
   //tempLocationId = parseInt(values.location);
 
-  //listId.forEach((element) => {
-  //  tempProductListId.push({ id: element });
-  //});
+  listId.forEach((element) => {
+    tempProductListId.push({ id: element });
+  });
 
   //values.tanggal_retur = values.tanggal_retur;
   //values.tanggal_pembelian = values.tanggal_retur;
@@ -41,15 +41,15 @@ const CreateReturLPB = async (
 
   var data = { 
     data: values,
-  };  console.log("ini data 1 : "); console.log(data);
+  };  //console.log("ini data 1 : "); console.log(data);
     
   const req = await createData(data); 
   const res = await req.json();
-    //console.log("ini data 1 : "); console.log(data); //console.log(req);
-  if (req.status === 200) { console.log("200 nih");
-    //await putRelationReturLPB(res.data.id, res.data.attributes, form, router);
-      console.log("res :"); console.log(res.data.id); console.log(res.data.attributes);
-      console.log("form :"); console.log(form); console.log(router);
+    console.log("ini data 1 : "); console.log(res);
+  if (req.status === 200) { //console.log("200 nih");
+    await putRelationReturLPB(res.data.id, res.data.attributes, form, router);
+      //console.log("res :"); console.log(res.data.id); console.log(res.data.attributes);
+      //console.log("form :"); console.log(form); console.log(router);
     //router.replace("/dashboard/pembelian/pembelian_barang");
   } else {
     openNotificationWithIcon("error");
@@ -59,7 +59,7 @@ const CreateReturLPB = async (
 const createData = async (data) => { console.log("create data masuk, data :");
   const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-lpbs";
     const JSONdata = JSON.stringify(data);
-    console.log("ini data LPB"); console.log(data)
+    //console.log("ini data LPB"); console.log(data)
   const options = {
     method: "POST",
     headers: {
@@ -70,7 +70,7 @@ const createData = async (data) => { console.log("create data masuk, data :");
   };
 
   const req = await fetch(endpoint, options);
-  const res = await req.json(); console.log("res :");console.log(res)
+  const res = await req.json();
   return req;
 };
 
@@ -80,10 +80,10 @@ const putRelationReturLPB = async (id, value, form, router) => {
     data: value,
   };
 
-  dataRetur.data.supplier = { id: tempSupplierId };
-  dataRetur.data.retur_details = tempProductListId;
+  //dataRetur.data.supplier = { id: tempSupplierId };
+  dataRetur.data.retur_lpb_details = tempProductListId;
   //dataRetur.data.added_by = user.name;
-  dataRetur.data.locations = { id: tempLocationId };
+  //dataRetur.data.locations = { id: tempLocationId };
 
   // clean object
   for (var key in dataRetur) {
@@ -105,9 +105,9 @@ const putRelationReturLPB = async (id, value, form, router) => {
 
 
   const req = await fetch(endpoint, options);
-  const res = await req.json();
+  //const res = await req.json();
 
-  if (req.status === 200) {
+  if (req.status === 200) { console.log("req status :"); console.log(req);
     form.resetFields();
     router.replace("/dashboard/pembelian/pembelian_barang");
     openNotificationWithIcon("success");
