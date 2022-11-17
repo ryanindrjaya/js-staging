@@ -221,7 +221,7 @@ function Tambah({ props }) {
     const req = await fetch(endpoint, options);
     const res = await req.json();
 
-    const dataPO = res.data.attributes;
+    const dataPO = res.data.attributes; console.log("data po :"); console.log(dataPO);
     const purchase_details = dataPO.purchase_details.data;
     const supplier = dataPO.supplier.data;
 
@@ -318,7 +318,9 @@ function Tambah({ props }) {
         d3: element.attributes.products.data[0].attributes.unit_1_dp3,
       });
     });
-
+      console.log("initial product"); console.log(products); console.log(productTotalPrice);
+      console.log(setTotalPrice); console.log(setProductTotalPrice); console.log(calculatePriceAfterDisc);
+      console.log(productSubTotal); console.log(locations);
     setTimeout(() => {
       setIsFetchingData(false);
     }, 3000);
