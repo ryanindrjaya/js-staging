@@ -391,7 +391,17 @@ var actions = __webpack_require__("Rv81");
 // EXTERNAL MODULE: external "react-icons/io"
 var io_ = __webpack_require__("2yjL");
 
+// EXTERNAL MODULE: ./node_modules/next/image.js
+var next_image = __webpack_require__("Aiso");
+var image_default = /*#__PURE__*/__webpack_require__.n(next_image);
+
+// EXTERNAL MODULE: ./public/images/logo.jpeg
+var logo = __webpack_require__("wdXh");
+var logo_default = /*#__PURE__*/__webpack_require__.n(logo);
+
 // CONCATENATED MODULE: ./components/utility/Logo.next.js
+
+
 
 
 
@@ -417,12 +427,11 @@ function LogoNext({
         })
       })
     }) : /*#__PURE__*/Object(jsx_runtime_["jsx"])("h3", {
-      children: /*#__PURE__*/Object(jsx_runtime_["jsx"])(link_default.a, {
-        href: "/dashboard",
-        children: /*#__PURE__*/Object(jsx_runtime_["jsx"])("a", {
-          className: "text-black",
-          children: "JAYA SEHAT"
-        })
+      children: /*#__PURE__*/Object(jsx_runtime_["jsx"])(image_default.a, {
+        src: logo_default.a,
+        alt: "logo",
+        width: "70px",
+        height: "70px"
       })
     })
   });
@@ -7493,6 +7502,13 @@ const actions = {
   })
 };
 /* harmony default export */ __webpack_exports__["a"] = (actions);
+
+/***/ }),
+
+/***/ "wdXh":
+/***/ (function(module, exports) {
+
+module.exports = "/_next/static/images/logo-4c28595b7fb32b4b456a3cc273acadce.jpeg";
 
 /***/ }),
 
