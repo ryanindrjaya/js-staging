@@ -2692,7 +2692,7 @@ const Pengguna = ({
   };
 
   const handleDelete = async id => {
-    const endpoint = "https://js-strapi.keelola.net/api" + "/users/" + id;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/users/" + id;
     const cookies = external_nookies_default.a.get(null, "token");
     const options = {
       method: "DELETE",
@@ -2758,7 +2758,7 @@ Pengguna.getInitialProps = async context => {
 };
 
 const fetchData = async cookies => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/users?populate=*";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/users?populate=*";
   const options = {
     method: "GET",
     headers: {

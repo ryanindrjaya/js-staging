@@ -4569,7 +4569,7 @@ const Satuan = ({
   };
 
   const handleDelete = async id => {
-    const endpoint = "https://js-strapi.keelola.net/api" + "/units/" + id;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/units/" + id;
     const cookies = external_nookies_default.a.get(null, "token");
     const options = {
       method: "DELETE",
@@ -4633,7 +4633,7 @@ Satuan.getInitialProps = async context => {
 };
 
 const fetchData = async cookies => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/units";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/units";
   const options = {
     method: "GET",
     headers: {

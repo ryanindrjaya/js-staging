@@ -2500,7 +2500,7 @@ Toko.getInitialProps = async context => {
 };
 
 const fetchData = async cookies => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/users/me";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/users/me";
   const options = {
     method: "GET",
     headers: {
@@ -2513,7 +2513,7 @@ const fetchData = async cookies => {
 };
 
 const fetchLocation = async cookies => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/locations";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/locations";
   const options = {
     method: "GET",
     headers: {

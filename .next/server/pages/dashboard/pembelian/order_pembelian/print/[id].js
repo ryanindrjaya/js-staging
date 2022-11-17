@@ -387,7 +387,7 @@ const Print = ({
 Print.getInitialProps = async context => {
   const cookies = nookies__WEBPACK_IMPORTED_MODULE_2___default.a.get(context);
   const id = context.query.id;
-  const endpoint = "https://js-strapi.keelola.net/api" + "/purchases/" + id + "?populate=deep";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/purchases/" + id + "?populate=deep";
   const options = {
     method: "GET",
     headers: {

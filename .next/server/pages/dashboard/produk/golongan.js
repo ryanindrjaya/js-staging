@@ -4418,7 +4418,7 @@ const Golongan = ({
   };
 
   const searchQuery = async keywords => {
-    const endpoint = "https://js-strapi.keelola.net/api" + "/groups?filters[$or][0][name][$contains]=" + keywords + "&filters[$or][1][code][$contains]=" + keywords + "&populate=*";
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/groups?filters[$or][0][name][$contains]=" + keywords + "&filters[$or][1][code][$contains]=" + keywords + "&populate=*";
     const cookies = external_nookies_default.a.get(null, "token");
     const options = {
       method: "GET",
@@ -4440,7 +4440,7 @@ const Golongan = ({
   };
 
   const handleDelete = async id => {
-    const endpoint = "https://js-strapi.keelola.net/api" + "/groups/" + id;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/groups/" + id;
     const cookies = external_nookies_default.a.get(null, "token");
     const options = {
       method: "DELETE",
@@ -4462,7 +4462,7 @@ const Golongan = ({
 
   const handlePageChange = async page => {
     const cookies = external_nookies_default.a.get(null, "token");
-    const endpoint = "https://js-strapi.keelola.net/api" + "/groups?pagination[page]=" + page;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/groups?pagination[page]=" + page;
     const options = {
       method: "GET",
       headers: {
@@ -4558,7 +4558,7 @@ Golongan.getInitialProps = async context => {
 };
 
 const fetchData = async cookies => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/groups?populate=*";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/groups?populate=*";
   const options = {
     method: "GET",
     headers: {

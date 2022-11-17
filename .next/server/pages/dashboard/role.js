@@ -3060,6 +3060,7 @@ var external_nookies_default = /*#__PURE__*/__webpack_require__.n(external_nooki
 const Role = ({
   props
 }) => {
+  console.log(props);
   const data = props.data.roles.filter(function (value, index, arr) {
     return index > 1;
   });
@@ -3074,7 +3075,7 @@ const Role = ({
   };
 
   const handleDelete = async id => {
-    const endpoint = "https://js-strapi.keelola.net/api" + "/users-permissions/roles/" + id;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/users-permissions/roles/" + id;
     const cookies = external_nookies_default.a.get(null, "token");
     const options = {
       method: "DELETE",
@@ -3142,7 +3143,7 @@ Role.getInitialProps = async context => {
 };
 
 const fetchData = async cookies => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/users-permissions/roles";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/users-permissions/roles";
   const options = {
     method: "GET",
     headers: {
@@ -3151,6 +3152,7 @@ const fetchData = async cookies => {
     }
   };
   const req = await fetch(endpoint, options);
+  console.log(endpoint);
   return req;
 };
 

@@ -2732,7 +2732,7 @@ const Pabrikasi = ({
   };
 
   const searchQuery = async keywords => {
-    const endpoint = "https://js-strapi.keelola.net/api" + "/manufactures?filters[$or][0][name][$contains]=" + keywords + "&filters[$or][1][code][$contains]=" + keywords + "&populate=*";
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/manufactures?filters[$or][0][name][$contains]=" + keywords + "&filters[$or][1][code][$contains]=" + keywords + "&populate=*";
     const cookies = external_nookies_default.a.get(null, "token");
     const options = {
       method: "GET",
@@ -2754,7 +2754,7 @@ const Pabrikasi = ({
   };
 
   const handleDelete = async id => {
-    const endpoint = "https://js-strapi.keelola.net/api" + "/manufactures/" + id;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/manufactures/" + id;
     const cookies = external_nookies_default.a.get(null, "token");
     const options = {
       method: "DELETE",
@@ -2776,7 +2776,7 @@ const Pabrikasi = ({
 
   const handlePageChange = async page => {
     const cookies = external_nookies_default.a.get(null, "token");
-    const endpoint = "https://js-strapi.keelola.net/api" + "/manufactures?pagination[page]=" + page;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/manufactures?pagination[page]=" + page;
     const options = {
       method: "GET",
       headers: {
@@ -2873,7 +2873,7 @@ Pabrikasi.getInitialProps = async context => {
 };
 
 const fetchData = async cookies => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/manufactures?populate=*";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/manufactures?populate=*";
   const options = {
     method: "GET",
     headers: {

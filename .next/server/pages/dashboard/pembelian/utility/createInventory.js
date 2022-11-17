@@ -182,7 +182,7 @@ function createInventory(data) {
 }
 
 const checkDetailStock = async (data, productId, locationId) => {
-  const endpoint = "https://js-strapi.keelola.net/api" + `/inventory-details?filters[locations][id][$eq]=${locationId}&filters[products][id][$eq]=${productId}&filters[expired_date][$eq]=2024-10-01&populate=*`;
+  const endpoint = "https://strapi-js.keelola.web.id/api" + `/inventory-details?filters[locations][id][$eq]=${locationId}&filters[products][id][$eq]=${productId}&filters[expired_date][$eq]=2024-10-01&populate=*`;
   const options = {
     method: "GET",
     headers: {
@@ -212,7 +212,7 @@ const updateAPI = async (resData, data, productId, locationId) => {
     data: resData.attributes
   };
   const JSONdata = JSON.stringify(newData);
-  const endpoint = "https://js-strapi.keelola.net/api" + "/inventory-details/" + resData.id;
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/inventory-details/" + resData.id;
   const options = {
     method: "PUT",
     headers: {
@@ -231,7 +231,7 @@ const updateAPI = async (resData, data, productId, locationId) => {
 
 const createAPI = async (data, productId, locationId) => {
   const JSONdata = JSON.stringify(data);
-  const endpoint = "https://js-strapi.keelola.net/api" + "/inventory-details";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/inventory-details";
   const options = {
     method: "POST",
     headers: {
@@ -251,7 +251,7 @@ const createAPI = async (data, productId, locationId) => {
 
 const createInventoryHistory = async data => {
   const JSONdata = JSON.stringify(data);
-  const endpoint = "https://js-strapi.keelola.net/api" + "/inventory-histories";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/inventory-histories";
   const options = {
     method: "POST",
     headers: {
@@ -266,7 +266,7 @@ const createInventoryHistory = async data => {
 
 
 const createInventoryAPI = async (locationId, productId, quantity, data) => {
-  const endpoint = "https://js-strapi.keelola.net/api" + `/inventories?filters[locations][id][$eq]=${locationId}&filters[products][id][$eq]=${productId}&populate=locations`;
+  const endpoint = "https://strapi-js.keelola.web.id/api" + `/inventories?filters[locations][id][$eq]=${locationId}&filters[products][id][$eq]=${productId}&populate=locations`;
   const options = {
     method: "GET",
     headers: {
@@ -296,7 +296,7 @@ const putExistingData = async (id, data, totalStock) => {
     data: data
   };
   const JSONdata = JSON.stringify(putData);
-  const endpoint = "https://js-strapi.keelola.net/api" + "/inventories/" + id;
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/inventories/" + id;
   const options = {
     method: "PUT",
     headers: {
@@ -314,7 +314,7 @@ const createNewData = async (data, locationId) => {
     id: locationId
   };
   const JSONdata = JSON.stringify(data);
-  const endpoint = "https://js-strapi.keelola.net/api" + "/inventories";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/inventories";
   const options = {
     method: "POST",
     headers: {
@@ -327,7 +327,7 @@ const createNewData = async (data, locationId) => {
 };
 
 const getUserLocation = async cookies => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/users/me?populate=*";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/users/me?populate=*";
   const options = {
     method: "GET",
     headers: {

@@ -4119,7 +4119,7 @@ Retur.getInitialProps = async context => {
 };
 
 const fetchData = async (cookies, id) => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/purchasings/" + id + "?populate=deep";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/purchasings/" + id + "?populate=deep";
   const options = {
     method: "GET",
     headers: {

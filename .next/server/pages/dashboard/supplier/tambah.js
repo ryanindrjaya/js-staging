@@ -4962,7 +4962,7 @@ const Tambah = () => {
     const data = {
       data: values
     };
-    const endpoint = "https://js-strapi.keelola.net/api" + "/suppliers";
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/suppliers";
     const JSONdata = JSON.stringify(data);
     const options = {
       method: "POST",

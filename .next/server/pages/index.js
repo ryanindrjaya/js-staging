@@ -452,7 +452,7 @@ function SignInPage(props) {
       password: field.password
     };
     const JSONdata = JSON.stringify(credentials);
-    const endpoint = "https://js-strapi.keelola.net/api" + "/auth/local";
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/auth/local";
     const options = {
       method: "POST",
       headers: {
@@ -472,7 +472,7 @@ function SignInPage(props) {
           // maxAge: 30 * 24 * 60 * 60,
           maxAge: 60,
           path: "/",
-          secure: "https://js-strapi.keelola.net/api" !== "development",
+          secure: "https://strapi-js.keelola.web.id/api" !== "development",
           sameSite: "strict"
         });
         const role = await getUserInformation(res.jwt); // set role token
@@ -481,7 +481,7 @@ function SignInPage(props) {
           // maxAge: 30 * 24 * 60 * 60,
           maxAge: 60,
           path: "/",
-          secure: "https://js-strapi.keelola.net/api" !== "development",
+          secure: "https://strapi-js.keelola.web.id/api" !== "development",
           sameSite: "strict"
         }); // redirect
 
@@ -498,7 +498,7 @@ function SignInPage(props) {
   };
 
   const getUserInformation = async jwt => {
-    const endpoint = "https://js-strapi.keelola.net/api" + "/users/me?populate=role";
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/users/me?populate=role";
     const options = {
       method: "GET",
       headers: {

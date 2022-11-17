@@ -2249,7 +2249,7 @@ const Edit = ({
     const data = {
       data: dataValues
     };
-    const endpoint = "https://js-strapi.keelola.net/api" + "/sub-categories/" + subCategory.id;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/sub-categories/" + subCategory.id;
     const JSONdata = JSON.stringify(data);
     const options = {
       method: "PUT",
@@ -2285,7 +2285,7 @@ const Edit = ({
       callback([]);
     } else {
       try {
-        const endpoint = "https://js-strapi.keelola.net/api" + `/categories?filters[$or][0][name][$contains]=${query}&filters[$or][1][category_id][$contains]=${query}`;
+        const endpoint = "https://strapi-js.keelola.web.id/api" + `/categories?filters[$or][0][name][$contains]=${query}&filters[$or][1][category_id][$contains]=${query}`;
         const options = {
           method: "GET",
           headers: {
@@ -2428,7 +2428,7 @@ const Edit = ({
 Edit.getInitialProps = async context => {
   const cookies = nookies__WEBPACK_IMPORTED_MODULE_5___default.a.get(context);
   const id = context.query.id;
-  const endpoint = "https://js-strapi.keelola.net/api" + "/sub-categories/" + id + "?populate=*";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/sub-categories/" + id + "?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -2449,7 +2449,7 @@ Edit.getInitialProps = async context => {
 };
 
 const fetchCategory = async cookies => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/categories?populate=*";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/categories?populate=*";
   const options = {
     method: "GET",
     headers: {

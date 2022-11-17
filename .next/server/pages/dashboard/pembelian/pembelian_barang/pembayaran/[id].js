@@ -356,7 +356,7 @@ function ReactDataTable({
 Pembayaran.getInitialProps = async context => {
   const cookies = external_nookies_default.a.get(context);
   const id = context.query.id;
-  const endpoint = "https://js-strapi.keelola.net/api" + "/purchasings/" + id + "?populate=deep";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/purchasings/" + id + "?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -599,7 +599,7 @@ function Pembayaran({
     const data = {
       data: values
     };
-    const endpoint = "https://js-strapi.keelola.net/api" + "/purchasing-payments";
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/purchasing-payments";
     const JSONdata = JSON.stringify(data);
     const cookies = external_nookies_default.a.get(null, "token");
     const options = {
@@ -630,7 +630,7 @@ function Pembayaran({
 
   const getPaymentData = async paymentId => {
     const id = props.purchases.data.id;
-    const endpoint = "https://js-strapi.keelola.net/api" + "/purchasings/" + id + "?populate=*";
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/purchasings/" + id + "?populate=*";
     const cookies = external_nookies_default.a.get(null, "token");
     const options = {
       method: "GET",
@@ -676,7 +676,7 @@ function Pembayaran({
     const postData = {
       data: data
     };
-    const endpoint = "https://js-strapi.keelola.net/api" + "/purchasings/" + id;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/purchasings/" + id;
     const JSONdata = JSON.stringify(postData);
     const cookies = external_nookies_default.a.get(null, "token");
     const options = {

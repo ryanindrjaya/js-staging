@@ -2491,7 +2491,7 @@ const Edit = ({
     const data = {
       data: values
     };
-    const endpoint = "https://js-strapi.keelola.net/api" + "/manufactures/" + manufactures.id;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/manufactures/" + manufactures.id;
     const JSONdata = JSON.stringify(data);
     const options = {
       method: "PUT",
@@ -2622,7 +2622,7 @@ const Edit = ({
 Edit.getInitialProps = async context => {
   const cookies = nookies__WEBPACK_IMPORTED_MODULE_4___default.a.get(context);
   const id = context.query.id;
-  const endpoint = "https://js-strapi.keelola.net/api" + "/manufactures/" + id;
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/manufactures/" + id;
   const options = {
     method: "GET",
     headers: {

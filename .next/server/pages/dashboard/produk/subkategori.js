@@ -4924,7 +4924,7 @@ const SubKategori = ({
   };
 
   const searchQuery = async keywords => {
-    const endpoint = "https://js-strapi.keelola.net/api" + "/sub-categories?filters[$or][0][name][$contains]=" + keywords + "&filters[$or][1][sub_id][$contains]=" + keywords + "&populate=*";
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/sub-categories?filters[$or][0][name][$contains]=" + keywords + "&filters[$or][1][sub_id][$contains]=" + keywords + "&populate=*";
     const cookies = nookies__WEBPACK_IMPORTED_MODULE_7___default.a.get(null, "token");
     const options = {
       method: "GET",
@@ -4946,7 +4946,7 @@ const SubKategori = ({
   };
 
   const handleDelete = async id => {
-    const endpoint = "https://js-strapi.keelola.net/api" + "/sub-categories/" + id;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/sub-categories/" + id;
     const cookies = nookies__WEBPACK_IMPORTED_MODULE_7___default.a.get(null, "token");
     const options = {
       method: "DELETE",
@@ -4968,7 +4968,7 @@ const SubKategori = ({
 
   const handlePageChange = async page => {
     const cookies = nookies__WEBPACK_IMPORTED_MODULE_7___default.a.get(null, "token");
-    const endpoint = "https://js-strapi.keelola.net/api" + "/sub-categories?pagination[page]=" + page;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/sub-categories?pagination[page]=" + page;
     const options = {
       method: "GET",
       headers: {
@@ -5061,7 +5061,7 @@ SubKategori.getInitialProps = async context => {
 };
 
 const fetchData = async cookies => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/sub-categories?populate=*";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/sub-categories?populate=*";
   const options = {
     method: "GET",
     headers: {

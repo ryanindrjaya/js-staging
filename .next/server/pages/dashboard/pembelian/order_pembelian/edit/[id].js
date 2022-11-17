@@ -2461,7 +2461,7 @@ function Supplier({
   const order = Object(react_redux__WEBPACK_IMPORTED_MODULE_4__["useSelector"])(state => state.Order);
 
   const handleChange = async id => {
-    const endpoint = "https://js-strapi.keelola.net/api" + `/suppliers/${id}`;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + `/suppliers/${id}`;
     const options = {
       method: "GET",
       headers: {
@@ -2491,7 +2491,7 @@ function Supplier({
       callback([]);
     } else {
       try {
-        const endpoint = "https://js-strapi.keelola.net/api" + `/suppliers?filters[$or][0][name][$contains]=${query}&filters[$or][1][id_supplier][$contains]=${query}`;
+        const endpoint = "https://strapi-js.keelola.web.id/api" + `/suppliers?filters[$or][0][name][$contains]=${query}&filters[$or][1][id_supplier][$contains]=${query}`;
         const options = {
           method: "GET",
           headers: {
@@ -2622,7 +2622,7 @@ function SearchBar({
   const handleChange = async id => {};
 
   const handleSelect = async id => {
-    const endpoint = "https://js-strapi.keelola.net/api" + `/products/${id}`;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + `/products/${id}`;
     const options = {
       method: "GET",
       headers: {
@@ -2645,7 +2645,7 @@ function SearchBar({
   };
 
   const getUserInfo = async () => {
-    const endpoint = "https://js-strapi.keelola.net/api" + `/users/me?populate=*`;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + `/users/me?populate=*`;
     const options = {
       method: "GET",
       headers: {
@@ -2681,7 +2681,7 @@ function SearchBar({
     } else {
       try {
         let queryLocations = await getUserInfo();
-        const endpoint = "https://js-strapi.keelola.net/api" + `/products?populate=locations&filters[name][$contains]=${query}&${queryLocations}`;
+        const endpoint = "https://strapi-js.keelola.web.id/api" + `/products?populate=locations&filters[name][$contains]=${query}&${queryLocations}`;
         const options = {
           method: "GET",
           headers: {
@@ -3462,7 +3462,7 @@ const Edit = ({
         disc: parseInt(disc)
       }
     };
-    const endpoint = "https://js-strapi.keelola.net/api" + "/purchase-details";
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/purchase-details";
     const JSONdata = JSON.stringify(data);
     const options = {
       method: "POST",
@@ -3509,7 +3509,7 @@ const Edit = ({
     var data = {
       data: values
     };
-    const endpoint = "https://js-strapi.keelola.net/api" + "/purchases";
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/purchases";
     const JSONdata = JSON.stringify(data);
     const options = {
       method: "POST",
@@ -3550,7 +3550,7 @@ const Edit = ({
     }
 
     const JSONdata = JSON.stringify(dataOrder);
-    const endpoint = "https://js-strapi.keelola.net/api" + "/purchases/" + id;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/purchases/" + id;
     const options = {
       method: "PUT",
       headers: {
@@ -3572,7 +3572,7 @@ const Edit = ({
   };
 
   const getUserMe = async () => {
-    const endpoint = "https://js-strapi.keelola.net/api" + "/users/me";
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/users/me";
     const options = {
       method: "GET",
       headers: {
@@ -4101,7 +4101,7 @@ const Edit = ({
 Edit.getInitialProps = async context => {
   const cookies = nookies__WEBPACK_IMPORTED_MODULE_17___default.a.get(context);
   const id = context.query.id;
-  const endpoint = "https://js-strapi.keelola.net/api" + "/purchases/" + id + "?populate=deep";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/purchases/" + id + "?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -4122,7 +4122,7 @@ Edit.getInitialProps = async context => {
 };
 
 const fetchDataLocation = async cookies => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/locations";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/locations";
   const options = {
     method: "GET",
     headers: {

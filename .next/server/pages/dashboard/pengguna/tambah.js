@@ -2285,7 +2285,7 @@ const Tambah = ({
       deleteAble: true
     });
 
-    const endpoint = "https://js-strapi.keelola.net/api" + "/auth/local/register";
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/auth/local/register";
     const JSONdata = JSON.stringify(data);
     const options = {
       method: "POST",
@@ -2318,7 +2318,7 @@ const Tambah = ({
   };
 
   const getRole = async roleId => {
-    const endpoint = "https://js-strapi.keelola.net/api" + "/users-permissions/roles/" + roleId;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/users-permissions/roles/" + roleId;
     const options = {
       method: "GET",
       headers: {
@@ -2524,7 +2524,7 @@ Tambah.getInitialProps = async context => {
 };
 
 const fetchData = async (cookies, url) => {
-  const endpoint = "https://js-strapi.keelola.net/api" + url;
+  const endpoint = "https://strapi-js.keelola.web.id/api" + url;
   const options = {
     method: "GET",
     headers: {

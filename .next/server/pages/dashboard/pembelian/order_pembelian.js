@@ -5184,7 +5184,7 @@ Pembelian.getInitialProps = async context => {
 };
 
 const order_pembelian_fetchData = async cookies => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/purchases?populate=deep";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/purchases?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -5223,7 +5223,7 @@ function Pembelian({
   };
 
   const handleDelete = async id => {
-    const endpoint = "https://js-strapi.keelola.net/api" + "/purchases/" + id;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/purchases/" + id;
     const cookies = external_nookies_default.a.get(null, "token");
     const options = {
       method: "DELETE",
@@ -5244,7 +5244,7 @@ function Pembelian({
 
   const handlePageChange = async page => {
     const cookies = external_nookies_default.a.get(null, "token");
-    const endpoint = "https://js-strapi.keelola.net/api" + "/purchases?pagination[page]=" + page;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/purchases?pagination[page]=" + page;
     const options = {
       method: "GET",
       headers: {
@@ -5284,7 +5284,7 @@ function Pembelian({
   };
 
   const searchQuery = async keywords => {
-    const endpoint = "https://js-strapi.keelola.net/api" + "/purchases?filters[$or][0][added_by][$contains]=" + keywords + "&filters[$or][1][no_po][$contains]=" + keywords + "&populate=*";
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/purchases?filters[$or][0][added_by][$contains]=" + keywords + "&filters[$or][1][no_po][$contains]=" + keywords + "&populate=*";
     const cookies = external_nookies_default.a.get(null, "token");
     const options = {
       method: "GET",
@@ -5341,7 +5341,7 @@ function Pembelian({
     };
     const JSONdata = JSON.stringify(newValues);
     const cookies = external_nookies_default.a.get(null, "token");
-    const endpoint = "https://js-strapi.keelola.net/api" + "/purchases/" + id;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/purchases/" + id;
     const options = {
       method: "PUT",
       headers: {
@@ -5370,7 +5370,7 @@ function Pembelian({
   };
 
   const fetchData = async cookies => {
-    const endpoint = "https://js-strapi.keelola.net/api" + "/purchases?populate=deep";
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/purchases?populate=deep";
     const options = {
       method: "GET",
       headers: {

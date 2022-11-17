@@ -5068,6 +5068,19 @@ function UnitsTableView({
       });
     }
   }];
+
+  const getInitialDescUnit = () => {
+    var _initialValue$qty_, _initialValue$unit_, _initialValue$qty_2, _initialValue$unit_2, _initialValue$qty_3, _initialValue$unit_3, _initialValue$qty_4, _initialValue$unit_4, _initialValue$qty_5, _initialValue$unit_5;
+
+    let unit1 = `${(_initialValue$qty_ = initialValue === null || initialValue === void 0 ? void 0 : initialValue.qty_1) !== null && _initialValue$qty_ !== void 0 ? _initialValue$qty_ : ""} ${(_initialValue$unit_ = initialValue === null || initialValue === void 0 ? void 0 : initialValue.unit_1) !== null && _initialValue$unit_ !== void 0 ? _initialValue$unit_ : ""} `;
+    let unit2 = `${(_initialValue$qty_2 = initialValue === null || initialValue === void 0 ? void 0 : initialValue.qty_2) !== null && _initialValue$qty_2 !== void 0 ? _initialValue$qty_2 : ""} ${(_initialValue$unit_2 = initialValue === null || initialValue === void 0 ? void 0 : initialValue.unit_2) !== null && _initialValue$unit_2 !== void 0 ? _initialValue$unit_2 : ""} `;
+    let unit3 = `${(_initialValue$qty_3 = initialValue === null || initialValue === void 0 ? void 0 : initialValue.qty_3) !== null && _initialValue$qty_3 !== void 0 ? _initialValue$qty_3 : ""} ${(_initialValue$unit_3 = initialValue === null || initialValue === void 0 ? void 0 : initialValue.unit_3) !== null && _initialValue$unit_3 !== void 0 ? _initialValue$unit_3 : ""} `;
+    let unit4 = `${(_initialValue$qty_4 = initialValue === null || initialValue === void 0 ? void 0 : initialValue.qty_4) !== null && _initialValue$qty_4 !== void 0 ? _initialValue$qty_4 : ""} ${(_initialValue$unit_4 = initialValue === null || initialValue === void 0 ? void 0 : initialValue.unit_4) !== null && _initialValue$unit_4 !== void 0 ? _initialValue$unit_4 : ""} `;
+    let unit5 = `${(_initialValue$qty_5 = initialValue === null || initialValue === void 0 ? void 0 : initialValue.qty_5) !== null && _initialValue$qty_5 !== void 0 ? _initialValue$qty_5 : ""} ${(_initialValue$unit_5 = initialValue === null || initialValue === void 0 ? void 0 : initialValue.unit_5) !== null && _initialValue$unit_5 !== void 0 ? _initialValue$unit_5 : ""} `;
+    let descUnit = unit1 + unit2 + unit3 + unit4 + unit5;
+    return descUnit;
+  };
+
   return /*#__PURE__*/Object(jsx_runtime_["jsxs"])(jsx_runtime_["Fragment"], {
     children: [/*#__PURE__*/Object(jsx_runtime_["jsx"])(external_react_data_table_component_default.a, {
       className: "mt-10",
@@ -5075,9 +5088,9 @@ function UnitsTableView({
       onChangePage: onPageChange,
       columns: columns,
       data: data
-    }), /*#__PURE__*/Object(jsx_runtime_["jsx"])("p", {
+    }), /*#__PURE__*/Object(jsx_runtime_["jsxs"])("p", {
       className: "mt-3",
-      children: "Keterangan Unit : 1 CTN 5 BOX 10 STRP"
+      children: ["Keterangan Unit : ", getInitialDescUnit()]
     })]
   });
 }
@@ -5998,7 +6011,7 @@ const productKeys = ["SKU", "name", "category", "sub_category", "manufacture", "
 
 const getRelationalData_cookies = external_nookies_default.a.get(null);
 async function getRelationalData(url, parameter, query) {
-  const endpoint = "https://js-strapi.keelola.net/api" + `/${url}?filters[${parameter}][$eq]=${query}`;
+  const endpoint = "https://strapi-js.keelola.web.id/api" + `/${url}?filters[${parameter}][$eq]=${query}`;
   const options = {
     method: "GET",
     headers: {
@@ -6018,7 +6031,7 @@ async function getRelationalData(url, parameter, query) {
   }
 }
 async function getLocationsId(locationsNamesArr = []) {
-  let endpoint = "https://js-strapi.keelola.net/api" + "/locations?";
+  let endpoint = "https://strapi-js.keelola.web.id/api" + "/locations?";
   (locationsNamesArr === null || locationsNamesArr === void 0 ? void 0 : locationsNamesArr.forEach((locationName, index) => {
     endpoint += `filters[name][$in][${index}]=${locationName}`;
 
@@ -6085,7 +6098,7 @@ function UploadProduk({
     let increment = 100 / data.length;
     console.log("increment", increment);
     const cookies = external_nookies_default.a.get(null);
-    const endpoint = "https://js-strapi.keelola.net/api" + "/products";
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/products";
 
     try {
       data.forEach(async (row, idx) => {
@@ -6108,7 +6121,7 @@ function UploadProduk({
           setPercent(prev => Math.round(prev + increment));
 
           if (req.status == 200) {
-            const endpointProduct = "https://js-strapi.keelola.net/api" + "/products?populate=*";
+            const endpointProduct = "https://strapi-js.keelola.web.id/api" + "/products?populate=*";
             const optionsAllProduct = {
               method: "GET",
               headers: {
@@ -6335,7 +6348,7 @@ const Product = ({
     const cookies = external_nookies_default.a.get(null);
 
     try {
-      const endpoint = "https://js-strapi.keelola.net/api" + `/${category}?filters[name][$containsi]=${query}`;
+      const endpoint = "https://strapi-js.keelola.web.id/api" + `/${category}?filters[name][$containsi]=${query}`;
       const options = {
         method: "GET",
         headers: {
@@ -6386,7 +6399,7 @@ const Product = ({
         locationQuery = "";
       }
 
-      const endpoint = "https://js-strapi.keelola.net/api" + "/products?populate=*&" + query + locationQuery;
+      const endpoint = "https://strapi-js.keelola.web.id/api" + "/products?populate=*&" + query + locationQuery;
       const cookies = external_nookies_default.a.get(null, "token");
       const options = {
         method: "GET",
@@ -6419,7 +6432,7 @@ const Product = ({
   };
 
   const handleDelete = async id => {
-    const endpoint = "https://js-strapi.keelola.net/api" + "/products/" + id;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/products/" + id;
     const cookies = external_nookies_default.a.get(null, "token");
     const options = {
       method: "DELETE",
@@ -6441,7 +6454,7 @@ const Product = ({
 
   const handlePageChange = async page => {
     const cookies = external_nookies_default.a.get(null, "token");
-    const endpoint = "https://js-strapi.keelola.net/api" + "/products?pagination[page]=" + page;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/products?pagination[page]=" + page;
     const options = {
       method: "GET",
       headers: {
@@ -6480,7 +6493,7 @@ const Product = ({
   const fetchInventory = async data => {
     setIsLoading(true);
     const cookies = external_nookies_default.a.get(null, "token");
-    const endpoint = "https://js-strapi.keelola.net/api" + `/inventories?filters[products][id][$eq]=${data.id}&populate=locations`;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + `/inventories?filters[products][id][$eq]=${data.id}&populate=locations`;
     const options = {
       method: "GET",
       headers: {
@@ -6672,7 +6685,7 @@ const formatData = data => {
 };
 
 const fetchData = async cookies => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/products?populate=*";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/products?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -6685,7 +6698,7 @@ const fetchData = async cookies => {
 };
 
 const fetchSearchParametersData = async (cookies, url) => {
-  const endpoint = "https://js-strapi.keelola.net/api" + `/${url}?pagination[limit]=10`;
+  const endpoint = "https://strapi-js.keelola.web.id/api" + `/${url}?pagination[limit]=10`;
   const options = {
     method: "GET",
     headers: {
@@ -7001,7 +7014,7 @@ function Manufactures({
       callback([]);
     } else {
       try {
-        const endpoint = "https://js-strapi.keelola.net/api" + `/manufactures?filters[$or][0][name][$containsi]=${query}&filters[$or][1][code][$containsi]=${query}`;
+        const endpoint = "https://strapi-js.keelola.web.id/api" + `/manufactures?filters[$or][0][name][$containsi]=${query}&filters[$or][1][code][$containsi]=${query}`;
         const options = {
           method: "GET",
           headers: {

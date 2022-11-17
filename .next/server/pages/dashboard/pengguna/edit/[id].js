@@ -4522,7 +4522,7 @@ const Edit = ({
       deleteAble: true
     });
 
-    const endpoint = "https://js-strapi.keelola.net/api" + "/users/" + user.id;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/users/" + user.id;
     const JSONdata = JSON.stringify(data);
     const options = {
       method: "PUT",
@@ -4554,7 +4554,7 @@ const Edit = ({
   };
 
   const getRole = async roleId => {
-    const endpoint = "https://js-strapi.keelola.net/api" + "/users-permissions/roles/" + roleId;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/users-permissions/roles/" + roleId;
     const options = {
       method: "GET",
       headers: {
@@ -4697,7 +4697,7 @@ const Edit = ({
 Edit.getInitialProps = async context => {
   const cookies = nookies__WEBPACK_IMPORTED_MODULE_7___default.a.get(context);
   const id = context.query.id;
-  const endpoint = "https://js-strapi.keelola.net/api" + "/users/" + id + "?populate=*";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/users/" + id + "?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -4721,7 +4721,7 @@ Edit.getInitialProps = async context => {
 };
 
 const fetchRole = async cookies => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/users-permissions/roles";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/users-permissions/roles";
   const options = {
     method: "GET",
     headers: {
@@ -4734,7 +4734,7 @@ const fetchRole = async cookies => {
 };
 
 const fetchDataLocation = async (cookies, url) => {
-  const endpoint = "https://js-strapi.keelola.net/api" + url;
+  const endpoint = "https://strapi-js.keelola.web.id/api" + url;
   const options = {
     method: "GET",
     headers: {

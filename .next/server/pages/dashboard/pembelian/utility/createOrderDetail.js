@@ -158,7 +158,7 @@ const POSTPurchaseDetail = async (qty, disc, unit, unitPrice, unitPriceAfterDisc
       disc: parseInt(disc)
     }
   };
-  const endpoint = "https://js-strapi.keelola.net/api" + url;
+  const endpoint = "https://strapi-js.keelola.web.id/api" + url;
   const JSONdata = JSON.stringify(data);
   const options = {
     method: "POST",

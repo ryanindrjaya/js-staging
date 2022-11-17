@@ -185,7 +185,7 @@ function Groups({
       setLoading(true);
 
       try {
-        const endpoint = "https://js-strapi.keelola.net/api" + `/groups?filters[$or][0][name][$containsi]=${query}&filters[$or][1][code][$containsi]=${query}`;
+        const endpoint = "https://strapi-js.keelola.web.id/api" + `/groups?filters[$or][0][name][$containsi]=${query}&filters[$or][1][code][$containsi]=${query}`;
         const options = {
           method: "GET",
           headers: {
@@ -5102,7 +5102,7 @@ const Edit = ({
   const imageLoader = ({
     src
   }) => {
-    return "https://js-strapi.keelola.net/api" + (image === null || image === void 0 ? void 0 : image.url);
+    return "https://strapi-js.keelola.web.id/api" + (image === null || image === void 0 ? void 0 : image.url);
   };
 
   const propsDagger = {
@@ -5122,7 +5122,7 @@ const Edit = ({
 
     async onChange(info) {
       if (info.fileList.length === 1) {
-        const endpoint = "https://js-strapi.keelola.net/api" + "/upload";
+        const endpoint = "https://strapi-js.keelola.web.id/api" + "/upload";
         const file = info.file.originFileObj;
         const data = new FormData();
         data.append("files", file);
@@ -5283,7 +5283,7 @@ const Edit = ({
       },
       body: JSONdata
     };
-    const endpoint = "https://js-strapi.keelola.net/api" + "/products/" + productId;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/products/" + productId;
     const req = await fetch(endpoint, options);
     const res = await req.json();
 
@@ -5440,7 +5440,7 @@ const Edit = ({
                   }) : /*#__PURE__*/Object(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__["jsx"])(next_image__WEBPACK_IMPORTED_MODULE_15___default.a, {
                     layout: "fill",
                     loader: imageLoader,
-                    src: "https://js-strapi.keelola.net/api" + (image === null || image === void 0 ? void 0 : image.url)
+                    src: "https://strapi-js.keelola.web.id/api" + (image === null || image === void 0 ? void 0 : image.url)
                   })
                 }))
               })]
@@ -5515,7 +5515,7 @@ Edit.getInitialProps = async context => {
 
 const fetchProduct = async (cookies, context) => {
   const id = context.query.id;
-  const endpoint = "https://js-strapi.keelola.net/api" + "/products/" + id + "?populate=*";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/products/" + id + "?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -5528,7 +5528,7 @@ const fetchProduct = async (cookies, context) => {
 };
 
 const fetchDataCategories = async cookies => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/categories";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/categories";
   const options = {
     method: "GET",
     headers: {
@@ -5541,7 +5541,7 @@ const fetchDataCategories = async cookies => {
 };
 
 const fetchDataManufactures = async cookies => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/manufactures";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/manufactures";
   const options = {
     method: "GET",
     headers: {
@@ -5554,7 +5554,7 @@ const fetchDataManufactures = async cookies => {
 };
 
 const fetchDataSubCategories = async (cookies, categoryId) => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/sub-categories?populate[category][filters][id][$eq]=" + categoryId;
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/sub-categories?populate[category][filters][id][$eq]=" + categoryId;
   const options = {
     method: "GET",
     headers: {
@@ -5567,7 +5567,7 @@ const fetchDataSubCategories = async (cookies, categoryId) => {
 };
 
 const fetchDataGroups = async cookies => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/groups";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/groups";
   const options = {
     method: "GET",
     headers: {
@@ -5580,7 +5580,7 @@ const fetchDataGroups = async cookies => {
 };
 
 const fetchDataLocations = async cookies => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/locations";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/locations";
   const options = {
     method: "GET",
     headers: {
@@ -6611,18 +6611,18 @@ function setHargaValue(form, changedValues, allValues, unit, firstInput) {
     const diskonPembelian_unit2 = hargaDiskon_unit1 / qty_unit2;
     const hargaJual_unit2 = hargaJual_unit1 / qty_unit2;
     const hargaPricelist_unit2 = hargaPricelist_unit1 / qty_unit2;
-    const hargaPembelian_unit3 = hargaPembelian_unit1 / qty_unit3;
-    const diskonPembelian_unit3 = hargaDiskon_unit1 / qty_unit3;
-    const hargaJual_unit3 = hargaJual_unit1 / qty_unit3;
-    const hargaPricelist_unit3 = hargaPricelist_unit1 / qty_unit3;
-    const hargaPembelian_unit4 = hargaPembelian_unit1 / qty_unit4;
-    const diskonPembelian_unit4 = hargaDiskon_unit1 / qty_unit4;
-    const hargaJual_unit4 = hargaJual_unit1 / qty_unit4;
+    const hargaPembelian_unit3 = hargaPembelian_unit2 / qty_unit3;
+    const diskonPembelian_unit3 = diskonPembelian_unit2 / qty_unit3;
+    const hargaJual_unit3 = hargaJual_unit2 / qty_unit3;
+    const hargaPricelist_unit3 = hargaPricelist_unit2 / qty_unit3;
+    const hargaPembelian_unit4 = hargaPembelian_unit3 / qty_unit4;
+    const diskonPembelian_unit4 = diskonPembelian_unit3 / qty_unit4;
+    const hargaJual_unit4 = hargaJual_unit3 / qty_unit4;
     const hargaPricelist_unit4 = hargaPricelist_unit3 / qty_unit4;
-    const hargaPembelian_unit5 = hargaPembelian_unit1 / qty_unit5;
-    const diskonPembelian_unit5 = hargaDiskon_unit1 / qty_unit5;
-    const hargaJual_unit5 = hargaJual_unit1 / qty_unit5;
-    const hargaPricelist_unit5 = hargaPricelist_unit1 / qty_unit5;
+    const hargaPembelian_unit5 = hargaPembelian_unit4 / qty_unit5;
+    const diskonPembelian_unit5 = diskonPembelian_unit4 / qty_unit5;
+    const hargaJual_unit5 = hargaJual_unit4 / qty_unit5;
+    const hargaPricelist_unit5 = hargaPricelist_unit4 / qty_unit5;
     form.setFieldsValue({
       buy_price_1: changedValues.qty_1 !== null ? hargaPembelian_unit1 : null,
       purchase_discount_1: changedValues.qty_1 !== null ? hargaDiskon_unit1 : null,
@@ -6668,8 +6668,8 @@ function setHargaValue(form, changedValues, allValues, unit, firstInput) {
   }
 
   if (unit == "2") {
-    const qty_unit2 = changedValues.qty_2 || allValues.qty_2 || null;
     const hargaPembelian_unit1 = changedValues.buy_price_1 || allValues.buy_price_1 || null;
+    const qty_unit2 = changedValues.qty_2 || allValues.qty_2 || null;
     const hargaDiskon_unit1 = changedValues.purchase_discount_1 || allValues.purchase_discount_1 || null;
     const hargaJual_unit1 = changedValues.sold_price_1 || allValues.sold_price_1 || null;
     const hargaPricelist_unit1 = changedValues.pricelist_1 || allValues.pricelist_1 || null;
@@ -6687,15 +6687,15 @@ function setHargaValue(form, changedValues, allValues, unit, firstInput) {
       });
     }
   } else if (unit === "3" && firstInput) {
+    const hargaPembelian_unit2 = changedValues.buy_price_2 || allValues.buy_price_2 || null;
     const qty_unit3 = changedValues.qty_3 || allValues.qty_3 || null;
-    const hargaPembelian_unit1 = changedValues.buy_price_1 || allValues.buy_price_1 || null;
-    const hargaDiskon_unit1 = changedValues.purchase_discount_1 || allValues.purchase_discount_1 || null;
-    const hargaJual_unit1 = changedValues.sold_price_1 || allValues.sold_price_1 || null;
-    const hargaPricelist_unit1 = changedValues.pricelist_1 || allValues.pricelist_1 || null;
-    const hargaPembelian_unit3 = hargaPembelian_unit1 / qty_unit3;
-    const diskonPembelian_unit3 = hargaDiskon_unit1 / qty_unit3;
-    const hargaJual_unit3 = hargaJual_unit1 / qty_unit3;
-    const hargaPricelist_unit3 = hargaPricelist_unit1 / qty_unit3;
+    const hargaDiskon_unit2 = changedValues.purchase_discount_2 || allValues.purchase_discount_2 || null;
+    const hargaJual_unit2 = changedValues.sold_price_2 || allValues.sold_price_2 || null;
+    const hargaPricelist_unit2 = changedValues.pricelist_2 || allValues.pricelist_2 || null;
+    const hargaPembelian_unit3 = hargaPembelian_unit2 / qty_unit3;
+    const diskonPembelian_unit3 = hargaDiskon_unit2 / qty_unit3;
+    const hargaJual_unit3 = hargaJual_unit2 / qty_unit3;
+    const hargaPricelist_unit3 = hargaPricelist_unit2 / qty_unit3;
 
     if (qty_unit3) {
       form.setFieldsValue({
@@ -6706,15 +6706,15 @@ function setHargaValue(form, changedValues, allValues, unit, firstInput) {
       });
     }
   } else if (unit === "4" && firstInput) {
+    const hargaPembelian_unit3 = changedValues.buy_price_3 || allValues.buy_price_3 || null;
     const qty_unit4 = changedValues.qty_4 || allValues.qty_4 || null;
-    const hargaPembelian_unit1 = changedValues.buy_price_1 || allValues.buy_price_1 || null;
-    const hargaDiskon_unit1 = changedValues.purchase_discount_1 || allValues.purchase_discount_1 || null;
-    const hargaJual_unit1 = changedValues.sold_price_1 || allValues.sold_price_1 || null;
-    const hargaPricelist_unit1 = changedValues.pricelist_1 || allValues.pricelist_1 || null;
-    const hargaPembelian_unit4 = hargaPembelian_unit1 / qty_unit4;
-    const diskonPembelian_unit4 = hargaDiskon_unit1 / qty_unit4;
-    const hargaJual_unit4 = hargaJual_unit1 / qty_unit4;
-    const hargaPricelist_unit4 = hargaPricelist_unit1 / qty_unit4;
+    const hargaDiskon_unit3 = changedValues.purchase_discount_3 || allValues.purchase_discount_3 || null;
+    const hargaJual_unit3 = changedValues.sold_price_3 || allValues.sold_price_3 || null;
+    const hargaPricelist_unit3 = changedValues.pricelist_3 || allValues.pricelist_3 || null;
+    const hargaPembelian_unit4 = hargaPembelian_unit3 / qty_unit4;
+    const diskonPembelian_unit4 = hargaDiskon_unit3 / qty_unit4;
+    const hargaJual_unit4 = hargaJual_unit3 / qty_unit4;
+    const hargaPricelist_unit4 = hargaPricelist_unit3 / qty_unit4;
 
     if (qty_unit4) {
       form.setFieldsValue({
@@ -6725,15 +6725,15 @@ function setHargaValue(form, changedValues, allValues, unit, firstInput) {
       });
     }
   } else if (unit === "5" && firstInput) {
+    const hargaPembelian_unit4 = changedValues.buy_price_4 || allValues.buy_price_4 || null;
     const qty_unit5 = changedValues.qty_5 || allValues.qty_5 || null;
-    const hargaPembelian_unit1 = changedValues.buy_price_1 || allValues.buy_price_1 || null;
-    const hargaDiskon_unit1 = changedValues.purchase_discount_1 || allValues.purchase_discount_1 || null;
-    const hargaJual_unit1 = changedValues.sold_price_1 || allValues.sold_price_1 || null;
-    const hargaPricelist_unit1 = changedValues.pricelist_1 || allValues.pricelist_1 || null;
-    const hargaPembelian_unit5 = hargaPembelian_unit1 / qty_unit5;
-    const diskonPembelian_unit5 = hargaDiskon_unit1 / qty_unit5;
-    const hargaJual_unit5 = hargaJual_unit1 / qty_unit5;
-    const hargaPricelist_unit5 = hargaPricelist_unit1 / qty_unit5;
+    const hargaDiskon_unit4 = changedValues.purchase_discount_4 || allValues.purchase_discount_4 || null;
+    const hargaJual_unit4 = changedValues.sold_price_4 || allValues.sold_price_4 || null;
+    const hargaPricelist_unit4 = changedValues.pricelist_4 || allValues.pricelist_4 || null;
+    const hargaPembelian_unit5 = hargaPembelian_unit4 / qty_unit5;
+    const diskonPembelian_unit5 = hargaDiskon_unit4 / qty_unit5;
+    const hargaJual_unit5 = hargaJual_unit4 / qty_unit5;
+    const hargaPricelist_unit5 = hargaPricelist_unit4 / qty_unit5;
 
     if (qty_unit5) {
       form.setFieldsValue({
@@ -6944,7 +6944,7 @@ function Manufactures({
       callback([]);
     } else {
       try {
-        const endpoint = "https://js-strapi.keelola.net/api" + `/manufactures?filters[$or][0][name][$containsi]=${query}&filters[$or][1][code][$containsi]=${query}`;
+        const endpoint = "https://strapi-js.keelola.web.id/api" + `/manufactures?filters[$or][0][name][$containsi]=${query}&filters[$or][1][code][$containsi]=${query}`;
         const options = {
           method: "GET",
           headers: {
@@ -7757,7 +7757,7 @@ function Categories({
   const cookies = nookies__WEBPACK_IMPORTED_MODULE_3___default.a.get(null, "token");
 
   const fetchSubCategoriesById = async id => {
-    const endpoint = "https://js-strapi.keelola.net/api" + `/sub-categories?populate[category][filters][id][$eq]=${id}&populate=*`;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + `/sub-categories?populate[category][filters][id][$eq]=${id}&populate=*`;
     const options = {
       method: "GET",
       headers: {
@@ -7799,7 +7799,7 @@ function Categories({
       callback([]);
     } else {
       try {
-        const endpoint = "https://js-strapi.keelola.net/api" + `/categories?filters[$or][0][name][$contains]=${query}&filters[$or][1][category_id][$contains]=${query}`;
+        const endpoint = "https://strapi-js.keelola.web.id/api" + `/categories?filters[$or][0][name][$contains]=${query}&filters[$or][1][category_id][$contains]=${query}`;
         const options = {
           method: "GET",
           headers: {

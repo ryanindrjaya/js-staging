@@ -4854,7 +4854,7 @@ const Tambah = ({
     const data = {
       data: dataValues
     };
-    const endpoint = "https://js-strapi.keelola.net/api" + "/sub-categories";
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/sub-categories";
     const JSONdata = JSON.stringify(data);
     const options = {
       method: "POST",
@@ -4891,7 +4891,7 @@ const Tambah = ({
       callback([]);
     } else {
       try {
-        const endpoint = "https://js-strapi.keelola.net/api" + `/categories?filters[$or][0][name][$contains]=${query}&filters[$or][1][category_id][$contains]=${query}`;
+        const endpoint = "https://strapi-js.keelola.web.id/api" + `/categories?filters[$or][0][name][$contains]=${query}&filters[$or][1][category_id][$contains]=${query}`;
         const options = {
           method: "GET",
           headers: {
@@ -5040,7 +5040,7 @@ Tambah.getInitialProps = async context => {
 };
 
 const fetchData = async cookies => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/categories";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/categories";
   const options = {
     method: "GET",
     headers: {

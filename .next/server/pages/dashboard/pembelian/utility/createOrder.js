@@ -176,7 +176,7 @@ const CreateOrder = async (grandTotal, totalPrice, values, listId, form, router)
 };
 
 const createData = async data => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/purchases";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/purchases";
   const JSONdata = JSON.stringify(data);
   const options = {
     method: "POST",
@@ -211,7 +211,7 @@ const putRelationOrder = async (id, value, form, router) => {
   }
 
   const JSONdata = JSON.stringify(dataOrder);
-  const endpoint = "https://js-strapi.keelola.net/api" + "/purchases/" + id;
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/purchases/" + id;
   const options = {
     method: "PUT",
     headers: {
@@ -233,7 +233,7 @@ const putRelationOrder = async (id, value, form, router) => {
 };
 
 const getUserMe = async () => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/users/me";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/users/me";
   const options = {
     method: "GET",
     headers: {

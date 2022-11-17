@@ -2756,7 +2756,7 @@ const Lokasi = ({
   };
 
   const handleDelete = async id => {
-    const endpoint = "https://js-strapi.keelola.net/api" + "/locations/" + id;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/locations/" + id;
     const cookies = external_nookies_default.a.get(null, "token");
     const options = {
       method: "DELETE",
@@ -2820,7 +2820,7 @@ Lokasi.getInitialProps = async context => {
 };
 
 const fetchData = async cookies => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/locations";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/locations";
   const options = {
     method: "GET",
     headers: {

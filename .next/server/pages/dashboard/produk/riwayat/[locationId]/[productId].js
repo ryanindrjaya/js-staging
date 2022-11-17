@@ -2578,7 +2578,7 @@ History.getInitialProps = async context => {
 };
 
 const fetchProduct = async (cookies, productId) => {
-  const endpoint = "https://js-strapi.keelola.net/api" + `/products/` + productId;
+  const endpoint = "https://strapi-js.keelola.web.id/api" + `/products/` + productId;
   const options = {
     method: "GET",
     headers: {
@@ -2591,7 +2591,7 @@ const fetchProduct = async (cookies, productId) => {
 };
 
 const fetchInventory = async (cookies, productId, locationId) => {
-  const endpoint = "https://js-strapi.keelola.net/api" + `/inventories?filters[locations][id][$eq]=${locationId}&filters[products][id][$eq]=${productId}&populate=*`;
+  const endpoint = "https://strapi-js.keelola.web.id/api" + `/inventories?filters[locations][id][$eq]=${locationId}&filters[products][id][$eq]=${productId}&populate=*`;
   const options = {
     method: "GET",
     headers: {
@@ -2604,7 +2604,7 @@ const fetchInventory = async (cookies, productId, locationId) => {
 };
 
 const fetchHistory = async (cookies, productId, locationId) => {
-  const endpoint = "https://js-strapi.keelola.net/api" + `/inventory-details?filters[locations][id][$eq]=${locationId}&filters[products][id][$eq]=${productId}&populate=*`;
+  const endpoint = "https://strapi-js.keelola.web.id/api" + `/inventory-details?filters[locations][id][$eq]=${locationId}&filters[products][id][$eq]=${productId}&populate=*`;
   const options = {
     method: "GET",
     headers: {

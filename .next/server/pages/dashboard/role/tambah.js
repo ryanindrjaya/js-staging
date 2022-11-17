@@ -2470,7 +2470,7 @@ const Tambah = () => {
 
   const onFinish = async values => {
     setLoading(true);
-    const endpoint = "https://js-strapi.keelola.net/api" + "/users-permissions/roles";
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/users-permissions/roles";
     const JSONdata = JSON.stringify(values);
     const options = {
       method: "POST",

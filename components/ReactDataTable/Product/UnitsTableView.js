@@ -3,7 +3,12 @@ import AlertDialog from "../../Alert/Alert";
 import { Input, Form, InputNumber } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 
-export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initialValue }) {
+export default function UnitsTableView({
+  onDelete,
+  onUpdate,
+  onPageChange,
+  initialValue,
+}) {
   const onConfirm = (id) => {
     onDelete(id);
   };
@@ -16,11 +21,29 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
     onUpdate(id);
   };
 
-  const unit = [initialValue?.unit_1, initialValue?.unit_2, initialValue?.unit_3, initialValue?.unit_4, initialValue?.unit_5];
+  const unit = [
+    initialValue?.unit_1,
+    initialValue?.unit_2,
+    initialValue?.unit_3,
+    initialValue?.unit_4,
+    initialValue?.unit_5,
+  ];
 
-  const qty = [initialValue?.qty_1, initialValue?.qty_2, initialValue?.qty_3, initialValue?.qty_4, initialValue?.qty_5];
+  const qty = [
+    initialValue?.qty_1,
+    initialValue?.qty_2,
+    initialValue?.qty_3,
+    initialValue?.qty_4,
+    initialValue?.qty_5,
+  ];
 
-  const disc = [initialValue?.disc_1_1, initialValue?.disc_1_2, initialValue?.disc_1_3, initialValue?.disc_1_4, initialValue?.disc_1_5];
+  const disc = [
+    initialValue?.disc_1_1,
+    initialValue?.disc_1_2,
+    initialValue?.disc_1_3,
+    initialValue?.disc_1_4,
+    initialValue?.disc_1_5,
+  ];
 
   const soldPrice = [
     initialValue?.sold_price_1,
@@ -54,15 +77,45 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
     initialValue?.purchase_discount_5,
   ];
 
-  const diskon1 = [initialValue?.unit_1_dp1, initialValue?.unit_2_dp1, initialValue?.unit_3_dp1, initialValue?.unit_4_dp1, initialValue?.unit_5_dp1];
+  const diskon1 = [
+    initialValue?.unit_1_dp1,
+    initialValue?.unit_2_dp1,
+    initialValue?.unit_3_dp1,
+    initialValue?.unit_4_dp1,
+    initialValue?.unit_5_dp1,
+  ];
 
-  const diskon2 = [initialValue?.unit_1_dp2, initialValue?.unit_2_dp2, initialValue?.unit_3_dp2, initialValue?.unit_4_dp2, initialValue?.unit_5_dp2];
+  const diskon2 = [
+    initialValue?.unit_1_dp2,
+    initialValue?.unit_2_dp2,
+    initialValue?.unit_3_dp2,
+    initialValue?.unit_4_dp2,
+    initialValue?.unit_5_dp2,
+  ];
 
-  const diskon3 = [initialValue?.unit_1_dp3, initialValue?.unit_2_dp3, initialValue?.unit_3_dp3, initialValue?.unit_4_dp3, initialValue?.unit_5_dp3];
+  const diskon3 = [
+    initialValue?.unit_1_dp3,
+    initialValue?.unit_2_dp3,
+    initialValue?.unit_3_dp3,
+    initialValue?.unit_4_dp3,
+    initialValue?.unit_5_dp3,
+  ];
 
-  const diskon4 = [initialValue?.unit_1_dp4, initialValue?.unit_2_dp4, initialValue?.unit_3_dp4, initialValue?.unit_4_dp4, initialValue?.unit_5_dp4];
+  const diskon4 = [
+    initialValue?.unit_1_dp4,
+    initialValue?.unit_2_dp4,
+    initialValue?.unit_3_dp4,
+    initialValue?.unit_4_dp4,
+    initialValue?.unit_5_dp4,
+  ];
 
-  const diskon5 = [initialValue?.unit_1_dp5, initialValue?.unit_2_dp5, initialValue?.unit_3_dp5, initialValue?.unit_4_dp5, initialValue?.unit_5_dp5];
+  const diskon5 = [
+    initialValue?.unit_1_dp5,
+    initialValue?.unit_2_dp5,
+    initialValue?.unit_3_dp5,
+    initialValue?.unit_4_dp5,
+    initialValue?.unit_5_dp5,
+  ];
 
   const locale = "en-us";
 
@@ -107,7 +160,10 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
 
   const content = (row) => (
     <div>
-      <button onClick={() => onEdit(row.id)} className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md ">
+      <button
+        onClick={() => onEdit(row.id)}
+        className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+      >
         <EditOutlined className="mr-2 mt-0.5 float float-left" />
         Edit
       </button>
@@ -184,7 +240,13 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
 
       selector: (row) => {
         return (
-          <Input value={unit[row.idx - 1] ?? "-"} size="large" style={{ backgroundColor: "#ffffff" }} placeholder={`Nama Unit ${row.idx}`} disabled />
+          <Input
+            value={unit[row.idx - 1] ?? "-"}
+            size="large"
+            style={{ backgroundColor: "#ffffff" }}
+            placeholder={`Nama Unit ${row.idx}`}
+            disabled
+          />
         );
       },
     },
@@ -372,10 +434,27 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
     },
   ];
 
+  const getInitialDescUnit = () => {
+    let unit1 = `${initialValue?.qty_1 ?? ""} ${initialValue?.unit_1 ?? ""} `;
+    let unit2 = `${initialValue?.qty_2 ?? ""} ${initialValue?.unit_2 ?? ""} `;
+    let unit3 = `${initialValue?.qty_3 ?? ""} ${initialValue?.unit_3 ?? ""} `;
+    let unit4 = `${initialValue?.qty_4 ?? ""} ${initialValue?.unit_4 ?? ""} `;
+    let unit5 = `${initialValue?.qty_5 ?? ""} ${initialValue?.unit_5 ?? ""} `;
+    let descUnit = unit1 + unit2 + unit3 + unit4 + unit5;
+
+    return descUnit;
+  };
+
   return (
     <>
-      <DataTable className="mt-10" customStyles={customStyles} onChangePage={onPageChange} columns={columns} data={data} />
-      <p className="mt-3">Keterangan Unit : 1 CTN 5 BOX 10 STRP</p>
+      <DataTable
+        className="mt-10"
+        customStyles={customStyles}
+        onChangePage={onPageChange}
+        columns={columns}
+        data={data}
+      />
+      <p className="mt-3">Keterangan Unit : {getInitialDescUnit()}</p>
     </>
   );
 }

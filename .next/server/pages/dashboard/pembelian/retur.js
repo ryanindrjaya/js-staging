@@ -4413,7 +4413,7 @@ Retur.getInitialProps = async context => {
 };
 
 const fetchData = async cookies => {
-  const endpoint = "https://js-strapi.keelola.net/api" + "/purchasings?populate=deep";
+  const endpoint = "https://strapi-js.keelola.web.id/api" + "/purchasings?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -4453,7 +4453,7 @@ function Retur({
 
   const handlePageChange = async page => {
     const cookies = nookies__WEBPACK_IMPORTED_MODULE_10___default.a.get(null, "token");
-    const endpoint = "https://js-strapi.keelola.net/api" + "/purchases?pagination[page]=" + page;
+    const endpoint = "https://strapi-js.keelola.web.id/api" + "/purchases?pagination[page]=" + page;
     const options = {
       method: "GET",
       headers: {
