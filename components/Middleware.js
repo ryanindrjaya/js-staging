@@ -10,11 +10,12 @@ function Middleware({ children }) {
   useEffect(async () => {
     const firstPath = router.pathname.split("/")[1];
 
-    let isValid = await istokenValid(token);
+    // let isValid = await istokenValid(token);
 
-    if (!isValid) {
-      router.push("/");
-    }
+    // if (!isValid) {
+    //   router.push("/");
+    // } else {
+    // }
 
     if (firstPath === "dashboard" && !token) {
       router.push("/");
@@ -40,11 +41,10 @@ const istokenValid = async (token) => {
 
   const req = await fetch(endpoint, options);
   const res = await req.json();
-
-  if (req.status === 200) {
-    return true;
-  } else {
+  if (req.status === 401) {
     return false;
+  } else {
+    return true;
   }
 };
 
