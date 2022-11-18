@@ -38,7 +38,7 @@ export default function ReactDataTable({
   };
 
   const retur = (row) => {
-    router.push("retur/"+row.id);
+    router.push("pembelian_barang/retur/" + row.id);
   };
 
   const onConfirm = (id, row) => {
@@ -50,9 +50,9 @@ export default function ReactDataTable({
     console.log("onCancel");
   };
 
-  const onEdit = (id) => {
-    onUpdate(id);
-  };
+  //const onEdit = (id) => {
+  //  onUpdate(id);
+  //};
 
   function formatMyDate(value, locale = "id-ID") {
     return new Date(value).toLocaleDateString(locale);
@@ -85,17 +85,17 @@ export default function ReactDataTable({
         </button>
       </div>
 
-      {row.attributes.status === "Diterima" ? (
-        <div></div>
-      ) : (
-        <button
-          onClick={() => onEdit(row.id)}
-          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-        >
-          <EditOutlined className="mr-2 mt-0.5 float float-left" />
-          Edit
-        </button>
-      )}
+      {/*{row.attributes.status === "Diterima" ? (*/}
+      {/*  <div></div>*/}
+      {/*) : (*/}
+      {/*  <button*/}
+      {/*    onClick={() => onEdit(row.id)}*/}
+      {/*    className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "*/}
+      {/*  >*/}
+      {/*    <EditOutlined className="mr-2 mt-0.5 float float-left" />*/}
+      {/*    Edit*/}
+      {/*  </button>*/}
+      {/*)}*/}
 
       <AlertDialog
         onCancel={onCancel}
