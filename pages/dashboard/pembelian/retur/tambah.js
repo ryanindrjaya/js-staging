@@ -13,6 +13,7 @@ import Lpb from "@iso/components/Form/AddRetur/LpbForm";
 import { useSelector, useDispatch } from "react-redux";
 import calculatePrice from "../utility/calculatePrice";
 import OrderTable from "@iso/components/ReactDataTable/Purchases/OrderTable";
+import LPBTable from "@iso/components/ReactDataTable/Purchases/LPBTable";
 import createDetailReturFunc from "../utility/createReturDetail";
 import createReturFunc from "../utility/createRetur";
 import { useRouter } from "next/router";
@@ -300,6 +301,15 @@ function Retur({ props }) {
                     productSubTotal={productSubTotal}
                     formObj={form}
                   />
+                  {/*<LPBTable*/}
+                  {/*  products={products}*/}
+                  {/*  productTotalPrice={productTotalPrice}*/}
+                  {/*  setTotalPrice={setTotalPrice}*/}
+                  {/*  setProductTotalPrice={setProductTotalPrice}*/}
+                  {/*  calculatePriceAfterDisc={calculatePriceAfterDisc}*/}
+                  {/*  productSubTotal={productSubTotal}*/}
+                  {/*  locations={locations}*/}
+                  {/*/>*/}
                 </div>
               </div>
               <div className="flex justify-start md:justify-between">

@@ -18,8 +18,9 @@ import LPBTable from "@iso/components/ReactDataTable/Purchases/LPBTable";
 import createDetailReturFunc from "../../utility/CreateReturDetail";
 import createReturLPBFunc from "../../utility/CreateReturLPB";
 import { useRouter } from "next/router";
+import moment from "moment";
 
-Edit.getInitialProps = async (context) => {
+ReturLPB.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
@@ -59,10 +60,10 @@ const fetchDataLocation = async (cookies) => {
   return req;
 };
 
-function Edit({ props }) {
-    //const locations = props.location.data;
+function ReturLPB({ props }) {
+    const locations = props.locations.data;
     const data = props.data.data; 
-    var products = useSelector((state) => state.Order); //console.log("props nih:"); console.log(props.data.data)
+    var products = useSelector((state) => state.Order); //console.log("data nih:"); console.log(data.attributes.supplier.data.attributes.address)
     var selectedProduct = products?.productList;
     const dispatch = useDispatch();
     // Set data for show in table
@@ -114,18 +115,19 @@ function Edit({ props }) {
 
     const onFinish = async (values) => {
         setLoading(true);
-        setDataValues(values);
+        setDataValues(values); console.log("values :"); console.log(values)
         setLoading(false);
     };
 
     const createDetailRetur = async () => {
-        console.log("info total", productTotalPrice, productSubTotal);
-        createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-lpb-details");
+        //console.log("info total", productTotalPrice, productSubTotal);
+        console.log("detail retur :"); console.log(products)
+        //createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-lpb-details");
     };
 
     const createRetur = async (values) => {
-        console.log("Retur"); console.log(values);
-        createReturLPBFunc(grandTotal, totalPrice, values, listId, form, router);
+        //console.log("Retur"); console.log(values);
+        //createReturLPBFunc(grandTotal, totalPrice, values, listId, form, router);
     };
 
     const onChangeProduct = async () => {
@@ -210,6 +212,8 @@ function Edit({ props }) {
             disc_value: null,
             DPP_active: null,
             PPN_active: null,
+            //EXP.Date
+            //batch 
         });
 
         //setAdditionalFee({
@@ -240,6 +244,9 @@ function Edit({ props }) {
             }
 
             const productId = element.attributes.product.data.id;
+            var dateString = element.attributes.expired_date;
+            var momentObj = moment(dateString, "YYYY-MM-DD");
+            var momentString = momentObj.format("MM-DD-YYYY");
 
             form.setFieldsValue({
                 disc_rp: {
@@ -251,25 +258,33 @@ function Edit({ props }) {
                 jumlah_qty: {
                     [productId]: element.attributes.total_order,
                 },
+                exp_date:{
+                    [productId]: moment(momentString),
+                },
+                batch: {
+                    [productId]: element.attributes.batch,
+                },
             });
 
-            const test = form.getFieldsValue(["disc_rp", "jumlah_option", "jumlah_qty"]);
-            console.log("test :"); console.log(test)
+            //const test = form.getFieldsValue(["disc_rp", "jumlah_option", "jumlah_qty"]);
+            //console.log("test :"); console.log(test)
             // SET INITIAL PRODUCT
-            //dispatch({
-            //    type: "SET_INITIAL_PRODUCT",
-            //    product: element.attributes.product.data,
-            //    qty: element.attributes.total_order,
-            //    unit: element.attributes.unit_order,
-            //    unitIndex: indexUnit,
-            //    priceUnit: element.attributes.unit_price,
-            //    disc: element.attributes.disc,
-            //    priceAfterDisc: element.attributes.unit_price_after_disc,
-            //    subTotal: element.attributes.sub_total,
-            //    d1: element.attributes.product.data.attributes.unit_1_dp1,
-            //    d2: element.attributes.product.data.attributes.unit_1_dp2,
-            //    d3: element.attributes.product.data.attributes.unit_1_dp3,
-            //});
+            dispatch({
+                type: "SET_INITIAL_PRODUCT",
+                product: element.attributes.product.data,
+                qty: element.attributes.total_order,
+                unit: element.attributes.unit_order,
+                unitIndex: indexUnit,
+                priceUnit: element.attributes.unit_price,
+                disc: element.attributes.disc,
+                priceAfterDisc: element.attributes.unit_price_after_disc,
+                subTotal: element.attributes.sub_total,
+                d1: element.attributes.product.data.attributes.unit_1_dp1,
+                d2: element.attributes.product.data.attributes.unit_1_dp2,
+                d3: element.attributes.product.data.attributes.unit_1_dp3,
+                batch: element.attributes.batch,
+                expired_date: moment(momentString),
+            });
         });
         setTimeout(() => {
             //setIsFetchingData(false);
@@ -327,11 +342,11 @@ function Edit({ props }) {
     return (
         <>
             <Head>
-                <title>Edit</title>
+                <title>Retur LPB</title>
             </Head>
             <DashboardLayout>
                 <LayoutWrapper style={{}}>
-                    <TitlePage titleText={"Edit Pembelian Barang"} />
+                    <TitlePage titleText={"Retur Lembar Pembelian Barang"} />
                     <LayoutContent>
                         <Form
                             form={form}
@@ -379,7 +394,7 @@ function Edit({ props }) {
                                     {/*<p> {supplier?.attributes.phone}</p>*/}
                                 </div>
                                 <div className="w-full md:w-3/4 px-3 mb-2 md:mb-0">
-                                    <p className="font-bold m-0">Alamat Supplier : </p>
+                                    <p className="font-bold m-0">Alamat Supplier : {data.attributes.supplier.data.attributes.address}</p>
                                     {/*<p className="m-0"> {supplier?.attributes.address}</p>*/}
                                     {/*<p> {supplier?.attributes.phone}</p>*/}
                                 </div>
@@ -392,34 +407,33 @@ function Edit({ props }) {
                                     />
                                 </div>
                                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                                    {/*<ReturLPBTable*/}
-                                    {/*    products={products}*/}
-                                    {/*    productTotalPrice={productTotalPrice}*/}
-                                    {/*    setTotalPrice={setTotalPrice}*/}
-                                    {/*    calculatePriceAfterDisc={calculatePriceAfterDisc}*/}
-                                    {/*    productSubTotal={productSubTotal}*/}
-                                    {/*    formObj={form}*/}
-                                    {/*    productList={productListData}*/}
-                                    {/*    qty={qty}*/}
-                                    {/*/>*/}
-                                    
-                                    <OrderTable
+                                    <ReturLPBTable
                                         products={products}
                                         productTotalPrice={productTotalPrice}
                                         setTotalPrice={setTotalPrice}
                                         calculatePriceAfterDisc={calculatePriceAfterDisc}
                                         productSubTotal={productSubTotal}
-                                        formObj={form} 
+                                        formObj={form}
+                                        locations={locations}
                                     />
+                                    
+                                    {/*<OrderTable*/}
+                                    {/*    products={products}*/}
+                                    {/*    productTotalPrice={productTotalPrice}*/}
+                                    {/*    setTotalPrice={setTotalPrice}*/}
+                                    {/*    calculatePriceAfterDisc={calculatePriceAfterDisc}*/}
+                                    {/*    productSubTotal={productSubTotal}*/}
+                                    {/*    formObj={form} */}
+                                    {/*/>*/}
 
                                     {/*<LPBTable*/}
                                     {/*    products={products}*/}
                                     {/*    productTotalPrice={productTotalPrice}*/}
                                     {/*    setTotalPrice={setTotalPrice}*/}
-                                    {/*    setProductTotalPrice={setProductTotalPrice}*/}
+                                    {/*    //setProductTotalPrice={setProductTotalPrice}*/}
                                     {/*    calculatePriceAfterDisc={calculatePriceAfterDisc}*/}
                                     {/*    productSubTotal={productSubTotal}*/}
-                                    {/*    //locations={locations}*/}
+                                    {/*    locations={locations}*/}
                                     {/*    formObj={form}*/}
                                     {/*/>*/}
                                 </div>
@@ -472,7 +486,7 @@ function Edit({ props }) {
                                     </div>
                                 ) : (
                                     <Button onClick={validateError} htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
-                                        Edit
+                                        Retur
                                     </Button>
                                 )}
                             </Form.Item>
@@ -484,4 +498,4 @@ function Edit({ props }) {
     );
 }
 
-export default Edit;
+export default ReturLPB;
