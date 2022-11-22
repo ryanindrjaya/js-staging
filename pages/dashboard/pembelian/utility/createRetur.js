@@ -28,7 +28,7 @@ const CreateRetur = async (
   });
 
   values.tanggal_retur = values.tanggal_retur;
-  values.tanggal_pembelian = values.tanggal_retur;
+  //values.tanggal_pembelian = values.tanggal_retur;
   //values.delivery_date = deliveryReturDate;
   values.supplier_id = supplierId;
   //values.status = "Dipesan";
@@ -71,7 +71,7 @@ const createData = async (data) => {
 };
 
 const putRelationRetur = async (id, value, form, router) => {
-  const user = await getUserMe(); console.log("masuk put relation")
+  const user = await getUserMe(); //console.log("masuk put relation")
   const dataRetur = {
     data: value,
   };

@@ -401,10 +401,15 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
             width: "150px",
             sortable: true,
             selector: (row) => {
+                var defaultBatch = "000";
+                if (products.productInfo[row.id]?.batch) {
+                    defaultBatch = products.productInfo[row.id].batch;
+                }
+
                 return (
                     <>
                         <Form.Item label={"Batch"} name={["batch", `${row.id}`]} noStyle>
-                            <Input size="normal" />
+                            <Input size="normal" defaultValue={defaultBatch} />
                         </Form.Item>
                     </>
                 );

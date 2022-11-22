@@ -221,7 +221,7 @@ function Tambah({ props }) {
     const req = await fetch(endpoint, options);
     const res = await req.json();
 
-    const dataPO = res.data.attributes; console.log("data po :"); console.log(dataPO);
+    const dataPO = res.data.attributes; //console.log("data po :"); console.log(dataPO);
     const purchase_details = dataPO.purchase_details.data;
     const supplier = dataPO.supplier.data;
 

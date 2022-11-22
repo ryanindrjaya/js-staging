@@ -3,17 +3,13 @@ import React, { useState, useEffect } from "react";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
-import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import { Form, Input, DatePicker, Button, message, Upload, Select, Spin } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import nookies from "nookies";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
-import Lpb from "@iso/components/Form/AddRetur/LpbForm";
 import { useSelector, useDispatch } from "react-redux";
 import calculatePrice from "../../utility/calculatePrice";
-import ReturLPBTable from "@iso/components/ReactDataTable/Purchases/ReturLPBTable";
-import OrderTable from "@iso/components/ReactDataTable/Purchases/OrderTable";
 import LPBTable from "@iso/components/ReactDataTable/Purchases/LPBTable";
 import createDetailReturFunc from "../../utility/CreateReturDetail";
 import createReturLPBFunc from "../../utility/CreateReturLPB";
@@ -38,10 +34,14 @@ ReturLPB.getInitialProps = async (context) => {
   const req = await fetchDataLocation(cookies);
   const locations = await req.json();
 
+  const lpbPage = await fetchData(cookies);
+  const dataLPBPage = await lpbPage.json();
+
   return {
     props: {
       data,
       locations,
+      dataLPBPage
     },
   };
 };
@@ -60,10 +60,25 @@ const fetchDataLocation = async (cookies) => {
   return req;
 };
 
+const fetchData = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=deep";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+
+    return req;
+};
+
 function ReturLPB({ props }) {
     const locations = props.locations.data;
     const data = props.data.data; 
-    var products = useSelector((state) => state.Order); //console.log("data nih:"); console.log(data.attributes.supplier.data.attributes.address)
+    var products = useSelector((state) => state.Order); console.log("data nih:"); console.log(props)
     var selectedProduct = products?.productList;
     const dispatch = useDispatch();
     // Set data for show in table
@@ -89,8 +104,8 @@ function ReturLPB({ props }) {
     const router = useRouter();
 
     const tempList = [];
-
-    var totalReturs = String(props.purchases?.meta?.pagination.total + 1).padStart(3, "0");
+    
+    var totalReturs = String(props.dataLPBPage?.meta?.pagination.total + 1).padStart(3, "0");
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, "0");
     var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
@@ -121,13 +136,13 @@ function ReturLPB({ props }) {
 
     const createDetailRetur = async () => {
         //console.log("info total", productTotalPrice, productSubTotal);
-        console.log("detail retur :"); console.log(products)
-        //createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-lpb-details");
+        console.log("detail retur :"); console.log(products);
+        createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-lpb-details", dataValues);
     };
 
     const createRetur = async (values) => {
         //console.log("Retur"); console.log(values);
-        //createReturLPBFunc(grandTotal, totalPrice, values, listId, form, router);
+        createReturLPBFunc(grandTotal, totalPrice, values, listId, form, router);
     };
 
     const onChangeProduct = async () => {
@@ -160,54 +175,30 @@ function ReturLPB({ props }) {
         return formatter.format(total);
     };
 
-    const fetchPOdata = async (data) => {
+    const fetchReturdata = async (data) => {
         //clearData();
-        //setIsFetchingData(true);
-        //const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings/" + id + "?populate=deep";
-        ////const endpoint = process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=deep`;
-        //const options = {
-        //    method: "GET",
-        //    headers: {
-        //        "Content-Type": "application/json",
-        //        Authorization: "Bearer " + cookies.token,
-        //    },
-        //};
-        console.log("fetch nih:"); console.log(data.data.data.attributes)
-        //const req = await fetch(endpoint, options);
-        //const res = await req.json();
-
-        const dataPO = data.data.data.attributes;
-        const purchase_details = dataPO.purchasing_details.data;
-        const supplier = dataPO.supplier.data;
-
-        //setDiscPrice(0);
-        //setPreOrderData(res.data);
-        //setSupplier(supplier);
-        //setGrandTotal(dataPO.delivery_total);
-        //setBiayaPengiriman(dataPO.delivery_fee);
-
-        //var dateString = dataPO.order_date;
-        //var momentObj = moment(dateString, "YYYY-MM-DD");
-        //var momentString = momentObj.format("MM-DD-YYYY");
+        const dataRetur = data.data.data.attributes;
+        const purchase_details = dataRetur.purchasing_details.data;
+        const supplier = dataRetur.supplier.data;
 
         form.setFieldsValue({
             supplier_id: `${supplier.attributes.id_supplier} - ${supplier.attributes.name}`,
             //order_date: moment(momentString),
-            location: dataPO.location.data.attributes.name,
-            tempo_days: dataPO.tempo_days,
-            tempo_time: dataPO.tempo_time,
-            additional_fee_1_desc: dataPO.additional_fee_1_desc,
-            additional_fee_2_desc: dataPO.additional_fee_2_desc,
-            additional_fee_3_desc: dataPO.additional_fee_3_desc,
-            additional_fee_4_desc: dataPO.additional_fee_4_desc,
-            additional_fee_5_desc: dataPO.additional_fee_5_desc,
-            additional_fee_1_sub: dataPO.additional_fee_1_sub,
-            additional_fee_2_sub: dataPO.additional_fee_2_sub,
-            additional_fee_3_sub: dataPO.additional_fee_3_sub,
-            additional_fee_4_sub: dataPO.additional_fee_4_sub,
-            additional_fee_5_sub: dataPO.additional_fee_5_sub,
-            additional_note: dataPO.additional_note,
-            delivery_fee: dataPO.delivery_fee,
+            location: dataRetur.location.data.attributes.name,
+            tempo_days: dataRetur.tempo_days,
+            tempo_time: dataRetur.tempo_time,
+            additional_fee_1_desc: dataRetur.additional_fee_1_desc,
+            additional_fee_2_desc: dataRetur.additional_fee_2_desc,
+            additional_fee_3_desc: dataRetur.additional_fee_3_desc,
+            additional_fee_4_desc: dataRetur.additional_fee_4_desc,
+            additional_fee_5_desc: dataRetur.additional_fee_5_desc,
+            additional_fee_1_sub: dataRetur.additional_fee_1_sub,
+            additional_fee_2_sub: dataRetur.additional_fee_2_sub,
+            additional_fee_3_sub: dataRetur.additional_fee_3_sub,
+            additional_fee_4_sub: dataRetur.additional_fee_4_sub,
+            additional_fee_5_sub: dataRetur.additional_fee_5_sub,
+            additional_note: dataRetur.additional_note,
+            delivery_fee: dataRetur.delivery_fee,
             disc_type: null,
             disc_value: null,
             DPP_active: null,
@@ -216,25 +207,14 @@ function ReturLPB({ props }) {
             //batch 
         });
 
-        //setAdditionalFee({
-        //    ...additionalFee,
-        //    additional_fee_1_sub: dataPO.additional_fee_1_sub,
-        //    additional_fee_2_sub: dataPO.additional_fee_2_sub,
-        //    additional_fee_3_sub: dataPO.additional_fee_3_sub,
-        //    additional_fee_4_sub: dataPO.additional_fee_4_sub,
-        //    additional_fee_5_sub: dataPO.additional_fee_5_sub,
-        //});
-
-        //setNewGrandTotal(dataPO);
-
         dispatch({
             type: "SET_PREORDER_DATA",
-            data: data.data,
+            data: data.data, 
         });
 
         purchase_details.forEach((element) => {
             var indexUnit = 1;
-            var unitOrder = element.attributes.unit_order; console.log("product :"); console.log(element.attributes)
+            var unitOrder = element.attributes.unit_order; console.log("product :"); console.log(element.attributes);
             var productUnit = element.attributes.product.data.attributes;
 
             for (let index = 1; index < 6; index++) {
@@ -258,7 +238,7 @@ function ReturLPB({ props }) {
                 jumlah_qty: {
                     [productId]: element.attributes.total_order,
                 },
-                exp_date:{
+                expired_date:{
                     [productId]: moment(momentString),
                 },
                 batch: {
@@ -266,8 +246,6 @@ function ReturLPB({ props }) {
                 },
             });
 
-            //const test = form.getFieldsValue(["disc_rp", "jumlah_option", "jumlah_qty"]);
-            //console.log("test :"); console.log(test)
             // SET INITIAL PRODUCT
             dispatch({
                 type: "SET_INITIAL_PRODUCT",
@@ -282,8 +260,8 @@ function ReturLPB({ props }) {
                 d1: element.attributes.product.data.attributes.unit_1_dp1,
                 d2: element.attributes.product.data.attributes.unit_1_dp2,
                 d3: element.attributes.product.data.attributes.unit_1_dp3,
-                batch: element.attributes.batch,
-                expired_date: moment(momentString),
+                //batch: element.attributes.batch,
+                //expired_date: moment(momentString),
             });
         });
         setTimeout(() => {
@@ -312,7 +290,7 @@ function ReturLPB({ props }) {
     }, [totalPrice]);
 
     useEffect(() => {
-        console.log("createRetur :"); console.log(dataValues);
+        //console.log("createRetur :"); console.log(dataValues);
         if (listId.length > 0) {
             createRetur(dataValues);
         } //console.log("listId 3:"); console.log(listId);
@@ -324,7 +302,7 @@ function ReturLPB({ props }) {
 
     useEffect(() => {
       clearData();
-      fetchPOdata(props);
+      fetchReturdata(props);
     }, []);
 
     const validateError = () => {
@@ -385,9 +363,14 @@ function ReturLPB({ props }) {
                                     </Form.Item>
                                 </div>
                                 <div className="w-full md:w-2/4 px-3 mb-2 md:mb-0">
-                                    <p className="font-bold m-0"
-                                        name="purchasings" value={data.attributes.no_purchasing}>
-                                        No LPB : {data.attributes.no_purchasing}</p>
+                                    <Form.Item
+                                        name="purchasing"
+                                        initialValue={data.id}
+                                    >
+                                        <p className="font-bold m-0">
+                                            No LPB : {data.attributes.no_purchasing}
+                                        </p>
+                                    </Form.Item>
                                     <p className="font-bold m-0">No Nota Supplier : {data.attributes.no_nota_suppplier}</p>
                                     <p className="font-bold m-0">Tanggal Pembelian : {data.attributes.date_purchasing}</p>
                                     {/*<p className="m-0"> {supplier?.attributes.address}</p>*/}
@@ -407,15 +390,15 @@ function ReturLPB({ props }) {
                                     />
                                 </div>
                                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                                    <ReturLPBTable
-                                        products={products}
-                                        productTotalPrice={productTotalPrice}
-                                        setTotalPrice={setTotalPrice}
-                                        calculatePriceAfterDisc={calculatePriceAfterDisc}
-                                        productSubTotal={productSubTotal}
-                                        formObj={form}
-                                        locations={locations}
-                                    />
+                                    {/*<ReturLPBTable*/}
+                                    {/*    products={products}*/}
+                                    {/*    productTotalPrice={productTotalPrice}*/}
+                                    {/*    setTotalPrice={setTotalPrice}*/}
+                                    {/*    calculatePriceAfterDisc={calculatePriceAfterDisc}*/}
+                                    {/*    productSubTotal={productSubTotal}*/}
+                                    {/*    formObj={form}*/}
+                                    {/*    locations={locations}*/}
+                                    {/*/>*/}
                                     
                                     {/*<OrderTable*/}
                                     {/*    products={products}*/}
@@ -426,16 +409,16 @@ function ReturLPB({ props }) {
                                     {/*    formObj={form} */}
                                     {/*/>*/}
 
-                                    {/*<LPBTable*/}
-                                    {/*    products={products}*/}
-                                    {/*    productTotalPrice={productTotalPrice}*/}
-                                    {/*    setTotalPrice={setTotalPrice}*/}
-                                    {/*    //setProductTotalPrice={setProductTotalPrice}*/}
-                                    {/*    calculatePriceAfterDisc={calculatePriceAfterDisc}*/}
-                                    {/*    productSubTotal={productSubTotal}*/}
-                                    {/*    locations={locations}*/}
-                                    {/*    formObj={form}*/}
-                                    {/*/>*/}
+                                    <LPBTable
+                                        products={products}
+                                        productTotalPrice={productTotalPrice}
+                                        setTotalPrice={setTotalPrice}
+                                        setProductTotalPrice={setProductTotalPrice}
+                                        calculatePriceAfterDisc={calculatePriceAfterDisc}
+                                        productSubTotal={productSubTotal}
+                                        locations={locations}
+                                        formObj={form}
+                                    />
                                 </div>
                             </div>
                             <div className="flex justify-start md:justify-between">

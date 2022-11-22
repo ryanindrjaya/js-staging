@@ -4,7 +4,7 @@ import { Input, InputNumber, Select, Form, Row, DatePicker } from "antd";
 import { useDispatch } from "react-redux";
 
 export default function ReactDataTable({ calculatePriceAfterDisc, productSubTotal, products, locations, setTotalPrice }) {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch(); //console.log("lokasi"); console.log(locations)
 
   var defaultDp1 = 0;
   var defaultDp2 = 0;
@@ -364,7 +364,7 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
       },
     },
     {
-      name: "EXP.Date",
+      name: "EXPDate",
       width: "150px",
       sortable: true,
       selector: (row) => {
@@ -372,7 +372,7 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
           <>
             <Form.Item
               label={"exp date"}
-              name={["exp_date", `${row.id}`]}
+              name={["expired_date", `${row.id}`]}
               rules={[
                 {
                   required: true,

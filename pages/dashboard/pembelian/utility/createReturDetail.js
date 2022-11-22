@@ -22,12 +22,13 @@ const createReturDetail = (
   productTotalPrice,
   productSubTotal,
   setListId,
-  url
+  url,
+  value
 ) => {
   products.productList.forEach((element) => {
     console.log("productTotalPrice", productTotalPrice);
     console.log("productSubTotal", productSubTotal);
-
+    console.log("nilai :", value);
     // default value
     const id = element.id;
     var qty = products?.productInfo?.[id]?.qty ?? 1;
@@ -38,9 +39,11 @@ const createReturDetail = (
     var unitPriceAfterDisc =
       productSubTotal?.[id] ?? element.attributes.buy_price_1;
     var subTotal = unitPriceAfterDisc * qty;
-
-    console.log(qty, disc, unit, unitPrice, unitPriceAfterDisc, subTotal);
-
+    var batch = value.batch?.[id];
+    var expired_date = value.expired_date?.[id];
+    var location = value.product_location?.[id];
+    //console.log(qty, disc, unit, unitPrice, unitPriceAfterDisc, subTotal);
+    //console.log("location :", value); //console.log("expired_date :", value);
     POSTReturDetail(
       qty,
       disc,
@@ -51,6 +54,9 @@ const createReturDetail = (
       id,
       setListId,
       products,
+      batch,
+      expired_date,
+      location,
       url
     );
   });
@@ -66,6 +72,9 @@ const POSTReturDetail = async (
   id,
   setListId,
   products,
+  batch,
+  expired_date,
+  location,
   url
 ) => {
   var data = {
@@ -77,6 +86,9 @@ const POSTReturDetail = async (
       sub_total: parseInt(subTotal),
       products: { id: id },
       //disc: parseInt(disc),
+      batch: batch,
+      expired_date: expired_date,
+      location: location,
     },
   };
 

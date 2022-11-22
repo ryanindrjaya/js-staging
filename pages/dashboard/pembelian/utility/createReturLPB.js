@@ -19,7 +19,7 @@ const CreateReturLPB = async (
   //var returDate = new Date(values.tanggal_retur); console.log("nilai"); console.log(values); //console.log(values.tanggal_retur._d)
   //var deliveryReturDate = new Date(values.delivery_date);
   //var supplierId = { id: parseInt(values.supplier_id) }; 
-    console.log("Masuk LPB");
+    console.log("Masuk LPB"); console.log(values);
 
   //tempSupplierId = parseInt(values.supplier_id);
   //tempLocationId = parseInt(values.location);
@@ -48,9 +48,6 @@ const CreateReturLPB = async (
     console.log("ini data 1 : "); console.log(res);
   if (req.status === 200) { //console.log("200 nih");
     await putRelationReturLPB(res.data.id, res.data.attributes, form, router);
-      //console.log("res :"); console.log(res.data.id); console.log(res.data.attributes);
-      //console.log("form :"); console.log(form); console.log(router);
-    //router.replace("/dashboard/pembelian/pembelian_barang");
   } else {
     openNotificationWithIcon("error");
   }
@@ -70,7 +67,7 @@ const createData = async (data) => { console.log("create data masuk, data :");
   };
 
   const req = await fetch(endpoint, options);
-  const res = await req.json();
+  //const res = await req.json();
   return req;
 };
 
@@ -82,6 +79,7 @@ const putRelationReturLPB = async (id, value, form, router) => {
 
   //dataRetur.data.supplier = { id: tempSupplierId };
   dataRetur.data.retur_lpb_details = tempProductListId;
+  //dataRetur.data.purchasings = "bisa";
   //dataRetur.data.added_by = user.name;
   //dataRetur.data.locations = { id: tempLocationId };
 
@@ -102,7 +100,6 @@ const putRelationReturLPB = async (id, value, form, router) => {
     },
     body: JSONdata,
   };
-
 
   const req = await fetch(endpoint, options);
   //const res = await req.json();

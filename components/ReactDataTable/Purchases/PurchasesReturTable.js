@@ -17,7 +17,7 @@ export default function ReactDataTable({
 }) {
   const router = useRouter(); //console.log("Mulai"); console.log(data); console.log(onDelete); console.log(onPageChange); console.log(onChangeStatus);
   const { Option } = Select;
-
+    //console.log("Mulai"); console.log(data);
   const openNotificationWithIcon = (type, title, message) => {
     notification[type]({
       message: title,
@@ -79,15 +79,6 @@ export default function ReactDataTable({
           Lihat
         </button>
       </div>
-      <div>
-        <button
-          onClick={() => returLpb(row)}
-          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-        >
-          <EditOutlined className="mr-2 mt-0.5 float float-left" />
-          Retur LPB
-        </button>
-      </div>
 
       <AlertDialog
         onCancel={onCancel}
@@ -113,7 +104,7 @@ export default function ReactDataTable({
     {
       name: "Tanggal",
       width: "150px",
-      selector: (row) => formatMyDate(row.attributes?.tanggal_retur, console.log(row)),
+      selector: (row) => formatMyDate(row.attributes?.tanggal_retur),
     },
     //{
     //  name: "NO PO",
@@ -138,7 +129,7 @@ export default function ReactDataTable({
     {
       name: "Supplier",
       width: "180px",
-      //selector: (row) => row.attributes?.suppliers.data[0].attributes.name ?? "-",
+      selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
     },
     //{
     //  name: "Status Pembayaran",

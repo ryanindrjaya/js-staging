@@ -9,26 +9,30 @@ import { Form, Input, DatePicker, Button, message, Upload, Select, Spin } from "
 import { UploadOutlined } from "@ant-design/icons";
 import nookies from "nookies";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
-import Lpb from "@iso/components/Form/AddRetur/LpbForm";
 import { useSelector, useDispatch } from "react-redux";
 import calculatePrice from "../utility/calculatePrice";
-import OrderTable from "@iso/components/ReactDataTable/Purchases/OrderTable";
 import LPBTable from "@iso/components/ReactDataTable/Purchases/LPBTable";
 import createDetailReturFunc from "../utility/createReturDetail";
 import createReturFunc from "../utility/createRetur";
 import { useRouter } from "next/router";
 
 Retur.getInitialProps = async (context) => {
-  const cookies = nookies.get(context);
+    const cookies = nookies.get(context);
+
   const reqLocation = await fetchLocation(cookies);
   const location = await reqLocation.json();
+
   const reqDataRetur = await fetchDataRetur(cookies);
   const returs = await reqDataRetur.json();
+
+  const reqDataReturLPB = await fetchDataReturLPB(cookies);
+  const returLPBs = await reqDataReturLPB.json();
 
   return {
     props: {
       location,
       returs,
+      returLPBs,
     },
   };
 };
@@ -61,8 +65,23 @@ const fetchDataRetur = async (cookies) => {
     return req;
 };
 
+const fetchDataReturLPB = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-lpbs?populate=deep";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
+};
+
 function Retur({ props }) {
-  const locations = props.location.data;
+  const locations = props.location.data; console.log("data props :"); console.log(props);
+  const returLPB = props.returLPBs.data;
   var products = useSelector((state) => state.Order);
   var selectedProduct = products?.productList;
   const dispatch = useDispatch();
@@ -96,13 +115,13 @@ function Retur({ props }) {
 
   const onFinish = async (values) => {
     setLoading(true);
-    setDataValues(values);
+    setDataValues(values); //console.log("Retur detail : "); console.log(dataValues);
     setLoading(false);
   };
 
   const createDetailRetur = async () => {
-    console.log("info total", productTotalPrice, productSubTotal);
-    createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-details");
+    console.log("info total", productTotalPrice, productSubTotal); //console.log("Retur detail : "); console.log(dataValues);
+    createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-details", dataValues);
   };
 
   const createRetur = async (values) => { //console.log("Retur"); //console.log("masuk");
@@ -162,6 +181,31 @@ function Retur({ props }) {
 
   useEffect(() => {
     dispatch({ type: "CLEAR_DATA" });
+    form.setFieldsValue({
+        //supplier_id: `${supplier.attributes.id_supplier} - ${supplier.attributes.name}`,
+        //order_date: moment(momentString),
+        //location: dataRetur.location.data.attributes.name,
+        //tempo_days: dataRetur.tempo_days,
+        //tempo_time: dataRetur.tempo_time,
+        //additional_fee_1_desc: dataRetur.additional_fee_1_desc,
+        //additional_fee_2_desc: dataRetur.additional_fee_2_desc,
+        //additional_fee_3_desc: dataRetur.additional_fee_3_desc,
+        //additional_fee_4_desc: dataRetur.additional_fee_4_desc,
+        //additional_fee_5_desc: dataRetur.additional_fee_5_desc,
+        //additional_fee_1_sub: dataRetur.additional_fee_1_sub,
+        //additional_fee_2_sub: dataRetur.additional_fee_2_sub,
+        //additional_fee_3_sub: dataRetur.additional_fee_3_sub,
+        //additional_fee_4_sub: dataRetur.additional_fee_4_sub,
+        //additional_fee_5_sub: dataRetur.additional_fee_5_sub,
+        //additional_note: dataRetur.additional_note,
+        //delivery_fee: dataRetur.delivery_fee,
+        //disc_type: null,
+        //disc_value: null,
+        //DPP_active: null,
+        //PPN_active: null,
+        //EXP.Date
+        //batch 
+    });
   }, []);
 
   const data = {
@@ -280,9 +324,32 @@ function Retur({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Lpb
-                    onChangeLpb={setLpb}
-                  />
+                  <Form.Item name="no_lpb">
+                    <Select
+                      placeholder="Pilih Nomor LPB"
+                      size="large"
+                      //onChange={(e) => fetchReturdata(e)}
+                      style={{
+                        width: "100%",
+                      }}
+                    >
+                      {returLPB.map((element) => { console.log("map :"); console.log(element.id);
+                        return (
+                          <Select.Option value={element.attributes.no_retur_LPB} key={element.id}>
+                            {element.attributes.no_retur_LPB}
+                          </Select.Option>
+                        );
+                      })}
+                    </Select>
+                  </Form.Item>                
+                </div>
+                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0" hidden>
+                    <Form.Item name="no_nota_supplier">
+                    
+                    </Form.Item>
+                    <Form.Item name="tanggal_pembelian">
+                    
+                    </Form.Item>
                 </div>
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
                   <SearchBar
@@ -293,23 +360,33 @@ function Retur({ props }) {
                   />
                 </div>
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                  <OrderTable
-                    products={products}
-                    productTotalPrice={productTotalPrice}
-                    setTotalPrice={setTotalPrice}
-                    calculatePriceAfterDisc={calculatePriceAfterDisc}
-                    productSubTotal={productSubTotal}
-                    formObj={form}
-                  />
-                  {/*<LPBTable*/}
+                  {/*<ReturLPBTable*/}
                   {/*  products={products}*/}
                   {/*  productTotalPrice={productTotalPrice}*/}
                   {/*  setTotalPrice={setTotalPrice}*/}
-                  {/*  setProductTotalPrice={setProductTotalPrice}*/}
                   {/*  calculatePriceAfterDisc={calculatePriceAfterDisc}*/}
                   {/*  productSubTotal={productSubTotal}*/}
+                  {/*  formObj={form}*/}
                   {/*  locations={locations}*/}
                   {/*/>*/}
+                  {/*<OrderTable*/}
+                  {/*  products={products}*/}
+                  {/*  productTotalPrice={productTotalPrice}*/}
+                  {/*  setTotalPrice={setTotalPrice}*/}
+                  {/*  calculatePriceAfterDisc={calculatePriceAfterDisc}*/}
+                  {/*  productSubTotal={productSubTotal}*/}
+                  {/*  formObj={form}*/}
+                  {/*/>*/}
+                  <LPBTable
+                    products={products}
+                    productTotalPrice={productTotalPrice}
+                    setTotalPrice={setTotalPrice}
+                    setProductTotalPrice={setProductTotalPrice}
+                    calculatePriceAfterDisc={calculatePriceAfterDisc}
+                    productSubTotal={productSubTotal}
+                    locations={locations}
+                    formObj={form}
+                  />
                 </div>
               </div>
               <div className="flex justify-start md:justify-between">
