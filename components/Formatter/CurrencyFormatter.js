@@ -33,13 +33,16 @@ export const formatterNumber = (val, unit) => {
   ).toFixed(2);
 
   let rounded = Number(test).toFixed(2);
-  console.log("formatter", rounded, newValue);
-
+  console.log("unit", unit);
   if (
     unit === "buy_price_1" ||
     unit === "purchase_discount_1" ||
     unit === "pricelist_1" ||
-    unit === "sold_price_1"
+    unit === "sold_price_1" ||
+    unit === "sold_price_2" ||
+    unit === "sold_price_3" ||
+    unit === "sold_price_4" ||
+    unit === "sold_price_5"
   ) {
     return newValue;
   } else {

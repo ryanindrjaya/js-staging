@@ -51,8 +51,7 @@ export default function SignInPage(props) {
       if (res.jwt) {
         // set new token
         nookies.set(null, "token", res.jwt, {
-          // maxAge: 30 * 24 * 60 * 60,
-          maxAge: 60,
+          maxAge: 24 * 60 * 60,
           path: "/",
           secure: process.env.NEXT_PUBLIC_URL !== "development",
           sameSite: "strict",
@@ -61,8 +60,7 @@ export default function SignInPage(props) {
         const role = await getUserInformation(res.jwt);
         // set role token
         nookies.set(null, "role", role, {
-          // maxAge: 30 * 24 * 60 * 60,
-          maxAge: 60,
+          maxAge: 24 * 60 * 60,
           path: "/",
           secure: process.env.NEXT_PUBLIC_URL !== "development",
           sameSite: "strict",

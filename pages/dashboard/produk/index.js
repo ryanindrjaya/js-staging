@@ -460,8 +460,6 @@ const fetchSearchParametersData = async (cookies, url) => {
   const req = await fetch(endpoint, options);
   const res = await req.json();
 
-  console.log("response", res);
-
   return formatData(res.data) || [];
 };
 
