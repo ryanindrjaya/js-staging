@@ -7,14 +7,7 @@ import { useDispatch } from "react-redux";
 
 const { addProduct } = action;
 
-export default function SearchBar({
-  form,
-  tempList,
-  onChange,
-  selectedProduct,
-  user,
-  isBasedOnLocation = true,
-}) {
+export default function SearchBar({ form, tempList, onChange, selectedProduct, user, isBasedOnLocation = true }) {
   const dispatch = useDispatch();
 
   const [product, setProduct] = useState();
@@ -57,11 +50,7 @@ export default function SearchBar({
     var queryLocations = "";
 
     res.locations.forEach((location) => {
-      queryLocations =
-        queryLocations +
-        "filters[locations][name][$contains]=" +
-        location.name +
-        "&";
+      queryLocations = queryLocations + "filters[locations][name][$contains]=" + location.name + "&";
     });
     // console.log("querylocation " + queryLocations);
     return queryLocations;
@@ -75,9 +64,7 @@ export default function SearchBar({
     }
   };
 
-  const options = data.map((d) => (
-    <Select.Option key={d.value}>{d.label}</Select.Option>
-  ));
+  const options = data.map((d) => <Select.Option key={d.value}>{d.label}</Select.Option>);
 
   const fetchProduct = async (query, callback) => {
     if (!query) {
@@ -86,9 +73,7 @@ export default function SearchBar({
       try {
         let queryLocations = await getUserInfo();
 
-        const endpoint =
-          process.env.NEXT_PUBLIC_URL +
-          `/products?populate=locations&filters[name][$contains]=${query}&${queryLocations}`;
+        const endpoint = process.env.NEXT_PUBLIC_URL + `/products?populate=locations&filters[name][$contains]=${query}&${queryLocations}`;
         const options = {
           method: "GET",
           headers: {
@@ -107,16 +92,14 @@ export default function SearchBar({
           //   return !selectedProduct?.some((temp) => temp.id == item.id);
           // });
 
-          // // product based on user location
-          // const filteredProductByLocation = filteredProduct.filter((item) =>
-          //   item.attributes.locations.data.some((location) =>
-          //     user.locations.some(
-          //       (userLocation) => userLocation.id == location.id
-          //     )
-          //   )
-          // );
+          // product based on user location
+          const filteredProductByLocation = res.data.filter((item) =>
+            item.attributes.locations.data.some((location) => user.locations.some((userLocation) => userLocation.id === location.id))
+          );
 
-          const products = res.data.map((product) => ({
+          console.log(filteredProductByLocation);
+
+          const products = filteredProductByLocation.map((product) => ({
             label: `${product.attributes.name}`,
             value: product.id,
           }));

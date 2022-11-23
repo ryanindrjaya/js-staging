@@ -1,14 +1,16 @@
-import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { Layout } from 'antd';
+import React, { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { Layout } from "antd";
 
-import Sidebar from '../Sidebar/Sidebar';
-import ThemeSwitcher from '@iso/containers/ThemeSwitcher/ThemeSwitcher';
-import Topbar from '../Topbar/Topbar';
-import siteConfig from '@iso/config/site.config';
-import AppHolder from './DashboardLayout.styles';
-import useWindowSize from '../../library/hooks/useWindowSize';
-import appActions from '@iso/redux/app/actions';
+import Sidebar from "../Sidebar/Sidebar";
+import ThemeSwitcher from "@iso/containers/ThemeSwitcher/ThemeSwitcher";
+import Topbar from "../Topbar/Topbar";
+import siteConfig from "@iso/config/site.config";
+import AppHolder from "./DashboardLayout.styles";
+import useWindowSize from "../../library/hooks/useWindowSize";
+import appActions from "@iso/redux/app/actions";
+import { Router } from "next/router";
+import DashboardContentSkeleton from "../../components/Skeleton/DashboardContentSkeleton";
 
 const { Content, Footer } = Layout;
 const { toggleAll } = appActions;
@@ -17,17 +19,28 @@ export default function DashboardLayout({ children }) {
   const dispatch = useDispatch();
   const appHeight = useSelector((state) => state.App.height);
   const { width, height } = useWindowSize();
+  const [loading, setLoading] = useState(false);
 
   React.useEffect(() => {
     dispatch(toggleAll(width, height));
   }, [width, height, dispatch]);
 
+  Router.events.on("routeChangeStart", () => {
+    setLoading(true);
+  });
+  Router.events.on("routeChangeComplete", () => {
+    setLoading(false);
+  });
+  Router.events.on("routeChangeError", () => {
+    setLoading(false);
+  });
+
   return (
     <AppHolder>
-      <Layout style={{ height: '100vh' }}>
+      <Layout style={{ height: "100vh" }}>
         <Topbar />
 
-        <Layout style={{ flexDirection: 'row', overflowX: 'hidden' }}>
+        <Layout style={{ flexDirection: "row", overflowX: "hidden" }}>
           <Sidebar />
           <Layout
             className="isoContentMainLayout"
@@ -38,19 +51,19 @@ export default function DashboardLayout({ children }) {
             <Content
               className="isomorphicContent"
               style={{
-                padding: '70px 0 0',
-                flexShrink: '0',
-                background: '#f1f3f6',
-                width: '100%',
+                padding: "70px 0 0",
+                flexShrink: "0",
+                background: "#f1f3f6",
+                width: "100%",
               }}
             >
-              {children}
+              {loading ? <DashboardContentSkeleton /> : children}
             </Content>
             <Footer
               style={{
-                background: '#ffffff',
-                textAlign: 'center',
-                borderTop: '1px solid #ededed',
+                background: "#ffffff",
+                textAlign: "center",
+                borderTop: "1px solid #ededed",
               }}
             >
               {siteConfig.footerText}

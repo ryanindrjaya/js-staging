@@ -16,14 +16,11 @@ const Tambah = () => {
   const { TextArea } = Input;
 
   const onFinish = async (values) => {
-
     setLoading(true);
 
-   
-    const data = {data : values };
+    const data = { data: values };
     const endpoint = process.env.NEXT_PUBLIC_URL + "/manufactures";
     const JSONdata = JSON.stringify(data);
-
 
     const options = {
       method: "POST",
@@ -43,17 +40,17 @@ const Tambah = () => {
         position: toast.POSITION.TOP_RIGHT,
       });
     } else {
-        res.error?.details.errors.map((error) => {
-            const ErrorMsg = error.path[0];
-            toast.error(
-              ErrorMsg === "code"
-                ? "Kode sudah digunakan"
-                : "Tidak dapat menambahkan Data Pabrikasi",
-              {
-                position: toast.POSITION.TOP_RIGHT,
-              }
-            );
-          });
+      res.error?.details.errors.map((error) => {
+        const ErrorMsg = error.path[0];
+        toast.error(
+          ErrorMsg === "code"
+            ? "Kode sudah digunakan"
+            : "Tidak dapat menambahkan Data Pabrikasi",
+          {
+            position: toast.POSITION.TOP_RIGHT,
+          }
+        );
+      });
     }
 
     setLoading(false);
@@ -115,7 +112,7 @@ const Tambah = () => {
                     rules={[
                       {
                         required: true,
-                        message: "Singkatan Sub tidak boleh kosong!",
+                        message: "Singkatan Pabrik boleh kosong!",
                       },
                     ]}
                   >
@@ -139,7 +136,7 @@ const Tambah = () => {
                     <Spin />
                   </div>
                 ) : (
-                 <Button
+                  <Button
                     htmlType="submit"
                     className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
                   >

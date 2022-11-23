@@ -68,6 +68,12 @@ export default function ReactDataTable({
 
   const columns = [
     {
+      name: "SKU",
+      width: "150px",
+      sortable: true,
+      selector: (row) => row.attributes?.SKU,
+    },
+    {
       name: "Nama Produk",
       width: "w-1/5",
       sortable: true,

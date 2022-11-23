@@ -10,10 +10,10 @@ import { toast } from "react-toastify";
 import nookies from "nookies";
 
 const Role = ({ props }) => {
+  console.log(props);
   const data = props.data.roles.filter(function (value, index, arr) {
     return index > 1;
   });
-
 
   const [role, setRole] = useState(data);
   const router = useRouter();
@@ -62,7 +62,7 @@ const Role = ({ props }) => {
             <button
               onClick={handleAddUser}
               type="button"
-             className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+              className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
             >
               <div className="text-white text-center text-sm font-bold">
                 <a className="text-white no-underline text-xs sm:text-xs">
@@ -104,6 +104,7 @@ const fetchData = async (cookies) => {
   };
 
   const req = await fetch(endpoint, options);
+  console.log(endpoint);
   return req;
 };
 

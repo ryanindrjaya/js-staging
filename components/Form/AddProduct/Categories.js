@@ -15,9 +15,7 @@ export default function Categories({
   const cookies = nookies.get(null, "token");
 
   const fetchSubCategoriesById = async (id) => {
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL +
-      `/sub-categories?populate[category][filters][id][$eq]=${id}&populate=*`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/sub-categories?populate[category][filters][id][$eq]=${id}&populate=*`;
 
     const options = {
       method: "GET",
@@ -55,9 +53,8 @@ export default function Categories({
       setData([]);
     }
   };
-  const options = data.map((d) => (
-    <Select.Option key={d.value}>{d.label}</Select.Option>
-  ));
+
+  const options = data.map((d) => <Select.Option key={d.value}>{d.label}</Select.Option>);
 
   const fetchCategory = async (query, callback) => {
     if (!query) {
@@ -65,8 +62,7 @@ export default function Categories({
     } else {
       try {
         const endpoint =
-          process.env.NEXT_PUBLIC_URL +
-          `/categories?filters[$or][0][name][$contains]=${query}&filters[$or][1][category_id][$contains]=${query}`;
+          process.env.NEXT_PUBLIC_URL + `/categories?filters[$or][0][name][$contains]=${query}&filters[$or][1][category_id][$contains]=${query}`;
         const options = {
           method: "GET",
           headers: {
