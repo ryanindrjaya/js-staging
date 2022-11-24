@@ -41,9 +41,6 @@ const fetchData = async (cookies) => {
 function Retur({ props }) {
   const data = props.data;
   const [retur, setRetur] = useState(data);
-  const [isSearching, setIsSearching] = useState(false);
-    //console.log("retur"); console.log(data);
-  const { Search } = Input;
   const router = useRouter();
 
   const handleAdd = () => {
@@ -113,39 +110,6 @@ function Retur({ props }) {
     }
   };
 
-  const onSearch = async (e) => {
-    // if (e.target.value.length >= 2) {
-    //   setIsSearching(true);
-    //   const req = await searchQuery(e.target.value);
-    //   const res = await req.json();
-    //   setPurchase(res);
-    //   setIsSearching(false);
-    // } else {
-    //   setPurchase(data);
-    //   setIsSearching(false);
-    // }
-  };
-
-  const searchQuery = async (keywords) => {
-    // const endpoint =
-    //   process.env.NEXT_PUBLIC_URL +
-    //   "/purchases?filters[$or][0][added_by][$contains]=" +
-    //   keywords +
-    //   "&filters[$or][1][no_po][$contains]=" +
-    //   keywords +
-    //   "&populate=*";
-    // const cookies = nookies.get(null, "token");
-    // const options = {
-    //   method: "GET",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     Authorization: "Bearer " + cookies.token,
-    //   },
-    // };
-    // const req = await fetch(endpoint, options);
-    // return req;
-  };
-
   const handleCancel = async (id, row) => {
     onChangeStatus("Dibatalkan", row);
   };
@@ -161,7 +125,7 @@ function Retur({ props }) {
       description: message,
     });
   };
-    //console.log("atas"); console.log(props); console.log(data);
+
   return (
     <>
       <Head>

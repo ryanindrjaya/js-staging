@@ -204,7 +204,7 @@ function Pembelian({ props }) {
       openNotificationWithIcon(
         "success",
         "Status berhasil dirubah",
-        "Status berhasil dirubah. Silahkan cek detail LPB"
+        "Status berhasil dirubah. Silahkan cek LPB"
       );
     } else {
       openNotificationWithIcon(

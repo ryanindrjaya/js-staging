@@ -16,8 +16,7 @@ const CreateRetur = async (
   router
 ) => {
   // CLEANING DATA
-  //var returDate = new Date(values.tanggal_retur); //console.log("nilai"); console.log(values); //console.log(values.tanggal_retur._d)
-  //var deliveryReturDate = new Date(values.delivery_date);
+
   var supplierId = { id: parseInt(values.supplier_id) };
 
   tempSupplierId = parseInt(values.supplier_id);
@@ -28,12 +27,7 @@ const CreateRetur = async (
   });
 
   values.tanggal_retur = values.tanggal_retur;
-  //values.tanggal_pembelian = values.tanggal_retur;
-  //values.delivery_date = deliveryReturDate;
   values.supplier_id = supplierId;
-  //values.status = "Dipesan";
-  //values.delivery_total =
-  values.no_nota_supplier = "kosong";
     grandTotal === 0 ? parseInt(totalPrice) : parseInt(grandTotal);
   values.retur_details = null;
   values.supplier_id = null;
@@ -71,14 +65,13 @@ const createData = async (data) => {
 };
 
 const putRelationRetur = async (id, value, form, router) => {
-  const user = await getUserMe(); //console.log("masuk put relation")
+  const user = await getUserMe();
   const dataRetur = {
     data: value,
   };
 
   dataRetur.data.supplier = { id: tempSupplierId };
   dataRetur.data.retur_details = tempProductListId;
-  //dataRetur.data.added_by = user.name;
   dataRetur.data.locations = { id: tempLocationId };
 
   // clean object
@@ -101,7 +94,7 @@ const putRelationRetur = async (id, value, form, router) => {
 
 
   const req = await fetch(endpoint, options);
-  const res = await req.json();
+  //const res = await req.json();
 
   if (req.status === 200) {
     form.resetFields();

@@ -6,6 +6,7 @@ const cookies = nookies.get(null, "token");
 var tempProductListId = [];
 var tempSupplierId = 0;
 var tempLocationId;
+var tempListId = [];
 
 const CreateReturLPB = async (
   grandTotal,
@@ -13,13 +14,15 @@ const CreateReturLPB = async (
   values,
   listId,
   form,
-  router
+  router,
+  dataLPB,
+  setListLPBdetail
 ) => {
   // CLEANING DATA
   //var returDate = new Date(values.tanggal_retur); console.log("nilai"); console.log(values); //console.log(values.tanggal_retur._d)
   //var deliveryReturDate = new Date(values.delivery_date);
   //var supplierId = { id: parseInt(values.supplier_id) }; 
-    console.log("Masuk LPB"); console.log(values);
+    console.log("Masuk LPB"); console.log(values); console.log(dataLPB); 
 
   //tempSupplierId = parseInt(values.supplier_id);
   //tempLocationId = parseInt(values.location);
@@ -45,15 +48,16 @@ const CreateReturLPB = async (
     
   const req = await createData(data); 
   const res = await req.json();
-    console.log("ini data 1 : "); console.log(res);
-  if (req.status === 200) { //console.log("200 nih");
+    //console.log("ini data 1 : "); console.log(res);
+  if (req.status === 200) { //console.log("200 nih"); console.log(res.data.attributes); console.log(values.purchasing);
+    //putStatus(values.purchasing, dataLPB);
     await putRelationReturLPB(res.data.id, res.data.attributes, form, router);
   } else {
     openNotificationWithIcon("error");
   }
 };
 
-const createData = async (data) => { console.log("create data masuk, data :");
+const createData = async (data) => { //console.log("create data masuk, data :");
   const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-lpbs";
     const JSONdata = JSON.stringify(data);
     //console.log("ini data LPB"); console.log(data)
@@ -71,12 +75,47 @@ const createData = async (data) => { console.log("create data masuk, data :");
   return req;
 };
 
+const putStatus = async (id, value, listdetail) => {
+    const dataLPB = {
+        data: value.attributes,
+    };
+    //console.log("put status"); console.log(dataLPB);
+    dataLPB.data.status = "Diretur";
+    dataLPB.data.supplier = dataLPB.data.supplier.data.id;
+    dataLPB.data.location = dataLPB.data.location.data.id;
+    var listLPBdetailId = dataLPB.attributes.purchasing_details.data;
+
+    const JSONdata = JSON.stringify(dataLPB);
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings/" + id;
+    const options = {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+        body: JSONdata,
+    };
+
+    const req = await fetch(endpoint, options);
+    //const res = await req.json();
+
+    if (req.status === 200) { //console.log("req status :"); console.log(req);
+        listLPBdetailId.forEach((element) => {
+            //listLPBdetail.push(element.id);
+            console.log("creat nih : "); console.log(element);
+        });
+        //tempListId.push(?.id);
+    } else {
+        openNotificationWithIcon("error");
+    }
+};
+
 const putRelationReturLPB = async (id, value, form, router) => {
-  const user = await getUserMe(); console.log("masuk put relation")
+  const user = await getUserMe(); //console.log("masuk put relation")
   const dataRetur = {
     data: value,
   };
-
+  //console.log("put LPB"); console.log(dataRetur);
   //dataRetur.data.supplier = { id: tempSupplierId };
   dataRetur.data.retur_lpb_details = tempProductListId;
   //dataRetur.data.purchasings = "bisa";

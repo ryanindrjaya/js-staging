@@ -30,6 +30,7 @@ const createReturDetail = (
     console.log("productSubTotal", productSubTotal);
     console.log("nilai :", value);
     // default value
+    tempListId = [];
     const id = element.id;
     var qty = products?.productInfo?.[id]?.qty ?? 1;
     var disc = products?.productInfo?.[id]?.disc ?? 0;
@@ -42,8 +43,7 @@ const createReturDetail = (
     var batch = value.batch?.[id];
     var expired_date = value.expired_date?.[id];
     var location = value.product_location?.[id];
-    //console.log(qty, disc, unit, unitPrice, unitPriceAfterDisc, subTotal);
-    //console.log("location :", value); //console.log("expired_date :", value);
+
     POSTReturDetail(
       qty,
       disc,
@@ -82,10 +82,8 @@ const POSTReturDetail = async (
       qty: String(qty),
       unit: unit,
       harga_satuan: parseInt(unitPrice),
-      //unit_price_after_disc: parseInt(unitPriceAfterDisc),
       sub_total: parseInt(subTotal),
       products: { id: id },
-      //disc: parseInt(disc),
       batch: batch,
       expired_date: expired_date,
       location: location,
@@ -105,9 +103,9 @@ const POSTReturDetail = async (
 
   const req = await fetch(endpoint, options);
   const res = await req.json();
-
-  if (req.status === 200) {
-    tempListId.push(res.data?.id);
+    console.log("req nih : "); console.log(req);
+  if (req.status === 200) { 
+    tempListId.push(res.data?.id); console.log("200 nih : "); console.log(tempListId);
     if (tempListId.length === products.productList.length) {
       setListId(tempListId); console.log(tempListId)
     }

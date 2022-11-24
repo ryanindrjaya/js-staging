@@ -25,14 +25,14 @@ Retur.getInitialProps = async (context) => {
   const reqDataRetur = await fetchDataRetur(cookies);
   const returs = await reqDataRetur.json();
 
-  const reqDataReturLPB = await fetchDataReturLPB(cookies);
-  const returLPBs = await reqDataReturLPB.json();
+  const reqDataLPB = await fetchDataLPB(cookies);
+  const dataLPB = await reqDataLPB.json();
 
   return {
     props: {
       location,
       returs,
-      returLPBs,
+      dataLPB,
     },
   };
 };
@@ -65,8 +65,8 @@ const fetchDataRetur = async (cookies) => {
     return req;
 };
 
-const fetchDataReturLPB = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-lpbs?populate=deep";
+const fetchDataLPB = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=deep";
     const options = {
         method: "GET",
         headers: {
@@ -81,16 +81,15 @@ const fetchDataReturLPB = async (cookies) => {
 
 function Retur({ props }) {
   const locations = props.location.data; console.log("data props :"); console.log(props);
-  const returLPB = props.returLPBs.data;
+  const dataLPB = props.dataLPB.data;
   var products = useSelector((state) => state.Order);
   var selectedProduct = products?.productList;
   const dispatch = useDispatch();
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [supplier, setSupplier] = useState();
-  const [lpb, setLpb] = useState();
   const [dataValues, setDataValues] = useState();
+  const [supplier, setSupplier] = useState();
   const [productTotalPrice, setProductTotalPrice] = useState({});
   const [productSubTotal, setProductSubTotal] = useState({});
   const [totalPrice, setTotalPrice] = useState(0);
@@ -98,7 +97,9 @@ function Retur({ props }) {
   const [listId, setListId] = useState([]);
   const router = useRouter();
 
+    //temp
   const tempList = [];
+  const cookies = nookies.get(null, "token");
 
   var totalReturs = String(props.returs?.meta?.pagination.total + 1).padStart(3, "0");
   var today = new Date();
@@ -115,16 +116,16 @@ function Retur({ props }) {
 
   const onFinish = async (values) => {
     setLoading(true);
-    setDataValues(values); //console.log("Retur detail : "); console.log(dataValues);
+    setDataValues(values);
     setLoading(false);
   };
 
   const createDetailRetur = async () => {
-    console.log("info total", productTotalPrice, productSubTotal); //console.log("Retur detail : "); console.log(dataValues);
+    console.log("info total", productTotalPrice, productSubTotal);
     createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-details", dataValues);
   };
 
-  const createRetur = async (values) => { //console.log("Retur"); //console.log("masuk");
+  const createRetur = async (values) => {
     createReturFunc(grandTotal, totalPrice, values, listId, form, router);
   };
 
@@ -158,6 +159,30 @@ function Retur({ props }) {
     return formatter.format(total);
   };
 
+  const fetchReturdata = async (id) => {
+    //clearData();
+      console.log("ids : "); console.log(id)
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=deep`;
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    const dataRetur = res.data.attributes; console.log("data retur :"); console.log(dataRetur);
+
+    form.setFieldsValue({
+      no_nota_supplier: dataRetur.no_nota_suppplier,
+      tanggal_pembelian: dataRetur.date_purchasing,
+    });
+
+  };
+
   useEffect(() => {
     setGrandTotal(totalPrice);
   }, [totalPrice]);
@@ -169,7 +194,7 @@ function Retur({ props }) {
     }
   }, [totalPrice]);
 
-  useEffect(() => {
+  useEffect(() => { console.log(listId.length)
     if (listId.length > 0) {
       createRetur(dataValues);
     }
@@ -181,31 +206,6 @@ function Retur({ props }) {
 
   useEffect(() => {
     dispatch({ type: "CLEAR_DATA" });
-    form.setFieldsValue({
-        //supplier_id: `${supplier.attributes.id_supplier} - ${supplier.attributes.name}`,
-        //order_date: moment(momentString),
-        //location: dataRetur.location.data.attributes.name,
-        //tempo_days: dataRetur.tempo_days,
-        //tempo_time: dataRetur.tempo_time,
-        //additional_fee_1_desc: dataRetur.additional_fee_1_desc,
-        //additional_fee_2_desc: dataRetur.additional_fee_2_desc,
-        //additional_fee_3_desc: dataRetur.additional_fee_3_desc,
-        //additional_fee_4_desc: dataRetur.additional_fee_4_desc,
-        //additional_fee_5_desc: dataRetur.additional_fee_5_desc,
-        //additional_fee_1_sub: dataRetur.additional_fee_1_sub,
-        //additional_fee_2_sub: dataRetur.additional_fee_2_sub,
-        //additional_fee_3_sub: dataRetur.additional_fee_3_sub,
-        //additional_fee_4_sub: dataRetur.additional_fee_4_sub,
-        //additional_fee_5_sub: dataRetur.additional_fee_5_sub,
-        //additional_note: dataRetur.additional_note,
-        //delivery_fee: dataRetur.delivery_fee,
-        //disc_type: null,
-        //disc_value: null,
-        //DPP_active: null,
-        //PPN_active: null,
-        //EXP.Date
-        //batch 
-    });
   }, []);
 
   const data = {
@@ -324,19 +324,19 @@ function Retur({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="no_lpb">
+                  <Form.Item name="purchasing">
                     <Select
                       placeholder="Pilih Nomor LPB"
                       size="large"
-                      //onChange={(e) => fetchReturdata(e)}
+                      onChange={(e) => fetchReturdata(e)}
                       style={{
                         width: "100%",
                       }}
                     >
-                      {returLPB.map((element) => { console.log("map :"); console.log(element.id);
+                      {dataLPB.map((element) => {
                         return (
-                          <Select.Option value={element.attributes.no_retur_LPB} key={element.id}>
-                            {element.attributes.no_retur_LPB}
+                          <Select.Option value={element.id} key={element.id}>
+                            {element.attributes.no_purchasing}
                           </Select.Option>
                         );
                       })}
@@ -344,12 +344,8 @@ function Retur({ props }) {
                   </Form.Item>                
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0" hidden>
-                    <Form.Item name="no_nota_supplier">
-                    
-                    </Form.Item>
-                    <Form.Item name="tanggal_pembelian">
-                    
-                    </Form.Item>
+                    <Form.Item name="no_nota_supplier"></Form.Item>
+                    <Form.Item name="tanggal_pembelian"></Form.Item>
                 </div>
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
                   <SearchBar
@@ -360,23 +356,6 @@ function Retur({ props }) {
                   />
                 </div>
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                  {/*<ReturLPBTable*/}
-                  {/*  products={products}*/}
-                  {/*  productTotalPrice={productTotalPrice}*/}
-                  {/*  setTotalPrice={setTotalPrice}*/}
-                  {/*  calculatePriceAfterDisc={calculatePriceAfterDisc}*/}
-                  {/*  productSubTotal={productSubTotal}*/}
-                  {/*  formObj={form}*/}
-                  {/*  locations={locations}*/}
-                  {/*/>*/}
-                  {/*<OrderTable*/}
-                  {/*  products={products}*/}
-                  {/*  productTotalPrice={productTotalPrice}*/}
-                  {/*  setTotalPrice={setTotalPrice}*/}
-                  {/*  calculatePriceAfterDisc={calculatePriceAfterDisc}*/}
-                  {/*  productSubTotal={productSubTotal}*/}
-                  {/*  formObj={form}*/}
-                  {/*/>*/}
                   <LPBTable
                     products={products}
                     productTotalPrice={productTotalPrice}

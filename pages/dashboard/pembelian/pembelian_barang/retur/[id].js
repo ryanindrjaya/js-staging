@@ -4,7 +4,7 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import { Form, Input, DatePicker, Button, message, Upload, Select, Spin } from "antd";
+import { Form, Input, DatePicker, Button, message, Upload, Select, Spin, notification } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import nookies from "nookies";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
@@ -61,7 +61,7 @@ const fetchDataLocation = async (cookies) => {
 };
 
 const fetchData = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=deep";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-lpbs?populate=deep";
     const options = {
         method: "GET",
         headers: {
@@ -77,12 +77,19 @@ const fetchData = async (cookies) => {
 
 function ReturLPB({ props }) {
     const locations = props.locations.data;
-    const data = props.data.data; 
-    var products = useSelector((state) => state.Order); console.log("data nih:"); console.log(props)
+    const data = props.data.data;
+    var products = useSelector((state) => state.Order); //console.log("data nih:"); console.log(props)
+
+    const [listLPBdetail, setListLPBdetail] = useState([]);
+    //const dataLPBdetails = data.attributes.purchasing_details.data;
+    //dataLPBdetails.forEach((element) => {
+    //    listLPBdetail.push(element.id);
+    //});
+
     var selectedProduct = products?.productList;
     const dispatch = useDispatch();
     // Set data for show in table
-    const productListData = data.attributes.purchasing_details.data;
+    //const productListData = data.attributes.purchasing_details.data;
     const [productList, setProductList] = useState([]);
     //products.productList.length = null;
     //productListData.forEach((element) => {
@@ -93,8 +100,8 @@ function ReturLPB({ props }) {
 
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
-    const [supplier, setSupplier] = useState();
-    const [lpb, setLpb] = useState();
+    //const [supplier, setSupplier] = useState();
+    //const [lpb, setLpb] = useState();
     const [dataValues, setDataValues] = useState();
     const [productTotalPrice, setProductTotalPrice] = useState({});
     const [productSubTotal, setProductSubTotal] = useState({});
@@ -136,13 +143,13 @@ function ReturLPB({ props }) {
 
     const createDetailRetur = async () => {
         //console.log("info total", productTotalPrice, productSubTotal);
-        console.log("detail retur :"); console.log(products);
+        console.log("detail retur :"); console.log(data); console.log("list value : "); console.log(listId)
         createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-lpb-details", dataValues);
     };
 
     const createRetur = async (values) => {
-        //console.log("Retur"); console.log(values);
-        createReturLPBFunc(grandTotal, totalPrice, values, listId, form, router);
+        console.log("Retur"); console.log(values);
+        createReturLPBFunc(grandTotal, totalPrice, values, listId, form, router, data);
     };
 
     const onChangeProduct = async () => {
@@ -179,33 +186,30 @@ function ReturLPB({ props }) {
         //clearData();
         const dataRetur = data.data.data.attributes;
         const purchase_details = dataRetur.purchasing_details.data;
-        const supplier = dataRetur.supplier.data;
+        //const supplier = dataRetur.supplier.data;
 
-        form.setFieldsValue({
-            supplier_id: `${supplier.attributes.id_supplier} - ${supplier.attributes.name}`,
-            //order_date: moment(momentString),
-            location: dataRetur.location.data.attributes.name,
-            tempo_days: dataRetur.tempo_days,
-            tempo_time: dataRetur.tempo_time,
-            additional_fee_1_desc: dataRetur.additional_fee_1_desc,
-            additional_fee_2_desc: dataRetur.additional_fee_2_desc,
-            additional_fee_3_desc: dataRetur.additional_fee_3_desc,
-            additional_fee_4_desc: dataRetur.additional_fee_4_desc,
-            additional_fee_5_desc: dataRetur.additional_fee_5_desc,
-            additional_fee_1_sub: dataRetur.additional_fee_1_sub,
-            additional_fee_2_sub: dataRetur.additional_fee_2_sub,
-            additional_fee_3_sub: dataRetur.additional_fee_3_sub,
-            additional_fee_4_sub: dataRetur.additional_fee_4_sub,
-            additional_fee_5_sub: dataRetur.additional_fee_5_sub,
-            additional_note: dataRetur.additional_note,
-            delivery_fee: dataRetur.delivery_fee,
-            disc_type: null,
-            disc_value: null,
-            DPP_active: null,
-            PPN_active: null,
-            //EXP.Date
-            //batch 
-        });
+        //form.setFieldsValue({
+        //    supplier_id: `${supplier.attributes.id_supplier} - ${supplier.attributes.name}`,
+        //    location: dataRetur.location.data.attributes.name,
+        //    tempo_days: dataRetur.tempo_days,
+        //    tempo_time: dataRetur.tempo_time,
+        //    additional_fee_1_desc: dataRetur.additional_fee_1_desc,
+        //    additional_fee_2_desc: dataRetur.additional_fee_2_desc,
+        //    additional_fee_3_desc: dataRetur.additional_fee_3_desc,
+        //    additional_fee_4_desc: dataRetur.additional_fee_4_desc,
+        //    additional_fee_5_desc: dataRetur.additional_fee_5_desc,
+        //    additional_fee_1_sub: dataRetur.additional_fee_1_sub,
+        //    additional_fee_2_sub: dataRetur.additional_fee_2_sub,
+        //    additional_fee_3_sub: dataRetur.additional_fee_3_sub,
+        //    additional_fee_4_sub: dataRetur.additional_fee_4_sub,
+        //    additional_fee_5_sub: dataRetur.additional_fee_5_sub,
+        //    additional_note: dataRetur.additional_note,
+        //    delivery_fee: dataRetur.delivery_fee,
+        //    disc_type: null,
+        //    disc_value: null,
+        //    DPP_active: null,
+        //    PPN_active: null,
+        //});
 
         dispatch({
             type: "SET_PREORDER_DATA",
@@ -228,9 +232,19 @@ function ReturLPB({ props }) {
             var momentObj = moment(dateString, "YYYY-MM-DD");
             var momentString = momentObj.format("MM-DD-YYYY");
 
+            var disc = 0;
+            if (element.attributes.disc == null) {
+                disc = 0;
+            } else {
+                disc = element.attributes.disc;
+            }
+
             form.setFieldsValue({
+                product_location: {
+                    [productId]: element.attributes.product.data.attributes.locations.data[0].id,
+                },
                 disc_rp: {
-                    [productId]: element.attributes.disc,
+                    [productId]: disc,
                 },
                 jumlah_option: {
                     [productId]: element.attributes.unit_order,
@@ -290,13 +304,13 @@ function ReturLPB({ props }) {
     }, [totalPrice]);
 
     useEffect(() => {
-        //console.log("createRetur :"); console.log(dataValues);
-        if (listId.length > 0) {
+        //console.log(dataValues);
+        if (listId.length > 0) { console.log("createRetur :");
             createRetur(dataValues);
-        } //console.log("listId 3:"); console.log(listId);
+        }
     }, [listId]);
 
-    useEffect(() => { console.log("data value : "); console.log(dataValues)
+    useEffect(() => { 
       if (dataValues) createDetailRetur();
     }, [dataValues]);
 
@@ -373,13 +387,9 @@ function ReturLPB({ props }) {
                                     </Form.Item>
                                     <p className="font-bold m-0">No Nota Supplier : {data.attributes.no_nota_suppplier}</p>
                                     <p className="font-bold m-0">Tanggal Pembelian : {data.attributes.date_purchasing}</p>
-                                    {/*<p className="m-0"> {supplier?.attributes.address}</p>*/}
-                                    {/*<p> {supplier?.attributes.phone}</p>*/}
                                 </div>
                                 <div className="w-full md:w-3/4 px-3 mb-2 md:mb-0">
                                     <p className="font-bold m-0">Alamat Supplier : {data.attributes.supplier.data.attributes.address}</p>
-                                    {/*<p className="m-0"> {supplier?.attributes.address}</p>*/}
-                                    {/*<p> {supplier?.attributes.phone}</p>*/}
                                 </div>
                                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
                                     <SearchBar
@@ -390,25 +400,6 @@ function ReturLPB({ props }) {
                                     />
                                 </div>
                                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                                    {/*<ReturLPBTable*/}
-                                    {/*    products={products}*/}
-                                    {/*    productTotalPrice={productTotalPrice}*/}
-                                    {/*    setTotalPrice={setTotalPrice}*/}
-                                    {/*    calculatePriceAfterDisc={calculatePriceAfterDisc}*/}
-                                    {/*    productSubTotal={productSubTotal}*/}
-                                    {/*    formObj={form}*/}
-                                    {/*    locations={locations}*/}
-                                    {/*/>*/}
-                                    
-                                    {/*<OrderTable*/}
-                                    {/*    products={products}*/}
-                                    {/*    productTotalPrice={productTotalPrice}*/}
-                                    {/*    setTotalPrice={setTotalPrice}*/}
-                                    {/*    calculatePriceAfterDisc={calculatePriceAfterDisc}*/}
-                                    {/*    productSubTotal={productSubTotal}*/}
-                                    {/*    formObj={form} */}
-                                    {/*/>*/}
-
                                     <LPBTable
                                         products={products}
                                         productTotalPrice={productTotalPrice}
