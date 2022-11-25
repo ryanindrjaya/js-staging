@@ -4,7 +4,7 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import { useRouter } from "next/router";
-import { Input, notification } from "antd";
+import { Input, notification, Select, DatePicker } from "antd";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
 import PurchasesReturTable from "../../../../components/ReactDataTable/Purchases/PurchasesReturTable";
 import nookies from "nookies";
@@ -135,18 +135,106 @@ function Retur({ props }) {
         <LayoutWrapper style={{}}>
           <TitlePage titleText={"Daftar Retur Pembelian"} />
           <LayoutContent>
-            <div>
-              <button
-                onClick={handleAdd}
-                type="button"
-                className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
-              >
-                <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    + Tambah Retur
-                  </a>
-                </div>
-              </button>
+            <div className="w-full flex justify-start">
+              <div className="w-full md:w-1/4 px-3"> 
+                <Select
+                  placeholder="Pilih Supplier"
+                  size="large"
+                  style={{
+                    width: "100%",
+                    marginRight: "10px",
+                  }}
+                >
+                {/*{locations.map((element) => {*/}
+                {/*  return (*/}
+                    <Select.Option>
+                      data
+                    </Select.Option>
+                {/*  );*/}
+                {/*})}*/}
+                </Select>
+              </div>
+              <div className="w-full md:w-1/4 px-3"> 
+                <Select
+                  placeholder="Lokasi Gudang"
+                  size="large"
+                  style={{
+                    width: "100%",
+                    marginRight: "10px",
+                  }}
+                >
+                {/*{locations.map((element) => {*/}
+                {/*  return (*/}
+                    <Select.Option>
+                      data
+                    </Select.Option>
+                {/*  );*/}
+                {/*})}*/}
+                </Select>
+              </div>
+              <div className="w-full md:w-1/4 px-3">                
+                <DatePicker placeholder="Tanggal Retur" size="large" style={{ width: "100%" }} />
+              </div>
+            </div>
+            <div  className="w-full flex justify-between">
+              <div class="mt-4 text-black text-md font-bold ml-1">Daftar Retur</div>
+                <button
+                    onClick={handleAdd}
+                    type="button"
+                    className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+                >
+                    <div className="text-white text-center text-sm font-bold">
+                      <a className="text-white no-underline text-xs sm:text-xs">
+                        + Tambah Retur
+                      </a>
+                    </div>
+                </button>
+            </div>
+            <div  className="w-full flex justify-between">
+                <button
+                    onClick={handleUpdate}
+                    type="button"
+                    className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+                >
+                    <div className="text-white text-center text-sm font-bold">
+                      <a className="text-white no-underline text-xs sm:text-xs">
+                        Print PDF
+                      </a>
+                    </div>
+                </button>
+                <button
+                    onClick={handleUpdate}
+                    type="button"
+                    className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+                >
+                    <div className="text-white text-center text-sm font-bold">
+                      <a className="text-white no-underline text-xs sm:text-xs">
+                        Print CSV
+                      </a>
+                    </div>
+                </button>
+                <button
+                    onClick={handleUpdate}
+                    type="button"
+                    className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+                >
+                    <div className="text-white text-center text-sm font-bold">
+                      <a className="text-white no-underline text-xs sm:text-xs">
+                        Print XLS
+                      </a>
+                    </div>
+                </button>
+                <button
+                    onClick={handleUpdate}
+                    type="button"
+                    className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+                >
+                    <div className="text-white text-center text-sm font-bold">
+                      <a className="text-white no-underline text-xs sm:text-xs">
+                        Kolom Tampak
+                      </a>
+                    </div>
+                </button>
             </div>
 
             <PurchasesReturTable

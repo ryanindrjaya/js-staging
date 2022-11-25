@@ -4,23 +4,26 @@ import { Input, InputNumber, Select, Form, Row, DatePicker } from "antd";
 import { useDispatch } from "react-redux";
 
 export default function ReactDataTable({ calculatePriceAfterDisc, productSubTotal, products, locations, setTotalPrice }) {
-  const dispatch = useDispatch(); //console.log("lokasi"); console.log(locations)
+  const dispatch = useDispatch();     //console.log("product totalprice :", productTotalPrice);
+    //console.log("product subtotal :", productSubTotal ); 
 
   var defaultDp1 = 0;
   var defaultDp2 = 0;
   var defaultDp3 = 0;
+  var unit = 1;
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
   });
 
   const onDeleteProduct = (value) => {
     dispatch({ type: "REMOVE_PRODUCT", index: value });
   };
 
-  const onChangeUnit = (value, data) => {
+  const onChangeUnit = (value, data) => { 
+    unit = value; //console.log("change unit : ", unit, data)
     dispatch({ type: "CHANGE_PRODUCT_UNIT", index: value, product: data });
   };
 
@@ -38,6 +41,40 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
       disc: value,
       product: data,
     });
+  };
+
+  const onChangePriceUnit = (value, data, index) => { 
+    var tempPriceUnit = []; 
+
+    tempPriceUnit.push(data.attributes.buy_price_1);
+    tempPriceUnit.push(data.attributes.buy_price_2);
+    tempPriceUnit.push(data.attributes.buy_price_3);
+    tempPriceUnit.push(data.attributes.buy_price_4);
+    tempPriceUnit.push(data.attributes.buy_price_5);
+    //console.log("change unit : ", tempPriceUnit)
+    data.attributes.buy_price_1 = value;
+    data.attributes.buy_price_2 = value;
+    data.attributes.buy_price_3 = value;
+    data.attributes.buy_price_4 = value;
+    data.attributes.buy_price_5 = value;
+      
+    //console.log("change price unit : ", value, data)
+      //formObj.setFieldsValue({
+      //    harga_satuan: {
+      //        [data.id]: value,
+      //    },
+      //});
+      //data.attributes.buy_price_1 = value;
+      onChangeUnit(index,data);
+    //console.log("product wow :", products); 
+
+    data.attributes.buy_price_1 = tempPriceUnit[0];
+    data.attributes.buy_price_2 = tempPriceUnit[1];
+    data.attributes.buy_price_3 = tempPriceUnit[2];
+    data.attributes.buy_price_4 = tempPriceUnit[3];
+    data.attributes.buy_price_5 = tempPriceUnit[4];
+
+    //console.log("change product : ", products)
   };
 
   const onChangeD1D2D3 = (value, data, type) => {
@@ -104,13 +141,30 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
       width: "150px",
       selector: (row) => {
         var priceUnit = row.attributes?.buy_price_1;
-        if (products.productInfo[row.id]) {
-          if (products.productInfo[row.id].priceUnit) {
-            priceUnit = products.productInfo[row.id].priceUnit;
-          }
-        }
-
-        return formatter.format(priceUnit);
+        //if (products.productInfo[row.id]) {
+        //  if (products.productInfo[row.id].priceUnit) {
+        //    priceUnit = products.productInfo[row.id].priceUnit;
+        //  }
+        //}
+        //var formatPriceUnit = formatter.format(priceUnit);
+        //return formatter.format(priceUnit);
+        return  (
+         <>
+          <Row>
+            <Form.Item name={["harga_satuan", `${row.id}`]} noStyle>
+              <InputNumber
+                defaultValue={priceUnit}
+                min={0}
+                onChange={(e) => onChangePriceUnit(e, row, unit)}
+                style={{
+                  width: "150px",
+                  marginRight: "10px",
+                }}
+              />
+            </Form.Item>
+          </Row>
+         </>
+         );
       },
     },
     {

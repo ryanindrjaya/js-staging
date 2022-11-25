@@ -48,8 +48,8 @@ const CreateReturLPB = async (
     
   const req = await createData(data); 
   const res = await req.json();
-    //console.log("ini data 1 : "); console.log(res);
-  if (req.status === 200) { //console.log("200 nih"); console.log(res.data.attributes); console.log(values.purchasing);
+    console.log("ini data 1 : "); console.log(res);
+  if (req.status === 200) { console.log("200 nih"); //console.log(res.data.attributes); console.log(values.purchasing);
     //putStatus(values.purchasing, dataLPB);
     await putRelationReturLPB(res.data.id, res.data.attributes, form, router);
   } else {
@@ -79,7 +79,7 @@ const putStatus = async (id, value, listdetail) => {
     const dataLPB = {
         data: value.attributes,
     };
-    //console.log("put status"); console.log(dataLPB);
+
     dataLPB.data.status = "Diretur";
     dataLPB.data.supplier = dataLPB.data.supplier.data.id;
     dataLPB.data.location = dataLPB.data.location.data.id;
@@ -111,7 +111,7 @@ const putStatus = async (id, value, listdetail) => {
 };
 
 const putRelationReturLPB = async (id, value, form, router) => {
-  const user = await getUserMe(); //console.log("masuk put relation")
+  const user = await getUserMe(); console.log("masuk put relation",tempProductListId)
   const dataRetur = {
     data: value,
   };

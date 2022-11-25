@@ -109,7 +109,7 @@ function ReturLPB({ props }) {
     const [grandTotal, setGrandTotal] = useState(0);
     const [listId, setListId] = useState([]);
     const router = useRouter();
-
+    
     const tempList = [];
     
     var totalReturs = String(props.dataLPBPage?.meta?.pagination.total + 1).padStart(3, "0");
@@ -132,6 +132,12 @@ function ReturLPB({ props }) {
     var formatter = new Intl.NumberFormat("id-ID", {
         style: "currency",
         currency: "IDR",
+        maximumFractionDigits: 2,
+    });
+
+    var formatterTotal = new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
         maximumFractionDigits: 0,
     });
 
@@ -143,7 +149,7 @@ function ReturLPB({ props }) {
 
     const createDetailRetur = async () => {
         //console.log("info total", productTotalPrice, productSubTotal);
-        console.log("detail retur :"); console.log(data); console.log("list value : "); console.log(listId)
+        //console.log("detail retur :"); console.log(data); console.log("produk nih value : "); console.log(products)
         createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-lpb-details", dataValues);
     };
 
@@ -171,6 +177,7 @@ function ReturLPB({ props }) {
     };
 
     const calculatePriceAfterDisc = (row) => {
+        //console.log("row", productTotalPrice, productSubTotal)
         const total = calculatePrice(
             row,
             products,
@@ -218,7 +225,7 @@ function ReturLPB({ props }) {
 
         purchase_details.forEach((element) => {
             var indexUnit = 1;
-            var unitOrder = element.attributes.unit_order; console.log("product :"); console.log(element.attributes);
+            var unitOrder = element.attributes.unit_order; //console.log("product :"); console.log(element.attributes);
             var productUnit = element.attributes.product.data.attributes;
 
             for (let index = 1; index < 6; index++) {
@@ -288,9 +295,9 @@ function ReturLPB({ props }) {
         setTotalPrice(0);
     };
 
-    //useEffect(() => {
-    //    setGrandTotal(totalPrice);
-    //}, [totalPrice]);
+    useEffect(() => {
+        setGrandTotal(totalPrice);
+    }, [totalPrice]);
 
     useEffect(() => {
         setGrandTotal(totalPrice);
@@ -402,9 +409,9 @@ function ReturLPB({ props }) {
                                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
                                     <LPBTable
                                         products={products}
-                                        productTotalPrice={productTotalPrice}
+                                        //productTotalPrice={productTotalPrice}
                                         setTotalPrice={setTotalPrice}
-                                        setProductTotalPrice={setProductTotalPrice}
+                                        //setProductTotalPrice={setProductTotalPrice}
                                         calculatePriceAfterDisc={calculatePriceAfterDisc}
                                         productSubTotal={productSubTotal}
                                         locations={locations}
@@ -448,7 +455,7 @@ function ReturLPB({ props }) {
                                 <p className="font-bold">Total Item : {products.productList.length} </p>
                             </div>
                             <div className="flex justify-end">
-                                <p className="font-bold">Total Harga : {formatter.format(totalPrice)} </p>
+                                <p className="font-bold">Total Harga : {formatterTotal.format(totalPrice)} </p>
                             </div>
                             <Form.Item name="catatan">
                                 <TextArea rows={4} placeholder="Catatan Tambahan" />

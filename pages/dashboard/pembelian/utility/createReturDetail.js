@@ -28,14 +28,15 @@ const createReturDetail = (
   products.productList.forEach((element) => {
     console.log("productTotalPrice", productTotalPrice);
     console.log("productSubTotal", productSubTotal);
-    console.log("nilai :", value);
+    console.log("nilai :", products.productInfo); console.log("nilai value :", value);
     // default value
     tempListId = [];
     const id = element.id;
     var qty = products?.productInfo?.[id]?.qty ?? 1;
     var disc = products?.productInfo?.[id]?.disc ?? 0;
     var unit = products.productInfo?.[id]?.unit ?? element.attributes.unit_1;
-    var unitPrice = getUnitPrice(element, unit);
+    //var unitPrice = getUnitPrice(element, unit);
+    var unitPrice = value.harga_satuan?.[id];
 
     var unitPriceAfterDisc =
       productSubTotal?.[id] ?? element.attributes.buy_price_1;
@@ -81,7 +82,8 @@ const POSTReturDetail = async (
     data: {
       qty: String(qty),
       unit: unit,
-      harga_satuan: parseInt(unitPrice),
+      //harga_satuan: parseInt(unitPrice),
+      harga_satuan: unitPrice,
       sub_total: parseInt(subTotal),
       products: { id: id },
       batch: batch,

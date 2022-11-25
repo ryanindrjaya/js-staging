@@ -15,9 +15,9 @@ export default function ReactDataTable({
   onChangeStatusPengiriman,
   onChangeStatus,
 }) {
-  const router = useRouter(); //console.log("Mulai"); console.log(data); console.log(onDelete); console.log(onPageChange); console.log(onChangeStatus);
+  const router = useRouter(); 
   const { Option } = Select;
-    //console.log("Mulai"); console.log(data);
+
   const openNotificationWithIcon = (type, title, message) => {
     notification[type]({
       message: title,
@@ -119,7 +119,7 @@ export default function ReactDataTable({
     {
       name: "NO LPB",
       width: "180px",
-      selector: (row) => row.attributes?.no_lpb ?? "-",
+      //selector: (row) => row.attributes.purchasing.data.attributes?.no_purchasing ?? "-",
     },
     {
       name: "Lokasi",

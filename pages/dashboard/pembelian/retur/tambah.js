@@ -80,9 +80,9 @@ const fetchDataLPB = async (cookies) => {
 };
 
 function Retur({ props }) {
-  const locations = props.location.data; console.log("data props :"); console.log(props);
+  const locations = props.location.data; //console.log("data props :"); console.log(props);
   const dataLPB = props.dataLPB.data;
-  var products = useSelector((state) => state.Order);
+  var products = useSelector((state) => state.Order); //console.log("data produk :");console.log(products);
   var selectedProduct = products?.productList;
   const dispatch = useDispatch();
 
@@ -96,7 +96,8 @@ function Retur({ props }) {
   const [grandTotal, setGrandTotal] = useState(0);
   const [listId, setListId] = useState([]);
   const router = useRouter();
-
+    //console.log("product totalprice :", productTotalPrice);
+    //console.log("product subtotal :", productSubTotal ); 
     //temp
   const tempList = [];
   const cookies = nookies.get(null, "token");
@@ -109,6 +110,12 @@ function Retur({ props }) {
 
   const { TextArea } = Input;
   var formatter = new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 2,
+  });
+
+  var formatterTotal = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
     maximumFractionDigits: 0,
@@ -146,7 +153,7 @@ function Retur({ props }) {
       });
     }
   };
-
+  
   const calculatePriceAfterDisc = (row) => {
     const total = calculatePrice(
       row,
@@ -161,7 +168,7 @@ function Retur({ props }) {
 
   const fetchReturdata = async (id) => {
     //clearData();
-      console.log("ids : "); console.log(id)
+    //console.log("ids : "); console.log(id)
     const endpoint = process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=deep`;
     const options = {
         method: "GET",
@@ -174,7 +181,7 @@ function Retur({ props }) {
     const req = await fetch(endpoint, options);
     const res = await req.json();
 
-    const dataRetur = res.data.attributes; console.log("data retur :"); console.log(dataRetur);
+    const dataRetur = res.data.attributes; //console.log("data retur :"); console.log(dataRetur);
 
     form.setFieldsValue({
       no_nota_supplier: dataRetur.no_nota_suppplier,
@@ -194,7 +201,7 @@ function Retur({ props }) {
     }
   }, [totalPrice]);
 
-  useEffect(() => { console.log(listId.length)
+  useEffect(() => { 
     if (listId.length > 0) {
       createRetur(dataValues);
     }
@@ -404,7 +411,7 @@ function Retur({ props }) {
                   <p className="font-bold">Total Item : {products.productList.length} </p>
               </div>
               <div className="flex justify-end">
-                <p className="font-bold">Total Harga : {formatter.format(totalPrice)} </p>
+                <p className="font-bold">Total Harga : {formatterTotal.format(totalPrice)} </p>
               </div>
               <Form.Item name="catatan">
                 <TextArea rows={4} placeholder="Catatan Tambahan" />
