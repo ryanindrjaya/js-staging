@@ -119,7 +119,7 @@ export default function ReactDataTable({
     {
       name: "NO LPB",
       width: "180px",
-      //selector: (row) => row.attributes.purchasing.data.attributes?.no_purchasing ?? "-",
+      selector: (row) => row.attributes.purchasing.data.attributes?.no_purchasing ?? "-",
     },
     {
       name: "Lokasi",

@@ -80,9 +80,9 @@ const fetchDataLPB = async (cookies) => {
 };
 
 function Retur({ props }) {
-  const locations = props.location.data; //console.log("data props :"); console.log(props);
+  const locations = props.location.data;
   const dataLPB = props.dataLPB.data;
-  var products = useSelector((state) => state.Order); //console.log("data produk :");console.log(products);
+  var products = useSelector((state) => state.Order);
   var selectedProduct = products?.productList;
   const dispatch = useDispatch();
 
@@ -96,9 +96,8 @@ function Retur({ props }) {
   const [grandTotal, setGrandTotal] = useState(0);
   const [listId, setListId] = useState([]);
   const router = useRouter();
-    //console.log("product totalprice :", productTotalPrice);
-    //console.log("product subtotal :", productSubTotal ); 
-    //temp
+
+  //temp
   const tempList = [];
   const cookies = nookies.get(null, "token");
 
@@ -153,7 +152,7 @@ function Retur({ props }) {
       });
     }
   };
-  
+    
   const calculatePriceAfterDisc = (row) => {
     const total = calculatePrice(
       row,
@@ -168,7 +167,6 @@ function Retur({ props }) {
 
   const fetchReturdata = async (id) => {
     //clearData();
-    //console.log("ids : "); console.log(id)
     const endpoint = process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=deep`;
     const options = {
         method: "GET",
@@ -181,13 +179,25 @@ function Retur({ props }) {
     const req = await fetch(endpoint, options);
     const res = await req.json();
 
-    const dataRetur = res.data.attributes; //console.log("data retur :"); console.log(dataRetur);
+    const dataRetur = res.data.attributes;
 
     form.setFieldsValue({
       no_nota_supplier: dataRetur.no_nota_suppplier,
       tanggal_pembelian: dataRetur.date_purchasing,
     });
+  };
 
+  const setProductValue = async () => {
+      if (products.productList.length != 0) {
+          products.productList.forEach((element) => {
+              console.log("masuk")
+              form.setFieldsValue({
+                  harga_satuan: {
+                      [element.id]: element.attributes.buy_price_1,
+                  },
+              });
+          });
+      }
   };
 
   useEffect(() => {
@@ -213,6 +223,7 @@ function Retur({ props }) {
 
   useEffect(() => {
     dispatch({ type: "CLEAR_DATA" });
+    setProductValue();
   }, []);
 
   const data = {

@@ -107,7 +107,7 @@ const POSTReturDetail = async (
   const res = await req.json();
     console.log("req nih : "); console.log(req);
   if (req.status === 200) { 
-    tempListId.push(res.data?.id); console.log("200 nih : "); console.log(tempListId);
+    tempListId.push(res.data?.id);
     if (tempListId.length === products.productList.length) {
       setListId(tempListId); console.log(tempListId)
     }

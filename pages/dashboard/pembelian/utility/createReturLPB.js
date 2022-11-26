@@ -19,48 +19,33 @@ const CreateReturLPB = async (
   setListLPBdetail
 ) => {
   // CLEANING DATA
-  //var returDate = new Date(values.tanggal_retur); console.log("nilai"); console.log(values); //console.log(values.tanggal_retur._d)
-  //var deliveryReturDate = new Date(values.delivery_date);
-  //var supplierId = { id: parseInt(values.supplier_id) }; 
+  tempProductListId = []; console.log("masuk put relation", tempProductListId)
+
     console.log("Masuk LPB"); console.log(values); console.log(dataLPB); 
 
-  //tempSupplierId = parseInt(values.supplier_id);
-  //tempLocationId = parseInt(values.location);
-
-  listId.forEach((element) => {
+  listId.forEach((element) => { console.log("masuk put listid", listId)
     tempProductListId.push({ id: element });
   });
 
-  //values.tanggal_retur = values.tanggal_retur;
-  //values.tanggal_pembelian = values.tanggal_retur;
-  //values.delivery_date = deliveryReturDate;
-  //values.supplier_id = supplierId;
-  //values.status = "Dipesan";
-  //values.delivery_total =
-  //values.no_nota_supplier = "kosong";
-  //  grandTotal === 0 ? parseInt(totalPrice) : parseInt(grandTotal);
-  //values.retur_details = null;
-  //values.supplier_id = null;
-
   var data = { 
     data: values,
-  };  //console.log("ini data 1 : "); console.log(data);
+  };
     
   const req = await createData(data); 
   const res = await req.json();
     console.log("ini data 1 : "); console.log(res);
-  if (req.status === 200) { console.log("200 nih"); //console.log(res.data.attributes); console.log(values.purchasing);
-    //putStatus(values.purchasing, dataLPB);
+  if (req.status === 200) {
+    //putStatus(values.purchasing, dataLPB, tempListId);
     await putRelationReturLPB(res.data.id, res.data.attributes, form, router);
   } else {
     openNotificationWithIcon("error");
   }
 };
 
-const createData = async (data) => { //console.log("create data masuk, data :");
+const createData = async (data) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-lpbs";
     const JSONdata = JSON.stringify(data);
-    //console.log("ini data LPB"); console.log(data)
+
   const options = {
     method: "POST",
     headers: {
@@ -99,7 +84,7 @@ const putStatus = async (id, value, listdetail) => {
     const req = await fetch(endpoint, options);
     //const res = await req.json();
 
-    if (req.status === 200) { //console.log("req status :"); console.log(req);
+    if (req.status === 200) {
         listLPBdetailId.forEach((element) => {
             //listLPBdetail.push(element.id);
             console.log("creat nih : "); console.log(element);
@@ -111,16 +96,12 @@ const putStatus = async (id, value, listdetail) => {
 };
 
 const putRelationReturLPB = async (id, value, form, router) => {
-  const user = await getUserMe(); console.log("masuk put relation",tempProductListId)
+  const user = await getUserMe(); 
   const dataRetur = {
     data: value,
   };
-  //console.log("put LPB"); console.log(dataRetur);
-  //dataRetur.data.supplier = { id: tempSupplierId };
+
   dataRetur.data.retur_lpb_details = tempProductListId;
-  //dataRetur.data.purchasings = "bisa";
-  //dataRetur.data.added_by = user.name;
-  //dataRetur.data.locations = { id: tempLocationId };
 
   // clean object
   for (var key in dataRetur) {

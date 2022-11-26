@@ -78,25 +78,14 @@ const fetchData = async (cookies) => {
 function ReturLPB({ props }) {
     const locations = props.locations.data;
     const data = props.data.data;
-    var products = useSelector((state) => state.Order); //console.log("data nih:"); console.log(props)
+    var products = useSelector((state) => state.Order);
 
     const [listLPBdetail, setListLPBdetail] = useState([]);
-    //const dataLPBdetails = data.attributes.purchasing_details.data;
-    //dataLPBdetails.forEach((element) => {
-    //    listLPBdetail.push(element.id);
-    //});
 
     var selectedProduct = products?.productList;
     const dispatch = useDispatch();
     // Set data for show in table
-    //const productListData = data.attributes.purchasing_details.data;
     const [productList, setProductList] = useState([]);
-    //products.productList.length = null;
-    //productListData.forEach((element) => {
-       //console.log("element baru"); console.log(productList.length)
-       //products.productList.push(element.attributes.product.data);
-    //}); //console.log("product list baru"); console.log(productList)
-    //console.log(products)
 
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
@@ -118,16 +107,6 @@ function ReturLPB({ props }) {
     var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
     var yyyy = today.getFullYear();
 
-    //const [qty, setQty] = useState([]);
-    //productList.forEach(element => {
-    //    console.log("elemen"); console.log(element);
-    //    if (element.attributes.unit_order == element.attributes.product.data.attributes.unit_2) { console.log("masuk") }
-    //    qty.push(element.attributes.total_order);
-    //    //unit.push(element.attributes.unit_order);
-    //    //onChangeQty(element.attributes.total_order, element.attributes.product.data);
-    //    //onChangeUnit(element.attributes.unit_order, element.attributes.product.data);
-    //});
-
     const { TextArea } = Input;
     var formatter = new Intl.NumberFormat("id-ID", {
         style: "currency",
@@ -148,8 +127,6 @@ function ReturLPB({ props }) {
     };
 
     const createDetailRetur = async () => {
-        //console.log("info total", productTotalPrice, productSubTotal);
-        //console.log("detail retur :"); console.log(data); console.log("produk nih value : "); console.log(products)
         createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-lpb-details", dataValues);
     };
 
@@ -177,7 +154,6 @@ function ReturLPB({ props }) {
     };
 
     const calculatePriceAfterDisc = (row) => {
-        //console.log("row", productTotalPrice, productSubTotal)
         const total = calculatePrice(
             row,
             products,
@@ -193,30 +169,6 @@ function ReturLPB({ props }) {
         //clearData();
         const dataRetur = data.data.data.attributes;
         const purchase_details = dataRetur.purchasing_details.data;
-        //const supplier = dataRetur.supplier.data;
-
-        //form.setFieldsValue({
-        //    supplier_id: `${supplier.attributes.id_supplier} - ${supplier.attributes.name}`,
-        //    location: dataRetur.location.data.attributes.name,
-        //    tempo_days: dataRetur.tempo_days,
-        //    tempo_time: dataRetur.tempo_time,
-        //    additional_fee_1_desc: dataRetur.additional_fee_1_desc,
-        //    additional_fee_2_desc: dataRetur.additional_fee_2_desc,
-        //    additional_fee_3_desc: dataRetur.additional_fee_3_desc,
-        //    additional_fee_4_desc: dataRetur.additional_fee_4_desc,
-        //    additional_fee_5_desc: dataRetur.additional_fee_5_desc,
-        //    additional_fee_1_sub: dataRetur.additional_fee_1_sub,
-        //    additional_fee_2_sub: dataRetur.additional_fee_2_sub,
-        //    additional_fee_3_sub: dataRetur.additional_fee_3_sub,
-        //    additional_fee_4_sub: dataRetur.additional_fee_4_sub,
-        //    additional_fee_5_sub: dataRetur.additional_fee_5_sub,
-        //    additional_note: dataRetur.additional_note,
-        //    delivery_fee: dataRetur.delivery_fee,
-        //    disc_type: null,
-        //    disc_value: null,
-        //    DPP_active: null,
-        //    PPN_active: null,
-        //});
 
         dispatch({
             type: "SET_PREORDER_DATA",
@@ -225,7 +177,7 @@ function ReturLPB({ props }) {
 
         purchase_details.forEach((element) => {
             var indexUnit = 1;
-            var unitOrder = element.attributes.unit_order; //console.log("product :"); console.log(element.attributes);
+            var unitOrder = element.attributes.unit_order; console.log("product :"); console.log(element.attributes);
             var productUnit = element.attributes.product.data.attributes;
 
             for (let index = 1; index < 6; index++) {
@@ -258,6 +210,9 @@ function ReturLPB({ props }) {
                 },
                 jumlah_qty: {
                     [productId]: element.attributes.total_order,
+                },
+                harga_satuan: {
+                    [productId]: element.attributes.unit_price,
                 },
                 expired_date:{
                     [productId]: moment(momentString),
