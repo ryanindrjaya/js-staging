@@ -1,1 +1,0 @@
-{"ast":null,"code":"export default {\n  siteName: 'ISOMORPHIC',\n  siteIcon: 'ion-flash',\n  footerText: \"ERP @ 2022 Created Keelola Teams\",\n  enableAnimatedRoute: false,\n  apiUrl: 'http://yoursite.com/api/',\n  google: {\n    analyticsKey: 'UA-xxxxxxxxx-1'\n  },\n  dashboard: '/dashboard'\n};","map":null,"metadata":{},"sourceType":"module"}

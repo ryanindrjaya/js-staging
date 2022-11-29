@@ -1,1 +1,0 @@
-{"ast":null,"code":"const drawerActions = {\n  SHOW_DRAWER: 'SHOW_DRAWER',\n  HIDE_DRAWER: 'HIDE_DRAWER',\n  openDrawer: payload => ({\n    type: drawerActions.SHOW_DRAWER,\n    payload\n  }),\n  closeDrawer: () => ({\n    type: drawerActions.HIDE_DRAWER\n  })\n};\nexport default drawerActions;","map":null,"metadata":{},"sourceType":"module"}

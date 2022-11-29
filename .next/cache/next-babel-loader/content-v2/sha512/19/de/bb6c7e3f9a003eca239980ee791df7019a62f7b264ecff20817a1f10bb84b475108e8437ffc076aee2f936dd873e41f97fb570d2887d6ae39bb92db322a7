@@ -1,1 +1,0 @@
-{"ast":null,"code":"import defaultTheme from './default';\nimport customTheme from './custom';\nconst themes = {\n  defaultTheme,\n  customTheme\n};\nexport const themeConfig = {\n  topbar: 'defaultTheme',\n  sidebar: 'defaultTheme',\n  layout: 'defaultTheme',\n  theme: 'defaultTheme'\n};\nexport default themes;","map":null,"metadata":{},"sourceType":"module"}
