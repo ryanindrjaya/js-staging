@@ -18,7 +18,7 @@ import Image from "next/image";
 import UnitTable from "../../../components/ReactDataTable/Product/UnitsTable";
 import { FileImageOutlined } from "@ant-design/icons";
 import setDiskonValue from "./utility/setDiskonValue";
-import setHargaValue from "./utility/setHargaValue";
+import setHargaValue, { setHargaNew } from "./utility/setHargaValue";
 import ConfirmDialog from "../../../components/Alert/ConfirmDialog";
 import debounce from "./utility/debounce";
 
@@ -398,7 +398,11 @@ const Tambah = ({ props }) => {
                     selectedGroups={selectedGroups}
                     onSelect={setSelectedGroup}
                   />
-                  <Locations data={locations} onSelect={setSelectLocation} required={true} />
+                  <Locations
+                    data={locations}
+                    onSelect={setSelectLocation}
+                    required={true}
+                  />
                 </div>
 
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
@@ -429,7 +433,11 @@ const Tambah = ({ props }) => {
               <div>
                 <h6 className="">HARGA</h6>
               </div>
-              <UnitTable getDescUnit={getDescriptionUnit} descUnit={descUnit} />
+              <UnitTable
+                getDescUnit={getDescriptionUnit}
+                descUnit={descUnit}
+                form={form}
+              />
 
               <Form.Item className="mt-5">
                 {loading ? (

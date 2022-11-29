@@ -13,54 +13,54 @@ const createDetailOrder = (
   setListId,
   url
 ) => {
-  // console.log(values);
   console.log("values", values);
-  console.log("product", products);
-  console.log("productList", products.productList);
-  products.productList.forEach((element) => {
-    // default value
-    var qty = 1;
-    var disc = 0;
-    var unit = element.attributes.unit_1;
-    var unitPrice = element.attributes.buy_price_1;
-    var unitPriceAfterDisc = element.attributes.buy_price_1;
-    var subTotal = unitPriceAfterDisc * qty;
+  // console.log(values);
+  // console.log("product", products);
+  // console.log("productList", products.productList);
+  // products.productList.forEach((element) => {
+  //   // default value
+  //   var qty = 1;
+  //   var disc = 0;
+  //   var unit = element.attributes.unit_1;
+  //   var unitPrice = element.attributes.buy_price_1;
+  //   var unitPriceAfterDisc = element.attributes.buy_price_1;
+  //   var subTotal = unitPriceAfterDisc * qty;
 
-    const id = element.id;
-    var batch = values.batch[id];
-    var location = values.product_location[id];
-    var expDate = new Date(values.exp_date[id]);
-    var newExptDate = moment
-      .utc(expDate)
-      .utcOffset(7 * 60)
-      .format();
+  //   const id = element.id;
+  //   var batch = values.batch[id];
+  //   var location = values.product_location[id];
+  //   var expDate = new Date(values.exp_date[id]);
+  //   var newExptDate = moment
+  //     .utc(expDate)
+  //     .utcOffset(7 * 60)
+  //     .format();
 
-    qty = products.productInfo[id]?.qty ?? 1;
-    disc = products.productInfo[id]?.disc ?? 0;
-    unit = products.productInfo[id]?.unit ?? element.attributes.unit_1;
-    unitPrice =
-      products.productInfo?.[id]?.priceUnit ?? element.attributes.buy_price_1;
-    unitPriceAfterDisc = productTotalPrice?.[id];
-    subTotal = productSubTotal?.[id];
+  //   qty = products.productInfo[id]?.qty ?? 1;
+  //   disc = products.productInfo[id]?.disc ?? 0;
+  //   unit = products.productInfo[id]?.unit ?? element.attributes.unit_1;
+  //   unitPrice =
+  //     products.productInfo?.[id]?.priceUnit ?? element.attributes.buy_price_1;
+  //   unitPriceAfterDisc = productTotalPrice?.[id];
+  //   subTotal = productSubTotal?.[id];
 
-    console.log("new data", batch, location, expDate, newExptDate);
+  //   console.log("new data", batch, location, expDate, newExptDate);
 
-    POSTPurchaseDetail(
-      qty,
-      disc,
-      unit,
-      unitPrice,
-      unitPriceAfterDisc,
-      subTotal,
-      id,
-      setListId,
-      products,
-      batch,
-      location,
-      newExptDate,
-      url
-    );
-  });
+  //   POSTPurchaseDetail(
+  //     qty,
+  //     disc,
+  //     unit,
+  //     unitPrice,
+  //     unitPriceAfterDisc,
+  //     subTotal,
+  //     id,
+  //     setListId,
+  //     products,
+  //     batch,
+  //     location,
+  //     newExptDate,
+  //     url
+  //   );
+  // });
 };
 
 const POSTPurchaseDetail = async (
@@ -104,15 +104,17 @@ const POSTPurchaseDetail = async (
     body: JSONdata,
   };
 
-  const req = await fetch(endpoint, options);
-  const res = await req.json();
+  console.log("test post data", data);
 
-  if (req.status === 200) {
-    tempListId.push(res.data?.id);
-    if (tempListId.length === products.productList.length) {
-      setListId(tempListId);
-    }
-  }
+  // const req = await fetch(endpoint, options);
+  // const res = await req.json();
+
+  // if (req.status === 200) {
+  //   tempListId.push(res.data?.id);
+  //   if (tempListId.length === products.productList.length) {
+  //     setListId(tempListId);
+  //   }
+  // }
 };
 
 export default createDetailOrder;

@@ -20,13 +20,16 @@ class CustomApp extends App {
   render() {
     const { Component, pageProps, store } = this.props;
 
+
     return (
       <Provider store={store}>
         <ThemeProvider>
           <Middleware>
             <Component {...pageProps} />
           </Middleware>
-          <ToastContainer toastStyle={{ backgroundColor: "black", color: "white" }} />
+          <ToastContainer
+            toastStyle={{ backgroundColor: "black", color: "white" }}
+          />
         </ThemeProvider>
       </Provider>
     );
