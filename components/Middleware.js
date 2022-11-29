@@ -7,25 +7,24 @@ function Middleware({ children }) {
   const token = cookies.token;
   const router = useRouter();
 
-  useEffect(async () => {
-    const firstPath = router.pathname.split("/")[1];
+//   useEffect(async () => {
+//     const firstPath = router.pathname.split("/")[1];
 
-    // await istokenValid(token);
-    // let isValid = await istokenValid(token);
+//     // let isValid = await istokenValid(token);
 
-    // if (!isValid) {
-    //   router.push("/");
-    // } else {
-    // }
+//     // if (!isValid) {
+//     //   router.push("/");
+//     // } else {
+//     // }
 
-    if (firstPath === "dashboard" && !token) {
-      router.push("/");
-    } else {
-      if (token && firstPath === "") {
-        router.push("/dashboard");
-      }
-    }
-  }, []);
+//     if (firstPath === "dashboard" && !token) {
+//       router.push("/");
+//     } else {
+//       if (token && firstPath === "") {
+//         router.push("/dashboard");
+//       }
+//     }
+//   }, []);
 
   return <>{children}</>;
 }
