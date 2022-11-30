@@ -53,12 +53,12 @@ function Pembelian({ props }) {
   };
 
   const handleUpdate = (id) => {
-    // router.push("/dashboard/pembelian/order_pembelian/edit/" + id);
-    openNotificationWithIcon(
-      "info",
-      "Work In Progress",
-      "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
-    );
+    router.push("/dashboard/pembelian/pembelian_barang/edit/" + id);
+    //openNotificationWithIcon(
+    //  "info",
+    //  "Work In Progress",
+    //  "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
+    //);
   };
 
   const handlePageChange = async (page) => {
@@ -204,7 +204,7 @@ function Pembelian({ props }) {
       openNotificationWithIcon(
         "success",
         "Status berhasil dirubah",
-        "Status berhasil dirubah. Silahkan cek detail LPB"
+        "Status berhasil dirubah. Silahkan cek LPB"
       );
     } else {
       openNotificationWithIcon(

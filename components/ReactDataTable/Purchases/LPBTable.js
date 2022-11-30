@@ -3,25 +3,37 @@ import AlertDialog from "../../Alert/Alert";
 import { Input, InputNumber, Select, Form, Row, DatePicker } from "antd";
 import { useDispatch } from "react-redux";
 
-export default function ReactDataTable({ calculatePriceAfterDisc, productSubTotal, products, locations, setTotalPrice }) {
+export default function ReactDataTable({ calculatePriceAfterDisc, productSubTotal, products, locations, setTotalPrice, formObj }) {
   const dispatch = useDispatch();
 
   var defaultDp1 = 0;
   var defaultDp2 = 0;
   var defaultDp3 = 0;
+  var unit = 1;
+  var priceUnit = 1;
+  var tempIndex = 0;
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
   });
 
   const onDeleteProduct = (value) => {
     dispatch({ type: "REMOVE_PRODUCT", index: value });
   };
 
-  const onChangeUnit = (value, data) => {
+  const onChangeUnit = (value, data) => { 
+    unit = value;
+    if(value == 1){ priceUnit = data.attributes.buy_price_1; }
+    else if(value == 2){ priceUnit = data.attributes.buy_price_2; }
+    else if(value == 3){ priceUnit = data.attributes.buy_price_3; }
+    else if(value == 4){ priceUnit = data.attributes.buy_price_4; }
+    else if(value == 5){ priceUnit = data.attributes.buy_price_5; }
+    
     dispatch({ type: "CHANGE_PRODUCT_UNIT", index: value, product: data });
+    onChangePriceUnit(priceUnit, data, value);
+    tempIndex = 0;
   };
 
   const onChangeQty = (value, data) => {
@@ -37,6 +49,39 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
       type: "CHANGE_PRODUCT_DISC",
       disc: value,
       product: data,
+    });
+  };
+
+  const onChangePriceUnit = (value, data, index) => { 
+    var tempPriceUnit = [];  console.log("value", value, data, index);
+    
+    tempPriceUnit.push(data.attributes.buy_price_1);
+    tempPriceUnit.push(data.attributes.buy_price_2);
+    tempPriceUnit.push(data.attributes.buy_price_3);
+    tempPriceUnit.push(data.attributes.buy_price_4);
+    tempPriceUnit.push(data.attributes.buy_price_5);
+    
+    data.attributes.buy_price_1 = value;
+    data.attributes.buy_price_2 = value;
+    data.attributes.buy_price_3 = value;
+    data.attributes.buy_price_4 = value;
+    data.attributes.buy_price_5 = value;
+
+    if(tempIndex != index){
+        tempIndex = index;
+        onChangeUnit(index, data);
+    }
+
+    data.attributes.buy_price_1 = tempPriceUnit[0];
+    data.attributes.buy_price_2 = tempPriceUnit[1];
+    data.attributes.buy_price_3 = tempPriceUnit[2];
+    data.attributes.buy_price_4 = tempPriceUnit[3];
+    data.attributes.buy_price_5 = tempPriceUnit[4];
+
+    formObj.setFieldsValue({
+        harga_satuan: {
+            [data.id]: value,
+        },
     });
   };
 
@@ -104,13 +149,23 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
       width: "150px",
       selector: (row) => {
         var priceUnit = row.attributes?.buy_price_1;
-        if (products.productInfo[row.id]) {
-          if (products.productInfo[row.id].priceUnit) {
-            priceUnit = products.productInfo[row.id].priceUnit;
-          }
-        }
-
-        return formatter.format(priceUnit);
+        return  (
+         <>
+          <Row>
+            <Form.Item name={["harga_satuan", `${row.id}`]} noStyle>
+              <InputNumber
+                defaultValue={priceUnit}
+                min={0}
+                onChange={(e) => onChangePriceUnit(e, row, unit)}
+                style={{
+                  width: "150px",
+                  marginRight: "10px",
+                }}
+              />
+            </Form.Item>
+          </Row>
+         </>
+         );
       },
     },
     {
@@ -364,7 +419,7 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
       },
     },
     {
-      name: "EXP.Date",
+      name: "EXPDate",
       width: "150px",
       sortable: true,
       selector: (row) => {
@@ -372,7 +427,7 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
           <>
             <Form.Item
               label={"exp date"}
-              name={["exp_date", `${row.id}`]}
+              name={["expired_date", `${row.id}`]}
               rules={[
                 {
                   required: true,

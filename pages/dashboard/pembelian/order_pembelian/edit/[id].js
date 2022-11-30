@@ -663,7 +663,7 @@ const Edit = ({ props }) => {
                   </div>
                 ) : (
                   <Button onClick={validateError} htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
-                    Tambah
+                    Edit
                   </Button>
                 )}
               </Form.Item>
