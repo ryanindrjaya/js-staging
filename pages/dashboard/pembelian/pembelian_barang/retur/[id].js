@@ -122,16 +122,13 @@ function ReturLPB({ props }) {
 
     const onFinish = async (values) => {
         setLoading(true);
-        setDataValues(values); console.log("values :"); console.log(values)
-        values.jumlah_option.forEach((element) => {
-            console.log("element", element)
-        });
+        setDataValues(values);
         setLoading(false);
     };
 
     const createDetailRetur = async () => {
         console.log("dataValues cdr : ", dataValues);
-        //createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-lpb-details", dataValues);
+        createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-lpb-details", dataValues);
     };
 
     const createRetur = async (values) => {
@@ -172,7 +169,7 @@ function ReturLPB({ props }) {
     const fetchReturdata = async (data) => {
         //clearData();
         const dataRetur = data.data.data.attributes;
-        const purchase_details = dataRetur.purchasing_details.data; console.log("purchase detail :", data);
+        const purchase_details = dataRetur.purchasing_details.data;
 
         dispatch({
             type: "SET_PREORDER_DATA",
@@ -181,7 +178,7 @@ function ReturLPB({ props }) {
 
         purchase_details.forEach((element) => {
             var indexUnit = 1;
-            var unitOrder = element.attributes.unit_order; console.log("product :"); console.log(element.attributes);
+            var unitOrder = element.attributes.unit_order;
             var productUnit = element.attributes.product.data.attributes;
 
             for (let index = 1; index < 6; index++) {
@@ -190,7 +187,7 @@ function ReturLPB({ props }) {
                 }
             }
 
-            const productId = element.attributes.product.data.id; console.log("productId :", productId);
+            const productId = element.attributes.product.data.id;
             var dateString = element.attributes.expired_date;
             var momentObj = moment(dateString, "YYYY-MM-DD");
             var momentString = momentObj.format("MM-DD-YYYY");
@@ -254,39 +251,6 @@ function ReturLPB({ props }) {
         setTotalPrice(0);
     };
 
-    //useEffect(() => {
-    //    console.log("productinfo :", products);
-    //    if (products.productList.length < products.productList.length + 1) {
-    //        products.productList.forEach((element) => {
-    //            console.log("element", element); console.log("data value", dataValues)
-    //            //form.setFieldsValue({
-    //            //    disc_rp: {
-    //            //        [element.id]: 0,
-    //            //    },
-    //            //    jumlah_option: {
-    //            //        [element.id]: element.attributes.unit_1,
-    //            //    },
-    //            //    jumlah_qty: {
-    //            //        [element.id]: 1,
-    //            //    },
-    //            //    harga_satuan: {
-    //            //        [element.id]: element.attributes.unit_price,
-    //            //    },
-    //            //});
-    //            //dispatch({
-    //            //    type: "CHANGE_PRODUCT_QTY",
-    //            //    qty: 1,
-    //            //    product: element,
-    //            //});
-    //            dispatch({
-    //                type: "CHANGE_PRODUCT_UNIT",
-    //                index: 1,
-    //                product: element,
-    //            });
-    //        });
-    //    }
-    //}, [products.productList]);
-
     useEffect(() => {
         setGrandTotal(totalPrice);
     }, [totalPrice]);
@@ -303,8 +267,7 @@ function ReturLPB({ props }) {
     }, [totalPrice]);
 
     useEffect(() => {
-        //console.log(dataValues);
-        if (listId.length > 0) { console.log("createRetur :");
+        if (listId.length > 0) {
             createRetur(dataValues);
         }
     }, [listId]);

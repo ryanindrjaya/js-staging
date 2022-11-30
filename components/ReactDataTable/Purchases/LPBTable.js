@@ -9,6 +9,7 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
   var defaultDp1 = 0;
   var defaultDp2 = 0;
   var defaultDp3 = 0;
+  var unit = 1;
   var priceUnit = 1;
   var tempIndex = 0;
 
@@ -23,12 +24,12 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
   };
 
   const onChangeUnit = (value, data) => { 
+    unit = value;
     if(value == 1){ priceUnit = data.attributes.buy_price_1; }
     else if(value == 2){ priceUnit = data.attributes.buy_price_2; }
     else if(value == 3){ priceUnit = data.attributes.buy_price_3; }
     else if(value == 4){ priceUnit = data.attributes.buy_price_4; }
     else if(value == 5){ priceUnit = data.attributes.buy_price_5; }
-    else { priceUnit = 0; }
     
     dispatch({ type: "CHANGE_PRODUCT_UNIT", index: value, product: data });
     onChangePriceUnit(priceUnit, data, value);
@@ -52,9 +53,8 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
   };
 
   const onChangePriceUnit = (value, data, index) => { 
-    var tempPriceUnit = [];
+    var tempPriceUnit = [];  console.log("value", value, data, index);
     
-
     tempPriceUnit.push(data.attributes.buy_price_1);
     tempPriceUnit.push(data.attributes.buy_price_2);
     tempPriceUnit.push(data.attributes.buy_price_3);

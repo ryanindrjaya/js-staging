@@ -28,7 +28,7 @@ const createReturDetail = (
   products.productList.forEach((element) => {
     console.log("productTotalPrice", productTotalPrice);
     console.log("productSubTotal", productSubTotal);
-    console.log("nilai :", products.productInfo); console.log("nilai value :", value);
+    //console.log("nilai :", products.productInfo); console.log("nilai value :", value);
     // default value
     tempListId = [];
     const id = element.id;
@@ -37,6 +37,9 @@ const createReturDetail = (
     var unit = products.productInfo?.[id]?.unit ?? element.attributes.unit_1;
     //var unitPrice = getUnitPrice(element, unit);
     var unitPrice = value.harga_satuan?.[id];
+    if(value.harga_satuan?.[id] == undefined){
+        unitPrice = element.attributes.buy_price_1;
+    }
 
     var unitPriceAfterDisc =
       productTotalPrice?.[id] ?? element.attributes.buy_price_1;
