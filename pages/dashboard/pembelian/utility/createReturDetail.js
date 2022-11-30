@@ -39,7 +39,7 @@ const createReturDetail = (
     var unitPrice = value.harga_satuan?.[id];
 
     var unitPriceAfterDisc =
-      productSubTotal?.[id] ?? element.attributes.buy_price_1;
+      productTotalPrice?.[id] ?? element.attributes.buy_price_1;
     var subTotal = unitPriceAfterDisc * qty;
     var batch = value.batch?.[id];
     var expired_date = value.expired_date?.[id];
@@ -105,11 +105,11 @@ const POSTReturDetail = async (
 
   const req = await fetch(endpoint, options);
   const res = await req.json();
-    console.log("req nih : "); console.log(req);
+
   if (req.status === 200) { 
     tempListId.push(res.data?.id);
     if (tempListId.length === products.productList.length) {
-      setListId(tempListId); console.log(tempListId)
+      setListId(tempListId);
     }
   }
 };

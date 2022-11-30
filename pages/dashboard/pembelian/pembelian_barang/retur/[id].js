@@ -123,11 +123,15 @@ function ReturLPB({ props }) {
     const onFinish = async (values) => {
         setLoading(true);
         setDataValues(values); console.log("values :"); console.log(values)
+        values.jumlah_option.forEach((element) => {
+            console.log("element", element)
+        });
         setLoading(false);
     };
 
     const createDetailRetur = async () => {
-        createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-lpb-details", dataValues);
+        console.log("dataValues cdr : ", dataValues);
+        //createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-lpb-details", dataValues);
     };
 
     const createRetur = async (values) => {
@@ -168,7 +172,7 @@ function ReturLPB({ props }) {
     const fetchReturdata = async (data) => {
         //clearData();
         const dataRetur = data.data.data.attributes;
-        const purchase_details = dataRetur.purchasing_details.data;
+        const purchase_details = dataRetur.purchasing_details.data; console.log("purchase detail :", data);
 
         dispatch({
             type: "SET_PREORDER_DATA",
@@ -186,7 +190,7 @@ function ReturLPB({ props }) {
                 }
             }
 
-            const productId = element.attributes.product.data.id;
+            const productId = element.attributes.product.data.id; console.log("productId :", productId);
             var dateString = element.attributes.expired_date;
             var momentObj = moment(dateString, "YYYY-MM-DD");
             var momentString = momentObj.format("MM-DD-YYYY");
@@ -212,7 +216,7 @@ function ReturLPB({ props }) {
                     [productId]: element.attributes.total_order,
                 },
                 harga_satuan: {
-                    [productId]: element.attributes.unit_price,
+                    [productId]: parseInt(element.attributes.unit_price),
                 },
                 expired_date:{
                     [productId]: moment(momentString),
@@ -249,6 +253,39 @@ function ReturLPB({ props }) {
         dispatch({ type: "CLEAR_DATA" });
         setTotalPrice(0);
     };
+
+    //useEffect(() => {
+    //    console.log("productinfo :", products);
+    //    if (products.productList.length < products.productList.length + 1) {
+    //        products.productList.forEach((element) => {
+    //            console.log("element", element); console.log("data value", dataValues)
+    //            //form.setFieldsValue({
+    //            //    disc_rp: {
+    //            //        [element.id]: 0,
+    //            //    },
+    //            //    jumlah_option: {
+    //            //        [element.id]: element.attributes.unit_1,
+    //            //    },
+    //            //    jumlah_qty: {
+    //            //        [element.id]: 1,
+    //            //    },
+    //            //    harga_satuan: {
+    //            //        [element.id]: element.attributes.unit_price,
+    //            //    },
+    //            //});
+    //            //dispatch({
+    //            //    type: "CHANGE_PRODUCT_QTY",
+    //            //    qty: 1,
+    //            //    product: element,
+    //            //});
+    //            dispatch({
+    //                type: "CHANGE_PRODUCT_UNIT",
+    //                index: 1,
+    //                product: element,
+    //            });
+    //        });
+    //    }
+    //}, [products.productList]);
 
     useEffect(() => {
         setGrandTotal(totalPrice);
