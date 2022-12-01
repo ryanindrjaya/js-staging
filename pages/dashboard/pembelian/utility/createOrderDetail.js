@@ -22,7 +22,8 @@ const createDetailOrder = (
   productTotalPrice,
   productSubTotal,
   setListId,
-  url
+  url,
+  value
 ) => {
   products.productList.forEach((element) => {
     console.log(products);
@@ -31,17 +32,22 @@ const createDetailOrder = (
     console.log("productSubTotal", productSubTotal);
 
     // default value
+    tempListId = [];
     const id = element.id;
     var qty = products?.productInfo?.[id]?.qty ?? 1;
     var disc = products?.productInfo?.[id]?.disc ?? 0;
     var unit = products.productInfo?.[id]?.unit ?? element.attributes.unit_1;
-    var unitPrice = getUnitPrice(element, unit);
+    //var unitPrice = getUnitPrice(element, unit);
+    var unitPrice = value.harga_satuan?.[id];
+    if(value.harga_satuan?.[id] == undefined){
+        unitPrice = element.attributes.buy_price_1;
+    }
 
     var unitPriceAfterDisc =
-      productSubTotal?.[id] ?? element.attributes.buy_price_1;
+      productTotalPrice?.[id] ?? element.attributes.buy_price_1;
     var subTotal = unitPriceAfterDisc * qty;
 
-    console.log(qty, disc, unit, unitPrice, unitPriceAfterDisc, subTotal);
+    //console.log("detail nich :",qty, disc, unit, unitPrice, unitPriceAfterDisc, subTotal);
 
     POSTPurchaseDetail(
       qty,
@@ -95,9 +101,6 @@ const POSTPurchaseDetail = async (
 
   const req = await fetch(endpoint, options);
   const res = await req.json();
-
-  console.log(data);
-  console.log(res);
 
   if (req.status === 200) {
     tempListId.push(res.data?.id);
