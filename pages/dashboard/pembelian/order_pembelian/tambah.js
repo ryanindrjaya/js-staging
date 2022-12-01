@@ -119,7 +119,7 @@ function Tambah({ props }) {
   var tempLocationId;
 
   // NO PO
-  var totalPurchases = String(props.purchases?.meta?.pagination.total + 1).padStart(3, "0"); console.log(props)
+  var totalPurchases = String(props.purchases?.meta?.pagination.total + 1).padStart(3, "0");
   var today = new Date();
   var dd = String(today.getDate()).padStart(2, "0");
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
@@ -140,7 +140,7 @@ function Tambah({ props }) {
 
   const createDetailOrder = async () => {
     console.log("info total", productTotalPrice, productSubTotal);
-    createDetailOrderFunc(products, productTotalPrice, productSubTotal, setListId, "/purchase-details");
+    createDetailOrderFunc(products, productTotalPrice, productSubTotal, setListId, "/purchase-details", dataValues);
   };
 
   const createOrder = async (values) => {

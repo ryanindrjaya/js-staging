@@ -22,6 +22,7 @@ const CreateOrder = async (
 
   tempSupplierId = parseInt(values.supplier_id);
   tempLocationId = parseInt(values.location);
+  tempProductListId = [];
 
   listId.forEach((element) => {
     tempProductListId.push({ id: element });
