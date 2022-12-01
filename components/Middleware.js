@@ -7,8 +7,16 @@ function Middleware({ children }) {
   const token = cookies.token;
   const router = useRouter();
 
-  useEffect(() => {
+  useEffect(async () => {
     const firstPath = router.pathname.split("/")[1];
+
+    // await istokenValid(token);
+    // let isValid = await istokenValid(token);
+
+    // if (!isValid) {
+    //   router.push("/");
+    // } else {
+    // }
 
     if (firstPath === "dashboard" && !token) {
       router.push("/");
@@ -21,5 +29,25 @@ function Middleware({ children }) {
 
   return <>{children}</>;
 }
+
+const istokenValid = async (token) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + `/products`;
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  const res = await req.json();
+
+  if (req.status === 401) {
+    return false;
+  } else {
+    return true;
+  }
+};
 
 export default Middleware;

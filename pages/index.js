@@ -17,7 +17,9 @@ export default function SignInPage(props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [failedLogin, setFailedLogin] = useState(false);
-  const [failedLoginMsg, setfailedLoginMsg] = useState("Username atau Password salah");
+  const [failedLoginMsg, setfailedLoginMsg] = useState(
+    "Username atau Password salah"
+  );
   const [field, setField] = useState({});
 
   const handleLogin = async (e) => {
@@ -49,7 +51,7 @@ export default function SignInPage(props) {
       if (res.jwt) {
         // set new token
         nookies.set(null, "token", res.jwt, {
-          maxAge: 30 * 24 * 60 * 60,
+          maxAge: 24 * 60 * 60,
           path: "/",
           secure: process.env.NEXT_PUBLIC_URL !== "development",
           sameSite: "strict",
@@ -58,7 +60,7 @@ export default function SignInPage(props) {
         const role = await getUserInformation(res.jwt);
         // set role token
         nookies.set(null, "role", role, {
-          maxAge: 30 * 24 * 60 * 60,
+          maxAge: 24 * 60 * 60,
           path: "/",
           secure: process.env.NEXT_PUBLIC_URL !== "development",
           sameSite: "strict",
@@ -129,11 +131,24 @@ export default function SignInPage(props) {
                 <center>LOGIN</center>
               </div>
               <div className="isoInputWrapper">
-                <Input onChange={setValue} name="username" id="inputUserName" size="large" placeholder="Username" />
+                <Input
+                  onChange={setValue}
+                  name="username"
+                  id="inputUserName"
+                  size="large"
+                  placeholder="Username"
+                />
               </div>
 
               <div className="isoInputWrapper">
-                <Input onChange={setValue} id="inpuPassword" size="large" name="password" type="password" placeholder="Password" />
+                <Input
+                  onChange={setValue}
+                  id="inpuPassword"
+                  size="large"
+                  name="password"
+                  type="password"
+                  placeholder="Password"
+                />
               </div>
 
               <div className="isoInputWrapper isoLeftRightComponent">
@@ -142,13 +157,23 @@ export default function SignInPage(props) {
                     <Spin />
                   </div>
                 ) : (
-                  <Button htmlType="submit" className="bg-blue-400 text-white w-full hover:bg-blue-600" onClick={handleLogin}>
+                  <Button
+                    htmlType="submit"
+                    className="bg-blue-400 text-white w-full hover:bg-blue-600"
+                    onClick={handleLogin}
+                  >
                     <IntlMessages id="page.signInButton" />
                   </Button>
                 )}
               </div>
               {failedLogin ? (
-                <Alert message="Login Error" description="Username atau Password salah" type="error" closable onClose={onClose} />
+                <Alert
+                  message="Login Error"
+                  description="Username atau Password salah"
+                  type="error"
+                  closable
+                  onClose={onClose}
+                />
               ) : (
                 <div></div>
               )}

@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
-import { Button, Form, Input, message, Upload, Space } from "antd";
+import { Button, Form, Input, message, Upload, notification } from "antd";
 import nookies from "nookies";
 import { toast } from "react-toastify";
 import { Spin, Row } from "antd";
@@ -18,18 +18,25 @@ import Image from "next/image";
 import UnitTable from "../../../components/ReactDataTable/Product/UnitsTable";
 import { FileImageOutlined } from "@ant-design/icons";
 import setDiskonValue from "./utility/setDiskonValue";
-import setHargaValue from "./utility/setHargaValue";
+import setHargaValue, { setHargaNew } from "./utility/setHargaValue";
+import ConfirmDialog from "../../../components/Alert/ConfirmDialog";
+import debounce from "./utility/debounce";
 
 const Tambah = ({ props }) => {
   const [image, setImage] = useState();
   const [category, setCategory] = useState();
   const [uploadedOnce, setUploadedOnce] = useState(true);
   const [fileList, setFileList] = useState([]);
+  const [statusSKU, setStatusSKU] = useState({
+    status: "",
+    message: "",
+  });
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [firstInput, setFirstInputDiskon] = useState(true);
   const cookies = nookies.get(null, "token");
   const router = useRouter();
+  const submitBtn = useRef();
 
   const { Dragger } = Upload;
   const { TextArea } = Input;
@@ -45,8 +52,10 @@ const Tambah = ({ props }) => {
   const [subCategories, setSubCategories] = useState([]);
   const [selectedSubCategory, setSelectedSubCategory] = useState();
 
+  const [descUnit, setDescUnit] = useState();
+
   const imageLoader = ({ src }) => {
-    return process.env.BASE_URL + image?.url;
+    return process.env.NEXT_PUBLIC_URL + image?.url;
   };
 
   const propsDagger = {
@@ -127,10 +136,7 @@ const Tambah = ({ props }) => {
       id: values?.groups,
     };
 
-    const locationsID = [];
-    for (let index = 0; index < values.locations.length; index++) {
-      locationsID.push({ id: values.locations[index] });
-    }
+    const locationsID = values.locations.map((locationId) => locationId);
 
     delete values.locations;
     delete values.category_id;
@@ -140,6 +146,7 @@ const Tambah = ({ props }) => {
 
     const postData = {
       ...values,
+      locations: locationsID,
     };
 
     const putData = {
@@ -150,6 +157,8 @@ const Tambah = ({ props }) => {
       locations: locationsID,
       image: { id: image?.id },
     };
+
+    console.log("put data", putData);
 
     // POST DATA
     const postRes = await handlePostData(postData);
@@ -188,8 +197,6 @@ const Tambah = ({ props }) => {
       }
     }
 
-    console.log(endpoint);
-
     const dataPut = { data: data };
     const JSONdata = JSON.stringify(dataPut);
 
@@ -216,9 +223,14 @@ const Tambah = ({ props }) => {
       } else {
         res?.error?.details?.errors.map((error) => {
           const ErrorMsg = error.path[0];
-          toast.error(ErrorMsg === "SKU" ? "SKU sudah digunakan" : "Tidak dapat menambahkan Produk", {
-            position: toast.POSITION.TOP_RIGHT,
-          });
+          toast.error(
+            ErrorMsg === "SKU"
+              ? "SKU sudah digunakan"
+              : "Tidak dapat menambahkan Produk",
+            {
+              position: toast.POSITION.TOP_RIGHT,
+            }
+          );
         });
       }
     } catch (error) {
@@ -228,15 +240,86 @@ const Tambah = ({ props }) => {
     }
   };
 
-  const handleValueChange = (changedValues, allValues) => {
-    const fieldName = Object.keys(changedValues)[0];
-    const unit = fieldName.split("_")[1];
+  const checkSKU = async (value) => {
+    setStatusSKU({ status: "validating", message: "" });
 
-    // jika user input unit 2,3,4, dan 5
-    if (unit > 1) {
-      setDiskonValue(form, changedValues, allValues, fieldName, firstInput);
-      setHargaValue(form, changedValues, allValues, fieldName, firstInput);
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL + "/products?filters[SKU][$eq]=" + value;
+    const options = {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    if (req.status === 200) {
+      if (res.data.length > 0) {
+        setStatusSKU({ status: "error", message: "SKU sudah digunakan" });
+      } else {
+        setStatusSKU({ status: "success", message: "" });
+      }
+    } else {
+      setStatusSKU({
+        status: "error",
+        message: "Error ketika mengambil data SKU",
+      });
     }
+  };
+
+  const handleValueChange = async (changedValues, allValues) => {
+    const fieldName = Object.keys(changedValues)[0];
+    const unitArr = fieldName.split("_");
+    const unit = unitArr[unitArr.length - 1];
+
+    // check SKU
+    if (fieldName === "SKU" && allValues.SKU !== "") {
+      debounce(checkSKU, 1000)(allValues.SKU);
+    } else if (fieldName === "SKU" && allValues.SKU === "") {
+      setStatusSKU({ status: "error", message: "SKU tidak boleh kosong" });
+    }
+
+    setDiskonValue(form, changedValues, allValues, fieldName, firstInput);
+    setHargaValue(form, changedValues, allValues, unit, firstInput);
+  };
+
+  const getDescriptionUnit = () => {
+    const unitText = form.getFieldsValue([
+      "unit_1",
+      "qty_1",
+      "unit_2",
+      "qty_2",
+      "unit_3",
+      "qty_3",
+      "unit_4",
+      "qty_4",
+      "unit_5",
+      "qty_5",
+    ]);
+
+    let unit1 = `${unitText.qty_1 ?? ""} ${unitText.unit_1 ?? ""} `;
+    let unit2 = `${unitText.qty_2 ?? ""} ${unitText.unit_2 ?? ""} `;
+    let unit3 = `${unitText.qty_3 ?? ""} ${unitText.unit_3 ?? ""} `;
+    let unit4 = `${unitText.qty_4 ?? ""} ${unitText.unit_4 ?? ""} `;
+    let unit5 = `${unitText.qty_5 ?? ""} ${unitText.unit_5 ?? ""} `;
+
+    let descUnit = unit1 + unit2 + unit3 + unit4 + unit5;
+    setDescUnit(descUnit);
+  };
+
+  const onFinishFailed = () => {
+    const error = form.getFieldsError();
+    error.forEach((value) => {
+      if (value.errors.length !== 0) {
+        let errorMsg = value.errors[0];
+        notification["error"]({
+          message: "Field Masih Kosong",
+          description: errorMsg,
+        });
+      }
+    });
   };
 
   return (
@@ -254,6 +337,7 @@ const Tambah = ({ props }) => {
               initialValues={{
                 remember: true,
               }}
+              onFinishFailed={onFinishFailed}
               onFinish={onFinish}
               onValuesChange={handleValueChange}
             >
@@ -268,7 +352,10 @@ const Tambah = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input style={{ height: "40px" }} placeholder="Nama Produk" />
+                    <Input
+                      style={{ height: "40px" }}
+                      placeholder="Nama Produk"
+                    />
                   </Form.Item>
                   <Categories
                     selectedCategory={category}
@@ -277,15 +364,45 @@ const Tambah = ({ props }) => {
                     setSelectedSubCategory={setSelectedSubCategory}
                     selectedSubCategory={selectedSubCategory}
                   />
-                  <SubCategories subCategories={subCategories} onSelect={setSelectedSubCategory} selectedSubCategory={selectedSubCategory} />
+                  <SubCategories
+                    subCategories={subCategories}
+                    onSelect={setSelectedSubCategory}
+                    selectedSubCategory={selectedSubCategory}
+                  />
                   <Form.Item name="description">
                     <TextArea rows={4} placeholder="Deskripsi" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
-                  <Manufactures data={manufactures.data} onSelect={setSelectedManufactures} />
-                  <Groups data={groups} onSelect={setSelectedGroup} />
-                  <Locations data={locations} onSelect={setSelectLocation} />
+                  <Form.Item
+                    name="SKU"
+                    hasFeedback
+                    validateStatus={statusSKU.status}
+                    help={statusSKU.message}
+                    rules={[
+                      {
+                        required: true,
+                        message: "SKU tidak boleh kosong!",
+                      },
+                    ]}
+                  >
+                    <Input style={{ height: "40px" }} placeholder="SKU" />
+                  </Form.Item>
+                  <Manufactures
+                    data={manufactures.data}
+                    selectedManufactures={selectedManufactures}
+                    onSelect={setSelectedManufactures}
+                  />
+                  <Groups
+                    data={groups}
+                    selectedGroups={selectedGroups}
+                    onSelect={setSelectedGroup}
+                  />
+                  <Locations
+                    data={locations}
+                    onSelect={setSelectLocation}
+                    required={true}
+                  />
                 </div>
 
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
@@ -295,11 +412,19 @@ const Tambah = ({ props }) => {
                         <p className="ant-upload-drag-icon">
                           <FileImageOutlined />
                         </p>
-                        <p className="ant-upload-text">Klik atau tarik gambar ke kotak ini</p>
-                        <p className="ant-upload-hint  m-3">Gambar akan digunakan sebagai contoh tampilan produk</p>
+                        <p className="ant-upload-text">
+                          Klik atau tarik gambar ke kotak ini
+                        </p>
+                        <p className="ant-upload-hint  m-3">
+                          Gambar akan digunakan sebagai contoh tampilan produk
+                        </p>
                       </>
                     ) : (
-                      <Image layout="fill" loader={imageLoader} src={process.env.BASE_URL + image?.url} />
+                      <Image
+                        layout="fill"
+                        loader={imageLoader}
+                        src={process.env.NEXT_PUBLIC_URL + image?.url}
+                      />
                     )}
                   </Dragger>
                 </div>
@@ -308,7 +433,11 @@ const Tambah = ({ props }) => {
               <div>
                 <h6 className="">HARGA</h6>
               </div>
-              <UnitTable />
+              <UnitTable
+                getDescUnit={getDescriptionUnit}
+                descUnit={descUnit}
+                form={form}
+              />
 
               <Form.Item className="mt-5">
                 {loading ? (
@@ -316,9 +445,20 @@ const Tambah = ({ props }) => {
                     <Spin />
                   </div>
                 ) : (
-                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
-                    Simpan
-                  </Button>
+                  <>
+                    <ConfirmDialog
+                      onConfirm={() => submitBtn?.current?.click()}
+                      onCancel={() => {}}
+                      title="Tambah Produk"
+                      message="Apakah anda yakin ingin menambahkan produk ini?"
+                      component={
+                        <Button className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
+                          Simpan
+                        </Button>
+                      }
+                    />
+                    <Button htmlType="submit" ref={submitBtn}></Button>
+                  </>
                 )}
               </Form.Item>
             </Form>

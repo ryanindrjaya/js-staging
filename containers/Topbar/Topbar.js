@@ -10,6 +10,7 @@ import TopbarAddtoCart from "./TopbarAddToCart";
 import TopbarWrapper from "./Topbar.styles";
 import { TopbarMenuIcon } from "@iso/config/icon.config";
 import TagWrapper from "../UIElements/Tag/Tag.styles";
+import nookies from 'nookies'
 
 import Tags from "@iso/components/uielements/tag";
 
@@ -26,6 +27,8 @@ class Topbar extends Component {
   render() {
     const { toggleCollapsed, url, customizedTheme, locale } = this.props;
     const collapsed = this.props.collapsed && !this.props.openDrawer;
+    const cookies = nookies.get(null);
+    const role = cookies?.role || 'guest';
     const styling = {
       background: customizedTheme.backgroundColor,
       position: "fixed",
@@ -34,17 +37,10 @@ class Topbar extends Component {
     };
     return (
       <TopbarWrapper>
-        <Header
-          style={styling}
-          className={
-            collapsed ? "isomorphicTopbar collapsed" : "isomorphicTopbar"
-          }
-        >
+        <Header style={styling} className={collapsed ? "isomorphicTopbar collapsed" : "isomorphicTopbar"}>
           <div className="isoLeft">
             <button
-              className={
-                collapsed ? "triggerBtn menuCollapsed" : "triggerBtn menuOpen"
-              }
+              className={collapsed ? "triggerBtn menuCollapsed" : "triggerBtn menuOpen"}
               style={{ color: customizedTheme.textColor }}
               onClick={toggleCollapsed}
             >
@@ -54,13 +50,10 @@ class Topbar extends Component {
 
           <ul className="isoRight">
             <li>
-              <Tag color={process.env.MAIN_COLOR}>DEV 0.1</Tag>
+              <Tag color={process.env.MAIN_COLOR}>{role}</Tag>
             </li>
 
-            <li
-              onClick={() => this.setState({ selectedItem: "user" })}
-              className="isoUser"
-            >
+            <li onClick={() => this.setState({ selectedItem: "user" })} className="isoUser">
               <TopbarUser locale={locale} />
             </li>
           </ul>

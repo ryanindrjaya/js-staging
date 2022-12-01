@@ -14,7 +14,7 @@ export default function LogoNext({ collapsed }) {
             <Link href="/dashboard">
               <a>
                 <center>
-                  <IoIosFlash className="mt-3" size={27} />
+                  <IoIosFlash className="mt-3 text-black" size={27} />
                 </center>
               </a>
             </Link>

@@ -42,6 +42,7 @@
 		"leaflet.markercluster": "^1.4.1",
 		"lottie-react": "^2.3.1",
 		"lru-cache": "^6.0.0",
+		"moment": "^2.29.4",
 		"next": "^11.1.2",
 		"next-compose-plugins": "^2.2.0",
 		"next-cookies": "^2.0.3",
@@ -107,7 +108,9 @@
 		"table": "^6.8.0",
 		"tailwindcss": "^3.1.8",
 		"uppy": "^1.21.0",
-		"uuid": "^8.3.0"
+		"uuid": "^8.3.0",
+		"write-excel-file": "^1.4.15",
+		"xlsx": "^0.18.5"
 	},
 	"scripts": {
 		"dev": "next -p 3003",

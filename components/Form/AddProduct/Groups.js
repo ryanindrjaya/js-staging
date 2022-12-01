@@ -1,20 +1,91 @@
 import { Form, Select } from "antd";
+import nookies from "nookies";
+import { useState } from "react";
 
-export default function Groups({ data, onSelect, initialValue }) {
+export default function Groups({ onSelect, selectedGroups, initialValue }) {
+  const [groups, setSelectedGroups] = useState(selectedGroups);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const cookies = nookies.get(null, "token");
+
+  const options = data?.map((d) => (
+    <Select.Option key={d.value}>{d.label}</Select.Option>
+  ));
+
+  const handleSearchGroups = (newValue) => {
+    if (newValue) {
+      fetchGroups(newValue, setData);
+    } else {
+      setData([]);
+    }
+  };
+
+  const handleChangeGroups = (newValue) => {
+    setSelectedGroups(newValue);
+    onSelect(newValue);
+  };
+
+  const fetchGroups = async (query, callback) => {
+    if (!query) {
+      callback([]);
+    } else {
+      setLoading(true);
+      try {
+        const endpoint =
+          process.env.NEXT_PUBLIC_URL +
+          `/groups?filters[$or][0][name][$containsi]=${query}&filters[$or][1][code][$containsi]=${query}`;
+        const options = {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+        };
+
+        const req = await fetch(endpoint, options);
+        const res = await req.json();
+
+        if (req.status == 200) {
+          const manufactureResult = res.data.map((manufacture) => ({
+            label: `${manufacture.attributes.name}`,
+            value: manufacture.id,
+          }));
+
+          callback(manufactureResult);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    setLoading(false);
+  };
 
   return (
     <div className="w-full md:w-full mb-2 md:mb-0">
-      <Form.Item name="groups" className="w-1/1" initialValue={initialValue}>
+      <Form.Item
+        name="groups"
+        className="w-1/1"
+        initialValue={initialValue?.attributes.name}
+      >
         <Select
           size="large"
+          value={groups ?? initialValue?.attributes.name}
+          defaultValue={
+            initialValue && {
+              value: initialValue?.id,
+              label: initialValue?.attributes?.name,
+            }
+          }
+          showSearch
+          showArrow={false}
+          filterOption={false}
+          defaultActiveFirstOption={false}
+          loading={loading}
           placeholder="Golongan"
-          onChange={onSelect}
+          onChange={handleChangeGroups}
+          onSearch={handleSearchGroups}
         >
-          {data.data.map((data) => (
-            <Select.Option key={data.id} value={data.id}>
-              {data.attributes.name}
-            </Select.Option>
-          ))}
+          {options}
         </Select>
       </Form.Item>
     </div>
