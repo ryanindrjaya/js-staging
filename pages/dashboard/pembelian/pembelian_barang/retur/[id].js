@@ -11,8 +11,8 @@ import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import { useSelector, useDispatch } from "react-redux";
 import calculatePrice from "../../utility/calculatePrice";
 import LPBTable from "@iso/components/ReactDataTable/Purchases/LPBTable";
-import createDetailReturFunc from "../../utility/CreateReturDetail";
-import createReturLPBFunc from "../../utility/CreateReturLPB";
+import createDetailReturFunc from "../../utility/createReturDetail";
+import createReturLPBFunc from "../../utility/createReturLPB";
 import { useRouter } from "next/router";
 import moment from "moment";
 
