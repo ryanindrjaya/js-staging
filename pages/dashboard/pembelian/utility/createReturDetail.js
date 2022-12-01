@@ -17,7 +17,7 @@ const getUnitPrice = (data, unit) => {
   return selectedUnit;
 };
 
-const createDetailOrder = (
+const createReturDetail = (
   products,
   productTotalPrice,
   productSubTotal,
@@ -26,11 +26,9 @@ const createDetailOrder = (
   value
 ) => {
   products.productList.forEach((element) => {
-    console.log(products);
-    console.log(products.productInfo);
     console.log("productTotalPrice", productTotalPrice);
     console.log("productSubTotal", productSubTotal);
-
+    //console.log("nilai :", products.productInfo); console.log("nilai value :", value);
     // default value
     tempListId = [];
     const id = element.id;
@@ -46,10 +44,11 @@ const createDetailOrder = (
     var unitPriceAfterDisc =
       productTotalPrice?.[id] ?? element.attributes.buy_price_1;
     var subTotal = unitPriceAfterDisc * qty;
+    var batch = value.batch?.[id];
+    var expired_date = value.expired_date?.[id];
+    var location = value.product_location?.[id];
 
-    //console.log("detail nich :",qty, disc, unit, unitPrice, unitPriceAfterDisc, subTotal);
-
-    POSTPurchaseDetail(
+    POSTReturDetail(
       qty,
       disc,
       unit,
@@ -59,12 +58,15 @@ const createDetailOrder = (
       id,
       setListId,
       products,
+      batch,
+      expired_date,
+      location,
       url
     );
   });
 };
 
-const POSTPurchaseDetail = async (
+const POSTReturDetail = async (
   qty,
   disc,
   unit,
@@ -74,17 +76,22 @@ const POSTPurchaseDetail = async (
   id,
   setListId,
   products,
+  batch,
+  expired_date,
+  location,
   url
 ) => {
   var data = {
     data: {
-      total_order: String(qty),
-      unit_order: unit,
-      unit_price: parseInt(unitPrice),
-      unit_price_after_disc: parseInt(unitPriceAfterDisc),
+      qty: String(qty),
+      unit: unit,
+      //harga_satuan: parseInt(unitPrice),
+      harga_satuan: unitPrice,
       sub_total: parseInt(subTotal),
       products: { id: id },
-      disc: parseInt(disc),
+      batch: batch,
+      expired_date: expired_date,
+      location: location,
     },
   };
 
@@ -102,7 +109,7 @@ const POSTPurchaseDetail = async (
   const req = await fetch(endpoint, options);
   const res = await req.json();
 
-  if (req.status === 200) {
+  if (req.status === 200) { 
     tempListId.push(res.data?.id);
     if (tempListId.length === products.productList.length) {
       setListId(tempListId);
@@ -110,4 +117,4 @@ const POSTPurchaseDetail = async (
   }
 };
 
-export default createDetailOrder;
+export default createReturDetail;

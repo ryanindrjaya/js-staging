@@ -140,7 +140,7 @@ function Tambah({ props }) {
 
   const createDetailOrder = async () => {
     console.log("info total", productTotalPrice, productSubTotal);
-    createDetailOrderFunc(products, productTotalPrice, productSubTotal, setListId, "/purchase-details");
+    createDetailOrderFunc(products, productTotalPrice, productSubTotal, setListId, "/purchase-details", dataValues);
   };
 
   const createOrder = async (values) => {

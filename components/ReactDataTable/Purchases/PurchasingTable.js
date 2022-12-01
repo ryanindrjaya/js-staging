@@ -1,6 +1,6 @@
 import DataTable from "react-data-table-component";
 import AlertDialog from "../../Alert/AlertCancel";
-import { Popover, Select, Row, Tag } from "antd";
+import { Popover, Select, Row, Tag, notification } from "antd";
 import {
   EditOutlined,
   PrinterOutlined,
@@ -24,6 +24,13 @@ export default function ReactDataTable({
   const tagGreen = process.env.TAG_GREEN;
   const tagOrange = process.env.TAG_ORANGE;
 
+  const openNotificationWithIcon = (type, title, message) => {
+    notification[type]({
+        message: title,
+        description: message,
+    });
+  };
+
   const print = (row) => {
     router.push("pembelian_barang/print/" + row.id);
     // router.push('/dashboard')
@@ -37,8 +44,17 @@ export default function ReactDataTable({
     router.push("pembelian_barang/pembayaran/" + row.id);
   };
 
-  const retur = (row) => {
-    router.push("retur/"+row.id);
+  const retur = (row) => { //console.log(row.attributes.status)
+    if (row.attributes.status != "Diretur") { 
+        router.push("pembelian_barang/retur/" + row.id);
+    } else {
+        openNotificationWithIcon(
+            "error",
+            "Maaf tidak bisa diretur",
+            "Karena status lembar pembelian barang sudah diretur."
+        );
+    }
+    //router.push("pembelian_barang/retur/" + row.id);
   };
 
   const onConfirm = (id, row) => {
@@ -50,9 +66,9 @@ export default function ReactDataTable({
     console.log("onCancel");
   };
 
-  const onEdit = (id) => {
-    onUpdate(id);
-  };
+  //const onEdit = (id) => {
+  //  onUpdate(id);
+  //};
 
   function formatMyDate(value, locale = "id-ID") {
     return new Date(value).toLocaleDateString(locale);
@@ -85,17 +101,17 @@ export default function ReactDataTable({
         </button>
       </div>
 
-      {row.attributes.status === "Diterima" ? (
-        <div></div>
-      ) : (
-        <button
-          onClick={() => onEdit(row.id)}
-          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-        >
-          <EditOutlined className="mr-2 mt-0.5 float float-left" />
-          Edit
-        </button>
-      )}
+      {/*{row.attributes.status === "Diproses" ? (*/}
+      {/*  <div></div>*/}
+      {/*) : (*/}
+      {/*  <button*/}
+      {/*    onClick={() => onEdit(row.id)}*/}
+      {/*    className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "*/}
+      {/*  >*/}
+      {/*    <EditOutlined className="mr-2 mt-0.5 float float-left" />*/}
+      {/*    Edit*/}
+      {/*  </button>*/}
+      {/*)}*/}
 
       <AlertDialog
         onCancel={onCancel}
@@ -114,13 +130,14 @@ export default function ReactDataTable({
           Pembayaran
         </button>
       </div>
+
       <div>
         <button
-          onClick={() => retur(row)}
-          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+            onClick={() => retur(row)}
+            className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
         >
-          <IoIosSwap className="mr-2 mt-0.5 float float-left" />
-          Retur Pembelian
+            <IoIosSwap className="mr-2 mt-0.5 float float-left" />
+            Retur Pembelian
         </button>
       </div>
     </div>
@@ -173,7 +190,8 @@ export default function ReactDataTable({
               bordered={false}
               disabled={
                 row.attributes.status === "Selesai" ||
-                row.attributes.status === "Dibatalkan"
+                row.attributes.status === "Dibatalkan" 
+                //row.attributes.status === "Diretur"
               }
               onChange={(e) => onChangeStatus(e, row)}
               style={{
@@ -189,6 +207,9 @@ export default function ReactDataTable({
                 className="text-black"
               >
                 <Tag color="error">Dibatalkan</Tag>
+              </Option>
+              <Option value="Diretur" key="Diretur" className="text-black">
+                <Tag color="blue">Diretur</Tag>
               </Option>
               <Option value="Selesai" key="Selesai" className="text-black">
                 <Tag color="success">Selesai</Tag>

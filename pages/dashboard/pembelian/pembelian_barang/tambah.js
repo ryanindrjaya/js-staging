@@ -153,7 +153,7 @@ function Tambah({ props }) {
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
   });
 
   const onFinish = async (values) => {
@@ -277,7 +277,7 @@ function Tambah({ props }) {
 
     purchase_details.forEach((element) => {
       var indexUnit = 1;
-      var unitOrder = element.attributes.unit_order;
+      var unitOrder = element.attributes.unit_order; console.log("product :"); console.log(element.attributes.products)
       var productUnit = element.attributes.products.data[0].attributes;
 
       for (let index = 1; index < 6; index++) {
@@ -318,7 +318,9 @@ function Tambah({ props }) {
         d3: element.attributes.products.data[0].attributes.unit_1_dp3,
       });
     });
-
+      //console.log("initial product"); console.log(products); console.log(productTotalPrice);
+      //console.log(setTotalPrice); console.log(setProductTotalPrice); console.log(calculatePriceAfterDisc);
+      //console.log(productSubTotal); console.log(locations);
     setTimeout(() => {
       setIsFetchingData(false);
     }, 3000);
@@ -785,7 +787,7 @@ function Tambah({ props }) {
               </div>
               <div>
                 <p className="font-bold flex justify-end">
-                  Total Biaya : {grandTotal === 0 ? formatter.format(totalPrice) : formatter.format(grandTotal)}
+                  Total Harga : {grandTotal === 0 ? formatter.format(totalPrice) : formatter.format(grandTotal)}
                 </p>
               </div>
               <Form.Item name="additional_note">

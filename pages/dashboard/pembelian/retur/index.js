@@ -4,9 +4,9 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import { useRouter } from "next/router";
-import { Input, notification } from "antd";
+import { Input, notification, Select, DatePicker } from "antd";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
-import PurchasingTable from "../../../../components/ReactDataTable/Purchases/PurchasingTable";
+import PurchasesReturTable from "../../../../components/ReactDataTable/Purchases/PurchasesReturTable";
 import nookies from "nookies";
 
 Retur.getInitialProps = async (context) => {
@@ -24,7 +24,7 @@ Retur.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -40,10 +40,7 @@ const fetchData = async (cookies) => {
 
 function Retur({ props }) {
   const data = props.data;
-  const [purchase, setPurchase] = useState(data);
-  const [isSearching, setIsSearching] = useState(false);
-
-  const { Search } = Input;
+  const [retur, setRetur] = useState(data);
   const router = useRouter();
 
   const handleAdd = () => {
@@ -59,10 +56,35 @@ function Retur({ props }) {
     );
   };
 
+  const handleDelete = async (id) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/returs/" + id;
+    const cookies = nookies.get(null, "token");
+
+    const options = {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+    if (res) {
+      const res = await fetchData(cookies);
+      openNotificationWithIcon(
+        "success",
+        "Berhasil menghapus data",
+        "Order Pembelian yang dipilih telah berhasil dihapus. Silahkan cek kembali Order Pembelian"
+      );
+      setRetur(res);
+    }
+  };
+
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
     const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/purchases?pagination[page]=" + page;
+      process.env.NEXT_PUBLIC_URL + "/returs?pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -76,7 +98,7 @@ function Retur({ props }) {
       const req = await fetch(endpoint, options);
       const res = await req.json();
       if (res) {
-        setPurchase((prevData) => ({
+        setRetur((prevData) => ({
           data: filterDuplicateData(prevData.data.concat(res.data)),
           meta: prevData.meta,
         }));
@@ -86,39 +108,6 @@ function Retur({ props }) {
     } catch (error) {
       console.log(error);
     }
-  };
-
-  const onSearch = async (e) => {
-    // if (e.target.value.length >= 2) {
-    //   setIsSearching(true);
-    //   const req = await searchQuery(e.target.value);
-    //   const res = await req.json();
-    //   setPurchase(res);
-    //   setIsSearching(false);
-    // } else {
-    //   setPurchase(data);
-    //   setIsSearching(false);
-    // }
-  };
-
-  const searchQuery = async (keywords) => {
-    // const endpoint =
-    //   process.env.NEXT_PUBLIC_URL +
-    //   "/purchases?filters[$or][0][added_by][$contains]=" +
-    //   keywords +
-    //   "&filters[$or][1][no_po][$contains]=" +
-    //   keywords +
-    //   "&populate=*";
-    // const cookies = nookies.get(null, "token");
-    // const options = {
-    //   method: "GET",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     Authorization: "Bearer " + cookies.token,
-    //   },
-    // };
-    // const req = await fetch(endpoint, options);
-    // return req;
   };
 
   const handleCancel = async (id, row) => {
@@ -146,19 +135,116 @@ function Retur({ props }) {
         <LayoutWrapper style={{}}>
           <TitlePage titleText={"Daftar Retur Pembelian"} />
           <LayoutContent>
-            <div>
-              <button
-                onClick={handleAdd}
-                type="button"
-                className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
-              >
-                <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    + Tambah
-                  </a>
-                </div>
-              </button>
+            <div className="w-full flex justify-start">
+              <div className="w-full md:w-1/4 px-3"> 
+                <Select
+                  placeholder="Pilih Supplier"
+                  size="large"
+                  style={{
+                    width: "100%",
+                    marginRight: "10px",
+                  }}
+                >
+                {/*{locations.map((element) => {*/}
+                {/*  return (*/}
+                    <Select.Option>
+                      data
+                    </Select.Option>
+                {/*  );*/}
+                {/*})}*/}
+                </Select>
+              </div>
+              <div className="w-full md:w-1/4 px-3"> 
+                <Select
+                  placeholder="Lokasi Gudang"
+                  size="large"
+                  style={{
+                    width: "100%",
+                    marginRight: "10px",
+                  }}
+                >
+                {/*{locations.map((element) => {*/}
+                {/*  return (*/}
+                    <Select.Option>
+                      data
+                    </Select.Option>
+                {/*  );*/}
+                {/*})}*/}
+                </Select>
+              </div>
+              <div className="w-full md:w-1/4 px-3">                
+                <DatePicker placeholder="Tanggal Retur" size="large" style={{ width: "100%" }} />
+              </div>
             </div>
+            <div  className="w-full flex justify-between">
+              <div class="mt-4 text-black text-md font-bold ml-1">Daftar Retur</div>
+                <button
+                    onClick={handleAdd}
+                    type="button"
+                    className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+                >
+                    <div className="text-white text-center text-sm font-bold">
+                      <a className="text-white no-underline text-xs sm:text-xs">
+                        + Tambah Retur
+                      </a>
+                    </div>
+                </button>
+            </div>
+            <div  className="w-full flex justify-between">
+                <button
+                    onClick={handleUpdate}
+                    type="button"
+                    className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+                >
+                    <div className="text-white text-center text-sm font-bold">
+                      <a className="text-white no-underline text-xs sm:text-xs">
+                        Print PDF
+                      </a>
+                    </div>
+                </button>
+                <button
+                    onClick={handleUpdate}
+                    type="button"
+                    className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+                >
+                    <div className="text-white text-center text-sm font-bold">
+                      <a className="text-white no-underline text-xs sm:text-xs">
+                        Print CSV
+                      </a>
+                    </div>
+                </button>
+                <button
+                    onClick={handleUpdate}
+                    type="button"
+                    className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+                >
+                    <div className="text-white text-center text-sm font-bold">
+                      <a className="text-white no-underline text-xs sm:text-xs">
+                        Print XLS
+                      </a>
+                    </div>
+                </button>
+                <button
+                    onClick={handleUpdate}
+                    type="button"
+                    className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+                >
+                    <div className="text-white text-center text-sm font-bold">
+                      <a className="text-white no-underline text-xs sm:text-xs">
+                        Kolom Tampak
+                      </a>
+                    </div>
+                </button>
+            </div>
+
+            <PurchasesReturTable
+              data={retur}
+              onUpdate={handleUpdate}
+              onDelete={handleDelete}
+              onPageChange={handlePageChange}
+              onChangeStatus={onChangeStatus}
+            />
+
           </LayoutContent>
         </LayoutWrapper>
       </DashboardLayout>
