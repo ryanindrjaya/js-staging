@@ -3,7 +3,7 @@ import Link from "next/link";
 import siteConfig from "@iso/config/site.config";
 import { IoIosFlash } from "react-icons/io";
 import Image from "next/image";
-import logo from "../../public/images/logo.jpeg";
+import logo from "../../public/images/logo.png";
 
 export default function LogoNext({ collapsed }) {
   return (
@@ -28,9 +28,9 @@ export default function LogoNext({ collapsed }) {
             width="70px"
             height="70px"
           />
-          {/* <Link href="/dashboard">
-            <a className="text-black">JAYA SEHAT</a>
-          </Link> */}
+          {/*<Link href="/dashboard">*/}
+          {/*  <a  className="text-black"> JAYA SEHAT </a>*/}
+          {/*</Link>*/}
         </h3>
       )}
     </div>
