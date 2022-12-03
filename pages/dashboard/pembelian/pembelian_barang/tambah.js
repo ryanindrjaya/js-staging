@@ -557,23 +557,31 @@ function Tambah({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 mt-5 md:mb-0">
                   <Form.Item name="no_po">
                     <Select
-                      placeholder="Pilih Nomor PO"
-                      size="large"
-                      onChange={(e) => fetchPOdata(e)}
-                      style={{
-                        width: "100%",
-                      }}
+                        placeholder="Pilih Nomor PO"
+                        size="large"
+                        onChange={(e) => fetchPOdata(e)}
+                        style={{
+                            width: "100%",
+                        }}
                     >
-                      {deliveredOrder.map((element) => {
-                        return (
-                          <Select.Option value={element.id} key={element.id}>
-                            {element.attributes.no_po}
-                          </Select.Option>
-                        );
-                      })}
+
+                        {deliveredOrder.map((element) => {
+                            if (supplier != undefined) {
+                                if (supplier.id == element.attributes.supplier.data.id) {
+                                console.log("delivered",supplier.id, element.attributes.supplier.data.id)
+                                return (
+                                    <Select.Option value={element.id} key={element.id}>
+                                        {element.attributes.no_po}
+                                    </Select.Option>
+                                );
+                                }
+                            }
+                        })}
+
                     </Select>
                   </Form.Item>
                 </div>
+
                 <div className="w-full md:w-1/4 px-3 mb-2 mt-5 md:mb-0">
                   <Form.Item name="no_nota_suppplier">
                     <Input placeholder="No. Nota Supplier" size="large" />
@@ -607,6 +615,7 @@ function Tambah({ props }) {
                       calculatePriceAfterDisc={calculatePriceAfterDisc}
                       productSubTotal={productSubTotal}
                       locations={locations}
+                      formObj={form}
                     />
                   </div>
                 )}
