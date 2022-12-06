@@ -181,7 +181,7 @@ function Retur({ props }) {
                 <button
                     onClick={handleAdd}
                     type="button"
-                    className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+                    className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-4"
                 >
                     <div className="text-white text-center text-sm font-bold">
                       <a className="text-white no-underline text-xs sm:text-xs">
@@ -194,7 +194,7 @@ function Retur({ props }) {
                 <button
                     onClick={handleUpdate}
                     type="button"
-                    className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+                    className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-2"
                 >
                     <div className="text-white text-center text-sm font-bold">
                       <a className="text-white no-underline text-xs sm:text-xs">
@@ -205,7 +205,7 @@ function Retur({ props }) {
                 <button
                     onClick={handleUpdate}
                     type="button"
-                    className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+                    className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-2"
                 >
                     <div className="text-white text-center text-sm font-bold">
                       <a className="text-white no-underline text-xs sm:text-xs">
@@ -216,7 +216,7 @@ function Retur({ props }) {
                 <button
                     onClick={handleUpdate}
                     type="button"
-                    className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+                    className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-2"
                 >
                     <div className="text-white text-center text-sm font-bold">
                       <a className="text-white no-underline text-xs sm:text-xs">
@@ -227,7 +227,7 @@ function Retur({ props }) {
                 <button
                     onClick={handleUpdate}
                     type="button"
-                    className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+                    className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-2"
                 >
                     <div className="text-white text-center text-sm font-bold">
                       <a className="text-white no-underline text-xs sm:text-xs">
