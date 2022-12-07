@@ -439,6 +439,22 @@ Tambah.getInitialProps = async (context) => {
   const reqSubCategories = await fetchDataSubCategories(cookies);
   const subCategories = await reqSubCategories.json();
 
+  if (
+    reqCategories.status !== 200 ||
+    reqGroups.status !== 200 ||
+    reqLocations.status !== 200 ||
+    reqManufactures.status !== 200 ||
+    reqSubCategories.status !== 200
+  ) {
+    context.res.writeHead(302, {
+      Location: "/signin?session=false",
+      "Content-Type": "text/html; charset=utf-8",
+    });
+    context.res.end();
+
+    return {};
+  }
+
   return {
     props: {
       categories,

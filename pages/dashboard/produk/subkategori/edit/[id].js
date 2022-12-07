@@ -226,7 +226,7 @@ Edit.getInitialProps = async (context) => {
       Location: "/signin?session=false",
       "Content-Type": "text/html; charset=utf-8",
     });
-    ctx.res.end();
+    context.res.end();
 
     return {};
   }

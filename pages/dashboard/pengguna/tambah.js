@@ -237,6 +237,16 @@ Tambah.getInitialProps = async (context) => {
   const reqLocations = await fetchData(cookies, "/locations");
   const resLocations = await reqLocations.json();
 
+  if (req.status !== 200) {
+    context.res.writeHead(302, {
+      Location: "/signin?session=false",
+      "Content-Type": "text/html; charset=utf-8",
+    });
+    context.res.end();
+
+    return {};
+  }
+
   return {
     props: {
       data,
