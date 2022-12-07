@@ -119,6 +119,10 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
     },
   ];
 
+  const setFocusHarga = (e) => {
+    e.target.setSelectionRange(0, 0);
+  };
+
   const columns = [
     {
       name: "Unit",
@@ -161,6 +165,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
       selector: (row) => (
         <Form.Item className="mt-4" name={`buy_price_${row.idx}`} initialValue={buyPrice[row.idx - 1]}>
           <InputNumber
+            onFocus={setFocusHarga}
             formatter={formatterNumber}
             parser={parserNumber}
             style={{
@@ -180,6 +185,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
       selector: (row) => (
         <Form.Item className="mt-4" name={`purchase_discount_${[row.idx]}`} initialValue={purchaseDiscount[row.idx - 1] ?? 0}>
           <InputNumber
+            onFocus={setFocusHarga}
             formatter={formatterNumber}
             parser={parserNumber}
             style={{
@@ -266,6 +272,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
       selector: (row) => (
         <Form.Item className="mt-4" name={`pricelist_${row.idx}`} initialValue={pricelist[row.idx - 1]}>
           <InputNumber
+            onFocus={setFocusHarga}
             formatter={formatterNumber}
             parser={parserNumber}
             style={{
@@ -285,6 +292,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
       selector: (row) => (
         <Form.Item className="mt-4" name={`sold_price_${row.idx}`} initialValue={soldPrice[row.idx - 1]}>
           <InputNumber
+            onFocus={setFocusHarga}
             formatter={formatterNumber}
             parser={parserNumber}
             style={{
