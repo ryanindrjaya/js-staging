@@ -221,6 +221,16 @@ Edit.getInitialProps = async (context) => {
   const resCategory = await fetchCategory(cookies);
   const categories = await resCategory.json();
 
+  if (res.status !== 200) {
+    context.res.writeHead(302, {
+      Location: "/signin?session=false",
+      "Content-Type": "text/html; charset=utf-8",
+    });
+    ctx.res.end();
+
+    return {};
+  }
+
   return {
     props: {
       subCategory,

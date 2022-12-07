@@ -377,6 +377,16 @@ Product.getInitialProps = async (context) => {
   const req = await fetchData(cookies);
   data = await req.json();
 
+  if (req.status !== 200) {
+    context.res.writeHead(302, {
+      Location: "/signin?session=false",
+      "Content-Type": "text/html; charset=utf-8",
+    });
+    ctx.res.end();
+
+    return {};
+  }
+
   const manufactures = await fetchSearchParametersData(cookies, "manufactures");
   const categories = await fetchSearchParametersData(cookies, "categories");
   const locations = await fetchSearchParametersData(cookies, "locations");
@@ -392,11 +402,11 @@ Product.getInitialProps = async (context) => {
 };
 
 const formatData = (data) => {
-  const formattedData = data.map((item) => {
+  const formattedData = data?.map((item) => {
     return {
-      name: `${item.attributes.name}`,
-      value: item.id,
-      id: item.id,
+      name: `${item?.attributes?.name}`,
+      value: item?.id,
+      id: item?.id,
     };
   });
 
@@ -430,7 +440,7 @@ const fetchSearchParametersData = async (cookies, url) => {
   const req = await fetch(endpoint, options);
   const res = await req.json();
 
-  return formatData(res.data) || [];
+  return formatData(res?.data || []) || [];
 };
 
 export default Product;

@@ -25,6 +25,16 @@ History.getInitialProps = async (context) => {
   const reqHistory = await fetchHistory(cookies, productId, locationId);
   const history = await reqHistory.json();
 
+  if (reqInventory.status !== 200 || reqProduct.status !== 200 || reqHistory.status !== 200) {
+    context.res.writeHead(302, {
+      Location: "/signin?session=false",
+      "Content-Type": "text/html; charset=utf-8",
+    });
+    ctx.res.end();
+
+    return {};
+  }
+
   return {
     props: { inventory, product, history },
   };

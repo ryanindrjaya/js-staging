@@ -8,6 +8,7 @@ import authActions from "../authentication/actions";
 import SignInStyleWrapper from "../styled/SignIn.styles";
 import { Spin, Alert } from "antd";
 import nookies from "nookies";
+import Head from "next/head";
 
 const { login } = authActions;
 
@@ -113,42 +114,47 @@ export default function SignInPage(props) {
   // =========================== UI ===========================
 
   return (
-    <SignInStyleWrapper className="isoSignInPage">
-      <div className="isoLoginContentWrapper">
-        <div className="isoLoginContent">
-          <div className="isoLogoWrapper">JAYA SEHAT</div>
+    <>
+      <Head>
+        <title>Login</title>
+      </Head>
+      <SignInStyleWrapper className="isoSignInPage">
+        <div className="isoLoginContentWrapper">
+          <div className="isoLoginContent">
+            <div className="isoLogoWrapper">JAYA SEHAT</div>
 
-          <div className="isoSignInForm">
-            <div className="isoInputWrapper">
-              <Input onChange={setValue} name="username" id="inputUserName" size="large" placeholder="Username" />
-            </div>
+            <div className="isoSignInForm">
+              <div className="isoInputWrapper">
+                <Input onChange={setValue} name="username" id="inputUserName" size="large" placeholder="Username" />
+              </div>
 
-            <div className="isoInputWrapper">
-              <Input onChange={setValue} id="inpuPassword" size="large" name="password" type="password" placeholder="Password" />
-            </div>
+              <div className="isoInputWrapper">
+                <Input onChange={setValue} id="inpuPassword" size="large" name="password" type="password" placeholder="Password" />
+              </div>
 
-            <div className="isoInputWrapper isoLeftRightComponent">
-              {loading ? (
-                <div className="center">
-                  <Spin />
-                </div>
+              <div className="isoInputWrapper isoLeftRightComponent">
+                {loading ? (
+                  <div className="center">
+                    <Spin />
+                  </div>
+                ) : (
+                  <div className="flex flex-col">
+                    {isExpired !== true ? <p className="text-sm text-red-500">Sesi anda telah berakhir, harap login kembali</p> : ""}
+                    <Button block type="primary" onClick={handleLogin}>
+                      <IntlMessages id="page.signInButton" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+              {failedLogin ? (
+                <Alert message="Login Error" description="Username atau Password salah" type="error" closable onClose={onClose} />
               ) : (
-                <div className="flex flex-col">
-                  {isExpired !== true ? <p className="text-sm text-red-500">Sesi anda telah berakhir, harap login kembali</p> : ""}
-                  <Button block type="primary" onClick={handleLogin}>
-                    <IntlMessages id="page.signInButton" />
-                  </Button>
-                </div>
+                <div></div>
               )}
             </div>
-            {failedLogin ? (
-              <Alert message="Login Error" description="Username atau Password salah" type="error" closable onClose={onClose} />
-            ) : (
-              <div></div>
-            )}
           </div>
         </div>
-      </div>
-    </SignInStyleWrapper>
+      </SignInStyleWrapper>
+    </>
   );
 }
