@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
-import { Button, Form, Input, message, Upload, notification } from "antd";
+import { Button, Form, Input, message, Upload, notification, Image } from "antd";
 import nookies from "nookies";
 import { toast } from "react-toastify";
 import { Spin, Row } from "antd";
@@ -14,7 +14,6 @@ import SubCategories from "../../../components/Form/AddProduct/subCategories";
 import Groups from "../../../components/Form/AddProduct/Groups";
 import Locations from "../../../components/Form/AddProduct/Locations";
 import { useRouter } from "next/router";
-import Image from "next/image";
 import UnitTable from "../../../components/ReactDataTable/Product/UnitsTable";
 import { FileImageOutlined } from "@ant-design/icons";
 import setDiskonValue from "./utility/setDiskonValue";
@@ -385,7 +384,7 @@ const Tambah = ({ props }) => {
                         <p className="ant-upload-hint  m-3">Gambar akan digunakan sebagai contoh tampilan produk</p>
                       </>
                     ) : (
-                      <Image layout="fill" loader={imageLoader} src={image} />
+                      <Image style={{ width: "100%" }} preview={false} src={image} />
                     )}
                   </Dragger>
                 </div>

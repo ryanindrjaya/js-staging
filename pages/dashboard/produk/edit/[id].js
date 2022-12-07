@@ -2,12 +2,11 @@ import { useRef, useState } from "react";
 import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
-import { Button, Form, Input, message, Upload, notification } from "antd";
+import { Button, Form, Input, message, Upload, notification, Image } from "antd";
 import nookies from "nookies";
 import { toast } from "react-toastify";
 import { Spin, Row } from "antd";
 import { useRouter } from "next/router";
-import Image from "next/image";
 import { FileImageOutlined } from "@ant-design/icons";
 import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLayout";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
@@ -393,7 +392,7 @@ const Edit = ({ props }) => {
                         <p className="ant-upload-hint  m-3">Gambar akan digunakan sebagai contoh tampilan produk</p>
                       </>
                     ) : (
-                      <Image layout="fill" loader={imageLoader} src={image?.url ? BASE_API + image?.url : image} />
+                      <Image style={{ width: "100%" }} preview={false} src={image?.url ? BASE_API + image?.url : image} />
                     )}
                   </Dragger>
                 </div>
