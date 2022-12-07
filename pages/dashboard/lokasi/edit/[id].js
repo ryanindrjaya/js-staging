@@ -150,7 +150,7 @@ const Edit = ({ props }) => {
   );
 };
 
-export async function getServerSideProps(context) {
+Edit.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
@@ -165,20 +165,11 @@ export async function getServerSideProps(context) {
   const res = await fetch(endpoint, options);
   const locationData = await res.json();
 
-  if (res.status !== 200) {
-    return {
-      redirect: {
-        destination: "/signin?session=false",
-        permanent: false,
-      },
-    };
-  } else {
-    return {
-      props: {
-        locationData,
-      },
-    };
-  }
-}
+  return {
+    props: {
+      locationData,
+    },
+  };
+};
 
 export default Edit;

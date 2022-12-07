@@ -370,7 +370,7 @@ const Product = ({ props }) => {
   );
 };
 
-export async function getServerSideProps(context) {
+Product.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   let data;
 
@@ -381,35 +381,26 @@ export async function getServerSideProps(context) {
   const categories = await fetchSearchParametersData(cookies, "categories");
   const locations = await fetchSearchParametersData(cookies, "locations");
 
-  if (req.status !== 200 || !cookies.token) {
-    return {
-      redirect: {
-        destination: "/signin?session=false",
-        permanent: false,
-      },
-    };
-  } else {
-    return {
-      props: {
-        data,
-        manufactures,
-        categories,
-        locations,
-      },
-    };
-  }
-}
+  return {
+    props: {
+      data,
+      manufactures,
+      categories,
+      locations,
+    },
+  };
+};
 
 const formatData = (data) => {
-  const formattedData = data?.map((item) => {
+  const formattedData = data.map((item) => {
     return {
-      name: `${item?.attributes?.name}`,
-      value: item?.id,
-      id: item?.id,
+      name: `${item.attributes.name}`,
+      value: item.id,
+      id: item.id,
     };
   });
 
-  return formattedData || [];
+  return formattedData;
 };
 
 const fetchData = async (cookies) => {
@@ -439,7 +430,7 @@ const fetchSearchParametersData = async (cookies, url) => {
   const req = await fetch(endpoint, options);
   const res = await req.json();
 
-  return formatData(res?.data || []) || [];
+  return formatData(res.data) || [];
 };
 
 export default Product;

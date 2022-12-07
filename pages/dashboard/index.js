@@ -3,8 +3,6 @@ import Head from "next/head";
 import Maintenance from "../../components/Illustration/Maintenance";
 import DashboardLayout from "../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
-import nookies from "nookies";
-import { useDispatch } from "react-redux";
 
 const Dashboard = () => {
   return (
@@ -22,27 +20,10 @@ const Dashboard = () => {
             </center>
           </div>
         </LayoutWrapper>
+        z
       </DashboardLayout>
     </>
   );
 };
-
-export async function getServerSideProps(context) {
-  const cookies = nookies.get(context);
-  if (!cookies.token) {
-    return {
-      redirect: {
-        destination: "/signin?session=false",
-        permanent: false,
-      },
-    };
-  }
-
-  return {
-    props: {
-      cookies,
-    },
-  };
-}
 
 export default Dashboard;
