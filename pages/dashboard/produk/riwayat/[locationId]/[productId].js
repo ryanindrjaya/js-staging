@@ -10,7 +10,7 @@ import DashboardLayout from "../../../../../containers/DashboardLayout/Dashboard
 import TitlePage from "../../../../../components/TitlePage/TitlePage";
 import HistoryTable from "../../../../../components/ReactDataTable/Product/HistoryTable";
 
-export async function getServerSideProps(context) {
+History.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const test = context.query;
   const locationId = context.query.locationId;
@@ -25,19 +25,10 @@ export async function getServerSideProps(context) {
   const reqHistory = await fetchHistory(cookies, productId, locationId);
   const history = await reqHistory.json();
 
-  if (reqInventory.status !== 200 || reqProduct.status !== 200 || reqHistory.status !== 200) {
-    return {
-      redirect: {
-        destination: "/signin?session=false",
-        permanent: false,
-      },
-    };
-  } else {
-    return {
-      props: { inventory, product, history },
-    };
-  }
-}
+  return {
+    props: { inventory, product, history },
+  };
+};
 
 const fetchProduct = async (cookies, productId) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + `/products/` + productId;

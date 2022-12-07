@@ -202,7 +202,7 @@ const Edit = ({ props }) => {
   );
 };
 
-export async function getServerSideProps(context) {
+Edit.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
@@ -221,21 +221,13 @@ export async function getServerSideProps(context) {
   const resCategory = await fetchCategory(cookies);
   const categories = await resCategory.json();
 
-  if (res.status !== 200) {
-    return {
-      redirect: {
-        destination: "/signin?session=false",
-      },
-    };
-  } else {
-    return {
-      props: {
-        subCategory,
-        categories,
-      },
-    };
-  }
-}
+  return {
+    props: {
+      subCategory,
+      categories,
+    },
+  };
+};
 
 const fetchCategory = async (cookies) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/categories?populate=*";

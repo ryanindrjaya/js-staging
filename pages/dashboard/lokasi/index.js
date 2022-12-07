@@ -4,7 +4,7 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "../../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import LocationTable from "../../../components/ReactDataTable/LocationTable";
-import { Router, useRouter } from "next/router";
+import { useRouter } from "next/router";
 import TitlePage from "../../../components/TitlePage/TitlePage";
 import { toast } from "react-toastify";
 import nookies from "nookies";
@@ -66,29 +66,19 @@ const Lokasi = ({ props }) => {
   );
 };
 
-export async function getServerSideProps(context) {
-  console.log(context);
+Lokasi.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   let data;
 
   const req = await fetchData(cookies);
   data = await req.json();
 
-  if (req.status !== 200) {
-    return {
-      redirect: {
-        destination: "/signin?session=false",
-        permanent: false,
-      },
-    };
-  } else {
-    return {
-      props: {
-        data,
-      },
-    };
-  }
-}
+  return {
+    props: {
+      data,
+    },
+  };
+};
 
 const fetchData = async (cookies) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
