@@ -88,6 +88,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
     headCells: {
       style: {
         textTransform: "uppercase",
+        justifyContent: "center",
       },
     },
   };
@@ -141,7 +142,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
         <Form.Item className="mt-4" name={`qty_${row.idx}`} initialValue={qty[row.idx - 1]}>
           <InputNumber
             style={{
-              width: 100,
+              width: "100%",
             }}
             size="small"
             placeholder={`Isi ${row.idx}`}
@@ -163,7 +164,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
             formatter={formatterNumber}
             parser={parserNumber}
             style={{
-              width: 120,
+              width: "100%",
             }}
             size="small"
           />
@@ -182,7 +183,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
             formatter={formatterNumber}
             parser={parserNumber}
             style={{
-              width: 120,
+              width: "100%",
             }}
             size="small"
           />
@@ -205,7 +206,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
         >
           <InputNumber
             style={{
-              width: 50,
+              width: "100%",
             }}
             size="small"
           />
@@ -227,7 +228,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
         >
           <InputNumber
             style={{
-              width: 200,
+              width: "100%",
             }}
             size="small"
           />
@@ -249,7 +250,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
         >
           <InputNumber
             style={{
-              width: 60,
+              width: "100%",
             }}
             size="small"
           />
@@ -268,7 +269,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
             formatter={formatterNumber}
             parser={parserNumber}
             style={{
-              width: 110,
+              width: "100%",
             }}
             size="small"
           />
@@ -287,7 +288,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
             formatter={formatterNumber}
             parser={parserNumber}
             style={{
-              width: 110,
+              width: "100%",
             }}
             size="small"
           />
@@ -304,7 +305,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
         <Form.Item className="mt-4" name={`disc_1_${row.idx}`} initialValue={disc[row.idx - 1]}>
           <InputNumber
             style={{
-              width: 120,
+              width: "100%",
             }}
             size="small"
           />

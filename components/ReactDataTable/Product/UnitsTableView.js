@@ -3,12 +3,7 @@ import AlertDialog from "../../Alert/Alert";
 import { Input, Form, InputNumber } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 
-export default function UnitsTableView({
-  onDelete,
-  onUpdate,
-  onPageChange,
-  initialValue,
-}) {
+export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initialValue }) {
   const onConfirm = (id) => {
     onDelete(id);
   };
@@ -21,29 +16,11 @@ export default function UnitsTableView({
     onUpdate(id);
   };
 
-  const unit = [
-    initialValue?.unit_1,
-    initialValue?.unit_2,
-    initialValue?.unit_3,
-    initialValue?.unit_4,
-    initialValue?.unit_5,
-  ];
+  const unit = [initialValue?.unit_1, initialValue?.unit_2, initialValue?.unit_3, initialValue?.unit_4, initialValue?.unit_5];
 
-  const qty = [
-    initialValue?.qty_1,
-    initialValue?.qty_2,
-    initialValue?.qty_3,
-    initialValue?.qty_4,
-    initialValue?.qty_5,
-  ];
+  const qty = [initialValue?.qty_1, initialValue?.qty_2, initialValue?.qty_3, initialValue?.qty_4, initialValue?.qty_5];
 
-  const disc = [
-    initialValue?.disc_1_1,
-    initialValue?.disc_1_2,
-    initialValue?.disc_1_3,
-    initialValue?.disc_1_4,
-    initialValue?.disc_1_5,
-  ];
+  const disc = [initialValue?.disc_1_1, initialValue?.disc_1_2, initialValue?.disc_1_3, initialValue?.disc_1_4, initialValue?.disc_1_5];
 
   const soldPrice = [
     initialValue?.sold_price_1,
@@ -77,45 +54,15 @@ export default function UnitsTableView({
     initialValue?.purchase_discount_5,
   ];
 
-  const diskon1 = [
-    initialValue?.unit_1_dp1,
-    initialValue?.unit_2_dp1,
-    initialValue?.unit_3_dp1,
-    initialValue?.unit_4_dp1,
-    initialValue?.unit_5_dp1,
-  ];
+  const diskon1 = [initialValue?.unit_1_dp1, initialValue?.unit_2_dp1, initialValue?.unit_3_dp1, initialValue?.unit_4_dp1, initialValue?.unit_5_dp1];
 
-  const diskon2 = [
-    initialValue?.unit_1_dp2,
-    initialValue?.unit_2_dp2,
-    initialValue?.unit_3_dp2,
-    initialValue?.unit_4_dp2,
-    initialValue?.unit_5_dp2,
-  ];
+  const diskon2 = [initialValue?.unit_1_dp2, initialValue?.unit_2_dp2, initialValue?.unit_3_dp2, initialValue?.unit_4_dp2, initialValue?.unit_5_dp2];
 
-  const diskon3 = [
-    initialValue?.unit_1_dp3,
-    initialValue?.unit_2_dp3,
-    initialValue?.unit_3_dp3,
-    initialValue?.unit_4_dp3,
-    initialValue?.unit_5_dp3,
-  ];
+  const diskon3 = [initialValue?.unit_1_dp3, initialValue?.unit_2_dp3, initialValue?.unit_3_dp3, initialValue?.unit_4_dp3, initialValue?.unit_5_dp3];
 
-  const diskon4 = [
-    initialValue?.unit_1_dp4,
-    initialValue?.unit_2_dp4,
-    initialValue?.unit_3_dp4,
-    initialValue?.unit_4_dp4,
-    initialValue?.unit_5_dp4,
-  ];
+  const diskon4 = [initialValue?.unit_1_dp4, initialValue?.unit_2_dp4, initialValue?.unit_3_dp4, initialValue?.unit_4_dp4, initialValue?.unit_5_dp4];
 
-  const diskon5 = [
-    initialValue?.unit_1_dp5,
-    initialValue?.unit_2_dp5,
-    initialValue?.unit_3_dp5,
-    initialValue?.unit_4_dp5,
-    initialValue?.unit_5_dp5,
-  ];
+  const diskon5 = [initialValue?.unit_1_dp5, initialValue?.unit_2_dp5, initialValue?.unit_3_dp5, initialValue?.unit_4_dp5, initialValue?.unit_5_dp5];
 
   const locale = "en-us";
 
@@ -123,7 +70,9 @@ export default function UnitsTableView({
     return new Intl.NumberFormat(locale, {
       style: "currency",
       currency: "IDR",
-    }).format(value);
+    })
+      .format(value)
+      .replace(/IDR/g, "");
   };
 
   const currencyParser = (val) => {
@@ -160,10 +109,7 @@ export default function UnitsTableView({
 
   const content = (row) => (
     <div>
-      <button
-        onClick={() => onEdit(row.id)}
-        className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-      >
+      <button onClick={() => onEdit(row.id)} className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md ">
         <EditOutlined className="mr-2 mt-0.5 float float-left" />
         Edit
       </button>
@@ -183,6 +129,7 @@ export default function UnitsTableView({
         color: "white",
         textTransform: "uppercase",
         backgroundColor: "#036B82",
+        justifyContent: "center",
       },
     },
     rows: {
@@ -240,13 +187,7 @@ export default function UnitsTableView({
 
       selector: (row) => {
         return (
-          <Input
-            value={unit[row.idx - 1] ?? "-"}
-            size="large"
-            style={{ backgroundColor: "#ffffff" }}
-            placeholder={`Nama Unit ${row.idx}`}
-            disabled
-          />
+          <Input value={unit[row.idx - 1] ?? "-"} size="large" style={{ backgroundColor: "#ffffff" }} placeholder={`Nama Unit ${row.idx}`} disabled />
         );
       },
     },
@@ -261,7 +202,7 @@ export default function UnitsTableView({
         <InputNumber
           disabled
           style={{
-            width: 100,
+            width: "100%",
             backgroundColor: "#ffffff",
           }}
           size="large"
@@ -283,11 +224,11 @@ export default function UnitsTableView({
           parser={currencyParser}
           disabled
           style={{
-            width: 200,
+            width: "100%",
             backgroundColor: "#ffffff",
           }}
           size="large"
-          defaultValue={buyPrice[row.idx - 1] ?? 0}
+          value={buyPrice[row.idx - 1] ?? 0}
           placeholder={`Isi ${row.idx}`}
         />
       ),
@@ -302,11 +243,11 @@ export default function UnitsTableView({
           parser={currencyParser}
           disabled
           style={{
-            width: 120,
+            width: "100%",
             backgroundColor: "#ffffff",
           }}
           size="large"
-          defaultValue={purchaseDiscount[row.idx - 1] ?? 0}
+          value={purchaseDiscount[row.idx - 1] ?? 0}
           placeholder="Diskon Pembelian"
         />
       ),
@@ -323,7 +264,7 @@ export default function UnitsTableView({
         <InputNumber
           disabled
           style={{
-            width: 40,
+            width: "100%",
             backgroundColor: "#ffffff",
           }}
           size="large"
@@ -342,7 +283,7 @@ export default function UnitsTableView({
         <InputNumber
           disabled
           style={{
-            width: 40,
+            width: "100%",
             backgroundColor: "#ffffff",
           }}
           value={diskon2[row.idx - 1] ?? "-"}
@@ -362,7 +303,7 @@ export default function UnitsTableView({
         <InputNumber
           disabled
           style={{
-            width: 40,
+            width: "100%",
             backgroundColor: "#ffffff",
           }}
           size="large"
@@ -383,12 +324,12 @@ export default function UnitsTableView({
           parser={currencyParser}
           disabled
           style={{
-            width: 120,
+            width: "100%",
             backgroundColor: "#ffffff",
           }}
           size="large"
           placeholder={`Pricelist ${row.idx}`}
-          defaultValue={pricelist[row.idx - 1] ?? 0}
+          value={pricelist[row.idx - 1] ?? 0}
         />
       ),
     },
@@ -404,12 +345,12 @@ export default function UnitsTableView({
           parser={currencyParser}
           disabled
           style={{
-            width: 120,
+            width: "100%",
             backgroundColor: "#ffffff",
           }}
           size="large"
           placeholder={`Harga Jual ${row.idx}`}
-          defaultValue={soldPrice[row.idx - 1] ?? 0}
+          value={soldPrice[row.idx - 1] ?? 0}
         />
       ),
     },
@@ -423,7 +364,7 @@ export default function UnitsTableView({
         <InputNumber
           disabled
           style={{
-            width: 120,
+            width: "100%",
             backgroundColor: "#ffffff",
           }}
           size="large"
@@ -447,13 +388,7 @@ export default function UnitsTableView({
 
   return (
     <>
-      <DataTable
-        className="mt-10"
-        customStyles={customStyles}
-        onChangePage={onPageChange}
-        columns={columns}
-        data={data}
-      />
+      <DataTable className="mt-10" customStyles={customStyles} onChangePage={onPageChange} columns={columns} data={data} />
       <p className="mt-3">Keterangan Unit : {getInitialDescUnit()}</p>
     </>
   );
