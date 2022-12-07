@@ -16,6 +16,16 @@ Retur.getInitialProps = async (context) => {
   const req = await fetchData(cookies);
   data = await req.json();
 
+  if (req.status !== 200) {
+    context.res.writeHead(302, {
+      Location: "/signin?session=false",
+      "Content-Type": "text/html; charset=utf-8",
+    });
+    context.res.end();
+
+    return {};
+  }
+
   return {
     props: {
       data,
@@ -49,11 +59,7 @@ function Retur({ props }) {
 
   const handleUpdate = (id) => {
     // router.push("/dashboard/pembelian/order_pembelian/edit/" + id);
-    openNotificationWithIcon(
-      "info",
-      "Work In Progress",
-      "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
-    );
+    openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
   };
 
   const handleDelete = async (id) => {
@@ -83,8 +89,7 @@ function Retur({ props }) {
 
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/returs?pagination[page]=" + page;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/returs?pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -136,7 +141,7 @@ function Retur({ props }) {
           <TitlePage titleText={"Daftar Retur Pembelian"} />
           <LayoutContent>
             <div className="w-full flex justify-start">
-              <div className="w-full md:w-1/4 px-3"> 
+              <div className="w-full md:w-1/4 px-3">
                 <Select
                   placeholder="Pilih Supplier"
                   size="large"
@@ -145,16 +150,14 @@ function Retur({ props }) {
                     marginRight: "10px",
                   }}
                 >
-                {/*{locations.map((element) => {*/}
-                {/*  return (*/}
-                    <Select.Option>
-                      data
-                    </Select.Option>
-                {/*  );*/}
-                {/*})}*/}
+                  {/*{locations.map((element) => {*/}
+                  {/*  return (*/}
+                  <Select.Option>data</Select.Option>
+                  {/*  );*/}
+                  {/*})}*/}
                 </Select>
               </div>
-              <div className="w-full md:w-1/4 px-3"> 
+              <div className="w-full md:w-1/4 px-3">
                 <Select
                   placeholder="Lokasi Gudang"
                   size="large"
@@ -163,78 +166,62 @@ function Retur({ props }) {
                     marginRight: "10px",
                   }}
                 >
-                {/*{locations.map((element) => {*/}
-                {/*  return (*/}
-                    <Select.Option>
-                      data
-                    </Select.Option>
-                {/*  );*/}
-                {/*})}*/}
+                  {/*{locations.map((element) => {*/}
+                  {/*  return (*/}
+                  <Select.Option>data</Select.Option>
+                  {/*  );*/}
+                  {/*})}*/}
                 </Select>
               </div>
-              <div className="w-full md:w-1/4 px-3">                
+              <div className="w-full md:w-1/4 px-3">
                 <DatePicker placeholder="Tanggal Retur" size="large" style={{ width: "100%" }} />
               </div>
             </div>
-            <div  className="w-full flex justify-between">
+            <div className="w-full flex justify-between">
               <div class="mt-4 text-black text-md font-bold ml-1">Daftar Retur</div>
-                <button
-                    onClick={handleAdd}
-                    type="button"
-                    className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
-                >
-                    <div className="text-white text-center text-sm font-bold">
-                      <a className="text-white no-underline text-xs sm:text-xs">
-                        + Tambah Retur
-                      </a>
-                    </div>
-                </button>
+              <button onClick={handleAdd} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5">
+                <div className="text-white text-center text-sm font-bold">
+                  <a className="text-white no-underline text-xs sm:text-xs">+ Tambah Retur</a>
+                </div>
+              </button>
             </div>
-            <div  className="w-full flex justify-between">
-                <button
-                    onClick={handleUpdate}
-                    type="button"
-                    className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
-                >
-                    <div className="text-white text-center text-sm font-bold">
-                      <a className="text-white no-underline text-xs sm:text-xs">
-                        Print PDF
-                      </a>
-                    </div>
-                </button>
-                <button
-                    onClick={handleUpdate}
-                    type="button"
-                    className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
-                >
-                    <div className="text-white text-center text-sm font-bold">
-                      <a className="text-white no-underline text-xs sm:text-xs">
-                        Print CSV
-                      </a>
-                    </div>
-                </button>
-                <button
-                    onClick={handleUpdate}
-                    type="button"
-                    className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
-                >
-                    <div className="text-white text-center text-sm font-bold">
-                      <a className="text-white no-underline text-xs sm:text-xs">
-                        Print XLS
-                      </a>
-                    </div>
-                </button>
-                <button
-                    onClick={handleUpdate}
-                    type="button"
-                    className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
-                >
-                    <div className="text-white text-center text-sm font-bold">
-                      <a className="text-white no-underline text-xs sm:text-xs">
-                        Kolom Tampak
-                      </a>
-                    </div>
-                </button>
+            <div className="w-full flex justify-between">
+              <button
+                onClick={handleUpdate}
+                type="button"
+                className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+              >
+                <div className="text-white text-center text-sm font-bold">
+                  <a className="text-white no-underline text-xs sm:text-xs">Print PDF</a>
+                </div>
+              </button>
+              <button
+                onClick={handleUpdate}
+                type="button"
+                className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+              >
+                <div className="text-white text-center text-sm font-bold">
+                  <a className="text-white no-underline text-xs sm:text-xs">Print CSV</a>
+                </div>
+              </button>
+              <button
+                onClick={handleUpdate}
+                type="button"
+                className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+              >
+                <div className="text-white text-center text-sm font-bold">
+                  <a className="text-white no-underline text-xs sm:text-xs">Print XLS</a>
+                </div>
+              </button>
+              <button
+                onClick={handleUpdate}
+                type="button"
+                className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+              >
+                <div className="text-white text-center text-sm font-bold">
+                  <a className="text-white no-underline text-xs sm:text-xs">Kolom Tampak</a>
+                </div>
+              </button>
             </div>
 
             <PurchasesReturTable
@@ -244,7 +231,6 @@ function Retur({ props }) {
               onPageChange={handlePageChange}
               onChangeStatus={onChangeStatus}
             />
-
           </LayoutContent>
         </LayoutWrapper>
       </DashboardLayout>
