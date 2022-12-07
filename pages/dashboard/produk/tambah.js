@@ -175,6 +175,7 @@ const Tambah = ({ props }) => {
       setFileList([]);
       setUploadedOnce(true);
       setSelectedManufactures({});
+      setSelectedSubCategory();
       setSelectedGroup({});
       setSelectLocation({});
       toast.success("Produk berhasil ditambahkan!", {

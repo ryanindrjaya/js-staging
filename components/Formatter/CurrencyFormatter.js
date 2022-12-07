@@ -9,48 +9,45 @@
 //     .replace(/\.(?=\d{0,2}$)/g, ".");
 // };
 
-export const parserNumber = (val) => {
-  let newValue = Number.parseFloat(
-    val.replace(/\$\s?|(\,*)/g, "").replace(/(\,{1})/g, ".")
-  ).toFixed(2);
+const locale = "id-ID";
 
-  let rounded = Number(newValue).toFixed(2);
-
-  if (!val) return 0;
-  return rounded;
+export const formatterNumber = (value) => {
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: "IDR",
+    // minimumFractionDigits: 0,
+  }).format(value);
 };
 
-// formatter and parser input number
-export const formatterNumber = (val, unit) => {
-  if (!val) return 0;
+export const parserNumber = (val) => {
+  try {
+    // for when the input gets clears
+    if (typeof val === "string" && !val.length) {
+      val = "0.0";
+    }
 
-  const newValue = `${val}`
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-    .replace(/\.(?=\d{0,2}$)/g, ".");
+    // detecting and parsing between comma and dot
+    var group = new Intl.NumberFormat(locale).format(1111).replace(/1/g, "");
+    var decimal = new Intl.NumberFormat(locale).format(1.1).replace(/1/g, "");
+    var reversedVal = val.replace(new RegExp("\\" + group, "g"), "");
+    reversedVal = reversedVal.replace(new RegExp("\\" + decimal, "g"), ".");
+    //  => 1232.21 €
 
-  let test = Number.parseFloat(
-    newValue.replace(/\$\s?|(\,*)/g, "").replace(/(\,{1})/g, ".")
-  ).toFixed(2);
+    // removing everything except the digits and dot
+    reversedVal = reversedVal.replace(/[^0-9.]/g, "");
+    //  => 1232.21
 
-  let rounded = Number(test).toFixed(2);
-  console.log("unit", unit);
-  if (
-    unit === "buy_price_1" ||
-    unit === "purchase_discount_1" ||
-    unit === "pricelist_1" ||
-    unit === "sold_price_1" ||
-    unit === "sold_price_2" ||
-    unit === "sold_price_3" ||
-    unit === "sold_price_4" ||
-    unit === "sold_price_5"
-  ) {
-    return newValue;
-  } else {
-    const newRounded = `${rounded}`
-      .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-      .replace(/\.(?=\d{0,2}$)/g, ".");
+    // appending digits properly
+    const digitsAfterDecimalCount = (reversedVal.split(".")[1] || []).length;
+    const needsDigitsAppended = digitsAfterDecimalCount > 2;
 
-    return newRounded;
+    if (needsDigitsAppended) {
+      reversedVal = reversedVal * Math.pow(10, digitsAfterDecimalCount - 2);
+    }
+
+    return Number.isNaN(reversedVal) ? 0 : reversedVal;
+  } catch (error) {
+    console.error(error);
   }
 };
 
