@@ -18,7 +18,8 @@ export const formatterNumber = (value) => {
     // minimumFractionDigits: 0,
   })
     .format(value)
-    .replace("Rp", "");
+    .replace("Rp", "")
+    .trim();
 };
 
 export const parserNumber = (val) => {

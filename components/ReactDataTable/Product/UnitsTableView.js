@@ -72,7 +72,8 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
       currency: "IDR",
     })
       .format(value)
-      .replace(/IDR/g, "");
+      .replace(/IDR/g, "")
+      .trim();
   };
 
   const currencyParser = (val) => {
@@ -186,9 +187,7 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
       },
 
       selector: (row) => {
-        return (
-          <Input value={unit[row.idx - 1] ?? "-"} size="large" style={{ backgroundColor: "#ffffff" }} placeholder={`Nama Unit ${row.idx}`} disabled />
-        );
+        return <Input value={unit[row.idx - 1] ?? "-"} size="large" style={{ backgroundColor: "#ffffff" }} placeholder={`Nama Unit ${row.idx}`} />;
       },
     },
     {
@@ -200,7 +199,6 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
 
       selector: (row) => (
         <InputNumber
-          disabled
           style={{
             width: "100%",
             backgroundColor: "#ffffff",
@@ -222,7 +220,6 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
         <InputNumber
           formatter={rupiahFormatter}
           parser={currencyParser}
-          disabled
           style={{
             width: "100%",
             backgroundColor: "#ffffff",
@@ -241,7 +238,6 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
         <InputNumber
           formatter={rupiahFormatter}
           parser={currencyParser}
-          disabled
           style={{
             width: "100%",
             backgroundColor: "#ffffff",
@@ -262,7 +258,6 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
 
       selector: (row) => (
         <InputNumber
-          disabled
           style={{
             width: "100%",
             backgroundColor: "#ffffff",
@@ -281,7 +276,6 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
       },
       selector: (row) => (
         <InputNumber
-          disabled
           style={{
             width: "100%",
             backgroundColor: "#ffffff",
@@ -301,7 +295,6 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
       },
       selector: (row) => (
         <InputNumber
-          disabled
           style={{
             width: "100%",
             backgroundColor: "#ffffff",
@@ -322,7 +315,6 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
         <InputNumber
           formatter={rupiahFormatter}
           parser={currencyParser}
-          disabled
           style={{
             width: "100%",
             backgroundColor: "#ffffff",
@@ -343,7 +335,6 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
         <InputNumber
           formatter={rupiahFormatter}
           parser={currencyParser}
-          disabled
           style={{
             width: "100%",
             backgroundColor: "#ffffff",
@@ -362,7 +353,6 @@ export default function UnitsTableView({ onDelete, onUpdate, onPageChange, initi
       },
       selector: (row) => (
         <InputNumber
-          disabled
           style={{
             width: "100%",
             backgroundColor: "#ffffff",
