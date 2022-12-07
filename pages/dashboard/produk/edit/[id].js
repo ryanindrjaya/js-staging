@@ -453,16 +453,25 @@ Edit.getInitialProps = async (context) => {
   const reqSubCategories = await fetchDataSubCategories(cookies, categoryId);
   const subCategories = await reqSubCategories.json();
 
-  return {
-    props: {
-      product,
-      categories,
-      groups,
-      locations,
-      manufactures,
-      subCategories,
-    },
-  };
+  if (reqProduct.status !== 200) {
+    return {
+      redirect: {
+        destination: "/signin?session=false",
+        permanent: false,
+      },
+    };
+  } else {
+    return {
+      props: {
+        product,
+        categories,
+        groups,
+        locations,
+        manufactures,
+        subCategories,
+      },
+    };
+  }
 };
 
 const fetchProduct = async (cookies, context) => {

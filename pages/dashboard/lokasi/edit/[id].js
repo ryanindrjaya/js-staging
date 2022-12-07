@@ -44,14 +44,9 @@ const Edit = ({ props }) => {
       res.error?.details.errors.map((error) => {
         const ErrorMsg = error.path[0];
         console.log(ErrorMsg);
-        toast.error(
-          ErrorMsg === "location_id"
-            ? "Lokasi yang dimasukkan sudah ada. Silahkan coba yang lain"
-            : "Tidak dapat memperbarui Lokasi",
-          {
-            position: toast.POSITION.TOP_RIGHT,
-          }
-        );
+        toast.error(ErrorMsg === "location_id" ? "Lokasi yang dimasukkan sudah ada. Silahkan coba yang lain" : "Tidak dapat memperbarui Lokasi", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
       });
     }
 
@@ -101,57 +96,36 @@ const Edit = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "50px" }}
-                      placeholder="Nama Lokasi"
-                    />
+                    <Input style={{ height: "50px" }} placeholder="Nama Lokasi" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="street"
-                    initialValue={location.attributes.street}
-                  >
+                  <Form.Item name="street" initialValue={location.attributes.street}>
                     <Input style={{ height: "50px" }} placeholder="Alamat" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="city"
-                    initialValue={location.attributes.city}
-                  >
+                  <Form.Item name="city" initialValue={location.attributes.city}>
                     <Input style={{ height: "50px" }} placeholder="Kota" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="province"
-                    initialValue={location.attributes.province}
-                  >
+                  <Form.Item name="province" initialValue={location.attributes.province}>
                     <Input style={{ height: "50px" }} placeholder="Provinsi" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="country"
-                    initialValue={location.attributes.country}
-                  >
+                  <Form.Item name="country" initialValue={location.attributes.country}>
                     <Input style={{ height: "50px" }} placeholder="Negara" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="postal_code"
-                    initialValue={location.attributes.postal_code}
-                  >
+                  <Form.Item name="postal_code" initialValue={location.attributes.postal_code}>
                     <Input style={{ height: "50px" }} placeholder="Kode Pos" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="phone"
-                    initialValue={location.attributes.phone}
-                  >
+                  <Form.Item name="phone" initialValue={location.attributes.phone}>
                     <Input style={{ height: "50px" }} placeholder="No.Telp" />
                   </Form.Item>
                 </div>
@@ -163,10 +137,7 @@ const Edit = ({ props }) => {
                     <Spin />
                   </div>
                 ) : (
-                 <Button
-                    htmlType="submit"
-                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
-                  >
+                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
                     Submit
                   </Button>
                 )}
@@ -179,7 +150,7 @@ const Edit = ({ props }) => {
   );
 };
 
-Edit.getInitialProps = async (context) => {
+export async function getServerSideProps(context) {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
@@ -194,11 +165,20 @@ Edit.getInitialProps = async (context) => {
   const res = await fetch(endpoint, options);
   const locationData = await res.json();
 
-  return {
-    props: {
-      locationData,
-    },
-  };
-};
+  if (res.status !== 200) {
+    return {
+      redirect: {
+        destination: "/signin?session=false",
+        permanent: false,
+      },
+    };
+  } else {
+    return {
+      props: {
+        locationData,
+      },
+    };
+  }
+}
 
 export default Edit;

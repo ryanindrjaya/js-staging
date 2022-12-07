@@ -1,11 +1,13 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
 import nookies from "nookies";
+import { useDispatch } from "react-redux";
 
 function Middleware({ children }) {
   const cookies = nookies.get(null);
   const token = cookies.token;
   const router = useRouter();
+  const dispatch = useDispatch();
 
   useEffect(async () => {
     const firstPath = router.pathname.split("/")[1];
@@ -19,6 +21,7 @@ function Middleware({ children }) {
     // }
 
     if (firstPath === "dashboard" && !token) {
+      dispatch({ type: "SET_SESSION", message: "Sesi anda telah berakhir, harap login kembali" });
       router.push("/");
     } else {
       if (token && firstPath === "") {

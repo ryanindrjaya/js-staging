@@ -164,19 +164,28 @@ const Pabrikasi = ({ props }) => {
   );
 };
 
-Pabrikasi.getInitialProps = async (context) => {
+export async function getServerSideProps(context) {
   const cookies = nookies.get(context);
   let data;
 
   const req = await fetchData(cookies);
   data = await req.json();
 
-  return {
-    props: {
-      data,
-    },
-  };
-};
+  if (req.status !== 200) {
+    return {
+      redirect: {
+        destination: "signin?session=false",
+        permanent: false,
+      },
+    };
+  } else {
+    return {
+      props: {
+        data,
+      },
+    };
+  }
+}
 
 const fetchData = async (cookies) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/manufactures?populate=*";

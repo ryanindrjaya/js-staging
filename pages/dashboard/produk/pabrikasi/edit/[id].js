@@ -22,8 +22,7 @@ const Edit = ({ props }) => {
     setLoading(true);
 
     const data = { data: values };
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/manufactures/" + manufactures.id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/manufactures/" + manufactures.id;
     const JSONdata = JSON.stringify(data);
 
     const options = {
@@ -34,7 +33,6 @@ const Edit = ({ props }) => {
       },
       body: JSONdata,
     };
-
 
     const req = await fetch(endpoint, options);
     const res = await req.json();
@@ -47,14 +45,9 @@ const Edit = ({ props }) => {
     } else {
       res.error?.details.errors.map((error) => {
         const ErrorMsg = error.path[0];
-        toast.error(
-          ErrorMsg === "code"
-            ? "Kode sudah digunakan"
-            : "Tidak dapat memperbarui Data",
-          {
-            position: toast.POSITION.TOP_RIGHT,
-          }
-        );
+        toast.error(ErrorMsg === "code" ? "Kode sudah digunakan" : "Tidak dapat memperbarui Data", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
       });
     }
 
@@ -90,10 +83,7 @@ const Edit = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "50px" }}
-                      placeholder="Kode Pabrik"
-                    />
+                    <Input style={{ height: "50px" }} placeholder="Kode Pabrik" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
@@ -107,10 +97,7 @@ const Edit = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "50px" }}
-                      placeholder="Nama Pabrikasi"
-                    />
+                    <Input style={{ height: "50px" }} placeholder="Nama Pabrikasi" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
@@ -124,18 +111,12 @@ const Edit = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "50px" }}
-                      placeholder="Nama Singkatan Pabrik"
-                    />
+                    <Input style={{ height: "50px" }} placeholder="Nama Singkatan Pabrik" />
                   </Form.Item>
                 </div>
 
                 <div className="w-full md:w-full px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    initialValue={manufactures.attributes.description}
-                    name="description"
-                  >
+                  <Form.Item initialValue={manufactures.attributes.description} name="description">
                     <TextArea rows={4} placeholder="Deskripsi" />
                   </Form.Item>
                 </div>
@@ -147,10 +128,7 @@ const Edit = ({ props }) => {
                     <Spin />
                   </div>
                 ) : (
-                 <Button
-                    htmlType="submit"
-                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
-                  >
+                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
                     Submit
                   </Button>
                 )}
@@ -163,7 +141,7 @@ const Edit = ({ props }) => {
   );
 };
 
-Edit.getInitialProps = async (context) => {
+export async function getServerSideProps(context) {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
@@ -178,11 +156,20 @@ Edit.getInitialProps = async (context) => {
   const res = await fetch(endpoint, options);
   const data = await res.json();
 
-  return {
-    props: {
-      data,
-    },
-  };
-};
+  if (res.status !== 200) {
+    return {
+      redirect: {
+        destination: "/signin?session=false",
+        permanent: false,
+      },
+    };
+  } else {
+    return {
+      props: {
+        data,
+      },
+    };
+  }
+}
 
 export default Edit;

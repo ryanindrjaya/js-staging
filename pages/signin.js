@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import Input from "@iso/components/uielements/input";
 import Button from "@iso/components/uielements/button";
@@ -18,6 +18,9 @@ export default function SignInPage(props) {
   const [failedLogin, setFailedLogin] = useState(false);
   const [failedLoginMsg, setfailedLoginMsg] = useState("Username atau Password salah");
   const [field, setField] = useState({});
+  const message = useSelector((state) => state.session.sessionMessage);
+
+  const isExpired = router?.query?.session || true;
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -130,9 +133,12 @@ export default function SignInPage(props) {
                   <Spin />
                 </div>
               ) : (
-                <Button type="primary" onClick={handleLogin}>
-                  <IntlMessages id="page.signInButton" />
-                </Button>
+                <div className="flex flex-col">
+                  {isExpired !== true ? <p className="text-sm text-red-500">Sesi anda telah berakhir, harap login kembali</p> : ""}
+                  <Button block type="primary" onClick={handleLogin}>
+                    <IntlMessages id="page.signInButton" />
+                  </Button>
+                </div>
               )}
             </div>
             {failedLogin ? (

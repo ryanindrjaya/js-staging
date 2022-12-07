@@ -86,8 +86,7 @@ const SubKategori = ({ props }) => {
 
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/sub-categories?pagination[page]=" + page;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/sub-categories?pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -149,9 +148,7 @@ const SubKategori = ({ props }) => {
                 className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
               >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    + Tambah
-                  </a>
+                  <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
                 </div>
               </button>
             </div>
@@ -170,19 +167,28 @@ const SubKategori = ({ props }) => {
   );
 };
 
-SubKategori.getInitialProps = async (context) => {
+export async function getServerSideProps(context) {
   const cookies = nookies.get(context);
   let data;
 
   const req = await fetchData(cookies);
   data = await req.json();
 
-  return {
-    props: {
-      data,
-    },
-  };
-};
+  if (req.status !== 200) {
+    return {
+      redirect: {
+        destination: "signin?session=false",
+        permanent: false,
+      },
+    };
+  } else {
+    return {
+      props: {
+        data,
+      },
+    };
+  }
+}
 
 const fetchData = async (cookies) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/sub-categories?populate=*";
