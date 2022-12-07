@@ -57,7 +57,7 @@ const Tambah = ({ props }) => {
   const [file, setFile] = useState();
 
   const imageLoader = ({ src }) => {
-    return process.env.NEXT_PUBLIC_URL + image?.url;
+    return BASE_API + image;
   };
 
   const getBase64 = (img, callback) => {
@@ -79,16 +79,19 @@ const Tambah = ({ props }) => {
       setUploadedOnce(true);
       setImage();
       setFileList([]);
+      setFile();
     },
 
-    async onChange(info) {
-      setFile(info.file.originFileObj);
-      // Get this url from response in real world.
-      getBase64(info.file.originFileObj, (url) => {
-        setLoading(false);
-        console.log(url);
-        setImage(url);
-      });
+    onChange(info) {
+      if (info.file.status !== "removed") {
+        setFile(info.file.originFileObj);
+        setFileList([info.file]);
+        // Get this url from response in real world.
+        getBase64(info.file.originFileObj, (url) => {
+          setLoading(false);
+          setImage(url);
+        });
+      }
     },
   };
 
@@ -382,7 +385,7 @@ const Tambah = ({ props }) => {
                         <p className="ant-upload-hint  m-3">Gambar akan digunakan sebagai contoh tampilan produk</p>
                       </>
                     ) : (
-                      <Image layout="fill" src={image} />
+                      <Image layout="fill" loader={imageLoader} src={image} />
                     )}
                   </Dragger>
                 </div>

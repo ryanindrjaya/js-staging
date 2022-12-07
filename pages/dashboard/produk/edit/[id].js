@@ -33,7 +33,7 @@ const Edit = ({ props }) => {
   const initGroup = product?.attributes?.group?.data;
   const BASE_API = "http://localhost:1337";
 
-  const [image, setImage] = useState(product.attributes?.image?.data ? product.attributes?.image?.data[0]?.attributes : null);
+  const [image, setImage] = useState(product.attributes?.image?.data ? product.attributes?.image?.data?.attributes : null);
 
   const [category, setCategory] = useState();
   const [idCategory, setIdCategory] = useState(initCategory.id);
@@ -41,6 +41,7 @@ const Edit = ({ props }) => {
   const [uploadedOnce, setUploadedOnce] = useState(true);
   const [fileList, setFileList] = useState([]);
   const [firstInput, setFirstInputDiskon] = useState(true);
+  const [file, setFile] = useState();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const cookies = nookies.get(null, "token");
@@ -68,8 +69,14 @@ const Edit = ({ props }) => {
     return locationNameList;
   }
 
+  const getBase64 = (img, callback) => {
+    const reader = new FileReader();
+    reader.addEventListener("load", () => callback(reader.result));
+    reader.readAsDataURL(img);
+  };
+
   const imageLoader = ({ src }) => {
-    return BASE_API + image?.url;
+    return image?.url ? BASE_API + image?.url : image;
   };
 
   const propsDagger = {
@@ -88,39 +95,14 @@ const Edit = ({ props }) => {
     },
 
     async onChange(info) {
-      if (info.fileList.length === 1) {
-        const endpoint = process.env.NEXT_PUBLIC_URL + "/upload";
-        const file = info.file.originFileObj;
-        const data = new FormData();
-        data.append("files", file);
-
-        setFileList(info.fileList);
-
-        const options = {
-          method: "POST",
-          headers: {
-            Authorization: "Bearer " + cookies.token,
-          },
-          body: data,
-        };
-
-        if (uploadedOnce) {
-          setUploadedOnce(false);
-          const req = await fetch(endpoint, options);
-          const res = await req.json();
-
-          if (req.status === 200) {
-            setImage(res[0]);
-
-            message.success(`${info.file.name} berhasil diupload`);
-          } else {
-            message.error(`${info.file.name} gagal upload`);
-          }
-        }
-      } else if (info.fileList.length === 0) {
-        message.info(`Gambar berhasil dihapus`);
-      } else {
-        message.error(`Hanya dapat menambahkan 1 gambar`);
+      if (info.file.status !== "removed") {
+        setFile(info.file.originFileObj);
+        setFileList([info.file]);
+        // Get this url from response in real world.
+        getBase64(info.file.originFileObj, (url) => {
+          setLoading(false);
+          setImage(url);
+        });
       }
     },
   };
@@ -168,6 +150,21 @@ const Edit = ({ props }) => {
     return values;
   };
 
+  const deleteOldImage = async (id) => {
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/upload/files/${id}`;
+    const options = {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${cookies.token}`,
+      },
+    };
+
+    const response = await fetch(endpoint, options);
+    const data = await response.json();
+
+    return data;
+  };
+
   const onFinish = async (values) => {
     console.log("values", values);
 
@@ -213,7 +210,6 @@ const Edit = ({ props }) => {
       sub_category: subCategoryID,
       manufacture: manufacturesID,
       group: groupID,
-      image: { id: image?.id },
     };
 
     if (putData.sub_category.id === "") {
@@ -243,18 +239,24 @@ const Edit = ({ props }) => {
       if (data[`purchase_discount_${index}`] === "-") delete data[`purchase_discount_${index}`];
     }
 
-    const dataPut = { data: data };
-    const JSONdata = JSON.stringify(dataPut);
+    const formData = new FormData();
+    formData.append("data", JSON.stringify(data));
 
-    console.log("tester", putData);
+    if (file) {
+      if (product.attributes?.image?.data) {
+        // delete old image
+        const deleteImage = await deleteOldImage(product.attributes?.image?.data.id);
+        console.log("deleteImage", deleteImage);
+      }
+      formData.append("files.image", file);
+    }
 
     const options = {
       method: "PUT",
       headers: {
-        "Content-Type": "application/json",
         Authorization: "Bearer " + cookies.token,
       },
-      body: JSONdata,
+      body: formData,
     };
 
     const endpoint = process.env.NEXT_PUBLIC_URL + "/products/" + productId;
@@ -391,7 +393,7 @@ const Edit = ({ props }) => {
                         <p className="ant-upload-hint  m-3">Gambar akan digunakan sebagai contoh tampilan produk</p>
                       </>
                     ) : (
-                      <Image layout="fill" loader={imageLoader} src={BASE_API + image?.url} />
+                      <Image layout="fill" loader={imageLoader} src={image?.url ? BASE_API + image?.url : image} />
                     )}
                   </Dragger>
                 </div>
