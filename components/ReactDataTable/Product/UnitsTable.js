@@ -120,7 +120,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
   ];
 
   const setFocusHarga = (e) => {
-    e.target.setSelectionRange(0, 0);
+    e.target.setSelectionRange(0, 1);
   };
 
   const columns = [
