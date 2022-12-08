@@ -37,6 +37,16 @@ Tambah.getInitialProps = async (context) => {
   const req4 = await fetchUser(cookies);
   user = await req4.json();
 
+  if (req.status !== 200) {
+    context.res.writeHead(302, {
+      Location: "/signin?session=false",
+      "Content-Type": "text/html; charset=utf-8",
+    });
+    context.res.end();
+
+    return {};
+  }
+
   return {
     props: {
       order,
@@ -277,7 +287,9 @@ function Tambah({ props }) {
 
     purchase_details.forEach((element) => {
       var indexUnit = 1;
-      var unitOrder = element.attributes.unit_order; console.log("product :"); console.log(element.attributes.products)
+      var unitOrder = element.attributes.unit_order;
+      console.log("product :");
+      console.log(element.attributes.products);
       var productUnit = element.attributes.products.data[0].attributes;
 
       for (let index = 1; index < 6; index++) {
@@ -318,9 +330,9 @@ function Tambah({ props }) {
         d3: element.attributes.products.data[0].attributes.unit_1_dp3,
       });
     });
-      //console.log("initial product"); console.log(products); console.log(productTotalPrice);
-      //console.log(setTotalPrice); console.log(setProductTotalPrice); console.log(calculatePriceAfterDisc);
-      //console.log(productSubTotal); console.log(locations);
+    //console.log("initial product"); console.log(products); console.log(productTotalPrice);
+    //console.log(setTotalPrice); console.log(setProductTotalPrice); console.log(calculatePriceAfterDisc);
+    //console.log(productSubTotal); console.log(locations);
     setTimeout(() => {
       setIsFetchingData(false);
     }, 3000);
