@@ -1,12 +1,15 @@
 import Head from "next/head";
-import React, { useState } from "react";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
+import { useSelector, useDispatch } from "react-redux";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { Row, Form, Input, InputNumber, Select, Button } from "antd";
-import TitlePage from "../../../../components/TitlePage/TitlePage";
-import PurchasingTable from "../../../../components/ReactDataTable/Purchases/PurchasingTable";
+import { Row, Form, Input, InputNumber, Select, Button, Spin } from "antd";
+import TitlePage from "@iso/components/TitlePage/TitlePage";
+import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
+import StoreSaleTable from "../../../../components/ReactDataTable/Selling/StoreSaleTable";
+import createSaleFunc from "../utility/createSale";
 import nookies from "nookies";
 
 Toko.getInitialProps = async (context) => {
@@ -27,7 +30,7 @@ Toko.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -55,17 +58,87 @@ const fetchLocation = async (cookies) => {
 };
 
 function Toko({ props }) {
+  const products = useSelector((state) => state.Order);
+  const dispatch = useDispatch();
+
+  var locations = props.locations.data;
+  //var deliveredOrder = props.order.data;
+  var selectedProduct = products?.productList;
   const user = props.user;
-  const locations = props.locations.data;
+
+
   const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const [productList, setProductList] = useState([]);
+  const [additionalFee, setAdditionalFee] = useState();
+  const [isFetchinData, setIsFetchingData] = useState(false);
+
+  const [dataValues, setDataValues] = useState();
   const [selectedCategory, setSelectedCategory] = useState("BEBAS");
+  const [deliveryFee, setDeliveryFee] = useState();
+
+  const router = useRouter();
   const { TextArea } = Input;
+  var today = new Date();
+
+  // DPP & PPN
+  //const dpp = 1.11;
+  //var ppn = 0;
+
+  // temp
+  const [biayaTambahan, setBiayaTambahan] = useState(0);
+  const [biayaPengiriman, setBiayaPengiriman] = useState(0);
+
+  const cookies = nookies.get(null, "token");
+  const tempList = [];
 
   const handleAdd = () => {
     console.log("tambah");
   };
 
-  const onFinish = () => {};
+  const handleDeliveryFee = (values) => {
+    setDeliveryFee(values.target.value);
+  }; 
+
+  const createSale = async (values) => {
+    //await createSaleFunc(products, grandTotal, totalPrice, values, listId, discPrice, form, router);
+    await createSaleFunc(values, values, values, values, values, values, form, router);
+  };
+
+  const onChangeProduct = async () => {
+    var isDuplicatedData = false;
+
+    tempList.find((item) => {
+      productList.forEach((element) => {
+        if (element.id === item.id) isDuplicatedData = true;
+      });
+    });
+
+    if (!isDuplicatedData) {
+      setProductList((productList) => [...productList, tempList[0]]);
+      toast.success("Produk berhasil ditambahkan!", {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 1000,
+      });
+    }
+  };
+
+  const onFinish = (values) => {console.log("data values : ",values)
+    setLoading(true);
+    setDataValues(values);
+    createSale(values);
+    setLoading(false); console.log("data values : ",dataValues)
+  };
+
+  const clearData = () => {
+    dispatch({ type: "CLEAR_DATA" });
+    //setTotalPrice(0);
+  };
+
+  useEffect(() => {
+    // used to reset redux from value before
+    clearData();
+  }, []);
 
   return (
     <>
@@ -223,8 +296,41 @@ function Toko({ props }) {
                 </div>
               </div>
 
-              <div className="w-full flex flex-wrap -mx-3 mb-3">
-                <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
+              <div className="w-full flex md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
+                  <SearchBar
+                    form={form}
+                    tempList={tempList}
+                    onChange={onChangeProduct}
+                    user={user}
+                    selectedProduct={selectedProduct}
+                    isBasedOnLocation={false}
+                  />
+              </div>
+
+              {isFetchinData ? (
+                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
+                    <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
+                      <LoadingAnimations />
+                    </div>
+                    <div className="text-sm align-middle text-center animate-pulse text-slate-400">Sedang Mengambil Data</div>
+                  </div>
+                ) : (
+                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
+                    <StoreSaleTable
+                      products={products}
+                      //productTotalPrice={productTotalPrice}
+                      //setTotalPrice={setTotalPrice}
+                      //setProductTotalPrice={setProductTotalPrice}
+                      //calculatePriceAfterDisc={calculatePriceAfterDisc}
+                      //productSubTotal={productSubTotal}
+                      locations={locations}
+                      formObj={form}
+                    />
+                  </div>
+              )}
+
+              <div className="w-full flex flex-wrap -mx-3 mb-1">
+                <div className="w-full md:w-1/3 px-3 mt-5 ">
                   <Form.Item name="disc_type">
                     <Select
                       //disabled={products.productList.length === 0}
@@ -244,7 +350,7 @@ function Toko({ props }) {
                     </Select>
                   </Form.Item>
                 </div>
-                <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
+                <div className="w-full md:w-1/3 px-3 mt-5 ">
                   <Form.Item name="disc_value" noStyle>
                     <InputNumber
                       //disabled={products.productList.length === 0}
@@ -256,25 +362,40 @@ function Toko({ props }) {
                     />
                   </Form.Item>
                 </div>
+              </div>
+
+              <div className="w-full flex flex-wrap -mx-3 mb-4">
                 {/*<div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">*/}
                 {/*  <Form.Item name="delivery_fee" noStyle>*/}
                 {/*    <InputNumber onChange={(e) => setBiayaPengiriman(e)} size="large" placeholder="Biaya Pengiriman" style={{ width: "100%" }} />*/}
                 {/*  </Form.Item>*/}
                 {/*</div>*/}
 
-                <div className="w-full md:w-1/4 px-3 mb-2">
-
+                <div className="w-full md:w-1/3 px-3">
+                  <Form.Item noStyle>
+                    <Input
+                      size="large"
+                      style={{
+                        width: "60%",
+                      }}
+                      value="Biaya Pengiriman"
+                      disabled
+                    />
+                  </Form.Item>
                   <Form.Item name="delivery_fee" initialValue={0} noStyle>
                     <Input
                       size="large"
                       style={{
-                        width: "50%",
+                        width: "40%",
                       }}
+                      onChange={handleDeliveryFee}
                     />
                   </Form.Item>
                 </div>
+              </div>
 
-                <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
+              <div className="w-full flex flex-wrap -mx-3 my-1 ">
+                <div className="w-full md:w-1/3 px-3">
                   <Form.Item name="DPP_active">
                     <Select
                       //disabled={products.productList.length === 0}
@@ -291,7 +412,7 @@ function Toko({ props }) {
                     </Select>
                   </Form.Item>
                 </div>
-                <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
+                <div className="w-full md:w-1/3 px-3">
                   <Form.Item name="PPN_active">
                     <Select
                       disabled={true}
@@ -377,8 +498,8 @@ function Toko({ props }) {
                 <Form.Item name="total" className="w-full h-2 md:w-1/2 mx-2">
                   Total
                 </Form.Item>
-                <Form.Item name="biayaPengiriman" className="w-full h-2 md:w-1/2 mx-2">
-                  Biaya Pengiriman
+                <Form.Item name="biayaPengiriman" value={deliveryFee} className="w-full h-2 md:w-1/2 mx-2">
+                  Biaya Pengiriman {deliveryFee}
                 </Form.Item>
                 <Form.Item name="biayaTambahan" className="w-full h-2 md:w-1/2 mx-2">
                   Biaya Tambahan
@@ -399,12 +520,17 @@ function Toko({ props }) {
               </div>
 
               <div  className="w-full flex justify-between">
-                <Button
-                htmlType="submit"
-                className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
-                >
-                Tambah
-                </Button>
+                  <Form.Item>
+                    {loading ? (
+                      <div className=" flex float-left ml-3 ">
+                        <Spin />
+                      </div>
+                    ) : (
+                      <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
+                        Tambah
+                      </Button>
+                    )}
+                  </Form.Item>
               </div>
             </Form>
           </LayoutContent>

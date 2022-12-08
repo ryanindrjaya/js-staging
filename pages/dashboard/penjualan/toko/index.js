@@ -18,10 +18,14 @@ Toko.getInitialProps = async (context) => {
   const reqLocation = await fetchLocation(cookies);
   const locations = await reqLocation.json();
 
+  const reqStore = await fetchStore(cookies);
+  const store = await reqStore.json();
+
   return {
     props: {
       user,
       locations,
+      store,
     },
   };
 };
@@ -54,11 +58,26 @@ const fetchLocation = async (cookies) => {
   return req;
 };
 
+const fetchStore = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
+};
+
 function Toko({ props }) { console.log("props :",props)
   //const user = props.user;
   const locations = props.locations.data;
+  const data = props.store;
   const router = useRouter();
-  //const [sell, setSell] = useState(data);
+  const [sell, setSell] = useState(data);
 
   const handleAdd = () => {
     console.log("tambah");
@@ -305,13 +324,13 @@ function Toko({ props }) { console.log("props :",props)
                 </button>
             </div>
 
-            {/*<SellingTable*/}
-            {/*  data={sell}*/}
-            {/*  //onUpdate={handleUpdate}*/}
-            {/*  //onDelete={handleDelete}*/}
-            {/*  //onPageChange={handlePageChange}*/}
-            {/*  //onChangeStatus={onChangeStatus}*/}
-            {/*/>*/}
+            <SellingTable
+              data={sell}
+              //onUpdate={handleUpdate}
+              //onDelete={handleDelete}
+              //onPageChange={handlePageChange}
+              //onChangeStatus={onChangeStatus}
+            />
           </LayoutContent>
         </LayoutWrapper>
       </DashboardLayout>

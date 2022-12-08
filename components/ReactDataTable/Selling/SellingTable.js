@@ -14,7 +14,7 @@ export default function ReactDataTable({
     onPageChange,
     onChangeStatusPengiriman,
     onChangeStatus,
-}) {
+}) { console.log("data nich : ", data)
     const router = useRouter();
     const { Option } = Select;
 
@@ -189,17 +189,17 @@ export default function ReactDataTable({
         {
           name: "Tanggal",
           width: "150px",
-          //selector: (row) => formatMyDate(row.attributes?.tanggal_retur),
+          selector: (row) => formatMyDate(row.attributes?.sale_date),
         },
         {
           name: "Customer",
           width: "180px",
-          //selector: (row) => row.attributes?.no_po ?? "-",
+          selector: (row) => row.attributes?.customer_name ?? "-",
         },
         {
           name: "NO Faktur",
           width: "180px",
-          //selector: (row) => row.attributes?.no_retur ?? "-",
+          selector: (row) => row.attributes?.faktur ?? "-",
         },
         {
           name: <div className="ml-6">Status</div>,
@@ -245,48 +245,48 @@ export default function ReactDataTable({
         {
           name: "Status Pembayaran",
           width: "150px",
-          selector: (row) => {
-            var tempoDate = new Date(row.attributes?.date_purchasing);
-            var tempoTime = parseInt(row.attributes?.tempo_days ?? 0);
-            var today = new Date();
-            var isTempo = false;
-            var statusPembayaran = row.attributes?.status_pembayaran;
-            var purchasingHistory = row.attributes?.purchasing_payments.data;
+          //selector: (row) => {
+          //  var tempoDate = new Date(row.attributes?.date_purchasing);
+          //  var tempoTime = parseInt(row.attributes?.tempo_days ?? 0);
+          //  var today = new Date();
+          //  var isTempo = false;
+          //  var statusPembayaran = row.attributes?.status_pembayaran;
+          //  var purchasingHistory = row.attributes?.purchasing_payments.data;
 
-            if (row.attributes?.tempo_time === "Hari") {
-              tempoDate.setDate(tempoDate.getDate() + tempoTime);
-            } else {
-              tempoDate.setDate(tempoDate.getMonth() + tempoTime);
-            }
+          //  if (row.attributes?.tempo_time === "Hari") {
+          //    tempoDate.setDate(tempoDate.getDate() + tempoTime);
+          //  } else {
+          //    tempoDate.setDate(tempoDate.getMonth() + tempoTime);
+          //  }
 
-            if (tempoDate < today) {
-              isTempo = true;
-            }
+          //  if (tempoDate < today) {
+          //    isTempo = true;
+          //  }
 
-            if (isTempo) {
-              if (statusPembayaran === "Belum Lunas") {
-                return <Tag color="red">Tempo</Tag>;
-              } else if (statusPembayaran === "Lunas") {
-                return <Tag color="green">Lunas</Tag>;
-              }
-            } else {
-              if (
-                statusPembayaran === "Belum Lunas" &&
-                purchasingHistory.length > 0
-              ) {
-                return <Tag color={tagRed}>Tempo</Tag>;
-              } else if (
-                statusPembayaran === "Lunas" &&
-                purchasingHistory.length > 0
-              ) {
-                return <Tag color={tagGreen}>Lunas</Tag>;
-              } else {
-                return <Tag color={tagOrange}>Menunggu</Tag>;
-              }
-            }
+          //  if (isTempo) {
+          //    if (statusPembayaran === "Belum Lunas") {
+          //      return <Tag color="red">Tempo</Tag>;
+          //    } else if (statusPembayaran === "Lunas") {
+          //      return <Tag color="green">Lunas</Tag>;
+          //    }
+          //  } else {
+          //    if (
+          //      statusPembayaran === "Belum Lunas" &&
+          //      purchasingHistory.length > 0
+          //    ) {
+          //      return <Tag color={tagRed}>Tempo</Tag>;
+          //    } else if (
+          //      statusPembayaran === "Lunas" &&
+          //      purchasingHistory.length > 0
+          //    ) {
+          //      return <Tag color={tagGreen}>Lunas</Tag>;
+          //    } else {
+          //      return <Tag color={tagOrange}>Menunggu</Tag>;
+          //    }
+          //  }
 
-            return <Tag color={tagOrange}>Menunggu</Tag>;
-          },
+          //  return <Tag color={tagOrange}>Menunggu</Tag>;
+          //},
         },
         {
           name: "Faktur Jatuh Tempo",
@@ -301,17 +301,17 @@ export default function ReactDataTable({
         {
           name: "Catatan Staff",
           width: "180px",
-          //selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
+          selector: (row) => row.attributes?.sale_staff ?? "-",
         },
         {
           name: "Catatan Penjualan",
           width: "180px",
-          //selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
+          selector: (row) => row.attributes?.sale_note ?? "-",
         },
         {
           name: "Ditambah Oleh",
           width: "180px",
-          //selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
+          selector: (row) => row.attributes?.added_by ?? "-",
         },
         {
             name: "Tindakan",
