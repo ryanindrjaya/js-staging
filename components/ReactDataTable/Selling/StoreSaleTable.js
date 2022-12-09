@@ -150,19 +150,31 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
       //selector: (row) => row.attributes?.name,
     },
     {
+      //name: "Harga Satuan",
+      //width: "150px",
+      //selector: (row) => {
+      //  var priceUnit = row.attributes?.buy_price_1;
+      //  return  (
+      //   <>
+      //    <Row>
+      //      <Form.Item name={["harga_satuan", `${row.id}`]} noStyle>
+      //          {priceUnit}
+      //      </Form.Item>
+      //    </Row>
+      //   </>
+      //   );
+      //},
       name: "Harga Satuan",
       width: "150px",
       selector: (row) => {
         var priceUnit = row.attributes?.buy_price_1;
-        return  (
-         <>
-          <Row>
-            <Form.Item name={["harga_satuan", `${row.id}`]} noStyle>
-                {priceUnit}
-            </Form.Item>
-          </Row>
-         </>
-         );
+        if (products.productInfo[row.id]) {
+          if (products.productInfo[row.id].priceUnit) {
+            priceUnit = products.productInfo[row.id].priceUnit;
+          }
+        }
+
+      return formatter.format(priceUnit);
       },
     },
     {
