@@ -22,11 +22,11 @@ export default function Locations({ data, onSelect, initialValue, errMsg, requir
         rules={[
           {
             required: required,
-            message: 'Lokasi Produk tidak boleh kosong!',
+            message: "Lokasi Produk tidak boleh kosong!",
           },
         ]}
       >
-        <Select mode="multiple" size="large" placeholder="Lokasi" onChange={onSelect}>
+        <Select onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")} mode="multiple" size="large" placeholder="Lokasi" onChange={onSelect}>
           {data.data.map((data) => (
             <Select.Option key={data.id} value={data.id}>
               {data.attributes.name}

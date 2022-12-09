@@ -52,7 +52,7 @@ export const auth = (ctx) => {
    */
   if (ctx.req && !token) {
     ctx.res.writeHead(302, { Location: "/signin" });
-    context.res.end();
+    context?.res?.end();
   }
 
   // We already checked for server. This should only happen on client.

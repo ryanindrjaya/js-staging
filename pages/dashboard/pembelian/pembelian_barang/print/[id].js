@@ -258,7 +258,7 @@ Print.getInitialProps = async (context) => {
       Location: "/signin?session=false",
       "Content-Type": "text/html; charset=utf-8",
     });
-    context.res.end();
+    context?.res?.end();
 
     return {};
   }

@@ -101,6 +101,7 @@ export default function Categories({
         ]}
       >
         <Select
+          onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")}
           size="large"
           showSearch
           value={category}

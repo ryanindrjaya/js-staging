@@ -154,6 +154,27 @@ const Tambah = ({ props }) => {
     // POST DATA
     const postRes = await handlePostData(formData);
 
+    if (postRes?.data?.attributes) {
+      setImage();
+      form.resetFields();
+      setDescUnit();
+      setFileList([]);
+      setUploadedOnce(true);
+      setSelectedManufactures({});
+      setSelectedSubCategory();
+      setSelectedGroup({});
+      setSelectLocation({});
+      toast.success("Produk berhasil ditambahkan!", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
+    } else {
+      toast.error(postRes?.message[0]?.messages[0]?.message, {
+        position: toast.POSITION.TOP_RIGHT,
+      });
+    }
+
+    console.log("postRes ->", postRes);
+
     setLoading(false);
   };
 
@@ -170,23 +191,7 @@ const Tambah = ({ props }) => {
     const req = await fetch(endpoint, options);
     const res = await req.json();
 
-    if (req.status === 200) {
-      setImage();
-      form.resetFields();
-      setDescUnit();
-      setFileList([]);
-      setUploadedOnce(true);
-      setSelectedManufactures({});
-      setSelectedSubCategory();
-      setSelectedGroup({});
-      setSelectLocation({});
-      toast.success("Produk berhasil ditambahkan!", {
-        position: toast.POSITION.TOP_RIGHT,
-      });
-      // router.reload();
-    } else {
-      console.log(res?.error);
-    }
+    return res;
   };
 
   const handlePutData = async (id, data) => {
@@ -339,7 +344,7 @@ const Tambah = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input style={{ height: "40px" }} placeholder="Nama Produk" />
+                    <Input onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")} style={{ height: "40px" }} placeholder="Nama Produk" />
                   </Form.Item>
                   <Categories
                     selectedCategory={category}
@@ -366,7 +371,7 @@ const Tambah = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input style={{ height: "40px" }} placeholder="SKU" />
+                    <Input onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")} style={{ height: "40px" }} placeholder="SKU" />
                   </Form.Item>
                   <Manufactures data={manufactures.data} selectedManufactures={selectedManufactures} onSelect={setSelectedManufactures} />
                   <Groups data={groups} selectedGroups={selectedGroups} onSelect={setSelectedGroup} />
@@ -450,7 +455,7 @@ Tambah.getInitialProps = async (context) => {
       Location: "/signin?session=false",
       "Content-Type": "text/html; charset=utf-8",
     });
-    context.res.end();
+    context?.res?.end();
 
     return {};
   }

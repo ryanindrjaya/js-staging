@@ -120,7 +120,8 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
   ];
 
   const setFocusHarga = (e) => {
-    e.target.setSelectionRange(0, 1);
+    const endSelection = e.target.value.split(",")[0].length;
+    e.target.setSelectionRange(0, endSelection);
   };
 
   const columns = [
@@ -132,7 +133,12 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
       },
       selector: (row) => (
         <Form.Item className="mt-4" name={`unit_${row.idx}`} initialValue={unit[row.idx - 1]}>
-          <Input size="small" placeholder={`Nama Unit ${row.idx}`} onChange={getDescUnit} />
+          <Input
+            onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")}
+            size="small"
+            placeholder={`Nama Unit ${row.idx}`}
+            onChange={getDescUnit}
+          />
         </Form.Item>
       ),
     },
@@ -145,6 +151,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
       selector: (row) => (
         <Form.Item className="mt-4" name={`qty_${row.idx}`} initialValue={qty[row.idx - 1]}>
           <InputNumber
+            onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")}
             style={{
               width: "100%",
             }}
@@ -165,6 +172,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
       selector: (row) => (
         <Form.Item className="mt-4" name={`buy_price_${row.idx}`} initialValue={buyPrice[row.idx - 1]}>
           <InputNumber
+            onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")}
             onFocus={setFocusHarga}
             formatter={formatterNumber}
             parser={parserNumber}
@@ -185,6 +193,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
       selector: (row) => (
         <Form.Item className="mt-4" name={`purchase_discount_${[row.idx]}`} initialValue={purchaseDiscount[row.idx - 1] ?? 0}>
           <InputNumber
+            onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")}
             onFocus={setFocusHarga}
             formatter={formatterNumber}
             parser={parserNumber}
@@ -211,6 +220,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
           initialValue={diskon1[row.idx - 1]}
         >
           <InputNumber
+            onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")}
             style={{
               width: "100%",
             }}
@@ -233,6 +243,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
           initialValue={diskon2[row.idx - 1]}
         >
           <InputNumber
+            onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")}
             style={{
               width: "100%",
             }}
@@ -255,6 +266,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
           initialValue={diskon3[row.idx - 1]}
         >
           <InputNumber
+            onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")}
             style={{
               width: "100%",
             }}
@@ -274,6 +286,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
           <InputNumber
             onFocus={setFocusHarga}
             formatter={formatterNumber}
+            onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")}
             parser={parserNumber}
             style={{
               width: "100%",
@@ -295,6 +308,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
             onFocus={setFocusHarga}
             formatter={formatterNumber}
             parser={parserNumber}
+            onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")}
             style={{
               width: "100%",
             }}
@@ -312,6 +326,7 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
       selector: (row) => (
         <Form.Item className="mt-4" name={`disc_1_${row.idx}`} initialValue={disc[row.idx - 1]}>
           <InputNumber
+            onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")}
             style={{
               width: "100%",
             }}
