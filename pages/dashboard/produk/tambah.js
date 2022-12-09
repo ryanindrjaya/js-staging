@@ -106,36 +106,36 @@ const Tambah = ({ props }) => {
     //   );
     // }
 
-    const categoryID = {
-      id: parseInt(values?.category_id),
-    };
+    // const categoryID = {
+    //   id: parseInt(values?.category_id),
+    // };
 
-    const subCategoryID = {
-      id: values?.subCategories,
-    };
+    // const subCategoryID = {
+    //   id: values?.subCategories,
+    // };
 
-    const manufacturesID = {
-      id: values?.manufactures,
-    };
+    // const manufacturesID = {
+    //   id: values?.manufactures,
+    // };
 
-    const groupID = {
-      id: values?.groups,
-    };
+    // const groupID = {
+    //   id: values?.groups,
+    // };
 
-    const locationsID = values.locations.map((locationId) => locationId);
+    // const locationsID = values.locations.map((locationId) => locationId);
 
-    delete values.category_id;
-    delete values.subCategories;
-    delete values.manufactures;
-    delete values.groups;
-    delete values.locations;
+    // delete values.category_id;
+    // delete values.subCategories;
+    // delete values.manufactures;
+    // delete values.groups;
+    // delete values.locations;
 
     const relationData = {
-      category: categoryID,
-      sub_category: subCategoryID,
-      manufacture: manufacturesID,
-      group: groupID,
-      locations: locationsID,
+      category: values.category_id,
+      sub_category: values.subCategories,
+      manufacture: values.manufactures,
+      group: values.groups,
+      locations: values.locations,
     };
 
     const data = {
