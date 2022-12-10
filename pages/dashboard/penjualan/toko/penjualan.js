@@ -10,6 +10,7 @@ import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import StoreSaleTable from "../../../../components/ReactDataTable/Selling/StoreSaleTable";
 import createSaleFunc from "../utility/createSale";
+import createDetailSaleFunc from "../utility/createDetailSale";
 import nookies from "nookies";
 
 Toko.getInitialProps = async (context) => {
@@ -77,6 +78,10 @@ function Toko({ props }) {
   const [selectedCategory, setSelectedCategory] = useState("BEBAS");
   const [deliveryFee, setDeliveryFee] = useState();
 
+  const [listId, setListId] = useState([]);
+  const [productTotalPrice, setProductTotalPrice] = useState({});
+  const [productSubTotal, setProductSubTotal] = useState({});
+
   const router = useRouter();
   const { TextArea } = Input;
   var today = new Date();
@@ -100,9 +105,13 @@ function Toko({ props }) {
     setDeliveryFee(values.target.value);
   }; 
 
+  const createDetailSale = async () => {
+    await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/store-sale-details");
+  };
+
   const createSale = async (values) => {
     //await createSaleFunc(products, grandTotal, totalPrice, values, listId, discPrice, form, router);
-    await createSaleFunc(values, values, values, values, values, values, form, router);
+    await createSaleFunc(1, 1, values, 1, form, router);
   };
 
   const onChangeProduct = async () => {
@@ -123,10 +132,17 @@ function Toko({ props }) {
     }
   };
 
+  //const calculatePriceAfterDisc = (row) => {
+  //  const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
+
+  //  return formatter.format(total);
+  //};
+
   const onFinish = (values) => {console.log("data values : ",values)
     setLoading(true);
     setDataValues(values);
-    createSale(values);
+    //createSale(values);
+    createDetailSale();
     setLoading(false); console.log("data values : ",dataValues)
   };
 
@@ -139,7 +155,7 @@ function Toko({ props }) {
     // used to reset redux from value before
     clearData();
   }, []);
-
+    console.log("products :", products)
   return (
     <>
       <Head>
@@ -511,10 +527,10 @@ function Toko({ props }) {
               </div>
 
               <div className="w-full flex justify-between">
-                <Form.Item name="catatanPenjualan" className="w-full md:w-1/2 mx-2">
+                <Form.Item name="sale_note" className="w-full md:w-1/2 mx-2">
                   <TextArea rows={4} placeholder="Catatan Penjualan" />
                 </Form.Item>
-                <Form.Item name="catatanStaff" className="w-full md:w-1/2 mx-2">
+                <Form.Item name="sale_staff" className="w-full md:w-1/2 mx-2">
                   <TextArea rows={4} placeholder="Catatan Staff" />
                 </Form.Item>
               </div>
