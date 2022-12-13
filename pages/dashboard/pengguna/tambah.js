@@ -55,6 +55,8 @@ const Tambah = ({ props }) => {
           position: toast.POSITION.TOP_RIGHT,
         });
       });
+
+      console.log(res);
     }
 
     setLoading(false);
