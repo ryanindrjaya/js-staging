@@ -12,6 +12,7 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
   var unit = 1;
   var priceUnit = 1;
   var tempIndex = 0;
+  var stock = 0;
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -24,19 +25,19 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
   };
 
   const onChangeUnit = (value, data) => { 
-    unit = value;
-    if(value == 1){ priceUnit = data.attributes.buy_price_1; }
-    else if(value == 2){ priceUnit = data.attributes.buy_price_2; }
-    else if(value == 3){ priceUnit = data.attributes.buy_price_3; }
-    else if(value == 4){ priceUnit = data.attributes.buy_price_4; }
-    else if(value == 5){ priceUnit = data.attributes.buy_price_5; }
+    //unit = value;
+    //if(value == 1){ priceUnit = data.attributes.buy_price_1; }
+    //else if(value == 2){ priceUnit = data.attributes.buy_price_2; }
+    //else if(value == 3){ priceUnit = data.attributes.buy_price_3; }
+    //else if(value == 4){ priceUnit = data.attributes.buy_price_4; }
+    //else if(value == 5){ priceUnit = data.attributes.buy_price_5; }
     
     dispatch({ type: "CHANGE_PRODUCT_UNIT", index: value, product: data });
-    onChangePriceUnit(priceUnit, data, value);
-    tempIndex = 0;
+    //onChangePriceUnit(priceUnit, data, value);
+    //tempIndex = 0;
   };
 
-  const onChangeQty = (value, data) => {
+  const onChangeQty = (value, data) => { console.log("data :",data);
     dispatch({
       type: "CHANGE_PRODUCT_QTY",
       qty: value,
@@ -52,38 +53,38 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
     });
   };
 
-  const onChangePriceUnit = (value, data, index) => { 
-    var tempPriceUnit = [];  console.log("value", value, data, index);
+  //const onChangePriceUnit = (value, data, index) => { 
+  //  var tempPriceUnit = [];  console.log("value", value, data, index);
     
-    tempPriceUnit.push(data.attributes.buy_price_1);
-    tempPriceUnit.push(data.attributes.buy_price_2);
-    tempPriceUnit.push(data.attributes.buy_price_3);
-    tempPriceUnit.push(data.attributes.buy_price_4);
-    tempPriceUnit.push(data.attributes.buy_price_5);
+  //  tempPriceUnit.push(data.attributes.buy_price_1);
+  //  tempPriceUnit.push(data.attributes.buy_price_2);
+  //  tempPriceUnit.push(data.attributes.buy_price_3);
+  //  tempPriceUnit.push(data.attributes.buy_price_4);
+  //  tempPriceUnit.push(data.attributes.buy_price_5);
     
-    data.attributes.buy_price_1 = value;
-    data.attributes.buy_price_2 = value;
-    data.attributes.buy_price_3 = value;
-    data.attributes.buy_price_4 = value;
-    data.attributes.buy_price_5 = value;
+  //  data.attributes.buy_price_1 = value;
+  //  data.attributes.buy_price_2 = value;
+  //  data.attributes.buy_price_3 = value;
+  //  data.attributes.buy_price_4 = value;
+  //  data.attributes.buy_price_5 = value;
 
-    if(tempIndex != index){
-        tempIndex = index;
-        onChangeUnit(index, data);
-    }
+  //  if(tempIndex != index){
+  //      tempIndex = index;
+  //      onChangeUnit(index, data);
+  //  }
 
-    data.attributes.buy_price_1 = tempPriceUnit[0];
-    data.attributes.buy_price_2 = tempPriceUnit[1];
-    data.attributes.buy_price_3 = tempPriceUnit[2];
-    data.attributes.buy_price_4 = tempPriceUnit[3];
-    data.attributes.buy_price_5 = tempPriceUnit[4];
+  //  data.attributes.buy_price_1 = tempPriceUnit[0];
+  //  data.attributes.buy_price_2 = tempPriceUnit[1];
+  //  data.attributes.buy_price_3 = tempPriceUnit[2];
+  //  data.attributes.buy_price_4 = tempPriceUnit[3];
+  //  data.attributes.buy_price_5 = tempPriceUnit[4];
 
-    formObj.setFieldsValue({
-        harga_satuan: {
-            [data.id]: value,
-        },
-    });
-  };
+  //  formObj.setFieldsValue({
+  //      harga_satuan: {
+  //          [data.id]: value,
+  //      },
+  //  });
+  //};
 
   const onChangeD1D2D3 = (value, data, type) => {
     switch (type) {
@@ -147,23 +148,9 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
     {
       name: "Jumlah Stock",
       width: "150px",
-      //selector: (row) => row.attributes?.name,
+      selector: (row) => row?.stock,
     },
     {
-      //name: "Harga Satuan",
-      //width: "150px",
-      //selector: (row) => {
-      //  var priceUnit = row.attributes?.buy_price_1;
-      //  return  (
-      //   <>
-      //    <Row>
-      //      <Form.Item name={["harga_satuan", `${row.id}`]} noStyle>
-      //          {priceUnit}
-      //      </Form.Item>
-      //    </Row>
-      //   </>
-      //   );
-      //},
       name: "Harga Satuan",
       width: "150px",
       selector: (row) => {

@@ -22,10 +22,14 @@ Toko.getInitialProps = async (context) => {
   const reqLocation = await fetchLocation(cookies);
   const locations = await reqLocation.json();
 
+  const reqInven = await fetchInven(cookies);
+  const inven = await reqInven.json();
+
   return {
     props: {
       user,
       locations,
+      inven,
     },
   };
 };
@@ -58,15 +62,28 @@ const fetchLocation = async (cookies) => {
   return req;
 };
 
+const fetchInven = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/inventories?populate=deep";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
+};
+
 function Toko({ props }) {
   const products = useSelector((state) => state.Order);
   const dispatch = useDispatch();
 
-  var locations = props.locations.data;
-  //var deliveredOrder = props.order.data;
   var selectedProduct = products?.productList;
+  const locations = props.locations.data;
   const user = props.user;
-
+  const inven = props.inven.data;
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -138,18 +155,31 @@ function Toko({ props }) {
   //  return formatter.format(total);
   //};
 
-  const onFinish = (values) => {console.log("data values : ",values)
+  const onFinish = (values) => {console.log("data values : ", values)
     setLoading(true);
     setDataValues(values);
     //createSale(values);
     createDetailSale();
-    setLoading(false); console.log("data values : ",dataValues)
+    setLoading(false); console.log("data values : ", dataValues)
   };
 
   const clearData = () => {
     dispatch({ type: "CLEAR_DATA" });
     //setTotalPrice(0);
   };
+
+  useEffect(() => {
+    if(products.productList.length > 0){ 
+        inven.forEach((element) => {
+            products.productList.forEach((data) => {
+              if (data.id == element.attributes.products.data[0].id) {
+                data.stock = element.attributes.total_stock;
+              }  
+            });
+          }
+        );
+    }
+  }, [products.productList]);
 
   useEffect(() => {
     // used to reset redux from value before
