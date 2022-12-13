@@ -33,16 +33,19 @@ const Edit = ({ props }) => {
     let newLocation = [];
     try {
       data.locations.forEach((element) => {
-        newLocation.push(element.value);
+        if (element.value) {
+          newLocation.push(element.value);
+        } else{
+          newLocation.push(element);
+        }
       });
     } catch (error) {
       console.log("no location detected");
     }
 
-    console.log(newLocation);
+
     data.locations = newLocation;
     console.log(data);
-
 
     const endpoint = process.env.NEXT_PUBLIC_URL + "/users/" + user.id;
     const JSONdata = JSON.stringify(data);
@@ -56,7 +59,6 @@ const Edit = ({ props }) => {
       body: JSONdata,
     };
 
-    // console.log(data);
     const req = await fetch(endpoint, options);
     const res = await req.json();
 
@@ -69,7 +71,7 @@ const Edit = ({ props }) => {
       toast.error("Tidak dapat memperbarui Pengguna", {
         position: toast.POSITION.TOP_RIGHT,
       });
-      console.log('error', res);
+      console.log("error", res);
     }
 
     setLoading(false);
