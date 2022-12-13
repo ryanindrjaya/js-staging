@@ -30,6 +30,23 @@ const Edit = ({ props }) => {
     const role = await getRole(values.role_id);
     const data = { ...values, role, deleteAble: true };
 
+    let newLocation = [];
+    try {
+      data.locations.forEach((element) => {
+        if (element.value) {
+          newLocation.push(element.value);
+        } else{
+          newLocation.push(element);
+        }
+      });
+    } catch (error) {
+      console.log("no location detected");
+    }
+
+
+    data.locations = newLocation;
+    console.log(data);
+
     const endpoint = process.env.NEXT_PUBLIC_URL + "/users/" + user.id;
     const JSONdata = JSON.stringify(data);
 
@@ -51,18 +68,18 @@ const Edit = ({ props }) => {
         position: toast.POSITION.TOP_RIGHT,
       });
     } else {
-      res.error?.details.errors.map((error) => {
-        toast.error("Tidak dapat memperbarui Pengguna", {
-          position: toast.POSITION.TOP_RIGHT,
-        });
+      toast.error("Tidak dapat memperbarui Pengguna", {
+        position: toast.POSITION.TOP_RIGHT,
       });
+      console.log("error", res);
     }
 
     setLoading(false);
   };
 
   const getRole = async (roleId) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/users-permissions/roles/" + roleId;
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL + "/users-permissions/roles/" + roleId;
     const options = {
       method: "GET",
       headers: {
@@ -109,7 +126,12 @@ const Edit = ({ props }) => {
                     <Input
                       disabled
                       style={{ height: "50px" }}
-                      prefix={<UserOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
+                      prefix={
+                        <UserOutlined
+                          style={{ fontSize: "150%" }}
+                          className="site-form-item-icon mr-5"
+                        />
+                      }
                       placeholder="Username"
                     />
                   </Form.Item>
@@ -127,7 +149,12 @@ const Edit = ({ props }) => {
                   >
                     <Input
                       style={{ height: "50px" }}
-                      prefix={<UserOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
+                      prefix={
+                        <UserOutlined
+                          style={{ fontSize: "150%" }}
+                          className="site-form-item-icon mr-5"
+                        />
+                      }
                       placeholder="Nama"
                     />
                   </Form.Item>
@@ -145,16 +172,31 @@ const Edit = ({ props }) => {
                   >
                     <Input
                       style={{ height: "50px" }}
-                      prefix={<MailOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
+                      prefix={
+                        <MailOutlined
+                          style={{ fontSize: "150%" }}
+                          className="site-form-item-icon mr-5"
+                        />
+                      }
                       placeholder="Email"
                     />
                   </Form.Item>
                 </div>
               </div>
 
-              <Locations data={locations} onSelect={setSelectLocation} initialValue={userLocation} errMsg={"Harap pilih lokasi user"} required />
+              <Locations
+                data={locations}
+                onSelect={setSelectLocation}
+                initialValue={userLocation}
+                errMsg={"Harap pilih lokasi user"}
+                required
+              />
 
-              <Form.Item name="role_id" className="w-1/4 mb-5 ml-1" initialValue={userRole.id}>
+              <Form.Item
+                name="role_id"
+                className="w-1/4 mb-5 ml-1"
+                initialValue={userRole.id}
+              >
                 <Select placeholder="Role">
                   {role.map((role) =>
                     role.name === "Authenticated" || role.name === "Public" ? (
@@ -174,7 +216,10 @@ const Edit = ({ props }) => {
                     <Spin />
                   </div>
                 ) : (
-                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
+                  <Button
+                    htmlType="submit"
+                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
+                  >
                     Submit
                   </Button>
                 )}

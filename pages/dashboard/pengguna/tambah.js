@@ -40,6 +40,7 @@ const Tambah = ({ props }) => {
       body: JSONdata,
     };
 
+
     const req = await fetch(endpoint, options);
     const res = await req.json();
 
