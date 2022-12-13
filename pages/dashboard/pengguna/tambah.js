@@ -27,6 +27,7 @@ const Tambah = ({ props }) => {
       locationsID.push({ id: values.locations[index] });
     }
     const data = { ...values, role, locations: locationsID, deleteAble: true };
+    // const data = { ...values, role : {id : role.id}, locations: locationsID, deleteAble: true };
 
     const endpoint = process.env.NEXT_PUBLIC_URL + "/auth/local/register";
     const JSONdata = JSON.stringify(data);
@@ -40,22 +41,26 @@ const Tambah = ({ props }) => {
       body: JSONdata,
     };
 
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
+    console.log(JSONdata);
 
-    if (req.status === 200) {
-      form.resetFields();
-      toast.success("Data Pengguna berhasil ditambahkan!", {
-        position: toast.POSITION.TOP_RIGHT,
-      });
-    } else {
-      res.error?.details.errors.map((error) => {
-        const ErrorMsg = error.path[0];
-        toast.error("Tidak dapat menambahkan Pengguna", {
-          position: toast.POSITION.TOP_RIGHT,
-        });
-      });
-    }
+    // const req = await fetch(endpoint, options);
+    // const res = await req.json();
+
+    // if (req.status === 200) {
+    //   form.resetFields();
+    //   toast.success("Data Pengguna berhasil ditambahkan!", {
+    //     position: toast.POSITION.TOP_RIGHT,
+    //   });
+    // } else {
+    //   res.error?.details.errors.map((error) => {
+    //     const ErrorMsg = error.path[0];
+    //     toast.error("Tidak dapat menambahkan Pengguna", {
+    //       position: toast.POSITION.TOP_RIGHT,
+    //     });
+    //   });
+
+    //   console.log(res);
+    // }
 
     setLoading(false);
   };

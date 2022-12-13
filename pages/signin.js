@@ -53,7 +53,7 @@ export default function SignInPage(props) {
         nookies.set(null, "token", res.jwt, {
           maxAge: 30 * 24 * 60 * 60,
           path: "/",
-          secure: process.env.NEXT_PUBLIC_URL !== "development",
+          secure: process.env.NODE_ENV !== "development",
           sameSite: "strict",
         });
 
@@ -62,7 +62,7 @@ export default function SignInPage(props) {
         nookies.set(null, "role", role, {
           maxAge: 30 * 24 * 60 * 60,
           path: "/",
-          secure: process.env.NEXT_PUBLIC_URL !== "development",
+          secure: process.env.NODE_ENV !== "development",
           sameSite: "strict",
         });
 

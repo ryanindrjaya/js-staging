@@ -1,4 +1,3 @@
-import React from "react";
 import nookies from "nookies";
 import { notification } from "antd";
 
