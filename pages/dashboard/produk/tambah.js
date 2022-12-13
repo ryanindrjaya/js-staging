@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
-import { Button, Form, Input, message, Upload, notification } from "antd";
+import { Button, Form, Input, message, Upload, notification, Image } from "antd";
 import nookies from "nookies";
 import { toast } from "react-toastify";
 import { Spin, Row } from "antd";
@@ -14,13 +14,13 @@ import SubCategories from "../../../components/Form/AddProduct/subCategories";
 import Groups from "../../../components/Form/AddProduct/Groups";
 import Locations from "../../../components/Form/AddProduct/Locations";
 import { useRouter } from "next/router";
-import Image from "next/image";
 import UnitTable from "../../../components/ReactDataTable/Product/UnitsTable";
 import { FileImageOutlined } from "@ant-design/icons";
 import setDiskonValue from "./utility/setDiskonValue";
 import setHargaValue, { setHargaNew } from "./utility/setHargaValue";
 import ConfirmDialog from "../../../components/Alert/ConfirmDialog";
 import debounce from "./utility/debounce";
+import UploadDokumen from "../../../components/ReactDataTable/Product/UploadDokumen";
 
 const Tambah = ({ props }) => {
   const [image, setImage] = useState();
@@ -53,9 +53,16 @@ const Tambah = ({ props }) => {
   const [selectedSubCategory, setSelectedSubCategory] = useState();
 
   const [descUnit, setDescUnit] = useState();
+  const [file, setFile] = useState();
 
   const imageLoader = ({ src }) => {
-    return process.env.NEXT_PUBLIC_URL + image?.url;
+    return BASE_API + image;
+  };
+
+  const getBase64 = (img, callback) => {
+    const reader = new FileReader();
+    reader.addEventListener("load", () => callback(reader.result));
+    reader.readAsDataURL(img);
   };
 
   const propsDagger = {
@@ -71,42 +78,18 @@ const Tambah = ({ props }) => {
       setUploadedOnce(true);
       setImage();
       setFileList([]);
+      setFile();
     },
 
-    async onChange(info) {
-      if (info.fileList.length === 1) {
-        const endpoint = process.env.NEXT_PUBLIC_URL + "/upload";
-        const file = info.file.originFileObj;
-        const data = new FormData();
-        data.append("files", file);
-
-        setFileList(info.fileList);
-
-        const options = {
-          method: "POST",
-          headers: {
-            Authorization: "Bearer " + cookies.token,
-          },
-          body: data,
-        };
-
-        if (uploadedOnce) {
-          setUploadedOnce(false);
-          const req = await fetch(endpoint, options);
-          const res = await req.json();
-
-          if (req.status === 200) {
-            setImage(res[0]);
-
-            message.success(`${info.file.name} berhasil diupload`);
-          } else {
-            message.error(`${info.file.name} gagal upload`);
-          }
-        }
-      } else if (info.fileList.length === 0) {
-        message.info(`Gambar berhasil dihapus`);
-      } else {
-        message.error(`Hanya dapat menambahkan 1 gambar`);
+    onChange(info) {
+      if (info.file.status !== "removed") {
+        setFile(info.file.originFileObj);
+        setFileList([info.file]);
+        // Get this url from response in real world.
+        getBase64(info.file.originFileObj, (url) => {
+          setLoading(false);
+          setImage(url);
+        });
       }
     },
   };
@@ -114,72 +97,95 @@ const Tambah = ({ props }) => {
   const onFinish = async (values) => {
     setLoading(true);
 
+    console.log(values);
+    // return;
+
     // if (selectedSubCategory === 0) {
     //   message.error(
     //     `Sub Kategori tidak ditemukan pada Induk Kategori. Silahkan cek kembali`
     //   );
     // }
 
-    const categoryID = {
-      id: parseInt(values?.category_id),
+    // const categoryID = {
+    //   id: parseInt(values?.category_id),
+    // };
+
+    // const subCategoryID = {
+    //   id: values?.subCategories,
+    // };
+
+    // const manufacturesID = {
+    //   id: values?.manufactures,
+    // };
+
+    // const groupID = {
+    //   id: values?.groups,
+    // };
+
+    // const locationsID = values.locations.map((locationId) => locationId);
+
+    // delete values.category_id;
+    // delete values.subCategories;
+    // delete values.manufactures;
+    // delete values.groups;
+    // delete values.locations;
+
+    const relationData = {
+      category: values.category_id,
+      sub_category: values.subCategories,
+      manufacture: values.manufactures,
+      group: values.groups,
+      locations: values.locations,
     };
 
-    const subCategoryID = {
-      id: values?.subCategories,
-    };
-
-    const manufacturesID = {
-      id: values?.manufactures,
-    };
-
-    const groupID = {
-      id: values?.groups,
-    };
-
-    const locationsID = values.locations.map((locationId) => locationId);
-
-    delete values.locations;
-    delete values.category_id;
-    delete values.subCategories;
-    delete values.manufactures;
-    delete values.groups;
-
-    const postData = {
+    const data = {
       ...values,
-      locations: locationsID,
+      ...relationData,
     };
 
-    const putData = {
-      category: categoryID,
-      sub_category: subCategoryID,
-      manufacture: manufacturesID,
-      group: groupID,
-      locations: locationsID,
-      image: { id: image?.id },
-    };
+    const formData = new FormData();
+    if (file) {
+      console.log("file ->", file);
+      formData.append("files.image", file);
+    }
 
-    console.log("put data", putData);
+    formData.append("data", JSON.stringify(data));
 
     // POST DATA
-    const postRes = await handlePostData(postData);
-    console.log(postRes);
-    // PUT DATA
-    await handlePutData(postRes?.data?.id, putData);
+    const postRes = await handlePostData(formData);
+
+    if (postRes?.data?.attributes) {
+      setImage();
+      form.resetFields();
+      setDescUnit();
+      setFileList([]);
+      setUploadedOnce(true);
+      setSelectedManufactures({});
+      setSelectedSubCategory();
+      setSelectedGroup({});
+      setSelectLocation({});
+      toast.success("Produk berhasil ditambahkan!", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
+    } else {
+      toast.error(postRes?.message[0]?.messages[0]?.message, {
+        position: toast.POSITION.TOP_RIGHT,
+      });
+    }
+
+    console.log("postRes ->", postRes);
 
     setLoading(false);
   };
 
   const handlePostData = async (data) => {
     const endpoint = process.env.NEXT_PUBLIC_URL + "/products";
-    const dataPost = { data: data };
-    const JSONdata = JSON.stringify(dataPost);
     const options = {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         Authorization: "Bearer " + cookies.token,
       },
-      body: JSONdata,
+      body: data,
     };
 
     const req = await fetch(endpoint, options);
@@ -191,14 +197,16 @@ const Tambah = ({ props }) => {
   const handlePutData = async (id, data) => {
     const endpoint = process.env.NEXT_PUBLIC_URL + "/products/" + id;
 
+    const dataPut = { data: data };
     for (const key in data) {
       if (data[key].id === undefined || data[key].id === NaN) {
         delete data[key];
       }
     }
 
-    const dataPut = { data: data };
     const JSONdata = JSON.stringify(dataPut);
+
+    console.log(dataPut);
 
     const options = {
       method: "PUT",
@@ -219,18 +227,13 @@ const Tambah = ({ props }) => {
         toast.success("Produk berhasil ditambahkan!", {
           position: toast.POSITION.TOP_RIGHT,
         });
-        router.reload();
+        // router.reload();
       } else {
         res?.error?.details?.errors.map((error) => {
           const ErrorMsg = error.path[0];
-          toast.error(
-            ErrorMsg === "SKU"
-              ? "SKU sudah digunakan"
-              : "Tidak dapat menambahkan Produk",
-            {
-              position: toast.POSITION.TOP_RIGHT,
-            }
-          );
+          toast.error(ErrorMsg === "SKU" ? "SKU sudah digunakan" : "Tidak dapat menambahkan Produk", {
+            position: toast.POSITION.TOP_RIGHT,
+          });
         });
       }
     } catch (error) {
@@ -243,8 +246,7 @@ const Tambah = ({ props }) => {
   const checkSKU = async (value) => {
     setStatusSKU({ status: "validating", message: "" });
 
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/products?filters[SKU][$eq]=" + value;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/products?filters[SKU][$eq]=" + value;
     const options = {
       method: "GET",
       headers: {
@@ -286,18 +288,7 @@ const Tambah = ({ props }) => {
   };
 
   const getDescriptionUnit = () => {
-    const unitText = form.getFieldsValue([
-      "unit_1",
-      "qty_1",
-      "unit_2",
-      "qty_2",
-      "unit_3",
-      "qty_3",
-      "unit_4",
-      "qty_4",
-      "unit_5",
-      "qty_5",
-    ]);
+    const unitText = form.getFieldsValue(["unit_1", "qty_1", "unit_2", "qty_2", "unit_3", "qty_3", "unit_4", "qty_4", "unit_5", "qty_5"]);
 
     let unit1 = `${unitText.qty_1 ?? ""} ${unitText.unit_1 ?? ""} `;
     let unit2 = `${unitText.qty_2 ?? ""} ${unitText.unit_2 ?? ""} `;
@@ -332,6 +323,7 @@ const Tambah = ({ props }) => {
           <TitlePage titleText={"Tambahkan Produk"} />
           <LayoutContent>
             <Form
+              encType="multipart/form-data"
               form={form}
               name="add_product"
               initialValues={{
@@ -352,10 +344,7 @@ const Tambah = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "40px" }}
-                      placeholder="Nama Produk"
-                    />
+                    <Input onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")} style={{ height: "40px" }} placeholder="Nama Produk" />
                   </Form.Item>
                   <Categories
                     selectedCategory={category}
@@ -364,11 +353,7 @@ const Tambah = ({ props }) => {
                     setSelectedSubCategory={setSelectedSubCategory}
                     selectedSubCategory={selectedSubCategory}
                   />
-                  <SubCategories
-                    subCategories={subCategories}
-                    onSelect={setSelectedSubCategory}
-                    selectedSubCategory={selectedSubCategory}
-                  />
+                  <SubCategories subCategories={subCategories} onSelect={setSelectedSubCategory} selectedSubCategory={selectedSubCategory} />
                   <Form.Item name="description">
                     <TextArea rows={4} placeholder="Deskripsi" />
                   </Form.Item>
@@ -386,23 +371,11 @@ const Tambah = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input style={{ height: "40px" }} placeholder="SKU" />
+                    <Input onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")} style={{ height: "40px" }} placeholder="SKU" />
                   </Form.Item>
-                  <Manufactures
-                    data={manufactures.data}
-                    selectedManufactures={selectedManufactures}
-                    onSelect={setSelectedManufactures}
-                  />
-                  <Groups
-                    data={groups}
-                    selectedGroups={selectedGroups}
-                    onSelect={setSelectedGroup}
-                  />
-                  <Locations
-                    data={locations}
-                    onSelect={setSelectLocation}
-                    required={true}
-                  />
+                  <Manufactures data={manufactures.data} selectedManufactures={selectedManufactures} onSelect={setSelectedManufactures} />
+                  <Groups data={groups} selectedGroups={selectedGroups} onSelect={setSelectedGroup} />
+                  <Locations data={locations} onSelect={setSelectLocation} required={true} />
                 </div>
 
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
@@ -412,19 +385,11 @@ const Tambah = ({ props }) => {
                         <p className="ant-upload-drag-icon">
                           <FileImageOutlined />
                         </p>
-                        <p className="ant-upload-text">
-                          Klik atau tarik gambar ke kotak ini
-                        </p>
-                        <p className="ant-upload-hint  m-3">
-                          Gambar akan digunakan sebagai contoh tampilan produk
-                        </p>
+                        <p className="ant-upload-text">Klik atau tarik gambar ke kotak ini</p>
+                        <p className="ant-upload-hint  m-3">Gambar akan digunakan sebagai contoh tampilan produk</p>
                       </>
                     ) : (
-                      <Image
-                        layout="fill"
-                        loader={imageLoader}
-                        src={process.env.NEXT_PUBLIC_URL + image?.url}
-                      />
+                      <Image style={{ width: "100%" }} preview={false} src={image} />
                     )}
                   </Dragger>
                 </div>
@@ -433,11 +398,7 @@ const Tambah = ({ props }) => {
               <div>
                 <h6 className="">HARGA</h6>
               </div>
-              <UnitTable
-                getDescUnit={getDescriptionUnit}
-                descUnit={descUnit}
-                form={form}
-              />
+              <UnitTable getDescUnit={getDescriptionUnit} descUnit={descUnit} form={form} />
 
               <Form.Item className="mt-5">
                 {loading ? (
@@ -451,11 +412,7 @@ const Tambah = ({ props }) => {
                       onCancel={() => {}}
                       title="Tambah Produk"
                       message="Apakah anda yakin ingin menambahkan produk ini?"
-                      component={
-                        <Button className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
-                          Simpan
-                        </Button>
-                      }
+                      component={<Button className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">Simpan</Button>}
                     />
                     <Button htmlType="submit" ref={submitBtn}></Button>
                   </>
@@ -486,6 +443,22 @@ Tambah.getInitialProps = async (context) => {
 
   const reqSubCategories = await fetchDataSubCategories(cookies);
   const subCategories = await reqSubCategories.json();
+
+  if (
+    reqCategories.status !== 200 ||
+    reqGroups.status !== 200 ||
+    reqLocations.status !== 200 ||
+    reqManufactures.status !== 200 ||
+    reqSubCategories.status !== 200
+  ) {
+    context.res.writeHead(302, {
+      Location: "/signin?session=false",
+      "Content-Type": "text/html; charset=utf-8",
+    });
+    context?.res?.end();
+
+    return {};
+  }
 
   return {
     props: {

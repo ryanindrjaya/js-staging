@@ -45,14 +45,9 @@ const Edit = ({ props }) => {
     } else {
       res.error?.details.errors.map((error) => {
         const ErrorMsg = error.path[0];
-        toast.error(
-          ErrorMsg === "code"
-            ? "Kode sudah digunakan"
-            : "Tidak dapat memperbarui Data",
-          {
-            position: toast.POSITION.TOP_RIGHT,
-          }
-        );
+        toast.error(ErrorMsg === "code" ? "Kode sudah digunakan" : "Tidak dapat memperbarui Data", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
       });
     }
 
@@ -88,10 +83,7 @@ const Edit = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "50px" }}
-                      placeholder="Kode Pabrik"
-                    />
+                    <Input style={{ height: "50px" }} placeholder="Kode Pabrik" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
@@ -105,10 +97,7 @@ const Edit = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "50px" }}
-                      placeholder="Nama Pabrikasi"
-                    />
+                    <Input style={{ height: "50px" }} placeholder="Nama Pabrikasi" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
@@ -122,18 +111,12 @@ const Edit = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "50px" }}
-                      placeholder="Nama Singkatan Pabrik"
-                    />
+                    <Input style={{ height: "50px" }} placeholder="Nama Singkatan Pabrik" />
                   </Form.Item>
                 </div>
 
                 <div className="w-full md:w-full px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    initialValue={golongan.attributes.description}
-                    name="description"
-                  >
+                  <Form.Item initialValue={golongan.attributes.description} name="description">
                     <TextArea rows={4} placeholder="Deskripsi" />
                   </Form.Item>
                 </div>
@@ -145,10 +128,7 @@ const Edit = ({ props }) => {
                     <Spin />
                   </div>
                 ) : (
-                 <Button
-                    htmlType="submit"
-                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
-                  >
+                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
                     Submit
                   </Button>
                 )}
@@ -175,6 +155,16 @@ Edit.getInitialProps = async (context) => {
   };
   const res = await fetch(endpoint, options);
   const data = await res.json();
+
+  if (res.status !== 200) {
+    context.res.writeHead(302, {
+      Location: "/signin?session=false",
+      "Content-Type": "text/html; charset=utf-8",
+    });
+    context?.res?.end();
+
+    return {};
+  }
 
   return {
     props: {

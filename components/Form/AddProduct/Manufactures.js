@@ -2,20 +2,13 @@ import { Form, Select, Spin } from "antd";
 import nookies from "nookies";
 import { useState } from "react";
 
-export default function Manufactures({
-  onSelect,
-  initialValue,
-  selectedManufacures,
-  label,
-}) {
+export default function Manufactures({ onSelect, initialValue, selectedManufacures, label }) {
   const [manufactures, setSelectedManufactures] = useState(selectedManufacures);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const cookies = nookies.get(null, "token");
 
-  const options = data?.map((d) => (
-    <Select.Option key={d.value}>{d.label}</Select.Option>
-  ));
+  const options = data?.map((d) => <Select.Option key={d.value}>{d.label}</Select.Option>);
 
   const handleSearchManufacure = (newValue) => {
     if (newValue) {
@@ -39,8 +32,7 @@ export default function Manufactures({
     } else {
       try {
         const endpoint =
-          process.env.NEXT_PUBLIC_URL +
-          `/manufactures?filters[$or][0][name][$containsi]=${query}&filters[$or][1][code][$containsi]=${query}`;
+          process.env.NEXT_PUBLIC_URL + `/manufactures?filters[$or][0][name][$containsi]=${query}&filters[$or][1][code][$containsi]=${query}`;
         const options = {
           method: "GET",
           headers: {
@@ -82,6 +74,7 @@ export default function Manufactures({
         ]}
       >
         <Select
+          onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")}
           value={manufactures ?? initialValue?.attributes.name}
           size="large"
           defaultValue={

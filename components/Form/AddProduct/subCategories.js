@@ -19,6 +19,7 @@ export default function subCategories({ subCategories, onSelect, selectedSubCate
     <div className="w-full md:w-full mb-2 md:mb-0">
       <Form.Item initialValue={initialValue} name="subCategories" className="w-1/1">
         <Select
+          onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")}
           size="large"
           showSearch
           showArrow={false}

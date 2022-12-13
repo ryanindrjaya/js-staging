@@ -21,8 +21,7 @@ const Edit = ({ props }) => {
   const onFinish = async (values) => {
     setLoading(true);
     const data = { data: values };
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/categories/" + categories.id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/categories/" + categories.id;
     const JSONdata = JSON.stringify(data);
 
     const options = {
@@ -48,14 +47,9 @@ const Edit = ({ props }) => {
     } else {
       res.error?.details.errors.map((error) => {
         const ErrorMsg = error.path[0];
-        toast.error(
-          ErrorMsg === "category_id"
-            ? "ID Kategori udah digunakan"
-            : "Tidak dapat menambahkan Kategori",
-          {
-            position: toast.POSITION.TOP_RIGHT,
-          }
-        );
+        toast.error(ErrorMsg === "category_id" ? "ID Kategori udah digunakan" : "Tidak dapat menambahkan Kategori", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
       });
     }
 
@@ -91,10 +85,7 @@ const Edit = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "50px" }}
-                      placeholder="ID Kategori"
-                    />
+                    <Input style={{ height: "50px" }} placeholder="ID Kategori" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
@@ -108,17 +99,11 @@ const Edit = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "50px" }}
-                      placeholder="Nama Kategori"
-                    />
+                    <Input style={{ height: "50px" }} placeholder="Nama Kategori" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-full px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="description"
-                    initialValue={categories.attributes.description}
-                  >
+                  <Form.Item name="description" initialValue={categories.attributes.description}>
                     <TextArea rows={4} placeholder="Deskripsi" />
                   </Form.Item>
                 </div>
@@ -130,10 +115,7 @@ const Edit = ({ props }) => {
                     <Spin />
                   </div>
                 ) : (
-                  <Button
-                    htmlType="submit"
-                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
-                  >
+                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
                     Submit
                   </Button>
                 )}
@@ -160,6 +142,16 @@ Edit.getInitialProps = async (context) => {
   };
   const res = await fetch(endpoint, options);
   const category = await res.json();
+
+  if (res.status !== 200) {
+    context.res.writeHead(302, {
+      Location: "/signin?session=false",
+      "Content-Type": "text/html; charset=utf-8",
+    });
+    context?.res?.end();
+
+    return {};
+  }
 
   return {
     props: {

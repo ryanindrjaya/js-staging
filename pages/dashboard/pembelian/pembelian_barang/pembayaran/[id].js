@@ -6,18 +6,7 @@ import DashboardLayout from "../../../../../containers/DashboardLayout/Dashboard
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import nookies from "nookies";
-import {
-  Row,
-  Form,
-  Input,
-  Select,
-  InputNumber,
-  DatePicker,
-  Button,
-  notification,
-  Spin,
-  Collapse,
-} from "antd";
+import { Row, Form, Input, Select, InputNumber, DatePicker, Button, notification, Spin, Collapse } from "antd";
 import PurchasingPaymentTable from "../../../../../components/ReactDataTable/Purchases/PurchasingPaymentTable";
 import * as moment from "moment";
 
@@ -25,8 +14,7 @@ Pembayaran.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/purchasings/" + id + "?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings/" + id + "?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -36,6 +24,16 @@ Pembayaran.getInitialProps = async (context) => {
   };
   const res = await fetch(endpoint, options);
   const purchases = await res.json();
+
+  if (res.status !== 200) {
+    context.res.writeHead(302, {
+      Location: "/signin?session=false",
+      "Content-Type": "text/html; charset=utf-8",
+    });
+    context?.res?.end();
+
+    return {};
+  }
 
   return {
     props: {
@@ -62,28 +60,23 @@ function Pembayaran({ props }) {
   const statusPembayaran = props.purchases.data.attributes.status_pembayaran;
 
   // SUPPLIER INFO
-  var supplierName =
-    props.purchases.data.attributes.supplier?.data?.attributes.name;
-  var supplierAddress =
-    props.purchases.data.attributes.supplier?.data?.attributes.address;
+  var supplierName = props.purchases.data.attributes.supplier?.data?.attributes.name;
+  var supplierAddress = props.purchases.data.attributes.supplier?.data?.attributes.address;
   var noNota = props.purchases.data.attributes.no_nota_suppplier ?? "-";
 
   // PURCHASING INFO
   var purchasingDate = props.purchases.data.attributes.date_purchasing;
   var statusPembelian = props.purchases.data.attributes.status;
   var lokasi = props.purchases.data.attributes?.location.data?.attributes.name;
-  var totalItem =
-    props.purchases.data.attributes.purchasing_details.data?.length ?? 0;
+  var totalItem = props.purchases.data.attributes.purchasing_details.data?.length ?? 0;
   var deliveryFee = props.purchases.data.attributes.delivery_fee ?? 0;
   var priceAfterDisc = props.purchases.data.attributes.price_after_disc ?? 0;
   var totalPurchasing = props.purchases.data.attributes.total_purchasing;
 
   // HISTORY
-  var purchasingHistory =
-    props.purchases.data.attributes.purchasing_payments?.data;
+  var purchasingHistory = props.purchases.data.attributes.purchasing_payments?.data;
   var lastIndex = purchasingHistory.length - 1;
-  var paymentRemaining =
-    purchasingHistory[lastIndex]?.attributes.payment_remaining;
+  var paymentRemaining = purchasingHistory[lastIndex]?.attributes.payment_remaining;
 
   useEffect(() => {
     setTempoPayment(getPriceAfterDisc());
@@ -113,11 +106,9 @@ function Pembayaran({ props }) {
 
   const getTotalProduct = () => {
     var total = 0;
-    props.purchases.data.attributes.purchasing_details.data.forEach(
-      (element) => {
-        total = total + element.attributes.sub_total;
-      }
-    );
+    props.purchases.data.attributes.purchasing_details.data.forEach((element) => {
+      total = total + element.attributes.sub_total;
+    });
 
     return total;
   };
@@ -125,8 +116,7 @@ function Pembayaran({ props }) {
   const getAdditionalFee = () => {
     var total = 0;
     for (let index = 1; index < 6; index++) {
-      var price =
-        props.purchases.data.attributes[`additional_fee_${index}_sub`];
+      var price = props.purchases.data.attributes[`additional_fee_${index}_sub`];
       total = total + price;
     }
 
@@ -139,9 +129,7 @@ function Pembayaran({ props }) {
       total = props.purchases.data.attributes.disc_value;
     } else if (props.purchases.data.attributes.disc_type === "Persentase") {
       var totalProduct = getTotalProduct();
-      total =
-        totalProduct -
-        totalProduct * props.purchases.data.attributes.disc_value;
+      total = totalProduct - totalProduct * props.purchases.data.attributes.disc_value;
     }
     return total;
   };
@@ -199,9 +187,7 @@ function Pembayaran({ props }) {
 
   const getFirstPayment = () => {
     var firstPayment = 0;
-    var paymentHistory =
-      props.purchases.data.attributes.purchasing_payments.data[0]?.attributes
-        ?.payment;
+    var paymentHistory = props.purchases.data.attributes.purchasing_payments.data[0]?.attributes?.payment;
 
     if (paymentHistory) {
       firstPayment = paymentHistory;
@@ -225,17 +211,13 @@ function Pembayaran({ props }) {
       isValid = false;
       notification["error"]({
         message: `Pembayaran kosong`,
-        description:
-          "Tidak ada pembayaran yang dilakukan. Silahkan masukan jumlah pembayaran yang akan dilakukan",
+        description: "Tidak ada pembayaran yang dilakukan. Silahkan masukan jumlah pembayaran yang akan dilakukan",
       });
     }
 
     for (let index = 1; index < 4; index++) {
       if (values[`payment_value_${index}`]) {
-        if (
-          values[`payment_method_${index}`] === null ||
-          values[`payment_method_${index}`] === undefined
-        ) {
+        if (values[`payment_method_${index}`] === null || values[`payment_method_${index}`] === undefined) {
           notification["error"]({
             message: `Metode Pembayaran ${index} Kosong`,
             description: "Silahkan pilih metode pembayaran terlebih dahulu",
@@ -293,16 +275,14 @@ function Pembayaran({ props }) {
       router.replace("/dashboard/pembelian/pembelian_barang");
       notification["success"]({
         message: `Pembayaran Berhasil`,
-        description:
-          "Pembayaran berhasil ditambahkan ke dalam pembelian. Silahkan cek untuk detail lebih lanjut",
+        description: "Pembayaran berhasil ditambahkan ke dalam pembelian. Silahkan cek untuk detail lebih lanjut",
       });
     }
   };
 
   const getPaymentData = async (paymentId) => {
     const id = props.purchases.data.id;
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/purchasings/" + id + "?populate=*";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings/" + id + "?populate=*";
     const cookies = nookies.get(null, "token");
     const options = {
       method: "GET",
@@ -358,8 +338,7 @@ function Pembayaran({ props }) {
     if (req.status === 200) {
       notification["success"]({
         message: `Pembayaran Lunas`,
-        description:
-          "Pembayaran pada transaksi ini sudah lunas. Silahkan cek kembali status pembayaran",
+        description: "Pembayaran pada transaksi ini sudah lunas. Silahkan cek kembali status pembayaran",
       });
     }
   };
@@ -393,44 +372,25 @@ function Pembayaran({ props }) {
               <div className="mt-2">
                 <Row justify="space-between flex flex-wrap -mx-3 mb-3">
                   <div className="w-1/3">
-                    <p className="text-sm m-0 pt-1">
-                      Nama Supplier : {supplierName}
-                    </p>
-                    <p className="text-sm m-0 pt-1">
-                      Alamat Supplier : {supplierAddress}
-                    </p>
-                    <p className="text-sm m-0 pt-1 font-bold">
-                      No Nota Supplier : {noNota}
-                    </p>
+                    <p className="text-sm m-0 pt-1">Nama Supplier : {supplierName}</p>
+                    <p className="text-sm m-0 pt-1">Alamat Supplier : {supplierAddress}</p>
+                    <p className="text-sm m-0 pt-1 font-bold">No Nota Supplier : {noNota}</p>
                   </div>
                   <div className="w-1/3 uppercase">
                     {statusPembayaran === "Belum Lunas" ? (
-                      <p className="text-lg m-0 pt-1 font-bold text-red-500">
-                        {statusPembayaran}
-                      </p>
+                      <p className="text-lg m-0 pt-1 font-bold text-red-500">{statusPembayaran}</p>
                     ) : (
-                      <p className="text-lg m-0 pt-1 font-bold text-green-400">
-                        {statusPembayaran}
-                      </p>
+                      <p className="text-lg m-0 pt-1 font-bold text-green-400">{statusPembayaran}</p>
                     )}
                   </div>
 
                   <div className="mt-14 md:mt-1">
-                    <p className="text-sm m-0 pt-1 right-16">
-                      Tanggal Pembelian : {purchasingDate}
-                    </p>
-                    <p className="text-sm m-0 pt-1">
-                      Status Pembelian : {statusPembelian}
-                    </p>
+                    <p className="text-sm m-0 pt-1 right-16">Tanggal Pembelian : {purchasingDate}</p>
+                    <p className="text-sm m-0 pt-1">Status Pembelian : {statusPembelian}</p>
                     <p className="text-sm m-0 pt-1">Lokasi Gudang : {lokasi}</p>
-                    <button
-                      type="button"
-                      className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex mb-4 mt-4"
-                    >
+                    <button type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex mb-4 mt-4">
                       <div className="text-white text-center text-sm font-bold">
-                        <a className="text-white no-underline text-xs sm:text-xs">
-                          Lihat Dokumen
-                        </a>
+                        <a className="text-white no-underline text-xs sm:text-xs">Lihat Dokumen</a>
                       </div>
                     </button>
                   </div>
@@ -445,10 +405,7 @@ function Pembayaran({ props }) {
                 <Row justify="space-between">
                   <div className="w-full md:w-1/3">
                     <Form.Item name="disc_description" noStyle>
-                      <Input
-                        size="large"
-                        placeholder="Keterangan Diskon"
-                      ></Input>
+                      <Input size="large" placeholder="Keterangan Diskon"></Input>
                     </Form.Item>
                     <div className="pt-3">
                       <Row justify="start">
@@ -457,11 +414,7 @@ function Pembayaran({ props }) {
                         </Form.Item>
 
                         <Form.Item name="disc_type" noStyle>
-                          <Select
-                            placeholder="Jenis Diskon"
-                            size="large"
-                            style={{ width: "50%" }}
-                          >
+                          <Select placeholder="Jenis Diskon" size="large" style={{ width: "50%" }}>
                             <Select.Option value="Tetap" key="Tetap">
                               Tetap
                             </Select.Option>
@@ -482,44 +435,23 @@ function Pembayaran({ props }) {
                           },
                         ]}
                       >
-                        <DatePicker
-                          placeholder="Tanggal Pembayaran"
-                          size="large"
-                          format={"DD/MM/YYYY"}
-                          style={{ width: "200%" }}
-                        />
+                        <DatePicker placeholder="Tanggal Pembayaran" size="large" format={"DD/MM/YYYY"} style={{ width: "200%" }} />
                       </Form.Item>
                     </div>
 
                     <div>
-                      <p className="text-sm m-0 pt-1  text-start">
-                        Saldo Di muka : {formatter.format(getFirstPayment())}
-                      </p>
-                      <p className="text-sm m-0 pt-1  text-start">
-                        Jumlah Pembayaran : {formatter.format(totalPayment)}
-                      </p>
+                      <p className="text-sm m-0 pt-1  text-start">Saldo Di muka : {formatter.format(getFirstPayment())}</p>
+                      <p className="text-sm m-0 pt-1  text-start">Jumlah Pembayaran : {formatter.format(totalPayment)}</p>
                     </div>
 
                     <div className="pt-3">
                       <Row justify="start">
-                        <Form.Item
-                          name="payment_value_1"
-                          initialValue={0}
-                          noStyle
-                        >
-                          <InputNumber
-                            onChange={setTotal}
-                            size="large"
-                            style={{ width: "40%", marginRight: "15px" }}
-                          />
+                        <Form.Item name="payment_value_1" initialValue={0} noStyle>
+                          <InputNumber onChange={setTotal} size="large" style={{ width: "40%", marginRight: "15px" }} />
                         </Form.Item>
 
                         <Form.Item name="payment_method_1" noStyle>
-                          <Select
-                            placeholder="Metode Pembayaran"
-                            size="large"
-                            style={{ width: "55%" }}
-                          >
+                          <Select placeholder="Metode Pembayaran" size="large" style={{ width: "55%" }}>
                             <Select.Option value="Bank 1" key="Bank 1">
                               Bank 1
                             </Select.Option>
@@ -529,16 +461,10 @@ function Pembayaran({ props }) {
                             <Select.Option value="Bank 3" key="Bank 3">
                               Bank 3
                             </Select.Option>
-                            <Select.Option
-                              value="Cash On Delivery"
-                              key="Cash On Delivery"
-                            >
+                            <Select.Option value="Cash On Delivery" key="Cash On Delivery">
                               Cash On Delivery
                             </Select.Option>
-                            <Select.Option
-                              value="Bayar Langsung"
-                              key="Bayar Langsung"
-                            >
+                            <Select.Option value="Bayar Langsung" key="Bayar Langsung">
                               Bayar Langsung
                             </Select.Option>
                           </Select>
@@ -547,24 +473,12 @@ function Pembayaran({ props }) {
                     </div>
                     <div className="pt-3">
                       <Row justify="start">
-                        <Form.Item
-                          name="payment_value_2"
-                          initialValue={0}
-                          noStyle
-                        >
-                          <InputNumber
-                            onChange={setTotal}
-                            size="large"
-                            style={{ width: "40%", marginRight: "15px" }}
-                          />
+                        <Form.Item name="payment_value_2" initialValue={0} noStyle>
+                          <InputNumber onChange={setTotal} size="large" style={{ width: "40%", marginRight: "15px" }} />
                         </Form.Item>
 
                         <Form.Item name="payment_method_2" noStyle>
-                          <Select
-                            placeholder="Metode Pembayaran"
-                            size="large"
-                            style={{ width: "55%" }}
-                          >
+                          <Select placeholder="Metode Pembayaran" size="large" style={{ width: "55%" }}>
                             <Select.Option value="Bank 1" key="Bank 1">
                               Bank 1
                             </Select.Option>
@@ -574,16 +488,10 @@ function Pembayaran({ props }) {
                             <Select.Option value="Bank 3" key="Bank 3">
                               Bank 3
                             </Select.Option>
-                            <Select.Option
-                              value="Cash On Delivery"
-                              key="Cash On Delivery"
-                            >
+                            <Select.Option value="Cash On Delivery" key="Cash On Delivery">
                               Cash On Delivery
                             </Select.Option>
-                            <Select.Option
-                              value="Bayar Langsung"
-                              key="Bayar Langsung"
-                            >
+                            <Select.Option value="Bayar Langsung" key="Bayar Langsung">
                               Bayar Langsung
                             </Select.Option>
                           </Select>
@@ -592,24 +500,12 @@ function Pembayaran({ props }) {
                     </div>
                     <div className="pt-3">
                       <Row justify="start">
-                        <Form.Item
-                          name="payment_value_3"
-                          initialValue={0}
-                          noStyle
-                        >
-                          <InputNumber
-                            onChange={setTotal}
-                            size="large"
-                            style={{ width: "40%", marginRight: "15px" }}
-                          />
+                        <Form.Item name="payment_value_3" initialValue={0} noStyle>
+                          <InputNumber onChange={setTotal} size="large" style={{ width: "40%", marginRight: "15px" }} />
                         </Form.Item>
 
                         <Form.Item name="payment_method_3" noStyle>
-                          <Select
-                            placeholder="Metode Pembayaran"
-                            size="large"
-                            style={{ width: "55%" }}
-                          >
+                          <Select placeholder="Metode Pembayaran" size="large" style={{ width: "55%" }}>
                             <Select.Option value="Bank 1" key="Bank 1">
                               Bank 1
                             </Select.Option>
@@ -619,16 +515,10 @@ function Pembayaran({ props }) {
                             <Select.Option value="Bank 3" key="Bank 3">
                               Bank 3
                             </Select.Option>
-                            <Select.Option
-                              value="Cash On Delivery"
-                              key="Cash On Delivery"
-                            >
+                            <Select.Option value="Cash On Delivery" key="Cash On Delivery">
                               Cash On Delivery
                             </Select.Option>
-                            <Select.Option
-                              value="Bayar Langsung"
-                              key="Bayar Langsung"
-                            >
+                            <Select.Option value="Bayar Langsung" key="Bayar Langsung">
                               Bayar Langsung
                             </Select.Option>
                           </Select>
@@ -638,42 +528,18 @@ function Pembayaran({ props }) {
                   </div>
 
                   <div>
-                    <p className="text-sm m-0 pt-1  text-start">
-                      Total Item : {totalItem}
-                    </p>
-                    <p className="text-sm m-0 pt-1  text-start">
-                      Total Harga : {formatter.format(getTotalProduct())}
-                    </p>
-                    <p className="text-sm m-0 pt-1  text-start">
-                      Diskon : -{formatter.format(getDiscPrice())}
-                    </p>
-                    <p className="text-sm m-0 pt-1  text-start">
-                      Biaya Kirim : {formatter.format(deliveryFee)}
-                    </p>
-                    <p className="text-sm m-0 pt-1  text-start">
-                      Biaya Lain : {formatter.format(getAdditionalFee())}
-                    </p>
-                    <p className="text-sm m-0 pt-4  text-start">
-                      DPP : {formatter.format(getDPP())}
-                    </p>
-                    <p className="text-sm m-0 pt-1  text-start">
-                      PPN : {formatter.format(getPPN())}
-                    </p>
-                    <p className="text-lg m-0 pt-4 font-bold text-start">
-                      TOTAL PEMBAYARAN INC PAJAK :
-                    </p>
-                    <p className="text-lg m-0 pt-1 font-bold text-start">
-                      {formatter.format(getPriceInclTax())}
-                    </p>
-                    <p className="text-sm m-0 pt-5 font-bold text-start">
-                      PEMBAYARAN TEMPO : {formatter.format(tempoPayment)}
-                    </p>
-                    <p className="text-sm m-0 pt-1 font-bold text-start">
-                      Total Pembayaran : {formatter.format(getPriceInclTax())}
-                    </p>
-                    <p className="text-sm m-0 pt-1 font-bold text-start">
-                      Total Kembali : {formatter.format(changePrice)}
-                    </p>
+                    <p className="text-sm m-0 pt-1  text-start">Total Item : {totalItem}</p>
+                    <p className="text-sm m-0 pt-1  text-start">Total Harga : {formatter.format(getTotalProduct())}</p>
+                    <p className="text-sm m-0 pt-1  text-start">Diskon : -{formatter.format(getDiscPrice())}</p>
+                    <p className="text-sm m-0 pt-1  text-start">Biaya Kirim : {formatter.format(deliveryFee)}</p>
+                    <p className="text-sm m-0 pt-1  text-start">Biaya Lain : {formatter.format(getAdditionalFee())}</p>
+                    <p className="text-sm m-0 pt-4  text-start">DPP : {formatter.format(getDPP())}</p>
+                    <p className="text-sm m-0 pt-1  text-start">PPN : {formatter.format(getPPN())}</p>
+                    <p className="text-lg m-0 pt-4 font-bold text-start">TOTAL PEMBAYARAN INC PAJAK :</p>
+                    <p className="text-lg m-0 pt-1 font-bold text-start">{formatter.format(getPriceInclTax())}</p>
+                    <p className="text-sm m-0 pt-5 font-bold text-start">PEMBAYARAN TEMPO : {formatter.format(tempoPayment)}</p>
+                    <p className="text-sm m-0 pt-1 font-bold text-start">Total Pembayaran : {formatter.format(getPriceInclTax())}</p>
+                    <p className="text-sm m-0 pt-1 font-bold text-start">Total Kembali : {formatter.format(changePrice)}</p>
                   </div>
                 </Row>
               </div>
@@ -687,53 +553,23 @@ function Pembayaran({ props }) {
               <div className="my-5">
                 <p className="font-bold">Riwayat Pembayaran</p>
                 {purchasingHistory.map((element) => {
-                  var date = new Date(
-                    element.attributes.payment_date
-                  ).toLocaleDateString();
+                  var date = new Date(element.attributes.payment_date).toLocaleDateString();
                   return (
                     <Collapse accordion>
                       <Panel header={date} key={date}>
+                        <p>{`Pembayaran 1 : ${formatter.format(element.attributes.payment_value_1)} (${element.attributes.payment_method_1})`}</p>
                         <p>
-                          {`Pembayaran 1 : ${formatter.format(
-                            element.attributes.payment_value_1
-                          )} (${element.attributes.payment_method_1})`}
+                          {`Pembayaran 2 : ${formatter.format(element.attributes.payment_value_2)} (${element.attributes.payment_method_2 ?? "-"})`}
                         </p>
                         <p>
-                          {`Pembayaran 2 : ${formatter.format(
-                            element.attributes.payment_value_2
-                          )} (${element.attributes.payment_method_2 ?? "-"})`}
-                        </p>
-                        <p>
-                          {`Pembayaran 3 : ${formatter.format(
-                            element.attributes.payment_value_3
-                          )} (${element.attributes.payment_method_3 ?? "-"})`}
+                          {`Pembayaran 3 : ${formatter.format(element.attributes.payment_value_3)} (${element.attributes.payment_method_3 ?? "-"})`}
                         </p>
 
-                        <p className="font-bold pt-5">
-                          {`Pembayaran : ${formatter.format(
-                            element.attributes.payment
-                          )}`}
-                        </p>
-                        <p className="font-bold">
-                          {`Total Pembayaran : ${formatter.format(
-                            element.attributes.total_payment
-                          )}`}
-                        </p>
-                        <p className="font-bold">
-                          {`Sisa Pembayaran : ${formatter.format(
-                            element.attributes.payment_remaining
-                          )}`}
-                        </p>
-                        <p className="font-bold">
-                          {`Kembalian : ${formatter.format(
-                            element.attributes.change
-                          )}`}
-                        </p>
-                        <p className="pt-5 italic">
-                          {`Catatan : ${
-                            element.attributes.additional_note ?? "-"
-                          }`}
-                        </p>
+                        <p className="font-bold pt-5">{`Pembayaran : ${formatter.format(element.attributes.payment)}`}</p>
+                        <p className="font-bold">{`Total Pembayaran : ${formatter.format(element.attributes.total_payment)}`}</p>
+                        <p className="font-bold">{`Sisa Pembayaran : ${formatter.format(element.attributes.payment_remaining)}`}</p>
+                        <p className="font-bold">{`Kembalian : ${formatter.format(element.attributes.change)}`}</p>
+                        <p className="pt-5 italic">{`Catatan : ${element.attributes.additional_note ?? "-"}`}</p>
                       </Panel>
                     </Collapse>
                   );
@@ -746,10 +582,7 @@ function Pembayaran({ props }) {
                     <Spin />
                   </div>
                 ) : (
-                  <Button
-                    htmlType="submit"
-                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
-                  >
+                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
                     Simpan
                   </Button>
                 )}

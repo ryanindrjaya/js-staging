@@ -24,6 +24,7 @@ import modal from "@iso/redux/modal/reducer";
 import quiz from "@iso/redux/quiz/reducer";
 import profile from "@iso/redux/profile/reducer";
 import githubSearch from "@iso/redux/githubSearch/reducers";
+import session from "@iso/redux/session/reducer";
 
 export default combineReducers({
   Order,
@@ -51,4 +52,5 @@ export default combineReducers({
   drawer,
   profile,
   githubSearch,
+  session,
 });

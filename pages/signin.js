@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import Input from "@iso/components/uielements/input";
 import Button from "@iso/components/uielements/button";
@@ -8,6 +8,7 @@ import authActions from "../authentication/actions";
 import SignInStyleWrapper from "../styled/SignIn.styles";
 import { Spin, Alert } from "antd";
 import nookies from "nookies";
+import Head from "next/head";
 
 const { login } = authActions;
 
@@ -18,6 +19,9 @@ export default function SignInPage(props) {
   const [failedLogin, setFailedLogin] = useState(false);
   const [failedLoginMsg, setfailedLoginMsg] = useState("Username atau Password salah");
   const [field, setField] = useState({});
+  const message = useSelector((state) => state.session.sessionMessage);
+
+  const isExpired = router?.query?.session || true;
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -49,7 +53,7 @@ export default function SignInPage(props) {
         nookies.set(null, "token", res.jwt, {
           maxAge: 30 * 24 * 60 * 60,
           path: "/",
-          secure: process.env.NEXT_PUBLIC_URL !== "development",
+          secure: process.env.NODE_ENV !== "development",
           sameSite: "strict",
         });
 
@@ -58,7 +62,7 @@ export default function SignInPage(props) {
         nookies.set(null, "role", role, {
           maxAge: 30 * 24 * 60 * 60,
           path: "/",
-          secure: process.env.NEXT_PUBLIC_URL !== "development",
+          secure: process.env.NODE_ENV !== "development",
           sameSite: "strict",
         });
 
@@ -110,39 +114,47 @@ export default function SignInPage(props) {
   // =========================== UI ===========================
 
   return (
-    <SignInStyleWrapper className="isoSignInPage">
-      <div className="isoLoginContentWrapper">
-        <div className="isoLoginContent">
-          <div className="isoLogoWrapper">JAYA SEHAT</div>
+    <>
+      <Head>
+        <title>Login</title>
+      </Head>
+      <SignInStyleWrapper className="isoSignInPage">
+        <div className="isoLoginContentWrapper">
+          <div className="isoLoginContent">
+            <div className="isoLogoWrapper">JAYA SEHAT</div>
 
-          <div className="isoSignInForm">
-            <div className="isoInputWrapper">
-              <Input onChange={setValue} name="username" id="inputUserName" size="large" placeholder="Username" />
-            </div>
+            <div className="isoSignInForm">
+              <div className="isoInputWrapper">
+                <Input onChange={setValue} name="username" id="inputUserName" size="large" placeholder="Username" />
+              </div>
 
-            <div className="isoInputWrapper">
-              <Input onChange={setValue} id="inpuPassword" size="large" name="password" type="password" placeholder="Password" />
-            </div>
+              <div className="isoInputWrapper">
+                <Input onChange={setValue} id="inpuPassword" size="large" name="password" type="password" placeholder="Password" />
+              </div>
 
-            <div className="isoInputWrapper isoLeftRightComponent">
-              {loading ? (
-                <div className="center">
-                  <Spin />
-                </div>
+              <div className="isoInputWrapper isoLeftRightComponent">
+                {loading ? (
+                  <div className="center">
+                    <Spin />
+                  </div>
+                ) : (
+                  <div className="flex flex-col">
+                    {isExpired !== true ? <p className="text-sm text-red-500">Sesi anda telah berakhir, harap login kembali</p> : ""}
+                    <Button block type="primary" onClick={handleLogin}>
+                      <IntlMessages id="page.signInButton" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+              {failedLogin ? (
+                <Alert message="Login Error" description="Username atau Password salah" type="error" closable onClose={onClose} />
               ) : (
-                <Button type="primary" onClick={handleLogin}>
-                  <IntlMessages id="page.signInButton" />
-                </Button>
+                <div></div>
               )}
             </div>
-            {failedLogin ? (
-              <Alert message="Login Error" description="Username atau Password salah" type="error" closable onClose={onClose} />
-            ) : (
-              <div></div>
-            )}
           </div>
         </div>
-      </div>
-    </SignInStyleWrapper>
+      </SignInStyleWrapper>
+    </>
   );
 }

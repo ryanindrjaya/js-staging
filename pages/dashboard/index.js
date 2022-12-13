@@ -3,6 +3,7 @@ import Head from "next/head";
 import Maintenance from "../../components/Illustration/Maintenance";
 import DashboardLayout from "../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
+import nookies from "nookies";
 
 const Dashboard = () => {
   return (
@@ -20,9 +21,28 @@ const Dashboard = () => {
             </center>
           </div>
         </LayoutWrapper>
+        z
       </DashboardLayout>
     </>
   );
+};
+
+Dashboard.getInitialProps = async (context) => {
+  const cookies = nookies.get(context);
+
+  if (!cookies.token) {
+    context.res.writeHead(302, {
+      Location: "/signin?session=false",
+      "Content-Type": "text/html; charset=utf-8",
+    });
+    context?.res?.end();
+
+    return {};
+  }
+
+  return {
+    props: {},
+  };
 };
 
 export default Dashboard;

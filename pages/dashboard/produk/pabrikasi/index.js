@@ -24,7 +24,7 @@ const Pabrikasi = ({ props }) => {
       const req = await searchQuery(e.target.value);
       const res = await req.json();
 
-      setManufacture(res.data);
+      setManufacture(res);
       setIsSearching(false);
     } else {
       setManufacture(data);
@@ -35,9 +35,9 @@ const Pabrikasi = ({ props }) => {
   const searchQuery = async (keywords) => {
     const endpoint =
       process.env.NEXT_PUBLIC_URL +
-      "/manufactures?filters[$or][0][name][$contains]=" +
+      "/manufactures?filters[$or][0][name][$containsi]=" +
       keywords +
-      "&filters[$or][1][code][$contains]=" +
+      "&filters[$or][1][code][$containsi]=" +
       keywords +
       "&populate=*";
 
@@ -87,8 +87,7 @@ const Pabrikasi = ({ props }) => {
 
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/manufactures?pagination[page]=" + page;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/manufactures?pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -149,22 +148,15 @@ const Pabrikasi = ({ props }) => {
               <button
                 onClick={handleAddSubManufacture}
                 type="button"
-               className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+                className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
               >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    + Tambah
-                  </a>
+                  <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
                 </div>
               </button>
             </div>
 
-            <Manufacture
-              data={manufature}
-              onDelete={handleDelete}
-              onUpdate={handleUpdateManufacture}
-              onPageChange={handlePageChange}
-            />
+            <Manufacture data={manufature} onDelete={handleDelete} onUpdate={handleUpdateManufacture} onPageChange={handlePageChange} />
           </LayoutContent>
         </LayoutWrapper>
       </DashboardLayout>
@@ -178,6 +170,16 @@ Pabrikasi.getInitialProps = async (context) => {
 
   const req = await fetchData(cookies);
   data = await req.json();
+
+  if (req.status !== 200) {
+    context.res.writeHead(302, {
+      Location: "/signin?session=false",
+      "Content-Type": "text/html; charset=utf-8",
+    });
+    context?.res?.end();
+
+    return {};
+  }
 
   return {
     props: {

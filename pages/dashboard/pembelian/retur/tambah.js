@@ -17,7 +17,7 @@ import createReturFunc from "../utility/createRetur";
 import { useRouter } from "next/router";
 
 Retur.getInitialProps = async (context) => {
-    const cookies = nookies.get(context);
+  const cookies = nookies.get(context);
 
   const reqLocation = await fetchLocation(cookies);
   const location = await reqLocation.json();
@@ -27,6 +27,16 @@ Retur.getInitialProps = async (context) => {
 
   const reqDataLPB = await fetchDataLPB(cookies);
   const dataLPB = await reqDataLPB.json();
+
+  if (reqLocation.status !== 200) {
+    context.res.writeHead(302, {
+      Location: "/signin?session=false",
+      "Content-Type": "text/html; charset=utf-8",
+    });
+    context?.res?.end();
+
+    return {};
+  }
 
   return {
     props: {
@@ -52,31 +62,31 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchDataRetur = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/returs?populate=deep";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
 
-    const req = await fetch(endpoint, options);
-    return req;
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
 const fetchDataLPB = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=deep";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
 
-    const req = await fetch(endpoint, options);
-    return req;
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
 function Retur({ props }) {
@@ -152,15 +162,9 @@ function Retur({ props }) {
       });
     }
   };
-    
+
   const calculatePriceAfterDisc = (row) => {
-    const total = calculatePrice(
-      row,
-      products,
-      productTotalPrice,
-      productSubTotal,
-      setTotalPrice
-    );
+    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
 
     return formatter.format(total);
   };
@@ -169,11 +173,11 @@ function Retur({ props }) {
     //clearData();
     const endpoint = process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=deep`;
     const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
     };
 
     const req = await fetch(endpoint, options);
@@ -188,16 +192,16 @@ function Retur({ props }) {
   };
 
   const setProductValue = async () => {
-      if (products.productList.length != 0) {
-          products.productList.forEach((element) => {
-              console.log("masuk")
-              form.setFieldsValue({
-                  harga_satuan: {
-                      [element.id]: element.attributes.buy_price_1,
-                  },
-              });
-          });
-      }
+    if (products.productList.length != 0) {
+      products.productList.forEach((element) => {
+        console.log("masuk");
+        form.setFieldsValue({
+          harga_satuan: {
+            [element.id]: element.attributes.buy_price_1,
+          },
+        });
+      });
+    }
   };
 
   useEffect(() => {
@@ -211,7 +215,7 @@ function Retur({ props }) {
     }
   }, [totalPrice]);
 
-  useEffect(() => { 
+  useEffect(() => {
     if (listId.length > 0) {
       createRetur(dataValues);
     }
@@ -291,19 +295,19 @@ function Retur({ props }) {
                     <Input style={{ height: "40px" }} placeholder="No.Retur" />
                   </Form.Item>
                 </div>
-                    <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                      <Form.Item
-                        name="tanggal_retur"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Tanggal tidak boleh kosong!",
-                          },
-                        ]}
-                      >
-                        <DatePicker placeholder="Tanggal Retur" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
-                      </Form.Item>
-                    </div>
+                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
+                  <Form.Item
+                    name="tanggal_retur"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Tanggal tidak boleh kosong!",
+                      },
+                    ]}
+                  >
+                    <DatePicker placeholder="Tanggal Retur" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
+                  </Form.Item>
+                </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Upload {...data}>
                     <Button size="large" icon={<UploadOutlined />}>
@@ -330,10 +334,7 @@ function Retur({ props }) {
                     >
                       {locations.map((element) => {
                         return (
-                          <Select.Option
-                            value={element.id}
-                            key={element.attributes.name}
-                          >
+                          <Select.Option value={element.id} key={element.attributes.name}>
                             {element.attributes.name}
                           </Select.Option>
                         );
@@ -359,19 +360,14 @@ function Retur({ props }) {
                         );
                       })}
                     </Select>
-                  </Form.Item>                
+                  </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0" hidden>
-                    <Form.Item name="no_nota_supplier"></Form.Item>
-                    <Form.Item name="tanggal_pembelian"></Form.Item>
+                  <Form.Item name="no_nota_supplier"></Form.Item>
+                  <Form.Item name="tanggal_pembelian"></Form.Item>
                 </div>
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
-                  <SearchBar
-                    form={form}
-                    tempList={tempList}
-                    onChange={onChangeProduct}
-                    selectedProduct={selectedProduct}
-                  />
+                  <SearchBar form={form} tempList={tempList} onChange={onChangeProduct} selectedProduct={selectedProduct} />
                 </div>
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
                   <LPBTable
@@ -404,22 +400,16 @@ function Retur({ props }) {
                         width: "100%",
                       }}
                     >
-                        <Select.Option
-                        value="Pajak Pembelian"
-                        key="Pajak Pembelian"
-                        >
-                            Pajak Pembelian
-                        </Select.Option>
-                        <Select.Option
-                        value="Non Pajak"
-                        key="Non Pajak"
-                        >
-                            Non Pajak
-                        </Select.Option>
+                      <Select.Option value="Pajak Pembelian" key="Pajak Pembelian">
+                        Pajak Pembelian
+                      </Select.Option>
+                      <Select.Option value="Non Pajak" key="Non Pajak">
+                        Non Pajak
+                      </Select.Option>
                     </Select>
                   </Form.Item>
                 </div>
-                  <p className="font-bold">Total Item : {products.productList.length} </p>
+                <p className="font-bold">Total Item : {products.productList.length} </p>
               </div>
               <div className="flex justify-end">
                 <p className="font-bold">Total Harga : {formatterTotal.format(totalPrice)} </p>

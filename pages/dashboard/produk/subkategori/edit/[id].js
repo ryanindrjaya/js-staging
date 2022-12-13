@@ -35,8 +35,7 @@ const Edit = ({ props }) => {
     delete values.category_id;
     const dataValues = { ...values, category: categoryID };
     const data = { data: dataValues };
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/sub-categories/" + subCategory.id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/sub-categories/" + subCategory.id;
     const JSONdata = JSON.stringify(data);
 
     const options = {
@@ -58,14 +57,9 @@ const Edit = ({ props }) => {
     } else {
       res.error?.details?.errors.map((error) => {
         const ErrorMsg = error.path[0];
-        toast.error(
-          ErrorMsg === "sub_id"
-            ? "ID Sub Kategori udah digunakan"
-            : "Tidak dapat menambahkan Sub Kategori",
-          {
-            position: toast.POSITION.TOP_RIGHT,
-          }
-        );
+        toast.error(ErrorMsg === "sub_id" ? "ID Sub Kategori udah digunakan" : "Tidak dapat menambahkan Sub Kategori", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
       });
     }
 
@@ -78,8 +72,7 @@ const Edit = ({ props }) => {
     } else {
       try {
         const endpoint =
-          process.env.NEXT_PUBLIC_URL +
-          `/categories?filters[$or][0][name][$contains]=${query}&filters[$or][1][category_id][$contains]=${query}`;
+          process.env.NEXT_PUBLIC_URL + `/categories?filters[$or][0][name][$contains]=${query}&filters[$or][1][category_id][$contains]=${query}`;
         const options = {
           method: "GET",
           headers: {
@@ -137,11 +130,7 @@ const Edit = ({ props }) => {
               onFinish={onFinish}
             >
               <div className="flex flex-wrap -mx-3 mb-6">
-                <Form.Item
-                  name="category_id"
-                  initialValues={categorySelected.id}
-                  className="w-full md:w-1/3 px-3 mb-2 md:mb-0"
-                >
+                <Form.Item name="category_id" initialValues={categorySelected.id} className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
                   <Select
                     defaultValue={`${categorySelected.attributes.category_id} - ${categorySelected.attributes.name}`}
                     size="large"
@@ -184,17 +173,11 @@ const Edit = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "50px" }}
-                      placeholder="Nama Sub Kategori"
-                    />
+                    <Input style={{ height: "50px" }} placeholder="Nama Sub Kategori" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-full px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="description"
-                    initialValue={subCategory.attributes.description}
-                  >
+                  <Form.Item name="description" initialValue={subCategory.attributes.description}>
                     <TextArea rows={4} placeholder="Deskripsi" />
                   </Form.Item>
                 </div>
@@ -206,10 +189,7 @@ const Edit = ({ props }) => {
                     <Spin />
                   </div>
                 ) : (
-                 <Button
-                    htmlType="submit"
-                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
-                  >
+                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
                     Submit
                   </Button>
                 )}
@@ -226,8 +206,7 @@ Edit.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/sub-categories/" + id + "?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/sub-categories/" + id + "?populate=*";
 
   const options = {
     method: "GET",
@@ -241,6 +220,16 @@ Edit.getInitialProps = async (context) => {
 
   const resCategory = await fetchCategory(cookies);
   const categories = await resCategory.json();
+
+  if (res.status !== 200) {
+    context.res.writeHead(302, {
+      Location: "/signin?session=false",
+      "Content-Type": "text/html; charset=utf-8",
+    });
+    context?.res?.end();
+
+    return {};
+  }
 
   return {
     props: {

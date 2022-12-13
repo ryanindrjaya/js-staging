@@ -25,6 +25,16 @@ History.getInitialProps = async (context) => {
   const reqHistory = await fetchHistory(cookies, productId, locationId);
   const history = await reqHistory.json();
 
+  if (reqInventory.status !== 200 || reqProduct.status !== 200 || reqHistory.status !== 200) {
+    context.res.writeHead(302, {
+      Location: "/signin?session=false",
+      "Content-Type": "text/html; charset=utf-8",
+    });
+    context?.res?.end();
+
+    return {};
+  }
+
   return {
     props: { inventory, product, history },
   };
@@ -46,8 +56,7 @@ const fetchProduct = async (cookies, productId) => {
 
 const fetchInventory = async (cookies, productId, locationId) => {
   const endpoint =
-    process.env.NEXT_PUBLIC_URL +
-    `/inventories?filters[locations][id][$eq]=${locationId}&filters[products][id][$eq]=${productId}&populate=*`;
+    process.env.NEXT_PUBLIC_URL + `/inventories?filters[locations][id][$eq]=${locationId}&filters[products][id][$eq]=${productId}&populate=*`;
   const options = {
     method: "GET",
     headers: {
@@ -62,8 +71,7 @@ const fetchInventory = async (cookies, productId, locationId) => {
 
 const fetchHistory = async (cookies, productId, locationId) => {
   const endpoint =
-    process.env.NEXT_PUBLIC_URL +
-    `/inventory-details?filters[locations][id][$eq]=${locationId}&filters[products][id][$eq]=${productId}&populate=*`;
+    process.env.NEXT_PUBLIC_URL + `/inventory-details?filters[locations][id][$eq]=${locationId}&filters[products][id][$eq]=${productId}&populate=*`;
   const options = {
     method: "GET",
     headers: {
@@ -99,9 +107,7 @@ function History({ props }) {
             <div>
               <Row justify="space-between">
                 <div>
-                  <div className="font-bold text-lg mb-4 uppercase">
-                    {product.name}
-                  </div>
+                  <div className="font-bold text-lg mb-4 uppercase">{product.name}</div>
                   <div className="text-sm mb-2">SKU : {product?.SKU}</div>
                   <div className="text-sm">
                     Total Stok : {inventory?.total_stock} {smallesUnit}
@@ -118,19 +124,12 @@ function History({ props }) {
                       }}
                       renderer="svg"
                     />
-                    <QRCodeSVG
-                      className="ml-5"
-                      height={80}
-                      width={80}
-                      value={product?.SKU}
-                    />
+                    <QRCodeSVG className="ml-5" height={80} width={80} value={product?.SKU} />
                   </Row>
                 </div>
               </Row>
 
-              <div className="font-bold text-lg mt-5 mb-3 uppercase">
-                Daftar Stok
-              </div>
+              <div className="font-bold text-lg mt-5 mb-3 uppercase">Daftar Stok</div>
               <HistoryTable data={historyList} />
             </div>
           </LayoutContent>

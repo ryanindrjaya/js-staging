@@ -3,12 +3,7 @@ import AlertDialog from "../Alert/Alert";
 import { Popover } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 
-export default function ReactDataTable({
-  data,
-  onDelete,
-  onUpdate,
-  onPageChange,
-}) {
+export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange }) {
   const onConfirm = (id) => {
     console.log(id);
     onDelete(id);
@@ -24,10 +19,7 @@ export default function ReactDataTable({
 
   const content = (row) => (
     <div>
-      <button
-        onClick={() => onEdit(row.id)}
-        className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-      >
+      <button onClick={() => onEdit(row.id)} className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md ">
         <EditOutlined className="mr-2 mt-0.5 float float-left" />
         Edit
       </button>
@@ -58,7 +50,7 @@ export default function ReactDataTable({
       selector: (row) => row.attributes?.code,
     },
     {
-      name: "Nama Pabrikasi",
+      name: "Nama Golongan",
       width: "250px",
       sortable: true,
       selector: (row) => row.attributes?.name,
@@ -81,9 +73,7 @@ export default function ReactDataTable({
       selector: (row) => (
         <>
           <Popover content={content(row)} placement="bottom" trigger="click">
-            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
-              Tindakan
-            </button>
+            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">Tindakan</button>
           </Popover>
         </>
       ),
