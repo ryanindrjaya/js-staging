@@ -161,6 +161,8 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
                   width: "150px",
                   marginRight: "10px",
                 }}
+                formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
               />
             </Form.Item>
           </Row>
