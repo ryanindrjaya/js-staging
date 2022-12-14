@@ -14,7 +14,7 @@ const CreateSale = async (
   listId,
   form,
   router
-) => { console.log("form and values :",form,values)
+) => { console.log("form and values :",form,values, listId)
   // CLEANING DATA
   //var orderDate = new Date(values.order_date);
   //var deliveryDate = new Date(values.delivery_date);
@@ -24,9 +24,9 @@ const CreateSale = async (
   //tempLocationId = parseInt(values.location);
   //tempProductListId = [];
 
-  //listId.forEach((element) => {
-  //  tempProductListId.push({ id: element });
-  //});
+  listId.forEach((element) => {
+    tempProductListId.push({ id: element });
+  });
 
   //values.order_date = orderDate;
   //values.delivery_date = deliveryDate;
@@ -42,13 +42,13 @@ const CreateSale = async (
   };
 
   const req = await createData(data);
-  //const res = await req.json();
+  const res = await req.json();
 
-  //if (req.status === 200) {
-  //  await putRelationOrder(res.data.id, res.data.attributes, form, router);
-  //} else {
-  //  openNotificationWithIcon("error");
-  //}
+  if (req.status === 200) { console.log("values nich bro:",res.data.attributes)
+    await putRelationSaleDetail(res.data.id, res.data.attributes, form, router);
+  } else {
+    openNotificationWithIcon("error");
+  }
 };
 
 const createData = async (data) => {
@@ -69,47 +69,47 @@ const createData = async (data) => {
   return req;
 };
 
-//const putRelationOrder = async (id, value, form, router) => {
-//  const user = await getUserMe();
-//  const dataOrder = {
-//    data: value,
-//  };
+const putRelationSaleDetail = async (id, value, form, router) => {
+  const user = await getUserMe();
+  const dataSale = {
+    data: value,
+  };
+    console.log("data sale :",dataSale);
+  //dataSale.data.supplier = { id: tempSupplierId };
+  dataSale.data.store_sale_detail = tempProductListId;
+  //dataSale.data.added_by = user.name;
+  //dataSale.data.locations = { id: tempLocationId };
 
-//  dataOrder.data.supplier = { id: tempSupplierId };
-//  dataOrder.data.purchase_details = tempProductListId;
-//  dataOrder.data.added_by = user.name;
-//  dataOrder.data.locations = { id: tempLocationId };
+  // clean object
+  for (var key in dataSale) {
+    if (dataSale[key] === null || dataSale[key] === undefined) {
+      delete dataSale[key];
+    }
+  }
 
-//  // clean object
-//  for (var key in dataOrder) {
-//    if (dataOrder[key] === null || dataOrder[key] === undefined) {
-//      delete dataOrder[key];
-//    }
-//  }
-
-//  const JSONdata = JSON.stringify(dataOrder);
-//  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/" + id;
-//  const options = {
-//    method: "PUT",
-//    headers: {
-//      "Content-Type": "application/json",
-//      Authorization: "Bearer " + cookies.token,
-//    },
-//    body: JSONdata,
-//  };
+  const JSONdata = JSON.stringify(dataSale);
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales/" + id;
+  const options = {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+    body: JSONdata,
+  };
 
 
-//  const req = await fetch(endpoint, options);
-//  const res = await req.json();
+  const req = await fetch(endpoint, options);
+  const res = await req.json();
 
-//  if (req.status === 200) {
-//    form.resetFields();
-//    router.replace("/dashboard/pembelian/order_pembelian");
-//    openNotificationWithIcon("success");
-//  } else {
-//    openNotificationWithIcon("error");
-//  }
-//};
+  if (req.status === 200) {
+    form.resetFields();
+    router.replace("/dashboard/penjualan/toko");
+    openNotificationWithIcon("success");
+  } else {
+    openNotificationWithIcon("error");
+  }
+};
 
 const getUserMe = async () => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me";

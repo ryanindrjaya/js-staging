@@ -12,7 +12,7 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
   var unit = 1;
   var priceUnit = 1;
   var tempIndex = 0;
-  var stock = 0;
+  var stock = 0; console.log("product sub total :",productSubTotal)
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -367,9 +367,14 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
       },
     },
     {
+      name: "Subtotal Setelah Diskon",
+      width: "200px",
+      selector: (row) => calculatePriceAfterDisc(row),
+    },
+    {
       name: "Subtotal",
       width: "200px",
-      //selector: (row) => formatter.format(productSubTotal[row.id]),
+      selector: (row) => formatter.format(productSubTotal[row.id]),
     },
     {
       name: "Hapus",

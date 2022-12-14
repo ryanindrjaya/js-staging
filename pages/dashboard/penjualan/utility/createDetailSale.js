@@ -17,7 +17,7 @@ const createDetailSale = (
   console.log("values", values);
   console.log("product", products);
   console.log("productList", products.productList);
-  products.productList.forEach((element) => {
+  products.productList.forEach((element) => { console.log("element :",element)
     // default value
     var qty = 1;
     var disc = 0;
@@ -27,8 +27,8 @@ const createDetailSale = (
     var subTotal = unitPriceAfterDisc * qty;
     //var d1 = products.productInfo[id].d1;
     //var d2 = products.productInfo[id].d2;
-    var d1 = element.attributes.unit_1_dp1;
-    var d2 = element.attributes.unit_1_dp2;
+    //var d1 = element.attributes.unit_1_dp1;
+    //var d2 = element.attributes.unit_1_dp2;
 
     const id = element.id;
     //var batch = values.batch[id];
@@ -45,10 +45,10 @@ const createDetailSale = (
     unitPrice = products.productInfo?.[id]?.priceUnit ?? element.attributes.buy_price_1;
     unitPriceAfterDisc = productTotalPrice?.[id];
     subTotal = productSubTotal?.[id];
-    d1 = products.productInfo[id]?.d1 ?? element.attributes.unit_1_dp1;
-    d2 = products.productInfo[id]?.d2 ?? element.attributes.unit_1_dp2;
+    //d1 = products.productInfo[id]?.d1 ?? element.attributes.unit_1_dp1;
+    //d2 = products.productInfo[id]?.d2 ?? element.attributes.unit_1_dp2;
 
-    console.log("new data", products.productInfo[id].d1);
+    //console.log("new data", products.productInfo[id].d1);
     //console.log("new data detail :", qty, disc, unit, unitPrice, unitPriceAfterDisc, subTotal, expDate, d1, d2, id);
 
     POSTSaleDetail(
@@ -64,8 +64,8 @@ const createDetailSale = (
       //batch,
       //location,
       newExptDate,
-      d1,
-      d2,
+      //d1,
+      //d2,
       url
     );
   });
@@ -84,8 +84,8 @@ const POSTSaleDetail = async (
   //batch,
   //location,
   expDate,
-  d1,
-  d2,
+  //d1,
+  //d2,
   url
 ) => {
   var data = {
@@ -100,8 +100,8 @@ const POSTSaleDetail = async (
       //batch: batch,
       //location: { id: location },
       expired_date: expDate,
-      disc1 : d1,
-      disc2 : d2,
+      //disc1 : d1,
+      //disc2 : d2,
     },
   };
 

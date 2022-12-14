@@ -11,6 +11,7 @@ import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import StoreSaleTable from "../../../../components/ReactDataTable/Selling/StoreSaleTable";
 import createSaleFunc from "../utility/createSale";
 import createDetailSaleFunc from "../utility/createDetailSale";
+import calculatePrice from "../utility/calculatePrice";
 import nookies from "nookies";
 
 Toko.getInitialProps = async (context) => {
@@ -93,11 +94,14 @@ function Toko({ props }) {
 
   const [dataValues, setDataValues] = useState();
   const [selectedCategory, setSelectedCategory] = useState("BEBAS");
-  const [deliveryFee, setDeliveryFee] = useState();
+  const [deliveryFee, setDeliveryFee] = useState(0);
 
   const [listId, setListId] = useState([]);
   const [productTotalPrice, setProductTotalPrice] = useState({});
   const [productSubTotal, setProductSubTotal] = useState({});
+  const [discPrice, setDiscPrice] = useState(0);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [grandTotal, setGrandTotal] = useState(0);
 
   const router = useRouter();
   const { TextArea } = Input;
@@ -108,11 +112,13 @@ function Toko({ props }) {
   //var ppn = 0;
 
   // temp
-  const [biayaTambahan, setBiayaTambahan] = useState(0);
+  const [biayaTambahan, setBiayaTambahan] = useState();
   const [biayaPengiriman, setBiayaPengiriman] = useState(0);
 
   const cookies = nookies.get(null, "token");
   const tempList = [];
+
+  var total = totalPrice + deliveryFee + biayaTambahan;
 
   const handleAdd = () => {
     console.log("tambah");
@@ -122,13 +128,27 @@ function Toko({ props }) {
     setDeliveryFee(values.target.value);
   }; 
 
+  var formatter = new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 2,
+  });
+
+  const onFinish = (values) => {
+    setLoading(true);
+    setDataValues(values);
+    //createSale(values);
+    //createDetailSale();
+    setLoading(false);
+  };
+
   const createDetailSale = async () => {
     await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/store-sale-details");
   };
 
   const createSale = async (values) => {
-    //await createSaleFunc(products, grandTotal, totalPrice, values, listId, discPrice, form, router);
-    await createSaleFunc(1, 1, values, 1, form, router);
+    //await createSaleFunc(grandTotal, totalPrice, values, listId, form, router);
+    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router);
   };
 
   const onChangeProduct = async () => {
@@ -149,24 +169,38 @@ function Toko({ props }) {
     }
   };
 
-  //const calculatePriceAfterDisc = (row) => {
-  //  const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
+  const calculatePriceAfterDisc = (row) => {
+    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
+      console.log("Total",total)
+    return formatter.format(total);
+  }; console.log("productSubTotal :", products, productTotalPrice, productSubTotal, totalPrice)
 
-  //  return formatter.format(total);
-  //};
+  const sumAdditionalPrice = () => {
+    var newTotal = 0;
 
-  const onFinish = (values) => {console.log("data values : ", values)
-    setLoading(true);
-    setDataValues(values);
-    //createSale(values);
-    createDetailSale();
-    setLoading(false); console.log("data values : ", dataValues)
+    for (var key in additionalFee) {
+      newTotal = newTotal + additionalFee[key];
+    }
+
+    var test = totalPrice + newTotal;
+    setBiayaTambahan(newTotal); console.log("biaya :", biayaTambahan)
   };
 
   const clearData = () => {
     dispatch({ type: "CLEAR_DATA" });
     //setTotalPrice(0);
   };
+
+  useEffect(() => {
+    // this one is used for checking the price if the old price is same with new one.
+    // if both are same then we should not set new price for grand total.
+    // if they are not, then set new grand total
+    if (discPrice !== totalPrice && discPrice !== 0) {
+      setGrandTotal(discPrice + biayaPengiriman + biayaTambahan);
+    } else {
+      setGrandTotal(totalPrice + biayaPengiriman + biayaTambahan);
+    }
+  }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
 
   useEffect(() => {
     if(products.productList.length > 0){ 
@@ -182,10 +216,24 @@ function Toko({ props }) {
   }, [products.productList]);
 
   useEffect(() => {
+    sumAdditionalPrice();
+  }, [additionalFee]);
+
+  useEffect(() => {
+    if (listId.length > 0) {
+      createSale(dataValues);
+    }
+  }, [listId]);
+
+  useEffect(() => {
+    if (dataValues) createDetailSale();
+  }, [dataValues]);
+
+  useEffect(() => {
     // used to reset redux from value before
     clearData();
   }, []);
-    console.log("products :", products)
+
   return (
     <>
       <Head>
@@ -364,11 +412,11 @@ function Toko({ props }) {
                   <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
                     <StoreSaleTable
                       products={products}
-                      //productTotalPrice={productTotalPrice}
-                      //setTotalPrice={setTotalPrice}
-                      //setProductTotalPrice={setProductTotalPrice}
-                      //calculatePriceAfterDisc={calculatePriceAfterDisc}
-                      //productSubTotal={productSubTotal}
+                      productTotalPrice={productTotalPrice}
+                      setTotalPrice={setTotalPrice}
+                      setProductTotalPrice={setProductTotalPrice}
+                      calculatePriceAfterDisc={calculatePriceAfterDisc}
+                      productSubTotal={productSubTotal}
                       locations={locations}
                       formObj={form}
                     />
@@ -536,23 +584,23 @@ function Toko({ props }) {
 
               <div className="w-full flex flex-wrap justify-end mb-3">
                 <Form.Item name="dpp" className="w-full h-2 md:w-1/2 mx-2">
-                  DPP
+                  <span> DPP </span>
                 </Form.Item>
                 <Form.Item name="ppn" className="w-full h-2 md:w-1/2 mx-2">
-                  PPN
+                  <span> PPN </span>
                 </Form.Item>
-                <Form.Item name="total" className="w-full h-2 md:w-1/2 mx-2">
-                  Total
+                <Form.Item name="grandtotal" value={totalPrice} className="w-full h-2 md:w-1/2 mx-2">
+                  <span> Total </span> <span>: {totalPrice}</span>
                 </Form.Item>
                 <Form.Item name="biayaPengiriman" value={deliveryFee} className="w-full h-2 md:w-1/2 mx-2">
-                  Biaya Pengiriman {deliveryFee}
+                  <span> Biaya Pengiriman </span> <span>: {deliveryFee}</span>
                 </Form.Item>
-                <Form.Item name="biayaTambahan" className="w-full h-2 md:w-1/2 mx-2">
-                  Biaya Tambahan
+                <Form.Item name="biayaTambahan" value={biayaTambahan} className="w-full h-2 md:w-1/2 mx-2">
+                  <span> Biaya Tambahan </span> <span>: {biayaTambahan}</span>
                 </Form.Item>
 
-                <Form.Item name="total" className="w-full h-2 md:w-1/2 mx-2 mt-3 text-lg">
-                  Total
+                <Form.Item name="total" value={total} className="w-full h-2 md:w-1/2 mx-2 mt-3 text-lg">
+                  <span> Total </span>  <span>: {total}</span>
                 </Form.Item>
               </div>
 
