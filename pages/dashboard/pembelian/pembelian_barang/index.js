@@ -99,6 +99,19 @@ function Pembelian({ props }) {
     }
   };
 
+
+  const filterDuplicateData = (arr) => {
+    const seen = new Set();
+
+    const filteredArr = arr.filter((el) => {
+      const duplicate = seen.has(el.id);
+      seen.add(el.id);
+      return !duplicate;
+    });
+
+    return filteredArr;
+  };
+
   const onSearch = async (e) => {
     // if (e.target.value.length >= 2) {
     //   setIsSearching(true);
