@@ -14,28 +14,20 @@ const CreateSale = async (
   listId,
   form,
   router
-) => { console.log("form and values :",form,values, listId)
+) => { console.log("form and values :",form, values, listId)
   // CLEANING DATA
-  //var orderDate = new Date(values.order_date);
-  //var deliveryDate = new Date(values.delivery_date);
-  //var supplierId = { id: parseInt(values.supplier_id) };
-
-  //tempSupplierId = parseInt(values.supplier_id);
-  //tempLocationId = parseInt(values.location);
-  //tempProductListId = [];
-
   listId.forEach((element) => {
     tempProductListId.push({ id: element });
   });
 
-  //values.order_date = orderDate;
-  //values.delivery_date = deliveryDate;
-  //values.supplier_id = supplierId;
-  //values.status = "Dipesan";
-  //values.delivery_total =
-  //  grandTotal === 0 ? parseInt(totalPrice) : parseInt(grandTotal);
-  //values.purchase_details = null;
-  //values.supplier_id = null;
+  if(values.category == "BEBAS"){
+    values.no_store_sale = "TB/"+values.no_store_sale;
+  }
+  if(values.category == "RESEP"){
+    values.no_store_sale = "TR/"+values.no_store_sale;
+  }
+
+  values.status = "Dipesan"
 
   var data = {
     data: values,
@@ -44,7 +36,7 @@ const CreateSale = async (
   const req = await createData(data);
   const res = await req.json();
 
-  if (req.status === 200) { console.log("values nich bro:",res.data.attributes)
+  if (req.status === 200) { console.log("values nich bro:",tempProductListId)
     await putRelationSaleDetail(res.data.id, res.data.attributes, form, router);
   } else {
     openNotificationWithIcon("error");
@@ -74,12 +66,12 @@ const putRelationSaleDetail = async (id, value, form, router) => {
   const dataSale = {
     data: value,
   };
-    console.log("data sale :",dataSale);
+
   //dataSale.data.supplier = { id: tempSupplierId };
-  dataSale.data.store_sale_detail = tempProductListId;
+  dataSale.data.store_sale_details = tempProductListId;
   //dataSale.data.added_by = user.name;
   //dataSale.data.locations = { id: tempLocationId };
-
+    console.log("data sale :", dataSale, tempProductListId, dataSale.data.store_sale_details);
   // clean object
   for (var key in dataSale) {
     if (dataSale[key] === null || dataSale[key] === undefined) {

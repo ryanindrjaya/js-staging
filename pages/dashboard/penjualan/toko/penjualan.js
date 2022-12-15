@@ -26,11 +26,15 @@ Toko.getInitialProps = async (context) => {
   const reqInven = await fetchInven(cookies);
   const inven = await reqInven.json();
 
+  const reqStoreSale = await fetchStoreSale(cookies);
+  const storeSale = await reqStoreSale.json();
+
   return {
     props: {
       user,
       locations,
       inven,
+      storeSale
     },
   };
 };
@@ -47,6 +51,20 @@ const fetchData = async (cookies) => {
 
   const req = await fetch(endpoint, options);
   return req;
+};
+
+const fetchStoreSale = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales?populate=deep";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
 };
 
 const fetchLocation = async (cookies) => {
@@ -78,7 +96,7 @@ const fetchInven = async (cookies) => {
 };
 
 function Toko({ props }) {
-  const products = useSelector((state) => state.Order);
+  const products = useSelector((state) => state.Order); console.log("store sale :",props.storeSale)
   const dispatch = useDispatch();
 
   var selectedProduct = products?.productList;
@@ -106,6 +124,8 @@ function Toko({ props }) {
   const router = useRouter();
   const { TextArea } = Input;
   var today = new Date();
+  var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
+  var yyyy = today.getFullYear();
 
   // DPP & PPN
   //const dpp = 1.11;
@@ -120,9 +140,10 @@ function Toko({ props }) {
 
   var total = totalPrice + deliveryFee + biayaTambahan;
 
-  const handleAdd = () => {
-    console.log("tambah");
-  };
+  // NO Store Sale
+  var noStoreSale = String(props.storeSale?.meta?.pagination.total + 1).padStart(3, "0");
+  //var categorySale = `TB/ET/${noStoreSale}/${mm}/${yyyy}`;
+  const [categorySale, setCategorySale] = useState(`ET/${noStoreSale}/${mm}/${yyyy}`);
 
   const handleDeliveryFee = (values) => {
     setDeliveryFee(values.target.value);
@@ -146,8 +167,12 @@ function Toko({ props }) {
     await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/store-sale-details");
   };
 
-  const createSale = async (values) => {
+  const createSale = async (values) => { console.log("list :", listId)
     //await createSaleFunc(grandTotal, totalPrice, values, listId, form, router);
+    values.sale_date = today;
+    values.added_by = user.name;
+    values.total = total;
+    values.category = selectedCategory;
     await createSaleFunc(grandTotal, totalPrice, values, listId, form, router);
   };
 
@@ -169,11 +194,17 @@ function Toko({ props }) {
     }
   };
 
+  //const onClickCategory = async (values) => {
+  //  console.log("wadidauw", values)
+  //  setCategorySale();
+  //  if(values == "BEBAS") setCategorySale(`TB/ET/${noStoreSale}/${mm}/${yyyy}`);
+  //  if(values == "RESEP") setCategorySale(`TR/ET/${noStoreSale}/${mm}/${yyyy}`);
+  //};
+
   const calculatePriceAfterDisc = (row) => {
     const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
-      console.log("Total",total)
     return formatter.format(total);
-  }; console.log("productSubTotal :", products, productTotalPrice, productSubTotal, totalPrice)
+  };
 
   const sumAdditionalPrice = () => {
     var newTotal = 0;
@@ -183,12 +214,12 @@ function Toko({ props }) {
     }
 
     var test = totalPrice + newTotal;
-    setBiayaTambahan(newTotal); console.log("biaya :", biayaTambahan)
+    setBiayaTambahan(newTotal);
   };
 
   const clearData = () => {
     dispatch({ type: "CLEAR_DATA" });
-    //setTotalPrice(0);
+    setTotalPrice(0);
   };
 
   useEffect(() => {
@@ -228,6 +259,12 @@ function Toko({ props }) {
   useEffect(() => {
     if (dataValues) createDetailSale();
   }, [dataValues]);
+
+  //useEffect(() => {
+  //  // used to change initial value for no penjualan
+  //  if (selectedCategory == "BEBAS") categorySale = `TB/ET/${noStoreSale}/${mm}/${yyyy}`;
+  //  if (selectedCategory == "RESEP") categorySale = `TR/ET/${noStoreSale}/${mm}/${yyyy}`;
+  //}, [categorySale]);
 
   useEffect(() => {
     // used to reset redux from value before
@@ -299,8 +336,22 @@ function Toko({ props }) {
                   <p>{user.name}</p>
                 </div>
               </Row>
-
+                
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-5">
+                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
+                  <Form.Item
+                    name="no_store_sale"
+                    initialValue={categorySale}
+                    rules={[
+                        {
+                            required: true,
+                            message: "Nomor Penjualan tidak boleh kosong!",
+                        },
+                    ]}
+                    >
+                    <Input style={{ height: "40px" }} placeholder="No. Penjualan" />
+                  </Form.Item>
+                </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="customer_name"

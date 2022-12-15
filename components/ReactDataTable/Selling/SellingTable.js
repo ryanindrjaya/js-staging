@@ -297,6 +297,7 @@ export default function ReactDataTable({
           name: "Lokasi Penjualan",
           width: "180px",
           //selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
+          selector: (row) => console.log("row index :",row),
         },
         {
           name: "Catatan Staff",
