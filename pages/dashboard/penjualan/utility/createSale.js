@@ -14,11 +14,13 @@ const CreateSale = async (
   listId,
   form,
   router
-) => { console.log("form and values :",form, values, listId)
+) => {
   // CLEANING DATA
   listId.forEach((element) => {
     tempProductListId.push({ id: element });
   });
+
+  values.total = grandTotal;
 
   if(values.category == "BEBAS"){
     values.no_store_sale = "TB/"+values.no_store_sale;
@@ -36,7 +38,7 @@ const CreateSale = async (
   const req = await createData(data);
   const res = await req.json();
 
-  if (req.status === 200) { console.log("values nich bro:",tempProductListId)
+  if (req.status === 200) {
     await putRelationSaleDetail(res.data.id, res.data.attributes, form, router);
   } else {
     openNotificationWithIcon("error");
@@ -67,11 +69,8 @@ const putRelationSaleDetail = async (id, value, form, router) => {
     data: value,
   };
 
-  //dataSale.data.supplier = { id: tempSupplierId };
   dataSale.data.store_sale_details = tempProductListId;
-  //dataSale.data.added_by = user.name;
-  //dataSale.data.locations = { id: tempLocationId };
-    console.log("data sale :", dataSale, tempProductListId, dataSale.data.store_sale_details);
+
   // clean object
   for (var key in dataSale) {
     if (dataSale[key] === null || dataSale[key] === undefined) {

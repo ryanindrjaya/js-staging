@@ -96,7 +96,7 @@ const fetchInven = async (cookies) => {
 };
 
 function Toko({ props }) {
-  const products = useSelector((state) => state.Order); console.log("store sale :",props.storeSale)
+  const products = useSelector((state) => state.Order);
   const dispatch = useDispatch();
 
   var selectedProduct = products?.productList;
@@ -138,15 +138,14 @@ function Toko({ props }) {
   const cookies = nookies.get(null, "token");
   const tempList = [];
 
-  var total = totalPrice + deliveryFee + biayaTambahan;
+  var total;
 
   // NO Store Sale
   var noStoreSale = String(props.storeSale?.meta?.pagination.total + 1).padStart(3, "0");
-  //var categorySale = `TB/ET/${noStoreSale}/${mm}/${yyyy}`;
   const [categorySale, setCategorySale] = useState(`ET/${noStoreSale}/${mm}/${yyyy}`);
 
-  const handleDeliveryFee = (values) => {
-    setDeliveryFee(values.target.value);
+  const handleBiayaPengiriman = (values) => {
+    setBiayaPengiriman(values.target.value);
   }; 
 
   var formatter = new Intl.NumberFormat("id-ID", {
@@ -158,8 +157,6 @@ function Toko({ props }) {
   const onFinish = (values) => {
     setLoading(true);
     setDataValues(values);
-    //createSale(values);
-    //createDetailSale();
     setLoading(false);
   };
 
@@ -167,11 +164,9 @@ function Toko({ props }) {
     await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/store-sale-details");
   };
 
-  const createSale = async (values) => { console.log("list :", listId)
-    //await createSaleFunc(grandTotal, totalPrice, values, listId, form, router);
+  const createSale = async (values) => {
     values.sale_date = today;
     values.added_by = user.name;
-    values.total = total;
     values.category = selectedCategory;
     await createSaleFunc(grandTotal, totalPrice, values, listId, form, router);
   };
@@ -193,13 +188,6 @@ function Toko({ props }) {
       });
     }
   };
-
-  //const onClickCategory = async (values) => {
-  //  console.log("wadidauw", values)
-  //  setCategorySale();
-  //  if(values == "BEBAS") setCategorySale(`TB/ET/${noStoreSale}/${mm}/${yyyy}`);
-  //  if(values == "RESEP") setCategorySale(`TR/ET/${noStoreSale}/${mm}/${yyyy}`);
-  //};
 
   const calculatePriceAfterDisc = (row) => {
     const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
@@ -227,9 +215,9 @@ function Toko({ props }) {
     // if both are same then we should not set new price for grand total.
     // if they are not, then set new grand total
     if (discPrice !== totalPrice && discPrice !== 0) {
-      setGrandTotal(discPrice + biayaPengiriman + biayaTambahan);
+      setGrandTotal(discPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
     } else {
-      setGrandTotal(totalPrice + biayaPengiriman + biayaTambahan);
+      setGrandTotal(totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
     }
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
 
@@ -259,12 +247,6 @@ function Toko({ props }) {
   useEffect(() => {
     if (dataValues) createDetailSale();
   }, [dataValues]);
-
-  //useEffect(() => {
-  //  // used to change initial value for no penjualan
-  //  if (selectedCategory == "BEBAS") categorySale = `TB/ET/${noStoreSale}/${mm}/${yyyy}`;
-  //  if (selectedCategory == "RESEP") categorySale = `TR/ET/${noStoreSale}/${mm}/${yyyy}`;
-  //}, [categorySale]);
 
   useEffect(() => {
     // used to reset redux from value before
@@ -510,12 +492,6 @@ function Toko({ props }) {
               </div>
 
               <div className="w-full flex flex-wrap -mx-3 mb-4">
-                {/*<div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">*/}
-                {/*  <Form.Item name="delivery_fee" noStyle>*/}
-                {/*    <InputNumber onChange={(e) => setBiayaPengiriman(e)} size="large" placeholder="Biaya Pengiriman" style={{ width: "100%" }} />*/}
-                {/*  </Form.Item>*/}
-                {/*</div>*/}
-
                 <div className="w-full md:w-1/3 px-3">
                   <Form.Item noStyle>
                     <Input
@@ -533,7 +509,7 @@ function Toko({ props }) {
                       style={{
                         width: "40%",
                       }}
-                      onChange={handleDeliveryFee}
+                      onChange={handleBiayaPengiriman}
                     />
                   </Form.Item>
                 </div>
@@ -641,17 +617,17 @@ function Toko({ props }) {
                   <span> PPN </span>
                 </Form.Item>
                 <Form.Item name="grandtotal" value={totalPrice} className="w-full h-2 md:w-1/2 mx-2">
-                  <span> Total </span> <span>: {totalPrice}</span>
+                  <span> Total </span> <span>: {formatter.format(totalPrice)}</span>
                 </Form.Item>
-                <Form.Item name="biayaPengiriman" value={deliveryFee} className="w-full h-2 md:w-1/2 mx-2">
-                  <span> Biaya Pengiriman </span> <span>: {deliveryFee}</span>
+                <Form.Item name="biayaPengiriman" value={biayaPengiriman} className="w-full h-2 md:w-1/2 mx-2">
+                  <span> Biaya Pengiriman </span> <span>: {formatter.format(biayaPengiriman)}</span>
                 </Form.Item>
                 <Form.Item name="biayaTambahan" value={biayaTambahan} className="w-full h-2 md:w-1/2 mx-2">
-                  <span> Biaya Tambahan </span> <span>: {biayaTambahan}</span>
+                  <span> Biaya Tambahan </span> <span>: {formatter.format(biayaTambahan)}</span>
                 </Form.Item>
 
-                <Form.Item name="total" value={total} className="w-full h-2 md:w-1/2 mx-2 mt-3 text-lg">
-                  <span> Total </span>  <span>: {total}</span>
+                <Form.Item name="grandTotal" value={grandTotal} className="w-full h-2 md:w-1/2 mx-2 mt-3 text-lg">
+                  <span> Total </span>  <span>: {formatter.format(grandTotal)}</span>
                 </Form.Item>
               </div>
 
