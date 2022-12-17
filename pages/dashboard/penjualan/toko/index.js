@@ -31,7 +31,7 @@ Toko.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users";
   const options = {
     method: "GET",
     headers: {
@@ -59,7 +59,7 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchStore = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales?populate=deep";
     const options = {
         method: "GET",
         headers: {
@@ -72,8 +72,8 @@ const fetchStore = async (cookies) => {
     return req;
 };
 
-function Toko({ props }) { console.log("props :",props)
-  //const user = props.user;
+function Toko({ props }) {
+  const user = props.user;
   const locations = props.locations.data;
   const data = props.store;
   const router = useRouter();
@@ -81,7 +81,7 @@ function Toko({ props }) { console.log("props :",props)
 
   const handleAdd = () => {
     console.log("tambah");
-    router.push("/dashboard/penjualan/toko/penjualan");
+    router.push("/dashboard/penjualan/toko/tambah");
   };
 
   const handleUpdate = (id) => {
@@ -91,6 +91,66 @@ function Toko({ props }) { console.log("props :",props)
       "Work In Progress",
       "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
     );
+  };
+
+  const onChangeStatus = (status, row) => {
+    row.attributes.status = status;
+    handleChangeStatus(row, row.id);
+  };
+
+  const handleChangeStatus = async (values, id) => {
+    // clean object
+    for (var key in values.attributes) {
+      if (values.attributes[key] === null || values.attributes[key] === undefined) {
+        delete values.attributes[key];
+      }
+    }
+
+    if (values.attributes?.document?.data === null || values.attributes?.document?.data === undefined) {
+      delete values.attributes?.document;
+    }
+
+    var store_sale_details = [];
+    values.attributes.store_sale_details.data.forEach((element) => {
+      store_sale_details.push({ id: element.id });
+    });
+
+    var purchasing_payments = [];
+    values.attributes.purchasing_payments.data.forEach((element) => {
+      purchasing_payments.push({ id: element.id });
+    });
+
+    values.attributes.location = { id: values.attributes.location.data.id };
+    values.attributes.store_sale_details = store_sale_details;
+    values.attributes.purchasing_payments = purchasing_payments;
+
+    const newValues = {
+      data: values.attributes,
+    };
+
+    const JSONdata = JSON.stringify(newValues);
+    const cookies = nookies.get(null, "token");
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales/" + id;
+
+    const options = {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+      body: JSONdata,
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    if (req.status === 200) {
+      const response = await fetchStore(cookies);
+      setSell(response);
+      openNotificationWithIcon("success", "Status berhasil dirubah", "Status berhasil dirubah. Silahkan cek penjualan toko");
+    } else {
+      openNotificationWithIcon("error", "Status gagal dirubah", "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah");
+    }
   };
 
   const openNotificationWithIcon = (type, title, message) => {
@@ -119,13 +179,13 @@ function Toko({ props }) { console.log("props :",props)
                     marginRight: "10px",
                   }}
                 >
-                {/*{locations.map((element) => {*/}
-                {/*  return (*/}
-                    <Select.Option>
-                      data
+                {locations.map((element) => { console.log(element)
+                  return (
+                    <Select.Option value={element.id}>
+                      {element.attributes.name}
                     </Select.Option>
-                {/*  );*/}
-                {/*})}*/}
+                  );
+                })}
                 </Select>
               </div>
               <div className="w-full md:w-1/5 px-3"> 
@@ -137,13 +197,13 @@ function Toko({ props }) { console.log("props :",props)
                     marginRight: "10px",
                   }}
                 >
-                {/*{locations.map((element) => {*/}
-                {/*  return (*/}
-                    <Select.Option>
-                      data
+                {locations.map((element) => {
+                  return (
+                    <Select.Option value={element.id}>
+                      {element.attributes.name}
                     </Select.Option>
-                {/*  );*/}
-                {/*})}*/}
+                  );
+                })}
                 </Select>
               </div>
               <div className="w-full md:w-1/5 px-3"> 
@@ -158,7 +218,13 @@ function Toko({ props }) { console.log("props :",props)
                 {/*{locations.map((element) => {*/}
                 {/*  return (*/}
                     <Select.Option>
-                      data
+                      Belum Dibayar
+                    </Select.Option>
+                    <Select.Option>
+                      Dibayar Sebagian
+                    </Select.Option>
+                    <Select.Option>
+                      Selesai
                     </Select.Option>
                 {/*  );*/}
                 {/*})}*/}
@@ -176,13 +242,14 @@ function Toko({ props }) { console.log("props :",props)
                     marginRight: "10px",
                   }}
                 >
-                {/*{locations.map((element) => {*/}
-                {/*  return (*/}
-                    <Select.Option>
-                      data
+                {user.map((element) => {
+                  return (
+                    <Select.Option value={element.id}>
+                      {element.name}
                     </Select.Option>
-                {/*  );*/}
-                {/*})}*/}
+                  );
+                }
+                )}
                 </Select>
               </div>
             </div>
@@ -236,7 +303,10 @@ function Toko({ props }) { console.log("props :",props)
                 {/*{locations.map((element) => {*/}
                 {/*  return (*/}
                     <Select.Option>
-                      data
+                      Dipesan
+                    </Select.Option>
+                    <Select.Option>
+                      Diterima
                     </Select.Option>
                 {/*  );*/}
                 {/*})}*/}
@@ -326,10 +396,10 @@ function Toko({ props }) { console.log("props :",props)
 
             <SellingTable
               data={sell}
-              //onUpdate={handleUpdate}
+              onUpdate={handleUpdate}
               //onDelete={handleDelete}
               //onPageChange={handlePageChange}
-              //onChangeStatus={onChangeStatus}
+              onChangeStatus={onChangeStatus}
             />
           </LayoutContent>
         </LayoutWrapper>

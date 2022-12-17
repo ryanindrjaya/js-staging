@@ -126,6 +126,8 @@ function Toko({ props }) {
   var today = new Date();
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
+  var date = today.getDate()+'/'+mm+'/'+yyyy;
+  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 
   // DPP & PPN
   //const dpp = 1.11;
@@ -318,8 +320,12 @@ function Toko({ props }) {
                   <p>{user.name}</p>
                 </div>
               </Row>
-                
-              <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-5">
+
+              <div className="w-full flex justify-start mx-2 mt-1">
+                <p>{date} {time}</p>
+              </div>
+
+              <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-1">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="no_store_sale"

@@ -12,7 +12,7 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
   var unit = 1;
   var priceUnit = 1;
   var tempIndex = 0;
-  var stock = 0; console.log("product sub total :",productSubTotal)
+  var stock = 0;
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -24,20 +24,11 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
     dispatch({ type: "REMOVE_PRODUCT", index: value });
   };
 
-  const onChangeUnit = (value, data) => { 
-    //unit = value;
-    //if(value == 1){ priceUnit = data.attributes.buy_price_1; }
-    //else if(value == 2){ priceUnit = data.attributes.buy_price_2; }
-    //else if(value == 3){ priceUnit = data.attributes.buy_price_3; }
-    //else if(value == 4){ priceUnit = data.attributes.buy_price_4; }
-    //else if(value == 5){ priceUnit = data.attributes.buy_price_5; }
-    
+  const onChangeUnit = (value, data) => {     
     dispatch({ type: "CHANGE_PRODUCT_UNIT", index: value, product: data });
-    //onChangePriceUnit(priceUnit, data, value);
-    //tempIndex = 0;
   };
 
-  const onChangeQty = (value, data) => { console.log("data :",data);
+  const onChangeQty = (value, data) => {
     dispatch({
       type: "CHANGE_PRODUCT_QTY",
       qty: value,
@@ -52,39 +43,6 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
       product: data,
     });
   };
-
-  //const onChangePriceUnit = (value, data, index) => { 
-  //  var tempPriceUnit = [];  console.log("value", value, data, index);
-    
-  //  tempPriceUnit.push(data.attributes.buy_price_1);
-  //  tempPriceUnit.push(data.attributes.buy_price_2);
-  //  tempPriceUnit.push(data.attributes.buy_price_3);
-  //  tempPriceUnit.push(data.attributes.buy_price_4);
-  //  tempPriceUnit.push(data.attributes.buy_price_5);
-    
-  //  data.attributes.buy_price_1 = value;
-  //  data.attributes.buy_price_2 = value;
-  //  data.attributes.buy_price_3 = value;
-  //  data.attributes.buy_price_4 = value;
-  //  data.attributes.buy_price_5 = value;
-
-  //  if(tempIndex != index){
-  //      tempIndex = index;
-  //      onChangeUnit(index, data);
-  //  }
-
-  //  data.attributes.buy_price_1 = tempPriceUnit[0];
-  //  data.attributes.buy_price_2 = tempPriceUnit[1];
-  //  data.attributes.buy_price_3 = tempPriceUnit[2];
-  //  data.attributes.buy_price_4 = tempPriceUnit[3];
-  //  data.attributes.buy_price_5 = tempPriceUnit[4];
-
-  //  formObj.setFieldsValue({
-  //      harga_satuan: {
-  //          [data.id]: value,
-  //      },
-  //  });
-  //};
 
   const onChangeD1D2D3 = (value, data, type) => {
     switch (type) {

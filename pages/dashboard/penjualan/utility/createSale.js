@@ -30,6 +30,7 @@ const CreateSale = async (
   }
 
   values.status = "Dipesan"
+  values.purchasing_payments = null;
 
   var data = {
     data: values,

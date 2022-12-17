@@ -14,9 +14,13 @@ export default function ReactDataTable({
     onPageChange,
     onChangeStatusPengiriman,
     onChangeStatus,
-}) { console.log("data nich : ", data)
-    const router = useRouter();
+}) {
+    const router = useRouter(); console.log("data :",data)
     const { Option } = Select;
+
+    const tagRed = process.env.TAG_RED;
+    const tagGreen = process.env.TAG_GREEN;
+    const tagOrange = process.env.TAG_ORANGE;
 
     const openNotificationWithIcon = (type, title, message) => {
         notification[type]({
@@ -230,12 +234,12 @@ export default function ReactDataTable({
         {
           name: "Jumlah Total",
           width: "180px",
-          //selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
+          selector: (row) => formatter.format(row.attributes?.total ?? "-"),
         },
         {
           name: "Total Dibayar",
           width: "180px",
-          //selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
+          //selector: (row) => formatter.format(row.attributes?.total ?? "-"),
         },
         {
           name: "Sisa Pembayaran",
@@ -245,48 +249,28 @@ export default function ReactDataTable({
         {
           name: "Status Pembayaran",
           width: "150px",
-          //selector: (row) => {
-          //  var tempoDate = new Date(row.attributes?.date_purchasing);
-          //  var tempoTime = parseInt(row.attributes?.tempo_days ?? 0);
-          //  var today = new Date();
-          //  var isTempo = false;
-          //  var statusPembayaran = row.attributes?.status_pembayaran;
-          //  var purchasingHistory = row.attributes?.purchasing_payments.data;
+          selector: (row) => {
+            const lastIndex = row.attributes.purchasing_payments?.data?.length;
+            const lastPayment =
+              row.attributes.purchasing_payments.data[lastIndex - 1];
 
-          //  if (row.attributes?.tempo_time === "Hari") {
-          //    tempoDate.setDate(tempoDate.getDate() + tempoTime);
-          //  } else {
-          //    tempoDate.setDate(tempoDate.getMonth() + tempoTime);
-          //  }
-
-          //  if (tempoDate < today) {
-          //    isTempo = true;
-          //  }
-
-          //  if (isTempo) {
-          //    if (statusPembayaran === "Belum Lunas") {
-          //      return <Tag color="red">Tempo</Tag>;
-          //    } else if (statusPembayaran === "Lunas") {
-          //      return <Tag color="green">Lunas</Tag>;
-          //    }
-          //  } else {
-          //    if (
-          //      statusPembayaran === "Belum Lunas" &&
-          //      purchasingHistory.length > 0
-          //    ) {
-          //      return <Tag color={tagRed}>Tempo</Tag>;
-          //    } else if (
-          //      statusPembayaran === "Lunas" &&
-          //      purchasingHistory.length > 0
-          //    ) {
-          //      return <Tag color={tagGreen}>Lunas</Tag>;
-          //    } else {
-          //      return <Tag color={tagOrange}>Menunggu</Tag>;
-          //    }
-          //  }
-
-          //  return <Tag color={tagOrange}>Menunggu</Tag>;
-          //},
+            if (
+              lastPayment?.attributes.payment_remaining ===
+              lastPayment?.attributes.total_payment
+            ) {
+              return <Tag color={tagRed}>Belum Dibayar</Tag>;
+            } else if (
+              lastPayment?.attributes.payment_remaining > 0 &&
+              lastPayment?.attributes.payment_remaining <
+                lastPayment?.attributes.total_payment
+            ) {
+              return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
+            } else if (lastPayment?.attributes.payment_remaining <= 0) {
+              return <Tag color={tagGreen}>Selesai</Tag>;
+            } else {
+              return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
+            }
+          },
         },
         {
           name: "Faktur Jatuh Tempo",
@@ -297,7 +281,7 @@ export default function ReactDataTable({
           name: "Lokasi Penjualan",
           width: "180px",
           //selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
-          selector: (row) => console.log("row index :",row),
+          selector: (row) => row.attributes?.location.data.attributes.name ?? "-",
         },
         {
           name: "Catatan Staff",
@@ -338,7 +322,7 @@ export default function ReactDataTable({
             columns={columns}
             data={data.data}
             pagination
-            noDataComponent={"Belum ada data Order Pembelian"}
+            noDataComponent={"Belum ada data Penjualan Toko"}
         />
     );
 }
