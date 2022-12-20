@@ -173,9 +173,11 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
         <Form.Item className="mt-4" name={`buy_price_${row.idx}`} initialValue={buyPrice[row.idx - 1]}>
           <InputNumber
             onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")}
-            onFocus={setFocusHarga}
-            formatter={formatterNumber}
-            parser={parserNumber}
+            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+            precision={2}
+            // onFocus={setFocusHarga}
+            // formatter={formatterNumber}
+            // parser={parserNumber}
             style={{
               width: "100%",
             }}
@@ -194,9 +196,11 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
         <Form.Item className="mt-4" name={`purchase_discount_${[row.idx]}`} initialValue={purchaseDiscount[row.idx - 1] ?? 0}>
           <InputNumber
             onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")}
-            onFocus={setFocusHarga}
-            formatter={formatterNumber}
-            parser={parserNumber}
+            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+            precision={2}
+            // onFocus={setFocusHarga}
+            // formatter={formatterNumber}
+            // parser={parserNumber}
             style={{
               width: "100%",
             }}
@@ -284,10 +288,12 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
       selector: (row) => (
         <Form.Item className="mt-4" name={`pricelist_${row.idx}`} initialValue={pricelist[row.idx - 1]}>
           <InputNumber
-            onFocus={setFocusHarga}
-            formatter={formatterNumber}
             onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")}
-            parser={parserNumber}
+            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+            precision={2}
+            // onFocus={setFocusHarga}
+            // formatter={formatterNumber}
+            // parser={parserNumber}
             style={{
               width: "100%",
             }}
@@ -305,10 +311,12 @@ export default function UnitsTable({ onDelete, onUpdate, onPageChange, initialVa
       selector: (row) => (
         <Form.Item className="mt-4" name={`sold_price_${row.idx}`} initialValue={soldPrice[row.idx - 1]}>
           <InputNumber
-            onFocus={setFocusHarga}
-            formatter={formatterNumber}
-            parser={parserNumber}
             onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")}
+            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+            precision={2}
+            // onFocus={setFocusHarga}
+            // formatter={formatterNumber}
+            // parser={parserNumber}
             style={{
               width: "100%",
             }}

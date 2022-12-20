@@ -391,6 +391,7 @@ const Tambah = ({ props }) => {
                     selectedSubCategory={selectedSubCategory}
                   />
                   <SubCategories
+                    category={category}
                     subCategories={subCategories}
                     onSelect={setSelectedSubCategory}
                     selectedSubCategory={selectedSubCategory}

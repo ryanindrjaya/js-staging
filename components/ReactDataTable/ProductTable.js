@@ -29,6 +29,10 @@ export default function ReactDataTable({
     onUpdate(id);
   };
 
+  const reverseData = data.data.map(
+    (val, index, array) => array[array.length - 1 - index]
+  );
+
   const content = (row) => (
     <div>
       <div>
@@ -119,7 +123,8 @@ export default function ReactDataTable({
       paginationRowsPerPageOptions={[10]}
       paginationTotalRows={data?.meta?.pagination.total}
       columns={columns}
-      data={data.data}
+      data={reverseData}
+      defaultSortAsc={false}
       pagination
     />
   );
