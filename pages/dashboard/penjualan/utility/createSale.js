@@ -124,7 +124,7 @@ const openNotificationWithIcon = (type) => {
     notification[type]({
       message: "Gagal menambahkan data",
       description:
-        "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
+        "Produk gagal ditambahkan. Silahkan cek NO Penjualan atau kelengkapan data lainnya",
     });
   } else if (type === "success") {
     notification[type]({
