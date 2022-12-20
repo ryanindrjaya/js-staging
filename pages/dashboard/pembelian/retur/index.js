@@ -192,49 +192,63 @@ function Retur({ props }) {
             </div>
             <div className="w-full flex justify-between">
               <div class="mt-4 text-black text-md font-bold ml-1">Daftar Retur</div>
-              <button onClick={handleAdd} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5">
-                <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">+ Tambah Retur</a>
-                </div>
-              </button>
+                <button
+                    onClick={handleAdd}
+                    type="button"
+                    className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-4"
+                >
+                    <div className="text-white text-center text-sm font-bold">
+                      <a className="text-white no-underline text-xs sm:text-xs">
+                        + Tambah Retur
+                      </a>
+                    </div>
+                </button>
             </div>
-            <div className="w-full flex justify-between">
-              <button
-                onClick={handleUpdate}
-                type="button"
-                className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
-              >
-                <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">Print PDF</a>
-                </div>
-              </button>
-              <button
-                onClick={handleUpdate}
-                type="button"
-                className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
-              >
-                <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">Print CSV</a>
-                </div>
-              </button>
-              <button
-                onClick={handleUpdate}
-                type="button"
-                className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
-              >
-                <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">Print XLS</a>
-                </div>
-              </button>
-              <button
-                onClick={handleUpdate}
-                type="button"
-                className="bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
-              >
-                <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">Kolom Tampak</a>
-                </div>
-              </button>
+            <div  className="w-full flex justify-between">
+                <button
+                    onClick={handleUpdate}
+                    type="button"
+                    className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-2"
+                >
+                    <div className="text-white text-center text-sm font-bold">
+                      <a className="text-white no-underline text-xs sm:text-xs">
+                        Print PDF
+                      </a>
+                    </div>
+                </button>
+                <button
+                    onClick={handleUpdate}
+                    type="button"
+                    className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-2"
+                >
+                    <div className="text-white text-center text-sm font-bold">
+                      <a className="text-white no-underline text-xs sm:text-xs">
+                        Print CSV
+                      </a>
+                    </div>
+                </button>
+                <button
+                    onClick={handleUpdate}
+                    type="button"
+                    className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-2"
+                >
+                    <div className="text-white text-center text-sm font-bold">
+                      <a className="text-white no-underline text-xs sm:text-xs">
+                        Print XLS
+                      </a>
+                    </div>
+                </button>
+                <button
+                    onClick={handleUpdate}
+                    type="button"
+                    className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-2"
+                >
+                    <div className="text-white text-center text-sm font-bold">
+                      <a className="text-white no-underline text-xs sm:text-xs">
+                        Kolom Tampak
+                      </a>
+                    </div>
+                </button>
             </div>
 
             <PurchasesReturTable
