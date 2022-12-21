@@ -99,7 +99,7 @@ function Toko({ props }) {
   const products = useSelector((state) => state.Order);
   const dispatch = useDispatch();
 
-  var selectedProduct = products?.productList; console.log("store sale",props.storeSale.data,props.user)
+  var selectedProduct = products?.productList;
   const locations = props.locations.data;
   const user = props.user;
   const inven = props.inven.data;
@@ -118,11 +118,13 @@ function Toko({ props }) {
   const [listId, setListId] = useState([]);
   const [productTotalPrice, setProductTotalPrice] = useState({});
   const [productSubTotal, setProductSubTotal] = useState({});
+  const [discType, setDiscType] = useState();
   const [discPrice, setDiscPrice] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
 
   const [dppActive, setDPPActive] = useState("Active");
+  const [ppnActive, setPPNActive] = useState("Active");
 
   const router = useRouter();
   const { TextArea } = Input;
@@ -135,6 +137,8 @@ function Toko({ props }) {
   // DPP & PPN
   const [dpp, setDPP] = useState(0);
   const [ppn, setPPN] = useState(0);
+  //var dpp = 0;
+  //var ppn = 0;
 
   // temp
   const [biayaTambahan, setBiayaTambahan] = useState();
@@ -142,6 +146,8 @@ function Toko({ props }) {
 
   const cookies = nookies.get(null, "token");
   const tempList = [];
+  const [info, setInfo] = useState();
+  const [jenisDiskon, setJenisDiskon] = useState();
 
   var total;
 
@@ -161,16 +167,17 @@ function Toko({ props }) {
 
   const onFinish = (values) => {
     setLoading(true);
-    storeSale.data.forEach((element) => {
+    setDataValues(values);
+    setInfo("sukses");
+    storeSale.data.forEach((element) => { console.log("element :",element)
       if (values.no_store_sale == element.attributes.no_store_sale) {
           notification["error"]({
               message: "Gagal menambahkan data",
               description:
                   "Data gagal ditambahkan, karena no penjualan sama",
           });
-      } else {
-          setDataValues(values);
-      }
+          setInfo("gagal");
+      } 
     });
     setLoading(false);
   };
@@ -183,6 +190,8 @@ function Toko({ props }) {
     values.sale_date = today;
     values.added_by = user.name;
     values.category = selectedCategory;
+    values.dpp = dpp;
+    values.ppn = ppn;
     await createSaleFunc(grandTotal, totalPrice, values, listId, form, router);
   };
 
@@ -204,10 +213,10 @@ function Toko({ props }) {
     }
   };
 
-  //const onChangeNoSale = async () => { console.log("sale nichhh");
-  //  if(selectedCategory == "BEBAS") form.setFieldsValue("no_store_sale", `TB/ET/${noStoreSale}/${mm}/${yyyy}`);
-  //  if(selectedCategory == "RESEP") form.setFieldsValue("no_store_sale", `TR/ET/${noStoreSale}/${mm}/${yyyy}`);
-  //};
+  const onChangeNoSale = () => {
+    if(selectedCategory == "BEBAS") form.setFieldValue("no_store_sale", `TR/ET/${noStoreSale}/${mm}/${yyyy}`);
+    if(selectedCategory == "RESEP") form.setFieldValue("no_store_sale", `TB/ET/${noStoreSale}/${mm}/${yyyy}`);
+  };
 
   const calculatePriceAfterDisc = (row) => {
     const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
@@ -223,6 +232,32 @@ function Toko({ props }) {
 
     var test = totalPrice + newTotal;
     setBiayaTambahan(newTotal);
+  };
+
+  
+  const setTotalWithDisc = () => {
+    const disc = form.getFieldsValue(["disc_type", "disc_value"]);
+
+    if (disc.disc_type === "Tetap") {
+      setTotalPriceWithFixedDisc(disc);
+    } else {
+      setTotalPriceWithPercentDisc(disc);
+    }
+  };
+
+  const setTotalPriceWithFixedDisc = (disc) => {
+    var newTotal = 0;
+
+    newTotal = totalPrice - disc.disc_value;
+    setDiscPrice(newTotal);
+  };
+
+  const setTotalPriceWithPercentDisc = (disc) => {
+    var newTotal = 0;
+
+    newTotal = totalPrice - (totalPrice * disc.disc_value) / 100;
+    if (newTotal < 0) newTotal = 0;
+    setDiscPrice(newTotal);
   };
 
   const clearData = () => {
@@ -258,32 +293,27 @@ function Toko({ props }) {
     sumAdditionalPrice();
   }, [additionalFee]);
 
-  //useEffect(() => {
-  //  if (listId.length > 0) {
-  //    createSale(dataValues);
-  //  }
-  //}, [listId]);
-
-  //useEffect(() => {
-  //  if (dataValues) createDetailSale();
-  //}, [dataValues]);
-
   useEffect(() => {
+    if (listId.length > 0) {
+      createSale(dataValues);
+    }
+  }, [listId]);
+
+  useEffect(() => { console.log("detail values :",dataValues, info)
+    if (dataValues && info == "sukses") createDetailSale();
+  }, [dataValues]);
+
+  useEffect(() => { console.log("dpp atas :",dppActive, ppnActive, dpp, ppn, grandTotal)
     // set dpp dan ppn
     if(dppActive == "DPP"){
       setDPP(grandTotal / 1.11);
-    } if(dppActive == "PPN"){
-      setPPN(dpp * 11)/100;
+    } if(ppnActive == "PPN"){
+      setPPN((grandTotal / 1.11) * 11 / 100);
     } else {
-      setDPP();
-      setPPN();
-    }
-  }, [dppActive]);
-
-  //useEffect(() => { console.log("selected",selectedCategory)
-  //  if(selectedCategory == "BEBAS") {setCategorySale(`TB/ET/${noStoreSale}/${mm}/${yyyy}`);}
-  //  if(selectedCategory == "RESEP") {setCategorySale(`TR/ET/${noStoreSale}/${mm}/${yyyy}`);}
-  //}, [selectedCategory]);
+      setDPP(0);
+      setPPN(0);
+    } console.log("dpp active :", dpp, ppn)
+  }, [dppActive, ppnActive]);
 
   useEffect(() => {
     // used to reset redux from value before
@@ -308,14 +338,22 @@ function Toko({ props }) {
                 <div>
                   {selectedCategory === "BEBAS" ? (
                     <button
-                      onClick={() => {setSelectedCategory("BEBAS"); setCategorySale(`TB/ET/${noStoreSale}/${mm}/${yyyy}`); }}
+                      onClick={() => {
+                                       setSelectedCategory("BEBAS"); 
+                                       //setCategorySale(`TB/ET/${noStoreSale}/${mm}/${yyyy}`);
+                                       onChangeNoSale();
+                                     }}
                       className="bg-white rounded-md border border-cyan-700 m-1 text-sm"
                     >
                       <p className="px-4 py-2 m-0 text-cyan-700">BEBAS</p>
                     </button>
                   ) : (
                     <button
-                      onClick={() => {setSelectedCategory("BEBAS"); setCategorySale(`TB/ET/${noStoreSale}/${mm}/${yyyy}`); }}
+                      onClick={() => {
+                                       setSelectedCategory("BEBAS"); 
+                                       //setCategorySale(`TB/ET/${noStoreSale}/${mm}/${yyyy}`); 
+                                       onChangeNoSale();
+                                     }}
                       className="bg-cyan-700 rounded-md m-1 text-sm"
                     >
                       <p className="px-4 py-2 m-0 text-white">BEBAS</p>
@@ -324,14 +362,22 @@ function Toko({ props }) {
 
                   {selectedCategory === "RESEP" ? (
                     <button
-                      onClick={() => {setSelectedCategory("RESEP"); setCategorySale(`TB/ET/${noStoreSale}/${mm}/${yyyy}`); }}
+                      onClick={() => {
+                                       setSelectedCategory("RESEP"); 
+                                       //setCategorySale(`TB/ET/${noStoreSale}/${mm}/${yyyy}`); 
+                                       onChangeNoSale();
+                                     }}
                       className="bg-white rounded-md border border-cyan-700 m-1 text-sm"
                     >
                       <p className="px-4 py-2 m-0 text-cyan-700">RESEP</p>
                     </button>
                   ) : (
                     <button
-                      onClick={() => {setSelectedCategory("RESEP"); setCategorySale(`TB/ET/${noStoreSale}/${mm}/${yyyy}`); }}
+                      onClick={() => {
+                                       setSelectedCategory("RESEP"); 
+                                       //setCategorySale(`TB/ET/${noStoreSale}/${mm}/${yyyy}`);
+                                       onChangeNoSale();
+                                     }}
                       className="bg-cyan-700 rounded-md m-1 text-sm"
                     >
                       <p className="px-4 py-2 m-0 text-white">RESEP</p>
@@ -504,7 +550,7 @@ function Toko({ props }) {
                   <Form.Item name="disc_type">
                     <Select
                       //disabled={products.productList.length === 0}
-                      //onChange={setDiscType}
+                      onChange={setDiscType}
                       placeholder="Pilih Jenis Diskon"
                       size="large"
                       style={{
@@ -524,7 +570,7 @@ function Toko({ props }) {
                   <Form.Item name="disc_value" noStyle>
                     <InputNumber
                       //disabled={products.productList.length === 0}
-                      //onChange={setTotalWithDisc}
+                      onChange={setTotalWithDisc}
                       size="large"
                       min={0}
                       placeholder="Diskon"
@@ -562,8 +608,8 @@ function Toko({ props }) {
                 <div className="w-full md:w-1/3 px-3">
                   <Form.Item name="DPP_active">
                     <Select
-                      //disabled={products.productList.length === 0}
                       placeholder="Pakai DPP"
+                      //onChange={setDPPActive}
                       onChange={setDPPActive}
                       size="large"
                       style={{
@@ -579,9 +625,9 @@ function Toko({ props }) {
                 <div className="w-full md:w-1/3 px-3">
                   <Form.Item name="PPN_active">
                     <Select
-                      //disabled={true}
                       placeholder="Pakai PPN"
-                      onChange={setDPPActive}
+                      //onChange={setDPPActive}
+                      onChange={setPPNActive}
                       size="large"
                       style={{
                         width: "100%",

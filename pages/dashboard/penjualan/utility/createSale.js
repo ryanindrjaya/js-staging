@@ -22,12 +22,12 @@ const CreateSale = async (
 
   values.total = grandTotal;
 
-  if(values.category == "BEBAS"){
-    values.no_store_sale = "TB/"+values.no_store_sale;
-  }
-  if(values.category == "RESEP"){
-    values.no_store_sale = "TR/"+values.no_store_sale;
-  }
+  //if(values.category == "BEBAS"){
+  //  values.no_store_sale = "TB/"+values.no_store_sale;
+  //}
+  //if(values.category == "RESEP"){
+  //  values.no_store_sale = "TR/"+values.no_store_sale;
+  //}
 
   values.status = "Dipesan"
   values.purchasing_payments = null;
