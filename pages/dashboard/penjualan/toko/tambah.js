@@ -137,8 +137,6 @@ function Toko({ props }) {
   // DPP & PPN
   const [dpp, setDPP] = useState(0);
   const [ppn, setPPN] = useState(0);
-  //var dpp = 0;
-  //var ppn = 0;
 
   // temp
   const [biayaTambahan, setBiayaTambahan] = useState();
@@ -147,13 +145,10 @@ function Toko({ props }) {
   const cookies = nookies.get(null, "token");
   const tempList = [];
   const [info, setInfo] = useState();
-  const [jenisDiskon, setJenisDiskon] = useState();
-
-  var total;
 
   // NO Store Sale
   var noStoreSale = String(storeSale?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`TB/ET/${noStoreSale}/${mm}/${yyyy}`);
+  const [categorySale, setCategorySale] = useState(`TB/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);
@@ -167,9 +162,8 @@ function Toko({ props }) {
 
   const onFinish = (values) => {
     setLoading(true);
-    setDataValues(values);
     setInfo("sukses");
-    storeSale.data.forEach((element) => { console.log("element :",element)
+    storeSale.data.forEach((element) => {
       if (values.no_store_sale == element.attributes.no_store_sale) {
           notification["error"]({
               message: "Gagal menambahkan data",
@@ -179,6 +173,7 @@ function Toko({ props }) {
           setInfo("gagal");
       } 
     });
+    setDataValues(values);
     setLoading(false);
   };
 
@@ -214,8 +209,8 @@ function Toko({ props }) {
   };
 
   const onChangeNoSale = () => {
-    if(selectedCategory == "BEBAS") form.setFieldValue("no_store_sale", `TR/ET/${noStoreSale}/${mm}/${yyyy}`);
-    if(selectedCategory == "RESEP") form.setFieldValue("no_store_sale", `TB/ET/${noStoreSale}/${mm}/${yyyy}`);
+    if(selectedCategory == "BEBAS") form.setFieldValue("no_store_sale", `TR/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
+    if(selectedCategory == "RESEP") form.setFieldValue("no_store_sale", `TB/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
   };
 
   const calculatePriceAfterDisc = (row) => {
@@ -299,11 +294,11 @@ function Toko({ props }) {
     }
   }, [listId]);
 
-  useEffect(() => { console.log("detail values :",dataValues, info)
+  useEffect(() => {
     if (dataValues && info == "sukses") createDetailSale();
   }, [dataValues]);
 
-  useEffect(() => { console.log("dpp atas :",dppActive, ppnActive, dpp, ppn, grandTotal)
+  useEffect(() => {
     // set dpp dan ppn
     if(dppActive == "DPP"){
       setDPP(grandTotal / 1.11);
@@ -312,7 +307,7 @@ function Toko({ props }) {
     } else {
       setDPP(0);
       setPPN(0);
-    } console.log("dpp active :", dpp, ppn)
+    }
   }, [dppActive, ppnActive]);
 
   useEffect(() => {
