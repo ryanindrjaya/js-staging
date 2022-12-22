@@ -81,8 +81,7 @@ function Sales({ props }) {
     const [sell, setSell] = useState(data);
 
     const handleAdd = () => {
-        console.log("tambah");
-        router.push("/dashboard/penjualan/sales/tambah");
+        router.push("/dashboard/penjualan/pesanansales/tambah");
     };
 
     const handleUpdate = (id) => {
@@ -210,15 +209,9 @@ function Sales({ props }) {
                         </div>
 
                         <div className="w-full flex justify-end mt-2 text-black text-md font-bold ml-1">
-                            <button
-                                onClick={handleAdd}
-                                type="button"
-                                className="w-full md:w-1/6 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-2"
-                            >
+                            <button onClick={handleAdd} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5">
                                 <div className="text-white text-center text-sm font-bold">
-                                    <a className="text-white no-underline text-xs sm:text-xs">
-                                        tambah
-                                    </a>
+                                    <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
                                 </div>
                             </button>
                         </div>
