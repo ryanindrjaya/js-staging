@@ -22,13 +22,6 @@ const CreateSale = async (
 
   values.total = grandTotal;
 
-  if(values.category == "BEBAS"){
-    values.no_store_sale = "TB/"+values.no_store_sale;
-  }
-  if(values.category == "RESEP"){
-    values.no_store_sale = "TR/"+values.no_store_sale;
-  }
-
   values.status = "Dipesan"
   values.purchasing_payments = null;
 
@@ -39,7 +32,7 @@ const CreateSale = async (
   const req = await createData(data);
   const res = await req.json();
 
-  if (req.status === 200) {
+  if (req.status === 200) { 
     await putRelationSaleDetail(res.data.id, res.data.attributes, form, router);
   } else {
     openNotificationWithIcon("error");
@@ -124,7 +117,7 @@ const openNotificationWithIcon = (type) => {
     notification[type]({
       message: "Gagal menambahkan data",
       description:
-        "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
+        "Produk gagal ditambahkan. Silahkan cek NO Penjualan atau kelengkapan data lainnya",
     });
   } else if (type === "success") {
     notification[type]({

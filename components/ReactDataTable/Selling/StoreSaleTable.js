@@ -301,6 +301,39 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
       },
     },
     {
+      name: "D3",
+      width: "100px",
+      selector: (row) => {
+        defaultDp3 = row.attributes?.unit_1_dp3 || 0;
+        if (products.productInfo[row.id]?.d3) {
+          defaultDp3 = products.productInfo[row.id].d3;
+        }
+
+        if (products.productInfo[row.id]) {
+          if (products.productInfo[row.id].unit) {
+            defaultDp3 = products.productInfo[row.id].d3;
+          }
+        }
+
+        return (
+          <div className="disabled:bg-white">
+            <InputNumber
+              controls={false}
+              formatter={(value) => `${value}%`}
+              max={100}
+              min={0}
+              name={["disc_rp3", `${row.id}`]}
+              value={defaultDp3}
+              onChange={(e) => onChangeD1D2D3(e, row, "d3")}
+              style={{
+                width: "60px",
+              }}
+            />
+          </div>
+        );
+      },
+    },
+    {
       name: "EXPDate",
       width: "150px",
       sortable: true,
