@@ -73,7 +73,6 @@ const fetchSell = async (cookies) => {
 };
 
 function Sales({ props }) {
-    console.log("props :", props)
     const user = props.user;
     const locations = props.locations.data;
     const data = props.sell;

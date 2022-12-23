@@ -108,7 +108,7 @@ function Toko({ props }) {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [productList, setProductList] = useState([]);
-  const [additionalFee, setAdditionalFee] = useState();
+  //const [additionalFee, setAdditionalFee] = useState();
   const [isFetchinData, setIsFetchingData] = useState(false);
 
   const [dataValues, setDataValues] = useState();
@@ -118,7 +118,7 @@ function Toko({ props }) {
   const [listId, setListId] = useState([]);
   const [productTotalPrice, setProductTotalPrice] = useState({});
   const [productSubTotal, setProductSubTotal] = useState({}); useState({});
-  const [discPrice, setDiscPrice] = useState(0);
+  //const [discPrice, setDiscPrice] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0); useState({});
   const [grandTotal, setGrandTotal] = useState(0);
 
@@ -135,8 +135,8 @@ function Toko({ props }) {
   //var ppn = 0;
 
   // temp
-  const [biayaTambahan, setBiayaTambahan] = useState();
-  const [biayaPengiriman, setBiayaPengiriman] = useState(0);
+  //const [biayaTambahan, setBiayaTambahan] = useState();
+  //const [biayaPengiriman, setBiayaPengiriman] = useState(0);
 
   const cookies = nookies.get(null, "token");
   const tempList = [];
@@ -164,21 +164,21 @@ function Toko({ props }) {
                   "Data gagal ditambahkan, karena no penjualan sama",
           });
           setInfo("gagal");
-      } 
+      }
     });
-    setDataValues(values); createSale(values);
+    setDataValues(values);
     setLoading(false);
   };
 
-  const createDetailSale = async () => { console.log("detail :", dataValues, products)
+  const createDetailSale = async () => {
     await createDetailOrderSaleFunc(dataValues, products, setListId, "/sales-sell-details");
   };
 
-  const createSale = async (values) => { console.log("list id ",listId)
+  const createSale = async (values) => {
     values.sale_date = today;
     values.added_by = user.name;
     //values.category = selectedCategory;
-    //await createOrderSaleFunc(grandTotal, totalPrice, values, listId, form, router);
+    await createOrderSaleFunc(values, listId, form, router);
   };
 
   const onChangeProduct = async () => {

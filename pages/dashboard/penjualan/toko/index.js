@@ -80,7 +80,6 @@ function Toko({ props }) {
   const [sell, setSell] = useState(data);
 
   const handleAdd = () => {
-    console.log("tambah");
     router.push("/dashboard/penjualan/toko/tambah");
   };
 
@@ -179,7 +178,7 @@ function Toko({ props }) {
                     marginRight: "10px",
                   }}
                 >
-                {locations.map((element) => { console.log(element)
+                {locations.map((element) => {
                   return (
                     <Select.Option value={element.id}>
                       {element.attributes.name}

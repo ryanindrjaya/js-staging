@@ -117,10 +117,10 @@ function Toko({ props }) {
 
   const [listId, setListId] = useState([]);
   const [productTotalPrice, setProductTotalPrice] = useState({});
-  const [productSubTotal, setProductSubTotal] = useState({}); console.log("productsubtotal before : ",productSubTotal)
+  const [productSubTotal, setProductSubTotal] = useState({});
   const [discType, setDiscType] = useState();
   const [discPrice, setDiscPrice] = useState(0);
-  const [totalPrice, setTotalPrice] = useState(0);  console.log("total price : ",totalPrice)
+  const [totalPrice, setTotalPrice] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
 
   const [dppActive, setDPPActive] = useState("Active");

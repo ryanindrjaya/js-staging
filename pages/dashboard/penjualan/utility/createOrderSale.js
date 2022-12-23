@@ -8,8 +8,6 @@ var tempSupplierId = 0;
 var tempLocationId;
 
 const CreateOrderSale = async (
-  grandTotal,
-  totalPrice,
   values,
   listId,
   form,
@@ -19,8 +17,6 @@ const CreateOrderSale = async (
   listId.forEach((element) => {
     tempProductListId.push({ id: element });
   });
-
-  values.total = grandTotal;
 
   values.status = "Dipesan"
   values.purchasing_payments = null;
@@ -32,11 +28,11 @@ const CreateOrderSale = async (
   const req = await createData(data);
   const res = await req.json();
 
-  //if (req.status === 200) { 
-  //  await putRelationSaleDetail(res.data.id, res.data.attributes, form, router);
-  //} else {
-  //  openNotificationWithIcon("error");
-  //}
+  if (req.status === 200) { 
+    await putRelationSaleDetail(res.data.id, res.data.attributes, form, router);
+  } else {
+    openNotificationWithIcon("error");
+  }
 };
 
 const createData = async (data) => {
@@ -63,7 +59,7 @@ const putRelationSaleDetail = async (id, value, form, router) => {
     data: value,
   };
 
-  dataSale.data.store_sale_details = tempProductListId;
+  dataSale.data.sales_sell_details = tempProductListId;
 
   // clean object
   for (var key in dataSale) {

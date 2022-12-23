@@ -16,7 +16,7 @@ export default function ReactDataTable({
     onChangeStatus,
     user,
 }) {
-    const router = useRouter(); console.log("data :",data,user)
+    const router = useRouter();
     const { Option } = Select;
 
     const tagRed = process.env.TAG_RED;

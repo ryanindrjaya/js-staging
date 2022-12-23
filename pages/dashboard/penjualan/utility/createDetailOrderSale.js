@@ -8,11 +8,9 @@ const cookies = nookies.get(null, "token");
 const createDetailOrderSale = (
   values,
   products,
-  productTotalPrice,
-  productSubTotal,
   setListId,
   url
-) => { console.log("mashook")
+) => {
   products.productList.forEach((element) => {
     // default value
     var qty = 1;
