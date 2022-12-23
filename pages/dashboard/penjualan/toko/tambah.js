@@ -725,16 +725,18 @@ function Toko({ props }) {
                 </Form.Item>
               </div>
 
-              <div  className="w-full flex justify-between">
+              <div  className="w-full flex justify-center">
                   <Form.Item>
                     {loading ? (
                       <div className=" flex float-left ml-3 ">
                         <Spin />
                       </div>
                     ) : (
-                      <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
-                        Tambah
-                      </Button>
+                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
+                        <p className="px-4 py-2 m-0 text-white">
+                          SIMPAN DAN CETAK UNTUK PEMBAYARAN
+                        </p>
+                      </button>
                     )}
                   </Form.Item>
               </div>

@@ -8,7 +8,7 @@ import { useRouter } from "next/router";
 import { Row, Form, Input, InputNumber, Select, Button, Spin, notification } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
-import AddSellSalesTable from "../../../../components/ReactDataTable/Selling/AddSellSalesTable";
+import StoreSaleTable from "../../../../components/ReactDataTable/Selling/StoreSaleTable";
 import createSaleFunc from "../utility/createSale";
 import createDetailSaleFunc from "../utility/createDetailSale";
 import calculatePrice from "../utility/calculatePrice";
@@ -26,15 +26,15 @@ Toko.getInitialProps = async (context) => {
   const reqInven = await fetchInven(cookies);
   const inven = await reqInven.json();
 
-  const reqSale = await fetchSale(cookies);
-  const sale = await reqSale.json();
+  const reqStoreSale = await fetchStoreSale(cookies);
+  const storeSale = await reqStoreSale.json();
 
   return {
     props: {
       user,
       locations,
       inven,
-      sale
+      storeSale
     },
   };
 };
@@ -53,8 +53,8 @@ const fetchData = async (cookies) => {
   return req;
 };
 
-const fetchSale = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sells?populate=deep";
+const fetchStoreSale = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales?populate=deep";
     const options = {
         method: "GET",
         headers: {
@@ -103,7 +103,7 @@ function Toko({ props }) {
   const locations = props.locations.data;
   const user = props.user;
   const inven = props.inven.data;
-  const sale = props.sale;
+  const storeSale = props.storeSale;
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -112,15 +112,19 @@ function Toko({ props }) {
   const [isFetchinData, setIsFetchingData] = useState(false);
 
   const [dataValues, setDataValues] = useState();
-  //const [selectedCategory, setSelectedCategory] = useState("BEBAS");
-  //const [deliveryFee, setDeliveryFee] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState("BEBAS");
+  const [deliveryFee, setDeliveryFee] = useState(0);
 
   const [listId, setListId] = useState([]);
   const [productTotalPrice, setProductTotalPrice] = useState({});
-  const [productSubTotal, setProductSubTotal] = useState({}); useState({}); console.log("productsubtotal before : ",productSubTotal)
+  const [productSubTotal, setProductSubTotal] = useState({});
+  const [discType, setDiscType] = useState();
   const [discPrice, setDiscPrice] = useState(0);
-  const [totalPrice, setTotalPrice] = useState(0); useState({}); console.log("total price : ",totalPrice)
+  const [totalPrice, setTotalPrice] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
+
+  const [dppActive, setDPPActive] = useState("Active");
+  const [ppnActive, setPPNActive] = useState("Active");
 
   const router = useRouter();
   const { TextArea } = Input;
@@ -131,8 +135,8 @@ function Toko({ props }) {
   var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 
   // DPP & PPN
-  //const dpp = 1.11;
-  //var ppn = 0;
+  const [dpp, setDPP] = useState(0);
+  const [ppn, setPPN] = useState(0);
 
   // temp
   const [biayaTambahan, setBiayaTambahan] = useState();
@@ -140,12 +144,11 @@ function Toko({ props }) {
 
   const cookies = nookies.get(null, "token");
   const tempList = [];
-
   const [info, setInfo] = useState();
 
-  // NO Sales Sale
-  var noSale = String(props.sale?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`PS/ET/${noSale}/${mm}/${yyyy}`);
+  // NO Store Sale
+  var noStoreSale = String(storeSale?.meta?.pagination.total + 1).padStart(3, "0");
+  const [categorySale, setCategorySale] = useState(`TB/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);
@@ -160,8 +163,8 @@ function Toko({ props }) {
   const onFinish = (values) => {
     setLoading(true);
     setInfo("sukses");
-    sale.data.forEach((element) => { console.log("values dan element",values, element)
-      if (values.no_sales_sale == element.attributes.no_sales_sale) {
+    storeSale.data.forEach((element) => {
+      if (values.no_store_sale == element.attributes.no_store_sale) {
           notification["error"]({
               message: "Gagal menambahkan data",
               description:
@@ -169,20 +172,22 @@ function Toko({ props }) {
           });
           setInfo("gagal");
       } 
-    }); console.log("values :", values, products, info, grandTotal)
+    });
     setDataValues(values);
     setLoading(false);
   };
 
   const createDetailSale = async () => {
-    //await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/store-sale-details");
+    await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/store-sale-details");
   };
 
   const createSale = async (values) => {
-    //values.sale_date = today;
-    //values.added_by = user.name;
-    //values.category = selectedCategory;
-    //await createSaleFunc(grandTotal, totalPrice, values, listId, form, router);
+    values.sale_date = today;
+    values.added_by = user.name;
+    values.category = selectedCategory;
+    values.dpp = dpp;
+    values.ppn = ppn;
+    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router);
   };
 
   const onChangeProduct = async () => {
@@ -203,21 +208,52 @@ function Toko({ props }) {
     }
   };
 
+  const onChangeNoSale = () => {
+    if(selectedCategory == "BEBAS") form.setFieldValue("no_store_sale", `TR/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
+    if(selectedCategory == "RESEP") form.setFieldValue("no_store_sale", `TB/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
+  };
+
   const calculatePriceAfterDisc = (row) => {
     const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
     return formatter.format(total);
   };
 
-  //const sumAdditionalPrice = () => {
-  //  var newTotal = 0;
+  const sumAdditionalPrice = () => {
+    var newTotal = 0;
 
-  //  for (var key in additionalFee) {
-  //    newTotal = newTotal + additionalFee[key];
-  //  }
+    for (var key in additionalFee) {
+      newTotal = newTotal + additionalFee[key];
+    }
 
-  //  var test = totalPrice + newTotal;
-  //  setBiayaTambahan(newTotal);
-  //};
+    var test = totalPrice + newTotal;
+    setBiayaTambahan(newTotal);
+  };
+
+  
+  const setTotalWithDisc = () => {
+    const disc = form.getFieldsValue(["disc_type", "disc_value"]);
+
+    if (disc.disc_type === "Tetap") {
+      setTotalPriceWithFixedDisc(disc);
+    } else {
+      setTotalPriceWithPercentDisc(disc);
+    }
+  };
+
+  const setTotalPriceWithFixedDisc = (disc) => {
+    var newTotal = 0;
+
+    newTotal = totalPrice - disc.disc_value;
+    setDiscPrice(newTotal);
+  };
+
+  const setTotalPriceWithPercentDisc = (disc) => {
+    var newTotal = 0;
+
+    newTotal = totalPrice - (totalPrice * disc.disc_value) / 100;
+    if (newTotal < 0) newTotal = 0;
+    setDiscPrice(newTotal);
+  };
 
   const clearData = () => {
     dispatch({ type: "CLEAR_DATA" });
@@ -248,19 +284,31 @@ function Toko({ props }) {
     }
   }, [products.productList]);
 
-  //useEffect(() => {
-  //  sumAdditionalPrice();
-  //}, [additionalFee]);
+  useEffect(() => {
+    sumAdditionalPrice();
+  }, [additionalFee]);
 
-  //useEffect(() => {
-  //  if (listId.length > 0) {
-  //    createSale(dataValues);
-  //  }
-  //}, [listId]);
+  useEffect(() => {
+    if (listId.length > 0) {
+      createSale(dataValues);
+    }
+  }, [listId]);
 
-  //useEffect(() => {
-  //  if (dataValues) createDetailSale();
-  //}, [dataValues]);
+  useEffect(() => {
+    if (dataValues && info == "sukses") createDetailSale();
+  }, [dataValues]);
+
+  useEffect(() => {
+    // set dpp dan ppn
+    if(dppActive == "DPP"){
+      setDPP(grandTotal / 1.11);
+    } if(ppnActive == "PPN"){
+      setPPN((grandTotal / 1.11) * 11 / 100);
+    } else {
+      setDPP(0);
+      setPPN(0);
+    }
+  }, [dppActive, ppnActive]);
 
   useEffect(() => {
     // used to reset redux from value before
@@ -276,20 +324,19 @@ function Toko({ props }) {
         <LayoutWrapper style={{}}>
           <TitlePage titleText={"Penjualan Sales"} />
           <LayoutContent>
-
-            <div className="w-full flex justify-start mx-2 mt-1">
-                <div className="w-full md:w-1/3">
+            <div className="w-full flex justify-between mx-2 mt-1">
+                <div className="w-full justify-start md:w-1/3">
                   <p>{date} {time}</p>
                 </div>
-                <div className="w-full content-center md:w-1/3">
+                <div className="w-full flex justify-center md:w-1/3">
                   <button
                     //onClick={() => setSelectedCategory("RESEP")}
                     className="bg-cyan-700 rounded-md m-1 text-sm"
                   >
-                    <p className="px-4 py-2 m-0 text-white">Riwayat Pesanan</p>
+                    <p className="px-4 py-2 m-0 text-white">Laporan Penjualan Hari Ini</p>
                   </button>
                 </div>
-                <div className="w-full text-right md:w-1/3">
+                <div className="w-full flex justify-end text-right md:w-1/3">
                   <p>{user.name}</p>
                 </div>
             </div>
@@ -303,10 +350,10 @@ function Toko({ props }) {
               onFinish={onFinish}
             >
 
-              <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-4">
+              <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-5">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    name="no_sales_sale"
+                    name="no_store_sale"
                     initialValue={categorySale}
                     rules={[
                         {
@@ -333,6 +380,21 @@ function Toko({ props }) {
                       style={{ height: "40px" }}
                       placeholder="Nama Pelanggan"
                     />
+                  </Form.Item>
+                </div>
+                <div className="w-full md:w-1/4 px-3 mb-2">
+                  <Form.Item name="address">
+                    <Input style={{ height: "40px" }} placeholder="Alamat" />
+                  </Form.Item>
+                </div>
+                <div className="w-full md:w-1/4 px-3 mb-2">
+                  <Form.Item name="phone">
+                    <Input style={{ height: "40px" }} placeholder="No. Telp" />
+                  </Form.Item>
+                </div>
+                <div className="w-full md:w-1/4 px-3 mb-2">
+                  <Form.Item name="faktur">
+                    <Input style={{ height: "40px" }} placeholder="Faktur" />
                   </Form.Item>
                 </div>
 
@@ -413,7 +475,7 @@ function Toko({ props }) {
                   </div>
                 ) : (
                   <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                    <AddSellSalesTable
+                    <StoreSaleTable
                       products={products}
                       productTotalPrice={productTotalPrice}
                       setTotalPrice={setTotalPrice}
@@ -426,7 +488,183 @@ function Toko({ props }) {
                   </div>
               )}
 
-              <div className="w-full mt-8 flex justify-between">
+              <div className="w-full flex flex-wrap -mx-3 mb-1">
+                <div className="w-full md:w-1/3 px-3 mt-5 ">
+                  <Form.Item name="disc_type">
+                    <Select
+                      //disabled={products.productList.length === 0}
+                      onChange={setDiscType}
+                      placeholder="Pilih Jenis Diskon"
+                      size="large"
+                      style={{
+                        width: "100%",
+                      }}
+                    >
+                      <Select.Option value="Tetap" key={"Tetap"}>
+                        Tetap
+                      </Select.Option>
+                      <Select.Option value="Persentase" key={"Persentase"}>
+                        Persentase
+                      </Select.Option>
+                    </Select>
+                  </Form.Item>
+                </div>
+                <div className="w-full md:w-1/3 px-3 mt-5 ">
+                  <Form.Item name="disc_value" noStyle>
+                    <InputNumber
+                      //disabled={products.productList.length === 0}
+                      onChange={setTotalWithDisc}
+                      size="large"
+                      min={0}
+                      placeholder="Diskon"
+                      style={{ width: "100%" }}
+                    />
+                  </Form.Item>
+                </div>
+              </div>
+
+              <div className="w-full flex flex-wrap -mx-3 mb-4">
+                <div className="w-full md:w-1/3 px-3">
+                  <Form.Item noStyle>
+                    <Input
+                      size="large"
+                      style={{
+                        width: "60%",
+                      }}
+                      value="Biaya Pengiriman"
+                      disabled
+                    />
+                  </Form.Item>
+                  <Form.Item name="delivery_fee" initialValue={0} noStyle>
+                    <Input
+                      size="large"
+                      style={{
+                        width: "40%",
+                      }}
+                      onChange={handleBiayaPengiriman}
+                    />
+                  </Form.Item>
+                </div>
+              </div>
+
+              <div className="w-full flex flex-wrap -mx-3 my-1 ">
+                <div className="w-full md:w-1/3 px-3">
+                  <Form.Item name="DPP_active">
+                    <Select
+                      placeholder="Pakai DPP"
+                      //onChange={setDPPActive}
+                      onChange={setDPPActive}
+                      size="large"
+                      style={{
+                        width: "100%",
+                      }}
+                    >
+                      <Select.Option value="DPP" key={"DPP"}>
+                        DPP
+                      </Select.Option>
+                    </Select>
+                  </Form.Item>
+                </div>
+                <div className="w-full md:w-1/3 px-3">
+                  <Form.Item name="PPN_active">
+                    <Select
+                      placeholder="Pakai PPN"
+                      //onChange={setDPPActive}
+                      onChange={setPPNActive}
+                      size="large"
+                      style={{
+                        width: "100%",
+                      }}
+                    >
+                      <Select.Option value="PPN" key={"PPN"}>
+                        PPN
+                      </Select.Option>
+                    </Select>
+                  </Form.Item>
+                </div>
+              </div>
+
+              <div className="w-full flex md:w-3/4 justify-end mb-2">
+                <p className="mb-4 font-bold text-center">Biaya Tambahan Lain Lain</p>
+              </div>
+              <div className="w-full flex flex-wrap justify-end mb-3">
+                <div className="w-full md:w-1/3 px-3 mb-2 text-center md:mb-0">
+                  <p className="mb-4 font-bold">Keterangan</p>
+                  <Form.Item name="additional_fee_1_desc">
+                    <Input size="large" style={{ width: "100%" }} />
+                  </Form.Item>
+                  <Form.Item name="additional_fee_2_desc">
+                    <Input size="large" style={{ width: "100%" }} />
+                  </Form.Item>
+                  <Form.Item name="additional_fee_3_desc">
+                    <Input size="large" style={{ width: "100%" }} />
+                  </Form.Item>
+                </div>
+
+                <div className="w-full md:w-1/3 px-3 mb-2 text-center md:mb-0">
+                  <p className="mb-4 font-bold">Jumlah</p>
+                  <Form.Item name="additional_fee_1_sub">
+                    <InputNumber
+                      size="large"
+                      style={{ width: "100%" }}
+                      onChange={(e) =>
+                        setAdditionalFee({
+                          ...additionalFee,
+                          additional_fee_1_sub: e,
+                        })
+                      }
+                    />
+                  </Form.Item>
+                  <Form.Item name="additional_fee_2_sub">
+                    <InputNumber
+                      size="large"
+                      style={{ width: "100%" }}
+                      onChange={(e) =>
+                        setAdditionalFee({
+                          ...additionalFee,
+                          additional_fee_2_sub: e,
+                        })
+                      }
+                    />
+                  </Form.Item>
+                  <Form.Item name="additional_fee_3_sub">
+                    <InputNumber
+                      size="large"
+                      style={{ width: "100%" }}
+                      onChange={(e) =>
+                        setAdditionalFee({
+                          ...additionalFee,
+                          additional_fee_3_sub: e,
+                        })
+                      }
+                    />
+                  </Form.Item>
+                </div>
+              </div>
+
+              <div className="w-full flex flex-wrap justify-end mb-3">
+                <Form.Item name="dpp" value={dpp} className="w-full h-2 md:w-1/2 mx-2">
+                  <span> DPP </span> <span>: {formatter.format(dpp)}</span>
+                </Form.Item>
+                <Form.Item name="ppn" value={ppn} className="w-full h-2 md:w-1/2 mx-2">
+                  <span> PPN </span> <span>: {formatter.format(ppn)}</span>
+                </Form.Item>
+                <Form.Item name="grandtotal" value={totalPrice} className="w-full h-2 md:w-1/2 mx-2">
+                  <span> Total </span> <span>: {formatter.format(totalPrice)}</span>
+                </Form.Item>
+                <Form.Item name="biayaPengiriman" value={biayaPengiriman} className="w-full h-2 md:w-1/2 mx-2">
+                  <span> Biaya Pengiriman </span> <span>: {formatter.format(biayaPengiriman)}</span>
+                </Form.Item>
+                <Form.Item name="biayaTambahan" value={biayaTambahan} className="w-full h-2 md:w-1/2 mx-2">
+                  <span> Biaya Tambahan </span> <span>: {formatter.format(biayaTambahan)}</span>
+                </Form.Item>
+
+                <Form.Item name="grandTotal" value={grandTotal} className="w-full h-2 md:w-1/2 mx-2 mt-3 text-lg">
+                  <span> Total </span>  <span>: {formatter.format(grandTotal)}</span>
+                </Form.Item>
+              </div>
+
+              <div className="w-full flex justify-between">
                 <Form.Item name="sale_note" className="w-full md:w-1/2 mx-2">
                   <TextArea rows={4} placeholder="Catatan Penjualan" />
                 </Form.Item>
@@ -435,16 +673,18 @@ function Toko({ props }) {
                 </Form.Item>
               </div>
 
-              <div  className="w-full flex justify-between">
+              <div  className="w-full flex justify-center">
                   <Form.Item>
                     {loading ? (
                       <div className=" flex float-left ml-3 ">
                         <Spin />
                       </div>
                     ) : (
-                      <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
-                        Tambah
-                      </Button>
+                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
+                        <p className="px-4 py-2 m-0 text-white">
+                          SIMPAN DAN CETAK UNTUK PEMBAYARAN PIUTANG
+                        </p>
+                      </button>
                     )}
                   </Form.Item>
               </div>

@@ -247,11 +247,11 @@ function Toko({ props }) {
           <TitlePage titleText={"Pesanan Penjualan Sales"} />
           <LayoutContent>
 
-            <div className="w-full flex justify-start mx-2 mt-1">
-                <div className="w-full md:w-1/3">
+            <div className="w-full flex justify-between mx-2 mt-1">
+                <div className="w-full justify-start md:w-1/3">
                   <p>{date} {time}</p>
                 </div>
-                <div className="w-full content-center md:w-1/3">
+                <div className="w-full flex justify-center md:w-1/3">
                   <button
                     //onClick={() => setSelectedCategory("RESEP")}
                     className="bg-cyan-700 rounded-md m-1 text-sm"
@@ -259,7 +259,7 @@ function Toko({ props }) {
                     <p className="px-4 py-2 m-0 text-white">Riwayat Pesanan</p>
                   </button>
                 </div>
-                <div className="w-full text-right md:w-1/3">
+                <div className="w-full flex justify-end text-right md:w-1/3">
                   <p>{user.name}</p>
                 </div>
             </div>
@@ -402,16 +402,18 @@ function Toko({ props }) {
                 </Form.Item>
               </div>
 
-              <div  className="w-full flex justify-between">
+              <div  className="w-full flex justify-center">
                   <Form.Item>
                     {loading ? (
                       <div className=" flex float-left ml-3 ">
                         <Spin />
                       </div>
                     ) : (
-                      <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
-                        Tambah
-                      </Button>
+                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
+                        <p className="px-4 py-2 m-0 text-white">
+                          SIMPAN UNTUK PEMESANAN PENJUALAN
+                        </p>
+                      </button>
                     )}
                   </Form.Item>
               </div>

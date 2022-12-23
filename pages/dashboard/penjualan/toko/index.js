@@ -329,21 +329,15 @@ function Toko({ props }) {
                 {/*})}*/}
                 </Select>
               </div>
-                <button
-                    onClick={handleAdd}
-                    type="button"
-                    className="w-full md:w-1/6 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-2"
-                >
-                    <div className="text-white text-center text-sm font-bold">
-                      <a className="text-white no-underline text-xs sm:text-xs">
-                        tambah
-                      </a>
-                    </div>
-                </button>
             </div>
 
-            <div className="w-full flex justify-start mt-4 mb-2 text-black text-md font-bold ml-1">
-              Semua Penjualan
+            <div className="w-full flex justify-between mt-0 mb-2">
+              <span className="text-black text-md font-bold ml-1 mt-5">Semua Penjualan</span>
+              <button onClick={handleAdd} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5">
+                    <div className="text-white text-center text-sm font-bold">
+                        <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
+                    </div>
+              </button>
             </div>
 
             <div  className="w-full flex justify-between">
