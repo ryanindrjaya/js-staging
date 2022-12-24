@@ -9,7 +9,7 @@ import TitlePage from "../../../../components/TitlePage/TitlePage";
 import SellingTable from "../../../../components/ReactDataTable/Selling/SellingTable";
 import nookies from "nookies";
 
-Toko.getInitialProps = async (context) => {
+SalesSale.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
 
   const req = await fetchData(cookies);
@@ -18,14 +18,14 @@ Toko.getInitialProps = async (context) => {
   const reqLocation = await fetchLocation(cookies);
   const locations = await reqLocation.json();
 
-  const reqStore = await fetchStore(cookies);
-  const store = await reqStore.json();
+  const reqSales = await fetchSales(cookies);
+  const sales = await reqSales.json();
 
   return {
     props: {
       user,
       locations,
-      store,
+      sales,
     },
   };
 };
@@ -58,8 +58,8 @@ const fetchLocation = async (cookies) => {
   return req;
 };
 
-const fetchStore = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales?populate=deep";
+const fetchSales = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?populate=deep";
     const options = {
         method: "GET",
         headers: {
@@ -72,10 +72,10 @@ const fetchStore = async (cookies) => {
     return req;
 };
 
-function Toko({ props }) {
+function SalesSale({ props }) {
   const user = props.user;
   const locations = props.locations.data;
-  const data = props.store;
+  const data = props.sales;
   const router = useRouter();
   const [sell, setSell] = useState(data);
 
@@ -109,9 +109,9 @@ function Toko({ props }) {
       delete values.attributes?.document;
     }
 
-    var store_sale_details = [];
-    values.attributes.store_sale_details.data.forEach((element) => {
-      store_sale_details.push({ id: element.id });
+    var sales_sale_details = [];
+    values.attributes.sales_sale_details.data.forEach((element) => {
+      sales_sale_details.push({ id: element.id });
     });
 
     var purchasing_payments = [];
@@ -120,7 +120,7 @@ function Toko({ props }) {
     });
 
     values.attributes.location = { id: values.attributes.location.data.id };
-    values.attributes.store_sale_details = store_sale_details;
+    values.attributes.sales_sale_details = sales_sale_details;
     values.attributes.purchasing_payments = purchasing_payments;
 
     const newValues = {
@@ -129,7 +129,7 @@ function Toko({ props }) {
 
     const JSONdata = JSON.stringify(newValues);
     const cookies = nookies.get(null, "token");
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales/" + id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales/" + id;
 
     const options = {
       method: "PUT",
@@ -144,7 +144,7 @@ function Toko({ props }) {
     const res = await req.json();
 
     if (req.status === 200) {
-      const response = await fetchStore(cookies);
+      const response = await fetchSales(cookies);
       setSell(response);
       openNotificationWithIcon("success", "Status berhasil dirubah", "Status berhasil dirubah. Silahkan cek penjualan sales");
     } else {
@@ -401,4 +401,4 @@ function Toko({ props }) {
   );
 }
 
-export default Toko;
+export default SalesSale;

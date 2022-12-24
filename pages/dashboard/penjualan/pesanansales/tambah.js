@@ -145,7 +145,7 @@ function Toko({ props }) {
 
   // NO Sales Sale
   var noSale = String(props.sale?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`PS/ET/${noSale}/${mm}/${yyyy}`);
+  const [categorySale, setCategorySale] = useState(`PS/ET/${user.id}/${noSale}/${mm}/${yyyy}`);
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",

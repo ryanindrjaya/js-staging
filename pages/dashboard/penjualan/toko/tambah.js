@@ -187,7 +187,7 @@ function Toko({ props }) {
     values.category = selectedCategory;
     values.dpp = dpp;
     values.ppn = ppn;
-    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router);
+    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/store-sales/", "store sale");
   };
 
   const onChangeProduct = async () => {

@@ -13,7 +13,9 @@ const CreateSale = async (
   values,
   listId,
   form,
-  router
+  router,
+  url,
+  page
 ) => {
   // CLEANING DATA
   listId.forEach((element) => {
@@ -29,18 +31,18 @@ const CreateSale = async (
     data: values,
   };
 
-  const req = await createData(data);
+  const req = await createData(data, url);
   const res = await req.json();
 
-  if (req.status === 200) { 
-    await putRelationSaleDetail(res.data.id, res.data.attributes, form, router);
+  if (req.status === 200) {
+    await putRelationSaleDetail(res.data.id, res.data.attributes, form, router, url, page);
   } else {
     openNotificationWithIcon("error");
   }
 };
 
-const createData = async (data) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales";
+const createData = async (data, url) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + url;
   const JSONdata = JSON.stringify(data);
 
   const options = {
@@ -57,13 +59,14 @@ const createData = async (data) => {
   return req;
 };
 
-const putRelationSaleDetail = async (id, value, form, router) => {
+const putRelationSaleDetail = async (id, value, form, router, url, page) => {
   const user = await getUserMe();
   const dataSale = {
     data: value,
   };
 
   dataSale.data.store_sale_details = tempProductListId;
+  dataSale.data.sales_sale_details = tempProductListId;
 
   // clean object
   for (var key in dataSale) {
@@ -73,7 +76,7 @@ const putRelationSaleDetail = async (id, value, form, router) => {
   }
 
   const JSONdata = JSON.stringify(dataSale);
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales/" + id;
+  const endpoint = process.env.NEXT_PUBLIC_URL + url + id;
   const options = {
     method: "PUT",
     headers: {
@@ -89,7 +92,8 @@ const putRelationSaleDetail = async (id, value, form, router) => {
 
   if (req.status === 200) {
     form.resetFields();
-    router.replace("/dashboard/penjualan/toko");
+    if(page == "store sale") router.replace("/dashboard/penjualan/toko");
+    if(page == "sales sale") router.replace("/dashboard/penjualan/sales");
     openNotificationWithIcon("success");
   } else {
     openNotificationWithIcon("error");

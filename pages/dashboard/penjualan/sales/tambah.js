@@ -26,15 +26,15 @@ Toko.getInitialProps = async (context) => {
   const reqInven = await fetchInven(cookies);
   const inven = await reqInven.json();
 
-  const reqStoreSale = await fetchStoreSale(cookies);
-  const storeSale = await reqStoreSale.json();
+  const reqSalesSale = await fetchSalesSale(cookies);
+  const salesSale = await reqSalesSale.json();
 
   return {
     props: {
       user,
       locations,
       inven,
-      storeSale
+      salesSale
     },
   };
 };
@@ -53,8 +53,8 @@ const fetchData = async (cookies) => {
   return req;
 };
 
-const fetchStoreSale = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales?populate=deep";
+const fetchSalesSale = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?populate=deep";
     const options = {
         method: "GET",
         headers: {
@@ -103,7 +103,7 @@ function Toko({ props }) {
   const locations = props.locations.data;
   const user = props.user;
   const inven = props.inven.data;
-  const storeSale = props.storeSale;
+  const salesSale = props.salesSale;
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -147,7 +147,7 @@ function Toko({ props }) {
   const [info, setInfo] = useState();
 
   // NO Store Sale
-  var noStoreSale = String(storeSale?.meta?.pagination.total + 1).padStart(3, "0");
+    var noStoreSale = String(salesSale?.meta?.pagination.total + 1).padStart(3, "0");
   const [categorySale, setCategorySale] = useState(`TB/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
 
   const handleBiayaPengiriman = (values) => {
@@ -163,8 +163,8 @@ function Toko({ props }) {
   const onFinish = (values) => {
     setLoading(true);
     setInfo("sukses");
-    storeSale.data.forEach((element) => {
-      if (values.no_store_sale == element.attributes.no_store_sale) {
+    salesSale.data.forEach((element) => {
+      if (values.no_sales_sale == element.attributes.no_sales_sale) {
           notification["error"]({
               message: "Gagal menambahkan data",
               description:
@@ -178,16 +178,16 @@ function Toko({ props }) {
   };
 
   const createDetailSale = async () => {
-    await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/store-sale-details");
+    await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/sales-sale-details");
   };
 
   const createSale = async (values) => {
     values.sale_date = today;
     values.added_by = user.name;
-    values.category = selectedCategory;
+    //values.category = selectedCategory;
     values.dpp = dpp;
     values.ppn = ppn;
-    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router);
+    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/sales-sales/", "sales sale");
   };
 
   const onChangeProduct = async () => {
@@ -353,7 +353,7 @@ function Toko({ props }) {
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-5">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    name="no_store_sale"
+                    name="no_sales_sale"
                     initialValue={categorySale}
                     rules={[
                         {
