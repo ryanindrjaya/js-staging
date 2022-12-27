@@ -44,6 +44,14 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
     });
   };
 
+  const onChangeMargin = (value, data) => {
+    dispatch({
+      type: "CHANGE_PRODUCT_MARGIN",
+      margin: value,
+      product: data,
+    });
+  };
+
   const onChangeD1D2D3 = (value, data, type) => {
     switch (type) {
       case "d1":
@@ -60,13 +68,13 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
           product: data,
         });
         break;
-      case "d3":
-        dispatch({
-          type: "CHANGE_PRODUCT_D3",
-          d3: value,
-          product: data,
-        });
-        break;
+      //case "d3":
+      //  dispatch({
+      //    type: "CHANGE_PRODUCT_D3",
+      //    d3: value,
+      //    product: data,
+      //  });
+      //  break;
       default:
         break;
     }
@@ -209,6 +217,29 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
       },
     },
     {
+      name: "Margin",
+      width: "150px",
+      selector: (row) => {
+        var defaultMargin = 0;
+
+        return (
+          <Row align="bottom" justify="center">
+            <Form.Item name={["margin", `${row.id}`]} noStyle>
+              <InputNumber
+                defaultValue={defaultMargin}
+                min={0}
+                onChange={(e) => onChangeMargin(e, row)}
+                style={{
+                  width: "100px",
+                  marginRight: "10px",
+                }}
+              />
+            </Form.Item>
+          </Row>
+        );
+      },
+    },
+    {
       name: "Diskon",
       width: "150px",
       selector: (row) => {
@@ -300,39 +331,39 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
         );
       },
     },
-    {
-      name: "D3",
-      width: "100px",
-      selector: (row) => {
-        defaultDp3 = row.attributes?.unit_1_dp3 || 0;
-        if (products.productInfo[row.id]?.d3) {
-          defaultDp3 = products.productInfo[row.id].d3;
-        }
+    //{
+    //  name: "D3",
+    //  width: "100px",
+    //  selector: (row) => {
+    //    defaultDp3 = row.attributes?.unit_1_dp3 || 0;
+    //    if (products.productInfo[row.id]?.d3) {
+    //      defaultDp3 = products.productInfo[row.id].d3;
+    //    }
 
-        if (products.productInfo[row.id]) {
-          if (products.productInfo[row.id].unit) {
-            defaultDp3 = products.productInfo[row.id].d3;
-          }
-        }
+    //    if (products.productInfo[row.id]) {
+    //      if (products.productInfo[row.id].unit) {
+    //        defaultDp3 = products.productInfo[row.id].d3;
+    //      }
+    //    }
 
-        return (
-          <div className="disabled:bg-white">
-            <InputNumber
-              controls={false}
-              formatter={(value) => `${value}%`}
-              max={100}
-              min={0}
-              name={["disc_rp3", `${row.id}`]}
-              value={defaultDp3}
-              onChange={(e) => onChangeD1D2D3(e, row, "d3")}
-              style={{
-                width: "60px",
-              }}
-            />
-          </div>
-        );
-      },
-    },
+    //    return (
+    //      <div className="disabled:bg-white">
+    //        <InputNumber
+    //          controls={false}
+    //          formatter={(value) => `${value}%`}
+    //          max={100}
+    //          min={0}
+    //          name={["disc_rp3", `${row.id}`]}
+    //          value={defaultDp3}
+    //          onChange={(e) => onChangeD1D2D3(e, row, "d3")}
+    //          style={{
+    //            width: "60px",
+    //          }}
+    //        />
+    //      </div>
+    //    );
+    //  },
+    //},
     {
       name: "EXPDate",
       width: "150px",

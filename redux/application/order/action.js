@@ -48,6 +48,12 @@ const actions = {
     product,
   }),
 
+  changeProductMargin: (margin, product) => ({
+    type: "CHANGE_PRODUCT_MARGIN",
+    margin,
+    product,
+  }),
+
   setPriceAfterDisc: (price, product) => ({
     type: "SET_PRICE_AFTER_DISC",
     price,

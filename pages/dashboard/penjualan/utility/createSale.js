@@ -33,7 +33,7 @@ const CreateSale = async (
 
   const req = await createData(data, url);
   const res = await req.json();
-
+    console.log("req status",req.status)
   if (req.status === 200) {
     await putRelationSaleDetail(res.data.id, res.data.attributes, form, router, url, page);
   } else {

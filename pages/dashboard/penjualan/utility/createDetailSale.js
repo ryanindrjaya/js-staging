@@ -17,6 +17,7 @@ const createDetailSale = (
     // default value
     var qty = 1;
     var disc = 0;
+    var margin = 0;
     var unit = element.attributes.unit_1;
     var unitPrice = element.attributes.buy_price_1;
     var unitPriceAfterDisc = element.attributes.buy_price_1;
@@ -38,6 +39,7 @@ const createDetailSale = (
     var d1 = products.productInfo[id]?.d1 ?? element.attributes.unit_1_dp1;
     var d2 = products.productInfo[id]?.d2 ?? element.attributes.unit_1_dp2;
     var d3 = products.productInfo[id]?.d3 ?? element.attributes.unit_1_dp3;
+    margin = products.productInfo[id]?.margin ?? 0;
 
     POSTSaleDetail(
       qty,
@@ -52,6 +54,7 @@ const createDetailSale = (
       d1,
       d2,
       d3,
+      margin,
       url
     );
   });
@@ -69,7 +72,8 @@ const POSTSaleDetail = async (
   expDate,
   d1,
   d2,
-  d3,
+  //d3,
+  margin,
   url
 ) => {
   var data = {
@@ -83,7 +87,8 @@ const POSTSaleDetail = async (
       expired_date: expDate,
       disc1 : d1,
       disc2 : d2,
-      disc3 : d3,
+      //disc3 : d3,
+      margin : margin
     },
   };
 
