@@ -29,7 +29,7 @@ const createDetailOrder = (
     const id = element.id;
     var batch = values.batch[id];
     var location = values.product_location[id];
-    var expDate = new Date(values.exp_date[id]);
+    var expDate = new Date(values.expired_date[id]);
     var newExptDate = moment
       .utc(expDate)
       .utcOffset(7 * 60)

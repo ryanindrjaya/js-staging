@@ -580,7 +580,6 @@ function Tambah({ props }) {
                         {deliveredOrder.map((element) => {
                             if (supplier != undefined) {
                                 if (supplier.id == element.attributes.supplier.data.id) {
-                                console.log("delivered",supplier.id, element.attributes.supplier.data.id)
                                 return (
                                     <Select.Option value={element.id} key={element.id}>
                                         {element.attributes.no_po}
