@@ -37,6 +37,7 @@ const createDetailSale = (
     subTotal = productSubTotal?.[id];
     var d1 = products.productInfo[id]?.d1 ?? element.attributes.unit_1_dp1;
     var d2 = products.productInfo[id]?.d2 ?? element.attributes.unit_1_dp2;
+    var d3 = products.productInfo[id]?.d3 ?? element.attributes.unit_1_dp3;
 
     POSTSaleDetail(
       qty,
@@ -50,6 +51,7 @@ const createDetailSale = (
       newExptDate,
       d1,
       d2,
+      d3,
       url
     );
   });
@@ -67,6 +69,7 @@ const POSTSaleDetail = async (
   expDate,
   d1,
   d2,
+  d3,
   url
 ) => {
   var data = {
@@ -80,6 +83,7 @@ const POSTSaleDetail = async (
       expired_date: expDate,
       disc1 : d1,
       disc2 : d2,
+      disc3 : d3,
     },
   };
 

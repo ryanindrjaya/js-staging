@@ -5,7 +5,7 @@ import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { Row, Form, Input, InputNumber, Select, Button, Spin } from "antd";
+import { Row, Form, Input, InputNumber, Select, Button, Spin, notification } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import StoreSaleTable from "../../../../components/ReactDataTable/Selling/StoreSaleTable";
@@ -103,6 +103,7 @@ function Toko({ props }) {
   const locations = props.locations.data;
   const user = props.user;
   const inven = props.inven.data;
+  const storeSale = props.storeSale;
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -117,9 +118,13 @@ function Toko({ props }) {
   const [listId, setListId] = useState([]);
   const [productTotalPrice, setProductTotalPrice] = useState({});
   const [productSubTotal, setProductSubTotal] = useState({});
+  const [discType, setDiscType] = useState();
   const [discPrice, setDiscPrice] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
+
+  const [dppActive, setDPPActive] = useState("Active");
+  const [ppnActive, setPPNActive] = useState("Active");
 
   const router = useRouter();
   const { TextArea } = Input;
@@ -130,8 +135,8 @@ function Toko({ props }) {
   var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 
   // DPP & PPN
-  //const dpp = 1.11;
-  //var ppn = 0;
+  const [dpp, setDPP] = useState(0);
+  const [ppn, setPPN] = useState(0);
 
   // temp
   const [biayaTambahan, setBiayaTambahan] = useState();
@@ -139,12 +144,11 @@ function Toko({ props }) {
 
   const cookies = nookies.get(null, "token");
   const tempList = [];
-
-  var total;
+  const [info, setInfo] = useState();
 
   // NO Store Sale
-  var noStoreSale = String(props.storeSale?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`ET/${noStoreSale}/${mm}/${yyyy}`);
+  var noStoreSale = String(storeSale?.meta?.pagination.total + 1).padStart(3, "0");
+  const [categorySale, setCategorySale] = useState(`TB/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);
@@ -158,6 +162,17 @@ function Toko({ props }) {
 
   const onFinish = (values) => {
     setLoading(true);
+    setInfo("sukses");
+    storeSale.data.forEach((element) => {
+      if (values.no_store_sale == element.attributes.no_store_sale) {
+          notification["error"]({
+              message: "Gagal menambahkan data",
+              description:
+                  "Data gagal ditambahkan, karena no penjualan sama",
+          });
+          setInfo("gagal");
+      } 
+    });
     setDataValues(values);
     setLoading(false);
   };
@@ -170,6 +185,8 @@ function Toko({ props }) {
     values.sale_date = today;
     values.added_by = user.name;
     values.category = selectedCategory;
+    values.dpp = dpp;
+    values.ppn = ppn;
     await createSaleFunc(grandTotal, totalPrice, values, listId, form, router);
   };
 
@@ -191,6 +208,11 @@ function Toko({ props }) {
     }
   };
 
+  const onChangeNoSale = () => {
+    if(selectedCategory == "BEBAS") form.setFieldValue("no_store_sale", `TR/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
+    if(selectedCategory == "RESEP") form.setFieldValue("no_store_sale", `TB/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
+  };
+
   const calculatePriceAfterDisc = (row) => {
     const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
     return formatter.format(total);
@@ -205,6 +227,32 @@ function Toko({ props }) {
 
     var test = totalPrice + newTotal;
     setBiayaTambahan(newTotal);
+  };
+
+  
+  const setTotalWithDisc = () => {
+    const disc = form.getFieldsValue(["disc_type", "disc_value"]);
+
+    if (disc.disc_type === "Tetap") {
+      setTotalPriceWithFixedDisc(disc);
+    } else {
+      setTotalPriceWithPercentDisc(disc);
+    }
+  };
+
+  const setTotalPriceWithFixedDisc = (disc) => {
+    var newTotal = 0;
+
+    newTotal = totalPrice - disc.disc_value;
+    setDiscPrice(newTotal);
+  };
+
+  const setTotalPriceWithPercentDisc = (disc) => {
+    var newTotal = 0;
+
+    newTotal = totalPrice - (totalPrice * disc.disc_value) / 100;
+    if (newTotal < 0) newTotal = 0;
+    setDiscPrice(newTotal);
   };
 
   const clearData = () => {
@@ -247,8 +295,20 @@ function Toko({ props }) {
   }, [listId]);
 
   useEffect(() => {
-    if (dataValues) createDetailSale();
+    if (dataValues && info == "sukses") createDetailSale();
   }, [dataValues]);
+
+  useEffect(() => {
+    // set dpp dan ppn
+    if(dppActive == "DPP"){
+      setDPP(grandTotal / 1.11);
+    } if(ppnActive == "PPN"){
+      setPPN((grandTotal / 1.11) * 11 / 100);
+    } else {
+      setDPP(0);
+      setPPN(0);
+    }
+  }, [dppActive, ppnActive]);
 
   useEffect(() => {
     // used to reset redux from value before
@@ -264,15 +324,7 @@ function Toko({ props }) {
         <LayoutWrapper style={{}}>
           <TitlePage titleText={"Penjualan Toko"} />
           <LayoutContent>
-            <Form
-              form={form}
-              name="add"
-              initialValues={{
-                remember: true,
-              }}
-              onFinish={onFinish}
-            >
-              <Row justify="space-between">
+            <Row justify="space-between">
                 <button disabled className="bg-yellow-500 rounded-md">
                   <p className="px-3 py-2 m-0 font-bold text-white uppercase">
                     {selectedCategory}
@@ -281,14 +333,22 @@ function Toko({ props }) {
                 <div>
                   {selectedCategory === "BEBAS" ? (
                     <button
-                      onClick={() => setSelectedCategory("BEBAS")}
+                      onClick={() => {
+                                       setSelectedCategory("BEBAS"); 
+                                       //setCategorySale(`TB/ET/${noStoreSale}/${mm}/${yyyy}`);
+                                       onChangeNoSale();
+                                     }}
                       className="bg-white rounded-md border border-cyan-700 m-1 text-sm"
                     >
                       <p className="px-4 py-2 m-0 text-cyan-700">BEBAS</p>
                     </button>
                   ) : (
                     <button
-                      onClick={() => setSelectedCategory("BEBAS")}
+                      onClick={() => {
+                                       setSelectedCategory("BEBAS"); 
+                                       //setCategorySale(`TB/ET/${noStoreSale}/${mm}/${yyyy}`); 
+                                       onChangeNoSale();
+                                     }}
                       className="bg-cyan-700 rounded-md m-1 text-sm"
                     >
                       <p className="px-4 py-2 m-0 text-white">BEBAS</p>
@@ -297,14 +357,22 @@ function Toko({ props }) {
 
                   {selectedCategory === "RESEP" ? (
                     <button
-                      onClick={() => setSelectedCategory("RESEP")}
+                      onClick={() => {
+                                       setSelectedCategory("RESEP"); 
+                                       //setCategorySale(`TB/ET/${noStoreSale}/${mm}/${yyyy}`); 
+                                       onChangeNoSale();
+                                     }}
                       className="bg-white rounded-md border border-cyan-700 m-1 text-sm"
                     >
                       <p className="px-4 py-2 m-0 text-cyan-700">RESEP</p>
                     </button>
                   ) : (
                     <button
-                      onClick={() => setSelectedCategory("RESEP")}
+                      onClick={() => {
+                                       setSelectedCategory("RESEP"); 
+                                       //setCategorySale(`TB/ET/${noStoreSale}/${mm}/${yyyy}`);
+                                       onChangeNoSale();
+                                     }}
                       className="bg-cyan-700 rounded-md m-1 text-sm"
                     >
                       <p className="px-4 py-2 m-0 text-white">RESEP</p>
@@ -319,7 +387,16 @@ function Toko({ props }) {
                 <div>
                   <p>{user.name}</p>
                 </div>
-              </Row>
+            </Row>
+
+            <Form
+              form={form}
+              name="add"
+              initialValues={{
+                remember: true,
+              }}
+              onFinish={onFinish}
+            >
 
               <div className="w-full flex justify-start mx-2 mt-1">
                 <p>{date} {time}</p>
@@ -343,6 +420,7 @@ function Toko({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="customer_name"
+                    initialValue="Walk In Customer"
                     rules={[
                       {
                         required: true,
@@ -467,7 +545,7 @@ function Toko({ props }) {
                   <Form.Item name="disc_type">
                     <Select
                       //disabled={products.productList.length === 0}
-                      //onChange={setDiscType}
+                      onChange={setDiscType}
                       placeholder="Pilih Jenis Diskon"
                       size="large"
                       style={{
@@ -487,7 +565,7 @@ function Toko({ props }) {
                   <Form.Item name="disc_value" noStyle>
                     <InputNumber
                       //disabled={products.productList.length === 0}
-                      //onChange={setTotalWithDisc}
+                      onChange={setTotalWithDisc}
                       size="large"
                       min={0}
                       placeholder="Diskon"
@@ -525,9 +603,9 @@ function Toko({ props }) {
                 <div className="w-full md:w-1/3 px-3">
                   <Form.Item name="DPP_active">
                     <Select
-                      //disabled={products.productList.length === 0}
                       placeholder="Pakai DPP"
                       //onChange={setDPPActive}
+                      onChange={setDPPActive}
                       size="large"
                       style={{
                         width: "100%",
@@ -542,8 +620,9 @@ function Toko({ props }) {
                 <div className="w-full md:w-1/3 px-3">
                   <Form.Item name="PPN_active">
                     <Select
-                      disabled={true}
                       placeholder="Pakai PPN"
+                      //onChange={setDPPActive}
+                      onChange={setPPNActive}
                       size="large"
                       style={{
                         width: "100%",
@@ -616,11 +695,11 @@ function Toko({ props }) {
               </div>
 
               <div className="w-full flex flex-wrap justify-end mb-3">
-                <Form.Item name="dpp" className="w-full h-2 md:w-1/2 mx-2">
-                  <span> DPP </span>
+                <Form.Item name="dpp" value={dpp} className="w-full h-2 md:w-1/2 mx-2">
+                  <span> DPP </span> <span>: {formatter.format(dpp)}</span>
                 </Form.Item>
-                <Form.Item name="ppn" className="w-full h-2 md:w-1/2 mx-2">
-                  <span> PPN </span>
+                <Form.Item name="ppn" value={ppn} className="w-full h-2 md:w-1/2 mx-2">
+                  <span> PPN </span> <span>: {formatter.format(ppn)}</span>
                 </Form.Item>
                 <Form.Item name="grandtotal" value={totalPrice} className="w-full h-2 md:w-1/2 mx-2">
                   <span> Total </span> <span>: {formatter.format(totalPrice)}</span>
