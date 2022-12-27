@@ -250,6 +250,19 @@ function Tambah({ props }) {
     });
   };
 
+  const onFinishFailed = () => {
+    const error = form.getFieldsError();
+    error.forEach((element) => {
+      if (element.errors.length > 0) {
+        console.log();
+        notification["error"]({
+          message: "Field Kosong",
+          description: element.errors[0],
+        });
+      }
+    });
+  };
+
   return (
     <>
       <Head>
@@ -266,6 +279,7 @@ function Tambah({ props }) {
                 remember: true,
               }}
               onFinish={onFinish}
+              onFinishFailed={onFinishFailed}
             >
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
