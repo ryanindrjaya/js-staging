@@ -9,7 +9,7 @@ import TitlePage from "../../../../components/TitlePage/TitlePage";
 import SellingTable from "../../../../components/ReactDataTable/Selling/SellingTable";
 import nookies from "nookies";
 
-SalesSale.getInitialProps = async (context) => {
+NonPanelSale.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
 
   const req = await fetchData(cookies);
@@ -18,14 +18,14 @@ SalesSale.getInitialProps = async (context) => {
   const reqLocation = await fetchLocation(cookies);
   const locations = await reqLocation.json();
 
-  const reqSales = await fetchSales(cookies);
-  const sales = await reqSales.json();
+  const reqNonPanelSales = await fetchNonPanelSales(cookies);
+  const nonpanelsales = await reqNonPanelSales.json();
 
   return {
     props: {
       user,
       locations,
-      sales,
+      nonpanelsales,
     },
   };
 };
@@ -58,8 +58,8 @@ const fetchLocation = async (cookies) => {
   return req;
 };
 
-const fetchSales = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?populate=deep";
+const fetchNonPanelSales = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/non-panel-sales?populate=deep";
     const options = {
         method: "GET",
         headers: {
@@ -72,10 +72,10 @@ const fetchSales = async (cookies) => {
     return req;
 };
 
-function SalesSale({ props }) {
+function NonPanelSale({ props }) {
   const user = props.user;
   const locations = props.locations.data;
-  const data = props.sales;
+  const data = props.nonpanelsales;
   const router = useRouter();
   const [sell, setSell] = useState(data);
 
@@ -401,4 +401,4 @@ function SalesSale({ props }) {
   );
 }
 
-export default SalesSale;
+export default NonPanelSale;

@@ -147,9 +147,9 @@ function Toko({ props }) {
   const tempList = [];
   const [info, setInfo] = useState();
 
-  // NO Store Sale
-  var noNonPanelSale = String(nonPanel?.meta?.pagination.total + 1).padStart(3, "0") ?? null;
-  const [categorySale, setCategorySale] = useState(`TB/ET/${user.id}/${noNonPanelSale}/${mm}/${yyyy}`);
+  // NO Non Panel Sale
+  var noNonPanelSale = String(nonPanel?.meta?.pagination.total + 1).padStart(3, "0");
+  const [categorySale, setCategorySale] = useState(`PN/ET/${user.id}/${noNonPanelSale}/${mm}/${yyyy}`);
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);
@@ -165,8 +165,8 @@ function Toko({ props }) {
     setLoading(true);
     values.status_data = simpanData;
     setInfo("sukses");
-    salesSale.data.forEach((element) => {
-      if (values.no_sales_sale == element.attributes.no_sales_sale) {
+    nonPanel.data.forEach((element) => {
+      if (values.no_non_panel_sale == element.attributes.no_non_panel_sale) {
           notification["error"]({
               message: "Gagal menambahkan data",
               description:
@@ -180,7 +180,7 @@ function Toko({ props }) {
   };
 
   const createDetailSale = async () => {
-    //await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/sales-sale-details");
+    await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/non-panel-sale-details");
   };
 
   const createSale = async (values) => {
@@ -189,7 +189,7 @@ function Toko({ props }) {
     //values.category = selectedCategory;
     values.dpp = dpp;
     values.ppn = ppn;
-    //await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/sales-sales/", "sales sale");
+    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/non-panel-sales/", "non panel sale");
   };
 
   const onChangeProduct = async () => {
@@ -210,10 +210,10 @@ function Toko({ props }) {
     }
   };
 
-  const onChangeNoSale = () => {
-    if(selectedCategory == "BEBAS") form.setFieldValue("no_store_sale", `TR/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
-    if(selectedCategory == "RESEP") form.setFieldValue("no_store_sale", `TB/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
-  };
+  //const onChangeNoSale = () => {
+  //  if(selectedCategory == "BEBAS") form.setFieldValue("no_store_sale", `TR/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
+  //  if(selectedCategory == "RESEP") form.setFieldValue("no_store_sale", `TB/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
+  //};
 
   const calculatePriceAfterDisc = (row) => {
     const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
@@ -355,7 +355,7 @@ function Toko({ props }) {
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-5">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    name="no_sales_sale"
+                    name="no_non_panel_sale"
                     initialValue={categorySale}
                     rules={[
                         {

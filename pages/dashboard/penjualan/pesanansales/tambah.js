@@ -145,7 +145,7 @@ function Toko({ props }) {
 
   // NO Sales Sale
   var noSale = String(props.sale?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`PS/ET/${user.id}/${noSale}/${mm}/${yyyy}`);
+  const [categorySale, setCategorySale] = useState(`PPS/ET/${user.id}/${noSale}/${mm}/${yyyy}`);
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -157,7 +157,7 @@ function Toko({ props }) {
     setLoading(true);
     setInfo("sukses");
     sale.data.forEach((element) => {
-      if (values.no_sales_sale == element.attributes.no_sales_sale) {
+      if (values.no_sales_sell == element.attributes.no_sales_sell) {
           notification["error"]({
               message: "Gagal menambahkan data",
               description:
@@ -276,7 +276,7 @@ function Toko({ props }) {
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-4">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    name="no_sales_sale"
+                    name="no_sales_sell"
                     initialValue={categorySale}
                     rules={[
                         {
@@ -397,8 +397,8 @@ function Toko({ props }) {
               )}
 
               <div className="w-full mt-8 flex justify-between">
-                <Form.Item name="sale_staff" className="w-full mx-2">
-                  <TextArea rows={4} placeholder="Catatan Staff" />
+                <Form.Item name="sale_note" className="w-full mx-2">
+                  <TextArea rows={4} placeholder="Catatan" />
                 </Form.Item>
               </div>
 

@@ -53,7 +53,7 @@ const createDetailSale = (
       newExptDate,
       d1,
       d2,
-      d3,
+      //d3,
       margin,
       url
     );
