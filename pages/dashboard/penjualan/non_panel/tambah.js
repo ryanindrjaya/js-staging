@@ -127,6 +127,9 @@ function Toko({ props }) {
   const [ppnActive, setPPNActive] = useState("Active");
   const [simpanData, setSimpanData] = useState("Publish");
 
+  const [location, setLocation] = useState();
+  const [locationData, setLocationData] = useState();
+
   const router = useRouter();
   const { TextArea } = Input;
   var today = new Date();
@@ -313,6 +316,12 @@ function Toko({ props }) {
   }, [dppActive, ppnActive]);
 
   useEffect(() => {
+    locations.forEach((element) => {
+      if (element.id == location) setLocationData(element.attributes);
+    })
+  }, [location]);
+
+  useEffect(() => {
     // used to reset redux from value before
     clearData();
   }, []);
@@ -384,21 +393,6 @@ function Toko({ props }) {
                     />
                   </Form.Item>
                 </div>
-                <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item name="address">
-                    <Input style={{ height: "40px" }} placeholder="Alamat" />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item name="phone">
-                    <Input style={{ height: "40px" }} placeholder="No. Telp" />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item name="faktur">
-                    <Input style={{ height: "40px" }} placeholder="Faktur" />
-                  </Form.Item>
-                </div>
 
                 <div className="w-full md:w-1/4 px-3 mb-2">
                   <Form.Item name="tempo_days" initialValue={0} noStyle>
@@ -436,6 +430,7 @@ function Toko({ props }) {
                     ]}
                   >
                     <Select
+                      onChange={setLocation}
                       placeholder="Pilih Lokasi"
                       size="large"
                       style={{
@@ -453,6 +448,17 @@ function Toko({ props }) {
                         );
                       })}
                     </Select>
+                  </Form.Item>
+                </div>
+                
+                <div className="w-full md:w-1/3 px-3 mb-2">
+                  <p className="m-0">Keterangan : {locationData?.name}</p>
+                  <p className="m-0"> {locationData?.street}</p>
+                  <p> {locationData?.city}</p>
+                </div>
+                <div className="w-full md:w-1/3 px-3 mb-2">
+                  <Form.Item name="no_inventory">
+                    <Input style={{ height: "40px" }} placeholder="No Inv" />
                   </Form.Item>
                 </div>
               </div>
