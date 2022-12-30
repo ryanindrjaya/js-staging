@@ -15,9 +15,11 @@ const CreateSale = async (
   form,
   router,
   url,
-  page
+  page,
+  locations
 ) => {
   // CLEANING DATA
+
   listId.forEach((element) => {
     tempProductListId.push({ id: element });
   });
@@ -27,13 +29,19 @@ const CreateSale = async (
   values.status = "Dipesan"
   values.purchasing_payments = null;
 
+  if(page == "sales sale"){
+    locations.forEach((element) => {
+      if(element.attributes.name == values.location) values.location = element.id;
+    });
+  }
+
   var data = {
     data: values,
   };
 
   const req = await createData(data, url);
   const res = await req.json();
-    console.log("req status",req.status)
+
   if (req.status === 200) {
     await putRelationSaleDetail(res.data.id, res.data.attributes, form, router, url, page);
   } else {
@@ -67,6 +75,8 @@ const putRelationSaleDetail = async (id, value, form, router, url, page) => {
 
   dataSale.data.store_sale_details = tempProductListId;
   dataSale.data.sales_sale_details = tempProductListId;
+  dataSale.data.non_panel_sale_details = tempProductListId;
+  dataSale.data.panel_sale_details = tempProductListId;
 
   // clean object
   for (var key in dataSale) {
@@ -94,6 +104,8 @@ const putRelationSaleDetail = async (id, value, form, router, url, page) => {
     form.resetFields();
     if(page == "store sale") router.replace("/dashboard/penjualan/toko");
     if(page == "sales sale") router.replace("/dashboard/penjualan/sales");
+    if(page == "non panel sale") router.replace("/dashboard/penjualan/non_panel");
+    if(page == "panel sale") router.replace("/dashboard/penjualan/panel");
     openNotificationWithIcon("success");
   } else {
     openNotificationWithIcon("error");

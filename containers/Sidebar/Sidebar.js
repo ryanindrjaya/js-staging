@@ -261,6 +261,11 @@ export default function Sidebar(props) {
                   <a>Penjualan Non Panel</a>
                 </Link>
               </Menu.Item>
+              <Menu.Item style={submenuStyle} key="penjualan_panel">
+                <Link href="/dashboard/penjualan/panel">
+                  <a>Penjualan Panel</a>
+                </Link>
+              </Menu.Item>
             </SubMenu>
           </Menu>
         </Scrollbars>
