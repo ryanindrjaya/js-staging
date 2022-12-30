@@ -12,52 +12,60 @@ const actions = {
     index,
   }),
 
-  changeProductUnit: (index, product) => ({
+  changeProductUnit: (index, product, unit) => ({
     type: "CHANGE_PRODUCT_UNIT",
-    index,
+    unit,
     product,
+    index,
   }),
 
-  changeProductQty: (qty, product) => ({
+  changeProductQty: (qty, product, index) => ({
     type: "CHANGE_PRODUCT_QTY",
     qty,
     product,
+    index,
   }),
 
-  changeProductD1: (d1, product) => ({
+  changeProductD1: (d1, product, index) => ({
     type: "CHANGE_PRODUCT_D1",
     d1,
     product,
+    index,
   }),
 
-  changeProductD2: (d2, product) => ({
+  changeProductD2: (d2, product, index) => ({
     type: "CHANGE_PRODUCT_D2",
     d2,
     product,
+    index,
   }),
 
-  changeProductD3: (d3, product) => ({
+  changeProductD3: (d3, product, index) => ({
     type: "CHANGE_PRODUCT_D3",
     d3,
     product,
+    index,
   }),
 
-  changeProductDisc: (disc, product) => ({
+  changeProductDisc: (disc, product, index) => ({
     type: "CHANGE_PRODUCT_DISC",
     disc,
     product,
+    index,
   }),
 
-  setPriceAfterDisc: (price, product) => ({
+  setPriceAfterDisc: (price, product, index) => ({
     type: "SET_PRICE_AFTER_DISC",
     price,
     product,
+    index,
   }),
 
-  setPriceAfterDisc: (subTotal, product) => ({
+  setPriceAfterDisc: (subTotal, product, index) => ({
     type: "SET_SUBTOTAL",
     subTotal,
     product,
+    index,
   }),
 
   setInitialProduct: (product) => ({

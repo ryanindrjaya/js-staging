@@ -15,14 +15,17 @@ export default function Reducer(state = initState, action) {
 
     case "REMOVE_PRODUCT":
       state.productList.splice(action.index, 1);
+      let productInfoCopy = state.productInfo;
+      delete productInfoCopy[action.index];
       return {
         ...state,
         productList: [...state.productList],
+        productInfo: productInfoCopy,
       };
 
     case "CHANGE_PRODUCT_UNIT":
-      var index = action.index;
-      var id = action.product.id;
+      var unit = action.unit;
+      var id = action.index;
       var data = action.product.attributes;
 
       return {
@@ -31,18 +34,18 @@ export default function Reducer(state = initState, action) {
           ...state.productInfo,
           [id]: {
             ...state.productInfo[id],
-            priceUnit: data[`buy_price_${index}`],
-            unit: data[`unit_${index}`],
-            d1: data[`unit_${index}_dp1`],
-            d2: data[`unit_${index}_dp2`],
-            d3: data[`unit_${index}_dp3`],
+            priceUnit: data[`buy_price_${unit}`],
+            unit: data[`unit_${unit}`],
+            d1: data[`unit_${unit}_dp1`],
+            d2: data[`unit_${unit}_dp2`],
+            d3: data[`unit_${unit}_dp3`],
           },
         },
       };
 
     case "CHANGE_PRODUCT_QTY":
       var qty = action.qty;
-      var id = action.product.id;
+      var id = action.index;
       var data = action.product.attributes;
 
       return {
@@ -58,7 +61,7 @@ export default function Reducer(state = initState, action) {
 
     case "CHANGE_PRODUCT_D1":
       var d1 = action.d1;
-      var id = action.product.id;
+      var id = action.index;
       var data = action.product.attributes;
 
       return {
@@ -74,7 +77,7 @@ export default function Reducer(state = initState, action) {
 
     case "CHANGE_PRODUCT_D2":
       var d2 = action.d2;
-      var id = action.product.id;
+      var id = action.index;
       var data = action.product.attributes;
 
       return {
@@ -90,7 +93,7 @@ export default function Reducer(state = initState, action) {
 
     case "CHANGE_PRODUCT_D3":
       var d3 = action.d3;
-      var id = action.product.id;
+      var id = action.index;
       var data = action.product.attributes;
 
       return {
@@ -106,7 +109,7 @@ export default function Reducer(state = initState, action) {
 
     case "CHANGE_PRODUCT_DISC":
       var disc = action.disc;
-      var id = action.product.id;
+      var id = action.index;
       var data = action.product.attributes;
 
       return {
@@ -122,7 +125,7 @@ export default function Reducer(state = initState, action) {
 
     case "SET_PRICE_AFTER_DISC":
       var price = action.price;
-      var id = action.product.id;
+      var id = action.index;
       var data = action.product.attributes;
 
       return {
@@ -138,7 +141,7 @@ export default function Reducer(state = initState, action) {
 
     case "SET_SUBTOTAL":
       var subTotal = action.subTotal;
-      var id = action.product.id;
+      var id = action.index;
       var data = action.product.attributes;
 
       return {

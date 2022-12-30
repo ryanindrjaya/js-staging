@@ -198,8 +198,8 @@ function Tambah({ props }) {
     }
   };
 
-  const calculatePriceAfterDisc = (row) => {
-    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
+  const calculatePriceAfterDisc = (row, index) => {
+    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setProductSubTotal, setTotalPrice, index);
 
     return formatter.format(total);
   };
@@ -569,26 +569,24 @@ function Tambah({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 mt-5 md:mb-0">
                   <Form.Item name="no_po">
                     <Select
-                        placeholder="Pilih Nomor PO"
-                        size="large"
-                        onChange={(e) => fetchPOdata(e)}
-                        style={{
-                            width: "100%",
-                        }}
+                      placeholder="Pilih Nomor PO"
+                      size="large"
+                      onChange={(e) => fetchPOdata(e)}
+                      style={{
+                        width: "100%",
+                      }}
                     >
-
-                        {deliveredOrder.map((element) => {
-                            if (supplier != undefined) {
-                                if (supplier.id == element.attributes.supplier.data.id) {
-                                return (
-                                    <Select.Option value={element.id} key={element.id}>
-                                        {element.attributes.no_po}
-                                    </Select.Option>
-                                );
-                                }
-                            }
-                        })}
-
+                      {deliveredOrder.map((element) => {
+                        if (supplier != undefined) {
+                          if (supplier.id == element.attributes.supplier.data.id) {
+                            return (
+                              <Select.Option value={element.id} key={element.id}>
+                                {element.attributes.no_po}
+                              </Select.Option>
+                            );
+                          }
+                        }
+                      })}
                     </Select>
                   </Form.Item>
                 </div>
@@ -625,6 +623,7 @@ function Tambah({ props }) {
                       setProductTotalPrice={setProductTotalPrice}
                       calculatePriceAfterDisc={calculatePriceAfterDisc}
                       productSubTotal={productSubTotal}
+                      setProductSubTotal={setProductSubTotal}
                       locations={locations}
                       formObj={form}
                     />
@@ -638,11 +637,11 @@ function Tambah({ props }) {
               <div className="flex justify-end transition-all">
                 <Row>
                   <p className="font-bold">Total Harga :</p>
-                  {discPrice === 0 ? <p></p> : <p className="font-bold text-red-500 ml-2">{formatter.format(discPrice)}</p>}
+                  {discPrice === 0 ? <p></p> : <p className="font-bold text-red-500 ml-2">{formatter.format(discPrice || 0)}</p>}
                   {discPrice === 0 ? (
-                    <p className="font-bold ml-2">{formatter.format(totalPrice)}</p>
+                    <p className="font-bold ml-2">{formatter.format(totalPrice || 0)}</p>
                   ) : (
-                    <p className="font-bold line-through ml-2 ">{formatter.format(totalPrice)}</p>
+                    <p className="font-bold line-through ml-2 ">{formatter.format(totalPrice || 0)}</p>
                   )}
                 </Row>
               </div>
