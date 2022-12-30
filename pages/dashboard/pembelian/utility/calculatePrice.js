@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function calculatePrice(row, products, productTotalPrice, productSubTotal, setProductSubTotal, setTotalPrice, index) {
+export default function calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index, setProductSubTotal) {
   var priceUnit = row.attributes[`buy_price_1`];
   var qty = 1;
   var disc = 0;

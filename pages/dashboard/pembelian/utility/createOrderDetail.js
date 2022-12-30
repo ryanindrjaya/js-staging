@@ -17,15 +17,8 @@ const getUnitPrice = (data, unit) => {
   return selectedUnit;
 };
 
-const createDetailOrder = (
-  products,
-  productTotalPrice,
-  productSubTotal,
-  setListId,
-  url,
-  value
-) => {
-  products.productList.forEach((element) => {
+const createDetailOrder = (products, productTotalPrice, productSubTotal, setListId, url, value) => {
+  products.productList.forEach((element, idx) => {
     console.log(products);
     console.log(products.productInfo);
     console.log("productTotalPrice", productTotalPrice);
@@ -34,48 +27,25 @@ const createDetailOrder = (
     // default value
     tempListId = [];
     const id = element.id;
-    var qty = products?.productInfo?.[id]?.qty ?? 1;
-    var disc = products?.productInfo?.[id]?.disc ?? 0;
-    var unit = products.productInfo?.[id]?.unit ?? element.attributes.unit_1;
+    var qty = products?.productInfo?.[idx]?.qty ?? 1;
+    var disc = products?.productInfo?.[idx]?.disc ?? 0;
+    var unit = products.productInfo?.[idx]?.unit ?? element.attributes.unit_1;
     //var unitPrice = getUnitPrice(element, unit);
-    var unitPrice = value.harga_satuan?.[id];
-    if(value.harga_satuan?.[id] == undefined){
-        unitPrice = element.attributes.buy_price_1;
+    var unitPrice = value.harga_satuan?.[idx];
+    if (value.harga_satuan?.[idx] == undefined) {
+      unitPrice = element.attributes.buy_price_1;
     }
 
-    var unitPriceAfterDisc =
-      productTotalPrice?.[id] ?? element.attributes.buy_price_1;
+    var unitPriceAfterDisc = productTotalPrice?.[idx] ?? element.attributes.buy_price_1;
     var subTotal = unitPriceAfterDisc * qty;
 
     //console.log("detail nich :",qty, disc, unit, unitPrice, unitPriceAfterDisc, subTotal);
 
-    POSTPurchaseDetail(
-      qty,
-      disc,
-      unit,
-      unitPrice,
-      unitPriceAfterDisc,
-      subTotal,
-      id,
-      setListId,
-      products,
-      url
-    );
+    POSTPurchaseDetail(qty, disc, unit, unitPrice, unitPriceAfterDisc, subTotal, id, setListId, products, url);
   });
 };
 
-const POSTPurchaseDetail = async (
-  qty,
-  disc,
-  unit,
-  unitPrice,
-  unitPriceAfterDisc,
-  subTotal,
-  id,
-  setListId,
-  products,
-  url
-) => {
+const POSTPurchaseDetail = async (qty, disc, unit, unitPrice, unitPriceAfterDisc, subTotal, id, setListId, products, url) => {
   var data = {
     data: {
       total_order: String(qty),

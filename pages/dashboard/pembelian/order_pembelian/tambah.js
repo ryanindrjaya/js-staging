@@ -189,8 +189,8 @@ function Tambah({ props }) {
     setBiayaTambahan(newTotal);
   };
 
-  const calculatePriceAfterDisc = (row) => {
-    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
+  const calculatePriceAfterDisc = (row, index) => {
+    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index);
 
     return formatter.format(total);
   };
@@ -369,6 +369,7 @@ function Tambah({ props }) {
                     setTotalPrice={setTotalPrice}
                     calculatePriceAfterDisc={calculatePriceAfterDisc}
                     productSubTotal={productSubTotal}
+                    setProductSubTotal={setProductSubTotal}
                     formObj={form}
                   />
                 </div>
@@ -393,7 +394,14 @@ function Tambah({ props }) {
                 </div>
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item name="delivery_fee">
-                    <InputNumber onChange={sumDeliveryPrice} size="large" placeholder="Biaya Pengiriman" style={{ width: "100%" }} />
+                    <InputNumber
+                      onChange={sumDeliveryPrice}
+                      formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                      parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                      size="large"
+                      placeholder="Biaya Pengiriman"
+                      style={{ width: "100%" }}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 mt-5 md:mb-0">
