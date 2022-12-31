@@ -395,6 +395,7 @@ const Edit = ({ props }) => {
                 remember: true,
               }}
               onFinish={onFinish}
+              onFinishFailed={validateError}
             >
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">

@@ -343,6 +343,19 @@ function Pembayaran({ props }) {
     }
   };
 
+  const onFinishFailed = () => {
+    const error = form.getFieldsError();
+    error.forEach((element) => {
+      if (element.errors.length > 0) {
+        console.log();
+        notification["error"]({
+          message: "Field Kosong",
+          description: element.errors[0],
+        });
+      }
+    });
+  };
+
   return (
     <>
       <Head>
@@ -358,6 +371,7 @@ function Pembayaran({ props }) {
               initialValues={{
                 remember: true,
               }}
+              onFinishFailed={onFinishFailed}
               onFinish={onFinish}
             >
               <div>

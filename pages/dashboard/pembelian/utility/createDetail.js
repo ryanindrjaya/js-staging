@@ -5,19 +5,12 @@ import * as moment from "moment";
 var tempListId = [];
 const cookies = nookies.get(null, "token");
 
-const createDetailOrder = (
-  values,
-  products,
-  productTotalPrice,
-  productSubTotal,
-  setListId,
-  url
-) => {
+const createDetailOrder = (values, products, productTotalPrice, productSubTotal, setListId, url) => {
   // console.log(values);
   console.log("values", values);
   console.log("product", products);
   console.log("productList", products.productList);
-  products.productList.forEach((element) => {
+  products.productList.forEach((element, idx) => {
     // default value
     var qty = 1;
     var disc = 0;
@@ -27,39 +20,25 @@ const createDetailOrder = (
     var subTotal = unitPriceAfterDisc * qty;
 
     const id = element.id;
-    var batch = values.batch[id];
-    var location = values.product_location[id];
-    var expDate = new Date(values.exp_date[id]);
+
+    var batch = values.batch[idx];
+    var location = values.product_location[idx];
+    var expDate = new Date(values.expired_date[idx]);
     var newExptDate = moment
       .utc(expDate)
       .utcOffset(7 * 60)
       .format();
 
-    qty = products.productInfo[id]?.qty ?? 1;
-    disc = products.productInfo[id]?.disc ?? 0;
-    unit = products.productInfo[id]?.unit ?? element.attributes.unit_1;
-    unitPrice =
-      products.productInfo?.[id]?.priceUnit ?? element.attributes.buy_price_1;
-    unitPriceAfterDisc = productTotalPrice?.[id];
-    subTotal = productSubTotal?.[id];
+    qty = products.productInfo[idx]?.qty ?? 1;
+    disc = products.productInfo[idx]?.disc ?? 0;
+    unit = products.productInfo[idx]?.unit ?? element.attributes.unit_1;
+    unitPrice = products.productInfo?.[idx]?.priceUnit ?? element.attributes.buy_price_1;
+    unitPriceAfterDisc = productTotalPrice?.[idx];
+    subTotal = productSubTotal?.[idx];
 
     console.log("new data", batch, location, expDate, newExptDate);
 
-    POSTPurchaseDetail(
-      qty,
-      disc,
-      unit,
-      unitPrice,
-      unitPriceAfterDisc,
-      subTotal,
-      id,
-      setListId,
-      products,
-      batch,
-      location,
-      newExptDate,
-      url
-    );
+    POSTPurchaseDetail(qty, disc, unit, unitPrice, unitPriceAfterDisc, subTotal, id, setListId, products, batch, location, newExptDate, url);
   });
 };
 
@@ -106,6 +85,8 @@ const POSTPurchaseDetail = async (
 
   const req = await fetch(endpoint, options);
   const res = await req.json();
+
+  console.log("res create detail", res);
 
   if (req.status === 200) {
     tempListId.push(res.data?.id);
