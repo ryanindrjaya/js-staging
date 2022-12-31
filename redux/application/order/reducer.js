@@ -125,7 +125,7 @@ export default function Reducer(state = initState, action) {
 
     case "CHANGE_PRODUCT_MARGIN":
       var margin = action.margin;
-      var id = action.product.id;
+      var id = action.index;
       var data = action.product.attributes;
 
       return {
@@ -200,6 +200,95 @@ export default function Reducer(state = initState, action) {
         ...state,
         preorderData: {
           data: action.data,
+        },
+      };
+    // untuk penjualan, jgn dirubah (sale)
+    case "CHANGE_SALE_PRODUCT_UNIT":
+      var index = action.unit;
+      var id = action.product.id;
+      var data = action.product.attributes;
+      return {
+        ...state,
+        productInfo: {
+          ...state.productInfo,
+          [id]: {
+            ...state.productInfo[id],
+            priceUnit: data[`buy_price_${index}`],
+            unit: data[`unit_${index}`],
+            d1: data[`unit_${index}_dp1`],
+            d2: data[`unit_${index}_dp2`],
+            d3: data[`unit_${index}_dp3`],
+          },
+        },
+      };
+    case "CHANGE_SALE_PRODUCT_QTY":
+      var qty = action.qty;
+      var id = action.product.id;
+      var data = action.product.attributes;
+      return {
+        ...state,
+        productInfo: {
+          ...state.productInfo,
+          [id]: {
+            ...state.productInfo[id],
+            qty: qty,
+          },
+        },
+      };
+    case "CHANGE_SALE_PRODUCT_D1":
+      var d1 = action.d1;
+      var id = action.product.id;
+      var data = action.product.attributes;
+      return {
+        ...state,
+        productInfo: {
+          ...state.productInfo,
+          [id]: {
+            ...state.productInfo[id],
+            d1: d1,
+          },
+        },
+      };
+    case "CHANGE_SALE_PRODUCT_D2":
+      var d2 = action.d2;
+      var id = action.product.id;
+      var data = action.product.attributes;
+      return {
+        ...state,
+        productInfo: {
+          ...state.productInfo,
+          [id]: {
+            ...state.productInfo[id],
+            d2: d2,
+          },
+        },
+      };
+    case "CHANGE_SALE_PRODUCT_DISC":
+      var disc = action.disc;
+      var id = action.product.id;
+      var data = action.product.attributes;
+      return {
+        ...state,
+        productInfo: {
+          ...state.productInfo,
+          [id]: {
+            ...state.productInfo[id],
+            disc: disc,
+          },
+        },
+      };
+    case "CHANGE_SALE_PRODUCT_MARGIN":
+      var margin = action.margin;
+      var id = action.product.id;
+      var data = action.product.attributes;
+      return {
+        ...state,
+        productInfo: {
+          ...state.productInfo,
+          [id]: {
+            ...state.productInfo[id],
+            margin: margin,
+          },
         },
       };
 
