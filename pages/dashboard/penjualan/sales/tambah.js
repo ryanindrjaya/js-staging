@@ -229,8 +229,8 @@ function Toko({ props }) {
     }
   };
 
-  const calculatePriceAfterDisc = (row) => {
-    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
+  const calculatePriceAfterDisc = (row, index) => {
+    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index);
     return formatter.format(total);
   };
 
@@ -406,7 +406,7 @@ function Toko({ props }) {
     // used to reset redux from value before
     clearData();
   }, []);
-
+    console.log("product sub total", productSubTotal)
   return (
     <>
       <Head>
@@ -583,6 +583,7 @@ function Toko({ props }) {
                       setProductTotalPrice={setProductTotalPrice}
                       calculatePriceAfterDisc={calculatePriceAfterDisc}
                       productSubTotal={productSubTotal}
+                      setProductSubTotal={setProductSubTotal}
                       locations={locations}
                       formObj={form}
                     />

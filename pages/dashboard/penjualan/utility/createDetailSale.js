@@ -4,6 +4,8 @@ import * as moment from "moment";
 
 var tempListId = [];
 const cookies = nookies.get(null, "token");
+var subtotalId = 0;
+//var id = 0;
 
 const createDetailSale = (
   values,
@@ -21,7 +23,7 @@ const createDetailSale = (
     var unit = element.attributes.unit_1;
     var unitPrice = element.attributes.buy_price_1;
     var unitPriceAfterDisc = element.attributes.buy_price_1;
-    var subTotal = unitPriceAfterDisc * qty;
+    var subTotal = 0;
 
     const id = element.id;
     var expDate = values.expired_date?.[id];
@@ -35,7 +37,7 @@ const createDetailSale = (
     unit = products.productInfo[id]?.unit ?? element.attributes.unit_1;
     unitPrice = products.productInfo?.[id]?.priceUnit ?? element.attributes.buy_price_1;
     unitPriceAfterDisc = productTotalPrice?.[id];
-    subTotal = productSubTotal?.[id];
+    subTotal = productSubTotal?.[subtotalId];
     var d1 = products.productInfo[id]?.d1 ?? element.attributes.unit_1_dp1;
     var d2 = products.productInfo[id]?.d2 ?? element.attributes.unit_1_dp2;
     var d3 = products.productInfo[id]?.d3 ?? element.attributes.unit_1_dp3;
@@ -57,6 +59,7 @@ const createDetailSale = (
       margin,
       url
     );
+    subtotalId++;
   });
 };
 

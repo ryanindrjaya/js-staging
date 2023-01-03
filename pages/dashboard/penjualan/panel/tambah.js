@@ -213,13 +213,8 @@ function Toko({ props }) {
     }
   };
 
-  //const onChangeNoSale = () => {
-  //  if(selectedCategory == "BEBAS") form.setFieldValue("no_store_sale", `TR/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
-  //  if(selectedCategory == "RESEP") form.setFieldValue("no_store_sale", `TB/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
-  //};
-
-  const calculatePriceAfterDisc = (row) => {
-    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
+  const calculatePriceAfterDisc = (row, index) => {
+    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index);
     return formatter.format(total);
   };
 
@@ -490,6 +485,7 @@ function Toko({ props }) {
                       setProductTotalPrice={setProductTotalPrice}
                       calculatePriceAfterDisc={calculatePriceAfterDisc}
                       productSubTotal={productSubTotal}
+                      setProductSubTotal={setProductSubTotal}
                       locations={locations}
                       formObj={form}
                     />

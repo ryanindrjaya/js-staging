@@ -213,8 +213,8 @@ function Toko({ props }) {
     if(selectedCategory == "RESEP") form.setFieldValue("no_store_sale", `TB/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
   };
 
-  const calculatePriceAfterDisc = (row) => {
-    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
+  const calculatePriceAfterDisc = (row, index) => {
+    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index);
     return formatter.format(total);
   };
 
@@ -314,7 +314,7 @@ function Toko({ props }) {
     // used to reset redux from value before
     clearData();
   }, []);
-
+    console.log("productSubTotal", productSubTotal)
   return (
     <>
       <Head>
@@ -534,6 +534,7 @@ function Toko({ props }) {
                       setProductTotalPrice={setProductTotalPrice}
                       calculatePriceAfterDisc={calculatePriceAfterDisc}
                       productSubTotal={productSubTotal}
+                      setProductSubTotal={setProductSubTotal}
                       locations={locations}
                       formObj={form}
                     />

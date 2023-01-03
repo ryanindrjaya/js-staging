@@ -91,37 +91,6 @@ const actions = {
     type: "SET_PREORDER_DATA",
     data,
   }),
-  // untuk penjualan, jgn dirubah (sale)
-  changeProductUnit: (index, product) => ({
-    type: "CHANGE_SALE_PRODUCT_UNIT",
-    index,
-    product,
-  }),
-  changeProductQty: (qty, product) => ({
-    type: "CHANGE_SALE_PRODUCT_QTY",
-    qty,
-    product,
-  }),
-  changeProductD1: (d1, product) => ({
-    type: "CHANGE_SALE_PRODUCT_D1",
-    d1,
-    product,
-  }),
-  changeProductD2: (d2, product) => ({
-    type: "CHANGE_SALE_PRODUCT_D2",
-    d2,
-    product,
-  }),
-  changeProductDisc: (disc, product) => ({
-    type: "CHANGE_SALE_PRODUCT_DISC",
-    disc,
-    product,
-  }),
-  changeProductMargin: (margin, product) => ({
-    type: "CHANGE_SALE_PRODUCT_MARGIN",
-    margin,
-    product,
-  }),
 
   clearValue: () => ({
     type: "CLEAR_DATA",
