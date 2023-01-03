@@ -224,6 +224,9 @@ function Tambah({ props }) {
     dispatch({ type: "CLEAR_DATA" });
   }, []);
 
+  useEffect(() => {
+    console.log("products", products);
+  }, [products]);
   const openNotificationWithIcon = (type) => {
     if (type === "error") {
       notification[type]({

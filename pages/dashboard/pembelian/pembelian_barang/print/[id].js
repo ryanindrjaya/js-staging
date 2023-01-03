@@ -5,7 +5,7 @@ import { PrinterOutlined } from "@ant-design/icons";
 const Print = ({ props }) => {
   const name = process.env.STAKEHOLDER_NAME;
   const noLPB = props.purchases.data.attributes.no_purchasing;
-  const noPO = props.purchases.data.attributes.purchase.data.attributes.no_po;
+  const noPO = props?.purchases?.data?.attributes?.purchase?.data?.attributes?.no_po || "-";
   const noNota = props.purchases.data.attributes.no_nota_suppplier ?? "-";
   const date = new Date(props.purchases.data.attributes.date_purchasing).toLocaleDateString("id-ID");
   const supplierName = props.purchases.data.attributes.supplier.data.attributes.name;
@@ -44,11 +44,13 @@ const Print = ({ props }) => {
 
     const product = props.purchases.data.attributes.purchasing_details.data[index - 1].attributes.product.data;
 
+    const detail = props.purchases.data.attributes.purchasing_details.data[index - 1].attributes;
+
     for (let index = 1; index < 6; index++) {
       if (product.attributes[`unit_${index}`] === unit) {
-        disc1 = product.attributes[`unit_${index}_dp1`];
-        disc2 = product.attributes[`unit_${index}_dp2`];
-        disc3 = product.attributes[`unit_${index}_dp3`];
+        disc1 = detail.dp1;
+        disc2 = detail.dp2;
+        disc3 = detail.dp3;
       }
     }
 
