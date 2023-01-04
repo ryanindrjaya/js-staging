@@ -10,11 +10,12 @@ import nookies from "nookies";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import { useSelector, useDispatch } from "react-redux";
 import calculatePrice from "../../utility/calculatePrice";
-import LPBTable from "@iso/components/ReactDataTable/Purchases/LPBTable";
+import StoreSaleTable from "@iso/components/ReactDataTable/Selling/StoreSaleTable";
 //import createDetailReturFunc from "../../utility/createReturDetail";
 //import createReturLPBFunc from "../../utility/createReturLPB";
 import { useRouter } from "next/router";
 import moment from "moment";
+import LoadingAnimations from "@iso/components/Animations/Loading";
 
 ReturToko.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -93,7 +94,7 @@ const products = useSelector((state) => state.Order);
   const locations = props.locations.data;
   const user = props.user;
   //const inven = props.inven.data;
-  const salesSale = props.data;
+  const returStore = props.data; console.log("retur data :", returStore)
   //const salesOrder = props.salesOrder.data;
 
   const [form] = Form.useForm();
@@ -137,10 +138,16 @@ const products = useSelector((state) => state.Order);
   const tempList = [];
   const [info, setInfo] = useState();
 
+  //set data retur
+  const [faktur, setFaktur] = useState(returStore.data.attributes.faktur);
+  const [customer, setCustomer] = useState(returStore.data.attributes.customer_name);
+  const [saleDate, setSaleDate] = useState(returStore.data.attributes.sale_date);
+  const [locationStore, setLocationStore] = useState(returStore.data.attributes.location.data.attributes.name);
+    
   // NO Sales Sale
   //var noSalesSale = String(salesSale?.meta?.pagination.total + 1).padStart(3, "0");
   //const [categorySale, setCategorySale] = useState(`PS/ET/${user.id}/${noSalesSale}/${mm}/${yyyy}`);
-  const [categorySale, setCategorySale] = useState(`RPS/ET/${mm}/${yyyy}`);
+  const [categorySale, setCategorySale] = useState(`RTB/ET/${mm}/${yyyy}`);
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);
@@ -155,7 +162,7 @@ const products = useSelector((state) => state.Order);
   const onFinish = (values) => {
     setLoading(true);
     setInfo("sukses");
-    salesSale.data.forEach((element) => {
+    returStore.data.forEach((element) => {
       if (values.no_sales_sale == element.attributes.no_sales_sale) {
           notification["error"]({
               message: "Gagal menambahkan data",
@@ -242,86 +249,159 @@ const products = useSelector((state) => state.Order);
     setDiscPrice(newTotal);
   };
 
-  const fetchSalesSaledata = async (id) => {
-    clearData();
-    setIsFetchingData(true);
+  //const fetchReturdata = async (id) => {
+  //  clearData();
+  //  setIsFetchingData(true);
 
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/sales-sells/${id}?populate=deep`;
-    const options = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-    };
+  //  const endpoint = process.env.NEXT_PUBLIC_URL + `/store-sales/${id}?populate=deep`;
+  //  const options = {
+  //    method: "GET",
+  //    headers: {
+  //      "Content-Type": "application/json",
+  //      Authorization: "Bearer " + cookies.token,
+  //    },
+  //  };
 
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
+  //  const req = await fetch(endpoint, options);
+  //  const res = await req.json();
       
-    const dataSalesSell = res.data.attributes;
-    const sales_sell_details = dataSalesSell.sales_sell_details.data;
+  //  const dataRetur = res.data.attributes; console.log("data", dataRetur)
+  //  const retur_details = dataSalesSell.sales_sell_details.data;
 
-    var dateString = dataSalesSell.sale_date;
-    var momentObj = moment(dateString, "YYYY-MM-DD");
-    var momentString = momentObj.format("MM-DD-YYYY");
+  //  var dateString = dataSalesSell.sale_date;
+  //  var momentObj = moment(dateString, "YYYY-MM-DD");
+  //  var momentString = momentObj.format("MM-DD-YYYY");
 
-    form.setFieldsValue({
-      sale_date: moment(momentString),
-      location: dataSalesSell.location.data.attributes.name,
-      customer_name: dataSalesSell.customer_name,
-      tempo_days: dataSalesSell.tempo_days,
-      tempo_time: dataSalesSell.tempo_time,
-      sale_note: dataSalesSell.sale_note,
-    });
+  //  form.setFieldsValue({
+  //    sale_date: moment(momentString),
+  //    location: dataSalesSell.location.data.attributes.name,
+  //    customer_name: dataSalesSell.customer_name,
+  //    tempo_days: dataSalesSell.tempo_days,
+  //    tempo_time: dataSalesSell.tempo_time,
+  //    sale_note: dataSalesSell.sale_note,
+  //  });
 
-    dispatch({
-      type: "SET_PREORDER_DATA",
-      data: res.data,
-    });
+  //  dispatch({
+  //    type: "SET_PREORDER_DATA",
+  //    data: res.data,
+  //  });
 
-    sales_sell_details.forEach((element) => {
-      var indexUnit = 1;
-      var unitOrder = element.attributes.unit_order;
-      var productUnit = element.attributes.product.data.attributes;
+  //  sales_sell_details.forEach((element) => {
+  //    var indexUnit = 1;
+  //    var unitOrder = element.attributes.unit_order;
+  //    var productUnit = element.attributes.product.data.attributes;
 
-      for (let index = 1; index < 6; index++) {
-        if (unitOrder === productUnit[`unit_${index}`]) {
-          indexUnit = index;
-        }
-      }
+  //    for (let index = 1; index < 6; index++) {
+  //      if (unitOrder === productUnit[`unit_${index}`]) {
+  //        indexUnit = index;
+  //      }
+  //    }
 
-      const productId = element.attributes.product.data.id;
+  //    const productId = element.attributes.product.data.id;
 
-      form.setFieldsValue({
-        disc_rp: {
-          [productId]: element.attributes.disc,
-        },
-        jumlah_option: {
-          [productId]: element.attributes.unit_order,
-        },
-        jumlah_qty: {
-          [productId]: element.attributes.total_order,
-        },
-      });
+  //    form.setFieldsValue({
+  //      disc_rp: {
+  //        [productId]: element.attributes.disc,
+  //      },
+  //      jumlah_option: {
+  //        [productId]: element.attributes.unit_order,
+  //      },
+  //      jumlah_qty: {
+  //        [productId]: element.attributes.total_order,
+  //      },
+  //    });
 
-       //SET INITIAL PRODUCT
-      dispatch({
-        type: "SET_INITIAL_PRODUCT",
-        product: element.attributes.product.data,
-        qty: element.attributes.total_order,
-        unit: element.attributes.unit_order,
-        unitIndex: indexUnit,
-      });
-    });
-    setTimeout(() => {
-      setIsFetchingData(false);
-    }, 3000);
-  };
+  //     //SET INITIAL PRODUCT
+  //    dispatch({
+  //      type: "SET_INITIAL_PRODUCT",
+  //      product: element.attributes.product.data,
+  //      qty: element.attributes.total_order,
+  //      unit: element.attributes.unit_order,
+  //      unitIndex: indexUnit,
+  //    });
+  //  });
+  //  setTimeout(() => {
+  //    setIsFetchingData(false);
+  //  }, 3000);
+  //};
 
   const clearData = () => {
     dispatch({ type: "CLEAR_DATA" });
     setTotalPrice(0);
   };
+
+  useEffect(() => { //set value from store sale
+    setIsFetchingData(true);
+
+    form.setFieldsValue({
+      disc_type: returStore.data.attributes.disc_type,
+      disc_value: returStore.data.attributes.disc_value,
+      additional_fee_1_sub: returStore.data.attributes?.additional_fee_1_sub,
+      additional_fee_2_sub: returStore.data.attributes?.additional_fee_2_sub,
+      additional_fee_3_sub: returStore.data.attributes?.additional_fee_3_sub,
+    });
+
+    const retur_details = returStore.data.attributes.store_sale_details.data;
+
+    dispatch({
+      type: "SET_PREORDER_DATA",
+      data: returStore,
+    });
+
+    retur_details.forEach((element) => { console.log("element", element)
+        var indexUnit = 1;
+        var unitOrder = element.attributes.unit_order;
+        var productUnit = element.attributes.product.data.attributes;
+
+        for (let index = 1; index < 6; index++) {
+            if (unitOrder === productUnit[`unit_${index}`]) {
+                indexUnit = index;
+            }
+        }
+
+        const productId = element.attributes.product.data.id;
+
+        form.setFieldsValue({
+            disc_rp: {
+                [productId]: element.attributes.disc,
+            },
+            disc_rp1: {
+                [productId]: element.attributes.disc1,
+            },
+            disc_rp2: {
+                [productId]: element.attributes.disc2,
+            },
+            //jumlah_option: {
+            //    [productId]: element.attributes.unit_order,
+            //},
+            jumlah_qty: {
+                [productId]: element.attributes.qty,
+            },
+        });
+
+        //SET INITIAL PRODUCT
+        dispatch({
+            type: "SET_INITIAL_PRODUCT",
+            product: element.attributes.product.data,
+            qty: element.attributes.qty,
+            unit: element.attributes.unit,
+            //unitIndex,
+            //priceUnit,
+            //disc,
+            //priceAfterDisc,
+            //subTotal,
+            //unit: element.attributes.unit_order,
+            unitIndex: indexUnit,
+        });
+    });
+
+    //setDPPActive("DPP");
+    //setPPNActive("PPN");
+
+    setTimeout(() => {
+      setIsFetchingData(false);
+    }, 3000);
+  }, [returStore]);
 
   useEffect(() => {
     // this one is used for checking the price if the old price is same with new one.
@@ -362,16 +442,22 @@ const products = useSelector((state) => state.Order);
   }, [dataValues]);
 
   useEffect(() => {
-    // set dpp dan ppn
+    // set dpp
     if(dppActive == "DPP"){
       setDPP(grandTotal / 1.11);
-    } if(ppnActive == "PPN"){
-      setPPN((grandTotal / 1.11) * 11 / 100);
     } else {
       setDPP(0);
+    }
+  }, [dppActive]);
+
+  useEffect(() => {
+    // set ppn
+    if(ppnActive == "PPN"){
+      setPPN((grandTotal / 1.11) * 11 / 100);
+    } else {
       setPPN(0);
     }
-  }, [dppActive, ppnActive]);
+  }, [ppnActive]);
 
   useEffect(() => {
     // used to reset redux from value before
@@ -426,31 +512,26 @@ const products = useSelector((state) => state.Order);
 
               <div className="w-full flex flex-wrap justify-start -mx-3 mt-1">
                 <div className="w-full md:w-1/3 px-3 mt-2 md:mb-0">
-                  <p className="text-sm text-start ml-9">No Faktur :</p>
+                  <p className="text-sm text-start ml-9">No Faktur : {faktur}</p>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mt-2 md:mb-0">
-                  <p className="text-sm text-start">Customer :</p>
+                  <p className="text-sm text-start">Customer : {customer}</p>
                 </div>
               </div>
 
               <div className="w-full flex flex-wrap justify-start -mx-3">
                 <div className="w-full md:w-1/3 px-3 md:mb-0">
-                  <p className="text-sm text-start ml-9">Tanggal :</p>
+                  <p className="text-sm text-start ml-9">Tanggal : {saleDate}</p>
                 </div>
                 <div className="w-full md:w-1/3 px-3 md:mb-0">
-                  <p className="text-sm text-start">Lokasi :</p>
+                  <p className="text-sm text-start">Lokasi : {locationStore}</p>
                 </div>
               </div>
 
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-3 mt-2">
-                <div className="w-full md:w-1/6 px-3 mt-2 mb-2 md:mb-0">
-                  <p className="font-bold text-lg text-end">
-                    No Faktur Retur
-                  </p>
-                </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    name="no_sales_sale"
+                    name="no_store_sale"
                     initialValue={categorySale}
                     rules={[
                         {
@@ -460,6 +541,19 @@ const products = useSelector((state) => state.Order);
                     ]}
                     >
                     <Input style={{ height: "40px" }} placeholder="No. Penjualan" />
+                  </Form.Item>
+                </div>
+                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
+                  <Form.Item
+                    name="faktur_retur"
+                    rules={[
+                        {
+                            required: true,
+                            message: "Nomor retur faktur tidak boleh kosong!",
+                        },
+                    ]}
+                    >
+                    <Input style={{ height: "40px" }} placeholder="No. Retur Faktur" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -504,12 +598,34 @@ const products = useSelector((state) => state.Order);
                 </div>
               </div>
 
+              {isFetchinData ? (
+                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
+                    <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
+                      <LoadingAnimations />
+                    </div>
+                    <div className="text-sm align-middle text-center animate-pulse text-slate-400">Sedang Mengambil Data</div>
+                  </div>
+                ) : (
+                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
+                    <StoreSaleTable
+                      products={products}
+                      productTotalPrice={productTotalPrice}
+                      setTotalPrice={setTotalPrice}
+                      setProductTotalPrice={setProductTotalPrice}
+                      calculatePriceAfterDisc={calculatePriceAfterDisc}
+                      productSubTotal={productSubTotal}
+                      setProductSubTotal={setProductSubTotal}
+                      locations={locations}
+                      formObj={form}
+                    />
+                  </div>
+              )}
               {/*<div className="w-full flex md:w-4/4 mb-2 mt-2">*/}
               {/*    <Form.Item name="no_sales_sell">*/}
               {/*      <Select*/}
               {/*          placeholder="Pilih Nomor Penjualan"*/}
               {/*          size="large"*/}
-              {/*          onChange={(e) => fetchSalesSaledata(e)}*/}
+              {/*          onChange={(e) => fetchReturdata(e)}*/}
               {/*          style={{*/}
               {/*              width: "100%",*/}
               {/*          }}*/}
@@ -526,17 +642,6 @@ const products = useSelector((state) => state.Order);
               {/*      </Select>*/}
               {/*    </Form.Item>*/}
               {/*</div>*/}
-
-              <div className="w-full flex md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
-                  <SearchBar
-                    form={form}
-                    tempList={tempList}
-                    onChange={onChangeProduct}
-                    user={user}
-                    selectedProduct={selectedProduct}
-                    isBasedOnLocation={false}
-                  />
-              </div>
 
               {/*{isFetchinData ? (*/}
               {/*    <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">*/}
@@ -581,7 +686,7 @@ const products = useSelector((state) => state.Order);
                     </Select>
                   </Form.Item>
                 </div>
-                <div className="w-full md:w-1/3 px-3 mt-5 ">
+                <div className="w-full md:w-1/6 px-3 mt-5 ">
                   <Form.Item name="disc_value" noStyle>
                     <InputNumber
                       //disabled={products.productList.length === 0}
@@ -591,6 +696,15 @@ const products = useSelector((state) => state.Order);
                       placeholder="Diskon"
                       style={{ width: "100%" }}
                     />
+                  </Form.Item>
+                </div>
+                <div className="w-full md:w-1/6 px-3 mt-5 ">
+                  <Form.Item>
+                    <button className="bg-cyan-700 rounded-md m-1 text-sm">
+                      <p className="px-4 py-2 m-0 text-white">
+                        INC. RETUR
+                      </p>
+                    </button>
                   </Form.Item>
                 </div>
               </div>
@@ -678,16 +792,16 @@ const products = useSelector((state) => state.Order);
                 <p className="mb-4 font-bold text-center">Biaya Tambahan Lain Lain</p>
               </div>
               <div className="w-full flex flex-wrap justify-end mb-3">
-                <div className="w-full md:w-1/3 px-3 mb-2 text-center md:mb-0">
-                  <p className="mb-4 font-bold">Keterangan</p>
-                  <Form.Item name="additional_fee_1_desc">
-                    <Input size="large" style={{ width: "100%" }} />
+                <div className="w-full md:w-1/3 px-3 mb-2 text-end md:mb-0">
+                  <p className="mb-4 font-bold ">Keterangan</p>
+                  <Form.Item>
+                    Biaya 1
                   </Form.Item>
-                  <Form.Item name="additional_fee_2_desc">
-                    <Input size="large" style={{ width: "100%" }} />
+                  <Form.Item>
+                    Biaya 2
                   </Form.Item>
-                  <Form.Item name="additional_fee_3_desc">
-                    <Input size="large" style={{ width: "100%" }} />
+                  <Form.Item>
+                    Biaya 3
                   </Form.Item>
                 </div>
 
@@ -730,6 +844,30 @@ const products = useSelector((state) => state.Order);
                     />
                   </Form.Item>
                 </div>
+                <div className="w-full md:w-1/6 px-1 mb-2 text-center md:mb-0">
+                  <p className="mb-4 font-bold">Jumlah</p>
+                  <Form.Item>
+                    <button className="bg-cyan-700 rounded-md m-1 text-sm">
+                      <p className="px-4 py-2 m-0 text-white">
+                        INC. RETUR
+                      </p>
+                    </button>
+                  </Form.Item>
+                  <Form.Item>
+                    <button className="bg-cyan-700 rounded-md m-1 text-sm">
+                      <p className="px-4 py-2 m-0 text-white">
+                        INC. RETUR
+                      </p>
+                    </button>
+                  </Form.Item>
+                  <Form.Item>
+                    <button className="bg-cyan-700 rounded-md m-1 text-sm">
+                      <p className="px-4 py-2 m-0 text-white">
+                        INC. RETUR
+                      </p>
+                    </button>
+                  </Form.Item>
+                </div>
               </div>
 
 
@@ -743,7 +881,20 @@ const products = useSelector((state) => state.Order);
                     ) : (
                       <button onClick={validateError} htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
                         <p className="px-4 py-2 m-0 text-white">
-                          SIMPAN DAN CETAK UNTUK PEMBAYARAN PIUTANG
+                          SIMPAN DAN CETAK UNTUK BAYAR
+                        </p>
+                      </button>
+                    )}
+                  </Form.Item>
+                  <Form.Item>
+                    {loading ? (
+                      <div className=" flex float-left ml-3 ">
+                        <Spin />
+                      </div>
+                    ) : (
+                      <button onClick={validateError} htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
+                        <p className="px-4 py-2 m-0 text-white">
+                          SIMPAN JADIKAN HUTANG
                         </p>
                       </button>
                     )}

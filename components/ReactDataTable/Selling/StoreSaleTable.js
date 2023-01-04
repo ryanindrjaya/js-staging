@@ -291,7 +291,7 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
               max={100}
               min={0}
               value={defaultDp1}
-              name={`disc_rp1_${idx}`}
+              name={["disc_rp1", `${idx}`]}
               onChange={(e) => onChangeD1D2D3(e, row, "d1", idx)}
               style={{
                 width: "60px",

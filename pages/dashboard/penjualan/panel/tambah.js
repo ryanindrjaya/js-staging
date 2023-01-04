@@ -299,16 +299,22 @@ function Toko({ props }) {
   }, [dataValues]);
 
   useEffect(() => {
-    // set dpp dan ppn
+    // set dpp
     if(dppActive == "DPP"){
       setDPP(grandTotal / 1.11);
-    } if(ppnActive == "PPN"){
-      setPPN((grandTotal / 1.11) * 11 / 100);
     } else {
       setDPP(0);
+    }
+  }, [dppActive]);
+
+  useEffect(() => {
+    // set ppn
+    if(ppnActive == "PPN"){
+      setPPN((grandTotal / 1.11) * 11 / 100);
+    } else {
       setPPN(0);
     }
-  }, [dppActive, ppnActive]);
+  }, [ppnActive]);
 
   useEffect(() => {
     locations.forEach((element) => {
