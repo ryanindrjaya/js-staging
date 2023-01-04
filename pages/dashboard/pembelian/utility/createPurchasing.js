@@ -14,8 +14,8 @@ const CreateOrder = async (products, grandTotal, totalPrice, values, listId, dis
     .format();
   var orderDate = newDate;
 
-  const supplier = products.preorderData.data.attributes.supplier.data;
-  const location = products.preorderData.data.attributes.location.data;
+  const supplier = products?.preorderData?.data?.attributes?.supplier?.data;
+  const location = products?.preorderData?.data?.attributes?.location?.data;
   var tempProductListId = [];
 
   listId.forEach((element) => {
@@ -23,24 +23,22 @@ const CreateOrder = async (products, grandTotal, totalPrice, values, listId, dis
   });
 
   var supplierId = {
-    id: parseInt(Number.isNaN(parseInt(values.supplier_id)) ? supplier.id : values.supplier_id),
+    id: parseInt(Number.isNaN(parseInt(values?.supplier_id)) ? supplier?.id : values?.supplier_id),
   };
 
   var locationId = {
-    id: parseInt(Number.isNaN(parseInt(values.location)) ? location.id : values.location),
+    id: parseInt(Number.isNaN(parseInt(values?.location)) ? location?.id : values?.location),
   };
 
-  var purchaseOrderId = {
-    id: values.no_po,
-  };
+  var purchaseOrderId = values?.no_po ? { id: values?.no_po } : null;
 
   // only in purchasing
-  delete values.delivery_date;
-  delete values.order_date;
-  delete values.products;
+  delete values?.delivery_date;
+  delete values?.order_date;
+  delete values?.products;
 
   values.price_after_disc = parseInt(discPrice);
-  values.tempo_days = String(values.tempo_days);
+  values.tempo_days = String(values?.tempo_days);
   values.purchasing_details = tempProductListId;
   values.purchase = purchaseOrderId;
   values.location = locationId;

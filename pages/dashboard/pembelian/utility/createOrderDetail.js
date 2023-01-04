@@ -17,16 +17,20 @@ const getUnitPrice = (data, unit) => {
   return selectedUnit;
 };
 
-const createDetailOrder = (
-  products,
-  productTotalPrice,
-  productSubTotal,
-  setListId,
-  url,
-  value
-) => {
-  products.productList.forEach((element) => {
-    console.log(products);
+const getIndexUnit = (data, idx) => {
+  var unitIndex = 1;
+  for (let index = 1; index < 6; index++) {
+    if (data.attributes[`unit_${index}`] === data.attributes[`unit_${idx + 1}`]) {
+      unitIndex = index;
+    }
+  }
+
+  return unitIndex;
+};
+
+const createDetailOrder = (products, productTotalPrice, productSubTotal, setListId, url, value) => {
+  products.productList.forEach((element, idx) => {
+    console.log("products", products);
     console.log(products.productInfo);
     console.log("productTotalPrice", productTotalPrice);
     console.log("productSubTotal", productSubTotal);
@@ -34,48 +38,29 @@ const createDetailOrder = (
     // default value
     tempListId = [];
     const id = element.id;
-    var qty = products?.productInfo?.[id]?.qty ?? 1;
-    var disc = products?.productInfo?.[id]?.disc ?? 0;
-    var unit = products.productInfo?.[id]?.unit ?? element.attributes.unit_1;
+    const unitByIndex = getIndexUnit(element, idx);
+    var qty = products?.productInfo?.[idx]?.qty ?? 1;
+    var disc = products?.productInfo?.[idx]?.disc ?? 0;
+    var unit = products.productInfo?.[idx]?.unit ?? element.attributes[`unit_${unitByIndex}`];
+    var dp1 = products.productInfo?.[idx]?.d1 ?? element.attributes[`unit_${unitByIndex}_dp1`] ?? 0;
+    var dp2 = products.productInfo?.[idx]?.d2 ?? element.attributes[`unit_${unitByIndex}_dp2`] ?? 0;
+    var dp3 = products.productInfo?.[idx]?.d3 ?? element.attributes[`unit_${unitByIndex}_dp3`] ?? 0;
     //var unitPrice = getUnitPrice(element, unit);
-    var unitPrice = value.harga_satuan?.[id];
-    if(value.harga_satuan?.[id] == undefined){
-        unitPrice = element.attributes.buy_price_1;
+    var unitPrice = value.harga_satuan?.[idx];
+    if (value.harga_satuan?.[idx] == undefined) {
+      unitPrice = element.attributes.buy_price_1;
     }
 
-    var unitPriceAfterDisc =
-      productTotalPrice?.[id] ?? element.attributes.buy_price_1;
+    var unitPriceAfterDisc = productTotalPrice?.[idx] ?? element.attributes[`buy_price_${idx + 1}`];
     var subTotal = unitPriceAfterDisc * qty;
 
     //console.log("detail nich :",qty, disc, unit, unitPrice, unitPriceAfterDisc, subTotal);
 
-    POSTPurchaseDetail(
-      qty,
-      disc,
-      unit,
-      unitPrice,
-      unitPriceAfterDisc,
-      subTotal,
-      id,
-      setListId,
-      products,
-      url
-    );
+    POSTPurchaseDetail(qty, disc, unit, unitPrice, unitPriceAfterDisc, subTotal, id, setListId, products, url, dp1, dp2, dp3);
   });
 };
 
-const POSTPurchaseDetail = async (
-  qty,
-  disc,
-  unit,
-  unitPrice,
-  unitPriceAfterDisc,
-  subTotal,
-  id,
-  setListId,
-  products,
-  url
-) => {
+const POSTPurchaseDetail = async (qty, disc, unit, unitPrice, unitPriceAfterDisc, subTotal, id, setListId, products, url, dp1, dp2, dp3) => {
   var data = {
     data: {
       total_order: String(qty),
@@ -84,7 +69,10 @@ const POSTPurchaseDetail = async (
       unit_price_after_disc: parseInt(unitPriceAfterDisc),
       sub_total: parseInt(subTotal),
       products: { id: id },
-      disc: parseInt(disc),
+      disc: parseFloat(disc),
+      dp1: parseFloat(dp1),
+      dp2: parseFloat(dp2),
+      dp3: parseFloat(dp3),
     },
   };
 

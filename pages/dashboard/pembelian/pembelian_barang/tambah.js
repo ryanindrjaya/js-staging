@@ -199,7 +199,7 @@ function Tambah({ props }) {
   };
 
   const calculatePriceAfterDisc = (row, index) => {
-    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setProductSubTotal, setTotalPrice, index);
+    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index, setProductSubTotal);
 
     return formatter.format(total);
   };
