@@ -30,7 +30,7 @@ const Edit = ({ props }) => {
   const subCategory = product?.attributes?.sub_category?.data;
   const initManufacture = product?.attributes?.manufacture?.data;
   const initGroup = product?.attributes?.group?.data;
-  const BASE_API = "http://localhost:1337";
+  const NEXT_PUBLIC_URL = "http://localhost:1337";
 
   const [image, setImage] = useState(product.attributes?.image?.data ? product.attributes?.image?.data?.attributes : null);
 
@@ -75,7 +75,7 @@ const Edit = ({ props }) => {
   };
 
   const imageLoader = ({ src }) => {
-    return image?.url ? BASE_API + image?.url : image;
+    return image?.url ? NEXT_PUBLIC_URL + image?.url : image;
   };
 
   const propsDagger = {
@@ -392,7 +392,7 @@ const Edit = ({ props }) => {
                         <p className="ant-upload-hint  m-3">Gambar akan digunakan sebagai contoh tampilan produk</p>
                       </>
                     ) : (
-                      <Image style={{ width: "100%" }} preview={false} src={image?.url ? BASE_API + image?.url : image} />
+                      <Image style={{ width: "100%" }} preview={false} src={image?.url ? NEXT_PUBLIC_URL + image?.url : image} />
                     )}
                   </Dragger>
                 </div>

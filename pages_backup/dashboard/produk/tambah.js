@@ -64,7 +64,7 @@ const Tambah = ({ props }) => {
   const [file, setFile] = useState();
 
   const imageLoader = ({ src }) => {
-    return BASE_API + image;
+    return NEXT_PUBLIC_URL + image;
   };
 
   const getBase64 = (img, callback) => {
