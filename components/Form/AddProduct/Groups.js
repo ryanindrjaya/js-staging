@@ -8,7 +8,9 @@ export default function Groups({ onSelect, selectedGroups, initialValue }) {
   const [loading, setLoading] = useState(false);
   const cookies = nookies.get(null, "token");
 
-  const options = data?.map((d) => <Select.Option key={d.value}>{d.label}</Select.Option>);
+  const options = data?.map((d) => {
+    return <Select.Option key={d.value}>{d.alias} - {d.label}</Select.Option>
+  });
 
   const handleSearchGroups = (newValue) => {
     if (newValue) {
@@ -44,6 +46,7 @@ export default function Groups({ onSelect, selectedGroups, initialValue }) {
 
         if (req.status == 200) {
           const manufactureResult = res.data.map((manufacture) => ({
+            alias : `${manufacture.attributes.alias}`,
             label: `${manufacture.attributes.name}`,
             value: manufacture.id,
           }));

@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice) {
+export default function calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index, setProductSubTotal) {
   var priceUnit = row.attributes[`buy_price_1`];
   var qty = 1;
   var disc = 0;
@@ -10,37 +10,37 @@ export default function calculatePrice(row, products, productTotalPrice, product
   var Dp3 = row.attributes?.unit_1_dp3;
 
   // check if Dp1, Dp2, Dp3 changed
-  if (products.productInfo[row.id]?.d1) {
-    Dp1 = products.productInfo[row.id].d1 ?? 1;
-  } else if (products.productInfo[row.id]?.d1 === 0 || products.productInfo[row.id]?.d1 === null) {
+  if (products.productInfo[index]?.d1) {
+    Dp1 = products.productInfo[index].d1 ?? 1;
+  } else if (products.productInfo[index]?.d1 === 0 || products.productInfo[index]?.d1 === null) {
     Dp1 = 0;
   }
 
-  if (products.productInfo[row.id]?.d2) {
-    Dp2 = products.productInfo[row.id].d2 ?? 1;
-  } else if (products.productInfo[row.id]?.d2 === 0 || products.productInfo[row.id]?.d2 === null) {
+  if (products.productInfo[index]?.d2) {
+    Dp2 = products.productInfo[index].d2 ?? 1;
+  } else if (products.productInfo[index]?.d2 === 0 || products.productInfo[index]?.d2 === null) {
     Dp2 = 0;
   }
 
-  if (products.productInfo[row.id]?.d3) {
-    Dp3 = products.productInfo[row.id].d3 ?? 1;
-  } else if (products.productInfo[row.id]?.d3 === 0 || products.productInfo[row.id]?.d3 === null) {
+  if (products.productInfo[index]?.d3) {
+    Dp3 = products.productInfo[index].d3 ?? 1;
+  } else if (products.productInfo[index]?.d3 === 0 || products.productInfo[index]?.d3 === null) {
     Dp3 = 0;
   }
 
   // check if price changed
-  if (products.productInfo[row.id]?.priceUnit) {
-    priceUnit = products.productInfo[row.id].priceUnit ?? row.attributes[`buy_price_1`];
+  if (products.productInfo[index]?.priceUnit) {
+    priceUnit = products.productInfo[index].priceUnit ?? row.attributes[`buy_price_1`];
   }
 
   // check if qty changed
-  if (products.productInfo[row.id]?.qty) {
-    qty = products.productInfo[row.id]?.qty ?? 1;
+  if (products.productInfo[index]?.qty) {
+    qty = products.productInfo[index]?.qty ?? 1;
   }
 
   // check if disc changed
-  if (products.productInfo[row.id]?.disc) {
-    disc = products.productInfo[row.id]?.disc ?? 0;
+  if (products.productInfo[index]?.disc) {
+    disc = products.productInfo[index]?.disc ?? 0;
   }
 
   priceUnit = priceUnit - disc;
@@ -49,8 +49,8 @@ export default function calculatePrice(row, products, productTotalPrice, product
   var price3 = calculatePercentage(price2, Dp3);
 
   // set product price after disc & sub total
-  productTotalPrice[row.id] = price3;
-  productSubTotal[row.id] = price3 * qty;
+  productTotalPrice[index] = price3;
+  productSubTotal[index] = price3 * qty;
 
   // set all product total
   var total = 0;
@@ -58,7 +58,7 @@ export default function calculatePrice(row, products, productTotalPrice, product
     total = total + productSubTotal[key];
   }
   setTotalPrice(total);
-  return productTotalPrice[row.id];
+  return productTotalPrice[index];
 }
 
 const calculatePercentage = (value, percent) => {

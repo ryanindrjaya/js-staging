@@ -5,43 +5,44 @@ import * as moment from "moment";
 var tempListId = [];
 const cookies = nookies.get(null, "token");
 
-const createDetailOrder = (
-  values,
-  products,
-  productTotalPrice,
-  productSubTotal,
-  setListId,
-  url
-) => {
+const getIndexUnit = (data, idx) => {
+  var unitIndex = 1;
+  for (let index = 1; index < 6; index++) {
+    if (data.attributes[`unit_${index}`] === data.attributes[`unit_${idx + 1}`]) {
+      unitIndex = index;
+    }
+  }
+
+  return unitIndex;
+};
+
+const createDetailOrder = (values, products, productTotalPrice, productSubTotal, setListId, url) => {
   // console.log(values);
   console.log("values", values);
   console.log("product", products);
   console.log("productList", products.productList);
-  products.productList.forEach((element) => {
-    // default value
-    var qty = 1;
-    var disc = 0;
-    var unit = element.attributes.unit_1;
-    var unitPrice = element.attributes.buy_price_1;
-    var unitPriceAfterDisc = element.attributes.buy_price_1;
+  products.productList.forEach((element, idx) => {
     var subTotal = unitPriceAfterDisc * qty;
 
     const id = element.id;
-    var batch = values.batch[id];
-    var location = values.product_location[id];
-    var expDate = new Date(values.expired_date[id]);
+
+    var batch = values.batch[idx];
+    var location = values.product_location[idx];
+    var expDate = new Date(values.expired_date[idx]);
     var newExptDate = moment
       .utc(expDate)
       .utcOffset(7 * 60)
       .format();
 
-    qty = products.productInfo[id]?.qty ?? 1;
-    disc = products.productInfo[id]?.disc ?? 0;
-    unit = products.productInfo[id]?.unit ?? element.attributes.unit_1;
-    unitPrice =
-      products.productInfo?.[id]?.priceUnit ?? element.attributes.buy_price_1;
-    unitPriceAfterDisc = productTotalPrice?.[id];
-    subTotal = productSubTotal?.[id];
+    var qty = products.productInfo[idx]?.qty ?? 1;
+    var disc = products.productInfo[idx]?.disc ?? 0;
+    var unit = products.productInfo?.[idx]?.unit ?? element.attributes.unit_1;
+    var unitPrice = products.productInfo?.[idx]?.priceUnit ?? element.attributes.buy_price_1;
+    var unitPriceAfterDisc = productTotalPrice?.[idx];
+    var subTotal = productSubTotal?.[idx];
+    var dp1 = products.productInfo?.[idx]?.d1 ?? element.attributes[`unit_1_dp1`] ?? 0;
+    var dp2 = products.productInfo?.[idx]?.d2 ?? element.attributes[`unit_1_dp2`] ?? 0;
+    var dp3 = products.productInfo?.[idx]?.d3 ?? element.attributes[`unit_1_dp3`] ?? 0;
 
     console.log("new data", batch, location, expDate, newExptDate);
 
@@ -58,7 +59,10 @@ const createDetailOrder = (
       batch,
       location,
       newExptDate,
-      url
+      url,
+      dp1,
+      dp2,
+      dp3
     );
   });
 };
@@ -76,7 +80,10 @@ const POSTPurchaseDetail = async (
   batch,
   location,
   expDate,
-  url
+  url,
+  dp1,
+  dp2,
+  dp3
 ) => {
   var data = {
     data: {
@@ -90,6 +97,9 @@ const POSTPurchaseDetail = async (
       batch: batch,
       location: { id: location },
       expired_date: expDate,
+      dp1: parseFloat(dp1),
+      dp2: parseFloat(dp2),
+      dp3: parseFloat(dp3),
     },
   };
 
@@ -106,6 +116,8 @@ const POSTPurchaseDetail = async (
 
   const req = await fetch(endpoint, options);
   const res = await req.json();
+
+  console.log("res create detail", res);
 
   if (req.status === 200) {
     tempListId.push(res.data?.id);

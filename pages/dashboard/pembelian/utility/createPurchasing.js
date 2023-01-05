@@ -5,16 +5,7 @@ import * as moment from "moment";
 
 const cookies = nookies.get(null, "token");
 
-const CreateOrder = async (
-  products,
-  grandTotal,
-  totalPrice,
-  values,
-  listId,
-  discPrice,
-  form,
-  router
-) => {
+const CreateOrder = async (products, grandTotal, totalPrice, values, listId, discPrice, form, router) => {
   // CLEANING DATA
   var date = new Date(values.order_date);
   var newDate = moment
@@ -23,8 +14,8 @@ const CreateOrder = async (
     .format();
   var orderDate = newDate;
 
-  const supplier = products.preorderData.data.attributes.supplier.data;
-  const location = products.preorderData.data.attributes.location.data;
+  const supplier = products?.preorderData?.data?.attributes?.supplier?.data;
+  const location = products?.preorderData?.data?.attributes?.location?.data;
   var tempProductListId = [];
 
   listId.forEach((element) => {
@@ -32,30 +23,22 @@ const CreateOrder = async (
   });
 
   var supplierId = {
-    id: parseInt(
-      Number.isNaN(parseInt(values.supplier_id))
-        ? supplier.id
-        : values.supplier_id
-    ),
+    id: parseInt(Number.isNaN(parseInt(values?.supplier_id)) ? supplier?.id : values?.supplier_id),
   };
 
   var locationId = {
-    id: parseInt(
-      Number.isNaN(parseInt(values.location)) ? location.id : values.location
-    ),
+    id: parseInt(Number.isNaN(parseInt(values?.location)) ? location?.id : values?.location),
   };
 
-  var purchaseOrderId = {
-    id: values.no_po,
-  };
+  var purchaseOrderId = values?.no_po ? { id: values?.no_po } : null;
 
   // only in purchasing
-  delete values.delivery_date;
-  delete values.order_date;
-  delete values.products;
+  delete values?.delivery_date;
+  delete values?.order_date;
+  delete values?.products;
 
   values.price_after_disc = parseInt(discPrice);
-  values.tempo_days = String(values.tempo_days);
+  values.tempo_days = String(values?.tempo_days);
   values.purchasing_details = tempProductListId;
   values.purchase = purchaseOrderId;
   values.location = locationId;
@@ -63,8 +46,7 @@ const CreateOrder = async (
   values.date_purchasing = orderDate;
   values.supplier_id = supplierId;
   values.status_pembayaran = "Belum Lunas";
-  values.total_purchasing =
-    grandTotal === 0 ? parseInt(totalPrice) : parseInt(grandTotal);
+  values.total_purchasing = grandTotal === 0 ? parseInt(totalPrice) : parseInt(grandTotal);
 
   var data = {
     data: values,
@@ -74,13 +56,7 @@ const CreateOrder = async (
   const res = await req.json();
 
   if (req.status === 200) {
-    await putRelationOrder(
-      res.data.id,
-      res.data.attributes,
-      values,
-      form,
-      router
-    );
+    await putRelationOrder(res.data.id, res.data.attributes, values, form, router);
   } else {
     openNotificationWithIcon("error");
   }
@@ -137,6 +113,8 @@ const putRelationOrder = async (id, value, values, form, router) => {
   const req = await fetch(endpoint, options);
   const res = await req.json();
 
+  console.log(res);
+
   if (req.status === 200) {
     form.resetFields();
     router.replace("/dashboard/pembelian/pembelian_barang");
@@ -166,14 +144,12 @@ const openNotificationWithIcon = (type) => {
   if (type === "error") {
     notification[type]({
       message: "Gagal menambahkan data",
-      description:
-        "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
+      description: "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
     });
   } else if (type === "success") {
     notification[type]({
       message: "Berhasil menambahkan data",
-      description:
-        "Produk berhasil ditambahkan. Silahkan cek pada halaman Pembelian Barang",
+      description: "Produk berhasil ditambahkan. Silahkan cek pada halaman Pembelian Barang",
     });
   }
 };

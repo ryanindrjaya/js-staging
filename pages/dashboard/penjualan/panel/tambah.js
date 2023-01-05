@@ -26,15 +26,15 @@ Toko.getInitialProps = async (context) => {
   const reqInven = await fetchInven(cookies);
   const inven = await reqInven.json();
 
-  const reqStoreSale = await fetchStoreSale(cookies);
-  const storeSale = await reqStoreSale.json();
+  const reqPanel = await fetchPanel(cookies);
+  const panel = await reqPanel.json();
 
   return {
     props: {
       user,
       locations,
       inven,
-      storeSale
+      panel
     },
   };
 };
@@ -53,8 +53,8 @@ const fetchData = async (cookies) => {
   return req;
 };
 
-const fetchStoreSale = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales?populate=deep";
+const fetchPanel = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/panel-sales?populate=deep";
     const options = {
         method: "GET",
         headers: {
@@ -103,7 +103,7 @@ function Toko({ props }) {
   const locations = props.locations.data;
   const user = props.user;
   const inven = props.inven.data;
-  const storeSale = props.storeSale;
+  const panel = props.panel;
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -125,6 +125,10 @@ function Toko({ props }) {
 
   const [dppActive, setDPPActive] = useState("Active");
   const [ppnActive, setPPNActive] = useState("Active");
+  const [simpanData, setSimpanData] = useState("Publish");
+
+  const [location, setLocation] = useState();
+  const [locationData, setLocationData] = useState();
 
   const router = useRouter();
   const { TextArea } = Input;
@@ -146,9 +150,9 @@ function Toko({ props }) {
   const tempList = [];
   const [info, setInfo] = useState();
 
-  // NO Store Sale
-  var noStoreSale = String(storeSale?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`TB/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
+  // NO Panel Sale
+  var noPanelSale = String(panel?.meta?.pagination.total + 1).padStart(3, "0");
+  const [categorySale, setCategorySale] = useState(`PN/ET/${user.id}/${noPanelSale}/${mm}/${yyyy}`);
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);
@@ -162,9 +166,10 @@ function Toko({ props }) {
 
   const onFinish = (values) => {
     setLoading(true);
+    values.status_data = simpanData;
     setInfo("sukses");
-    storeSale.data.forEach((element) => {
-      if (values.no_store_sale == element.attributes.no_store_sale) {
+    panel.data.forEach((element) => {
+      if (values.no_panel_sale == element.attributes.no_panel_sale) {
           notification["error"]({
               message: "Gagal menambahkan data",
               description:
@@ -178,16 +183,16 @@ function Toko({ props }) {
   };
 
   const createDetailSale = async () => {
-    await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/store-sale-details");
+    await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/panel-sale-details");
   };
 
   const createSale = async (values) => {
     values.sale_date = today;
     values.added_by = user.name;
-    values.category = selectedCategory;
+    //values.category = selectedCategory;
     values.dpp = dpp;
     values.ppn = ppn;
-    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/store-sales/", "store sale");
+    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/panel-sales/", "panel sale");
   };
 
   const onChangeProduct = async () => {
@@ -206,11 +211,6 @@ function Toko({ props }) {
         autoClose: 1000,
       });
     }
-  };
-
-  const onChangeNoSale = () => {
-    if(selectedCategory == "BEBAS") form.setFieldValue("no_store_sale", `TR/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
-    if(selectedCategory == "RESEP") form.setFieldValue("no_store_sale", `TB/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
   };
 
   const calculatePriceAfterDisc = (row, index) => {
@@ -317,83 +317,41 @@ function Toko({ props }) {
   }, [ppnActive]);
 
   useEffect(() => {
+    locations.forEach((element) => {
+      if (element.id == location) setLocationData(element.attributes);
+    })
+  }, [location]);
+
+  useEffect(() => {
     // used to reset redux from value before
     clearData();
   }, []);
-    console.log("productSubTotal", productSubTotal)
+
   return (
     <>
       <Head>
-        <title>Penjualan Toko</title>
+        <title>Penjualan Panel</title>
       </Head>
       <DashboardLayout>
         <LayoutWrapper style={{}}>
-          <TitlePage titleText={"Penjualan Toko"} />
+          <TitlePage titleText={"Penjualan Panel"} />
           <LayoutContent>
-            <Row justify="space-between">
-                <button disabled className="bg-yellow-500 rounded-md">
-                  <p className="px-3 py-2 m-0 font-bold text-white uppercase">
-                    {selectedCategory}
-                  </p>
-                </button>
-                <div>
-                  {selectedCategory === "BEBAS" ? (
-                    <button
-                      onClick={() => {
-                                       setSelectedCategory("BEBAS"); 
-                                       //setCategorySale(`TB/ET/${noStoreSale}/${mm}/${yyyy}`);
-                                       onChangeNoSale();
-                                     }}
-                      className="bg-white rounded-md border border-cyan-700 m-1 text-sm"
-                    >
-                      <p className="px-4 py-2 m-0 text-cyan-700">BEBAS</p>
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => {
-                                       setSelectedCategory("BEBAS"); 
-                                       //setCategorySale(`TB/ET/${noStoreSale}/${mm}/${yyyy}`); 
-                                       onChangeNoSale();
-                                     }}
-                      className="bg-cyan-700 rounded-md m-1 text-sm"
-                    >
-                      <p className="px-4 py-2 m-0 text-white">BEBAS</p>
-                    </button>
-                  )}
-
-                  {selectedCategory === "RESEP" ? (
-                    <button
-                      onClick={() => {
-                                       setSelectedCategory("RESEP"); 
-                                       //setCategorySale(`TB/ET/${noStoreSale}/${mm}/${yyyy}`); 
-                                       onChangeNoSale();
-                                     }}
-                      className="bg-white rounded-md border border-cyan-700 m-1 text-sm"
-                    >
-                      <p className="px-4 py-2 m-0 text-cyan-700">RESEP</p>
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => {
-                                       setSelectedCategory("RESEP"); 
-                                       //setCategorySale(`TB/ET/${noStoreSale}/${mm}/${yyyy}`);
-                                       onChangeNoSale();
-                                     }}
-                      className="bg-cyan-700 rounded-md m-1 text-sm"
-                    >
-                      <p className="px-4 py-2 m-0 text-white">RESEP</p>
-                    </button>
-                  )}
-                  <button className="bg-cyan-700 rounded-md m-1 text-sm">
-                    <p className="px-4 py-2 m-0 text-white">
-                      Laporan Penjualan
-                    </p>
+            <div className="w-full flex justify-between mx-2 mt-1">
+                <div className="w-full justify-start md:w-1/3">
+                  <p>{date} {time}</p>
+                </div>
+                <div className="w-full flex justify-center md:w-1/3">
+                  <button
+                    //onClick={() => setSelectedCategory("RESEP")}
+                    className="bg-cyan-700 rounded-md m-1 text-sm"
+                  >
+                    <p className="px-4 py-2 m-0 text-white">Laporan Penjualan Hari Ini</p>
                   </button>
                 </div>
-                <div>
+                <div className="w-full flex justify-end text-right md:w-1/3">
                   <p>{user.name}</p>
                 </div>
-            </Row>
+            </div>
 
             <Form
               form={form}
@@ -404,14 +362,10 @@ function Toko({ props }) {
               onFinish={onFinish}
             >
 
-              <div className="w-full flex justify-start mx-2 mt-1">
-                <p>{date} {time}</p>
-              </div>
-
-              <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-1">
+              <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-5">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    name="no_store_sale"
+                    name="no_panel_sale"
                     initialValue={categorySale}
                     rules={[
                         {
@@ -438,21 +392,6 @@ function Toko({ props }) {
                       style={{ height: "40px" }}
                       placeholder="Nama Pelanggan"
                     />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item name="address">
-                    <Input style={{ height: "40px" }} placeholder="Alamat" />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item name="phone">
-                    <Input style={{ height: "40px" }} placeholder="No. Telp" />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item name="faktur">
-                    <Input style={{ height: "40px" }} placeholder="Faktur" />
                   </Form.Item>
                 </div>
 
@@ -492,6 +431,7 @@ function Toko({ props }) {
                     ]}
                   >
                     <Select
+                      onChange={setLocation}
                       placeholder="Pilih Lokasi"
                       size="large"
                       style={{
@@ -509,6 +449,17 @@ function Toko({ props }) {
                         );
                       })}
                     </Select>
+                  </Form.Item>
+                </div>
+                
+                <div className="w-full md:w-1/3 px-3 mb-2">
+                  <p className="m-0">Keterangan : {locationData?.name}</p>
+                  <p className="m-0"> {locationData?.street}</p>
+                  <p> {locationData?.city}</p>
+                </div>
+                <div className="w-full md:w-1/3 px-3 mb-2">
+                  <Form.Item name="no_inventory">
+                    <Input style={{ height: "40px" }} placeholder="No Inv" />
                   </Form.Item>
                 </div>
               </div>
@@ -732,16 +683,29 @@ function Toko({ props }) {
                 </Form.Item>
               </div>
 
-              <div  className="w-full flex justify-center">
+              <div  className="w-full flex justify-between">
                   <Form.Item>
                     {loading ? (
                       <div className=" flex float-left ml-3 ">
                         <Spin />
                       </div>
                     ) : (
-                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
+                      <button htmlType="submit" onClick={() => setSimpanData("Draft")} className="bg-cyan-700 rounded-md m-1 text-sm">
+                        <p className="px-20 py-2 m-0 text-white">
+                          SIMPAN DRAFT
+                        </p>
+                      </button>
+                    )}
+                  </Form.Item>
+                  <Form.Item>
+                    {loading ? (
+                      <div className=" flex float-left ml-3 ">
+                        <Spin />
+                      </div>
+                    ) : (
+                      <button htmlType="submit" onClick={() => setSimpanData("Publish")} className="bg-cyan-700 rounded-md m-1 text-sm">
                         <p className="px-4 py-2 m-0 text-white">
-                          SIMPAN DAN CETAK UNTUK PEMBAYARAN
+                          SIMPAN DAN CETAK UNTUK PEMBAYARAN PIUTANG
                         </p>
                       </button>
                     )}
