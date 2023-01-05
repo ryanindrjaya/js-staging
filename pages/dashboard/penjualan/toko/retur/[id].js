@@ -11,7 +11,7 @@ import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import { useSelector, useDispatch } from "react-redux";
 import calculatePrice from "../../utility/calculatePrice";
 import StoreSaleTable from "@iso/components/ReactDataTable/Selling/StoreSaleTable";
-//import createDetailReturFunc from "../../utility/createReturDetail";
+import createDetailSaleFunc from "../../utility/createDetailSale";
 //import createReturLPBFunc from "../../utility/createReturLPB";
 import { useRouter } from "next/router";
 import moment from "moment";
@@ -35,6 +35,9 @@ ReturToko.getInitialProps = async (context) => {
   const req = await fetchDataLocation(cookies);
   const locations = await req.json();
 
+  const returStore = await fetchData(cookies);
+  const datareturStore = await returStore.json();
+
   //const lpbPage = await fetchData(cookies);
   //const dataLPBPage = await lpbPage.json();
 
@@ -52,7 +55,7 @@ ReturToko.getInitialProps = async (context) => {
     props: {
       data,
       locations,
-      //dataLPBPage,
+      datareturStore,
     },
   };
 };
@@ -71,20 +74,20 @@ const fetchDataLocation = async (cookies) => {
   return req;
 };
 
-//const fetchData = async (cookies) => {
-//  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-lpbs?populate=deep";
-//  const options = {
-//    method: "GET",
-//    headers: {
-//      "Content-Type": "application/json",
-//      Authorization: "Bearer " + cookies.token,
-//    },
-//  };
+const fetchData = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-store-sales?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
 
-//  const req = await fetch(endpoint, options);
+  const req = await fetch(endpoint, options);
 
-//  return req;
-//};
+  return req;
+};
 
 function ReturToko({ props }) {
 const products = useSelector((state) => state.Order);
@@ -94,7 +97,8 @@ const products = useSelector((state) => state.Order);
   const locations = props.locations.data;
   const user = props.user;
   //const inven = props.inven.data;
-  const returStore = props.data; console.log("retur data :", returStore)
+  const store = props.data;
+  const returStore = props.datareturStore;
   //const salesOrder = props.salesOrder.data;
 
   const [form] = Form.useForm();
@@ -139,10 +143,13 @@ const products = useSelector((state) => state.Order);
   const [info, setInfo] = useState();
 
   //set data retur
-  const [faktur, setFaktur] = useState(returStore.data.attributes.faktur);
-  const [customer, setCustomer] = useState(returStore.data.attributes.customer_name);
-  const [saleDate, setSaleDate] = useState(returStore.data.attributes.sale_date);
-  const [locationStore, setLocationStore] = useState(returStore.data.attributes.location.data.attributes.name);
+  const [faktur, setFaktur] = useState(store.data.attributes.faktur);
+  const [customer, setCustomer] = useState(store.data.attributes.customer_name);
+  const [saleDate, setSaleDate] = useState(store.data.attributes.sale_date);
+  const [locationStore, setLocationStore] = useState(store.data.attributes.location.data.attributes.name);
+  const [addFee1Desc, setaddFee1Desc] = useState(store.data.attributes.additional_fee_1_desc);
+  const [addFee2Desc, setaddFee2Desc] = useState(store.data.attributes.additional_fee_2_desc);
+  const [addFee3Desc, setaddFee3Desc] = useState(store.data.attributes.additional_fee_3_desc);
     
   // NO Sales Sale
   //var noSalesSale = String(salesSale?.meta?.pagination.total + 1).padStart(3, "0");
@@ -163,7 +170,7 @@ const products = useSelector((state) => state.Order);
     setLoading(true);
     setInfo("sukses");
     returStore.data.forEach((element) => {
-      if (values.no_sales_sale == element.attributes.no_sales_sale) {
+        if (values.no_retur_store_sale == element.attributes.no_retur_store_sale) {
           notification["error"]({
               message: "Gagal menambahkan data",
               description:
@@ -176,17 +183,17 @@ const products = useSelector((state) => state.Order);
     setLoading(false);
   };
 
-  const createDetailSale = async () => {
-    await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/sales-sale-details");
+  const createDetailSale = async () => { console.log("detail lol :",dataValues,products,grandTotal)
+    await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/retur-store-sale-details");
   };
 
   const createSale = async (values) => {
     values.sale_date = today;
-    values.added_by = user.name;
+    //values.added_by = user.name;
     //values.category = selectedCategory;
     values.dpp = dpp;
     values.ppn = ppn;
-    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/sales-sales/", "sales sale", locations);
+    //await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/sales-sales/", "sales sale", locations);
   };
 
   const onChangeProduct = async () => {
@@ -207,9 +214,10 @@ const products = useSelector((state) => state.Order);
     }
   };
 
-  const calculatePriceAfterDisc = (row) => {
-    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
-    return formatter.format(total);
+  const calculatePriceAfterDisc = (row, index) => {
+      const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index, setProductSubTotal);
+
+      return formatter.format(total);
   };
 
   const sumAdditionalPrice = () => {
@@ -249,159 +257,10 @@ const products = useSelector((state) => state.Order);
     setDiscPrice(newTotal);
   };
 
-  //const fetchReturdata = async (id) => {
-  //  clearData();
-  //  setIsFetchingData(true);
-
-  //  const endpoint = process.env.NEXT_PUBLIC_URL + `/store-sales/${id}?populate=deep`;
-  //  const options = {
-  //    method: "GET",
-  //    headers: {
-  //      "Content-Type": "application/json",
-  //      Authorization: "Bearer " + cookies.token,
-  //    },
-  //  };
-
-  //  const req = await fetch(endpoint, options);
-  //  const res = await req.json();
-      
-  //  const dataRetur = res.data.attributes; console.log("data", dataRetur)
-  //  const retur_details = dataSalesSell.sales_sell_details.data;
-
-  //  var dateString = dataSalesSell.sale_date;
-  //  var momentObj = moment(dateString, "YYYY-MM-DD");
-  //  var momentString = momentObj.format("MM-DD-YYYY");
-
-  //  form.setFieldsValue({
-  //    sale_date: moment(momentString),
-  //    location: dataSalesSell.location.data.attributes.name,
-  //    customer_name: dataSalesSell.customer_name,
-  //    tempo_days: dataSalesSell.tempo_days,
-  //    tempo_time: dataSalesSell.tempo_time,
-  //    sale_note: dataSalesSell.sale_note,
-  //  });
-
-  //  dispatch({
-  //    type: "SET_PREORDER_DATA",
-  //    data: res.data,
-  //  });
-
-  //  sales_sell_details.forEach((element) => {
-  //    var indexUnit = 1;
-  //    var unitOrder = element.attributes.unit_order;
-  //    var productUnit = element.attributes.product.data.attributes;
-
-  //    for (let index = 1; index < 6; index++) {
-  //      if (unitOrder === productUnit[`unit_${index}`]) {
-  //        indexUnit = index;
-  //      }
-  //    }
-
-  //    const productId = element.attributes.product.data.id;
-
-  //    form.setFieldsValue({
-  //      disc_rp: {
-  //        [productId]: element.attributes.disc,
-  //      },
-  //      jumlah_option: {
-  //        [productId]: element.attributes.unit_order,
-  //      },
-  //      jumlah_qty: {
-  //        [productId]: element.attributes.total_order,
-  //      },
-  //    });
-
-  //     //SET INITIAL PRODUCT
-  //    dispatch({
-  //      type: "SET_INITIAL_PRODUCT",
-  //      product: element.attributes.product.data,
-  //      qty: element.attributes.total_order,
-  //      unit: element.attributes.unit_order,
-  //      unitIndex: indexUnit,
-  //    });
-  //  });
-  //  setTimeout(() => {
-  //    setIsFetchingData(false);
-  //  }, 3000);
-  //};
-
   const clearData = () => {
     dispatch({ type: "CLEAR_DATA" });
     setTotalPrice(0);
   };
-
-  useEffect(() => { //set value from store sale
-    setIsFetchingData(true);
-
-    form.setFieldsValue({
-      disc_type: returStore.data.attributes.disc_type,
-      disc_value: returStore.data.attributes.disc_value,
-      additional_fee_1_sub: returStore.data.attributes?.additional_fee_1_sub,
-      additional_fee_2_sub: returStore.data.attributes?.additional_fee_2_sub,
-      additional_fee_3_sub: returStore.data.attributes?.additional_fee_3_sub,
-    });
-
-    const retur_details = returStore.data.attributes.store_sale_details.data;
-
-    dispatch({
-      type: "SET_PREORDER_DATA",
-      data: returStore,
-    });
-
-    retur_details.forEach((element) => { console.log("element", element)
-        var indexUnit = 1;
-        var unitOrder = element.attributes.unit_order;
-        var productUnit = element.attributes.product.data.attributes;
-
-        for (let index = 1; index < 6; index++) {
-            if (unitOrder === productUnit[`unit_${index}`]) {
-                indexUnit = index;
-            }
-        }
-
-        const productId = element.attributes.product.data.id;
-
-        form.setFieldsValue({
-            disc_rp: {
-                [productId]: element.attributes.disc,
-            },
-            disc_rp1: {
-                [productId]: element.attributes.disc1,
-            },
-            disc_rp2: {
-                [productId]: element.attributes.disc2,
-            },
-            //jumlah_option: {
-            //    [productId]: element.attributes.unit_order,
-            //},
-            jumlah_qty: {
-                [productId]: element.attributes.qty,
-            },
-        });
-
-        //SET INITIAL PRODUCT
-        dispatch({
-            type: "SET_INITIAL_PRODUCT",
-            product: element.attributes.product.data,
-            qty: element.attributes.qty,
-            unit: element.attributes.unit,
-            //unitIndex,
-            //priceUnit,
-            //disc,
-            //priceAfterDisc,
-            //subTotal,
-            //unit: element.attributes.unit_order,
-            unitIndex: indexUnit,
-        });
-    });
-
-    //setDPPActive("DPP");
-    //setPPNActive("PPN");
-
-    setTimeout(() => {
-      setIsFetchingData(false);
-    }, 3000);
-  }, [returStore]);
 
   useEffect(() => {
     // this one is used for checking the price if the old price is same with new one.
@@ -413,19 +272,6 @@ const products = useSelector((state) => state.Order);
       setGrandTotal(totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
     }
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
-
-  //useEffect(() => {
-  //  if(products.productList.length > 0){ 
-  //      inven.forEach((element) => {
-  //          products.productList.forEach((data) => {
-  //            if (data.id == element.attributes.products.data[0].id) {
-  //              data.stock = element.attributes.total_stock;
-  //            }  
-  //          });
-  //        }
-  //      );
-  //  }
-  //}, [products.productList]);
 
   useEffect(() => {
     sumAdditionalPrice();
@@ -462,6 +308,99 @@ const products = useSelector((state) => state.Order);
   useEffect(() => {
     // used to reset redux from value before
     clearData();
+    setIsFetchingData(true);
+
+    form.setFieldsValue({
+      disc_type: store.data.attributes.disc_type,
+      disc_value: store.data.attributes.disc_value,
+      additional_fee_1_sub: store.data.attributes?.additional_fee_1_sub,
+      additional_fee_2_sub: store.data.attributes?.additional_fee_2_sub,
+      additional_fee_3_sub: store.data.attributes?.additional_fee_3_sub,
+    });
+
+    const retur_details = store.data.attributes.store_sale_details.data;
+
+    dispatch({
+      type: "SET_PREORDER_DATA",
+      data: store,
+    });
+
+    retur_details.forEach((element) => { console.log("element", element)
+        var indexUnit = 1;
+        var unitOrder = element.attributes.unit_order;
+        var productUnit = element.attributes.product.data.attributes;
+
+        for (let index = 1; index < 6; index++) {
+            if (unitOrder === productUnit[`unit_${index}`]) {
+                indexUnit = index;
+            }
+        }
+
+        var dateString = element.attributes.expired_date;
+        var momentObj = moment(dateString, "YYYY-MM-DD");
+        var momentString = momentObj.format("MM-DD-YYYY");
+
+        //var productId = element.attributes.product.data.id;
+        var productId = 0;
+
+        form.setFieldsValue({
+            jumlah_qty: {
+                [productId]: element.attributes.qty,
+            },
+            jumlah_option: {
+                [productId]: element.attributes.unit,
+            },
+            disc_rp: {
+                [productId]: element.attributes.disc,
+            },
+            disc_rp1: {
+                [productId]: element.attributes.disc1,
+            },
+            disc_rp2: {
+                [productId]: element.attributes.disc2,
+            },
+            margin: {
+                [productId]: element.attributes.margin,
+            },
+            expired_date: {
+                [productId]: moment(momentString),
+            },
+            expired_date: {
+                [productId]: moment(momentString),
+            },
+        });
+
+        //productSubTotal.push(parseInt(element.attributes.sub_total));
+        //setProductSubTotal();
+
+        //SET INITIAL PRODUCT
+        dispatch({
+            type: "SET_SALE_INITIAL_PRODUCT",
+            product: element.attributes.product.data,
+            qty: element.attributes.qty,
+            unit: element.attributes.unit,
+            unitIndex: indexUnit,
+            disc: element.attributes.disc,
+            margin: element.attributes.margin,
+            d1: element.attributes.disc1,
+            d2: element.attributes.disc2,
+            expired_date: element.attributes.expired_date,
+            //priceAfterDisc,
+            //subTotal,
+            //unit: element.attributes.unit_order,
+            //unitIndex,
+            priceUnit: element.attributes.unit_price,
+            index: productId,
+        });
+        productId++;
+    });
+
+    //setDPPActive("DPP");
+    //setPPNActive("PPN");
+      console.log("produk nih", products)
+    setTimeout(() => {
+      setIsFetchingData(false);
+    }, 3000);
   }, []);
 
   const validateError = () => {
@@ -531,7 +470,7 @@ const products = useSelector((state) => state.Order);
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-3 mt-2">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    name="no_store_sale"
+                    name="no_retur_store_sale"
                     initialValue={categorySale}
                     rules={[
                         {
@@ -792,16 +731,16 @@ const products = useSelector((state) => state.Order);
                 <p className="mb-4 font-bold text-center">Biaya Tambahan Lain Lain</p>
               </div>
               <div className="w-full flex flex-wrap justify-end mb-3">
-                <div className="w-full md:w-1/3 px-3 mb-2 text-end md:mb-0">
+                <div className="w-full md:w-1/3 px-3 mb-2 text-end md:mb-0 mt-2">
                   <p className="mb-4 font-bold ">Keterangan</p>
                   <Form.Item>
-                    Biaya 1
+                    <p>{addFee1Desc}</p>
                   </Form.Item>
                   <Form.Item>
-                    Biaya 2
+                    <p>{addFee2Desc}</p>
                   </Form.Item>
                   <Form.Item>
-                    Biaya 3
+                    <p>{addFee3Desc}</p>
                   </Form.Item>
                 </div>
 
@@ -844,8 +783,7 @@ const products = useSelector((state) => state.Order);
                     />
                   </Form.Item>
                 </div>
-                <div className="w-full md:w-1/6 px-1 mb-2 text-center md:mb-0">
-                  <p className="mb-4 font-bold">Jumlah</p>
+                <div className="w-full md:w-1/6 px-1 mb-2 text-center md:mb-0 mt-10">
                   <Form.Item>
                     <button className="bg-cyan-700 rounded-md m-1 text-sm">
                       <p className="px-4 py-2 m-0 text-white">

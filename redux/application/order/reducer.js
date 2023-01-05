@@ -195,6 +195,31 @@ export default function Reducer(state = initState, action) {
         },
       };
 
+    case "SET_SALE_INITIAL_PRODUCT":
+      state.productList.push(action.product);
+      var id = action.index;
+
+      return {
+        ...state,
+        productList: [...state.productList],
+        productInfo: {
+          ...state.productInfo,
+          [id]: {
+            qty: action.qty,
+            unit: action.unit,
+            unitIndex: action.unitIndex,
+            priceUnit: action.priceUnit,
+            disc: action.disc,
+            priceAfterDisc: action.priceAfterDisc,
+            subTotal: action.subTotal,
+            d1: action.d1,
+            d2: action.d2,
+            d3: action.d3,
+            margin: action.margin,
+          },
+        },
+      };
+
     case "SET_PREORDER_DATA":
       return {
         ...state,

@@ -320,7 +320,7 @@ function Toko({ props }) {
     // used to reset redux from value before
     clearData();
   }, []);
-    console.log("productSubTotal", productSubTotal)
+
   return (
     <>
       <Head>

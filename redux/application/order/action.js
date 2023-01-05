@@ -87,6 +87,20 @@ const actions = {
     subTotal,
   }),
 
+  setSaleInitialProduct: (product, index) => ({
+    type: "SET_SALE_INITIAL_PRODUCT",
+    product,
+    qty,
+    unit,
+    unitIndex,
+    priceUnit,
+    disc,
+    margin,
+    priceAfterDisc,
+    subTotal,
+    index,
+  }),
+
   setPreOrderData: (data) => ({
     type: "SET_PREORDER_DATA",
     data,
