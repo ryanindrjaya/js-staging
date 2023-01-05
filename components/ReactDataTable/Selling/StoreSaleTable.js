@@ -105,7 +105,7 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
       },
     },
   };
-    console.log("productinfo", products)
+
   const columns = [
     {
       name: "Nama Produk",
