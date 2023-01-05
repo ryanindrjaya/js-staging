@@ -28,6 +28,9 @@ Retur.getInitialProps = async (context) => {
   const reqDataLPB = await fetchDataLPB(cookies);
   const dataLPB = await reqDataLPB.json();
 
+  const reqUser = await fetchUser(cookies);
+  const user = await reqUser.json();
+
   if (reqLocation.status !== 200) {
     context.res.writeHead(302, {
       Location: "/signin?session=false",
@@ -43,6 +46,7 @@ Retur.getInitialProps = async (context) => {
       location,
       returs,
       dataLPB,
+      user
     },
   };
 };
@@ -89,7 +93,22 @@ const fetchDataLPB = async (cookies) => {
   return req;
 };
 
+const fetchUser = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=*";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
 function Retur({ props }) {
+  const user = props.user;
   const locations = props.location.data;
   const dataLPB = props.dataLPB.data;
   var products = useSelector((state) => state.Order);
@@ -367,7 +386,7 @@ function Retur({ props }) {
                   <Form.Item name="tanggal_pembelian"></Form.Item>
                 </div>
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
-                  <SearchBar form={form} tempList={tempList} onChange={onChangeProduct} selectedProduct={selectedProduct} />
+                  <SearchBar form={form} tempList={tempList} onChange={onChangeProduct} user={user}  selectedProduct={selectedProduct} isBasedOnLocation={false}/>
                 </div>
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
                   <LPBTable

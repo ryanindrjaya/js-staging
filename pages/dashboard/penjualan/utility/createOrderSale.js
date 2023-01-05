@@ -7,50 +7,36 @@ var tempProductListId = [];
 var tempSupplierId = 0;
 var tempLocationId;
 
-const CreateSale = async (
-  grandTotal,
-  totalPrice,
+const CreateOrderSale = async (
   values,
   listId,
   form,
-  router,
-  url,
-  page,
-  locations
+  router
 ) => {
   // CLEANING DATA
-
   listId.forEach((element) => {
     tempProductListId.push({ id: element });
   });
 
-  values.total = grandTotal;
-
   values.status = "Dipesan"
   values.purchasing_payments = null;
-
-  if(page == "sales sale"){
-    locations.forEach((element) => {
-      if(element.attributes.name == values.location) values.location = element.id;
-    });
-  }
 
   var data = {
     data: values,
   };
 
-  const req = await createData(data, url);
+  const req = await createData(data);
   const res = await req.json();
 
-  if (req.status === 200) {
-    await putRelationSaleDetail(res.data.id, res.data.attributes, form, router, url, page);
+  if (req.status === 200) { 
+    await putRelationSaleDetail(res.data.id, res.data.attributes, form, router);
   } else {
     openNotificationWithIcon("error");
   }
 };
 
-const createData = async (data, url) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + url;
+const createData = async (data) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sells";
   const JSONdata = JSON.stringify(data);
 
   const options = {
@@ -67,16 +53,13 @@ const createData = async (data, url) => {
   return req;
 };
 
-const putRelationSaleDetail = async (id, value, form, router, url, page) => {
+const putRelationSaleDetail = async (id, value, form, router) => {
   const user = await getUserMe();
   const dataSale = {
     data: value,
   };
 
-  dataSale.data.store_sale_details = tempProductListId;
-  dataSale.data.sales_sale_details = tempProductListId;
-  dataSale.data.non_panel_sale_details = tempProductListId;
-  dataSale.data.panel_sale_details = tempProductListId;
+  dataSale.data.sales_sell_details = tempProductListId;
 
   // clean object
   for (var key in dataSale) {
@@ -86,7 +69,7 @@ const putRelationSaleDetail = async (id, value, form, router, url, page) => {
   }
 
   const JSONdata = JSON.stringify(dataSale);
-  const endpoint = process.env.NEXT_PUBLIC_URL + url + id;
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sells/" + id;
   const options = {
     method: "PUT",
     headers: {
@@ -102,10 +85,7 @@ const putRelationSaleDetail = async (id, value, form, router, url, page) => {
 
   if (req.status === 200) {
     form.resetFields();
-    if(page == "store sale") router.replace("/dashboard/penjualan/toko");
-    if(page == "sales sale") router.replace("/dashboard/penjualan/sales");
-    if(page == "non panel sale") router.replace("/dashboard/penjualan/non_panel");
-    if(page == "panel sale") router.replace("/dashboard/penjualan/panel");
+    router.replace("/dashboard/penjualan/pesanansales");
     openNotificationWithIcon("success");
   } else {
     openNotificationWithIcon("error");
@@ -144,4 +124,4 @@ const openNotificationWithIcon = (type) => {
   }
 };
 
-export default CreateSale;
+export default CreateOrderSale;

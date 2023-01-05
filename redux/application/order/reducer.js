@@ -123,6 +123,22 @@ export default function Reducer(state = initState, action) {
         },
       };
 
+    case "CHANGE_PRODUCT_MARGIN":
+      var margin = action.margin;
+      var id = action.index;
+      var data = action.product.attributes;
+
+      return {
+        ...state,
+        productInfo: {
+          ...state.productInfo,
+          [id]: {
+            ...state.productInfo[id],
+            margin: margin,
+          },
+        },
+      };
+
     case "SET_PRICE_AFTER_DISC":
       var price = action.price;
       var id = action.index;

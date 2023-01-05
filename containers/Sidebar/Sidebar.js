@@ -246,6 +246,11 @@ export default function Sidebar(props) {
                   <a>Penjualan Toko</a>
                 </Link>
               </Menu.Item>
+              <Menu.Item style={submenuStyle} key="penjualan_pesanan_sales">
+                <Link href="/dashboard/penjualan/pesanansales">
+                  <a>Penjualan Pesanan Sales</a>
+                </Link>
+              </Menu.Item>
               <Menu.Item style={submenuStyle} key="penjualan_sales">
                 <Link href="/dashboard/penjualan/sales">
                   <a>Penjualan Sales</a>
@@ -254,6 +259,11 @@ export default function Sidebar(props) {
               <Menu.Item style={submenuStyle} key="penjualan_non_panel">
                 <Link href="/dashboard/penjualan/non_panel">
                   <a>Penjualan Non Panel</a>
+                </Link>
+              </Menu.Item>
+              <Menu.Item style={submenuStyle} key="penjualan_panel">
+                <Link href="/dashboard/penjualan/panel">
+                  <a>Penjualan Panel</a>
                 </Link>
               </Menu.Item>
             </SubMenu>

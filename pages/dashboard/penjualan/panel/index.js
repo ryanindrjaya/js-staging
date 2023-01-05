@@ -9,7 +9,7 @@ import TitlePage from "../../../../components/TitlePage/TitlePage";
 import SellingTable from "../../../../components/ReactDataTable/Selling/SellingTable";
 import nookies from "nookies";
 
-Toko.getInitialProps = async (context) => {
+NonPanelSale.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
 
   const req = await fetchData(cookies);
@@ -18,14 +18,14 @@ Toko.getInitialProps = async (context) => {
   const reqLocation = await fetchLocation(cookies);
   const locations = await reqLocation.json();
 
-  const reqStore = await fetchStore(cookies);
-  const store = await reqStore.json();
+  const reqPanelSales = await fetchPanelSales(cookies);
+  const panel = await reqPanelSales.json();
 
   return {
     props: {
       user,
       locations,
-      store,
+      panel,
     },
   };
 };
@@ -58,8 +58,8 @@ const fetchLocation = async (cookies) => {
   return req;
 };
 
-const fetchStore = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales?populate=deep";
+const fetchPanelSales = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/panel-sales?populate=deep";
     const options = {
         method: "GET",
         headers: {
@@ -72,15 +72,15 @@ const fetchStore = async (cookies) => {
     return req;
 };
 
-function Toko({ props }) {
+function NonPanelSale({ props }) {
   const user = props.user;
   const locations = props.locations.data;
-  const data = props.store;
+  const data = props.panel;
   const router = useRouter();
   const [sell, setSell] = useState(data);
 
   const handleAdd = () => {
-    router.push("/dashboard/penjualan/toko/tambah");
+    router.push("/dashboard/penjualan/panel/tambah");
   };
 
   const handleUpdate = (id) => {
@@ -109,9 +109,9 @@ function Toko({ props }) {
       delete values.attributes?.document;
     }
 
-    var store_sale_details = [];
-    values.attributes.store_sale_details.data.forEach((element) => {
-      store_sale_details.push({ id: element.id });
+    var sales_sale_details = [];
+    values.attributes.sales_sale_details.data.forEach((element) => {
+      sales_sale_details.push({ id: element.id });
     });
 
     var purchasing_payments = [];
@@ -120,7 +120,7 @@ function Toko({ props }) {
     });
 
     values.attributes.location = { id: values.attributes.location.data.id };
-    values.attributes.store_sale_details = store_sale_details;
+    values.attributes.sales_sale_details = sales_sale_details;
     values.attributes.purchasing_payments = purchasing_payments;
 
     const newValues = {
@@ -129,7 +129,7 @@ function Toko({ props }) {
 
     const JSONdata = JSON.stringify(newValues);
     const cookies = nookies.get(null, "token");
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales/" + id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales/" + id;
 
     const options = {
       method: "PUT",
@@ -144,9 +144,9 @@ function Toko({ props }) {
     const res = await req.json();
 
     if (req.status === 200) {
-      const response = await fetchStore(cookies);
+      const response = await fetchSales(cookies);
       setSell(response);
-      openNotificationWithIcon("success", "Status berhasil dirubah", "Status berhasil dirubah. Silahkan cek penjualan toko");
+      openNotificationWithIcon("success", "Status berhasil dirubah", "Status berhasil dirubah. Silahkan cek penjualan sales");
     } else {
       openNotificationWithIcon("error", "Status gagal dirubah", "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah");
     }
@@ -162,11 +162,11 @@ function Toko({ props }) {
   return (
     <>
       <Head>
-        <title>Penjualan Toko</title>
+        <title>Penjualan Panel</title>
       </Head>
       <DashboardLayout>
         <LayoutWrapper style={{}}>
-          <TitlePage titleText={"Daftar Penjualan Toko"} />
+          <TitlePage titleText={"Daftar Penjualan Panel"} />
           <LayoutContent>
             <div className="w-full flex justify-start">
               <div className="w-full md:w-1/5 px-3"> 
@@ -340,7 +340,7 @@ function Toko({ props }) {
               </button>
             </div>
 
-            <div  className="w-full flex justify-between">
+            <div className="w-full flex justify-between">
                 <button
                     onClick={handleUpdate}
                     type="button"
@@ -401,4 +401,4 @@ function Toko({ props }) {
   );
 }
 
-export default Toko;
+export default NonPanelSale;
