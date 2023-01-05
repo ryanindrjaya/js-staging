@@ -5,7 +5,7 @@ import * as moment from "moment";
 var tempListId = [];
 const cookies = nookies.get(null, "token");
 var subtotalId = 0;
-//var id = 0;
+var id = 0;
 
 const createDetailSale = (
   values,
@@ -25,22 +25,22 @@ const createDetailSale = (
     var unitPriceAfterDisc = element.attributes.buy_price_1;
     var subTotal = 0;
 
-    const id = element.id;
     var expDate = values.expired_date?.[id];
     var newExptDate = moment
       .utc(expDate)
       .utcOffset(7 * 60)
       .format();
 
+    var elementId = element.id;
     qty = products.productInfo[id]?.qty ?? 1;
     disc = products.productInfo[id]?.disc ?? 0;
     unit = products.productInfo[id]?.unit ?? element.attributes.unit_1;
-    unitPrice = products.productInfo?.[id]?.priceUnit ?? element.attributes.buy_price_1;
+    unitPrice = products.productInfo[id]?.priceUnit ?? element.attributes.buy_price_1;
     unitPriceAfterDisc = productTotalPrice?.[id];
     subTotal = productSubTotal?.[subtotalId];
     var d1 = products.productInfo[id]?.d1 ?? element.attributes.unit_1_dp1;
     var d2 = products.productInfo[id]?.d2 ?? element.attributes.unit_1_dp2;
-    var d3 = products.productInfo[id]?.d3 ?? element.attributes.unit_1_dp3;
+    //var d3 = products.productInfo[id]?.d3 ?? element.attributes.unit_1_dp3;
     margin = products.productInfo[id]?.margin ?? 0;
 
     POSTSaleDetail(
@@ -50,6 +50,7 @@ const createDetailSale = (
       unitPrice,
       subTotal,
       id,
+      elementId,
       setListId,
       products,
       newExptDate,
@@ -59,6 +60,7 @@ const createDetailSale = (
       margin,
       url
     );
+    id++;
     subtotalId++;
   });
 };
@@ -70,6 +72,7 @@ const POSTSaleDetail = async (
   unitPrice,
   subTotal,
   id,
+  elementId,
   setListId,
   products,
   expDate,
@@ -85,7 +88,7 @@ const POSTSaleDetail = async (
       unit : unit,
       unit_price : unitPrice,
       sub_total: parseInt(subTotal),
-      product: { id: id },
+      product: { id: elementId },
       disc: parseInt(disc),
       expired_date: expDate,
       disc1 : d1,
