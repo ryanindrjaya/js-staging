@@ -13,7 +13,17 @@ import LPBTable from "@iso/components/ReactDataTable/Purchases/LPBTable";
 import { useSelector, useDispatch } from "react-redux";
 import LoadingAnimations from "@iso/components/Animations/Loading";
 import moment from "moment";
-import { Form, Button, Spin, Input, DatePicker, Select, InputNumber, notification, Row } from "antd";
+import {
+  Form,
+  Button,
+  Spin,
+  Input,
+  DatePicker,
+  Select,
+  InputNumber,
+  notification,
+  Row,
+} from "antd";
 import createDetailPurchasing from "../utility/createDetail";
 import createPurchasing from "../utility/createPurchasing";
 import calculatePrice from "../utility/calculatePrice";
@@ -86,7 +96,9 @@ const fetchDataPurchasing = async (cookies) => {
 };
 
 const fetchDataPurchase = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/?populate=deep&filters[delivery_status][$eq]=Terkirim";
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL +
+    "/purchases/?populate=deep&filters[delivery_status][$eq]=Terkirim";
   const options = {
     method: "GET",
     headers: {
@@ -173,11 +185,27 @@ function Tambah({ props }) {
   };
 
   const createDetailOrder = async () => {
-    createDetailPurchasing(dataValues, products, productTotalPrice, productSubTotal, setListId, "/purchasing-details");
+    createDetailPurchasing(
+      dataValues,
+      products,
+      productTotalPrice,
+      productSubTotal,
+      setListId,
+      "/purchasing-details"
+    );
   };
 
   const createOrder = async (values) => {
-    await createPurchasing(products, grandTotal, totalPrice, values, listId, discPrice, form, router);
+    await createPurchasing(
+      products,
+      grandTotal,
+      totalPrice,
+      values,
+      listId,
+      discPrice,
+      form,
+      router
+    );
   };
 
   const onChange = async () => {
@@ -199,7 +227,15 @@ function Tambah({ props }) {
   };
 
   const calculatePriceAfterDisc = (row, index) => {
-    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index, setProductSubTotal);
+    const total = calculatePrice(
+      row,
+      products,
+      productTotalPrice,
+      productSubTotal,
+      setTotalPrice,
+      index,
+      setProductSubTotal
+    );
 
     return formatter.format(total);
   };
@@ -285,7 +321,7 @@ function Tambah({ props }) {
       data: res.data,
     });
 
-    purchase_details.forEach((element) => {
+    purchase_details.forEach((element, index) => {
       var indexUnit = 1;
       var unitOrder = element.attributes.unit_order;
       console.log("product :");
@@ -325,9 +361,10 @@ function Tambah({ props }) {
         disc: element.attributes.disc,
         priceAfterDisc: element.attributes.unit_price_after_disc,
         subTotal: element.attributes.sub_total,
-        d1: element.attributes.products.data[0].attributes.unit_1_dp1,
-        d2: element.attributes.products.data[0].attributes.unit_1_dp2,
-        d3: element.attributes.products.data[0].attributes.unit_1_dp3,
+        d1: element.attributes.dp1 || 0,
+        d2: element.attributes.dp2 || 0,
+        d3: element.attributes.dp3 || 0,
+        index,
       });
     });
     //console.log("initial product"); console.log(products); console.log(productTotalPrice);
@@ -485,7 +522,12 @@ function Tambah({ props }) {
                       },
                     ]}
                   >
-                    <DatePicker placeholder="Tanggal Pembelian" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
+                    <DatePicker
+                      placeholder="Tanggal Pembelian"
+                      size="large"
+                      format={"DD/MM/YYYY"}
+                      style={{ width: "100%" }}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -612,7 +654,9 @@ function Tambah({ props }) {
                     <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
                       <LoadingAnimations />
                     </div>
-                    <div className="text-sm align-middle text-center animate-pulse text-slate-400">Sedang Mengambil Data</div>
+                    <div className="text-sm align-middle text-center animate-pulse text-slate-400">
+                      Sedang Mengambil Data
+                    </div>
                   </div>
                 ) : (
                   <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
@@ -637,11 +681,19 @@ function Tambah({ props }) {
               <div className="flex justify-end transition-all">
                 <Row>
                   <p className="font-bold">Total Harga :</p>
-                  {discPrice === 0 ? <p></p> : <p className="font-bold text-red-500 ml-2">{formatter.format(discPrice || 0)}</p>}
+                  {discPrice === 0 ? (
+                    <p></p>
+                  ) : (
+                    <p className="font-bold text-red-500 ml-2">
+                      {formatter.format(discPrice || 0)}
+                    </p>
+                  )}
                   {discPrice === 0 ? (
                     <p className="font-bold ml-2">{formatter.format(totalPrice || 0)}</p>
                   ) : (
-                    <p className="font-bold line-through ml-2 ">{formatter.format(totalPrice || 0)}</p>
+                    <p className="font-bold line-through ml-2 ">
+                      {formatter.format(totalPrice || 0)}
+                    </p>
                   )}
                 </Row>
               </div>
@@ -681,7 +733,12 @@ function Tambah({ props }) {
                 </div>
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item name="delivery_fee" noStyle>
-                    <InputNumber onChange={(e) => setBiayaPengiriman(e)} size="large" placeholder="Biaya Pengiriman" style={{ width: "100%" }} />
+                    <InputNumber
+                      onChange={(e) => setBiayaPengiriman(e)}
+                      size="large"
+                      placeholder="Biaya Pengiriman"
+                      style={{ width: "100%" }}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
@@ -806,7 +863,8 @@ function Tambah({ props }) {
               </div>
               <div>
                 <p className="font-bold flex justify-end">
-                  Total Harga : {grandTotal === 0 ? formatter.format(totalPrice) : formatter.format(grandTotal)}
+                  Total Harga :{" "}
+                  {grandTotal === 0 ? formatter.format(totalPrice) : formatter.format(grandTotal)}
                 </p>
               </div>
               <Form.Item name="additional_note">
@@ -819,7 +877,10 @@ function Tambah({ props }) {
                     <Spin />
                   </div>
                 ) : (
-                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
+                  <Button
+                    htmlType="submit"
+                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
+                  >
                     Tambah
                   </Button>
                 )}
