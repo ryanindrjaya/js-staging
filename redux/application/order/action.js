@@ -85,6 +85,7 @@ const actions = {
     disc,
     priceAfterDisc,
     subTotal,
+    index,
   }),
 
   setPreOrderData: (data) => ({
