@@ -12,7 +12,7 @@ import { useSelector, useDispatch } from "react-redux";
 import calculatePrice from "../../utility/calculatePrice";
 import StoreSaleTable from "@iso/components/ReactDataTable/Selling/StoreSaleTable";
 import createDetailSaleFunc from "../../utility/createDetailSale";
-//import createReturLPBFunc from "../../utility/createReturLPB";
+import createSaleFunc from "../../utility/createSale";
 import { useRouter } from "next/router";
 import moment from "moment";
 import LoadingAnimations from "@iso/components/Animations/Loading";
@@ -154,7 +154,8 @@ const products = useSelector((state) => state.Order);
   // NO Sales Sale
   //var noSalesSale = String(salesSale?.meta?.pagination.total + 1).padStart(3, "0");
   //const [categorySale, setCategorySale] = useState(`PS/ET/${user.id}/${noSalesSale}/${mm}/${yyyy}`);
-  const [categorySale, setCategorySale] = useState(`RTB/ET/${mm}/${yyyy}`);
+  var noStore = String(returStore?.meta?.pagination.total + 1).padStart(3, "0");
+  const [categorySale, setCategorySale] = useState(`RTB/ET/${noStore}/${mm}/${yyyy}`);
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);
@@ -185,6 +186,7 @@ const products = useSelector((state) => state.Order);
 
   const createDetailSale = async () => { console.log("detail lol :",dataValues,products,grandTotal)
     await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/retur-store-sale-details");
+    console.log("listId :",listId)
   };
 
   const createSale = async (values) => {
@@ -193,7 +195,8 @@ const products = useSelector((state) => state.Order);
     //values.category = selectedCategory;
     values.dpp = dpp;
     values.ppn = ppn;
-    //await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/sales-sales/", "sales sale", locations);
+    values.store_sale = store.data.id; //console.log("values create sale",values.idStore)
+    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/retur-store-sales/", "retur store sale", locations);
   };
 
   const onChangeProduct = async () => {
@@ -325,6 +328,8 @@ const products = useSelector((state) => state.Order);
       data: store,
     });
 
+    var productId = 0;
+
     retur_details.forEach((element) => { console.log("element", element)
         var indexUnit = 1;
         var unitOrder = element.attributes.unit_order;
@@ -341,7 +346,6 @@ const products = useSelector((state) => state.Order);
         var momentString = momentObj.format("MM-DD-YYYY");
 
         //var productId = element.attributes.product.data.id;
-        var productId = 0;
 
         form.setFieldsValue({
             jumlah_qty: {
@@ -361,9 +365,6 @@ const products = useSelector((state) => state.Order);
             },
             margin: {
                 [productId]: element.attributes.margin,
-            },
-            expired_date: {
-                [productId]: moment(momentString),
             },
             expired_date: {
                 [productId]: moment(momentString),
@@ -397,7 +398,6 @@ const products = useSelector((state) => state.Order);
 
     //setDPPActive("DPP");
     //setPPNActive("PPN");
-      console.log("produk nih", products)
     setTimeout(() => {
       setIsFetchingData(false);
     }, 3000);
@@ -484,7 +484,7 @@ const products = useSelector((state) => state.Order);
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    name="faktur_retur"
+                    name="faktur"
                     rules={[
                         {
                             required: true,
