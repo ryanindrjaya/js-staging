@@ -40,7 +40,6 @@ const Tambah = ({ props }) => {
       body: JSONdata,
     };
 
-
     const req = await fetch(endpoint, options);
     const res = await req.json();
 
@@ -64,7 +63,8 @@ const Tambah = ({ props }) => {
   };
 
   const getRole = async (roleId) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/users-permissions/roles/" + roleId;
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL + "/users-permissions/roles/" + roleId;
     const options = {
       method: "GET",
       headers: {
@@ -109,7 +109,12 @@ const Tambah = ({ props }) => {
                   >
                     <Input
                       style={{ height: "50px" }}
-                      prefix={<UserOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
+                      prefix={
+                        <UserOutlined
+                          style={{ fontSize: "150%" }}
+                          className="site-form-item-icon mr-5"
+                        />
+                      }
                       placeholder="Username"
                     />
                   </Form.Item>
@@ -126,7 +131,12 @@ const Tambah = ({ props }) => {
                   >
                     <Input
                       style={{ height: "50px" }}
-                      prefix={<UserOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
+                      prefix={
+                        <UserOutlined
+                          style={{ fontSize: "150%" }}
+                          className="site-form-item-icon mr-5"
+                        />
+                      }
                       placeholder="Nama"
                     />
                   </Form.Item>
@@ -143,7 +153,12 @@ const Tambah = ({ props }) => {
                   >
                     <Input
                       style={{ height: "50px" }}
-                      prefix={<MailOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
+                      prefix={
+                        <MailOutlined
+                          style={{ fontSize: "150%" }}
+                          className="site-form-item-icon mr-5"
+                        />
+                      }
                       placeholder="Email"
                     />
                   </Form.Item>
@@ -160,7 +175,12 @@ const Tambah = ({ props }) => {
                   >
                     <Input.Password
                       style={{ height: "50px" }}
-                      prefix={<LockOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
+                      prefix={
+                        <LockOutlined
+                          style={{ fontSize: "150%" }}
+                          className="site-form-item-icon mr-5"
+                        />
+                      }
                       placeholder="Kata Sandi"
                     />
                   </Form.Item>
@@ -181,21 +201,33 @@ const Tambah = ({ props }) => {
                             return Promise.resolve();
                           }
 
-                          return Promise.reject(new Error("Kata Sandi tidak cocok!"));
+                          return Promise.reject(
+                            new Error("Kata Sandi tidak cocok!")
+                          );
                         },
                       }),
                     ]}
                   >
                     <Input.Password
                       style={{ height: "50px" }}
-                      prefix={<LockOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
+                      prefix={
+                        <LockOutlined
+                          style={{ fontSize: "150%" }}
+                          className="site-form-item-icon mr-5"
+                        />
+                      }
                       placeholder="Konfirmasi Kata Sandi"
                     />
                   </Form.Item>
                 </div>
               </div>
 
-              <Locations data={locations} onSelect={setSelectLocation} errMsg={"Harap pilih lokasi user"} required />
+              <Locations
+                data={locations}
+                onSelect={setSelectLocation}
+                errMsg={"Harap pilih lokasi user"}
+                required
+              />
 
               <Form.Item name="role_id" className="w-1/4 mb-5 ml-1">
                 <Select size="large" placeholder="Role">
@@ -217,7 +249,10 @@ const Tambah = ({ props }) => {
                     <Spin />
                   </div>
                 ) : (
-                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
+                  <Button
+                    htmlType="submit"
+                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
+                  >
                     Submit
                   </Button>
                 )}

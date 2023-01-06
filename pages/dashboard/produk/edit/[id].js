@@ -38,13 +38,15 @@ const Edit = ({ props }) => {
   const subCategory = product?.attributes?.sub_category?.data;
   const initManufacture = product?.attributes?.manufacture?.data;
   const initGroup = product?.attributes?.group?.data;
-  const BASE_API = process.env.BASE_URL;
+  const NEXT_PUBLIC_URL = process.env.IMAGE_URL;
+
 
   const [image, setImage] = useState(
     product.attributes?.image?.data
       ? product.attributes?.image?.data?.attributes
       : null
   );
+ 
 
   const [category, setCategory] = useState();
   const [idCategory, setIdCategory] = useState(initCategory.id);
@@ -87,7 +89,7 @@ const Edit = ({ props }) => {
   };
 
   const imageLoader = ({ src }) => {
-    return image?.url ? BASE_API + image?.url : image;
+    return image?.url ? NEXT_PUBLIC_URL + image?.url : image;
   };
 
   const propsDagger = {
@@ -244,10 +246,38 @@ const Edit = ({ props }) => {
       }
     }
 
+    
+    values.pricelist_1 = parseFloat(values.pricelist_1);
+    values.pricelist_2 = parseFloat(values.pricelist_2);
+    values.pricelist_3 = parseFloat(values.pricelist_3);
+    values.pricelist_4 = parseFloat(values.pricelist_4);
+    values.pricelist_5 = parseFloat(values.pricelist_5);
+
+    values.purchase_discount_1 = parseFloat(values.purchase_discount_1);
+    values.purchase_discount_2 = parseFloat(values.purchase_discount_2);
+    values.purchase_discount_3 = parseFloat(values.purchase_discount_3);
+    values.purchase_discount_4 = parseFloat(values.purchase_discount_4);
+    values.purchase_discount_5 = parseFloat(values.purchase_discount_5);
+
+    values.sold_price_1 = parseFloat(values.sold_price_1);
+    values.sold_price_2 = parseFloat(values.sold_price_2);
+    values.sold_price_3 = parseFloat(values.sold_price_3);
+    values.sold_price_4 = parseFloat(values.sold_price_4);
+    values.sold_price_5 = parseFloat(values.sold_price_5);
+
+    values.buy_price_1 = parseFloat(values.buy_price_1);
+    values.buy_price_2 = parseFloat(values.buy_price_2);
+    values.buy_price_3 = parseFloat(values.buy_price_3);
+    values.buy_price_4 = parseFloat(values.buy_price_4);
+    values.buy_price_5 = parseFloat(values.buy_price_5);
+
     const data = {
       ...values,
       ...putData,
     };
+
+
+    console.log(data);
 
     for (let index = 1; index < 6; index++) {
       if (data[`purchase_discount_${index}`] === "-")
@@ -451,7 +481,7 @@ const Edit = ({ props }) => {
                       <Image
                         style={{ width: "100%" }}
                         preview={false}
-                        src={image?.url ? BASE_API + image?.url : image}
+                        src={image?.url ? NEXT_PUBLIC_URL + image?.url : image}
                       />
                     )}
                   </Dragger>

@@ -64,7 +64,7 @@ const Tambah = ({ props }) => {
   const [file, setFile] = useState();
 
   const imageLoader = ({ src }) => {
-    return BASE_API + image;
+    return NEXT_PUBLIC_URL + image;
   };
 
   const getBase64 = (img, callback) => {
@@ -105,38 +105,33 @@ const Tambah = ({ props }) => {
   const onFinish = async (values) => {
     setLoading(true);
 
-    console.log(values);
-    // return;
+  
+    values.pricelist_1 = parseFloat(values.pricelist_1);
+    values.pricelist_2 = parseFloat(values.pricelist_2);
+    values.pricelist_3 = parseFloat(values.pricelist_3);
+    values.pricelist_4 = parseFloat(values.pricelist_4);
+    values.pricelist_5 = parseFloat(values.pricelist_5);
 
-    // if (selectedSubCategory === 0) {
-    //   message.error(
-    //     `Sub Kategori tidak ditemukan pada Induk Kategori. Silahkan cek kembali`
-    //   );
-    // }
+    values.purchase_discount_1 = parseFloat(values.purchase_discount_1);
+    values.purchase_discount_2 = parseFloat(values.purchase_discount_2);
+    values.purchase_discount_3 = parseFloat(values.purchase_discount_3);
+    values.purchase_discount_4 = parseFloat(values.purchase_discount_4);
+    values.purchase_discount_5 = parseFloat(values.purchase_discount_5);
 
-    // const categoryID = {
-    //   id: parseInt(values?.category_id),
-    // };
+    values.sold_price_1 = parseFloat(values.sold_price_1);
+    values.sold_price_2 = parseFloat(values.sold_price_2);
+    values.sold_price_3 = parseFloat(values.sold_price_3);
+    values.sold_price_4 = parseFloat(values.sold_price_4);
+    values.sold_price_5 = parseFloat(values.sold_price_5);
 
-    // const subCategoryID = {
-    //   id: values?.subCategories,
-    // };
+    values.buy_price_1 = parseFloat(values.buy_price_1);
+    values.buy_price_2 = parseFloat(values.buy_price_2);
+    values.buy_price_3 = parseFloat(values.buy_price_3);
+    values.buy_price_4 = parseFloat(values.buy_price_4);
+    values.buy_price_5 = parseFloat(values.buy_price_5);
 
-    // const manufacturesID = {
-    //   id: values?.manufactures,
-    // };
 
-    // const groupID = {
-    //   id: values?.groups,
-    // };
 
-    // const locationsID = values.locations.map((locationId) => locationId);
-
-    // delete values.category_id;
-    // delete values.subCategories;
-    // delete values.manufactures;
-    // delete values.groups;
-    // delete values.locations;
 
     const relationData = {
       category: values.category_id,
@@ -177,7 +172,9 @@ const Tambah = ({ props }) => {
         toast.success("Produk berhasil ditambahkan!", {
           position: toast.POSITION.TOP_RIGHT,
         });
+        router.replace("/dashboard/produk");
       } else {
+        console.log(postRes);
         postRes?.error.details.errors.forEach((element) => {
           toast.error(element, {
             position: toast.POSITION.TOP_RIGHT,
@@ -187,6 +184,9 @@ const Tambah = ({ props }) => {
       setLoading(false);
     } catch (error) {
       setLoading(false);
+      toast.error("GAGAL MENAMBAHKAN PRODUK", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
     }
 
     setLoading(false);

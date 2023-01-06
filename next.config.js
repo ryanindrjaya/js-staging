@@ -11,6 +11,7 @@ const nextConfig = {
   env: {
     BASE_URL: process.env.BASE_URL,
     NEXT_PUBLIC_URL: "http://localhost:1337/api",
+    IMAGE_URL : "http://localhost:1337",
     BACKEND_URL: "https://localhost:8080",
     STAKEHOLDER_NAME: "APOTEK JAYA SEHAT",
     MAIN_COLOR: "#056A81",
