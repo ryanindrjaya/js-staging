@@ -305,7 +305,7 @@ function Toko({ props }) {
     } else {
       setDPP(0);
     }
-  }, [dppActive]);
+  }, [dppActive, grandTotal]);
 
   useEffect(() => {
     // set ppn
@@ -314,11 +314,12 @@ function Toko({ props }) {
     } else {
       setPPN(0);
     }
-  }, [ppnActive]);
+  }, [ppnActive, grandTotal]);
 
   useEffect(() => {
     // used to reset redux from value before
     clearData();
+    setProductSubTotal({});
   }, []);
 
   return (
@@ -621,6 +622,9 @@ function Toko({ props }) {
                       <Select.Option value="DPP" key={"DPP"}>
                         DPP
                       </Select.Option>
+                      <Select.Option value="Active" key={"Active"}>
+                        Tidak Ada
+                      </Select.Option>
                     </Select>
                   </Form.Item>
                 </div>
@@ -637,6 +641,9 @@ function Toko({ props }) {
                     >
                       <Select.Option value="PPN" key={"PPN"}>
                         PPN
+                      </Select.Option>
+                      <Select.Option value="Active" key={"Active"}>
+                        Tidak Ada
                       </Select.Option>
                     </Select>
                   </Form.Item>
