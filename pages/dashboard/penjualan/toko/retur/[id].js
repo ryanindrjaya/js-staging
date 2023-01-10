@@ -96,10 +96,8 @@ const products = useSelector((state) => state.Order);
   var selectedProduct = products?.productList;
   const locations = props.locations.data;
   const user = props.user;
-  //const inven = props.inven.data;
   const store = props.data;
   const returStore = props.datareturStore;
-  //const salesOrder = props.salesOrder.data;
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -121,6 +119,7 @@ const products = useSelector((state) => state.Order);
 
   const [dppActive, setDPPActive] = useState("Active");
   const [ppnActive, setPPNActive] = useState("Active");
+  const [simpanData, setSimpanData] = useState("Bayar");
 
   const router = useRouter();
   const { TextArea } = Input;
@@ -151,9 +150,7 @@ const products = useSelector((state) => state.Order);
   const [addFee2Desc, setaddFee2Desc] = useState(store.data.attributes.additional_fee_2_desc);
   const [addFee3Desc, setaddFee3Desc] = useState(store.data.attributes.additional_fee_3_desc);
     
-  // NO Sales Sale
-  //var noSalesSale = String(salesSale?.meta?.pagination.total + 1).padStart(3, "0");
-  //const [categorySale, setCategorySale] = useState(`PS/ET/${user.id}/${noSalesSale}/${mm}/${yyyy}`);
+  // NO Store
   var noStore = String(returStore?.meta?.pagination.total + 1).padStart(3, "0");
   const [categorySale, setCategorySale] = useState(`RTB/ET/${noStore}/${mm}/${yyyy}`);
 
@@ -170,6 +167,7 @@ const products = useSelector((state) => state.Order);
   const onFinish = (values) => {
     setLoading(true);
     setInfo("sukses");
+    values.status_pembayaran = simpanData;
     returStore.data.forEach((element) => {
         if (values.no_retur_store_sale == element.attributes.no_retur_store_sale) {
           notification["error"]({
@@ -195,7 +193,7 @@ const products = useSelector((state) => state.Order);
     //values.category = selectedCategory;
     values.dpp = dpp;
     values.ppn = ppn;
-    values.store_sale = store.data.id; //console.log("values create sale",values.idStore)
+    values.store_sale = store.data.id;
     await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/retur-store-sales/", "retur store sale", locations);
   };
 
@@ -234,16 +232,35 @@ const products = useSelector((state) => state.Order);
     setBiayaTambahan(newTotal);
   };
 
-  
-  const setTotalWithDisc = () => {
-    const disc = form.getFieldsValue(["disc_type", "disc_value"]);
+  var disc;
+  const setBtnInc = () =>{
+    //form.setFieldsValue({
+    //  disc_type: "",
+    //  disc_value: 0,
+    //});
+    disc = form.getFieldsValue(["disc_type", "disc_value"]);
+    disc.disc_type = "";
+    disc.disc_value = 0;
+    totalWithDisc();
+  }
 
+  const setTotalWithDisc = () => {
+    disc = form.getFieldsValue(["disc_type", "disc_value"]);
+    totalWithDisc();
+  };
+
+  const totalWithDisc = () => {
+    console.log("disc wow",disc.disc_type, discType);
     if (disc.disc_type === "Tetap") {
       setTotalPriceWithFixedDisc(disc);
-    } else {
+    } if (disc.disc_type === "Persentase") {
       setTotalPriceWithPercentDisc(disc);
     }
-  };
+    else {
+      disc.disc_type = "";
+      disc.disc_value = 0;
+    }
+  }
 
   const setTotalPriceWithFixedDisc = (disc) => {
     var newTotal = 0;
@@ -274,6 +291,7 @@ const products = useSelector((state) => state.Order);
     } else {
       setGrandTotal(totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
     }
+    setTotalWithDisc();
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
 
   useEffect(() => {
@@ -320,6 +338,15 @@ const products = useSelector((state) => state.Order);
       additional_fee_2_sub: store.data.attributes?.additional_fee_2_sub,
       additional_fee_3_sub: store.data.attributes?.additional_fee_3_sub,
     });
+
+    setAdditionalFee({
+        ...additionalFee,
+        additional_fee_1_sub: store.data.attributes?.additional_fee_1_sub,
+        additional_fee_2_sub: store.data.attributes?.additional_fee_2_sub,
+        additional_fee_3_sub: store.data.attributes?.additional_fee_3_sub
+    });
+
+    //setDiscValue(store.data.attributes.disc_value);
 
     const retur_details = store.data.attributes.store_sale_details.data;
 
@@ -396,8 +423,6 @@ const products = useSelector((state) => state.Order);
         productId++;
     });
 
-    //setDPPActive("DPP");
-    //setPPNActive("PPN");
     setTimeout(() => {
       setIsFetchingData(false);
     }, 3000);
@@ -424,21 +449,6 @@ const products = useSelector((state) => state.Order);
         <LayoutWrapper style={{}}>
           <TitlePage titleText={"Retur Penjualan Toko dan Resep"} />
           <LayoutContent>
-            {/*<div className="w-full flex justify-between mx-2 mt-1">*/}
-            {/*    <div className="w-full justify-start md:w-1/3">*/}
-            {/*      <p>{date} {time}</p>*/}
-            {/*    </div>*/}
-            {/*    <div className="w-full flex justify-center md:w-1/3">*/}
-            {/*      <button*/}
-            {/*        className="bg-cyan-700 rounded-md m-1 text-sm"*/}
-            {/*      >*/}
-            {/*        <p className="px-4 py-2 m-0 text-white">Laporan Penjualan Hari Ini</p>*/}
-            {/*      </button>*/}
-            {/*    </div>*/}
-            {/*    <div className="w-full flex justify-end text-right md:w-1/3">*/}
-            {/*      <p>{user.name}</p>*/}
-            {/*    </div>*/}
-            {/*</div>*/}
 
             <Form
               form={form}
@@ -559,56 +569,11 @@ const products = useSelector((state) => state.Order);
                     />
                   </div>
               )}
-              {/*<div className="w-full flex md:w-4/4 mb-2 mt-2">*/}
-              {/*    <Form.Item name="no_sales_sell">*/}
-              {/*      <Select*/}
-              {/*          placeholder="Pilih Nomor Penjualan"*/}
-              {/*          size="large"*/}
-              {/*          onChange={(e) => fetchReturdata(e)}*/}
-              {/*          style={{*/}
-              {/*              width: "100%",*/}
-              {/*          }}*/}
-              {/*      >*/}
-
-              {/*          {salesOrder.map((element) => {*/}
-              {/*            return (*/}
-              {/*              <Select.Option value={element.id} key={element.id}>*/}
-              {/*                  {element.attributes.no_sales_sell}*/}
-              {/*              </Select.Option>*/}
-              {/*            );*/}
-              {/*          })}*/}
-
-              {/*      </Select>*/}
-              {/*    </Form.Item>*/}
-              {/*</div>*/}
-
-              {/*{isFetchinData ? (*/}
-              {/*    <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">*/}
-              {/*      <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">*/}
-              {/*        <LoadingAnimations />*/}
-              {/*      </div>*/}
-              {/*      <div className="text-sm align-middle text-center animate-pulse text-slate-400">Sedang Mengambil Data</div>*/}
-              {/*    </div>*/}
-              {/*  ) : (*/}
-              {/*    <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">*/}
-              {/*      <StoreSaleTable*/}
-              {/*        products={products}*/}
-              {/*        productTotalPrice={productTotalPrice}*/}
-              {/*        setTotalPrice={setTotalPrice}*/}
-              {/*        setProductTotalPrice={setProductTotalPrice}*/}
-              {/*        calculatePriceAfterDisc={calculatePriceAfterDisc}*/}
-              {/*        productSubTotal={productSubTotal}*/}
-              {/*        locations={locations}*/}
-              {/*        formObj={form}*/}
-              {/*      />*/}
-              {/*    </div>*/}
-              {/*)}*/}
 
               <div className="w-full flex flex-wrap -mx-3 mb-1">
                 <div className="w-full md:w-1/3 px-3 mt-5 ">
                   <Form.Item name="disc_type">
                     <Select
-                      //disabled={products.productList.length === 0}
                       onChange={setDiscType}
                       placeholder="Pilih Jenis Diskon"
                       size="large"
@@ -628,7 +593,6 @@ const products = useSelector((state) => state.Order);
                 <div className="w-full md:w-1/6 px-3 mt-5 ">
                   <Form.Item name="disc_value" noStyle>
                     <InputNumber
-                      //disabled={products.productList.length === 0}
                       onChange={setTotalWithDisc}
                       size="large"
                       min={0}
@@ -638,46 +602,19 @@ const products = useSelector((state) => state.Order);
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/6 px-3 mt-5 ">
-                  <Form.Item>
-                    <button className="bg-cyan-700 rounded-md m-1 text-sm">
+                    <button type="button" onClick={() => setBtnInc()} className="bg-cyan-700 rounded-md m-1 text-sm">
                       <p className="px-4 py-2 m-0 text-white">
                         INC. RETUR
                       </p>
                     </button>
-                  </Form.Item>
                 </div>
               </div>
-
-              {/*<div className="w-full flex flex-wrap -mx-3 mb-4">*/}
-              {/*  <div className="w-full md:w-1/3 px-3">*/}
-              {/*    <Form.Item noStyle>*/}
-              {/*      <Input*/}
-              {/*        size="large"*/}
-              {/*        style={{*/}
-              {/*          width: "60%",*/}
-              {/*        }}*/}
-              {/*        value="Biaya Pengiriman"*/}
-              {/*        disabled*/}
-              {/*      />*/}
-              {/*    </Form.Item>*/}
-              {/*    <Form.Item name="delivery_fee" initialValue={0} noStyle>*/}
-              {/*      <Input*/}
-              {/*        size="large"*/}
-              {/*        style={{*/}
-              {/*          width: "40%",*/}
-              {/*        }}*/}
-              {/*        onChange={handleBiayaPengiriman}*/}
-              {/*      />*/}
-              {/*    </Form.Item>*/}
-              {/*  </div>*/}
-              {/*</div>*/}
 
               <div className="w-full flex flex-wrap -mx-3 my-1 ">
                 <div className="w-full md:w-1/3 px-3">
                   <Form.Item name="DPP_active">
                     <Select
                       placeholder="Pakai DPP"
-                      //onChange={setDPPActive}
                       onChange={setDPPActive}
                       size="large"
                       style={{
@@ -694,7 +631,6 @@ const products = useSelector((state) => state.Order);
                   <Form.Item name="PPN_active">
                     <Select
                       placeholder="Pakai PPN"
-                      //onChange={setDPPActive}
                       onChange={setPPNActive}
                       size="large"
                       style={{
@@ -785,21 +721,36 @@ const products = useSelector((state) => state.Order);
                 </div>
                 <div className="w-full md:w-1/6 px-1 mb-2 text-center md:mb-0 mt-10">
                   <Form.Item>
-                    <button className="bg-cyan-700 rounded-md m-1 text-sm">
+                    <button type="button" onClick={() =>
+                        setAdditionalFee({
+                          ...additionalFee,
+                          additional_fee_1_sub: 0,
+                        })
+                      } className="bg-cyan-700 rounded-md m-1 text-sm">
                       <p className="px-4 py-2 m-0 text-white">
                         INC. RETUR
                       </p>
                     </button>
                   </Form.Item>
                   <Form.Item>
-                    <button className="bg-cyan-700 rounded-md m-1 text-sm">
+                    <button type="button" onClick={() =>
+                        setAdditionalFee({
+                          ...additionalFee,
+                          additional_fee_2_sub: 0,
+                        })
+                      } className="bg-cyan-700 rounded-md m-1 text-sm">
                       <p className="px-4 py-2 m-0 text-white">
                         INC. RETUR
                       </p>
                     </button>
                   </Form.Item>
                   <Form.Item>
-                    <button className="bg-cyan-700 rounded-md m-1 text-sm">
+                    <button type="button" onClick={() =>
+                        setAdditionalFee({
+                          ...additionalFee,
+                          additional_fee_3_sub: 0,
+                        })
+                      } className="bg-cyan-700 rounded-md m-1 text-sm">
                       <p className="px-4 py-2 m-0 text-white">
                         INC. RETUR
                       </p>
@@ -817,7 +768,7 @@ const products = useSelector((state) => state.Order);
                         <Spin />
                       </div>
                     ) : (
-                      <button onClick={validateError} htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
+                      <button onClick={validateError} onClick={() => setSimpanData("Bayar")} htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
                         <p className="px-4 py-2 m-0 text-white">
                           SIMPAN DAN CETAK UNTUK BAYAR
                         </p>
@@ -830,7 +781,7 @@ const products = useSelector((state) => state.Order);
                         <Spin />
                       </div>
                     ) : (
-                      <button onClick={validateError} htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
+                      <button onClick={validateError} onClick={() => setSimpanData("Hutang")} htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
                         <p className="px-4 py-2 m-0 text-white">
                           SIMPAN JADIKAN HUTANG
                         </p>

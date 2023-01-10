@@ -19,7 +19,6 @@ const CreateSale = async (
   locations
 ) => {
   // CLEANING DATA
-
   listId.forEach((element) => {
     tempProductListId.push({ id: element });
   });
@@ -74,6 +73,8 @@ const putRelationSaleDetail = async (id, value, form, router, url, page) => {
   };
 
   dataSale.data.store_sale_details = tempProductListId;
+  dataSale.data.retur_store_sale_details = tempProductListId;
+
   dataSale.data.sales_sale_details = tempProductListId;
   dataSale.data.non_panel_sale_details = tempProductListId;
   dataSale.data.panel_sale_details = tempProductListId;
@@ -103,6 +104,7 @@ const putRelationSaleDetail = async (id, value, form, router, url, page) => {
   if (req.status === 200) {
     form.resetFields();
     if(page == "store sale") router.replace("/dashboard/penjualan/toko");
+    if(page == "retur store sale") router.replace("/dashboard/penjualan/toko");
     if(page == "sales sale") router.replace("/dashboard/penjualan/sales");
     if(page == "non panel sale") router.replace("/dashboard/penjualan/non_panel");
     if(page == "panel sale") router.replace("/dashboard/penjualan/panel");
