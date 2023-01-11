@@ -78,6 +78,7 @@ function Toko({ props }) {
   const data = props.store;
   const router = useRouter();
   const [sell, setSell] = useState(data);
+  const [returPage, setReturPage] = useState("toko");
 
   const handleAdd = () => {
     router.push("/dashboard/penjualan/toko/tambah");
@@ -393,6 +394,7 @@ function Toko({ props }) {
               //onDelete={handleDelete}
               //onPageChange={handlePageChange}
               onChangeStatus={onChangeStatus}
+              returPage={returPage}
             />
           </LayoutContent>
         </LayoutWrapper>

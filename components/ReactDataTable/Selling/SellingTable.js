@@ -20,6 +20,7 @@ export default function ReactDataTable({
     onPageChange,
     onChangeStatusPengiriman,
     onChangeStatus,
+    returPage,
 }) {
     const router = useRouter(); console.log("data :",data)
     const { Option } = Select;
@@ -47,7 +48,8 @@ export default function ReactDataTable({
 
     const returPenjualan = (row) => {
         if (row.attributes.status != "Diretur") {
-            router.push("toko/retur/" + row.id);
+            if (returPage == "toko") router.push("toko/retur/" + row.id);
+            if (returPage == "sales") router.push("sales/retur/" + row.id);
         } else {
             openNotificationWithIcon(
                 "error",

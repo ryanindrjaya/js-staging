@@ -17,11 +17,11 @@ import { useRouter } from "next/router";
 import moment from "moment";
 import LoadingAnimations from "@iso/components/Animations/Loading";
 
-ReturToko.getInitialProps = async (context) => {
+ReturSales.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales/" + id + "?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales/" + id + "?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -35,8 +35,8 @@ ReturToko.getInitialProps = async (context) => {
   const req = await fetchDataLocation(cookies);
   const locations = await req.json();
 
-  const returStore = await fetchData(cookies);
-  const datareturStore = await returStore.json();
+  const returSales = await fetchData(cookies);
+  const datareturSales = await returSales.json();
 
   const dataUser = await fetchUser(cookies);
   const user = await dataUser.json();
@@ -55,8 +55,8 @@ ReturToko.getInitialProps = async (context) => {
     props: {
       data,
       locations,
-      datareturStore,
-      user,
+      datareturSales,
+      user
     },
   };
 };
@@ -76,7 +76,7 @@ const fetchDataLocation = async (cookies) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-store-sales?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-sales-sales?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -104,15 +104,15 @@ const fetchUser = async (cookies) => {
     return req;
 };
 
-function ReturToko({ props }) {
+function ReturSales({ props }) {
 const products = useSelector((state) => state.Order);
   const dispatch = useDispatch();
 
   var selectedProduct = products?.productList;
   const locations = props.locations.data;
   const user = props.user;
-  const store = props.data;
-  const returStore = props.datareturStore;
+  const sales = props.data;
+  const returSales = props.datareturSales;
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -157,17 +157,17 @@ const products = useSelector((state) => state.Order);
   const [info, setInfo] = useState();
 
   //set data retur
-  const [faktur, setFaktur] = useState(store.data.attributes.faktur);
-  const [customer, setCustomer] = useState(store.data.attributes.customer_name);
-  const [saleDate, setSaleDate] = useState(store.data.attributes.sale_date);
-  const [locationStore, setLocationStore] = useState(store.data.attributes.location.data.attributes.name);
-  const [addFee1Desc, setaddFee1Desc] = useState(store.data.attributes.additional_fee_1_desc);
-  const [addFee2Desc, setaddFee2Desc] = useState(store.data.attributes.additional_fee_2_desc);
-  const [addFee3Desc, setaddFee3Desc] = useState(store.data.attributes.additional_fee_3_desc);
+  //const [faktur, setFaktur] = useState(sales.data.attributes.faktur);
+  const [customer, setCustomer] = useState(sales.data.attributes.customer_name);
+  const [saleDate, setSaleDate] = useState(sales.data.attributes.sale_date);
+  const [locationStore, setLocationStore] = useState(sales.data.attributes.location.data.attributes.name);
+  const [addFee1Desc, setaddFee1Desc] = useState(sales.data.attributes.additional_fee_1_desc);
+  const [addFee2Desc, setaddFee2Desc] = useState(sales.data.attributes.additional_fee_2_desc);
+  const [addFee3Desc, setaddFee3Desc] = useState(sales.data.attributes.additional_fee_3_desc);
     
-  // NO Store
-  var noStore = String(returStore?.meta?.pagination.total + 1).padStart(3, "0");
-  //const [categorySale, setCategorySale] = useState();
+  // NO Sales
+  var noSales = String(returSales?.meta?.pagination.total + 1).padStart(3, "0");
+  const [categorySale, setCategorySale] = useState(`RPS/ET/${user.id}/${noSales}/${mm}/${yyyy}`);
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);
@@ -182,9 +182,9 @@ const products = useSelector((state) => state.Order);
   const onFinish = (values) => {
     setLoading(true);
     setInfo("sukses");
-    values.status_pembayaran = simpanData;
-    returStore.data.forEach((element) => {
-        if (values.no_retur_store_sale == element.attributes.no_retur_store_sale) {
+    //values.status_pembayaran = simpanData;
+    returSales.data.forEach((element) => {
+        if (values.no_retur_sales_sale == element.attributes.no_retur_sales_sale) {
           notification["error"]({
               message: "Gagal menambahkan data",
               description:
@@ -198,7 +198,7 @@ const products = useSelector((state) => state.Order);
   };
 
   const createDetailSale = async () => {
-    await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/retur-store-sale-details");
+    await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/retur-sales-sale-details");
   };
 
   const createSale = async (values) => {
@@ -210,8 +210,8 @@ const products = useSelector((state) => state.Order);
     values.additional_fee_1_desc = addFee1Desc;
     values.additional_fee_2_desc = addFee2Desc;
     values.additional_fee_3_desc = addFee3Desc;
-    values.store_sale = store.data.id;
-    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/retur-store-sales/", "store sale", locations);
+    values.sales_sale = sales.data.id;
+    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/retur-sales-sales/", "sales sale", locations);
   };
 
   //const onChangeProduct = async () => {
@@ -325,25 +325,22 @@ const products = useSelector((state) => state.Order);
     // used to reset redux from value before
     clearData();
     setIsFetchingData(true);
-    var categorySale;
-    if (store.data.attributes.category == "BEBAS") categorySale = `RTB/ET/${user.id}/${noStore}/${mm}/${yyyy}`;
-    if (store.data.attributes.category == "RESEP") categorySale = `RTR/ET/${user.id}/${noStore}/${mm}/${yyyy}`;
 
     form.setFieldsValue({
-      no_store_sale: store.data.attributes.no_store_sale,
-      no_retur_store_sale: categorySale,
-      disc_type: store.data.attributes.disc_type,
-      disc_value: store.data.attributes.disc_value,
-      additional_fee_1_sub: store.data.attributes?.additional_fee_1_sub,
-      additional_fee_2_sub: store.data.attributes?.additional_fee_2_sub,
-      additional_fee_3_sub: store.data.attributes?.additional_fee_3_sub,
+      no_sales_sale: sales.data.attributes.no_sales_sale,
+      no_retur_sales_sale: categorySale,
+      disc_type: sales.data.attributes.disc_type,
+      disc_value: sales.data.attributes.disc_value,
+      additional_fee_1_sub: sales.data.attributes?.additional_fee_1_sub,
+      additional_fee_2_sub: sales.data.attributes?.additional_fee_2_sub,
+      additional_fee_3_sub: sales.data.attributes?.additional_fee_3_sub,
     });
 
-    const retur_details = store.data.attributes.store_sale_details.data;
+    const retur_details = sales.data.attributes.sales_sale_details.data;
 
     dispatch({
       type: "SET_PREORDER_DATA",
-      data: store,
+      data: sales,
     });
 
     var productId = 0;
@@ -429,11 +426,11 @@ const products = useSelector((state) => state.Order);
   return (
     <>
       <Head>
-        <title>Retur Penjualan Toko dan Resep</title>
+        <title>Retur Penjualan Sales</title>
       </Head>
       <DashboardLayout>
         <LayoutWrapper style={{}}>
-          <TitlePage titleText={"Retur Penjualan Toko dan Resep"} />
+          <TitlePage titleText={"Retur Penjualan Sales"} />
           <LayoutContent>
 
             <Form
@@ -447,7 +444,7 @@ const products = useSelector((state) => state.Order);
 
               <div className="w-full flex flex-wrap justify-start -mx-3 mt-1">
                 <div className="w-full md:w-1/3 px-3 mt-2 md:mb-0">
-                  <p className="text-sm text-start ml-9">No Faktur : {faktur}</p>
+                  {/*<p className="text-sm text-start ml-9">No Faktur : {faktur}</p>*/}
                 </div>
                 <div className="w-full md:w-1/3 px-3 mt-2 md:mb-0">
                   <p className="text-sm text-start">Customer : {customer}</p>
@@ -466,15 +463,15 @@ const products = useSelector((state) => state.Order);
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-3 mt-2">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    name="no_store_sale"
+                    name="no_sales_sale"
                     >
-                    <Input style={{ height: "40px" }} disabled/>
+                    <Input style={{ height: "40px" }} disabled />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    name="no_retur_store_sale"
-                    //initialValue={categorySale}
+                    name="no_retur_sales_sale"
+                    initialValue={categorySale}
                     rules={[
                         {
                             required: true,
@@ -485,19 +482,6 @@ const products = useSelector((state) => state.Order);
                     <Input style={{ height: "40px" }} placeholder="No. Penjualan" />
                   </Form.Item>
                 </div>
-                {/*<div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">*/}
-                {/*  <Form.Item*/}
-                {/*    name="faktur"*/}
-                {/*    rules={[*/}
-                {/*        {*/}
-                {/*            required: true,*/}
-                {/*            message: "Nomor retur faktur tidak boleh kosong!",*/}
-                {/*        },*/}
-                {/*    ]}*/}
-                {/*    >*/}
-                {/*    <Input style={{ height: "40px" }} placeholder="No. Retur Faktur" />*/}
-                {/*  </Form.Item>*/}
-                {/*</div>*/}
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="location"
@@ -717,7 +701,7 @@ const products = useSelector((state) => state.Order);
                     <button type="button" onClick={() =>
                         setAdditionalFee({
                           ...additionalFee,
-                          additional_fee_1_sub: store.data.attributes?.additional_fee_1_sub,
+                          additional_fee_1_sub: sales.data.attributes?.additional_fee_1_sub,
                         })
                       } className="bg-cyan-700 rounded-md m-1 text-sm">
                       <p className="px-4 py-2 m-0 text-white">
@@ -729,7 +713,7 @@ const products = useSelector((state) => state.Order);
                     <button type="button" onClick={() =>
                         setAdditionalFee({
                           ...additionalFee,
-                          additional_fee_2_sub: store.data.attributes?.additional_fee_2_sub,
+                          additional_fee_2_sub: sales.data.attributes?.additional_fee_2_sub,
                         })
                       } className="bg-cyan-700 rounded-md m-1 text-sm">
                       <p className="px-4 py-2 m-0 text-white">
@@ -741,7 +725,7 @@ const products = useSelector((state) => state.Order);
                     <button type="button" onClick={() =>
                         setAdditionalFee({
                           ...additionalFee,
-                          additional_fee_3_sub: store.data.attributes?.additional_fee_3_sub,
+                          additional_fee_3_sub: sales.data.attributes?.additional_fee_3_sub,
                         })
                       } className="bg-cyan-700 rounded-md m-1 text-sm">
                       <p className="px-4 py-2 m-0 text-white">
@@ -762,21 +746,8 @@ const products = useSelector((state) => state.Order);
                       </div>
                     ) : (
                       <button onClick={validateError} onClick={() => setSimpanData("Bayar")} htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
-                        <p className="px-4 py-2 m-0 text-white">
-                          SIMPAN DAN CETAK UNTUK BAYAR
-                        </p>
-                      </button>
-                    )}
-                  </Form.Item>
-                  <Form.Item>
-                    {loading ? (
-                      <div className=" flex float-left ml-3 ">
-                        <Spin />
-                      </div>
-                    ) : (
-                      <button onClick={validateError} onClick={() => setSimpanData("Hutang")} htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
-                        <p className="px-4 py-2 m-0 text-white">
-                          SIMPAN JADIKAN HUTANG
+                        <p className="px-8 py-2 m-0 text-white">
+                          SIMPAN DAN CETAK
                         </p>
                       </button>
                     )}
@@ -790,4 +761,4 @@ const products = useSelector((state) => state.Order);
   );
 }
 
-export default ReturToko;
+export default ReturSales;

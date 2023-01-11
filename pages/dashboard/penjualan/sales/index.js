@@ -78,6 +78,7 @@ function SalesSale({ props }) {
   const data = props.sales;
   const router = useRouter();
   const [sell, setSell] = useState(data);
+  const [returPage, setReturPage] = useState("sales");
 
   const handleAdd = () => {
     router.push("/dashboard/penjualan/sales/tambah");
@@ -393,6 +394,7 @@ function SalesSale({ props }) {
               //onDelete={handleDelete}
               //onPageChange={handlePageChange}
               onChangeStatus={onChangeStatus}
+              returPage={returPage}
             />
           </LayoutContent>
         </LayoutWrapper>
