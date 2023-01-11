@@ -38,9 +38,6 @@ ReturToko.getInitialProps = async (context) => {
   const returStore = await fetchData(cookies);
   const datareturStore = await returStore.json();
 
-  //const lpbPage = await fetchData(cookies);
-  //const dataLPBPage = await lpbPage.json();
-
   if (req.status !== 200) {
     context.res.writeHead(302, {
       Location: "/signin?session=false",
@@ -232,35 +229,14 @@ const products = useSelector((state) => state.Order);
     setBiayaTambahan(newTotal);
   };
 
-  var disc;
-  const setBtnInc = () =>{
-    //form.setFieldsValue({
-    //  disc_type: "",
-    //  disc_value: 0,
-    //});
-    disc = form.getFieldsValue(["disc_type", "disc_value"]);
-    disc.disc_type = "";
-    disc.disc_value = 0;
-    totalWithDisc();
-  }
-
   const setTotalWithDisc = () => {
-    disc = form.getFieldsValue(["disc_type", "disc_value"]);
-    totalWithDisc();
-  };
-
-  const totalWithDisc = () => {
-    console.log("disc wow",disc.disc_type, discType);
+    const disc = form.getFieldsValue(["disc_type", "disc_value"]);
     if (disc.disc_type === "Tetap") {
       setTotalPriceWithFixedDisc(disc);
-    } if (disc.disc_type === "Persentase") {
+    } else {
       setTotalPriceWithPercentDisc(disc);
     }
-    else {
-      disc.disc_type = "";
-      disc.disc_value = 0;
-    }
-  }
+  };
 
   const setTotalPriceWithFixedDisc = (disc) => {
     var newTotal = 0;
@@ -291,7 +267,6 @@ const products = useSelector((state) => state.Order);
     } else {
       setGrandTotal(totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
     }
-    setTotalWithDisc();
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
 
   useEffect(() => {
@@ -339,15 +314,6 @@ const products = useSelector((state) => state.Order);
       additional_fee_3_sub: store.data.attributes?.additional_fee_3_sub,
     });
 
-    setAdditionalFee({
-        ...additionalFee,
-        additional_fee_1_sub: store.data.attributes?.additional_fee_1_sub,
-        additional_fee_2_sub: store.data.attributes?.additional_fee_2_sub,
-        additional_fee_3_sub: store.data.attributes?.additional_fee_3_sub
-    });
-
-    //setDiscValue(store.data.attributes.disc_value);
-
     const retur_details = store.data.attributes.store_sale_details.data;
 
     dispatch({
@@ -372,8 +338,6 @@ const products = useSelector((state) => state.Order);
         var momentObj = moment(dateString, "YYYY-MM-DD");
         var momentString = momentObj.format("MM-DD-YYYY");
 
-        //var productId = element.attributes.product.data.id;
-
         form.setFieldsValue({
             jumlah_qty: {
                 [productId]: element.attributes.qty,
@@ -397,9 +361,6 @@ const products = useSelector((state) => state.Order);
                 [productId]: moment(momentString),
             },
         });
-
-        //productSubTotal.push(parseInt(element.attributes.sub_total));
-        //setProductSubTotal();
 
         //SET INITIAL PRODUCT
         dispatch({
@@ -602,7 +563,7 @@ const products = useSelector((state) => state.Order);
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/6 px-3 mt-5 ">
-                    <button type="button" onClick={() => setBtnInc()} className="bg-cyan-700 rounded-md m-1 text-sm">
+                    <button type="button" onClick={setTotalWithDisc} className="bg-cyan-700 rounded-md m-1 text-sm">
                       <p className="px-4 py-2 m-0 text-white">
                         INC. RETUR
                       </p>
@@ -724,7 +685,7 @@ const products = useSelector((state) => state.Order);
                     <button type="button" onClick={() =>
                         setAdditionalFee({
                           ...additionalFee,
-                          additional_fee_1_sub: 0,
+                          additional_fee_1_sub: store.data.attributes?.additional_fee_1_sub,
                         })
                       } className="bg-cyan-700 rounded-md m-1 text-sm">
                       <p className="px-4 py-2 m-0 text-white">
@@ -736,7 +697,7 @@ const products = useSelector((state) => state.Order);
                     <button type="button" onClick={() =>
                         setAdditionalFee({
                           ...additionalFee,
-                          additional_fee_2_sub: 0,
+                          additional_fee_2_sub: store.data.attributes?.additional_fee_2_sub,
                         })
                       } className="bg-cyan-700 rounded-md m-1 text-sm">
                       <p className="px-4 py-2 m-0 text-white">
@@ -748,7 +709,7 @@ const products = useSelector((state) => state.Order);
                     <button type="button" onClick={() =>
                         setAdditionalFee({
                           ...additionalFee,
-                          additional_fee_3_sub: 0,
+                          additional_fee_3_sub: store.data.attributes?.additional_fee_3_sub,
                         })
                       } className="bg-cyan-700 rounded-md m-1 text-sm">
                       <p className="px-4 py-2 m-0 text-white">
