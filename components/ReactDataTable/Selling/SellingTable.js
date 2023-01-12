@@ -50,6 +50,8 @@ export default function ReactDataTable({
         if (row.attributes.status != "Diretur") {
             if (returPage == "toko") router.push("toko/retur/" + row.id);
             if (returPage == "sales") router.push("sales/retur/" + row.id);
+            if (returPage == "nonpanel") router.push("non_panel/retur/" + row.id);
+            if (returPage == "panel") router.push("panel/retur/" + row.id);
         } else {
             openNotificationWithIcon(
                 "error",
@@ -233,6 +235,9 @@ export default function ReactDataTable({
                 </Option>
                 <Option value="Diterima">
                   <Tag color="success">Diterima</Tag>
+                </Option>
+                <Option value="Diretur">
+                  <Tag color="blue">Diretur</Tag>
                 </Option>
               </Select>
             );

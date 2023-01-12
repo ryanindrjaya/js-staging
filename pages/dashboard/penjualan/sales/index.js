@@ -93,6 +93,59 @@ function SalesSale({ props }) {
     );
   };
 
+  const handleDelete = async (id) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales/" + id;
+    const cookies = nookies.get(null, "token");
+
+    const options = {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+    if (res) {
+      const res = await fetchData(cookies);
+      openNotificationWithIcon(
+        "success",
+        "Berhasil menghapus data",
+        "Penjualan Sales Pembelian yang dipilih telah berhasil dihapus. Silahkan cek kembali Penjualan Sales"
+      );
+      setSell(res);
+    }
+  };
+
+  const handlePageChange = async (page) => {
+    const cookies = nookies.get(null, "token");
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?pagination[page]=" + page;
+
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    try {
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
+      if (res) {
+        setPurchase((prevData) => ({
+          data: filterDuplicateData(prevData.data.concat(res.data)),
+          meta: prevData.meta,
+        }));
+      } else {
+        console.log("something is wrong");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const onChangeStatus = (status, row) => {
     row.attributes.status = status;
     handleChangeStatus(row, row.id);
@@ -391,8 +444,8 @@ function SalesSale({ props }) {
             <SellingTable
               data={sell}
               onUpdate={handleUpdate}
-              //onDelete={handleDelete}
-              //onPageChange={handlePageChange}
+              onDelete={handleDelete}
+              onPageChange={handlePageChange}
               onChangeStatus={onChangeStatus}
               returPage={returPage}
             />
