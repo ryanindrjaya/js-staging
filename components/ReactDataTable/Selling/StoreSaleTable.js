@@ -3,9 +3,16 @@ import AlertDialog from "../../Alert/Alert";
 import { Input, InputNumber, Select, Form, Row, DatePicker } from "antd";
 import { useDispatch } from "react-redux";
 
-export default function ReactDataTable({ calculatePriceAfterDisc, productSubTotal, setProductSubTotal, products, locations, setTotalPrice, formObj }) {
+export default function ReactDataTable({
+    calculatePriceAfterDisc,
+    productSubTotal,
+    setProductSubTotal,
+    products,
+    locations,
+    setTotalPrice,
+    formObj,
+}) {
   const dispatch = useDispatch();
-
   var defaultDp1 = 0;
   var defaultDp2 = 0;
   var defaultDp3 = 0;
@@ -78,6 +85,13 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
     }
   };
 
+  const sumProductSubTotal = (data) => {
+    const newProductSubTotalProduct = [data];
+
+    const sum = newProductSubTotalProduct.reduce((prev, curr, index, array) => prev + curr, 0)
+    setTotalPrice(sum);
+  };
+
   const onConfirm = (id) => {
 
     var newSubTotalProduct = productSubTotal;
@@ -87,10 +101,16 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
     delete newProductInfo[id];
 
     setProductSubTotal(newSubTotalProduct);
-
-    const subtotal = productSubTotal[id];
-    setTotalPrice((prev) => prev - subtotal);
+    let subtotal = productSubTotal;
     onDeleteProduct(id);
+
+    subtotal[id+1] = 0;
+    setProductSubTotal(subtotal);
+    sumProductSubTotal(productSubTotal);
+
+    if(products.productList.length == 0){
+      setTotalPrice(0);
+    }
   };
 
   const onCancel = () => {

@@ -78,6 +78,7 @@ function Toko({ props }) {
   const data = props.store;
   const router = useRouter();
   const [sell, setSell] = useState(data);
+  const [returPage, setReturPage] = useState("toko");
 
   const handleAdd = () => {
     router.push("/dashboard/penjualan/toko/tambah");
@@ -90,6 +91,59 @@ function Toko({ props }) {
       "Work In Progress",
       "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
     );
+  };
+
+  const handleDelete = async (id) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales/" + id;
+    const cookies = nookies.get(null, "token");
+
+    const options = {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+    if (res) {
+      const res = await fetchData(cookies);
+      openNotificationWithIcon(
+        "success",
+        "Berhasil menghapus data",
+        "Penjualan Toko dan Resep yang dipilih telah berhasil dihapus. Silahkan cek kembali Penjualan Toko dan Resep"
+      );
+      setSell(res);
+    }
+  };
+
+  const handlePageChange = async (page) => {
+    const cookies = nookies.get(null, "token");
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales?pagination[page]=" + page;
+
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    try {
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
+      if (res) {
+        setPurchase((prevData) => ({
+          data: filterDuplicateData(prevData.data.concat(res.data)),
+          meta: prevData.meta,
+        }));
+      } else {
+        console.log("something is wrong");
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const onChangeStatus = (status, row) => {
@@ -390,9 +444,10 @@ function Toko({ props }) {
             <SellingTable
               data={sell}
               onUpdate={handleUpdate}
-              //onDelete={handleDelete}
-              //onPageChange={handlePageChange}
+              onDelete={handleDelete}
+              onPageChange={handlePageChange}
               onChangeStatus={onChangeStatus}
+              returPage={returPage}
             />
           </LayoutContent>
         </LayoutWrapper>
