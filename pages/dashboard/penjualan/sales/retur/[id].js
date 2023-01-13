@@ -158,7 +158,7 @@ const products = useSelector((state) => state.Order);
 
   //set data retur
   //const [faktur, setFaktur] = useState(sales.data.attributes.faktur);
-  const [customer, setCustomer] = useState(sales.data.attributes.customer_name);
+  const [customer, setCustomer] = useState(sales.data.attributes.customer.data.attributes.name);
   const [saleDate, setSaleDate] = useState(sales.data.attributes.sale_date);
   const [locationStore, setLocationStore] = useState(sales.data.attributes.location.data.attributes.name);
   const [addFee1Desc, setaddFee1Desc] = useState(sales.data.attributes.additional_fee_1_desc);
