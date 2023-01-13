@@ -164,7 +164,13 @@ const products = useSelector((state) => state.Order);
   const [addFee1Desc, setaddFee1Desc] = useState(nonPanel.data.attributes.additional_fee_1_desc);
   const [addFee2Desc, setaddFee2Desc] = useState(nonPanel.data.attributes.additional_fee_2_desc);
   const [addFee3Desc, setaddFee3Desc] = useState(nonPanel.data.attributes.additional_fee_3_desc);
-    
+
+  // Button Include
+  const [btnDisc, setBtnDisc] = useState("Uninclude");
+  const [btnAddFee1, setBtnAddFee1] = useState("Uninclude");
+  const [btnAddFee2, setBtnAddFee2] = useState("Uninclude");
+  const [btnAddFee3, setBtnAddFee3] = useState("Uninclude");
+
   // NO non panel
     var noNonPanel = String(returNonPanel?.meta?.pagination.total + 1).padStart(3, "0");
     const [categorySale, setCategorySale] = useState(`RPN/ET/${user.id}/${noNonPanel}/${mm}/${yyyy}`);
@@ -214,24 +220,6 @@ const products = useSelector((state) => state.Order);
     await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/retur-non-panel-sales/", "non panel sale", locations);
   };
 
-  //const onChangeProduct = async () => {
-  //  var isDuplicatedData = false;
-
-  //  tempList.find((item) => {
-  //    productList.forEach((element) => {
-  //      if (element.id === item.id) isDuplicatedData = true;
-  //    });
-  //  });
-
-  //  if (!isDuplicatedData) {
-  //    setProductList((productList) => [...productList, tempList[0]]);
-  //    toast.success("Produk berhasil ditambahkan!", {
-  //      position: toast.POSITION.TOP_RIGHT,
-  //      autoClose: 1000,
-  //    });
-  //  }
-  //};
-
   const calculatePriceAfterDisc = (row, index) => {
       const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index, setProductSubTotal);
 
@@ -272,6 +260,16 @@ const products = useSelector((state) => state.Order);
     if (newTotal < 0) newTotal = 0;
     setDiscPrice(newTotal);
   };
+
+  const Uninclude = () => {
+    var newTotal = 0;
+    //const disc = form.getFieldsValue(["disc_type", "disc_value"]);
+    // kondisi utk uninclude
+    if (btnDisc == "Include") {
+      setDiscPrice(totalPrice);
+    }
+  };
+
 
   const clearData = () => {
     dispatch({ type: "CLEAR_DATA" });
@@ -579,11 +577,19 @@ const products = useSelector((state) => state.Order);
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/6 px-3 mt-5 ">
-                    <button type="button" onClick={setTotalWithDisc} className="bg-cyan-700 rounded-md m-1 text-sm">
+                 {btnDisc === "Uninclude" ? (
+                    <button type="button" onClick={() => { setTotalWithDisc(); setBtnDisc("Include") } } className="bg-cyan-700 rounded-md m-1 text-sm">
                       <p className="px-4 py-2 m-0 text-white">
                         INC. RETUR
                       </p>
                     </button>
+                  ) : (
+                    <button type="button" onClick={() => { setTotalWithDisc(); setBtnDisc("Uninclude"); Uninclude(); } } className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm">
+                      <p className="px-4 py-2 m-0 text-cyan">
+                        INC. RETUR
+                      </p>
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -656,7 +662,6 @@ const products = useSelector((state) => state.Order);
                     <p>{addFee3Desc}</p>
                   </Form.Item>
                 </div>
-
                 <div className="w-full md:w-1/3 px-3 mb-2 text-center md:mb-0">
                   <p className="mb-4 font-bold">Jumlah</p>
                   <Form.Item name="additional_fee_1_sub">
@@ -698,40 +703,97 @@ const products = useSelector((state) => state.Order);
                 </div>
                 <div className="w-full md:w-1/6 px-1 mb-2 text-center md:mb-0 mt-10">
                   <Form.Item>
-                    <button type="button" onClick={() =>
+                  {btnAddFee1 === "Uninclude" ? (
+                    <button type="button" 
+                      onClick={() => { 
+                        setBtnAddFee1("Include");
                         setAdditionalFee({
                           ...additionalFee,
                           additional_fee_1_sub: nonPanel.data.attributes?.additional_fee_1_sub,
                         })
-                      } className="bg-cyan-700 rounded-md m-1 text-sm">
+                      }}
+                    className="bg-cyan-700 rounded-md m-1 text-sm">
                       <p className="px-4 py-2 m-0 text-white">
                         INC. RETUR
                       </p>
                     </button>
+                  ) : (
+                    <button type="button"
+                      onClick={() => {
+                        setBtnAddFee1("Uninclude");
+                        setAdditionalFee({
+                          ...additionalFee,
+                          additional_fee_1_sub: 0,
+                        })
+                      }}
+                    className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm">
+                      <p className="px-4 py-2 m-0 text-cyan">
+                        INC. RETUR
+                      </p>
+                    </button>
+                  )}
                   </Form.Item>
                   <Form.Item>
-                    <button type="button" onClick={() =>
+                  {btnAddFee2 === "Uninclude" ? (
+                    <button type="button" 
+                      onClick={() => { 
+                        setBtnAddFee2("Include");
                         setAdditionalFee({
                           ...additionalFee,
                           additional_fee_2_sub: nonPanel.data.attributes?.additional_fee_2_sub,
                         })
-                      } className="bg-cyan-700 rounded-md m-1 text-sm">
+                      }}
+                    className="bg-cyan-700 rounded-md m-1 text-sm">
                       <p className="px-4 py-2 m-0 text-white">
                         INC. RETUR
                       </p>
                     </button>
+                  ) : (
+                    <button type="button"
+                      onClick={() => {
+                        setBtnAddFee2("Uninclude");
+                        setAdditionalFee({
+                          ...additionalFee,
+                          additional_fee_2_sub: 0,
+                        })
+                      }}
+                    className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm">
+                      <p className="px-4 py-2 m-0 text-cyan">
+                        INC. RETUR
+                      </p>
+                    </button>
+                  )}
                   </Form.Item>
                   <Form.Item>
-                    <button type="button" onClick={() =>
+                  {btnAddFee3 === "Uninclude" ? (
+                    <button type="button" 
+                      onClick={() => { 
+                        setBtnAddFee3("Include");
                         setAdditionalFee({
                           ...additionalFee,
                           additional_fee_3_sub: nonPanel.data.attributes?.additional_fee_3_sub,
                         })
-                      } className="bg-cyan-700 rounded-md m-1 text-sm">
+                      }}
+                    className="bg-cyan-700 rounded-md m-1 text-sm">
                       <p className="px-4 py-2 m-0 text-white">
                         INC. RETUR
                       </p>
                     </button>
+                  ) : (
+                    <button type="button"
+                      onClick={() => {
+                        setBtnAddFee3("Uninclude");
+                        setAdditionalFee({
+                          ...additionalFee,
+                          additional_fee_3_sub: 0,
+                        })
+                      }}
+                    className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm">
+                      <p className="px-4 py-2 m-0 text-cyan">
+                        INC. RETUR
+                      </p>
+                    </button>
+                  )}
                   </Form.Item>
                 </div>
               </div>
