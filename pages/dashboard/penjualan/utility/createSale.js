@@ -19,7 +19,6 @@ const CreateSale = async (
   locations
 ) => {
   // CLEANING DATA
-
   listId.forEach((element) => {
     tempProductListId.push({ id: element });
   });
@@ -74,7 +73,11 @@ const putRelationSaleDetail = async (id, value, form, router, url, page) => {
   };
 
   dataSale.data.store_sale_details = tempProductListId;
+  dataSale.data.retur_store_sale_details = tempProductListId;
+
   dataSale.data.sales_sale_details = tempProductListId;
+  dataSale.data.retur_sales_sale_details = tempProductListId;
+
   dataSale.data.non_panel_sale_details = tempProductListId;
   dataSale.data.panel_sale_details = tempProductListId;
 

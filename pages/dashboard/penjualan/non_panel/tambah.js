@@ -179,7 +179,7 @@ function Toko({ props }) {
       } 
     });
     setDataValues(values);
-    setLoading(false); console.log("values nih", values, simpanData)
+    setLoading(false);
   };
 
   const createDetailSale = async () => {
