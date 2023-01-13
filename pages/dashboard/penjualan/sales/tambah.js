@@ -14,6 +14,7 @@ import createDetailSaleFunc from "../utility/createDetailSale";
 import calculatePrice from "../utility/calculatePrice";
 import nookies from "nookies";
 import moment from "moment";
+import Customer from "@iso/components/Form/AddSale/CustomerForm";
 import LoadingAnimations from "@iso/components/Animations/Loading";
 
 Toko.getInitialProps = async (context) => {
@@ -167,6 +168,9 @@ function Toko({ props }) {
   const tempList = [];
   const [info, setInfo] = useState();
 
+  // customer
+  const [customer, setCustomer] = useState();
+
   // NO Sales Sale
   var noSalesSale = String(salesSale?.meta?.pagination.total + 1).padStart(3, "0");
   const [categorySale, setCategorySale] = useState(`PS/ET/${user.id}/${noSalesSale}/${mm}/${yyyy}`);
@@ -208,6 +212,7 @@ function Toko({ props }) {
     //values.category = selectedCategory;
     values.dpp = dpp;
     values.ppn = ppn;
+    values.customer = customer;
     await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/sales-sales/", "sales sale", locations);
   };
 
@@ -463,21 +468,7 @@ function Toko({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="customer_name"
-                    initialValue="Walk In Customer"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Nama Pelanggan tidak boleh kosong!",
-                      },
-                    ]}
-                  >
-                    <Input
-                      style={{ height: "40px" }}
-                      placeholder="Nama Pelanggan"
-                    />
-                  </Form.Item>
+                  <Customer onChangeCustomer={setCustomer} />
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2">
                   <Form.Item name="no_inventory">

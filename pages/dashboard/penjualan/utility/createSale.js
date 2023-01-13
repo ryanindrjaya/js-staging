@@ -79,7 +79,10 @@ const putRelationSaleDetail = async (id, value, form, router, url, page) => {
   dataSale.data.retur_sales_sale_details = tempProductListId;
 
   dataSale.data.non_panel_sale_details = tempProductListId;
+  dataSale.data.retur_non_panel_sale_details = tempProductListId;
+
   dataSale.data.panel_sale_details = tempProductListId;
+  dataSale.data.retur_panel_sale_details = tempProductListId;
 
   // clean object
   for (var key in dataSale) {
