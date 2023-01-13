@@ -2,15 +2,7 @@ import { useRef, useState } from "react";
 import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
-import {
-  Button,
-  Form,
-  Input,
-  message,
-  Upload,
-  notification,
-  Image,
-} from "antd";
+import { Button, Form, Input, message, Upload, notification, Image } from "antd";
 import nookies from "nookies";
 import { toast } from "react-toastify";
 import { Spin, Row } from "antd";
@@ -29,7 +21,7 @@ import setHargaValue from "../utility/setHargaValue";
 import setDiskonValue from "../utility/setDiskonValue";
 
 const Edit = ({ props }) => {
-  const productId = props?.product.data.id;
+  const productId = props?.product?.data?.id;
   const product = props?.product?.data;
   const manufactures = props?.manufactures;
   const groups = props?.groups;
@@ -40,17 +32,13 @@ const Edit = ({ props }) => {
   const initGroup = product?.attributes?.group?.data;
   const NEXT_PUBLIC_URL = process.env.IMAGE_URL;
 
-
   const [image, setImage] = useState(
-    product.attributes?.image?.data
-      ? product.attributes?.image?.data?.attributes
-      : null
+    product.attributes?.image?.data ? product.attributes?.image?.data?.attributes : null
   );
- 
 
   const [category, setCategory] = useState();
-  const [idCategory, setIdCategory] = useState(initCategory.id);
-  const [idManufacture, setIdManufacture] = useState(initManufacture.id);
+  const [idCategory, setIdCategory] = useState(initCategory?.id);
+  const [idManufacture, setIdManufacture] = useState(initManufacture?.id);
   const [uploadedOnce, setUploadedOnce] = useState(true);
   const [fileList, setFileList] = useState([]);
   const [firstInput, setFirstInputDiskon] = useState(true);
@@ -246,7 +234,6 @@ const Edit = ({ props }) => {
       }
     }
 
-    
     values.pricelist_1 = parseFloat(values.pricelist_1);
     values.pricelist_2 = parseFloat(values.pricelist_2);
     values.pricelist_3 = parseFloat(values.pricelist_3);
@@ -276,12 +263,10 @@ const Edit = ({ props }) => {
       ...putData,
     };
 
-
     console.log(data);
 
     for (let index = 1; index < 6; index++) {
-      if (data[`purchase_discount_${index}`] === "-")
-        delete data[`purchase_discount_${index}`];
+      if (data[`purchase_discount_${index}`] === "-") delete data[`purchase_discount_${index}`];
     }
 
     const formData = new FormData();
@@ -290,9 +275,7 @@ const Edit = ({ props }) => {
     if (file) {
       if (product.attributes?.image?.data) {
         // delete old image
-        const deleteImage = await deleteOldImage(
-          product.attributes?.image?.data.id
-        );
+        const deleteImage = await deleteOldImage(product.attributes?.image?.data.id);
         console.log("deleteImage", deleteImage);
       }
       formData.append("files.image", file);
@@ -402,10 +385,7 @@ const Edit = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "40px" }}
-                      placeholder="Nama Produk"
-                    />
+                    <Input style={{ height: "40px" }} placeholder="Nama Produk" />
                   </Form.Item>
                   <Categories
                     initialValue={`${initCategory.attributes.category_id} - ${initCategory.attributes.name}`}
@@ -421,8 +401,7 @@ const Edit = ({ props }) => {
                     onSelect={setSelectedSubCategory}
                     selectedSubCategory={selectedSubCategory}
                     initialValue={`${
-                      product.attributes?.sub_category?.data?.attributes.name ??
-                      ""
+                      product.attributes?.sub_category?.data?.attributes.name ?? ""
                     }`}
                   />
                   <Form.Item
@@ -470,9 +449,7 @@ const Edit = ({ props }) => {
                         <p className="ant-upload-drag-icon">
                           <FileImageOutlined />
                         </p>
-                        <p className="ant-upload-text">
-                          Klik atau tarik gambar ke kotak ini
-                        </p>
+                        <p className="ant-upload-text">Klik atau tarik gambar ke kotak ini</p>
                         <p className="ant-upload-hint  m-3">
                           Gambar akan digunakan sebagai contoh tampilan produk
                         </p>
@@ -574,9 +551,8 @@ Edit.getInitialProps = async (context) => {
 };
 
 const fetchProduct = async (cookies, context) => {
-  const id = context.query.id;
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/products/" + id + "?populate=*";
+  const id = context?.query?.id;
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/products/" + id + "?populate=*";
   const options = {
     method: "GET",
     headers: {
