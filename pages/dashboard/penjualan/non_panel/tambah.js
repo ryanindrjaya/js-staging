@@ -127,6 +127,7 @@ function Toko({ props }) {
   const [dppActive, setDPPActive] = useState("Active");
   const [ppnActive, setPPNActive] = useState("Active");
   const [simpanData, setSimpanData] = useState("Publish");
+  const [discMax, setDiscMax] = useState();
 
   const [location, setLocation] = useState();
   const [locationData, setLocationData] = useState();
@@ -196,7 +197,6 @@ function Toko({ props }) {
     //values.category = selectedCategory;
     values.dpp = dpp;
     values.ppn = ppn;
-    values.customer = customer;
     await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/non-panel-sales/", "non panel sale");
   };
 
@@ -249,6 +249,14 @@ function Toko({ props }) {
     var newTotal = 0;
 
     newTotal = totalPrice - disc.disc_value;
+    if (disc.disc_value > totalPrice) {
+        newTotal = 0;
+        notification["error"]({
+            message: "Disc tidak sesuai",
+            description:
+                "Disc tetap tidak boleh melebihi total",
+        });
+    }
     setDiscPrice(newTotal);
   };
 
@@ -257,6 +265,14 @@ function Toko({ props }) {
 
     newTotal = totalPrice - (totalPrice * disc.disc_value) / 100;
     if (newTotal < 0) newTotal = 0;
+    if (disc.disc_value > 100) {
+        newTotal = 0;
+        notification["error"]({
+            message: "Disc tidak sesuai",
+            description:
+                "Disc persentase tidak boleh 100%",
+        });
+    }
     setDiscPrice(newTotal);
   };
 
@@ -328,10 +344,28 @@ function Toko({ props }) {
   }, [location]);
 
   useEffect(() => {
+    // set max value
+    if(discType == "Tetap") setDiscMax(totalPrice);
+    if(discType == "Persentase") setDiscMax(100);
+  }, [discType]);
+
+  useEffect(() => {
     // used to reset redux from value before
     clearData();
     setProductSubTotal({});
   }, []);
+
+  const validateError = () => {
+    var listError = form.getFieldsError();
+    listError.forEach((element) => {
+      if (element.errors[0]) {
+        notification["error"]({
+          message: "Field Kosong",
+          description: element.errors[0],
+        });
+      }
+    });
+  };
 
   return (
     <>
@@ -366,6 +400,7 @@ function Toko({ props }) {
                 remember: true,
               }}
               onFinish={onFinish}
+              onFinishFailed={validateError}
             >
 
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-5">
@@ -387,7 +422,7 @@ function Toko({ props }) {
                   <Customer onChangeCustomer={setCustomer} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item name="tempo_days" initialValue={0} noStyle>
+                  <Form.Item name="tempo_days" initialValue={"0"} noStyle>
                     <Input
                       size="large"
                       style={{
@@ -517,6 +552,7 @@ function Toko({ props }) {
                       onChange={setTotalWithDisc}
                       size="large"
                       min={0}
+                      max={discMax}
                       placeholder="Diskon"
                       style={{ width: "100%" }}
                     />

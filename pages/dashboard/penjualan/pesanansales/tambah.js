@@ -181,7 +181,6 @@ function PesananSales({ props }) {
   const createSale = async (values) => {
     values.sale_date = today;
     values.added_by = user.name;
-    values.customer = customer;
     //values.category = selectedCategory;
     await createOrderSaleFunc(values, listId, form, router);
   };
@@ -242,6 +241,18 @@ function PesananSales({ props }) {
     clearData();
   }, []);
 
+  const validateError = () => {
+    var listError = form.getFieldsError();
+    listError.forEach((element) => {
+      if (element.errors[0]) {
+        notification["error"]({
+          message: "Field Kosong",
+          description: element.errors[0],
+        });
+      }
+    });
+  };
+
   return (
     <>
       <Head>
@@ -276,6 +287,7 @@ function PesananSales({ props }) {
                 remember: true,
               }}
               onFinish={onFinish}
+              onFinishFailed={validateError}
             >
 
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-4">
@@ -297,7 +309,7 @@ function PesananSales({ props }) {
                   <Customer onChangeCustomer={setCustomer} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item name="tempo_days" initialValue={0} noStyle>
+                  <Form.Item name="tempo_days" initialValue={"0"} noStyle>
                     <Input
                       size="large"
                       style={{

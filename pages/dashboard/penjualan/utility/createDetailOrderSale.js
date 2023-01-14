@@ -16,7 +16,7 @@ const createDetailOrderSale = (
     var qty = 1;
     var unit = element.attributes.unit_1;
     var unitPrice = element.attributes.buy_price_1;
-
+    tempListId = [];
     const id = element.id;
 
     qty = products.productInfo[id]?.qty ?? 1;
