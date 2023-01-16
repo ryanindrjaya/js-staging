@@ -16,7 +16,8 @@ const CreateSale = async (
   router,
   url,
   page,
-  locations
+  locations,
+  masterId
 ) => {
   // CLEANING DATA
   listId.forEach((element) => {
@@ -25,12 +26,13 @@ const CreateSale = async (
 
   values.total = grandTotal;
 
-  values.status = "Dipesan"
+  values.status = "Draft";
+
   values.purchasing_payments = null;
 
-  if(page == "sales sale"){
+  if (page == "sales sale") {
     locations.forEach((element) => {
-      if(element.attributes.name == values.location) values.location = element.id;
+      if (element.attributes.name == values.location) values.location = element.id;
     });
   }
 
@@ -42,7 +44,19 @@ const CreateSale = async (
   const res = await req.json();
 
   if (req.status === 200) {
-    await putRelationSaleDetail(res.data.id, res.data.attributes, form, router, url, page);
+    const putRelationDetail = await putRelationSaleDetail(
+      res.data.id,
+      res.data.attributes,
+      form,
+      router,
+      url,
+      page
+    );
+
+    // update data penjualan
+    if (putRelationDetail.status === 200 && url.includes("retur")) {
+      await putMasterData(res.data.id, masterId, form, router, url, page);
+    }
   } else {
     openNotificationWithIcon("error");
   }
@@ -102,17 +116,22 @@ const putRelationSaleDetail = async (id, value, form, router, url, page) => {
     body: JSONdata,
   };
 
-
   const req = await fetch(endpoint, options);
   const res = await req.json();
 
   if (req.status === 200) {
-    form.resetFields();
-    if(page == "store sale") router.replace("/dashboard/penjualan/toko");
-    if(page == "sales sale") router.replace("/dashboard/penjualan/sales");
-    if(page == "non panel sale") router.replace("/dashboard/penjualan/non_panel");
-    if(page == "panel sale") router.replace("/dashboard/penjualan/panel");
-    openNotificationWithIcon("success");
+    if (url.includes("retur")) {
+      return {
+        status: 200,
+      };
+    } else {
+      form.resetFields();
+      if (page == "store sale") router.replace("/dashboard/penjualan/toko");
+      if (page == "sales sale") router.replace("/dashboard/penjualan/sales");
+      if (page == "non panel sale") router.replace("/dashboard/penjualan/non_panel");
+      if (page == "panel sale") router.replace("/dashboard/penjualan/panel");
+      openNotificationWithIcon("success");
+    }
   } else {
     openNotificationWithIcon("error");
   }
@@ -144,9 +163,42 @@ const openNotificationWithIcon = (type) => {
   } else if (type === "success") {
     notification[type]({
       message: "Berhasil menambahkan data",
-      description:
-        "Produk berhasil ditambahkan. Silahkan cek pada halaman Pembelian Barang",
+      description: "Produk berhasil ditambahkan. Silahkan cek pada halaman Pembelian Barang",
     });
+  }
+};
+
+const putMasterData = async (id, masterId, form, router, url, page) => {
+  const data = {
+    data: {
+      status: "Diretur",
+      retur_store_sale: id,
+    },
+  };
+
+  const JSONdata = JSON.stringify(data);
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales/" + masterId;
+  const options = {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+    body: JSONdata,
+  };
+
+  const req = await fetch(endpoint, options);
+  const res = await req.json();
+
+  if (req.status === 200) {
+    form.resetFields();
+    if (page == "store sale") router.replace("/dashboard/penjualan/toko");
+    if (page == "sales sale") router.replace("/dashboard/penjualan/sales");
+    if (page == "non panel sale") router.replace("/dashboard/penjualan/non_panel");
+    if (page == "panel sale") router.replace("/dashboard/penjualan/panel");
+    openNotificationWithIcon("success");
+  } else {
+    openNotificationWithIcon("error");
   }
 };
 
