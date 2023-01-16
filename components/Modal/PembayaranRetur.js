@@ -13,8 +13,6 @@ export default function PembayaranRetur({
   retur,
   preview = false,
 }) {
-  console.log("data pembayaran retur", { data });
-
   const [form] = Form.useForm();
   const [dataRetur, setDataRetur] = useState(data.retur_store_sale.data.attributes);
   const [totalRetur, setTotalRetur] = useState(parseInt(dataRetur?.total));
@@ -32,16 +30,10 @@ export default function PembayaranRetur({
       const lastIndex = payments.data.length - 1;
       const lastPayment = payments.data[lastIndex].attributes;
 
-      console.log("last payment", lastPayment);
-
       total = total + parseFloat(lastPayment?.payment_remaining);
-
-      console.log("total", total);
 
       return parseFloat(total).toFixed(2);
     }
-
-    console.log("payments", payments);
 
     for (let index = 1; index < 4; index++) {
       total = total + parseFloat(dataRetur?.[`additional_fee_${index}_sub`] || 0);
@@ -62,8 +54,6 @@ export default function PembayaranRetur({
       }
     }
 
-    console.log("total", total);
-
     return parseFloat(total).toFixed(2);
   };
 
@@ -71,7 +61,6 @@ export default function PembayaranRetur({
 
   // refresh data
   useEffect(() => {
-    console.log("refresh data");
     form.resetFields();
     const newTotalRetur = data?.retur_store_sale?.data?.attributes?.total;
     setPayments(data?.payments);
@@ -87,16 +76,10 @@ export default function PembayaranRetur({
         const lastIndex = payments.data.length - 1;
         const lastPayment = payments.data[lastIndex].attributes;
 
-        console.log("last payment", lastPayment);
-
         total = total + parseFloat(lastPayment?.payment_remaining);
-
-        console.log("total", total);
 
         return parseFloat(total).toFixed(2);
       }
-
-      console.log("payments", payments);
 
       for (let index = 1; index < 4; index++) {
         total = total + parseFloat(dataRetur?.[`additional_fee_${index}_sub`] || 0);
@@ -116,8 +99,6 @@ export default function PembayaranRetur({
             break;
         }
       }
-
-      console.log("total", total);
 
       return parseFloat(total).toFixed(2);
     };
@@ -191,14 +172,10 @@ export default function PembayaranRetur({
       const lastIndex = payments.data.length - 1;
       const lastPayment = payments.data[lastIndex].attributes;
 
-      console.log("last payment", lastPayment);
-
       totalTempo = parseFloat(lastPayment?.payment_remaining);
     }
 
     var remains = totalTempo - total;
-
-    console.log({ field, total, totalTempo, remains });
 
     setTotalPayment(parseFloat(total).toFixed(2));
     if (remains >= 0) {
@@ -266,8 +243,6 @@ export default function PembayaranRetur({
     const req = await fetch(endpoint, options);
     const res = await req.json();
 
-    console.log("res", res);
-
     if (req.status === 200) {
       const getNewData = await refetch();
 
@@ -317,7 +292,6 @@ export default function PembayaranRetur({
     const error = form.getFieldsError();
     error.forEach((element) => {
       if (element.errors.length > 0) {
-        console.log();
         notification["error"]({
           message: "Field Kosong",
           description: element.errors[0],

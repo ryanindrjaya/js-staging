@@ -179,7 +179,7 @@ function Toko({ props }) {
 
   const onFinish = (values) => {
     setLoading(true);
-    console.log("on finish is called");
+
     setInfo("sukses");
     storeSale.data.forEach((element) => {
       if (values.no_store_sale == element.attributes.no_store_sale) {
@@ -374,7 +374,6 @@ function Toko({ props }) {
     const error = form.getFieldsError();
     error.forEach((element) => {
       if (element.errors.length > 0) {
-        console.log();
         notification["error"]({
           message: "Field Kosong",
           description: element.errors[0],

@@ -210,9 +210,7 @@ function ReturToko({ props }) {
       onOk() {
         onFinish(values);
       },
-      onCancel() {
-        console.log("Cancel");
-      },
+      onCancel() {},
     });
   };
 
@@ -354,11 +352,9 @@ function ReturToko({ props }) {
       newDiscPrice = 0;
     }
 
-    console.log("set grand total", { newDiscPrice, totalPrice });
     if (newDiscPrice !== totalPrice && newDiscPrice !== 0) {
       setGrandTotal(newDiscPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
     } else {
-      console.log("set grand total with total price");
       setGrandTotal(totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
     }
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice, btnDisc]);
@@ -494,7 +490,6 @@ function ReturToko({ props }) {
     const grandTotalPenjualan = parseFloat(products?.preorderData?.data?.data?.attributes?.total);
     setTotalPenjualan(grandTotalPenjualan);
 
-    console.log({ grandTotal, grandTotalPenjualan });
     if (grandTotal > grandTotalPenjualan) {
       setExceedTotal(true);
     } else {
@@ -536,7 +531,6 @@ function ReturToko({ props }) {
     const error = form.getFieldsError();
     error.forEach((element) => {
       if (element.errors.length > 0) {
-        console.log();
         notification["error"]({
           message: "Field Kosong",
           description: element.errors[0],

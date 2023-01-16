@@ -146,9 +146,7 @@ export default function ReactDataTable({
     }
   };
 
-  const onCancel = () => {
-    console.log("onCancel");
-  };
+  const onCancel = () => {};
 
   const customStyles = {
     headCells: {
@@ -161,7 +159,6 @@ export default function ReactDataTable({
 
   const onChangePriceUnit = (value, data, index, indexRow) => {
     var tempPriceUnit = [];
-    console.log("value", value, data, index);
 
     tempPriceUnit.push(data.attributes.buy_price_1);
     tempPriceUnit.push(data.attributes.buy_price_2);

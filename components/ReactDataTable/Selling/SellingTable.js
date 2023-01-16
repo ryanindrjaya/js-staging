@@ -27,7 +27,7 @@ export default function ReactDataTable({
   view,
 }) {
   const router = useRouter();
-  console.log("data :", data);
+
   const { Option } = Select;
 
   const tagRed = process.env.TAG_RED;
@@ -125,7 +125,6 @@ export default function ReactDataTable({
   };
 
   const returPenjualan = (row) => {
-    console.log("row :", row);
     if (row.attributes.status !== "Diretur") {
       if (returPage == "toko") router.push("toko/retur/" + row.id);
       if (returPage == "sales") router.push("sales/retur/" + row.id);
@@ -142,13 +141,10 @@ export default function ReactDataTable({
   };
 
   const onConfirm = (id) => {
-    console.log(id);
     onDelete(id);
   };
 
-  const onCancel = () => {
-    console.log("onCancel");
-  };
+  const onCancel = () => {};
 
   function formatMyDate(value, locale = "id-ID") {
     return new Date(value).toLocaleDateString(locale);

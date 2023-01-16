@@ -43,12 +43,8 @@ const CreateSale = async (
     data: values,
   };
 
-  console.log("data to post", data.data);
-
   const req = await createData(data, url);
   const res = await req.json();
-
-  console.log(res);
 
   if (req.status === 200) {
     const putRelationDetail = await putRelationSaleDetail(

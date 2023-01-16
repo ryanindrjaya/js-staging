@@ -162,11 +162,8 @@ function Toko({ props }) {
           meta: prevData.meta,
         }));
       } else {
-        console.log("something is wrong");
       }
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
 
   const onChangeStatus = (status, row) => {
@@ -246,8 +243,6 @@ function Toko({ props }) {
       description: message,
     });
   };
-
-  console.log("data returrr", dataRetur);
 
   return (
     <>
