@@ -59,7 +59,7 @@ export default function PembayaranRetur({ data, lokasiPenjualan, onCancel, id, r
 
   // refresh data
   useEffect(() => {
-    if (dataRetur) {
+    if (retur) {
       setGrandTotal(getGrandTotal());
     }
   }, [retur]);
