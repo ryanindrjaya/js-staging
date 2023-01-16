@@ -277,6 +277,7 @@ export default function ReactDataTable({
               <Form.Item name={["jumlah_qty", `${idx}`]} noStyle>
                 <InputNumber
                   // max={initialQty}
+                  min={1}
                   defaultValue={defaultQty}
                   onChange={(e) => {
                     onChangeQty(e, row, idx, initialQty);

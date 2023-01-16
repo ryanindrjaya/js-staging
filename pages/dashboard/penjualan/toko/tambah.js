@@ -146,8 +146,25 @@ function Toko({ props }) {
   const tempList = [];
   const [info, setInfo] = useState();
 
+  const getNoStoreSale = () => {
+    var noStoreSale = 0;
+
+    const lastData = storeSale?.data?.[storeSale.data.length - 1];
+
+    if (lastData) {
+      const lastNoStoreSale = lastData?.attributes?.no_store_sale;
+      const splitted = lastNoStoreSale.split("/");
+
+      noStoreSale = parseInt(splitted[3]) + 1; // get nomor urut
+    } else {
+      noStoreSale = 1;
+    }
+
+    return String(noStoreSale);
+  };
+
   // NO Store Sale
-  var noStoreSale = String(storeSale?.meta?.pagination.total + 1).padStart(3, "0");
+  var noStoreSale = getNoStoreSale().padStart(3, "0");
   const [categorySale, setCategorySale] = useState(`TB/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
 
   const handleBiayaPengiriman = (values) => {
@@ -162,6 +179,7 @@ function Toko({ props }) {
 
   const onFinish = (values) => {
     setLoading(true);
+    console.log("on finish is called");
     setInfo("sukses");
     storeSale.data.forEach((element) => {
       if (values.no_store_sale == element.attributes.no_store_sale) {
@@ -173,8 +191,11 @@ function Toko({ props }) {
       }
     });
     setDataValues(values);
-    setLoading(false);
   };
+
+  useEffect(() => {
+    if (info === "gagal") setLoading(false);
+  }, [info]);
 
   const createDetailSale = async () => {
     await createDetailSaleFunc(
@@ -183,7 +204,8 @@ function Toko({ props }) {
       productTotalPrice,
       productSubTotal,
       setListId,
-      "/store-sale-details"
+      "/store-sale-details",
+      setLoading
     );
   };
 
@@ -201,7 +223,9 @@ function Toko({ props }) {
       form,
       router,
       "/store-sales/",
-      "store sale"
+      "store sale",
+      null, // masterId
+      setLoading
     );
   };
 
@@ -317,7 +341,9 @@ function Toko({ props }) {
   }, [listId]);
 
   useEffect(() => {
-    if (dataValues && info == "sukses") createDetailSale();
+    if (dataValues && info == "sukses") {
+      createDetailSale();
+    }
   }, [dataValues]);
 
   useEffect(() => {
@@ -343,6 +369,19 @@ function Toko({ props }) {
     clearData();
     setProductSubTotal({});
   }, []);
+
+  const showErrorNotifications = () => {
+    const error = form.getFieldsError();
+    error.forEach((element) => {
+      if (element.errors.length > 0) {
+        console.log();
+        notification["error"]({
+          message: "Field Kosong",
+          description: element.errors[0],
+        });
+      }
+    });
+  };
 
   return (
     <>
@@ -421,6 +460,7 @@ function Toko({ props }) {
                 remember: true,
               }}
               onFinish={onFinish}
+              onFinishFailed={showErrorNotifications}
             >
               <div className="w-full flex justify-start mx-2 mt-1">
                 <p>
@@ -771,17 +811,33 @@ function Toko({ props }) {
               </div>
 
               <div className="w-full flex justify-center">
-                <Form.Item>
-                  {loading ? (
-                    <div className=" flex float-left ml-3 ">
-                      <Spin />
-                    </div>
-                  ) : (
-                    <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
-                      <p className="px-4 py-2 m-0 text-white">SIMPAN DAN CETAK UNTUK PEMBAYARAN</p>
-                    </button>
-                  )}
-                </Form.Item>
+                {loading ? (
+                  <div className="rounded-md m-1">
+                    <Spin className="w-full rounded-md">
+                      <button
+                        disabled
+                        htmlType="submit"
+                        className={` bg-cyan-700 transition-all rounded-md duration-200 text-sm`}
+                      >
+                        <p className="px-4 py-2 m-0 text-white">
+                          SIMPAN DAN CETAK UNTUK PEMBAYARAN
+                        </p>
+                      </button>
+                    </Spin>
+                  </div>
+                ) : (
+                  <button
+                    disabled={products.productList.length === 0}
+                    htmlType="submit"
+                    className={`bg-cyan-700 rounded-md m-1 text-sm ${
+                      products.productList.length === 0
+                        ? "opacity-80 cursor-not-allowed"
+                        : "opacity-100"
+                    }`}
+                  >
+                    <p className="px-4 py-2 m-0 text-white">SIMPAN DAN CETAK UNTUK PEMBAYARAN</p>
+                  </button>
+                )}
               </div>
             </Form>
           </LayoutContent>

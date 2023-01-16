@@ -14,6 +14,7 @@ import {
 } from "@ant-design/icons";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import moment from "moment";
 
 export default function ReactDataTable({
   data,
@@ -23,6 +24,7 @@ export default function ReactDataTable({
   onChangeStatus,
   returPage,
   bayarRetur,
+  view,
 }) {
   const router = useRouter();
   console.log("data :", data);
@@ -74,11 +76,16 @@ export default function ReactDataTable({
   };
 
   const lihatPembayaran = (row) => {
-    openNotificationWithIcon(
-      "info",
-      "Work In Progress",
-      "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
-    );
+    if (row?.attributes?.retur_store_sale?.data !== null) {
+      bayarRetur(row);
+      view(true);
+    } else {
+      openNotificationWithIcon(
+        "info",
+        "Work In Progress",
+        "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
+      );
+    }
   };
 
   const updateStatus = (row) => {
@@ -293,10 +300,10 @@ export default function ReactDataTable({
       const dataRetur = row.attributes.retur_store_sale.data.attributes;
 
       for (let index = 1; index < 4; index++) {
-        total = total + parseInt(dataRetur?.[`additional_fee_${index}_sub`] || 0);
+        total = total + parseFloat(dataRetur?.[`additional_fee_${index}_sub`] || 0);
       }
 
-      total = total + parseInt(dataRetur?.total);
+      total = total + parseFloat(dataRetur?.total);
 
       if (dataRetur?.disc_value) {
         switch (dataRetur?.disc_type) {
@@ -311,13 +318,13 @@ export default function ReactDataTable({
         }
       }
 
-      return formatter.format(total);
+      return numberFormat(parseFloat(total).toFixed(2));
     } else {
       for (let index = 1; index < 4; index++) {
-        total = total + parseInt(row.attributes?.[`additional_fee_${index}_sub`] || 0);
+        total = total + parseFloat(row.attributes?.[`additional_fee_${index}_sub`] || 0);
       }
 
-      total = total + parseInt(row.attributes?.total);
+      total = total + parseFloat(row.attributes?.total);
 
       if (row.attributes?.disc_value) {
         switch (row.attributes?.disc_type) {
@@ -332,17 +339,30 @@ export default function ReactDataTable({
         }
       }
 
-      return formatter.format(total);
+      return numberFormat(parseFloat(total).toFixed(2));
     }
   };
 
   const getTotalPayed = (payments) => {
     var total = 0;
     payments.forEach((element) => {
-      total = total + parseInt(element.attributes?.payment);
+      total = total + parseFloat(element.attributes?.payment);
     });
 
-    return formatter.format(total);
+    return numberFormat(parseFloat(total).toFixed(2));
+  };
+
+  const numberFormat = (value) => {
+    let angka = value;
+
+    // cek apakah value merupakan angka bulat
+    if (value % 1 === 0) {
+      angka = parseInt(value);
+    }
+
+    var formatted = `${angka}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+    return formatted;
   };
 
   const columns = [
@@ -427,10 +447,13 @@ export default function ReactDataTable({
       width: "200px",
       selector: (row) =>
         row?.attributes?.payments?.data[0]?.attributes?.payment_remaining
-          ? formatter.format(
-              row?.attributes?.payments?.data[row?.attributes?.payments?.data.length - 1]
-                ?.attributes?.payment_remaining
-            )
+          ? row?.attributes?.payments?.data[row?.attributes?.payments?.data.length - 1]?.attributes
+              ?.payment_remaining > 0
+            ? numberFormat(
+                row?.attributes?.payments?.data[row?.attributes?.payments?.data.length - 1]
+                  ?.attributes?.payment_remaining
+              )
+            : ""
           : "",
     },
     {
@@ -457,7 +480,13 @@ export default function ReactDataTable({
     {
       name: "Faktur Jatuh Tempo",
       width: "180px",
-      //selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
+      selector: (row) =>
+        moment(row.attributes?.sale_date)
+          .add(
+            parseInt(row?.attributes?.tempo_days || 0),
+            row?.attributes?.tempo_time === "Bulan" ? "months" : "days"
+          )
+          .format("DD/MM/YYYY"),
     },
     {
       name: "Lokasi Penjualan",

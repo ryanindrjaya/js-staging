@@ -81,6 +81,7 @@ function Toko({ props }) {
   const [sell, setSell] = useState(data);
   const [returPage, setReturPage] = useState("toko");
   const [dataRetur, setDataRetur] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
 
   const handleAdd = () => {
     router.push("/dashboard/penjualan/toko/tambah");
@@ -123,13 +124,20 @@ function Toko({ props }) {
     const req = await fetch(endpoint, options);
     const res = await req.json();
     if (res) {
-      const res = await fetchData(cookies);
-      openNotificationWithIcon(
-        "success",
-        "Berhasil menghapus data",
-        "Penjualan Toko dan Resep yang dipilih telah berhasil dihapus. Silahkan cek kembali Penjualan Toko dan Resep"
-      );
-      setSell(res);
+      const res = refetchData();
+      if (res) {
+        openNotificationWithIcon(
+          "success",
+          "Berhasil menghapus data",
+          "Penjualan Toko dan Resep yang dipilih telah berhasil dihapus. Silahkan cek kembali Penjualan Toko dan Resep"
+        );
+      } else {
+        openNotificationWithIcon(
+          "error",
+          "Gagal menghapus data",
+          "Penjualan Toko dan Resep yang dipilih gagal dihapus. Silahkan coba lagi"
+        );
+      }
     }
   };
 
@@ -448,10 +456,13 @@ function Toko({ props }) {
               open={dataRetur ? true : false}
               onOk={() => setDataRetur(null)}
               onCancel={() => {
-                console.log("aku dicancel ges");
                 setDataRetur(null);
+                setShowPreview(false);
               }}
-              afterClose={() => setDataRetur(null)}
+              afterClose={() => {
+                setDataRetur(null);
+                setShowPreview(false);
+              }}
               bodyStyle={{
                 borderRadius: "20px",
                 backgroundColor: "#E8F2F2",
@@ -463,14 +474,27 @@ function Toko({ props }) {
               footer={null}
               // zIndex={999999}
             >
-              {dataRetur && (
+              {dataRetur && !showPreview ? (
                 <PembayaranRetur
                   data={dataRetur?.attributes}
+                  retur={dataRetur}
                   id={dataRetur?.id}
                   lokasiPenjualan="PENJUALAN TOKO"
                   onCancel={() => setDataRetur(null)}
                   refetch={refetchData}
                 />
+              ) : dataRetur && showPreview ? (
+                <PembayaranRetur
+                  data={dataRetur?.attributes}
+                  id={dataRetur?.id}
+                  retur={dataRetur}
+                  lokasiPenjualan="PENJUALAN TOKO"
+                  onCancel={() => setDataRetur(null)}
+                  refetch={refetchData}
+                  preview // preview data
+                />
+              ) : (
+                ""
               )}
             </Modal>
 
@@ -483,6 +507,7 @@ function Toko({ props }) {
               returPage={returPage}
               bayarRetur={setDataRetur}
               retur={dataRetur}
+              view={setShowPreview}
             />
           </LayoutContent>
         </LayoutWrapper>

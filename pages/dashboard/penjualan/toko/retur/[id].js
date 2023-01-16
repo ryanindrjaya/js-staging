@@ -298,11 +298,14 @@ function ReturToko({ props }) {
 
   const setTotalWithDisc = () => {
     const disc = form.getFieldsValue(["disc_type", "disc_value"]);
+    var newTotal = 0;
     if (disc.disc_type === "Tetap") {
-      setTotalPriceWithFixedDisc(disc);
+      newTotal = setTotalPriceWithFixedDisc(disc);
     } else {
-      setTotalPriceWithPercentDisc(disc);
+      newTotal = setTotalPriceWithPercentDisc(disc);
     }
+
+    return newTotal;
   };
 
   const setTotalPriceWithFixedDisc = (disc) => {
@@ -310,6 +313,8 @@ function ReturToko({ props }) {
 
     newTotal = totalPrice - disc.disc_value;
     setDiscPrice(newTotal);
+
+    return newTotal;
   };
 
   const setTotalPriceWithPercentDisc = (disc) => {
@@ -318,6 +323,8 @@ function ReturToko({ props }) {
     newTotal = totalPrice - (totalPrice * disc.disc_value) / 100;
     if (newTotal < 0) newTotal = 0;
     setDiscPrice(newTotal);
+
+    return newTotal;
   };
 
   const Uninclude = () => {
@@ -339,12 +346,22 @@ function ReturToko({ props }) {
     // this one is used for checking the price if the old price is same with new one.
     // if both are same then we should not set new price for grand total.
     // if they are not, then set new grand total
-    if (discPrice !== totalPrice && discPrice !== 0) {
-      setGrandTotal(discPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
+    var newDiscPrice = 0;
+
+    if (discPrice !== 0 && btnDisc === "Include") {
+      newDiscPrice = setTotalWithDisc();
     } else {
+      newDiscPrice = 0;
+    }
+
+    console.log("set grand total", { newDiscPrice, totalPrice });
+    if (newDiscPrice !== totalPrice && newDiscPrice !== 0) {
+      setGrandTotal(newDiscPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
+    } else {
+      console.log("set grand total with total price");
       setGrandTotal(totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
     }
-  }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
+  }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice, btnDisc]);
 
   useEffect(() => {
     sumAdditionalPrice();
@@ -515,6 +532,19 @@ function ReturToko({ props }) {
     }
   };
 
+  const showErrorNotifications = () => {
+    const error = form.getFieldsError();
+    error.forEach((element) => {
+      if (element.errors.length > 0) {
+        console.log();
+        notification["error"]({
+          message: "Field Kosong",
+          description: element.errors[0],
+        });
+      }
+    });
+  };
+
   return (
     <>
       <Head>
@@ -537,6 +567,7 @@ function ReturToko({ props }) {
                   onFinish(values);
                 }
               }}
+              onFinishFailed={showErrorNotifications}
             >
               <div className="w-full flex flex-wrap justify-start -mx-3 mt-1">
                 <div className="w-full md:w-1/3 px-3 mt-2 md:mb-0">
@@ -957,10 +988,7 @@ function ReturToko({ props }) {
                     </div>
                   ) : (
                     <button
-                      onClick={() => {
-                        validateError();
-                        setSimpanData("Bayar");
-                      }}
+                      onClick={() => setSimpanData("Bayar")}
                       htmlType="submit"
                       className="bg-cyan-700 rounded-md m-1 text-sm"
                     >
@@ -975,10 +1003,7 @@ function ReturToko({ props }) {
                     </div>
                   ) : (
                     <button
-                      onClick={() => {
-                        validateError();
-                        setSimpanData("Hutang");
-                      }}
+                      onClick={() => setSimpanData("Hutang")}
                       htmlType="submit"
                       className="bg-cyan-700 rounded-md m-1 text-sm"
                     >

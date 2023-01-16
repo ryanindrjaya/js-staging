@@ -17,7 +17,8 @@ const CreateSale = async (
   url,
   page,
   locations,
-  masterId
+  masterId,
+  setLoading
 ) => {
   // CLEANING DATA
   listId.forEach((element) => {
@@ -30,6 +31,8 @@ const CreateSale = async (
 
   values.purchasing_payments = null;
 
+  if (values.tempo_days === 0) values.tempo_days = null;
+
   if (page == "sales sale") {
     locations.forEach((element) => {
       if (element.attributes.name == values.location) values.location = element.id;
@@ -40,8 +43,12 @@ const CreateSale = async (
     data: values,
   };
 
+  console.log("data to post", data.data);
+
   const req = await createData(data, url);
   const res = await req.json();
+
+  console.log(res);
 
   if (req.status === 200) {
     const putRelationDetail = await putRelationSaleDetail(
@@ -50,15 +57,17 @@ const CreateSale = async (
       form,
       router,
       url,
-      page
+      page,
+      setLoading
     );
 
     // update data penjualan
-    if (putRelationDetail.status === 200 && url.includes("retur")) {
-      await putMasterData(res.data.id, masterId, form, router, url, page);
+    if (putRelationDetail?.status === 200 && url.includes("retur")) {
+      await putMasterData(res.data.id, masterId, form, router, url, page, setLoading);
     }
   } else {
     openNotificationWithIcon("error");
+    setLoading(false);
   }
 };
 
@@ -80,7 +89,7 @@ const createData = async (data, url) => {
   return req;
 };
 
-const putRelationSaleDetail = async (id, value, form, router, url, page) => {
+const putRelationSaleDetail = async (id, value, form, router, url, page, setLoading) => {
   const user = await getUserMe();
   const dataSale = {
     data: value,
@@ -134,6 +143,7 @@ const putRelationSaleDetail = async (id, value, form, router, url, page) => {
     }
   } else {
     openNotificationWithIcon("error");
+    setLoading(false);
   }
 };
 
@@ -168,7 +178,7 @@ const openNotificationWithIcon = (type) => {
   }
 };
 
-const putMasterData = async (id, masterId, form, router, url, page) => {
+const putMasterData = async (id, masterId, form, router, url, page, setLoading) => {
   const data = {
     data: {
       status: "Diretur",
@@ -199,6 +209,7 @@ const putMasterData = async (id, masterId, form, router, url, page) => {
     openNotificationWithIcon("success");
   } else {
     openNotificationWithIcon("error");
+    setLoading(false);
   }
 };
 

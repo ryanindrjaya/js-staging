@@ -7,7 +7,15 @@ const cookies = nookies.get(null, "token");
 var subtotalId = 0;
 var id = 0;
 
-const createDetailSale = (values, products, productTotalPrice, productSubTotal, setListId, url) => {
+const createDetailSale = (
+  values,
+  products,
+  productTotalPrice,
+  productSubTotal,
+  setListId,
+  url,
+  setLoading
+) => {
   products.productList.forEach((element) => {
     // default value
     var qty = 1;
@@ -51,7 +59,8 @@ const createDetailSale = (values, products, productTotalPrice, productSubTotal, 
       d2,
       //d3,
       margin,
-      url
+      url,
+      setLoading
     );
     id++;
     subtotalId++;
@@ -73,7 +82,8 @@ const POSTSaleDetail = async (
   d2,
   //d3,
   margin,
-  url
+  url,
+  setLoading
 ) => {
   var data = {
     data: {
@@ -110,6 +120,8 @@ const POSTSaleDetail = async (
     if (tempListId.length === products.productList.length) {
       setListId(tempListId);
     }
+  } else {
+    setLoading(false);
   }
 };
 
