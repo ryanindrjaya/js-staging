@@ -228,7 +228,6 @@ function ReturToko({ props }) {
       }
     });
     setDataValues(values);
-    setLoading(false);
   };
 
   const createDetailSale = async () => {
@@ -283,14 +282,17 @@ function ReturToko({ props }) {
     return formatter.format(total);
   };
 
-  const sumAdditionalPrice = () => {
+  const sumAdditionalPrice = (addFee1, addFee2, addFee3) => {
     var newTotal = 0;
 
     for (var key in additionalFee) {
       newTotal = newTotal + additionalFee[key];
     }
 
-    var test = totalPrice + newTotal;
+    if (addFee1 === "Uninclude") newTotal -= additionalFee?.["additional_fee_1_sub"] || 0;
+    if (addFee2 === "Uninclude") newTotal -= additionalFee?.["additional_fee_2_sub"] || 0;
+    if (addFee3 === "Uninclude") newTotal -= additionalFee?.["additional_fee_3_sub"] || 0;
+
     setBiayaTambahan(newTotal);
   };
 
@@ -338,6 +340,8 @@ function ReturToko({ props }) {
   const clearData = () => {
     dispatch({ type: "CLEAR_DATA" });
     setTotalPrice(0);
+    setTotalPenjualan(0);
+    setGrandTotal(0);
   };
 
   useEffect(() => {
@@ -360,8 +364,8 @@ function ReturToko({ props }) {
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice, btnDisc]);
 
   useEffect(() => {
-    sumAdditionalPrice();
-  }, [additionalFee]);
+    sumAdditionalPrice(btnAddFee1, btnAddFee2, btnAddFee3);
+  }, [additionalFee, btnAddFee1, btnAddFee2, btnAddFee3]);
 
   useEffect(() => {
     if (listId.length > 0) {
@@ -827,150 +831,183 @@ function ReturToko({ props }) {
               <div className="w-full flex flex-wrap justify-end mb-3">
                 <div className="w-full md:w-1/3 px-3 mb-2 text-end md:mb-0 mt-2">
                   <p className="mb-4 font-bold ">Keterangan</p>
-                  <Form.Item>
-                    <p>{addFee1Desc}</p>
-                  </Form.Item>
-                  <Form.Item>
-                    <p>{addFee2Desc}</p>
-                  </Form.Item>
-                  <Form.Item>
-                    <p>{addFee3Desc}</p>
-                  </Form.Item>
+                  {addFee1Desc && (
+                    <Form.Item>
+                      <p>{addFee1Desc}</p>
+                    </Form.Item>
+                  )}
+                  {addFee2Desc && (
+                    <Form.Item>
+                      <p>{addFee2Desc}</p>
+                    </Form.Item>
+                  )}
+                  {addFee3Desc && (
+                    <Form.Item>
+                      <p>{addFee3Desc}</p>
+                    </Form.Item>
+                  )}
                 </div>
 
                 <div className="w-full md:w-1/3 px-3 mb-2 text-center md:mb-0">
                   <p className="mb-4 font-bold">Jumlah</p>
-                  <Form.Item name="additional_fee_1_sub">
-                    <InputNumber
-                      size="large"
-                      style={{ width: "100%" }}
-                      onChange={(e) =>
-                        setAdditionalFee({
-                          ...additionalFee,
-                          additional_fee_1_sub: e,
-                        })
-                      }
-                    />
-                  </Form.Item>
-                  <Form.Item name="additional_fee_2_sub">
-                    <InputNumber
-                      size="large"
-                      style={{ width: "100%" }}
-                      onChange={(e) =>
-                        setAdditionalFee({
-                          ...additionalFee,
-                          additional_fee_2_sub: e,
-                        })
-                      }
-                    />
-                  </Form.Item>
-                  <Form.Item name="additional_fee_3_sub">
-                    <InputNumber
-                      size="large"
-                      style={{ width: "100%" }}
-                      onChange={(e) =>
-                        setAdditionalFee({
-                          ...additionalFee,
-                          additional_fee_3_sub: e,
-                        })
-                      }
-                    />
-                  </Form.Item>
+                  {addFee1Desc ? (
+                    <Form.Item name="additional_fee_1_sub">
+                      <InputNumber
+                        size="large"
+                        style={{ width: "100%" }}
+                        onChange={(e) =>
+                          setAdditionalFee({
+                            ...additionalFee,
+                            additional_fee_1_sub: e,
+                          })
+                        }
+                      />
+                    </Form.Item>
+                  ) : (
+                    ""
+                  )}
+                  {addFee2Desc ? (
+                    <Form.Item name="additional_fee_2_sub">
+                      <InputNumber
+                        size="large"
+                        style={{ width: "100%" }}
+                        onChange={(e) =>
+                          setAdditionalFee({
+                            ...additionalFee,
+                            additional_fee_2_sub: e,
+                          })
+                        }
+                      />
+                    </Form.Item>
+                  ) : (
+                    ""
+                  )}
+                  {addFee3Desc ? (
+                    <Form.Item name="additional_fee_3_sub">
+                      <InputNumber
+                        size="large"
+                        style={{ width: "100%" }}
+                        onChange={(e) =>
+                          setAdditionalFee({
+                            ...additionalFee,
+                            additional_fee_3_sub: e,
+                          })
+                        }
+                      />
+                    </Form.Item>
+                  ) : (
+                    ""
+                  )}
                 </div>
                 <div className="w-full md:w-1/6 px-1 mb-2 text-center md:mb-0 mt-10">
-                  <Form.Item>
-                    {btnAddFee1 === "Uninclude" ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setBtnAddFee1("Include");
-                          setAdditionalFee({
-                            ...additionalFee,
-                            additional_fee_1_sub: store.data.attributes?.additional_fee_1_sub,
-                          });
-                        }}
-                        className="bg-cyan-700 rounded-md m-1 text-sm"
-                      >
-                        <p className="px-4 py-2 m-0 text-white">INC. RETUR</p>
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setBtnAddFee1("Uninclude");
-                          setAdditionalFee({
-                            ...additionalFee,
-                            additional_fee_1_sub: 0,
-                          });
-                        }}
-                        className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm"
-                      >
-                        <p className="px-4 py-2 m-0 text-cyan">INC. RETUR</p>
-                      </button>
-                    )}
-                  </Form.Item>
-                  <Form.Item>
-                    {btnAddFee2 === "Uninclude" ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setBtnAddFee2("Include");
-                          setAdditionalFee({
-                            ...additionalFee,
-                            additional_fee_2_sub: store.data.attributes?.additional_fee_2_sub,
-                          });
-                        }}
-                        className="bg-cyan-700 rounded-md m-1 text-sm"
-                      >
-                        <p className="px-4 py-2 m-0 text-white">INC. RETUR</p>
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setBtnAddFee2("Uninclude");
-                          setAdditionalFee({
-                            ...additionalFee,
-                            additional_fee_2_sub: 0,
-                          });
-                        }}
-                        className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm"
-                      >
-                        <p className="px-4 py-2 m-0 text-cyan">INC. RETUR</p>
-                      </button>
-                    )}
-                  </Form.Item>
-                  <Form.Item>
-                    {btnAddFee3 === "Uninclude" ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setBtnAddFee3("Include");
-                          setAdditionalFee({
-                            ...additionalFee,
-                            additional_fee_3_sub: store.data.attributes?.additional_fee_3_sub,
-                          });
-                        }}
-                        className="bg-cyan-700 rounded-md m-1 text-sm"
-                      >
-                        <p className="px-4 py-2 m-0 text-white">INC. RETUR</p>
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setBtnAddFee3("Uninclude");
-                          setAdditionalFee({
-                            ...additionalFee,
-                            additional_fee_3_sub: 0,
-                          });
-                        }}
-                        className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm"
-                      >
-                        <p className="px-4 py-2 m-0 text-cyan">INC. RETUR</p>
-                      </button>
-                    )}
-                  </Form.Item>
+                  {addFee1Desc ? (
+                    <Form.Item>
+                      {btnAddFee1 === "Uninclude" ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const additionalFee1 = form.getFieldValue("additional_fee_1_sub");
+                            setBtnAddFee1("Include");
+                            setAdditionalFee({
+                              ...additionalFee,
+                              additional_fee_1_sub: additionalFee1,
+                            });
+                          }}
+                          className="bg-cyan-700 rounded-md m-1 text-sm"
+                        >
+                          <p className="px-4 py-2 m-0 text-white">INC. RETUR</p>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setBtnAddFee1("Uninclude");
+                            setAdditionalFee({
+                              ...additionalFee,
+                              additional_fee_1_sub: 0,
+                            });
+                          }}
+                          className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm"
+                        >
+                          <p className="px-4 py-2 m-0 text-cyan">INC. RETUR</p>
+                        </button>
+                      )}
+                    </Form.Item>
+                  ) : (
+                    ""
+                  )}
+                  {addFee2Desc ? (
+                    <Form.Item>
+                      {btnAddFee2 === "Uninclude" ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const additionalFee2 = form.getFieldValue("additional_fee_2_sub");
+                            setBtnAddFee2("Include");
+                            setAdditionalFee({
+                              ...additionalFee,
+                              additional_fee_2_sub: additionalFee2,
+                            });
+                          }}
+                          className="bg-cyan-700 rounded-md m-1 text-sm"
+                        >
+                          <p className="px-4 py-2 m-0 text-white">INC. RETUR</p>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setBtnAddFee2("Uninclude");
+                            setAdditionalFee({
+                              ...additionalFee,
+                              additional_fee_2_sub: 0,
+                            });
+                          }}
+                          className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm"
+                        >
+                          <p className="px-4 py-2 m-0 text-cyan">INC. RETUR</p>
+                        </button>
+                      )}
+                    </Form.Item>
+                  ) : (
+                    ""
+                  )}
+                  {addFee3Desc ? (
+                    <Form.Item>
+                      {btnAddFee3 === "Uninclude" ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const additionalFee3 = form.getFieldValue("additional_fee_3_sub");
+                            setBtnAddFee3("Include");
+                            setAdditionalFee({
+                              ...additionalFee,
+                              additional_fee_3_sub: additionalFee3,
+                            });
+                          }}
+                          className="bg-cyan-700 rounded-md m-1 text-sm"
+                        >
+                          <p className="px-4 py-2 m-0 text-white">INC. RETUR</p>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setBtnAddFee3("Uninclude");
+                            setAdditionalFee({
+                              ...additionalFee,
+                              additional_fee_3_sub: 0,
+                            });
+                          }}
+                          className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm"
+                        >
+                          <p className="px-4 py-2 m-0 text-cyan">INC. RETUR</p>
+                        </button>
+                      )}
+                    </Form.Item>
+                  ) : (
+                    ""
+                  )}
                 </div>
               </div>
 
