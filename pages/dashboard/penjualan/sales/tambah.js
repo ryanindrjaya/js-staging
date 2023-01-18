@@ -331,10 +331,13 @@ function Toko({ props }) {
       data: res.data,
     });
 
-    sales_sell_details.forEach((element) => {
+    var id = 0;
+    sales_sell_details.forEach((element) => { console.log("element", element)
       var indexUnit = 1;
-      var unitOrder = element.attributes.unit_order;
+      var unitOrder = element.attributes.unit;
       var productUnit = element.attributes.product.data.attributes;
+      var d1 = 0;
+      var d2 = 0;
 
       for (let index = 1; index < 6; index++) {
         if (unitOrder === productUnit[`unit_${index}`]) {
@@ -345,9 +348,6 @@ function Toko({ props }) {
       const productId = element.attributes.product.data.id;
 
       form.setFieldsValue({
-        disc_rp: {
-          [productId]: element.attributes.disc,
-        },
         jumlah_option: {
           [productId]: element.attributes.unit_order,
         },
@@ -360,15 +360,20 @@ function Toko({ props }) {
       dispatch({
         type: "SET_INITIAL_PRODUCT",
         product: element.attributes.product.data,
-        qty: element.attributes.total_order,
-        unit: element.attributes.unit_order,
+        qty: element.attributes.qty,
+        unit: element.attributes.unit,
         unitIndex: indexUnit,
+        priceUnit: element.attributes.unit_price,
+        d1: element.attributes.disc1,
+        d2: element.attributes.disc2,
+        index: id,
       });
+    id++;
     });
     setTimeout(() => {
       setIsFetchingData(false);
     }, 3000);
-  };
+  }; console.log("product", products)
 
   const clearData = () => {
     dispatch({ type: "CLEAR_DATA" });

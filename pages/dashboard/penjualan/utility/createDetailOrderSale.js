@@ -5,23 +5,28 @@ import * as moment from "moment";
 var tempListId = [];
 const cookies = nookies.get(null, "token");
 
+var id = 0;
+
 const createDetailOrderSale = (
   values,
   products,
   setListId,
   url
 ) => {
-  products.productList.forEach((element) => {
-    // default value
+  products.productList.forEach((element) => { console.log("element",element,products)
+    //default value
     var qty = 1;
     var unit = element.attributes.unit_1;
     var unitPrice = element.attributes.buy_price_1;
+    var elementId = element.id;
     tempListId = [];
-    const id = element.id;
 
     qty = products.productInfo[id]?.qty ?? 1;
     unit = products.productInfo[id]?.unit ?? element.attributes.unit_1;
-    unitPrice = products.productInfo?.[id]?.priceUnit ?? element.attributes.buy_price_1;
+    unitPrice = products.productInfo?.[id]?.unit_price ?? element.attributes.buy_price_1;
+
+    var d1 = products.productInfo[id]?.d1;
+    var d2 = products.productInfo[id]?.d2;
 
     POSTSaleDetail(
       qty,
@@ -30,8 +35,12 @@ const createDetailOrderSale = (
       id,
       setListId,
       products,
+      elementId,
+      d1,
+      d2,
       url
     );
+    id++;
   });
 };
 
@@ -42,6 +51,9 @@ const POSTSaleDetail = async (
   id,
   setListId,
   products,
+  elementId,
+  d1,
+  d2,
   url
 ) => {
   var data = {
@@ -49,7 +61,9 @@ const POSTSaleDetail = async (
       qty : qty,
       unit : unit,
       unit_price : unitPrice,
-      product: { id: id },
+      product: { id: elementId },
+      disc1: d1,
+      disc2: d2,
     },
   };
 

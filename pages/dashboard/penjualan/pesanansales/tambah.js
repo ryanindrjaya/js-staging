@@ -30,12 +30,16 @@ PesananSales.getInitialProps = async (context) => {
   const reqSale = await fetchSale(cookies);
   const sale = await reqSale.json();
 
+  const reqCustomer = await fetchCustomer(cookies);
+  const customer = await reqCustomer.json();
+
   return {
     props: {
       user,
       locations,
       inven,
-      sale
+      sale,
+      customer
     },
   };
 };
@@ -96,6 +100,21 @@ const fetchInven = async (cookies) => {
     return req;
 };
 
+const fetchCustomer = async (cookies) => {
+    let name = "walk in customer"
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/customers?filters[name][$contains]=${name}`;
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+    const req = await fetch(endpoint, options);
+    return req;
+};
+
+
 function PesananSales({ props }) {
   const products = useSelector((state) => state.Order);
   const dispatch = useDispatch();
@@ -105,6 +124,7 @@ function PesananSales({ props }) {
   const user = props.user;
   const inven = props.inven.data;
   const sale = props.sale;
+  const customerData = props.customer.data[0];
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -181,7 +201,7 @@ function PesananSales({ props }) {
   const createSale = async (values) => {
     values.sale_date = today;
     values.added_by = user.name;
-    //values.category = selectedCategory;
+    values.customer = customer;
     await createOrderSaleFunc(values, listId, form, router);
   };
 
@@ -239,6 +259,10 @@ function PesananSales({ props }) {
   useEffect(() => {
     // used to reset redux from value before
     clearData();
+    form.setFieldsValue({
+      customer: customerData.attributes.name,
+    });
+    setCustomer(customerData);
   }, []);
 
   const validateError = () => {
