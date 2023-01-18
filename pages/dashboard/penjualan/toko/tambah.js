@@ -30,12 +30,16 @@ Toko.getInitialProps = async (context) => {
   const reqStoreSale = await fetchStoreSale(cookies);
   const storeSale = await reqStoreSale.json();
 
+  const reqCustomer = await fetchCustomer(cookies);
+  const customer = await reqCustomer.json();
+
   return {
     props: {
       user,
       locations,
       inven,
-      storeSale
+      storeSale,
+      customer
     },
   };
 };
@@ -96,6 +100,21 @@ const fetchInven = async (cookies) => {
     return req;
 };
 
+const fetchCustomer = async (cookies) => {
+    let name = "walk in customer"
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/customers?filters[name][$contains]=${name}`;
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
+};
+
 function Toko({ props }) {
   const products = useSelector((state) => state.Order);
   const dispatch = useDispatch();
@@ -105,6 +124,7 @@ function Toko({ props }) {
   const user = props.user;
   const inven = props.inven.data;
   const storeSale = props.storeSale;
+  const customerData = props.customer.data[0];
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -192,6 +212,7 @@ function Toko({ props }) {
     values.category = selectedCategory;
     values.dpp = dpp;
     values.ppn = ppn;
+    values.customer = customer;
     await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/store-sales/", "store sale");
   };
 
@@ -347,6 +368,10 @@ function Toko({ props }) {
     // used to reset redux from value before
     clearData();
     setProductSubTotal({});
+    form.setFieldsValue({
+      customer: customerData.attributes.name,
+    });
+    setCustomer(customerData);
   }, []);
 
   const validateError = () => {
