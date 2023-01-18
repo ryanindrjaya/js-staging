@@ -212,7 +212,7 @@ export default function ReactDataTable({
         {
           name: "Customer",
           width: "180px",
-          selector: (row) => row.attributes?.customer_name ?? "-",
+          selector: (row) => row.attributes?.customer.data.attributes.name ?? "-",
         },
         {
           name: "NO Faktur",
