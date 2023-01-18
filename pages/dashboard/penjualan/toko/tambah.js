@@ -311,7 +311,7 @@ function Toko({ props }) {
     } else {
       setGrandTotal(totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
     }
-  }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
+  }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]); console.log("producttotal price", productTotalPrice)
 
   useEffect(() => {
     if(products.productList.length > 0){ 
