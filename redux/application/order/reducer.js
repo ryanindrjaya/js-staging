@@ -139,6 +139,23 @@ export default function Reducer(state = initState, action) {
         },
       };
 
+
+    case "CHANGE_PRODUCT_PRICE":
+      var unit_price = action.unit_price;
+      var id = action.index;
+      var data = action.product.attributes;
+
+      return {
+        ...state,
+        productInfo: {
+          ...state.productInfo,
+          [id]: {
+            ...state.productInfo[id],
+            unit_price: unit_price,
+          },
+        },
+      };
+
     case "SET_PRICE_AFTER_DISC":
       var price = action.price;
       var id = action.index;

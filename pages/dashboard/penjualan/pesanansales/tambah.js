@@ -30,12 +30,16 @@ PesananSales.getInitialProps = async (context) => {
   const reqSale = await fetchSale(cookies);
   const sale = await reqSale.json();
 
+  const reqCustomer = await fetchCustomer(cookies);
+  const customer = await reqCustomer.json();
+
   return {
     props: {
       user,
       locations,
       inven,
-      sale
+      sale,
+      customer
     },
   };
 };
@@ -96,6 +100,21 @@ const fetchInven = async (cookies) => {
     return req;
 };
 
+const fetchCustomer = async (cookies) => {
+    let name = "walk in customer"
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/customers?filters[name][$contains]=${name}`;
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+    const req = await fetch(endpoint, options);
+    return req;
+};
+
+
 function PesananSales({ props }) {
   const products = useSelector((state) => state.Order);
   const dispatch = useDispatch();
@@ -105,6 +124,7 @@ function PesananSales({ props }) {
   const user = props.user;
   const inven = props.inven.data;
   const sale = props.sale;
+  const customerData = props.customer.data[0];
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -182,7 +202,6 @@ function PesananSales({ props }) {
     values.sale_date = today;
     values.added_by = user.name;
     values.customer = customer;
-    //values.category = selectedCategory;
     await createOrderSaleFunc(values, listId, form, router);
   };
 
@@ -240,7 +259,23 @@ function PesananSales({ props }) {
   useEffect(() => {
     // used to reset redux from value before
     clearData();
+    form.setFieldsValue({
+      customer: customerData.attributes.name,
+    });
+    setCustomer(customerData);
   }, []);
+
+  const validateError = () => {
+    var listError = form.getFieldsError();
+    listError.forEach((element) => {
+      if (element.errors[0]) {
+        notification["error"]({
+          message: "Field Kosong",
+          description: element.errors[0],
+        });
+      }
+    });
+  };
 
   return (
     <>
@@ -276,6 +311,7 @@ function PesananSales({ props }) {
                 remember: true,
               }}
               onFinish={onFinish}
+              onFinishFailed={validateError}
             >
 
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-4">
@@ -297,7 +333,7 @@ function PesananSales({ props }) {
                   <Customer onChangeCustomer={setCustomer} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item name="tempo_days" initialValue={0} noStyle>
+                  <Form.Item name="tempo_days" initialValue={"0"} noStyle>
                     <Input
                       size="large"
                       style={{

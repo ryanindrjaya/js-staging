@@ -147,6 +147,7 @@ function Toko({ props }) {
 
   const [dppActive, setDPPActive] = useState("Active");
   const [ppnActive, setPPNActive] = useState("Active");
+  const [discMax, setDiscMax] = useState();
 
   const router = useRouter();
   const { TextArea } = Input;
@@ -169,7 +170,7 @@ function Toko({ props }) {
   const [info, setInfo] = useState();
 
   // customer
-  const [customer, setCustomer] = useState();
+    const [customer, setCustomer] = useState();
 
   // NO Sales Sale
   var noSalesSale = String(salesSale?.meta?.pagination.total + 1).padStart(3, "0");
@@ -289,6 +290,14 @@ function Toko({ props }) {
     var newTotal = 0;
 
     newTotal = totalPrice - disc.disc_value;
+   if (disc.disc_value > totalPrice) {
+        newTotal = 0;
+        notification["error"]({
+            message: "Disc tidak sesuai",
+            description:
+                "Disc tetap tidak boleh melebihi total",
+        });
+    }
     setDiscPrice(newTotal);
   };
 
@@ -297,6 +306,14 @@ function Toko({ props }) {
 
     newTotal = totalPrice - (totalPrice * disc.disc_value) / 100;
     if (newTotal < 0) newTotal = 0;
+    if (disc.disc_value > 100) {
+        newTotal = 0;
+        notification["error"]({
+            message: "Disc tidak sesuai",
+            description:
+                "Disc persentase tidak boleh 100%",
+        });
+    }
     setDiscPrice(newTotal);
   };
 
@@ -326,21 +343,25 @@ function Toko({ props }) {
     form.setFieldsValue({
       sale_date: moment(momentString),
       location: dataSalesSell.location.data.attributes.name,
-      customer_name: dataSalesSell.customer_name,
       tempo_days: dataSalesSell.tempo_days,
       tempo_time: dataSalesSell.tempo_time,
       sale_note: dataSalesSell.sale_note,
+      customer: dataSalesSell.customer.data.attributes.name,
     });
+    setCustomer(dataSalesSell.customer.data);
 
     dispatch({
       type: "SET_PREORDER_DATA",
       data: res.data,
     });
 
-    sales_sell_details.forEach((element) => {
+    var id = 0;
+    sales_sell_details.forEach((element) => { console.log("element", element)
       var indexUnit = 1;
-      var unitOrder = element.attributes.unit_order;
+      var unitOrder = element.attributes.unit;
       var productUnit = element.attributes.product.data.attributes;
+      var d1 = 0;
+      var d2 = 0;
 
       for (let index = 1; index < 6; index++) {
         if (unitOrder === productUnit[`unit_${index}`]) {
@@ -351,9 +372,6 @@ function Toko({ props }) {
       const productId = element.attributes.product.data.id;
 
       form.setFieldsValue({
-        disc_rp: {
-          [productId]: element.attributes.disc,
-        },
         jumlah_option: {
           [productId]: element.attributes.unit_order,
         },
@@ -366,15 +384,20 @@ function Toko({ props }) {
       dispatch({
         type: "SET_INITIAL_PRODUCT",
         product: element.attributes.product.data,
-        qty: element.attributes.total_order,
-        unit: element.attributes.unit_order,
+        qty: element.attributes.qty,
+        unit: element.attributes.unit,
         unitIndex: indexUnit,
+        priceUnit: element.attributes.unit_price,
+        d1: element.attributes.disc1,
+        d2: element.attributes.disc2,
+        index: id,
       });
+    id++;
     });
     setTimeout(() => {
       setIsFetchingData(false);
     }, 3000);
-  };
+  }; console.log("product", products)
 
   const clearData = () => {
     dispatch({ type: "CLEAR_DATA" });
@@ -437,10 +460,28 @@ function Toko({ props }) {
   }, [ppnActive, grandTotal]);
 
   useEffect(() => {
+    // set max value
+    if(discType == "Tetap") setDiscMax(totalPrice);
+    if(discType == "Persentase") setDiscMax(100);
+  }, [discType]);
+
+  useEffect(() => {
     // used to reset redux from value before
     clearData();
     setProductSubTotal({});
   }, []);
+
+  const validateError = () => {
+    var listError = form.getFieldsError();
+    listError.forEach((element) => {
+      if (element.errors[0]) {
+        notification["error"]({
+          message: "Field Kosong",
+          description: element.errors[0],
+        });
+      }
+    });
+  };
 
   return (
     <>
@@ -474,6 +515,7 @@ function Toko({ props }) {
                 remember: true,
               }}
               onFinish={onFinish}
+              onFinishFailed={validateError}
             >
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-5">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -491,7 +533,18 @@ function Toko({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Customer onChangeCustomer={setCustomer} />
+                  <Form.Item
+                    name="customer"
+                    //initialValue={c}
+                    rules={[
+                        {
+                            required: true,
+                            message: "Data customer tidak boleh kosong!",
+                        },
+                    ]}
+                    >
+                    <Customer onChangeCustomer={setCustomer} />
+                  </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2">
                   <Form.Item name="no_inventory">
@@ -500,7 +553,7 @@ function Toko({ props }) {
                 </div>
 
                 <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item name="tempo_days" initialValue={0} noStyle>
+                  <Form.Item name="tempo_days" initialValue={"0"} noStyle>
                     <Input
                       size="large"
                       style={{
@@ -638,6 +691,7 @@ function Toko({ props }) {
                       onChange={setTotalWithDisc}
                       size="large"
                       min={0}
+                      max={discMax}
                       placeholder="Diskon"
                       style={{ width: "100%" }}
                     />
