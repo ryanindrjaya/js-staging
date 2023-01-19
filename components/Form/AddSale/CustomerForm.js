@@ -58,7 +58,7 @@ export default function Customer({ onChangeCustomer }) {
 
         if (req.status == 200) {
           const customerResult = res.data.map((customer) => ({
-            label: `${customer.attributes.name} - ${customer.attributes.type}`,
+            label: `${customer.attributes.name}`,
             value: customer.id,
           }));
 
@@ -74,12 +74,12 @@ export default function Customer({ onChangeCustomer }) {
     <>
       <div className="w-full md:w-full mb-2 md:mb-0">
         <Form.Item
-          name="supplier_id"
+          name="customer"
           style={{ width: "100%" }}
           rules={[
             {
               required: true,
-              message: "Supplier tidak boleh kosong!",
+              message: "Customer tidak boleh kosong!",
             },
           ]}
         >

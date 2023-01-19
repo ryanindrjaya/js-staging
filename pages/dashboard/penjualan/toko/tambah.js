@@ -13,6 +13,7 @@ import createSaleFunc from "../utility/createSale";
 import createDetailSaleFunc from "../utility/createDetailSale";
 import calculatePrice from "../utility/calculatePrice";
 import nookies from "nookies";
+import Customer from "@iso/components/Form/AddSale/CustomerForm";
 
 Toko.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -29,12 +30,16 @@ Toko.getInitialProps = async (context) => {
   const reqStoreSale = await fetchStoreSale(cookies);
   const storeSale = await reqStoreSale.json();
 
+  const reqCustomer = await fetchCustomer(cookies);
+  const customer = await reqCustomer.json();
+
   return {
     props: {
       user,
       locations,
       inven,
-      storeSale
+      storeSale,
+      customer
     },
   };
 };
@@ -95,6 +100,21 @@ const fetchInven = async (cookies) => {
     return req;
 };
 
+const fetchCustomer = async (cookies) => {
+    let name = "walk in customer"
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/customers?filters[name][$contains]=${name}`;
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
+};
+
 function Toko({ props }) {
   const products = useSelector((state) => state.Order);
   const dispatch = useDispatch();
@@ -104,6 +124,7 @@ function Toko({ props }) {
   const user = props.user;
   const inven = props.inven.data;
   const storeSale = props.storeSale;
+  const customerData = props.customer.data[0];
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -125,6 +146,7 @@ function Toko({ props }) {
 
   const [dppActive, setDPPActive] = useState("Active");
   const [ppnActive, setPPNActive] = useState("Active");
+  const [discMax, setDiscMax] = useState();
 
   const router = useRouter();
   const { TextArea } = Input;
@@ -145,6 +167,9 @@ function Toko({ props }) {
   const cookies = nookies.get(null, "token");
   const tempList = [];
   const [info, setInfo] = useState();
+
+  // customer
+  const [customer, setCustomer] = useState();
 
   // NO Store Sale
   var noStoreSale = String(storeSale?.meta?.pagination.total + 1).padStart(3, "0");
@@ -187,6 +212,7 @@ function Toko({ props }) {
     values.category = selectedCategory;
     values.dpp = dpp;
     values.ppn = ppn;
+    values.customer = customer;
     await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/store-sales/", "store sale");
   };
 
@@ -244,6 +270,14 @@ function Toko({ props }) {
     var newTotal = 0;
 
     newTotal = totalPrice - disc.disc_value;
+    if (disc.disc_value > totalPrice) {
+        newTotal = 0;
+        notification["error"]({
+            message: "Disc tidak sesuai",
+            description:
+                "Disc tetap tidak boleh melebihi total",
+        });
+    }
     setDiscPrice(newTotal);
   };
 
@@ -252,6 +286,14 @@ function Toko({ props }) {
 
     newTotal = totalPrice - (totalPrice * disc.disc_value) / 100;
     if (newTotal < 0) newTotal = 0;
+    if (disc.disc_value > 100) {
+        newTotal = 0;
+        notification["error"]({
+            message: "Disc tidak sesuai",
+            description:
+                "Disc persentase tidak boleh 100%",
+        });
+    }
     setDiscPrice(newTotal);
   };
 
@@ -269,7 +311,7 @@ function Toko({ props }) {
     } else {
       setGrandTotal(totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
     }
-  }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
+  }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]); console.log("producttotal price", productTotalPrice)
 
   useEffect(() => {
     if(products.productList.length > 0){ 
@@ -317,10 +359,32 @@ function Toko({ props }) {
   }, [ppnActive, grandTotal]);
 
   useEffect(() => {
+    // set max value
+    if(discType == "Tetap") setDiscMax(totalPrice);
+    if(discType == "Persentase") setDiscMax(100);
+  }, [discType]);
+
+  useEffect(() => {
     // used to reset redux from value before
     clearData();
     setProductSubTotal({});
+    form.setFieldsValue({
+      customer: customerData.attributes.name,
+    });
+    setCustomer(customerData);
   }, []);
+
+  const validateError = () => {
+    var listError = form.getFieldsError();
+    listError.forEach((element) => {
+      if (element.errors[0]) {
+        notification["error"]({
+          message: "Field Kosong",
+          description: element.errors[0],
+        });
+      }
+    });
+  };
 
   return (
     <>
@@ -403,6 +467,7 @@ function Toko({ props }) {
                 remember: true,
               }}
               onFinish={onFinish}
+              onFinishFailed={validateError}
             >
 
               <div className="w-full flex justify-start mx-2 mt-1">
@@ -425,21 +490,7 @@ function Toko({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="customer_name"
-                    initialValue="Walk In Customer"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Nama Pelanggan tidak boleh kosong!",
-                      },
-                    ]}
-                  >
-                    <Input
-                      style={{ height: "40px" }}
-                      placeholder="Nama Pelanggan"
-                    />
-                  </Form.Item>
+                  <Customer onChangeCustomer={setCustomer} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
                   <Form.Item name="address">
@@ -458,7 +509,7 @@ function Toko({ props }) {
                 </div>
 
                 <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item name="tempo_days" initialValue={0} noStyle>
+                  <Form.Item name="tempo_days" initialValue={"0"} noStyle>
                     <Input
                       size="large"
                       style={{
@@ -576,6 +627,7 @@ function Toko({ props }) {
                       onChange={setTotalWithDisc}
                       size="large"
                       min={0}
+                      max={discMax}
                       placeholder="Diskon"
                       style={{ width: "100%" }}
                     />

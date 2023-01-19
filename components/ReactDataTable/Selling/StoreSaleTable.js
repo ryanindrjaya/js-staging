@@ -174,6 +174,7 @@ export default function ReactDataTable({
                 <InputNumber
                   defaultValue={defaultQty}
                   onChange={(e) => onChangeQty(e, row, idx)}
+                  min={1}
                   rules={[
                     {
                       required: true,
@@ -248,7 +249,9 @@ export default function ReactDataTable({
             <Form.Item name={["margin", `${idx}`]} noStyle>
               <InputNumber
                 defaultValue={defaultMargin}
+                formatter={(value) => `${value}%`}
                 min={0}
+                max={100}
                 onChange={(e) => onChangeMargin(e, row, idx)}
                 style={{
                   width: "100px",
@@ -367,7 +370,7 @@ export default function ReactDataTable({
               rules={[
                 {
                   required: true,
-                  message: "Tanggal EXP tidak boleh kosong!",
+                  message: "Tanggal EXP produk tidak boleh kosong!",
                 },
               ]}
               noStyle

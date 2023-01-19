@@ -24,6 +24,7 @@ const createDetailSale = (
     var unitPrice = element.attributes.buy_price_1;
     var unitPriceAfterDisc = element.attributes.buy_price_1;
     var subTotal = 0;
+    tempListId = [];
 
     var expDate = values.expired_date?.[id];
     var newExptDate = moment
