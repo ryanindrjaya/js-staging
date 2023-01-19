@@ -7,7 +7,14 @@ import { useDispatch } from "react-redux";
 
 const { addProduct } = action;
 
-export default function SearchBar({ form, tempList, onChange, selectedProduct, user, isBasedOnLocation = true }) {
+export default function SearchBar({
+  form,
+  tempList,
+  onChange,
+  selectedProduct,
+  user,
+  isBasedOnLocation = true,
+}) {
   const dispatch = useDispatch();
 
   const [product, setProduct] = useState();
@@ -50,7 +57,8 @@ export default function SearchBar({ form, tempList, onChange, selectedProduct, u
     var queryLocations = "";
 
     res.locations.forEach((location) => {
-      queryLocations = queryLocations + "filters[locations][name][$contains]=" + location.name + "&";
+      queryLocations =
+        queryLocations + "filters[locations][name][$contains]=" + location.name + "&";
     });
     // console.log("querylocation " + queryLocations);
     return queryLocations;
@@ -73,7 +81,9 @@ export default function SearchBar({ form, tempList, onChange, selectedProduct, u
       try {
         let queryLocations = await getUserInfo();
 
-        const endpoint = process.env.NEXT_PUBLIC_URL + `/products?populate=locations&filters[name][$contains]=${query}&${queryLocations}`;
+        const endpoint =
+          process.env.NEXT_PUBLIC_URL +
+          `/products?populate=locations&filters[name][$contains]=${query}&${queryLocations}`;
         const options = {
           method: "GET",
           headers: {
@@ -94,7 +104,9 @@ export default function SearchBar({ form, tempList, onChange, selectedProduct, u
 
           // product based on user location
           const filteredProductByLocation = res.data.filter((item) =>
-            item.attributes.locations.data.some((location) => user.locations.some((userLocation) => userLocation.id === location.id))
+            item.attributes.locations.data.some((location) =>
+              user.locations.some((userLocation) => userLocation.id === location.id)
+            )
           );
 
           console.log(filteredProductByLocation);
