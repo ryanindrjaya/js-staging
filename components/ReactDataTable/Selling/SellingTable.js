@@ -41,221 +41,6 @@ export default function ReactDataTable({
     });
   };
 
-  const lihat = (row) => {
-    openNotificationWithIcon(
-      "info",
-      "Work In Progress",
-      "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
-    );
-    //router.push("order_pembelian/print/" + row.id);
-  };
-
-  const print = (row) => {
-    openNotificationWithIcon(
-      "info",
-      "Work In Progress",
-      "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
-    );
-    //router.push("order_pembelian/print/" + row.id);
-  };
-
-  const edit = (row) => {
-    openNotificationWithIcon(
-      "info",
-      "Work In Progress",
-      "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
-    );
-  };
-
-  const piutang = (row) => {
-    openNotificationWithIcon(
-      "info",
-      "Work In Progress",
-      "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
-    );
-  };
-
-  const lihatPembayaran = (row) => {
-    if (row?.attributes?.retur_store_sale?.data !== null) {
-      bayarRetur(row);
-      view(true);
-    } else {
-      openNotificationWithIcon(
-        "info",
-        "Work In Progress",
-        "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
-      );
-    }
-  };
-
-  const updateStatus = (row) => {
-    openNotificationWithIcon(
-      "info",
-      "Work In Progress",
-      "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
-    );
-  };
-
-  const cetakLabel = (row) => {
-    openNotificationWithIcon(
-      "info",
-      "Work In Progress",
-      "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
-    );
-  };
-
-
-    const customStyles = {
-        headerStyle: { textAlign: "center" },
-        headCells: {
-            style: {
-                color: "white",
-                background: "#036B82",
-            },
-        },
-    };
-
-    const columns = [
-        {
-          name: "Tanggal",
-          width: "150px",
-          selector: (row) => formatMyDate(row.attributes?.sale_date),
-        },
-        {
-          name: "Customer",
-          width: "180px",
-          selector: (row) => row.attributes?.customer.data.attributes.name ?? "-",
-        },
-        {
-          name: "NO Faktur",
-          width: "180px",
-          selector: (row) => row.attributes?.faktur ?? "-",
-        },
-        {
-          name: <div className="ml-6">Status</div>,
-          width: "150px",
-          selector: (row) => {
-            return (
-              <Select
-                defaultValue={row.attributes.status}
-                bordered={false}
-                disabled={row.attributes.status === "Diterima"}
-                onChange={(e) => onChangeStatus(e, row)}
-              >
-                <Option value="Dipesan">
-                  <Tag color="default">Dipesan</Tag>
-                </Option>
-                <Option value="Diterima">
-                  <Tag color="success">Diterima</Tag>
-                </Option>
-                <Option value="Diretur">
-                  <Tag color="blue">Diretur</Tag>
-                </Option>
-              </Select>
-            );
-          },
-        },
-        {
-          name: "Metode Pembayaran",
-          width: "180px",
-          //selector: (row) => row.attributes.purchasing.data.attributes?.no_purchasing ?? "-",
-        },
-        {
-          name: "Jumlah Total",
-          width: "180px",
-          selector: (row) => formatter.format(row.attributes?.total ?? "-"),
-        },
-        {
-          name: "Total Dibayar",
-          width: "180px",
-          //selector: (row) => formatter.format(row.attributes?.total ?? "-"),
-        },
-        {
-          name: "Sisa Pembayaran",
-          width: "200px",
-          //selector: (row) => row.attributes?.location.data.attributes.name,
-        },
-        {
-          name: "Status Pembayaran",
-          width: "150px",
-          selector: (row) => {
-            const lastIndex = row.attributes.purchasing_payments?.data?.length;
-            const lastPayment =
-              row.attributes.purchasing_payments.data[lastIndex - 1];
-
-            if (
-              lastPayment?.attributes.payment_remaining ===
-              lastPayment?.attributes.total_payment
-            ) {
-              return <Tag color={tagRed}>Belum Dibayar</Tag>;
-            } else if (
-              lastPayment?.attributes.payment_remaining > 0 &&
-              lastPayment?.attributes.payment_remaining <
-                lastPayment?.attributes.total_payment
-            ) {
-              return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
-            } else if (lastPayment?.attributes.payment_remaining <= 0) {
-              return <Tag color={tagGreen}>Selesai</Tag>;
-            } else {
-              return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
-            }
-          },
-        },
-        {
-          name: "Faktur Jatuh Tempo",
-          width: "180px",
-          //selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
-        },
-        {
-          name: "Lokasi Penjualan",
-          width: "180px",
-          //selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
-          selector: (row) => row.attributes?.location.data.attributes.name ?? "-",
-        },
-        {
-          name: "Catatan Staff",
-          width: "180px",
-          selector: (row) => row.attributes?.sale_staff ?? "-",
-        },
-        {
-          name: "Catatan Penjualan",
-          width: "180px",
-          selector: (row) => row.attributes?.sale_note ?? "-",
-        },
-        {
-          name: "Ditambah Oleh",
-          width: "180px",
-          selector: (row) => row.attributes?.added_by ?? "-",
-        },
-        {
-            name: "Tindakan",
-            width: "250px",
-            selector: (row) => (
-                <>
-                    <Popover content={content(row)} placement="bottom" trigger="click">
-                        <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
-                            Tindakan
-                        </button>
-                    </Popover>
-                </>
-            ),
-        },
-    ];
-
-    return (
-        <DataTable
-            customStyles={customStyles}
-            onChangePage={onPageChange}
-            paginationRowsPerPageOptions={[10]}
-            paginationTotalRows={data?.meta?.pagination?.total}
-            columns={columns}
-            data={data.data}
-            pagination
-            noDataComponent={"Belum ada data Penjualan Toko"}
-        />
-    );
-  };
-
   const pembayaran = (row) => {
     if (row?.attributes?.retur_store_sale?.data !== null) {
       bayarRetur(row);
@@ -440,7 +225,8 @@ export default function ReactDataTable({
       const dataRetur = row.attributes.retur_store_sale.data.attributes;
 
       for (let index = 1; index < 4; index++) {
-        total = total + parseFloat(dataRetur?.[`additional_fee_${index}_sub`] || 0);
+        total =
+          total + parseFloat(dataRetur?.[`additional_fee_${index}_sub`] || 0);
       }
 
       total = total + parseFloat(dataRetur?.total);
@@ -461,7 +247,9 @@ export default function ReactDataTable({
       return numberFormat(parseFloat(total).toFixed(2));
     } else {
       for (let index = 1; index < 4; index++) {
-        total = total + parseFloat(row.attributes?.[`additional_fee_${index}_sub`] || 0);
+        total =
+          total +
+          parseFloat(row.attributes?.[`additional_fee_${index}_sub`] || 0);
       }
 
       total = total + parseFloat(row.attributes?.total);
@@ -553,7 +341,9 @@ export default function ReactDataTable({
       width: "180px",
       selector: (row) => {
         const paymentData =
-          row?.attributes?.payments?.data[row?.attributes?.payments?.data.length - 1]?.attributes;
+          row?.attributes?.payments?.data[
+            row?.attributes?.payments?.data.length - 1
+          ]?.attributes;
         if (!paymentData) {
           return "";
         }
@@ -587,11 +377,13 @@ export default function ReactDataTable({
       width: "200px",
       selector: (row) =>
         row?.attributes?.payments?.data[0]?.attributes?.payment_remaining
-          ? row?.attributes?.payments?.data[row?.attributes?.payments?.data.length - 1]?.attributes
-              ?.payment_remaining > 0
+          ? row?.attributes?.payments?.data[
+              row?.attributes?.payments?.data.length - 1
+            ]?.attributes?.payment_remaining > 0
             ? numberFormat(
-                row?.attributes?.payments?.data[row?.attributes?.payments?.data.length - 1]
-                  ?.attributes?.payment_remaining
+                row?.attributes?.payments?.data[
+                  row?.attributes?.payments?.data.length - 1
+                ]?.attributes?.payment_remaining
               )
             : ""
           : "",
@@ -603,11 +395,15 @@ export default function ReactDataTable({
         const lastIndex = row.attributes.payments?.data?.length;
         const lastPayment = row.attributes.payments.data[lastIndex - 1];
 
-        if (lastPayment?.attributes.payment_remaining === lastPayment?.attributes.total_payment) {
+        if (
+          lastPayment?.attributes.payment_remaining ===
+          lastPayment?.attributes.total_payment
+        ) {
           return <Tag color={tagRed}>Belum Dibayar</Tag>;
         } else if (
           lastPayment?.attributes.payment_remaining > 0 &&
-          lastPayment?.attributes.payment_remaining < lastPayment?.attributes.total_payment
+          lastPayment?.attributes.payment_remaining <
+            lastPayment?.attributes.total_payment
         ) {
           return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
         } else if (lastPayment?.attributes.payment_remaining <= 0) {
@@ -654,7 +450,12 @@ export default function ReactDataTable({
       width: "250px",
       selector: (row) => (
         <>
-          <Popover content={content(row)} placement="bottom" trigger="click" zIndex={9999}>
+          <Popover
+            content={content(row)}
+            placement="bottom"
+            trigger="click"
+            zIndex={9999}
+          >
             <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
               Tindakan
             </button>

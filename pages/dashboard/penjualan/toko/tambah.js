@@ -5,7 +5,16 @@ import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { Row, Form, Input, InputNumber, Select, Button, Spin, notification } from "antd";
+import {
+  Row,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  Button,
+  Spin,
+  notification,
+} from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import StoreSaleTable from "../../../../components/ReactDataTable/Selling/StoreSaleTable";
@@ -33,13 +42,15 @@ Toko.getInitialProps = async (context) => {
   const reqCustomer = await fetchCustomer(cookies);
   const customer = await reqCustomer.json();
 
+  console.log("customer", customer);
+
   return {
     props: {
       user,
       locations,
       inven,
       storeSale,
-      customer
+      customer,
     },
   };
 };
@@ -101,18 +112,21 @@ const fetchInven = async (cookies) => {
 };
 
 const fetchCustomer = async (cookies) => {
-    let name = "walk in customer"
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/customers?filters[name][$contains]=${name}`;
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
+  let name = "walk in customer";
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL + `/customers?filters[name][$contains]=${name}`;
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
 
-    const req = await fetch(endpoint, options);
-    return req;
+  const req = await fetch(endpoint, options);
+  console.log('endpoint', endpoint);
+  
+  return req;
 };
 
 function Toko({ props }) {
@@ -154,7 +168,8 @@ function Toko({ props }) {
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
   var date = today.getDate() + "/" + mm + "/" + yyyy;
-  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  var time =
+    today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 
   // DPP & PPN
   const [dpp, setDPP] = useState(0);
@@ -167,11 +182,18 @@ function Toko({ props }) {
   const cookies = nookies.get(null, "token");
   const tempList = [];
   const [info, setInfo] = useState();
+
+  // customer
   const [customer, setCustomer] = useState();
 
   // NO Store Sale
-  var noStoreSale = getNoStoreSale().padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`TB/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
+  var noStoreSale = String(storeSale?.meta?.pagination.total + 1).padStart(
+    3,
+    "0"
+  );
+  const [categorySale, setCategorySale] = useState(
+    `TB/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`
+  );
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);
@@ -185,7 +207,6 @@ function Toko({ props }) {
 
   const onFinish = (values) => {
     setLoading(true);
-
     setInfo("sukses");
     storeSale.data.forEach((element) => {
       if (values.no_store_sale == element.attributes.no_store_sale) {
@@ -197,11 +218,8 @@ function Toko({ props }) {
       }
     });
     setDataValues(values);
+    setLoading(false);
   };
-
-  useEffect(() => {
-    if (info === "gagal") setLoading(false);
-  }, [info]);
 
   const createDetailSale = async () => {
     await createDetailSaleFunc(
@@ -210,8 +228,7 @@ function Toko({ props }) {
       productTotalPrice,
       productSubTotal,
       setListId,
-      "/store-sale-details",
-      setLoading
+      "/store-sale-details"
     );
   };
 
@@ -222,7 +239,16 @@ function Toko({ props }) {
     values.dpp = dpp;
     values.ppn = ppn;
     values.customer = customer;
-    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/store-sales/", "store sale");
+    await createSaleFunc(
+      grandTotal,
+      totalPrice,
+      values,
+      listId,
+      form,
+      router,
+      "/store-sales/",
+      "store sale"
+    );
   };
 
   const onChangeProduct = async () => {
@@ -245,9 +271,15 @@ function Toko({ props }) {
 
   const onChangeNoSale = () => {
     if (selectedCategory == "BEBAS")
-      form.setFieldValue("no_store_sale", `TR/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
+      form.setFieldValue(
+        "no_store_sale",
+        `TR/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`
+      );
     if (selectedCategory == "RESEP")
-      form.setFieldValue("no_store_sale", `TB/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`);
+      form.setFieldValue(
+        "no_store_sale",
+        `TB/ET/${user.id}/${noStoreSale}/${mm}/${yyyy}`
+      );
   };
 
   const calculatePriceAfterDisc = (row, index) => {
@@ -288,12 +320,11 @@ function Toko({ props }) {
 
     newTotal = totalPrice - disc.disc_value;
     if (disc.disc_value > totalPrice) {
-        newTotal = 0;
-        notification["error"]({
-            message: "Disc tidak sesuai",
-            description:
-                "Disc tetap tidak boleh melebihi total",
-        });
+      newTotal = 0;
+      notification["error"]({
+        message: "Disc tidak sesuai",
+        description: "Disc tetap tidak boleh melebihi total",
+      });
     }
     setDiscPrice(newTotal);
   };
@@ -304,12 +335,11 @@ function Toko({ props }) {
     newTotal = totalPrice - (totalPrice * disc.disc_value) / 100;
     if (newTotal < 0) newTotal = 0;
     if (disc.disc_value > 100) {
-        newTotal = 0;
-        notification["error"]({
-            message: "Disc tidak sesuai",
-            description:
-                "Disc persentase tidak boleh 100%",
-        });
+      newTotal = 0;
+      notification["error"]({
+        message: "Disc tidak sesuai",
+        description: "Disc persentase tidak boleh 100%",
+      });
     }
     setDiscPrice(newTotal);
   };
@@ -324,17 +354,22 @@ function Toko({ props }) {
     // if both are same then we should not set new price for grand total.
     // if they are not, then set new grand total
     if (discPrice !== totalPrice && discPrice !== 0) {
-      setGrandTotal(discPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
+      setGrandTotal(
+        discPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan)
+      );
     } else {
-      setGrandTotal(totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
+      setGrandTotal(
+        totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan)
+      );
     }
-  }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]); console.log("producttotal price", productTotalPrice)
+  }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
+  console.log("producttotal price", productTotalPrice);
 
   useEffect(() => {
     if (products.productList.length > 0) {
       inven.forEach((element) => {
         products.productList.forEach((data) => {
-          if (data.id == element?.attributes?.products?.data[0]?.id) {
+          if (data.id == element.attributes.products.data[0].id) {
             data.stock = element.attributes.total_stock;
           }
         });
@@ -353,9 +388,7 @@ function Toko({ props }) {
   }, [listId]);
 
   useEffect(() => {
-    if (dataValues && info == "sukses") {
-      createDetailSale();
-    }
+    if (dataValues && info == "sukses") createDetailSale();
   }, [dataValues]);
 
   useEffect(() => {
@@ -378,8 +411,8 @@ function Toko({ props }) {
 
   useEffect(() => {
     // set max value
-    if(discType == "Tetap") setDiscMax(totalPrice);
-    if(discType == "Persentase") setDiscMax(100);
+    if (discType == "Tetap") setDiscMax(totalPrice);
+    if (discType == "Persentase") setDiscMax(100);
   }, [discType]);
 
   useEffect(() => {
@@ -387,12 +420,12 @@ function Toko({ props }) {
     clearData();
     setProductSubTotal({});
     form.setFieldsValue({
-      customer: customerData.attributes.name,
+      customer: customerData?.attributes.name,
     });
     setCustomer(customerData);
   }, []);
 
-const validateError = () => {
+  const validateError = () => {
     var listError = form.getFieldsError();
     listError.forEach((element) => {
       if (element.errors[0]) {
@@ -415,7 +448,9 @@ const validateError = () => {
           <LayoutContent>
             <Row justify="space-between">
               <button disabled className="bg-yellow-500 rounded-md">
-                <p className="px-3 py-2 m-0 font-bold text-white uppercase">{selectedCategory}</p>
+                <p className="px-3 py-2 m-0 font-bold text-white uppercase">
+                  {selectedCategory}
+                </p>
               </button>
               <div>
                 {selectedCategory === "BEBAS" ? (
@@ -501,11 +536,14 @@ const validateError = () => {
                       },
                     ]}
                   >
-                    <Input style={{ height: "40px" }} placeholder="No. Penjualan" />
+                    <Input
+                      style={{ height: "40px" }}
+                      placeholder="No. Penjualan"
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                <Customer onChangeCustomer={setCustomer} />
+                  <Customer onChangeCustomer={setCustomer} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
                   <Form.Item name="address">
@@ -567,7 +605,10 @@ const validateError = () => {
                     >
                       {locations.map((element) => {
                         return (
-                          <Select.Option value={element.id} key={element.attributes.name}>
+                          <Select.Option
+                            value={element.id}
+                            key={element.attributes.name}
+                          >
                             {element.attributes.name}
                           </Select.Option>
                         );
@@ -717,7 +758,9 @@ const validateError = () => {
               </div>
 
               <div className="w-full flex md:w-3/4 justify-end mb-2">
-                <p className="mb-4 font-bold text-center">Biaya Tambahan Lain Lain</p>
+                <p className="mb-4 font-bold text-center">
+                  Biaya Tambahan Lain Lain
+                </p>
               </div>
               <div className="w-full flex flex-wrap justify-end mb-3">
                 <div className="w-full md:w-1/3 px-3 mb-2 text-center md:mb-0">
@@ -775,10 +818,18 @@ const validateError = () => {
               </div>
 
               <div className="w-full flex flex-wrap justify-end mb-3">
-                <Form.Item name="dpp" value={dpp} className="w-full h-2 md:w-1/2 mx-2">
+                <Form.Item
+                  name="dpp"
+                  value={dpp}
+                  className="w-full h-2 md:w-1/2 mx-2"
+                >
                   <span> DPP </span> <span>: {formatter.format(dpp)}</span>
                 </Form.Item>
-                <Form.Item name="ppn" value={ppn} className="w-full h-2 md:w-1/2 mx-2">
+                <Form.Item
+                  name="ppn"
+                  value={ppn}
+                  className="w-full h-2 md:w-1/2 mx-2"
+                >
                   <span> PPN </span> <span>: {formatter.format(ppn)}</span>
                 </Form.Item>
                 <Form.Item
@@ -786,21 +837,24 @@ const validateError = () => {
                   value={totalPrice}
                   className="w-full h-2 md:w-1/2 mx-2"
                 >
-                  <span> Total </span> <span>: {formatter.format(totalPrice)}</span>
+                  <span> Total </span>{" "}
+                  <span>: {formatter.format(totalPrice)}</span>
                 </Form.Item>
                 <Form.Item
                   name="biayaPengiriman"
                   value={biayaPengiriman}
                   className="w-full h-2 md:w-1/2 mx-2"
                 >
-                  <span> Biaya Pengiriman </span> <span>: {formatter.format(biayaPengiriman)}</span>
+                  <span> Biaya Pengiriman </span>{" "}
+                  <span>: {formatter.format(biayaPengiriman)}</span>
                 </Form.Item>
                 <Form.Item
                   name="biayaTambahan"
                   value={biayaTambahan}
                   className="w-full h-2 md:w-1/2 mx-2"
                 >
-                  <span> Biaya Tambahan </span> <span>: {formatter.format(biayaTambahan)}</span>
+                  <span> Biaya Tambahan </span>{" "}
+                  <span>: {formatter.format(biayaTambahan)}</span>
                 </Form.Item>
 
                 <Form.Item
@@ -808,7 +862,8 @@ const validateError = () => {
                   value={grandTotal}
                   className="w-full h-2 md:w-1/2 mx-2 mt-3 text-lg"
                 >
-                  <span> Total </span> <span>: {formatter.format(grandTotal)}</span>
+                  <span> Total </span>{" "}
+                  <span>: {formatter.format(grandTotal)}</span>
                 </Form.Item>
               </div>
 
@@ -822,33 +877,22 @@ const validateError = () => {
               </div>
 
               <div className="w-full flex justify-center">
-                {loading ? (
-                  <div className="rounded-md m-1">
-                    <Spin className="w-full rounded-md">
-                      <button
-                        disabled
-                        htmlType="submit"
-                        className={` bg-cyan-700 transition-all rounded-md duration-200 text-sm`}
-                      >
-                        <p className="px-4 py-2 m-0 text-white">
-                          SIMPAN DAN CETAK UNTUK PEMBAYARAN
-                        </p>
-                      </button>
-                    </Spin>
-                  </div>
-                ) : (
-                  <button
-                    disabled={products.productList.length === 0}
-                    htmlType="submit"
-                    className={`bg-cyan-700 rounded-md m-1 text-sm ${
-                      products.productList.length === 0
-                        ? "opacity-80 cursor-not-allowed"
-                        : "opacity-100"
-                    }`}
-                  >
-                    <p className="px-4 py-2 m-0 text-white">SIMPAN DAN CETAK UNTUK PEMBAYARAN</p>
-                  </button>
-                )}
+                <Form.Item>
+                  {loading ? (
+                    <div className=" flex float-left ml-3 ">
+                      <Spin />
+                    </div>
+                  ) : (
+                    <button
+                      htmlType="submit"
+                      className="bg-cyan-700 rounded-md m-1 text-sm"
+                    >
+                      <p className="px-4 py-2 m-0 text-white">
+                        SIMPAN DAN CETAK UNTUK PEMBAYARAN
+                      </p>
+                    </button>
+                  )}
+                </Form.Item>
               </div>
             </Form>
           </LayoutContent>
