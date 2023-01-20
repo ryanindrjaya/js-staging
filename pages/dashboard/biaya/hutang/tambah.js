@@ -15,6 +15,7 @@ import AddDebtTable from "@iso/components/ReactDataTable/Cost/AddDebtTable";
 //import calculatePrice from "@iso/utility/calculatePrice";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
 import nookies from "nookies";
+import DataTable from "react-data-table-component";
 
 Hutang.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -31,6 +32,9 @@ Hutang.getInitialProps = async (context) => {
   const reqLPB = await fetchDataPurchasing(cookies);
   const LPB = await reqLPB.json();
 
+  const reqReturLPB = await fetchRetur(cookies);
+  const returLPB = await reqReturLPB.json();
+
   //const reqCustomer = await fetchCustomer(cookies);
   //const customer = await reqCustomer.json();
 
@@ -40,6 +44,7 @@ Hutang.getInitialProps = async (context) => {
       //locations,
       //inven,
       LPB,
+      returLPB,
       //customer
     },
   };
@@ -61,6 +66,20 @@ const fetchData = async (cookies) => {
 
 const fetchDataPurchasing = async (cookies) => {
     const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=deep";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
+};
+
+const fetchRetur = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-lpbs?populate=deep";
     const options = {
         method: "GET",
         headers: {
@@ -124,10 +143,13 @@ function Hutang({ props }) {
   //const locations = props.locations.data;
   const user = props.user;
   //const inven = props.inven.data;
-  const lpb = props.LPB.data; console.log("LPB", lpb)
+  const lpb = props.LPB.data;
+  const returLPB = props.returLPB.data;
   //const customerData = props.customer.data[0];
   const [supplier, setSupplier] = useState();
   const [dataTabel, setDataTabel] =  useState([]);
+  const [dataRetur, setDataRetur] = useState([]);
+  const [sisaHutang, setSisaHutang] = useState([]); console.log("sisa hutang", sisaHutang)
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -233,7 +255,20 @@ function Hutang({ props }) {
 
         if (status == "Tempo" || statusPembayaran == "Dibayar Sebagian") dataTabel.push(row);
     });
-      console.log("data", dataTabel)
+
+    returLPB.forEach((row) => {
+      row.subtotal = 0;
+      dataTabel.forEach((element) => {
+        if(element.attributes.no_purchasing == row.attributes.purchasing.data.attributes.no_purchasing)
+        {
+          row.attributes.retur_lpb_details.data.forEach((detail) => {
+            row.subtotal += parseInt( detail.attributes.sub_total ); 
+          });
+          //row.subtotal = 
+          dataRetur.push({id: element.attributes.no_purchasing, subtotal: row.subtotal});
+        }
+      });
+    });
   }, []);
 
   const validateError = () => {
@@ -356,12 +391,14 @@ function Hutang({ props }) {
               <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
                 <AddDebtTable
                   data={dataTabel}
+                  retur={dataRetur}
+                  setSisaHutang={setSisaHutang}
                 />
               </div>
 
               <div className="w-full flex flex-wrap mb-3">
                 <Form.Item name="total_item" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> TOTAL ITEM </span> <span> : </span>
+                  <span> TOTAL ITEM </span> <span> : {dataTabel.length}</span>
                 </Form.Item>
                 <Form.Item name="total_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
                   <span> TOTAL HUTANG JATUH TEMPO </span> <span> : </span>
