@@ -76,12 +76,12 @@ export default function Supplier({ onChangeSupplier }) {
         <Form.Item
           name="supplier_id"
           style={{ width: "100%" }}
-          rules={[
-            {
-              required: true,
-              message: "Supplier tidak boleh kosong!",
-            },
-          ]}
+          //rules={[
+          //  {
+          //    required: true,
+          //    message: "Supplier tidak boleh kosong!",
+          //  },
+          //]}
         >
           <Select
             size="large"

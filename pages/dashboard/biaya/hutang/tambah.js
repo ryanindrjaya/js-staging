@@ -136,10 +136,10 @@ const fetchRetur = async (cookies) => {
 
 
 function Hutang({ props }) {
-  const products = useSelector((state) => state.Order);
+  const biaya = useSelector((state) => state.Cost);
   const dispatch = useDispatch();
 
-  var selectedProduct = products?.productList;
+  //var selectedProduct = products?.productList;
   //const locations = props.locations.data;
   const user = props.user;
   //const inven = props.inven.data;
@@ -149,7 +149,7 @@ function Hutang({ props }) {
   const [supplier, setSupplier] = useState();
   const [dataTabel, setDataTabel] =  useState([]);
   const [dataRetur, setDataRetur] = useState([]);
-  const [sisaHutang, setSisaHutang] = useState([]); console.log("sisa hutang", sisaHutang)
+  const [sisaHutang, setSisaHutang] = useState([]);
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -180,7 +180,7 @@ function Hutang({ props }) {
   });
 
   const onFinish = (values) => {
-    setLoading(true);
+    setLoading(true); console.log("values", values)
     //setInfo("sukses");
     //sale.data.forEach((element) => {
     //  if (values.no_sales_sell == element.attributes.no_sales_sell) {
@@ -200,11 +200,31 @@ function Hutang({ props }) {
     dispatch({ type: "CLEAR_DATA" });
   };
 
+  //useEffect(() => {
+  //  var lpbId = 0;
+
+  //  returLPB.forEach((row) => { console.log("lpb id", lpbId, biaya)
+  //    row.subtotal = 0;
+  //    biaya.list.forEach((element) => {
+  //      if(element.attributes.no_purchasing == row.attributes.purchasing.data.attributes.no_purchasing)
+  //      {
+  //        row.attributes.retur_lpb_details.data.forEach((detail) => {
+  //          row.subtotal += parseInt( detail.attributes.sub_total ); 
+  //        });
+  //        //row.subtotal =
+  //        //dataRetur.push({id: element.attributes.no_purchasing, subtotal: row.subtotal});
+  //        dataRetur[lpbId] = {id: element.attributes.no_purchasing, subtotal: row.subtotal};
+  //      }
+  //    });
+  //    lpbId++;
+  //  }); console.log("data retur", dataRetur)
+  //}, [biaya.list]);
+
   useEffect(() => {
     // used to reset redux from value before
     //setDataTabel([]);
     clearData();
-
+    var lpbId = 0;
     lpb.forEach((row) => {
         var tempoDate = new Date(row.attributes?.date_purchasing);
         var tempoTime = parseInt(row.attributes?.tempo_days ?? 0);
@@ -253,23 +273,38 @@ function Hutang({ props }) {
             }
         }
 
-        if (status == "Tempo" || statusPembayaran == "Dibayar Sebagian") dataTabel.push(row);
+        if (status == "Tempo" || statusPembayaran == "Dibayar Sebagian") {
+          dataTabel[lpbId] = row;
+          //biaya.list.push(row);
+          dispatch({ type: "ADD_LIST", list: row });
+        }
+        lpbId++;
     });
 
-    returLPB.forEach((row) => {
+    //dataTabel.push(biaya.list);
+    lpbId = 0;
+
+    returLPB.forEach((row) => { console.log("row", row)
       row.subtotal = 0;
-      dataTabel.forEach((element) => {
+      dataTabel.forEach((element) => { console.log("element", element)
         if(element.attributes.no_purchasing == row.attributes.purchasing.data.attributes.no_purchasing)
         {
           row.attributes.retur_lpb_details.data.forEach((detail) => {
             row.subtotal += parseInt( detail.attributes.sub_total ); 
           });
-          //row.subtotal = 
-          dataRetur.push({id: element.attributes.no_purchasing, subtotal: row.subtotal});
+          //row.subtotal =
+          //dataRetur.push({id: element.attributes.no_purchasing, subtotal: row.subtotal});
+          dataRetur[lpbId] = {id: element.attributes.no_purchasing, subtotal: row.subtotal};
         }
       });
-    });
+      lpbId++;
+    }); console.log("biaya", biaya, dataTabel, dataRetur)
+    //biaya.info = dataRetur;
+    //biaya.list = dataTabel; 
+    
   }, []);
+
+  console.log("biaya list", biaya, dataTabel)
 
   const validateError = () => {
     var listError = form.getFieldsError();
@@ -393,12 +428,13 @@ function Hutang({ props }) {
                   data={dataTabel}
                   retur={dataRetur}
                   setSisaHutang={setSisaHutang}
+                  biaya={biaya}
                 />
               </div>
 
               <div className="w-full flex flex-wrap mb-3">
                 <Form.Item name="total_item" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> TOTAL ITEM </span> <span> : {dataTabel.length}</span>
+                  <span> TOTAL ITEM </span> <span> : {dataTabel.length - 1}</span>
                 </Form.Item>
                 <Form.Item name="total_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
                   <span> TOTAL HUTANG JATUH TEMPO </span> <span> : </span>
@@ -470,11 +506,20 @@ function Hutang({ props }) {
                       }}
                       placeholder="Metode Pembayaran"
                     >
-                      <Select.Option value="1" key="1">
-                        Status 1
+                      <Select.Option value="tunai" key="tunai">
+                        Tunai
                       </Select.Option>
-                      <Select.Option value="2" key="2">
-                        Status 2
+                      <Select.Option value="transfer" key="transfer">
+                        Bank Transfer
+                      </Select.Option>
+                      <Select.Option value="giro" key="giro">
+                        Bank Giro
+                      </Select.Option>
+                      <Select.Option value="cn" key="cn">
+                        CN
+                      </Select.Option>
+                      <Select.Option value="oth" key="oth">
+                        OTH
                       </Select.Option>
                     </Select>
                   </Form.Item>
@@ -507,11 +552,20 @@ function Hutang({ props }) {
                       }}
                       placeholder="Metode Pembayaran"
                     >
-                      <Select.Option value="1" key="1">
-                        Status 1
+                      <Select.Option value="tunai" key="tunai">
+                        Tunai
                       </Select.Option>
-                      <Select.Option value="2" key="2">
-                        Status 2
+                      <Select.Option value="transfer" key="transfer">
+                        Bank Transfer
+                      </Select.Option>
+                      <Select.Option value="giro" key="giro">
+                        Bank Giro
+                      </Select.Option>
+                      <Select.Option value="cn" key="cn">
+                        CN
+                      </Select.Option>
+                      <Select.Option value="oth" key="oth">
+                        OTH
                       </Select.Option>
                     </Select>
                   </Form.Item>
@@ -543,11 +597,20 @@ function Hutang({ props }) {
                       }}
                       placeholder="Metode Pembayaran"
                     >
-                      <Select.Option value="1" key="1">
-                        Status 1
+                      <Select.Option value="tunai" key="tunai">
+                        Tunai
                       </Select.Option>
-                      <Select.Option value="2" key="2">
-                        Status 2
+                      <Select.Option value="transfer" key="transfer">
+                        Bank Transfer
+                      </Select.Option>
+                      <Select.Option value="giro" key="giro">
+                        Bank Giro
+                      </Select.Option>
+                      <Select.Option value="cn" key="cn">
+                        CN
+                      </Select.Option>
+                      <Select.Option value="oth" key="oth">
+                        OTH
                       </Select.Option>
                     </Select>
                   </Form.Item>
@@ -579,11 +642,20 @@ function Hutang({ props }) {
                       }}
                       placeholder="Metode Pembayaran"
                     >
-                      <Select.Option value="1" key="1">
-                        Status 1
+                      <Select.Option value="tunai" key="tunai">
+                        Tunai
                       </Select.Option>
-                      <Select.Option value="2" key="2">
-                        Status 2
+                      <Select.Option value="transfer" key="transfer">
+                        Bank Transfer
+                      </Select.Option>
+                      <Select.Option value="giro" key="giro">
+                        Bank Giro
+                      </Select.Option>
+                      <Select.Option value="cn" key="cn">
+                        CN
+                      </Select.Option>
+                      <Select.Option value="oth" key="oth">
+                        OTH
                       </Select.Option>
                     </Select>
                   </Form.Item>
@@ -615,11 +687,20 @@ function Hutang({ props }) {
                       }}
                       placeholder="Metode Pembayaran"
                     >
-                      <Select.Option value="1" key="1">
-                        Status 1
+                      <Select.Option value="tunai" key="tunai">
+                        Tunai
                       </Select.Option>
-                      <Select.Option value="2" key="2">
-                        Status 2
+                      <Select.Option value="transfer" key="transfer">
+                        Bank Transfer
+                      </Select.Option>
+                      <Select.Option value="giro" key="giro">
+                        Bank Giro
+                      </Select.Option>
+                      <Select.Option value="cn" key="cn">
+                        CN
+                      </Select.Option>
+                      <Select.Option value="oth" key="oth">
+                        OTH
                       </Select.Option>
                     </Select>
                   </Form.Item>
