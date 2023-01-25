@@ -23,8 +23,8 @@ export default function Reducer(state = initState, action) {
         info: infoCopy,
       };
 
-    case "CHANGE_DATA_SUBTOTAL":
-    var subtotal = action.subtotal;
+    case "CHANGE_TOTAL_HUTANG_JATUH_TEMPO":
+    var totalHutangJatuhTempo = action.totalHutangJatuhTempo;
     var id = action.index;
     //var data = action.listData.attributes;
 
@@ -34,7 +34,7 @@ export default function Reducer(state = initState, action) {
           ...state.info,
           [id]: {
             ...state.info[id],
-            subtotal: subtotal,
+            totalHutangJatuhTempo: totalHutangJatuhTempo,
           },
         },
       };

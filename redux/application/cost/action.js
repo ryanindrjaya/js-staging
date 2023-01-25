@@ -12,9 +12,9 @@ const actions = {
     index,
   }),
 
-  changeSubtotal: (subtotal, listData, index) => ({
-    type: "CHANGE_DATA_SUBTOTAL",
-    subtotal,
+  changeTotalHutangJatuhTempo: (totalHutangJatuhTempo, listData, index) => ({
+    type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO",
+    totalHutangJatuhTempo,
     listData,
     index,
   }),

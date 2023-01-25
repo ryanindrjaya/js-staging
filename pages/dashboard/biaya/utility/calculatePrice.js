@@ -9,7 +9,6 @@ export default function calculatePrice(
     //productSubTotal,
     //setTotalPrice,
     index) {
-    console.log("calculate row", row, biaya, index);
 
     var sisaHutang = row.sisaHutang;
     var tunai = 0;

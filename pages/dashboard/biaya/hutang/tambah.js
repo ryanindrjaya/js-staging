@@ -181,7 +181,7 @@ function Hutang({ props }) {
   });
 
   const onFinish = (values) => {
-    setLoading(true); console.log("values", values)
+    setLoading(true);
     //setInfo("sukses");
     //sale.data.forEach((element) => {
     //  if (values.no_sales_sell == element.attributes.no_sales_sell) {
