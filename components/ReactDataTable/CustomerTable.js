@@ -1,7 +1,10 @@
 import DataTable from "react-data-table-component";
 import AlertDialog from "../Alert/Alert";
+import { Popover } from "antd";
+import { EditOutlined } from "@ant-design/icons"
 
-export default function ReactDataTable({ data, onDelete, onUpdate }) { console.log("coba data",data)
+export default function ReactDataTable({ data, onDelete, onUpdate }) {
+  console.log("coba data", data);
   const onConfirm = (id) => {
     onDelete(id);
   };
@@ -13,6 +16,25 @@ export default function ReactDataTable({ data, onDelete, onUpdate }) { console.l
   const onEdit = (id) => {
     onUpdate(id);
   };
+
+  const content = (row) => (
+    <div>
+      <button
+        onClick={() => onEdit(row.id)}
+        className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+      >
+        <EditOutlined className="mr-2 mt-0.5 float float-left" />
+        Edit
+      </button>
+      <AlertDialog
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+        title="Hapus Kategori"
+        message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
+        id={row.id}
+      />
+    </div>
+  );
 
   const customStyles = {
     headCells: {
@@ -32,60 +54,32 @@ export default function ReactDataTable({ data, onDelete, onUpdate }) { console.l
     //},
     {
       name: "Nama",
-      width: "250px",
+      width: "w-1/4",
       //sortable: true,
-      selector: (row) => row.name,
+      selector: (row) => row?.attributes?.name,
     },
     {
       name: "Alamat",
-      width: "250px",
+      width: "w-1/4",
       //sortable: true,
-      selector: (row) => row.address,
+      selector: (row) => row?.attributes?.address,
     },
     {
       name: "Type",
-      width: "250px",
+      width: "w-1/4",
       //sortable: true,
-      selector: (row) => row.type,
+      selector: (row) => row?.attributes?.type,
     },
     {
       name: "Tindakan",
-      width: "250px",
+      width: "w-1/4",
       selector: (row) => (
         <>
-          <div className="grid grid-cols-3 gap-2">
-            {row.deleteAble ? (
-              <button
-                onClick={() => onEdit(row.id)}
-                className="hover:bg-cyan-700  hover:text-white transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-              >
-                Edit
-              </button>
-            ) : (
-              <button
-                onClick={() => onEdit(row.id)}
-                className="invisible hover:bg-cyan-700  hover:text-white transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-              >
-                Edit
-              </button>
-            )}
-
-            {row.deleteAble ? (
-              <AlertDialog
-                onCancel={onCancel}
-                onConfirm={onConfirm}
-                title="Hapus Customer"
-                message="Data customer yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
-                id={row.id}
-              />
-            ) : (
-              <div className="invisible">
-                <button className="hover:bg-cyan-400  hover:text-white transition-colors  text-xs font-normal py-2 px-2 rounded-md ">
-                  Hapus
-                </button>
-              </div>
-            )}
-          </div>
+          <Popover content={content(row)} placement="bottom" trigger="click">
+            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
+              Tindakan
+            </button>
+          </Popover>
         </>
       ),
     },
@@ -95,9 +89,9 @@ export default function ReactDataTable({ data, onDelete, onUpdate }) { console.l
     <DataTable
       customStyles={customStyles}
       columns={columns}
-      data={data}
+      data={data.data}
       paginationRowsPerPageOptions={[50]}
-      noDataComponent={`--Belum ada produk--`}
+      noDataComponent={`--Belum ada data--`}
       //pagination
     />
   );
