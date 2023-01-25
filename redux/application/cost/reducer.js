@@ -55,6 +55,22 @@ export default function Reducer(state = initState, action) {
         },
       };
 
+    case "CHANGE_PILIH_DATA":
+    var pilihdata = action.pilihData;
+    var id = action.index;
+    //var data = action.listData.attributes;
+
+      return {
+        ...state,
+        info: {
+          ...state.info,
+          [id]: {
+            ...state.info[id],
+            pilihData: pilihdata,
+          },
+        },
+      };
+
     case "CHANGE_DATA_TUNAI":
     var tunai = action.tunai;
     var id = action.index;

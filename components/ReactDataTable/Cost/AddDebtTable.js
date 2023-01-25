@@ -1,10 +1,10 @@
 import DataTable from "react-data-table-component";
 import AlertDialog from "../../Alert/Alert";
-import { Input, InputNumber, Select, Form, Row, DatePicker } from "antd";
+import { Input, InputNumber, Select, Form, Row, DatePicker, Checkbox } from "antd";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
 
-export default function ReactDataTable({ data, retur, setSisaHutang, biaya }) {
+export default function ReactDataTable({ data, retur, setSisaHutang, biaya, calculatePriceTotal }) {
   const dispatch = useDispatch();
 
   var unit = 1;
@@ -39,18 +39,13 @@ export default function ReactDataTable({ data, retur, setSisaHutang, biaya }) {
     element.hutangJatuhTempo = element.attributes.total_purchasing - element.subtotal;
     element.sisaHutang = element.hutangJatuhTempo;
     element.sisaHutangFix = element.hutangJatuhTempo; 
-    element.tunai = 0;
-    element.transfer = 0;
-    element.giro = 0;
-    element.cn = 0;
-    element.oth = 0;
     sisaHutang[index] = element.sisaHutang;
-    element.pilih = "tidak";
-    
+    //biaya.info[index].pilihData = "tidak";
+
     index++;
   });
 
-  const onChange = (value, inputData, status) => { console.log("inputData",inputData,status)
+  const onChange = (value, inputData, status) => {
     var index = 0;
     data.forEach((row) => {
       if(row.attributes.no_purchasing == inputData.attributes.no_purchasing)
@@ -58,7 +53,7 @@ export default function ReactDataTable({ data, retur, setSisaHutang, biaya }) {
         if(status == "tunai") {
           row.sisaHutang = row.sisaHutang + row.tunai;
           row.tunai = value;
-          row.sisaHutang = row.sisaHutang - row.tunai; console.log("masuk")
+          row.sisaHutang = row.sisaHutang - row.tunai;
           //onChangeTunai( value, row, index );
         } else if(status == "transfer") {
           row.sisaHutang = row.sisaHutang + row.transfer;
@@ -91,36 +86,43 @@ export default function ReactDataTable({ data, retur, setSisaHutang, biaya }) {
     
   };
 
-  const onChangeSisaHutang = (value, data, index) => {
-    var sisa = data.sisaHutangFix;
-    sisa = sisa;
-    dispatch({ type: "CHANGE_DATA_SISAHUTANG", sisahutang: sisa, listData: data, index: index });
+  //const onChangeSisaHutang = (value, data, index) => {
+  //  var sisa = data.sisaHutangFix;
+  //  sisa = sisa;
+  //  dispatch({ type: "CHANGE_DATA_SISAHUTANG", sisahutang: sisa, listData: data, index: index });
+  //};
+
+  const onChangePilih = async (value, data, index) => {
+    dispatch({ type: "CHANGE_PILIH_DATA", pilihData: value, listData: data, index: index });
+    //    console.log('test');
+    //onChange(value, data, "tunai");
+    //onChangeSisaHutang(value, data, index);
   };
 
   const onChangeTunai = (value, data, index) => {
-    onChange(value, data, "tunai");
+    //onChange(value, data, "tunai");
     dispatch({ type: "CHANGE_DATA_TUNAI", tunai: value, listData: data, index: index });
-    onChangeSisaHutang(value, data, index);
+    //onChangeSisaHutang(value, data, index);
   };
 
   const onChangeTransfer = (value, data, index) => {
     dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: value, listData: data, index: index });
-    onChangeSisaHutang(value, data, index);
+    //onChangeSisaHutang(value, data, index);
   };
 
   const onChangeGiro = (value, data, index) => {
     dispatch({ type: "CHANGE_DATA_GIRO", giro: value, listData: data, index: index });
-    onChangeSisaHutang(value, data, index);
+    //onChangeSisaHutang(value, data, index);
   };
 
   const onChangeCn = (value, data, index) => {
     dispatch({ type: "CHANGE_DATA_CN", cn: value, listData: data, index: index });
-    onChangeSisaHutang(value, data, index);
+    //onChangeSisaHutang(value, data, index);
   };
 
   const onChangeOth = (value, data, index) => {
     dispatch({ type: "CHANGE_DATA_OTH", oth: value, listData: data, index: index });
-    onChangeSisaHutang(value, data, index);
+    //onChangeSisaHutang(value, data, index);
   };
 
   var formatter = new Intl.NumberFormat("id-ID", {
@@ -149,20 +151,21 @@ export default function ReactDataTable({ data, retur, setSisaHutang, biaya }) {
       selector: (row, idx) => {
         return (
           <Row align="bottom" justify="center">
-            <Form.Item noStyle>
-            {dataRetur === "tidak" ? (
-              <button type="button" className="bg-cyan-700 rounded-md m-1 text-sm">
-                <p className="px-4 py-2 m-0 text-white">
-                Pilih
-                </p>
-              </button>
-            ) : (
-              <button type="button" className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm">
-                <p className="px-4 py-2 m-0 text-black">
-                Tidak
-                </p>
-              </button>
-            )}
+                <Form.Item noStyle>
+                    <Checkbox  onChange={onChangePilih("pilih", row, idx)} />
+            {/*{biaya.info[idx]?.pilihData == null || biaya.info[idx]?.pilihData == "tidak" ? (*/}
+            {/*  <button type="button" className="bg-cyan-700 rounded-md m-1 text-sm">*/}
+            {/*    <p className="px-4 py-2 m-0 text-white">*/}
+            {/*    Pilih*/}
+            {/*    </p>*/}
+            {/*  </button>*/}
+            {/*) : (*/}
+            {/*  <button type="button" onClick={onChangePilih("pilih", row, idx)} className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm">*/}
+            {/*    <p className="px-4 py-2 m-0 text-black">*/}
+            {/*    Tidak*/}
+            {/*    </p>*/}
+            {/*  </button>*/}
+            {/*)}*/}
             </Form.Item>
           </Row>
         )
@@ -197,7 +200,7 @@ export default function ReactDataTable({ data, retur, setSisaHutang, biaya }) {
       name: "ACC Tunai",
       width: "150px",
       selector: (row, idx) => {
-        var defaultAccTunai = row.tunai;
+        var defaultAccTunai = 0;
 
         return (
           <Row align="bottom" justify="center">
@@ -221,7 +224,7 @@ export default function ReactDataTable({ data, retur, setSisaHutang, biaya }) {
       name: "ACC Bank Transfer",
       width: "150px",
       selector: (row, idx) => {
-        var defaultAccBankTf = row.transfer;
+        var defaultAccBankTf = 0;
 
         return (
           <Row align="bottom" justify="center">
@@ -245,7 +248,7 @@ export default function ReactDataTable({ data, retur, setSisaHutang, biaya }) {
       name: "ACC Bank Giro",
       width: "150px",
       selector: (row, idx) => {
-        var defaultAccBankGiro = row.giro;
+        var defaultAccBankGiro = 0;
 
         return (
           <Row align="bottom" justify="center">
@@ -269,7 +272,7 @@ export default function ReactDataTable({ data, retur, setSisaHutang, biaya }) {
       name: "ACC CN",
       width: "150px",
       selector: (row, idx) => {
-        var defaultAccCN = row.cn;
+        var defaultAccCN = 0;
 
         return (
           <Row align="bottom" justify="center">
@@ -293,7 +296,7 @@ export default function ReactDataTable({ data, retur, setSisaHutang, biaya }) {
       name: "ACC OTH",
       width: "150px",
       selector: (row, idx) => {
-        var defaultAccOTH = row.oth;
+        var defaultAccOTH = 0;
 
         return (
           <Row align="bottom" justify="center">
@@ -316,7 +319,7 @@ export default function ReactDataTable({ data, retur, setSisaHutang, biaya }) {
     {
       name: "Sisa Hutang Jt",
       width: "150px",
-      selector: (row) => formatter.format(row.sisaHutang),
+      selector: (row, idx) => calculatePriceTotal(row, idx),
     },
   ];
 

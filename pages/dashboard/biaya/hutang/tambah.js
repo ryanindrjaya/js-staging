@@ -12,7 +12,7 @@ import AddSellSalesTable from "@iso/components/ReactDataTable/Selling/AddSellSal
 import AddDebtTable from "@iso/components/ReactDataTable/Cost/AddDebtTable";
 //import createOrderSaleFunc from "@iso/utility/createOrderSale";
 //import createDetailOrderSaleFunc from "@iso/utility/createDetailOrderSale";
-//import calculatePrice from "@iso/utility/calculatePrice";
+import calculatePrice from "../utility/calculatePrice";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
 import nookies from "nookies";
 import DataTable from "react-data-table-component";
@@ -150,6 +150,7 @@ function Hutang({ props }) {
   const [dataTabel, setDataTabel] =  useState([]);
   const [dataRetur, setDataRetur] = useState([]);
   const [sisaHutang, setSisaHutang] = useState([]);
+  const [sisaHutangTotal, setSisaHutangTotal] = useState({});
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -200,25 +201,10 @@ function Hutang({ props }) {
     dispatch({ type: "CLEAR_DATA" });
   };
 
-  //useEffect(() => {
-  //  var lpbId = 0;
-
-  //  returLPB.forEach((row) => { console.log("lpb id", lpbId, biaya)
-  //    row.subtotal = 0;
-  //    biaya.list.forEach((element) => {
-  //      if(element.attributes.no_purchasing == row.attributes.purchasing.data.attributes.no_purchasing)
-  //      {
-  //        row.attributes.retur_lpb_details.data.forEach((detail) => {
-  //          row.subtotal += parseInt( detail.attributes.sub_total ); 
-  //        });
-  //        //row.subtotal =
-  //        //dataRetur.push({id: element.attributes.no_purchasing, subtotal: row.subtotal});
-  //        dataRetur[lpbId] = {id: element.attributes.no_purchasing, subtotal: row.subtotal};
-  //      }
-  //    });
-  //    lpbId++;
-  //  }); console.log("data retur", dataRetur)
-  //}, [biaya.list]);
+  const calculatePriceTotal = (row, index) => {
+    const total = calculatePrice(row, biaya, sisaHutangTotal, index);
+    return formatter.format(total);
+  };
 
   useEffect(() => {
     // used to reset redux from value before
@@ -284,24 +270,19 @@ function Hutang({ props }) {
     //dataTabel.push(biaya.list);
     lpbId = 0;
 
-    returLPB.forEach((row) => { console.log("row", row)
-      row.subtotal = 0;
-      dataTabel.forEach((element) => { console.log("element", element)
-        if(element.attributes.no_purchasing == row.attributes.purchasing.data.attributes.no_purchasing)
-        {
-          row.attributes.retur_lpb_details.data.forEach((detail) => {
-            row.subtotal += parseInt( detail.attributes.sub_total ); 
+      returLPB.forEach((row) => {
+          row.subtotal = 0;
+          dataTabel.forEach((element) => {
+              if (element.attributes.no_purchasing == row.attributes.purchasing.data.attributes.no_purchasing) {
+                  row.attributes.retur_lpb_details.data.forEach((detail) => {
+                      row.subtotal += parseInt(detail.attributes.sub_total);
+                  });
+                  dataRetur[lpbId] = { id: element.attributes.no_purchasing, subtotal: row.subtotal };
+              }
           });
-          //row.subtotal =
-          //dataRetur.push({id: element.attributes.no_purchasing, subtotal: row.subtotal});
-          dataRetur[lpbId] = {id: element.attributes.no_purchasing, subtotal: row.subtotal};
-        }
+          lpbId++;
       });
-      lpbId++;
-    }); console.log("biaya", biaya, dataTabel, dataRetur)
-    //biaya.info = dataRetur;
-    //biaya.list = dataTabel; 
-    
+
   }, []);
 
   console.log("biaya list", biaya, dataTabel)
@@ -429,12 +410,13 @@ function Hutang({ props }) {
                   retur={dataRetur}
                   setSisaHutang={setSisaHutang}
                   biaya={biaya}
+                  calculatePriceTotal={calculatePriceTotal}
                 />
               </div>
 
               <div className="w-full flex flex-wrap mb-3">
                 <Form.Item name="total_item" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> TOTAL ITEM </span> <span> : {dataTabel.length - 1}</span>
+                  <span> TOTAL ITEM </span> <span> : {dataTabel.length}</span>
                 </Form.Item>
                 <Form.Item name="total_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
                   <span> TOTAL HUTANG JATUH TEMPO </span> <span> : </span>

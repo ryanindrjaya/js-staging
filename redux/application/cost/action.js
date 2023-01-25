@@ -26,6 +26,13 @@ const actions = {
     index,
   }),
 
+  changePilih: (pilihData, listData, index) => ({
+    type: "CHANGE_PILIH_DATA",
+    pilihData,
+    listData,
+    index,
+  }),
+
   changeTunai: (tunai, listData, index) => ({
     type: "CHANGE_DATA_TUNAI",
     tunai,
