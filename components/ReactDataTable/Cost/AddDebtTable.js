@@ -4,7 +4,7 @@ import { Input, InputNumber, Select, Form, Row, DatePicker, Checkbox } from "ant
 import { useDispatch } from "react-redux";
 import { useState } from "react";
 
-export default function ReactDataTable({ data, retur, setSisaHutang, biaya, calculatePriceTotal }) {
+export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal }) {
   const dispatch = useDispatch();
 
   var unit = 1;
@@ -14,9 +14,6 @@ export default function ReactDataTable({ data, retur, setSisaHutang, biaya, calc
   var returSubtotal = 0;
   var sisaHutang = {};
   const [dataRetur, setDataRetur] = useState("tidak");
-  //var returId = 0;
-
-  //const [nilaiRetur, setNilaiRetur] = useState([]);
 
   var index = 0;
   data.forEach((element) => {
@@ -24,23 +21,15 @@ export default function ReactDataTable({ data, retur, setSisaHutang, biaya, calc
     retur.forEach((row) => {
       if(element.attributes.no_purchasing == row.id)
       {
-        //element.attributes.purchasing_details.data.forEach((detail) => {
-        //  row.subtotal += detail.attributes.sub_total;
-        //});
-        //row.subtotal = 
         returSubtotal += row.subtotal;
       }
     });
-
-    //dispatch({ type: "CHAN    GE_DATA_SUBTOTAL", subtotal: returSubtotal, listData: element, index: index });
-    //dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
 
     element.subtotal = returSubtotal;
     element.hutangJatuhTempo = element.attributes.total_purchasing - element.subtotal;
     element.sisaHutang = element.hutangJatuhTempo;
     element.sisaHutangFix = element.hutangJatuhTempo; 
     sisaHutang[index] = element.sisaHutang;
-    //biaya.info[index].pilihData = "tidak";
 
     index++;
   });
@@ -51,7 +40,7 @@ export default function ReactDataTable({ data, retur, setSisaHutang, biaya, calc
   //  dispatch({ type: "CHANGE_DATA_SISAHUTANG", sisahutang: sisa, listData: data, index: index });
   //};
 
-  const onChangePilih = async (value, data, index, v) => { console.log("data nih ",data)
+  const onChangePilih = async (value, data, index, v) => {
     var pilihData = "tidak";
     if(value.target.checked == true) pilihData = "pilih";
     else pilihData = "tidak";
@@ -62,27 +51,27 @@ export default function ReactDataTable({ data, retur, setSisaHutang, biaya, calc
   const onChangeTunai = (value, data, index) => {
     //onChange(value, data, "tunai");
     dispatch({ type: "CHANGE_DATA_TUNAI", tunai: value, listData: data, index: index });
-    onChangeSisaHutang(value, data, index);
+    //onChangeSisaHutang(value, data, index);
   };
 
   const onChangeTransfer = (value, data, index) => {
     dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: value, listData: data, index: index });
-    onChangeSisaHutang(value, data, index);
+    //onChangeSisaHutang(value, data, index);
   };
 
   const onChangeGiro = (value, data, index) => {
     dispatch({ type: "CHANGE_DATA_GIRO", giro: value, listData: data, index: index });
-    onChangeSisaHutang(value, data, index);
+    //onChangeSisaHutang(value, data, index);
   };
 
   const onChangeCn = (value, data, index) => {
     dispatch({ type: "CHANGE_DATA_CN", cn: value, listData: data, index: index });
-    onChangeSisaHutang(value, data, index);
+    //onChangeSisaHutang(value, data, index);
   };
 
   const onChangeOth = (value, data, index) => {
     dispatch({ type: "CHANGE_DATA_OTH", oth: value, listData: data, index: index });
-    onChangeSisaHutang(value, data, index);
+    //onChangeSisaHutang(value, data, index);
   };
 
   var formatter = new Intl.NumberFormat("id-ID", {

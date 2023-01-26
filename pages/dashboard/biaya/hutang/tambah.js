@@ -11,7 +11,7 @@ import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import AddSellSalesTable from "@iso/components/ReactDataTable/Selling/AddSellSalesTable";
 import AddDebtTable from "@iso/components/ReactDataTable/Cost/AddDebtTable";
 //import createOrderSaleFunc from "@iso/utility/createOrderSale";
-//import createDetailOrderSaleFunc from "@iso/utility/createDetailOrderSale";
+import createDetails from "../utility/createDetailHutang";
 import calculatePrice from "../utility/calculatePrice";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
 import nookies from "nookies";
@@ -157,6 +157,10 @@ function Hutang({ props }) {
   //const [additionalFee, setAdditionalFee] = useState();
   const [isFetchinData, setIsFetchingData] = useState(false);
 
+  const [dataValues, setDataValues] = useState();
+
+  const [listId, setListId] = useState([]);
+
   const router = useRouter();
   const { TextArea } = Input;
   var today = new Date();
@@ -182,6 +186,10 @@ function Hutang({ props }) {
 
   const onFinish = (values) => {
     setLoading(true);
+    values.total_item = dataTabel.length;
+    values.total_hutang_jatuh_tempo = totalHutangJatuhTempo();
+    values.total_pembayaran = totalPembayaran();
+    values.sisa_hutang_jatuh_tempo = sisaHutangJatuhTempo();
     //setInfo("sukses");
     //sale.data.forEach((element) => {
     //  if (values.no_sales_sell == element.attributes.no_sales_sell) {
@@ -193,8 +201,13 @@ function Hutang({ props }) {
     //      setInfo("gagal");
     //  }
     //});
-    //setDataValues(values);
-    setLoading(false);
+    setDataValues(values);
+    setLoading(false); console.log("finish",values)
+  };
+
+  const createDetail = async () => {
+    //await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/sales-sale-details");
+    await createDetails(dataValues, biaya, sisaHutang, setListId, "/debt-details");
   };
 
   const clearData = () => {
@@ -203,8 +216,54 @@ function Hutang({ props }) {
 
   const calculatePriceTotal = (row, index) => {
     const total = calculatePrice(row, biaya, sisaHutangTotal, index);
+    sisaHutang[index] = total;
     return formatter.format(total);
   };
+
+  const totalHutangJatuhTempo = () => {
+    var total = 0;
+    if(biaya.info != null){
+
+      for(let row in biaya.info) {
+        if(biaya.info[row].pilihData == "pilih") total = total + biaya.info[row].totalHutangJatuhTempo;
+      };
+    }
+    return total;
+  };
+
+  const totalPembayaran = () => {
+    var total = 0;
+    var tunai = 0;
+    var transfer = 0;
+    var giro = 0;
+    var cn = 0;
+    var oth = 0;
+      for (let row in biaya.info) {
+        if (biaya.info[row].pilihData == "pilih") {
+          if(biaya.info[row].tunai != null) tunai = biaya.info[row].tunai;
+          if(biaya.info[row].transfer != null) transfer = biaya.info[row].transfer;
+          if(biaya.info[row].giro != null) giro = biaya.info[row].giro;
+          if(biaya.info[row].cn != null) cn = biaya.info[row].cn;
+          if(biaya.info[row].oth != null) oth = biaya.info[row].oth;
+
+          total = total + tunai + transfer + giro + cn + oth;
+        }
+      };
+    return total;
+  };
+
+  const sisaHutangJatuhTempo = () => {
+    var total = 0;
+    var totalHutang = totalHutangJatuhTempo();
+    var totalBayar = totalPembayaran();
+    total = totalHutang - totalBayar;
+    return total;
+  };
+
+  useEffect(() => {
+    //if (dataValues && info == "sukses") createDetailSale();
+    if (dataValues) createDetail();
+  }, [dataValues]);
 
   useEffect(() => {
     // used to reset redux from value before
@@ -284,8 +343,6 @@ function Hutang({ props }) {
       });
 
   }, []);
-
-  console.log("biaya list", biaya, dataTabel)
 
   const validateError = () => {
     var listError = form.getFieldsError();
@@ -382,35 +439,13 @@ function Hutang({ props }) {
                   {/*/>*/}
               </div>
 
-              {isFetchinData ? (
-                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
-                    <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
-                      <LoadingAnimations />
-                    </div>
-                    <div className="text-sm align-middle text-center animate-pulse text-slate-400">Sedang Mengambil Data</div>
-                  </div>
-                ) : (
-                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                    {/*<AddSellSalesTable*/}
-                    {/*  products={products}*/}
-                    {/*  productTotalPrice={productTotalPrice}*/}
-                    {/*  setTotalPrice={setTotalPrice}*/}
-                    {/*  setProductTotalPrice={setProductTotalPrice}*/}
-                    {/*  //calculatePriceAfterDisc={calculatePriceAfterDisc}*/}
-                    {/*  productSubTotal={productSubTotal}*/}
-                    {/*  //locations={locations}*/}
-                    {/*  formObj={form}*/}
-                    {/*/>*/}
-                  </div>
-              )}
-
               <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
                 <AddDebtTable
                   data={dataTabel}
                   retur={dataRetur}
-                  setSisaHutang={setSisaHutang}
                   biaya={biaya}
                   calculatePriceTotal={calculatePriceTotal}
+                  sisaHutang={sisaHutang}
                 />
               </div>
 
@@ -419,33 +454,14 @@ function Hutang({ props }) {
                   <span> TOTAL ITEM </span> <span> : {dataTabel.length}</span>
                 </Form.Item>
                 <Form.Item name="total_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> TOTAL HUTANG JATUH TEMPO </span> <span> : </span>
+                  <span> TOTAL HUTANG JATUH TEMPO </span> <span> : {formatter.format(totalHutangJatuhTempo())}</span>
                 </Form.Item>
                 <Form.Item name="total_pembayaran" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> TOTAL PEMBAYARAN </span> <span> : </span>
+                  <span> TOTAL PEMBAYARAN </span> <span> : {formatter.format(totalPembayaran())}</span>
                 </Form.Item>
                 <Form.Item name="sisa_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> SISA HUTANG JATUH TEMPO </span> <span> : </span>
+                  <span> SISA HUTANG JATUH TEMPO </span> <span> : {formatter.format(sisaHutangJatuhTempo())}</span>
                 </Form.Item>
-                
-                {/*<Form.Item name="dpp" value={dpp} className="w-full h-2 md:w-1/2 mx-2">*/}
-                {/*  <span> DPP </span> <span>: {formatter.format(dpp)}</span>*/}
-                {/*</Form.Item>*/}
-                {/*<Form.Item name="ppn" value={ppn} className="w-full h-2 md:w-1/2 mx-2">*/}
-                {/*  <span> PPN </span> <span>: {formatter.format(ppn)}</span>*/}
-                {/*</Form.Item>*/}
-                {/*<Form.Item name="grandtotal" value={totalPrice} className="w-full h-2 md:w-1/2 mx-2">*/}
-                {/*  <span> Total </span> <span>: {formatter.format(totalPrice)}</span>*/}
-                {/*</Form.Item>*/}
-                {/*<Form.Item name="biayaPengiriman" value={biayaPengiriman} className="w-full h-2 md:w-1/2 mx-2">*/}
-                {/*  <span> Biaya Pengiriman </span> <span>: {formatter.format(biayaPengiriman)}</span>*/}
-                {/*</Form.Item>*/}
-                {/*<Form.Item name="biayaTambahan" value={biayaTambahan} className="w-full h-2 md:w-1/2 mx-2">*/}
-                {/*  <span> Biaya Tambahan </span> <span>: {formatter.format(biayaTambahan)}</span>*/}
-                {/*</Form.Item>*/}
-                {/*<Form.Item name="grandTotal" value={grandTotal} className="w-full h-2 md:w-1/2 mx-2 mt-3 text-lg">*/}
-                {/*  <span> Total </span>  <span>: {formatter.format(grandTotal)}</span>*/}
-                {/*</Form.Item>*/}
               </div>
 
               <div className="w-full md:w-1/4 px-3 -mx-3">
