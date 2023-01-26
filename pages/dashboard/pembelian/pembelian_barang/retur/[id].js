@@ -30,7 +30,7 @@ ReturLPB.getInitialProps = async (context) => {
   };
   const res = await fetch(endpoint, options);
   const data = await res.json();
-
+  
   const req = await fetchDataLocation(cookies);
   const locations = await req.json();
 
@@ -88,7 +88,11 @@ const fetchData = async (cookies) => {
 function ReturLPB({ props }) {
   const locations = props.locations.data;
   const data = props.data.data;
-  var products = useSelector((state) => state.Order);
+  var products = useSelector((state) => {
+      console.log(state)
+      return state.Order
+    });
+
 
   const [listLPBdetail, setListLPBdetail] = useState([]);
 
@@ -165,8 +169,8 @@ function ReturLPB({ props }) {
     }
   };
 
-  const calculatePriceAfterDisc = (row) => {
-    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
+  const calculatePriceAfterDisc = (row,index) => {
+    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice,index);
 
     return formatter.format(total);
   };
@@ -181,7 +185,7 @@ function ReturLPB({ props }) {
       data: data.data,
     });
 
-    purchase_details.forEach((element) => {
+    purchase_details.forEach((element,key) => {
       var indexUnit = 1;
       var unitOrder = element.attributes.unit_order;
       var productUnit = element.attributes.product.data.attributes;
@@ -242,6 +246,7 @@ function ReturLPB({ props }) {
         d1: element.attributes.product.data.attributes.unit_1_dp1,
         d2: element.attributes.product.data.attributes.unit_1_dp2,
         d3: element.attributes.product.data.attributes.unit_1_dp3,
+        index:key
         //batch: element.attributes.batch,
         //expired_date: moment(momentString),
       });
@@ -362,6 +367,7 @@ function ReturLPB({ props }) {
                     //productTotalPrice={productTotalPrice}
                     setTotalPrice={setTotalPrice}
                     //setProductTotalPrice={setProductTotalPrice}
+                    setProductSubTotal={setProductSubTotal}
                     calculatePriceAfterDisc={calculatePriceAfterDisc}
                     productSubTotal={productSubTotal}
                     locations={locations}

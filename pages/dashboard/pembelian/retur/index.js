@@ -52,7 +52,6 @@ function Retur({ props }) {
   const data = props.data;
   const [retur, setRetur] = useState(data);
   const router = useRouter();
-
   const handleAdd = () => {
     router.push("/dashboard/pembelian/retur/tambah");
   };

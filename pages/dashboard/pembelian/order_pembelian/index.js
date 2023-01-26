@@ -51,7 +51,7 @@ function Pembelian({ props }) {
   const data = props.data;
   const [purchase, setPurchase] = useState(data);
   const [isSearching, setIsSearching] = useState(false);
-
+  console.log(purchase)
   const { Search } = Input;
   const router = useRouter();
 
