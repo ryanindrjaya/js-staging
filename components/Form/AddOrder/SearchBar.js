@@ -95,7 +95,6 @@ export default function SearchBar({
 
         const req = await fetch(endpoint, options);
         const res = await req.json();
-
         if (req.status == 200) {
           // filter product that already added
           // const filteredProduct = res.data.filter((item) => {

@@ -20,8 +20,7 @@ const Edit = ({ props }) => {
   const router = useRouter();
 
   //const role = props?.role?.roles;
-  const customer = props?.data;
-  console.log("cust", customer);
+  const customer = props?.data; console.log("cust",customer)
   //const userRole = props?.user.role;
   //const userLocation = props?.user.locations;
   //const locations = props?.locations;
@@ -29,7 +28,7 @@ const Edit = ({ props }) => {
   const onFinish = async (values) => {
     setLoading(true);
     //const role = await getRole(values.role_id);
-    var data = { data: values };
+    var data = { data: values};
 
     //let newLocation = [];
     //try {
@@ -47,8 +46,7 @@ const Edit = ({ props }) => {
     //data.locations = newLocation;
     //console.log(data);
 
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/customers/" + customer.data.id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/customers/" + customer.data.id;
     const JSONdata = JSON.stringify(data);
 
     const options = {
@@ -179,11 +177,7 @@ const Edit = ({ props }) => {
               {/*  </Select>*/}
               {/*</Form.Item>*/}
 
-              <Form.Item
-                name="type"
-                initialValue={customer?.data?.attributes?.type}
-                className="w-1/4 mb-5 ml-1"
-              >
+              <Form.Item name="type" className="w-1/4 mb-5 ml-1">
                 <Select size="large" placeholder="Type">
                   <Select.Option value="Toko" key="Toko">
                     Toko
@@ -226,8 +220,7 @@ Edit.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/customers/" + id + "?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/customers/" + id + "?populate=*";
 
   const options = {
     method: "GET",

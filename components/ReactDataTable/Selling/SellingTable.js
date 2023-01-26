@@ -53,14 +53,6 @@ export default function ReactDataTable({
     }
   };
 
-  const onDevelopment = () => {
-    openNotificationWithIcon(
-        "info",
-        "Work In Progress",
-        "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
-      );
-  }
-
   const returPenjualan = (row) => {
     if (row.attributes.status !== "Diretur") {
       if (returPage == "toko") router.push("toko/retur/" + row.id);
@@ -108,7 +100,7 @@ export default function ReactDataTable({
     <div>
       <div>
         <button
-          onClick={() => onDevelopment(row)}
+          onClick={() => lihat(row)}
           className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
         >
           <UnorderedListOutlined className="mr-2 mt-0.5 float float-left" />
@@ -117,7 +109,7 @@ export default function ReactDataTable({
       </div>
       <div>
         <button
-          onClick={() => onDevelopment(row)}
+          onClick={() => print(row)}
           className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
         >
           <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
@@ -126,7 +118,7 @@ export default function ReactDataTable({
       </div>
       <div>
         <button
-          onClick={() => onDevelopment(row)}
+          onClick={() => edit(row)}
           className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
         >
           <EditOutlined className="mr-2 mt-0.5 float float-left" />
@@ -144,7 +136,7 @@ export default function ReactDataTable({
       </div>
       <div>
         <button
-          onClick={() => onDevelopment(row)}
+          onClick={() => piutang(row)}
           className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
         >
           <CalculatorOutlined className="mr-2 mt-0.5 float float-left" />
@@ -162,7 +154,7 @@ export default function ReactDataTable({
       </div>
       <div>
         <button
-          onClick={() => onDevelopment(row)}
+          onClick={() => lihatPembayaran(row)}
           className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
         >
           <BankOutlined className="mr-2 mt-0.5 float float-left" />
@@ -171,7 +163,7 @@ export default function ReactDataTable({
       </div>
       <div>
         <button
-          onClick={() => onDevelopment(row)}
+          onClick={() => updateStatus(row)}
           className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
         >
           <SyncOutlined className="mr-2 mt-0.5 float float-left" />
@@ -189,7 +181,7 @@ export default function ReactDataTable({
       </div>
       <div>
         <button
-          onClick={() => onDevelopment(row)}
+          onClick={() => cetakLabel(row)}
           className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
         >
           <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
@@ -198,7 +190,7 @@ export default function ReactDataTable({
       </div>
       <div>
         <button
-          onClick={() => onDevelopment(row)}
+          onClick={() => cetakBarcode(row)}
           className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
         >
           <BarcodeOutlined className="mr-2 mt-0.5 float float-left" />
