@@ -61,6 +61,13 @@ const actions = {
     index,
   }),
 
+  changeProductPrice: (unit_price, product, index) => ({
+    type: "CHANGE_PRODUCT_PRICE",
+    unit_price,
+    product,
+    index,
+  }),
+
   setPriceAfterDisc: (price, product) => ({
     type: "SET_PRICE_AFTER_DISC",
     price,

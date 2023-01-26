@@ -198,28 +198,23 @@ export default function ReactDataTable({
         },
         {
           name: "Customer",
-          width: "150px",
-          selector: (row) => row.attributes?.customer_name ?? "-",
+          width: "100px",
+          selector: (row) => row.attributes?.customer.data.attributes?.name ?? "-",
         },
         {
           name: "NO Sales Order",
-          width: "150px",
-          selector: (row) => row.attributes?.no_sales_sale ?? "-",
+          width: "200px",
+          selector: (row) => row.attributes?.no_sales_sell ?? "-",
         },
         {
           name: "Sales",
           width: "150px",
-          //selector: user?.name ?? "-",
+          selector: (row) => row.attributes?.sales ?? "-",
         },
         {
           name: "Jumlah Item",
           width: "120px",
           //selector: (row) => formatter.format(row.attributes?.total ?? "-"),
-        },
-        {
-          name: "Catatan Staff",
-          width: "180px",
-          selector: (row) => row.attributes?.sale_staff ?? "-",
         },
         {
           name: "Catatan Penjualan",

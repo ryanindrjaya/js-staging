@@ -6,10 +6,10 @@ import { useEffect } from "react";
 
 export default function ReactDataTable({
   calculatePriceAfterDisc,
-  productSubTotal,
+  productSubTotal, 
   setProductSubTotal,
   products,
-  locations,
+  locations, 
   setTotalPrice,
   formObj,
 }) {
@@ -140,16 +140,32 @@ export default function ReactDataTable({
   };
 
   const onConfirm = (id) => {
-    var newSubTotalProduct = productSubTotal;
+    
+    var newSubTotalProduct = [];
     var newProductInfo = products.productInfo;
 
-    delete newSubTotalProduct[id];
+    for (var s in newSubTotalProduct) {
+      if(s !== id){
+        newSubTotalProduct.push(productSubTotal[s]);
+      }
+    }
+
+    // delete newSubTotalProduct[id];
     delete newProductInfo[id];
 
     setProductSubTotal(newSubTotalProduct);
 
-    const subtotal = productSubTotal[id];
-    setTotalPrice((prev) => prev - subtotal);
+    const subtotal = newSubTotalProduct[id];
+
+    setTotalPrice((prev) => {
+      var hasil = 0;
+      for (var key in newSubTotalProduct) {
+        hasil = hasil + newSubTotalProduct[key];
+      }
+      console.log("key",newSubTotalProduct)
+     
+      return hasil;
+    });
     onDeleteProduct(id);
   };
 
@@ -170,7 +186,9 @@ export default function ReactDataTable({
     {
       name: "Nama Produk",
       width: "250px",
-      selector: (row) => row.attributes?.name,
+      selector: (row,index) => {
+        return products.productList[index]?.attributes.name;
+      },
     },
     {
       name: "Harga Satuan",
@@ -180,6 +198,7 @@ export default function ReactDataTable({
         if (products.productInfo[idx]?.priceUnit) {
           priceUnit = products.productInfo[idx].priceUnit;
         }
+        console.log(priceUnit);
         return (
           <>
             <Row>
@@ -210,13 +229,13 @@ export default function ReactDataTable({
         var defaultIndex = 1;
 
         if (products.productInfo[idx]?.qty) {
-          defaultQty = products.productInfo[idx].qty;
+          defaultQty = products.productInfo[idx]?.qty;
         }
 
         if (products.productInfo[idx]?.unitIndex) {
-          defaultIndex = products.productInfo[idx].unitIndex;
+          defaultIndex = products.productInfo[idx]?.unitIndex;
         }
-
+        
         return (
           <>
             <Row>
@@ -499,7 +518,10 @@ export default function ReactDataTable({
     {
       name: "Subtotal",
       width: "200px",
-      selector: (row, idx) => formatter.format(productSubTotal[idx]),
+      selector: (row, idx) => { 
+        console.log(productSubTotal)
+        return formatter.format(productSubTotal[idx])
+      },
     },
     {
       name: "Hapus",

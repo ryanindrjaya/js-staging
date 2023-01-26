@@ -119,7 +119,7 @@ const openNotificationWithIcon = (type) => {
     notification[type]({
       message: "Berhasil menambahkan data",
       description:
-        "Produk berhasil ditambahkan. Silahkan cek pada halaman Pembelian Barang",
+        "Data berhasil ditambahkan. Silahkan cek pada halaman Pesanan Penjualan Sales",
     });
   }
 };
