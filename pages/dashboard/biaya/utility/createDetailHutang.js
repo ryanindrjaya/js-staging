@@ -6,6 +6,7 @@ var tempListId = [];
 const cookies = nookies.get(null, "token");
 
 var id = 0;
+var length = 1;
 
 const createDetailHutang = (
   values,
@@ -14,67 +15,69 @@ const createDetailHutang = (
   setListId,
   url
 ) => {
-  biaya.list.forEach((element) => { console.log("sisaHutang", sisaHutang);
+  tempListId = [];
+
+  biaya.list.forEach((element) => {
+    //tempListId = [];
+
     if(biaya.info[id] != null){ 
       if(biaya.info[id].pilihData == "pilih"){
         //default value
-        console.log("element", element);
+
+        //tempListId = [];
+
         var tunai = biaya.info[id]?.tunai ?? 0;
         var transfer = biaya.info[id]?.transfer ?? 0;
         var giro = biaya.info[id]?.giro ?? 0;
         var cn = biaya.info[id]?.cn ?? 0;
         var oth = biaya.info[id]?.oth ?? 0;
-        var sisa_hutang = biaya.info[id]?.sisa_hutang ?? 0;
+        var sisa_hutang = sisaHutang[id] ?? 0;
         var lpb = element;
+
+        POSTDetail(
+            tunai,
+            transfer,
+            giro,
+            cn,
+            oth,
+            sisa_hutang,
+            lpb,
+            setListId,
+            biaya,
+            length,
+            url
+        );
+
+        length++;
       }
     }
-    //default value
-    //var qty = 1;
-    //var unit = element.attributes.unit_1;
-    //var unitPrice = element.attributes.buy_price_1;
-    //var elementId = element.id;
-    //tempListId = [];
 
-    //qty = products.productInfo[id]?.qty ?? 1;
-    //unit = products.productInfo[id]?.unit ?? element.attributes.unit_1;
-    //unitPrice = products.productInfo?.[id]?.unit_price ?? element.attributes.buy_price_1;
-
-    //var d1 = products.productInfo[id]?.d1;
-    //var d2 = products.productInfo[id]?.d2;
-
-    //POSTDetail(
-    //  qty,
-    //  unit,
-    //  unitPrice,
-    //  id,
-    //  setListId,
-    //  biaya,
-    //  url
-    //);
     id++;
   });
 };
 
 const POSTDetail = async (
-  qty,
-  unit,
-  unitPrice,
-  id,
+  tunai,
+  transfer,
+  giro,
+  cn,
+  oth,
+  sisa_hutang,
+  lpb,
   setListId,
   biaya,
-  elementId,
-  d1,
-  d2,
+  length,
   url
 ) => {
   var data = {
     data: {
-      qty : qty,
-      unit : unit,
-      unit_price : unitPrice,
-      product: { id: elementId },
-      disc1: d1,
-      disc2: d2,
+      tunai : tunai,
+      transfer : transfer,
+      giro : giro,
+      cn : cn,
+      oth : oth,
+      sisa_hutang : sisa_hutang,
+      purchasing: { id: lpb.id },
     },
   };
 
@@ -92,11 +95,11 @@ const POSTDetail = async (
   const req = await fetch(endpoint, options);
   const res = await req.json();
 
-  if (req.status === 200) {
-    tempListId.push(res.data?.id);
-    //if (tempListId.length === biaya.List.length) {
-    //  setListId(tempListId);
-    //}
+  if (req.status === 200) { 
+    tempListId.push(res.data?.id); console.log("tempListId", tempListId)
+    if (tempListId.length == length) {
+      setListId(tempListId);
+    }
   }
 };
 

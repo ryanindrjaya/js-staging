@@ -10,7 +10,7 @@ import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import AddSellSalesTable from "@iso/components/ReactDataTable/Selling/AddSellSalesTable";
 import AddDebtTable from "@iso/components/ReactDataTable/Cost/AddDebtTable";
-//import createOrderSaleFunc from "@iso/utility/createOrderSale";
+import createData from "../utility/createHutang";
 import createDetails from "../utility/createDetailHutang";
 import calculatePrice from "../utility/calculatePrice";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
@@ -186,10 +186,6 @@ function Hutang({ props }) {
 
   const onFinish = (values) => {
     setLoading(true);
-    values.total_item = dataTabel.length;
-    values.total_hutang_jatuh_tempo = totalHutangJatuhTempo();
-    values.total_pembayaran = totalPembayaran();
-    values.sisa_hutang_jatuh_tempo = sisaHutangJatuhTempo();
     //setInfo("sukses");
     //sale.data.forEach((element) => {
     //  if (values.no_sales_sell == element.attributes.no_sales_sell) {
@@ -201,13 +197,22 @@ function Hutang({ props }) {
     //      setInfo("gagal");
     //  }
     //});
+    //createMaster(values);
     setDataValues(values);
-    setLoading(false); console.log("finish",values)
+    setLoading(false); console.log("values", values)
   };
 
   const createDetail = async () => {
     //await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/sales-sale-details");
     await createDetails(dataValues, biaya, sisaHutang, setListId, "/debt-details");
+  };
+
+  const createMaster = async (values) => { console.log("master", listId)
+    values.total_item = dataTabel.length;
+    values.total_hutang_jatuh_tempo = totalHutangJatuhTempo();
+    values.total_pembayaran = totalPembayaran();
+    values.sisa_hutang_jatuh_tempo = sisaHutangJatuhTempo();
+    await createData(sisaHutang, values, listId, form, router, "/debts/", "hutang");
   };
 
   const clearData = () => {
@@ -264,6 +269,12 @@ function Hutang({ props }) {
     //if (dataValues && info == "sukses") createDetailSale();
     if (dataValues) createDetail();
   }, [dataValues]);
+
+  useEffect(() => {
+    if (listId.length > 0) {
+      createMaster(dataValues);
+    }
+  }, [listId]);
 
   useEffect(() => {
     // used to reset redux from value before
@@ -706,7 +717,7 @@ function Hutang({ props }) {
               </div>
 
               <div className="w-full mt-8 flex justify-between">
-                <Form.Item name="note" className="w-full mx-2">
+                <Form.Item name="catatan" className="w-full mx-2">
                   <TextArea rows={4} placeholder="Catatan Pembayaran" />
                 </Form.Item>
               </div>
