@@ -10,6 +10,7 @@ var length = 1;
 
 const createDetailHutang = (
   values,
+  data,
   biaya,
   sisaHutang,
   setListId,
@@ -33,6 +34,7 @@ const createDetailHutang = (
         var oth = biaya.info[id]?.oth ?? 0;
         var sisa_hutang = sisaHutang[id] ?? 0;
         var lpb = element;
+        var total_retur = data[id].subtotal;
 
         POSTDetail(
             tunai,
@@ -40,6 +42,7 @@ const createDetailHutang = (
             giro,
             cn,
             oth,
+            total_retur,
             sisa_hutang,
             lpb,
             setListId,
@@ -62,6 +65,7 @@ const POSTDetail = async (
   giro,
   cn,
   oth,
+  total_retur,
   sisa_hutang,
   lpb,
   setListId,
@@ -76,6 +80,7 @@ const POSTDetail = async (
       giro : giro,
       cn : cn,
       oth : oth,
+      total_retur : total_retur,
       sisa_hutang : sisa_hutang,
       purchasing: { id: lpb.id },
     },

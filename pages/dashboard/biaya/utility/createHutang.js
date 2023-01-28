@@ -22,6 +22,8 @@ const CreateHutang = async (
     tempProductListId.push({ id: element });
   }); console.log("tempProductListId", tempProductListId)
 
+  values.status = "Dibayar";
+
   values.bayar1 = parseInt( values.bayar1 );
   values.bayar2 = parseInt( values.bayar2 );
   values.bayar3 = parseInt( values.bayar3 );

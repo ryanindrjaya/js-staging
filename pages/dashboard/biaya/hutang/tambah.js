@@ -23,29 +23,21 @@ Hutang.getInitialProps = async (context) => {
   const req = await fetchData(cookies);
   const user = await req.json();
 
-  //const reqLocation = await fetchLocation(cookies);
-  //const locations = await reqLocation.json();
-
-  //const reqInven = await fetchInven(cookies);
-  //const inven = await reqInven.json();
-
   const reqLPB = await fetchDataPurchasing(cookies);
   const LPB = await reqLPB.json();
 
   const reqReturLPB = await fetchRetur(cookies);
   const returLPB = await reqReturLPB.json();
 
-  //const reqCustomer = await fetchCustomer(cookies);
-  //const customer = await reqCustomer.json();
+  const reqHutang = await fetchHutang(cookies);
+  const hutang = await reqHutang.json();
 
   return {
     props: {
       user,
-      //locations,
-      //inven,
       LPB,
       returLPB,
-      //customer
+      hutang,
     },
   };
 };
@@ -92,48 +84,19 @@ const fetchRetur = async (cookies) => {
     return req;
 };
 
-//const fetchLocation = async (cookies) => {
-//  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
-//  const options = {
-//    method: "GET",
-//    headers: {
-//      "Content-Type": "application/json",
-//      Authorization: "Bearer " + cookies.token,
-//    },
-//  };
+const fetchHutang = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate=deep";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
 
-//  const req = await fetch(endpoint, options);
-//  return req;
-//};
-
-//const fetchInven = async (cookies) => {
-//    const endpoint = process.env.NEXT_PUBLIC_URL + "/inventories?populate=deep";
-//    const options = {
-//        method: "GET",
-//        headers: {
-//            "Content-Type": "application/json",
-//            Authorization: "Bearer " + cookies.token,
-//        },
-//    };
-
-//    const req = await fetch(endpoint, options);
-//    return req;
-//};
-
-//const fetchCustomer = async (cookies) => {
-//    let name = "walk in customer"
-//    const endpoint = process.env.NEXT_PUBLIC_URL + `/customers?filters[name][$contains]=${name}`;
-//    const options = {
-//        method: "GET",
-//        headers: {
-//            "Content-Type": "application/json",
-//            Authorization: "Bearer " + cookies.token,
-//        },
-//    };
-//    const req = await fetch(endpoint, options);
-//    return req;
-//};
-
+    const req = await fetch(endpoint, options);
+    return req;
+};
 
 function Hutang({ props }) {
   const biaya = useSelector((state) => state.Cost);
@@ -174,9 +137,9 @@ function Hutang({ props }) {
 
   const [info, setInfo] = useState();
 
-  // NO Sales Sale
-  //var noSale = String(props.sale?.meta?.pagination.total + 1).padStart(3, "0");
-  //const [categorySale, setCategorySale] = useState(`PPS/ET/${user.id}/${noSale}/${mm}/${yyyy}`);
+  // NO Hutang
+  var noHutang = String(props.hutang?.meta?.pagination.total + 1).padStart(3, "0");
+  const [categorySale, setCategorySale] = useState(`PH/ET/${user.id}/${noHutang}/${mm}/${yyyy}`);
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -204,7 +167,7 @@ function Hutang({ props }) {
 
   const createDetail = async () => {
     //await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/sales-sale-details");
-    await createDetails(dataValues, biaya, sisaHutang, setListId, "/debt-details");
+    await createDetails(dataValues, dataTabel, biaya, sisaHutang, setListId, "/debt-details");
   };
 
   const createMaster = async (values) => { console.log("master", listId)
@@ -270,7 +233,7 @@ function Hutang({ props }) {
     if (dataValues) createDetail();
   }, [dataValues]);
 
-  useEffect(() => {
+  useEffect(() => { console.log("data list",listId)
     if (listId.length > 0) {
       createMaster(dataValues);
     }
@@ -278,8 +241,8 @@ function Hutang({ props }) {
 
   useEffect(() => {
     // used to reset redux from value before
-    //setDataTabel([]);
     clearData();
+
     var lpbId = 0;
     lpb.forEach((row) => {
         var tempoDate = new Date(row.attributes?.date_purchasing);
@@ -365,7 +328,7 @@ function Hutang({ props }) {
         });
       }
     });
-  };
+  }; console.log("biaya coba",biaya, dataTabel)
 
   return (
     <>
@@ -390,7 +353,7 @@ function Hutang({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="no_hutang"
-                    //initialValue={categorySale}
+                    initialValue={categorySale}
                     rules={[
                         {
                             required: true,
@@ -506,8 +469,7 @@ function Hutang({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="metode_bayar1" //initialValue={"Hari"} 
-                  noStyle>
+                  <Form.Item name="metode_bayar1" noStyle>
                     <Select
                       size="large"
                       style={{
@@ -552,8 +514,7 @@ function Hutang({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="metode_bayar2" //initialValue={"Hari"} 
-                  noStyle>
+                  <Form.Item name="metode_bayar2" noStyle>
                     <Select
                       size="large"
                       style={{
@@ -597,8 +558,7 @@ function Hutang({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="metode_bayar3" //initialValue={"Hari"} 
-                  noStyle>
+                  <Form.Item name="metode_bayar3" noStyle>
                     <Select
                       size="large"
                       style={{
@@ -642,8 +602,7 @@ function Hutang({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="metode_bayar4" //initialValue={"Hari"} 
-                  noStyle>
+                  <Form.Item name="metode_bayar4" noStyle>
                     <Select
                       size="large"
                       style={{
@@ -687,8 +646,7 @@ function Hutang({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="metode_bayar5" //initialValue={"Hari"} 
-                  noStyle>
+                  <Form.Item name="metode_bayar5" noStyle>
                     <Select
                       size="large"
                       style={{

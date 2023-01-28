@@ -6,7 +6,7 @@ import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import router, { useRouter } from "next/router";
 import { Input, notification, Select, DatePicker } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-/*import SellSalesTable from "../../../../components/ReactDataTable/Selling/SellSalesTable";*/
+import DebtTable from "@iso/components/ReactDataTable/Cost/DebtTable";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
 import nookies from "nookies";
 
@@ -19,14 +19,14 @@ Hutang.getInitialProps = async (context) => {
     const reqLocation = await fetchLocation(cookies);
     const locations = await reqLocation.json();
 
-    //const reqSell = await fetchSell(cookies);
-    //const sell = await reqSell.json();
+    const reqHutang = await fetchHutang(cookies);
+    const hutang = await reqHutang.json();
 
     return {
       props: {
         user,
         locations,
-        //sell,
+        hutang,
       },
     };
 };
@@ -59,8 +59,8 @@ const fetchLocation = async (cookies) => {
     return req;
 };
 
-const fetchSell = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sells?populate=deep";
+const fetchHutang = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate=deep";
     const options = {
         method: "GET",
         headers: {
@@ -76,10 +76,14 @@ const fetchSell = async (cookies) => {
 function Hutang({ props }) {
     const user = props.user;
     const locations = props.locations.data;
-    const data = props.sell;
+    const data = props.hutang;
     const router = useRouter();
     const [hutang, setHutang] = useState(data);
     const [supplier, setSupplier] = useState();
+
+    const handleSetting = () => {
+        router.push("/dashboard/biaya/hutang/setting");
+    };
 
     const handleAdd = () => {
         router.push("/dashboard/biaya/hutang/tambah");
@@ -157,11 +161,18 @@ function Hutang({ props }) {
 
                         <div className="w-full flex justify-between mt-0 mb-2">
                             <span className="text-black text-md font-bold ml-1 mt-5">Semua Penjualan</span>
-                            <button onClick={handleAdd} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5">
-                                <div className="text-white text-center text-sm font-bold">
-                                    <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
-                                </div>
-                            </button>
+                            <div className="float-right">
+                                <button onClick={handleSetting} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm mb-5 mx-2">
+                                    <div className="text-white text-center text-sm font-bold">
+                                        <a className="text-white no-underline text-xs sm:text-xs">Setting</a>
+                                    </div>
+                                </button>
+                                <button onClick={handleAdd} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm mb-5 mx-2">
+                                    <div className="text-white text-center text-sm font-bold">
+                                        <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
+                                    </div>
+                                </button>
+                            </div>
                         </div>
 
                         <div className="w-full flex justify-between">
@@ -211,14 +222,14 @@ function Hutang({ props }) {
                             </button>
                         </div>
 
-                        {/*<SellSalesTable*/}
-                        {/*  data={sell}*/}
-                        {/*  onUpdate={handleUpdate}*/}
-                        {/*  //onDelete={handleDelete}*/}
-                        {/*  //onPageChange={handlePageChange}*/}
-                        {/*  //onChangeStatus={onChangeStatus}*/}
-                        {/*  user={user}*/}
-                        {/*/>*/}
+                        <DebtTable
+                          data={data}
+                          onUpdate={handleUpdate}
+                          //onDelete={handleDelete}
+                          //onPageChange={handlePageChange}
+                          //onChangeStatus={onChangeStatus}
+                          user={user}
+                        />
                     </LayoutContent>
                 </LayoutWrapper>
             </DashboardLayout>
