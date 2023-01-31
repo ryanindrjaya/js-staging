@@ -82,11 +82,11 @@ function Hutang({ props }) {
     const [supplier, setSupplier] = useState();
 
     const handleSetting = () => {
-        router.push("/dashboard/biaya/hutang/setting");
+        router.push("/dashboard/biaya/piutang/setting");
     };
 
     const handleAdd = () => {
-        router.push("/dashboard/biaya/hutang/tambah");
+        router.push("/dashboard/biaya/piutang/tambah");
     };
 
     const handleUpdate = (id) => {
@@ -108,19 +108,16 @@ function Hutang({ props }) {
     return (
         <>
             <Head>
-                <title>Pembayaran Pembelian</title>
+                <title>Daftar Penagihan Piutang Penjualan</title>
             </Head>
             <DashboardLayout>
                 <LayoutWrapper style={{}}>
-                    <TitlePage titleText={"Daftar Pembayaran Pembelian"} />
+                    <TitlePage titleText={"Daftar Penagihan Piutang Penjualan"} />
                     <LayoutContent>
                         <div className="w-full flex justify-start">
                             <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                                <Supplier onChangeSupplier={setSupplier} />
-                            </div>
-                            <div className="w-full md:w-1/4 px-3">
                                 <Select
-                                    placeholder="No Pembayaran"
+                                    placeholder="Pelanggan"
                                     size="large"
                                     style={{
                                         width: "100%",
@@ -130,7 +127,7 @@ function Hutang({ props }) {
                                     {/*{locations.map((element) => {*/}
                                     {/*  return (*/}
                                     <Select.Option>
-                                        data
+                                        Pelanggan
                                     </Select.Option>
                                     {/*  );*/}
                                     {/*})}*/}
@@ -138,7 +135,7 @@ function Hutang({ props }) {
                             </div>
                             <div className="w-full md:w-1/4 px-3">
                                 <Select
-                                    placeholder="Status Pembayaran"
+                                    placeholder="Status Penagihan"
                                     size="large"
                                     style={{
                                         width: "100%",
@@ -157,22 +154,85 @@ function Hutang({ props }) {
                             <div className="w-full md:w-1/4 px-3">
                                 <DatePicker placeholder="Rentang Tanggal" size="large" style={{ width: "100%" }} />
                             </div>
+                            <div className="w-full md:w-1/4 mt-0 mb-2">
+                                <div className="float-right">
+                                    <button onClick={handleAdd} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm mb-5 mx-2">
+                                        <div className="text-white text-center text-sm font-bold">
+                                            <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="w-full flex justify-between mt-0 mb-2">
-                            <span className="text-black text-md font-bold ml-1 mt-5">Semua Penjualan</span>
-                            <div className="float-right">
-                                <button onClick={handleSetting} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm mb-5 mx-2">
-                                    <div className="text-white text-center text-sm font-bold">
-                                        <a className="text-white no-underline text-xs sm:text-xs">Setting</a>
-                                    </div>
-                                </button>
-                                <button onClick={handleAdd} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm mb-5 mx-2">
-                                    <div className="text-white text-center text-sm font-bold">
-                                        <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
-                                    </div>
-                                </button>
+                        <div className="w-full flex justify-start -mt-6">
+                            <div className="w-full md:w-1/4 px-3">
+                                <Select
+                                    placeholder="Sales"
+                                    size="large"
+                                    style={{
+                                        width: "100%",
+                                        marginRight: "10px",
+                                    }}
+                                >
+                                    {/*{locations.map((element) => {*/}
+                                    {/*  return (*/}
+                                    <Select.Option>
+                                        data
+                                    </Select.Option>
+                                    {/*  );*/}
+                                    {/*})}*/}
+                                </Select>
                             </div>
+                            <div className="w-full md:w-1/4 px-3">
+                                <Select
+                                    placeholder="Area"
+                                    size="large"
+                                    style={{
+                                        width: "100%",
+                                        marginRight: "10px",
+                                    }}
+                                >
+                                    {/*{locations.map((element) => {*/}
+                                    {/*  return (*/}
+                                    <Select.Option>
+                                        data
+                                    </Select.Option>
+                                    {/*  );*/}
+                                    {/*})}*/}
+                                </Select>
+                            </div>
+                            <div className="w-full md:w-1/4 px-3">
+                                <Select
+                                    placeholder="Wilayah"
+                                    size="large"
+                                    style={{
+                                        width: "100%",
+                                        marginRight: "10px",
+                                    }}
+                                >
+                                    {/*{locations.map((element) => {*/}
+                                    {/*  return (*/}
+                                    <Select.Option>
+                                        data
+                                    </Select.Option>
+                                    {/*  );*/}
+                                    {/*})}*/}
+                                </Select>
+                            </div>
+                            <div className="w-full md:w-1/4 mt-0 mb-2">
+                                <div className="float-right">
+                                    <button onClick={handleSetting} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm mx-2">
+                                        <div className="text-white text-center text-sm font-bold">
+                                            <a className="text-white no-underline text-xs sm:text-xs">Setting</a>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="w-full flex justify-start -mt-6">
+                          <span className="text-black text-md font-bold ml-1 mt-5">Semua Penagihan</span>
                         </div>
 
                         <div className="w-full flex justify-between">

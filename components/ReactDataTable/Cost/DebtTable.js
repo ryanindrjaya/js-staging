@@ -142,7 +142,7 @@ export default function ReactDataTable({
         {
           name: "Pembayaran",
           width: "120px",
-          //selector: (row) => row.attributes?.customer.data.attributes?.name ?? "-",
+          selector: (row) => row.attributes?.status ?? "-",
         },
         {
           name: "Total Bayar",
