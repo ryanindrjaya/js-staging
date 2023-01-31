@@ -150,6 +150,22 @@ export default function Sidebar(props) {
               </Menu.Item>
             </SubMenu>
 
+            <SubMenu
+              key="kelola_customer"
+              title={
+                <span className="isoMenuHolder" style={submenuColor}>
+                  <SidebarPersonIcon size={18} />
+                  <span className="nav-text">Kelola Customer</span>
+                </span>
+              }
+            >
+              <Menu.Item style={submenuStyle} key="customer">
+                <Link href="/dashboard/customer">
+                  <a>Customer</a>
+                </Link>
+              </Menu.Item>
+            </SubMenu>
+
             {/* SUPPLIER */}
             <SubMenu
               key="kontak"
