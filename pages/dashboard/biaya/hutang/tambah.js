@@ -122,7 +122,7 @@ function Hutang({ props }) {
 
   const [dataValues, setDataValues] = useState();
 
-  const [listId, setListId] = useState([]);
+  const [listId, setListId] = useState({}); console.log("data list",listId)
 
   const router = useRouter();
   const { TextArea } = Input;
@@ -233,7 +233,7 @@ function Hutang({ props }) {
     if (dataValues) createDetail();
   }, [dataValues]);
 
-  useEffect(() => { console.log("data list",listId)
+  useEffect(() => {
     if (listId.length > 0) {
       createMaster(dataValues);
     }

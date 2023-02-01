@@ -4,7 +4,7 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import router, { useRouter } from "next/router";
-import { Input, notification, Select, DatePicker, Form } from "antd";
+import { Input, notification, Select, DatePicker, Form, Spin } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import DebtTable from "@iso/components/ReactDataTable/Cost/DebtTable";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
@@ -22,11 +22,15 @@ Setting.getInitialProps = async (context) => {
     //const reqHutang = await fetchHutang(cookies);
     //const hutang = await reqHutang.json();
 
+    const reqAkun = await fetchAkun(cookies);
+    const akun = await reqAkun.json();
+
     return {
       props: {
         //user,
         //locations,
         //hutang,
+        akun
       },
     };
 };
@@ -73,13 +77,29 @@ const fetchHutang = async (cookies) => {
     return req;
 };
 
+const fetchAkun = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=deep";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
+};
+
 function Setting({ props }) {
     //const user = props.user;
     //const locations = props.locations.data;
     //const data = props.hutang;
+    const akun = props.akun; console.log("akun", akun, akun.data)
     //const router = useRouter();
     //const [hutang, setHutang] = useState(data);
     //const [supplier, setSupplier] = useState();
+    const [loading, setLoading] = useState(false);
 
     //const handleSetting = () => {
     //    router.push("/dashboard/biaya/hutang/setting");
@@ -98,10 +118,28 @@ function Setting({ props }) {
     //    );
     //};
 
+    const onFinish = (values) => {
+        setLoading(true); console.log(values)
+        //setDataValues(values);
+        setLoading(false);
+    };
+
     const openNotificationWithIcon = (type, title, message) => {
         notification[type]({
             message: title,
             description: message,
+        });
+    };
+
+    const validateError = () => {
+        var listError = form.getFieldsError();
+        listError.forEach((element) => {
+            if (element.errors[0]) {
+                notification["error"]({
+                    message: "Field Kosong",
+                    description: element.errors[0],
+                });
+            }
         });
     };
 
@@ -120,8 +158,8 @@ function Setting({ props }) {
                           initialValues={{
                             remember: true,
                           }}
-                          //onFinish={onFinish}
-                          //onFinishFailed={validateError}
+                          onFinish={onFinish}
+                          onFinishFailed={validateError}
                       >
                         <div className="w-full flex justify-start">
                           <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0 text-center">
@@ -169,21 +207,11 @@ function Setting({ props }) {
                                         }}
                                         placeholder="Akun Pembayaran"
                                     >
-                                        <Select.Option value="tunai" key="tunai">
-                                            Tunai
-                                        </Select.Option>
-                                        <Select.Option value="transfer" key="transfer">
-                                            Bank Transfer
-                                        </Select.Option>
-                                        <Select.Option value="giro" key="giro">
-                                            Bank Giro
-                                        </Select.Option>
-                                        <Select.Option value="cn" key="cn">
-                                            CN
-                                        </Select.Option>
-                                        <Select.Option value="oth" key="oth">
-                                            OTH
-                                        </Select.Option>
+                                    {akun.data.map((element) => (
+                                    <Select.Option value= {element.attributes.nama} key= {element.id}>
+                                        {element.attributes.nama}
+                                    </Select.Option>
+                                    )) }
                                     </Select>
                                 </Form.Item>
                             </div>
@@ -226,21 +254,11 @@ function Setting({ props }) {
                                         }}
                                         placeholder="Akun Pembayaran"
                                     >
-                                        <Select.Option value="tunai" key="tunai">
-                                            Tunai
-                                        </Select.Option>
-                                        <Select.Option value="transfer" key="transfer">
-                                            Bank Transfer
-                                        </Select.Option>
-                                        <Select.Option value="giro" key="giro">
-                                            Bank Giro
-                                        </Select.Option>
-                                        <Select.Option value="cn" key="cn">
-                                            CN
-                                        </Select.Option>
-                                        <Select.Option value="oth" key="oth">
-                                            OTH
-                                        </Select.Option>
+                                    {akun.data.map((element) => (
+                                    <Select.Option value= {element.attributes.nama} key= {element.id}>
+                                        {element.attributes.nama}
+                                    </Select.Option>
+                                    )) }
                                     </Select>
                                 </Form.Item>
                             </div>
@@ -283,21 +301,11 @@ function Setting({ props }) {
                                         }}
                                         placeholder="Akun Pembayaran"
                                     >
-                                        <Select.Option value="tunai" key="tunai">
-                                            Tunai
+                                    {akun.data.map((element) => (
+                                        <Select.Option value={element.attributes.nama} key={element.id}>
+                                            {element.attributes.nama}
                                         </Select.Option>
-                                        <Select.Option value="transfer" key="transfer">
-                                            Bank Transfer
-                                        </Select.Option>
-                                        <Select.Option value="giro" key="giro">
-                                            Bank Giro
-                                        </Select.Option>
-                                        <Select.Option value="cn" key="cn">
-                                            CN
-                                        </Select.Option>
-                                        <Select.Option value="oth" key="oth">
-                                            OTH
-                                        </Select.Option>
+                                    ))}
                                     </Select>
                                 </Form.Item>
                             </div>
@@ -340,21 +348,11 @@ function Setting({ props }) {
                                         }}
                                         placeholder="Akun Pembayaran"
                                     >
-                                        <Select.Option value="tunai" key="tunai">
-                                            Tunai
+                                    {akun.data.map((element) => (
+                                        <Select.Option value={element.attributes.nama} key={element.id}>
+                                            {element.attributes.nama}
                                         </Select.Option>
-                                        <Select.Option value="transfer" key="transfer">
-                                            Bank Transfer
-                                        </Select.Option>
-                                        <Select.Option value="giro" key="giro">
-                                            Bank Giro
-                                        </Select.Option>
-                                        <Select.Option value="cn" key="cn">
-                                            CN
-                                        </Select.Option>
-                                        <Select.Option value="oth" key="oth">
-                                            OTH
-                                        </Select.Option>
+                                    ))}
                                     </Select>
                                 </Form.Item>
                             </div>
@@ -397,21 +395,11 @@ function Setting({ props }) {
                                         }}
                                         placeholder="Akun Pembayaran"
                                     >
-                                        <Select.Option value="tunai" key="tunai">
-                                            Tunai
+                                    {akun.data.map((element) => (
+                                        <Select.Option value={element.attributes.nama} key={element.id}>
+                                            {element.attributes.nama}
                                         </Select.Option>
-                                        <Select.Option value="transfer" key="transfer">
-                                            Bank Transfer
-                                        </Select.Option>
-                                        <Select.Option value="giro" key="giro">
-                                            Bank Giro
-                                        </Select.Option>
-                                        <Select.Option value="cn" key="cn">
-                                            CN
-                                        </Select.Option>
-                                        <Select.Option value="oth" key="oth">
-                                            OTH
-                                        </Select.Option>
+                                    ))}
                                     </Select>
                                 </Form.Item>
                             </div>
@@ -454,24 +442,30 @@ function Setting({ props }) {
                                         }}
                                         placeholder="Akun Pembayaran"
                                     >
-                                        <Select.Option value="tunai" key="tunai">
-                                            Tunai
+                                    {akun.data.map((element) => (
+                                        <Select.Option value={element.attributes.nama} key={element.id}>
+                                            {element.attributes.nama}
                                         </Select.Option>
-                                        <Select.Option value="transfer" key="transfer">
-                                            Bank Transfer
-                                        </Select.Option>
-                                        <Select.Option value="giro" key="giro">
-                                            Bank Giro
-                                        </Select.Option>
-                                        <Select.Option value="cn" key="cn">
-                                            CN
-                                        </Select.Option>
-                                        <Select.Option value="oth" key="oth">
-                                            OTH
-                                        </Select.Option>
+                                    ))}
                                     </Select>
                                 </Form.Item>
                             </div>
+                        </div>
+
+                        <div className="w-full flex justify-start">
+                          <Form.Item>
+                            {loading ? (
+                                <div className=" flex float-left ml-3 ">
+                                    <Spin />
+                                </div>
+                            ) : (
+                                <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
+                                    <p className="px-4 py-2 m-0 text-white">
+                                        SIMPAN
+                                    </p>
+                                </button>
+                            )}
+                          </Form.Item>
                         </div>
 
                       </Form>

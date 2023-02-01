@@ -96,13 +96,13 @@ const POSTDetail = async (
     },
     body: JSONdata,
   };
-
+    console.log("TId", tempListId)
   const req = await fetch(endpoint, options);
   const res = await req.json();
 
   if (req.status === 200) { 
-    tempListId.push(res.data?.id); console.log("tempListId", tempListId)
-    if (tempListId.length == length) {
+    tempListId.push(res.data?.id); console.log("tempListId", tempListId, tempListId.length)
+    if (tempListId.length == length) { console.log("urutan")
       setListId(tempListId);
     }
   }
