@@ -1,14 +1,15 @@
 import Head from "next/head";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import router, { useRouter } from "next/router";
 import { Input, notification, Select, DatePicker, Form, Spin } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import DebtTable from "@iso/components/ReactDataTable/Cost/DebtTable";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
+import DebtTable from "@iso/components/ReactDataTable/Cost/DebtAccountTable";
 import nookies from "nookies";
+import { toast } from "react-toastify";
 
 Setting.getInitialProps = async (context) => {
     const cookies = nookies.get(context);
@@ -95,11 +96,15 @@ function Setting({ props }) {
     //const user = props.user;
     //const locations = props.locations.data;
     //const data = props.hutang;
-    const akun = props.akun; console.log("akun", akun, akun.data)
-    //const router = useRouter();
+    const akunData = props.akun;
+    const router = useRouter();
     //const [hutang, setHutang] = useState(data);
     //const [supplier, setSupplier] = useState();
+    const [akun, setAkun] = useState(akunData);
     const [loading, setLoading] = useState(false);
+    const [selected, setSelected] = useState();
+    const [tunaiData, setTunaiData] = useState();
+    const [transferData, setTransferData] = useState();
 
     //const handleSetting = () => {
     //    router.push("/dashboard/biaya/hutang/setting");
@@ -118,11 +123,138 @@ function Setting({ props }) {
     //    );
     //};
 
+    const handleDelete = async (id) => {
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts/" + id;
+        const cookies = nookies.get(null, "token");
+
+        const options = {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + cookies.token,
+            },
+        };
+
+        const req = await fetch(endpoint, options);
+        const res = await req.json();
+        if (res) {
+            const res = await fetchData(cookies);
+            openNotificationWithIcon(
+                "success",
+                "Berhasil menghapus data",
+                "Akun hutang yang dipilih telah berhasil dihapus. Silahkan cek kembali akun hutang"
+            );
+            setAkun(res);
+            router.reload("/dashboard/biaya/hutang/setting");
+        }
+    };
+
+    const handlePageChange = async (page) => {
+        const cookies = nookies.get(null, "token");
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?pagination[page]=" + page;
+
+        const options = {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + cookies.token,
+            },
+        };
+
+        try {
+            const req = await fetch(endpoint, options);
+            const res = await req.json();
+            if (res) {
+                setPurchase((prevData) => ({
+                    data: filterDuplicateData(prevData.data.concat(res.data)),
+                    meta: prevData.meta,
+                }));
+            } else {
+                console.log("something is wrong");
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const handleTambahAkun = () => {
+        router.push("/dashboard/biaya/hutang/tambahakun");
+    };
+
+    const changeSelectOption = (value, idx) => {console.log("value idx",value,idx)
+        setSelected(value);
+
+        //var temp = [];
+        //if (value === "tunai") {
+        //    temp = [];
+        //    akun.data.map((element) => {
+        //        if (element.attributes.type == "Tunai") {
+        //            temp.push(element);
+        //        }
+        //    });
+        //    setTunaiData(temp);
+        //} else if (value === "transfer") {
+        //    //type = "transfer";
+        //} else if (value === "giro") {
+        //    //type = "giro";
+        //} else if (value === "cn") {
+        //    //type = "cn";
+        //} else if (value === "oth") {
+        //    //type = "oth";
+        //}
+    };
+
     const onFinish = (values) => {
         setLoading(true); console.log(values)
         //setDataValues(values);
         setLoading(false);
     };
+
+    //const tunai =
+    //    tunaiData.map((element) => (
+    //        {
+    //          key: element.id,
+    //          value: element.attributes.nama,
+    //          label: element.attributes.nama,
+    //        }
+    //    ))
+    //;
+
+    //let type = [];
+    //useEffect(() => {
+    //    var temp = [];
+    //    if (selected === "tunai") {
+    //        temp = [];
+    //        akun.data.map((element) => {
+    //            if (element.attributes.type == "Tunai") {
+    //              temp.push(element);
+    //            }
+    //        });
+    //        setTunaiData(temp);
+    //        type = temp;
+    //    } else if (selected === "transfer") {
+    //        temp = [];
+    //        akun.data.map((element) => {
+    //            if (element.attributes.type == "Transfer") {
+    //                temp.push(element);
+    //            }
+    //        });
+    //        setTransferData(temp);
+    //        type = temp;
+    //    } else if (selected === "giro") {
+    //        type = "giro";
+    //    } else if (selected === "cn") {
+    //        type = "cn";
+    //    } else if (selected === "oth") {
+    //        type = "oth";
+    //    }
+    //    console.log("temp", temp, tunaiData, type, selected)
+    //}, [selected]);
+
+    useEffect(() => {
+      var akunData = akun;
+      setAkun(akunData);
+    }, [akun]);
 
     const openNotificationWithIcon = (type, title, message) => {
         notification[type]({
@@ -152,6 +284,15 @@ function Setting({ props }) {
                 <LayoutWrapper style={{}}>
                     <TitlePage titleText={"AKUN PEMBAYARAN HUTANG PEMBELIAN"} />
                     <LayoutContent>
+
+                      <div className="w-full flex justify-end">
+                        <button htmlType="button" className="bg-cyan-700 rounded-md m-1 text-sm" onClick={handleTambahAkun}>
+                            <p className="px-4 py-2 m-0 text-white">
+                                + Tambah Akun
+                            </p>
+                        </button>
+                      </div>
+
                       <Form
                           //form={form}
                           //name="add"
@@ -179,20 +320,21 @@ function Setting({ props }) {
                                             width: "100%",
                                         }}
                                         placeholder="Metode Pembayaran"
+                                        onChange={(value, idx) => changeSelectOption(value,idx)}
                                     >
-                                        <Select.Option value="tunai" key="tunai">
+                                        <Select.Option name="metode_bayar1" value="tunai" key="tunai">
                                             Tunai
                                         </Select.Option>
-                                        <Select.Option value="transfer" key="transfer">
+                                        <Select.Option name="metode_bayar1" value="transfer" key="transfer">
                                             Bank Transfer
                                         </Select.Option>
-                                        <Select.Option value="giro" key="giro">
+                                        <Select.Option name="metode_bayar1" value="giro" key="giro">
                                             Bank Giro
                                         </Select.Option>
-                                        <Select.Option value="cn" key="cn">
+                                        <Select.Option name="metode_bayar1" value="cn" key="cn">
                                             CN
                                         </Select.Option>
-                                        <Select.Option value="oth" key="oth">
+                                        <Select.Option name="metode_bayar1" value="oth" key="oth">
                                             OTH
                                         </Select.Option>
                                     </Select>
@@ -206,12 +348,26 @@ function Setting({ props }) {
                                             width: "100%",
                                         }}
                                         placeholder="Akun Pembayaran"
+                                        //options={type}
                                     >
-                                    {akun.data.map((element) => (
-                                    <Select.Option value= {element.attributes.nama} key= {element.id}>
-                                        {element.attributes.nama}
-                                    </Select.Option>
-                                    )) }
+                                    {/*{akun.data.map((element) => (*/}
+                                    {/*<Select.Option value= {element.attributes.nama} key= {element.id}>*/}
+                                    {/*    {element.attributes.nama}*/}
+                                    {/*</Select.Option>*/}
+                                    {/*)) }*/}
+
+                                    {/*{selected != null ? (*/}
+                                    {/*    tunaiData.map((element) => (*/}
+                                    {/*    <Select.Option value={element.attributes.nama} key={element.id}>*/}
+                                    {/*        {element.attributes.nama}*/}
+                                    {/*    </Select.Option>*/}
+                                    {/*  ))*/}
+                                    {/*) : (*/}
+                                    {/*    <Select.Option disabled>*/}
+                                    {/*      Pilih metode pembayaran dulu*/}
+                                    {/*    </Select.Option>*/}
+                                    {/*)}*/}
+
                                     </Select>
                                 </Form.Item>
                             </div>
@@ -254,11 +410,19 @@ function Setting({ props }) {
                                         }}
                                         placeholder="Akun Pembayaran"
                                     >
-                                    {akun.data.map((element) => (
-                                    <Select.Option value= {element.attributes.nama} key= {element.id}>
-                                        {element.attributes.nama}
-                                    </Select.Option>
-                                    )) }
+
+                                    {/*{tunaiData != null ? (*/}
+                                    {/*  tunaiData.map((element) => (*/}
+                                    {/*    <Select.Option value={element.attributes.nama} key={element.id}>*/}
+                                    {/*        {element.attributes.nama}*/}
+                                    {/*    </Select.Option>*/}
+                                    {/*  ))*/}
+                                    {/*) : (*/}
+                                    {/*    <Select.Option disabled>*/}
+                                    {/*      Pilih metode pembayaran dulu*/}
+                                    {/*    </Select.Option>*/}
+                                    {/*)}*/}
+
                                     </Select>
                                 </Form.Item>
                             </div>
@@ -301,11 +465,11 @@ function Setting({ props }) {
                                         }}
                                         placeholder="Akun Pembayaran"
                                     >
-                                    {akun.data.map((element) => (
-                                        <Select.Option value={element.attributes.nama} key={element.id}>
-                                            {element.attributes.nama}
-                                        </Select.Option>
-                                    ))}
+                                    {/*{akun.data.map((element) => (*/}
+                                    {/*    <Select.Option value={element.attributes.nama} key={element.id}>*/}
+                                    {/*        {element.attributes.nama}*/}
+                                    {/*    </Select.Option>*/}
+                                    {/*))}*/}
                                     </Select>
                                 </Form.Item>
                             </div>
@@ -341,19 +505,19 @@ function Setting({ props }) {
                             </div>
                             <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                                 <Form.Item name="akun_bayar4" noStyle>
-                                    <Select
-                                        size="large"
-                                        style={{
-                                            width: "100%",
-                                        }}
-                                        placeholder="Akun Pembayaran"
-                                    >
-                                    {akun.data.map((element) => (
-                                        <Select.Option value={element.attributes.nama} key={element.id}>
-                                            {element.attributes.nama}
-                                        </Select.Option>
-                                    ))}
-                                    </Select>
+                                    {/*<Select*/}
+                                    {/*    size="large"*/}
+                                    {/*    style={{*/}
+                                    {/*        width: "100%",*/}
+                                    {/*    }}*/}
+                                    {/*    placeholder="Akun Pembayaran"*/}
+                                    {/*>*/}
+                                    {/*{akun.data.map((element) => (*/}
+                                    {/*    <Select.Option value={element.attributes.nama} key={element.id}>*/}
+                                    {/*        {element.attributes.nama}*/}
+                                    {/*    </Select.Option>*/}
+                                    {/*))}*/}
+                                    {/*</Select>*/}
                                 </Form.Item>
                             </div>
                         </div>
@@ -395,11 +559,11 @@ function Setting({ props }) {
                                         }}
                                         placeholder="Akun Pembayaran"
                                     >
-                                    {akun.data.map((element) => (
-                                        <Select.Option value={element.attributes.nama} key={element.id}>
-                                            {element.attributes.nama}
-                                        </Select.Option>
-                                    ))}
+                                    {/*{akun.data.map((element) => (*/}
+                                    {/*    <Select.Option value={element.attributes.nama} key={element.id}>*/}
+                                    {/*        {element.attributes.nama}*/}
+                                    {/*    </Select.Option>*/}
+                                    {/*))}*/}
                                     </Select>
                                 </Form.Item>
                             </div>
@@ -442,11 +606,11 @@ function Setting({ props }) {
                                         }}
                                         placeholder="Akun Pembayaran"
                                     >
-                                    {akun.data.map((element) => (
-                                        <Select.Option value={element.attributes.nama} key={element.id}>
-                                            {element.attributes.nama}
-                                        </Select.Option>
-                                    ))}
+                                    {/*{akun.data.map((element) => (*/}
+                                    {/*    <Select.Option value={element.attributes.nama} key={element.id}>*/}
+                                    {/*        {element.attributes.nama}*/}
+                                    {/*    </Select.Option>*/}
+                                    {/*))}*/}
                                     </Select>
                                 </Form.Item>
                             </div>
@@ -459,7 +623,7 @@ function Setting({ props }) {
                                     <Spin />
                                 </div>
                             ) : (
-                                <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
+                                <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm mt-4">
                                     <p className="px-4 py-2 m-0 text-white">
                                         SIMPAN
                                     </p>
@@ -467,6 +631,15 @@ function Setting({ props }) {
                             )}
                           </Form.Item>
                         </div>
+
+                        <DebtTable
+                          data={akun}
+                          //onUpdate={handleUpdate}
+                          onDelete={handleDelete}
+                          onPageChange={handlePageChange}
+                          //onChangeStatus={onChangeStatus}
+                          //user={user}
+                        />
 
                       </Form>
                     </LayoutContent>
