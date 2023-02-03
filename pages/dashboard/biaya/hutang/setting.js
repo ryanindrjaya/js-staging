@@ -79,7 +79,7 @@ const fetchHutang = async (cookies) => {
 };
 
 const fetchAkun = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=deep";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?sort[0]=setting%3Aasc";
     const options = {
         method: "GET",
         headers: {
@@ -100,7 +100,7 @@ function Setting({ props }) {
     const router = useRouter();
     //const [hutang, setHutang] = useState(data);
     //const [supplier, setSupplier] = useState();
-    const [akun, setAkun] = useState(akunData);
+    const [akun, setAkun] = useState(akunData); console.log("akun",akun)
     const [loading, setLoading] = useState(false);
     const [selected, setSelected] = useState();
     const [tunaiData, setTunaiData] = useState();
@@ -145,7 +145,6 @@ function Setting({ props }) {
                 "Akun hutang yang dipilih telah berhasil dihapus. Silahkan cek kembali akun hutang"
             );
             setAkun(res);
-            router.reload("/dashboard/biaya/hutang/setting");
         }
     };
 
@@ -210,6 +209,71 @@ function Setting({ props }) {
         setLoading(false);
     };
 
+    const onChangeSetting = (setting, row) => {
+        var aktifLength = 0;
+        var length = 0;
+        akun.data.forEach((element) => {
+          if(element.attributes.type == row.attributes.type){
+            if(element.attributes.setting == true) aktifLength++;
+          }
+
+          length++;
+        });
+
+        const cookies = nookies.get(length, "token");
+
+        if (aktifLength < 1 || setting == "Tidak Aktif") {
+          if (setting == "Tidak Aktif") row.attributes.setting = false;
+          if (setting == "Aktif") row.attributes.setting = true;
+            handleChangeSetting(row, row.id);
+        } else {
+          openNotificationWithIcon("error", "Setting gagal dirubah", "Karena tipe transaksi "+row.attributes.type+" memiliki lebih dari 1 akun aktif");
+          router.push("/dashboard/biaya/hutang/setting");
+        }
+    };
+
+    const handleChangeSetting = async (values, id) => {
+        // clean object
+        for (var key in values.attributes) {
+            if (values.attributes[key] === null || values.attributes[key] === undefined) {
+                delete values.attributes[key];
+            }
+        }
+
+        if (values.attributes?.document?.data === null || values.attributes?.document?.data === undefined) {
+            delete values.attributes?.document;
+        }
+
+        const newValues = {
+            data: values.attributes,
+        };
+
+        const JSONdata = JSON.stringify(newValues); console.log("newValues", newValues, id)
+        const cookies = nookies.get(null, "token");
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts/" + id;
+
+        const options = {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + cookies.token,
+            },
+            body: JSONdata,
+        }; console.log("cookies.token,", cookies.token)
+
+        const req = await fetch(endpoint, options);
+        const res = await req.json();
+
+        if (req.status === 200) {
+            const response = await fetchData(cookies);
+            setAkun(response);
+
+            openNotificationWithIcon("success", "Setting berhasil dirubah", "Setting berhasil dirubah. Silahkan cek setting hutang");
+        } else {
+            openNotificationWithIcon("error", "Setting gagal dirubah", "Tedapat kesalahan yang menyebabkan setting tidak dapat dirubah");
+        }
+    };
+
     //const tunai =
     //    tunaiData.map((element) => (
     //        {
@@ -251,10 +315,10 @@ function Setting({ props }) {
     //    console.log("temp", temp, tunaiData, type, selected)
     //}, [selected]);
 
-    useEffect(() => {
-      var akunData = akun;
-      setAkun(akunData);
-    }, [akun]);
+    //useEffect(() => {
+    //  var akunData = akun;
+    //  setAkun(akunData);
+    //}, [akun]);
 
     const openNotificationWithIcon = (type, title, message) => {
         notification[type]({
@@ -273,6 +337,22 @@ function Setting({ props }) {
                 });
             }
         });
+    };
+
+    const fetchData = async (cookies) => {
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=deep";
+        const options = {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + cookies.token,
+            },
+        };
+
+        const req = await fetch(endpoint, options);
+        const res = req.json();
+
+        return res;
     };
 
     return (
@@ -638,6 +718,7 @@ function Setting({ props }) {
                           onDelete={handleDelete}
                           onPageChange={handlePageChange}
                           //onChangeStatus={onChangeStatus}
+                          onChangeSetting={onChangeSetting}
                           //user={user}
                         />
 

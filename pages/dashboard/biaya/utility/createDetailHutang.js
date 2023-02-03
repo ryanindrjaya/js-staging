@@ -18,6 +18,17 @@ const createDetailHutang = (
 ) => {
   tempListId = [];
 
+  //get length choosen data
+  biaya.list.forEach((element) => {
+    if(biaya.info[id] != null){ 
+      if(biaya.info[id].pilihData == "pilih"){
+        length++;
+      }
+    }
+    id++;
+  });
+
+  id = 0;
   biaya.list.forEach((element) => {
     //tempListId = [];
 
@@ -50,8 +61,6 @@ const createDetailHutang = (
             length,
             url
         );
-
-        length++;
       }
     }
 
@@ -101,8 +110,8 @@ const POSTDetail = async (
   const res = await req.json();
 
   if (req.status === 200) { 
-    tempListId.push(res.data?.id); console.log("tempListId", tempListId, tempListId.length)
-    if (tempListId.length == length) { console.log("urutan")
+    tempListId.push(res.data?.id); console.log("tempListId", tempListId, tempListId.length, length, biaya.list.length)
+    if (tempListId.length > length) { console.log("urutan")
       setListId(tempListId);
     }
   }

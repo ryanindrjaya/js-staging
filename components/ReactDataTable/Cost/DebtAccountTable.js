@@ -14,6 +14,7 @@ export default function ReactDataTable({
     onPageChange,
     onChangeStatusPengiriman,
     onChangeStatus,
+    onChangeSetting,
     user,
 }) {
     const router = useRouter();
@@ -22,6 +23,14 @@ export default function ReactDataTable({
     const tagRed = process.env.TAG_RED;
     const tagGreen = process.env.TAG_GREEN;
     const tagOrange = process.env.TAG_ORANGE;
+
+    //var tunai = 0;
+    //var tf = 0;
+    //var giro = 0;
+    //var cn = 0;
+    //var oth = 0;
+
+    //data.data.forEac
 
     const openNotificationWithIcon = (type, title, message) => {
         notification[type]({
@@ -86,7 +95,7 @@ export default function ReactDataTable({
         },
         {
           name: "Setting",
-          width: "120px",
+          width: "170px",
           selector: (row) => {
             var setting = "-";
 
@@ -95,7 +104,23 @@ export default function ReactDataTable({
             else setting = "-";
             //row.attributes?.setting ?? "-"]
 
-            return setting;
+            return (
+              <>
+                <Select
+                  defaultValue={setting}
+                  bordered={false}
+                  //disabled={row.attributes.delivery_status === "Terkirim"}
+                  onChange={(e) => onChangeSetting(e, row)}
+                >
+                  <Option value="Tidak Aktif">
+                    <Tag color="error">Tidak Aktif</Tag>
+                  </Option>
+                  <Option value="Aktif">
+                    <Tag color="success">Aktif</Tag>
+                  </Option>
+                </Select>
+              </>
+            );
           }
         },
         {

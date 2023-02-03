@@ -32,12 +32,16 @@ Hutang.getInitialProps = async (context) => {
   const reqHutang = await fetchHutang(cookies);
   const hutang = await reqHutang.json();
 
+  const reqAkunHutang = await fetchAkunHutang(cookies);
+  const akunHutang = await reqAkunHutang.json();
+
   return {
     props: {
       user,
       LPB,
       returLPB,
       hutang,
+      akunHutang
     },
   };
 };
@@ -98,6 +102,20 @@ const fetchHutang = async (cookies) => {
     return req;
 };
 
+const fetchAkunHutang = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=deep";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
+};
+
 function Hutang({ props }) {
   const biaya = useSelector((state) => state.Cost);
   const dispatch = useDispatch();
@@ -108,6 +126,7 @@ function Hutang({ props }) {
   //const inven = props.inven.data;
   const lpb = props.LPB.data;
   const returLPB = props.returLPB.data;
+  const akunHutang = props.akunHutang.data;
   //const customerData = props.customer.data[0];
   const [supplier, setSupplier] = useState();
   const [dataTabel, setDataTabel] =  useState([]);
@@ -122,7 +141,7 @@ function Hutang({ props }) {
 
   const [dataValues, setDataValues] = useState();
 
-  const [listId, setListId] = useState({}); console.log("data list",listId)
+  const [listId, setListId] = useState([]);
 
   const router = useRouter();
   const { TextArea } = Input;
@@ -162,7 +181,7 @@ function Hutang({ props }) {
     //});
     //createMaster(values);
     setDataValues(values);
-    setLoading(false); console.log("values", values)
+    setLoading(false);
   };
 
   const createDetail = async () => {
@@ -170,12 +189,12 @@ function Hutang({ props }) {
     await createDetails(dataValues, dataTabel, biaya, sisaHutang, setListId, "/debt-details");
   };
 
-  const createMaster = async (values) => { console.log("master", listId)
+  const createMaster = async (values) => { console.log("listId",listId)
     values.total_item = dataTabel.length;
     values.total_hutang_jatuh_tempo = totalHutangJatuhTempo();
     values.total_pembayaran = totalPembayaran();
     values.sisa_hutang_jatuh_tempo = sisaHutangJatuhTempo();
-    await createData(sisaHutang, values, listId, form, router, "/debts/", "hutang");
+    await createData(sisaHutang, values, listId, form, router, "/debts/", "hutang", akunHutang);
   };
 
   const clearData = () => {
@@ -328,7 +347,7 @@ function Hutang({ props }) {
         });
       }
     });
-  }; console.log("biaya coba",biaya, dataTabel)
+  };
 
   return (
     <>

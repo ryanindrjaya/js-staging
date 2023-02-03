@@ -98,11 +98,52 @@ function Hutang({ props }) {
         );
     };
 
+    const handleDelete = async (id) => {
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/debts/" + id;
+        const cookies = nookies.get(null, "token");
+
+        const options = {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + cookies.token,
+            },
+        };
+
+        const req = await fetch(endpoint, options);
+        const res = await req.json();
+        if (res) {
+            const res = await fetchData(cookies);
+            openNotificationWithIcon(
+                "success",
+                "Berhasil menghapus data",
+                "Hutang yang dipilih telah berhasil dihapus. Silahkan cek kembali hutang"
+            );
+            setHutang(res);
+        }
+    };
+
     const openNotificationWithIcon = (type, title, message) => {
         notification[type]({
             message: title,
             description: message,
         });
+    };
+
+    const fetchData = async (cookies) => {
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate=deep";
+        const options = {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + cookies.token,
+            },
+        };
+
+        const req = await fetch(endpoint, options);
+        const res = req.json();
+
+        return res;
     };
 
     return (
@@ -223,9 +264,9 @@ function Hutang({ props }) {
                         </div>
 
                         <DebtTable
-                          data={data}
+                          data={hutang}
                           onUpdate={handleUpdate}
-                          //onDelete={handleDelete}
+                          onDelete={handleDelete}
                           //onPageChange={handlePageChange}
                           //onChangeStatus={onChangeStatus}
                           user={user}
