@@ -6,7 +6,7 @@ var tempListId = [];
 const cookies = nookies.get(null, "token");
 
 var id = 0;
-var length = 1;
+var length = 0;
 
 const createDetailHutang = (
   values,
@@ -105,13 +105,13 @@ const POSTDetail = async (
     },
     body: JSONdata,
   };
-    console.log("TId", tempListId)
+
   const req = await fetch(endpoint, options);
   const res = await req.json();
 
   if (req.status === 200) { 
-    tempListId.push(res.data?.id); console.log("tempListId", tempListId, tempListId.length, length, biaya.list.length)
-    if (tempListId.length > length) { console.log("urutan")
+    tempListId.push(res.data?.id);
+    if (tempListId.length == length) {
       setListId(tempListId);
     }
   }

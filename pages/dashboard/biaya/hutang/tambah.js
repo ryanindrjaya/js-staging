@@ -127,7 +127,7 @@ function Hutang({ props }) {
   const lpb = props.LPB.data;
   const returLPB = props.returLPB.data;
   const akunHutang = props.akunHutang.data;
-  //const customerData = props.customer.data[0];
+  const hutang = props.hutang;
   const [supplier, setSupplier] = useState();
   const [dataTabel, setDataTabel] =  useState([]);
   const [dataRetur, setDataRetur] = useState([]);
@@ -168,18 +168,17 @@ function Hutang({ props }) {
 
   const onFinish = (values) => {
     setLoading(true);
-    //setInfo("sukses");
-    //sale.data.forEach((element) => {
-    //  if (values.no_sales_sell == element.attributes.no_sales_sell) {
-    //      notification["error"]({
-    //          message: "Gagal menambahkan data",
-    //          description:
-    //              "Data gagal ditambahkan, karena no penjualan sama",
-    //      });
-    //      setInfo("gagal");
-    //  }
-    //});
-    //createMaster(values);
+    setInfo("sukses");
+    hutang.data.forEach((element) => {
+      if (values.no_hutang == element.attributes.no_hutang) {
+          notification["error"]({
+              message: "Gagal menambahkan data",
+              description:
+                  "Data gagal ditambahkan, karena no hutang sama",
+          });
+          setInfo("gagal");
+      }
+    });
     setDataValues(values);
     setLoading(false);
   };
@@ -189,7 +188,7 @@ function Hutang({ props }) {
     await createDetails(dataValues, dataTabel, biaya, sisaHutang, setListId, "/debt-details");
   };
 
-  const createMaster = async (values) => { console.log("listId",listId)
+  const createMaster = async (values) => {
     values.total_item = dataTabel.length;
     values.total_hutang_jatuh_tempo = totalHutangJatuhTempo();
     values.total_pembayaran = totalPembayaran();
@@ -248,8 +247,7 @@ function Hutang({ props }) {
   };
 
   useEffect(() => {
-    //if (dataValues && info == "sukses") createDetailSale();
-    if (dataValues) createDetail();
+    if (dataValues && info == "sukses") createDetail();
   }, [dataValues]);
 
   useEffect(() => {

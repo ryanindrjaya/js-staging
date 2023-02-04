@@ -36,7 +36,7 @@ export default function ReactDataTable({
     };
 
     const print = (row) => {
-        router.push("hutang/print/" + row.id);
+        router.push("piutang/print/" + row.id);
     };
 
     const onConfirm = (id) => {
@@ -70,7 +70,7 @@ export default function ReactDataTable({
             </div>
             <div>
                 <button
-                    onClick={() => print(row)}
+                    onClick={() => lihat(row)}
                     className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
                 >
                     <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
@@ -109,44 +109,39 @@ export default function ReactDataTable({
 
     const columns = [
         {
-          name: "No Pembayaran Hutang",
+          name: "No Penagihan Piutang",
           width: "200px",
-          selector: (row) => row.attributes?.no_hutang ?? "-",
+          selector: (row) => row.attributes?.no_piutang ?? "-",
         },
         {
-          name: "No LPB",
+          name: "Sales",
           width: "150px",
           selector: (row) => console.log(row),
         },
         {
-          name: "Nota Supplier",
+          name: "Area",
           width: "150px",
           //selector: (row) => row.attributes?.customer.data.attributes?.name ?? "-",
         },
         {
-            name: "Nota Supplier",
-            width: "150px",
-            //selector: (row) => row.attributes?.customer.data.attributes?.name ?? "-",
-        },
-        {
-            name: "Supplier",
-            width: "120px",
-            //selector: (row) => row.attributes?.customer.data.attributes?.name ?? "-",
+          name: "Wilayah",
+          width: "150px",
+          //selector: (row) => row.attributes?.customer.data.attributes?.name ?? "-",
         },
         {
           name: "Tanggal",
           width: "120px",
-          selector: (row) => formatMyDate(row.attributes?.tanggal_pembayaran ?? "-"),
+          //selector: (row) => formatMyDate(row.attributes?.tanggal_pembayaran ?? "-"),
         },
         {
-          name: "Pembayaran",
-          width: "120px",
-          selector: (row) => row.attributes?.status ?? "-",
-        },
-        {
-          name: "Total Bayar",
+          name: "Status Penagihan",
           width: "150px",
-          selector: (row) => formatter.format(row.attributes?.total_pembayaran ?? "-"),
+          //selector: (row) => row.attributes?.status ?? "-",
+        },
+        {
+          name: "Total Penagihan",
+          width: "150px",
+          //selector: (row) => formatter.format(row.attributes?.total_pembayaran ?? "-"),
         },
         {
             name: "Tindakan",

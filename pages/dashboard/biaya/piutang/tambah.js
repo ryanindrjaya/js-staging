@@ -14,8 +14,9 @@ import createData from "../utility/createHutang";
 import createDetails from "../utility/createDetailHutang";
 import calculatePrice from "../utility/calculatePrice";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
+import Customer from "@iso/components/Form/AddCost/CustomerForm";
 import nookies from "nookies";
-import DataTable from "react-data-table-component";
+
 
 Hutang.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -136,6 +137,9 @@ function Hutang({ props }) {
   const tempList = [];
 
   const [info, setInfo] = useState();
+
+  // customer
+  const [customer, setCustomer] = useState();
 
   // NO Hutang
   var noHutang = String(props.hutang?.meta?.pagination.total + 1).padStart(3, "0");
@@ -364,24 +368,8 @@ function Hutang({ props }) {
                     <Input style={{ height: "40px" }} placeholder="No. Hutang" />
                   </Form.Item>
                 </div>
-                <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item name="customer" //initialValue={"Hari"} 
-                  noStyle>
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      placeholder="Customer"
-                    >
-                      <Select.Option value="1" key="1">
-                        Wil 1
-                      </Select.Option>
-                      <Select.Option value="2" key="2">
-                        Wil 2
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
+                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
+                  <Customer onChangeCustomer={setCustomer} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
                   <Form.Item name="status_pembayaran" //initialValue={"Hari"} 
@@ -517,258 +505,22 @@ function Hutang({ props }) {
                 </Form.Item>
               </div>
 
-              <div className="w-full md:w-1/4 px-3 -mx-3">
-                <Form.Item
-                    name="tanggal_pembayaran"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
-                    >
-                    <DatePicker placeholder="Tanggal Pembayaran" size="large" style={{ width: "100%" }} />
-                  </Form.Item>
-              </div>
-
-              <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 mt-8">
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="bayar1"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
-                    >
-                    <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="metode_bayar1" noStyle>
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      placeholder="Metode Pembayaran"
-                    >
-                      <Select.Option value="tunai" key="tunai">
-                        Tunai
-                      </Select.Option>
-                      <Select.Option value="transfer" key="transfer">
-                        Bank Transfer
-                      </Select.Option>
-                      <Select.Option value="giro" key="giro">
-                        Bank Giro
-                      </Select.Option>
-                      <Select.Option value="cn" key="cn">
-                        CN
-                      </Select.Option>
-                      <Select.Option value="oth" key="oth">
-                        OTH
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
-                </div>
-
-              </div>
-
-              <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="bayar2"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
-                    >
-                    <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="metode_bayar2" noStyle>
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      placeholder="Metode Pembayaran"
-                    >
-                      <Select.Option value="tunai" key="tunai">
-                        Tunai
-                      </Select.Option>
-                      <Select.Option value="transfer" key="transfer">
-                        Bank Transfer
-                      </Select.Option>
-                      <Select.Option value="giro" key="giro">
-                        Bank Giro
-                      </Select.Option>
-                      <Select.Option value="cn" key="cn">
-                        CN
-                      </Select.Option>
-                      <Select.Option value="oth" key="oth">
-                        OTH
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
-                </div>
-              </div>
-
-              <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="bayar3"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
-                    >
-                    <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="metode_bayar3" noStyle>
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      placeholder="Metode Pembayaran"
-                    >
-                      <Select.Option value="tunai" key="tunai">
-                        Tunai
-                      </Select.Option>
-                      <Select.Option value="transfer" key="transfer">
-                        Bank Transfer
-                      </Select.Option>
-                      <Select.Option value="giro" key="giro">
-                        Bank Giro
-                      </Select.Option>
-                      <Select.Option value="cn" key="cn">
-                        CN
-                      </Select.Option>
-                      <Select.Option value="oth" key="oth">
-                        OTH
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
-                </div>
-              </div>
-
-              <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="bayar4"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
-                    >
-                    <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="metode_bayar4" noStyle>
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      placeholder="Metode Pembayaran"
-                    >
-                      <Select.Option value="tunai" key="tunai">
-                        Tunai
-                      </Select.Option>
-                      <Select.Option value="transfer" key="transfer">
-                        Bank Transfer
-                      </Select.Option>
-                      <Select.Option value="giro" key="giro">
-                        Bank Giro
-                      </Select.Option>
-                      <Select.Option value="cn" key="cn">
-                        CN
-                      </Select.Option>
-                      <Select.Option value="oth" key="oth">
-                        OTH
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
-                </div>
-              </div>
-
-              <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="bayar5"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
-                    >
-                    <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="metode_bayar5" noStyle>
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      placeholder="Metode Pembayaran"
-                    >
-                      <Select.Option value="tunai" key="tunai">
-                        Tunai
-                      </Select.Option>
-                      <Select.Option value="transfer" key="transfer">
-                        Bank Transfer
-                      </Select.Option>
-                      <Select.Option value="giro" key="giro">
-                        Bank Giro
-                      </Select.Option>
-                      <Select.Option value="cn" key="cn">
-                        CN
-                      </Select.Option>
-                      <Select.Option value="oth" key="oth">
-                        OTH
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
-                </div>
-              </div>
-
               <div className="w-full mt-8 flex justify-between">
                 <Form.Item name="catatan" className="w-full mx-2">
                   <TextArea rows={4} placeholder="Catatan Pembayaran" />
                 </Form.Item>
               </div>
 
-              <div  className="w-full flex justify-center">
+              <div  className="w-full flex justify-between">
                   <Form.Item>
                     {loading ? (
                       <div className=" flex float-left ml-3 ">
                         <Spin />
                       </div>
                     ) : (
-                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
+                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm px-4">
                         <p className="px-4 py-2 m-0 text-white">
-                          SIMPAN DAN PERBARUI
+                          SIMPAN
                         </p>
                       </button>
                     )}
@@ -779,9 +531,22 @@ function Hutang({ props }) {
                         <Spin />
                       </div>
                     ) : (
-                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
+                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm px-4">
                         <p className="px-4 py-2 m-0 text-white">
-                          SIMPAN DAN CETAK
+                          CETAK
+                        </p>
+                      </button>
+                    )}
+                  </Form.Item>
+                  <Form.Item>
+                    {loading ? (
+                      <div className=" flex float-left ml-3 ">
+                        <Spin />
+                      </div>
+                    ) : (
+                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm px-4">
+                        <p className="px-4 py-2 m-0 text-white">
+                          SELESAI
                         </p>
                       </button>
                     )}

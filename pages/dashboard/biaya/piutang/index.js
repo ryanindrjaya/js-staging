@@ -6,11 +6,11 @@ import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import router, { useRouter } from "next/router";
 import { Input, notification, Select, DatePicker } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import DebtTable from "@iso/components/ReactDataTable/Cost/DebtTable";
+import CreditTable from "@iso/components/ReactDataTable/Cost/CreditTable";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
 import nookies from "nookies";
 
-Hutang.getInitialProps = async (context) => {
+Piutang.getInitialProps = async (context) => {
     const cookies = nookies.get(context);
 
     const req = await fetchData(cookies);
@@ -19,14 +19,14 @@ Hutang.getInitialProps = async (context) => {
     const reqLocation = await fetchLocation(cookies);
     const locations = await reqLocation.json();
 
-    const reqHutang = await fetchHutang(cookies);
-    const hutang = await reqHutang.json();
+    const reqPiutang = await fetchPiutang(cookies);
+    const piutang = await reqPiutang.json();
 
     return {
       props: {
         user,
         locations,
-        hutang,
+        piutang,
       },
     };
 };
@@ -59,8 +59,8 @@ const fetchLocation = async (cookies) => {
     return req;
 };
 
-const fetchHutang = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate=deep";
+const fetchPiutang = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/credits?populate=deep";
     const options = {
         method: "GET",
         headers: {
@@ -73,12 +73,12 @@ const fetchHutang = async (cookies) => {
     return req;
 };
 
-function Hutang({ props }) {
+function Piutang({ props }) {
     const user = props.user;
     const locations = props.locations.data;
-    const data = props.hutang;
+    const data = props.piutang; console.log("piutang", props)
     const router = useRouter();
-    const [hutang, setHutang] = useState(data);
+    const [piutang, setPiutang] = useState(data);
     const [supplier, setSupplier] = useState();
 
     const handleSetting = () => {
@@ -282,13 +282,13 @@ function Hutang({ props }) {
                             </button>
                         </div>
 
-                        <DebtTable
+                        <CreditTable
                           data={data}
                           onUpdate={handleUpdate}
                           //onDelete={handleDelete}
                           //onPageChange={handlePageChange}
                           //onChangeStatus={onChangeStatus}
-                          user={user}
+                          //user={user}
                         />
                     </LayoutContent>
                 </LayoutWrapper>
@@ -297,4 +297,4 @@ function Hutang({ props }) {
     );
 }
 
-export default Hutang;
+export default Piutang;

@@ -22,7 +22,7 @@ const CreateHutang = async (
   listId.forEach((element) => {
     tempProductListId.push({ id: element });
   });
-    console.log("values master", values, akunHutang)
+
   var totalTunai = 0;
   var totalTransfer = 0;
   var totalGiro = 0;
@@ -157,9 +157,11 @@ const putAkunHutang = async (id, value, form, total) => {
 
     if (req.status === 200) {
         //form.resetFields();
-        openNotificationWithIcon("success");
+        //openNotificationWithIcon("success");
+        console.log("akun hutang sukses");
     } else {
-        openNotificationWithIcon("error");
+        //openNotificationWithIcon("error");
+        console.log("akun hutang error");
     }
 };
 

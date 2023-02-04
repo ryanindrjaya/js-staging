@@ -98,8 +98,10 @@ function Hutang({ props }) {
         );
     };
 
-    const handleDelete = async (id) => {
-        const endpoint = process.env.NEXT_PUBLIC_URL + "/debts/" + id;
+    const handleDelete = async (data) => {
+        handleDeleteRelation(data);
+
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/debts/" + data.id;
         const cookies = nookies.get(null, "token");
 
         const options = {
@@ -121,6 +123,30 @@ function Hutang({ props }) {
             );
             setHutang(res);
         }
+    };
+
+    const handleDeleteRelation = async (data) => {
+        var id = 0;
+        data.attributes.debt_details.data.forEach((element) => {
+          id = element.id;
+
+          const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-details/" + id;
+          const cookies = nookies.get(null, "token");
+
+          const options = {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + cookies.token,
+            },
+          };
+
+          const req = fetch(endpoint, options);
+          //const res = req.json();
+          if (req) {
+            console.log("relation deleted");
+          }
+        });
     };
 
     const openNotificationWithIcon = (type, title, message) => {
