@@ -70,7 +70,7 @@ export default function ReactDataTable({
             </div>
             <div>
                 <button
-                    onClick={() => lihat(row)}
+                    onClick={() => print(row)}
                     className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
                 >
                     <PrinterOutlined className="mr-2 mt-0.5 float float-left" />

@@ -9,7 +9,7 @@ import { Row, Form, Input, InputNumber, Select, Button, Spin, notification, Date
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import AddSellSalesTable from "@iso/components/ReactDataTable/Selling/AddSellSalesTable";
-import AddDebtTable from "@iso/components/ReactDataTable/Cost/AddDebtTable";
+import AddCreditTable from "@iso/components/ReactDataTable/Cost/AddCreditTable";
 import createData from "../utility/createHutang";
 import createDetails from "../utility/createDetailHutang";
 import calculatePrice from "../utility/calculatePrice";
@@ -481,7 +481,7 @@ function Hutang({ props }) {
               </div>
 
               <div className="w-full md:w-4/4 px-3 mb-2 mt-1 md:mb-0">
-                <AddDebtTable
+                <AddCreditTable
                   data={dataTabel}
                   retur={dataRetur}
                   biaya={biaya}
