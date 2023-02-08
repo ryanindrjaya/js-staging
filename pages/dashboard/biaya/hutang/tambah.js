@@ -333,7 +333,7 @@ function Hutang({ props }) {
           lpbId++;
       });
 
-  }, []);
+  }, []); console.log("biaya", biaya, dataRetur)
 
   const validateError = () => {
     var listError = form.getFieldsError();

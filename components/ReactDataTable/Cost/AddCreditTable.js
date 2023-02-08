@@ -4,6 +4,7 @@ import { Input, InputNumber, Select, Form, Row, DatePicker, Checkbox, Popover } 
 import { useDispatch } from "react-redux";
 import { useState } from "react";
 import { PrinterOutlined } from "@ant-design/icons";
+import router from "next/router";
 
 export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal }) {
   const dispatch = useDispatch();
@@ -13,24 +14,24 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   var tempIndex = 0;
   var stock = 0;
   var returSubtotal = 0;
-  var sisaHutang = {};
+  var sisaPiutang = {};
   const [dataRetur, setDataRetur] = useState("tidak");
 
   var index = 0;
   data.forEach((element) => {
 
     retur.forEach((row) => {
-      if(element.attributes.no_purchasing == row.id)
+      if(element.attributes.no_sales_sale == row.id)
       {
         returSubtotal += row.subtotal;
       }
     });
 
     element.subtotal = returSubtotal;
-    element.hutangJatuhTempo = element.attributes.total_purchasing - element.subtotal;
-    element.sisaHutang = element.hutangJatuhTempo;
-    element.sisaHutangFix = element.hutangJatuhTempo; 
-    sisaHutang[index] = element.sisaHutang;
+    //element.hutangJatuhTempo = element.attributes.total_purchasing - element.subtotal;
+    //element.sisaHutang = element.hutangJatuhTempo;
+    //element.sisaHutangFix = element.hutangJatuhTempo; 
+    sisaPiutang[index] = element.sisaPiutang;
 
     index++;
   });
@@ -46,7 +47,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     if(value.target.checked == true) pilihData = "pilih";
     else pilihData = "tidak";
     dispatch({ type: "CHANGE_PILIH_DATA", pilihData: pilihData, listData: data, index: index });
-    dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: data.sisaHutang, listData: data, index: index });
+    dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: data.sisaPiutang, listData: data, index: index });
   };
 
   const onChangeTunai = (value, data, index) => {
@@ -73,6 +74,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   const onChangeOth = (value, data, index) => {
     dispatch({ type: "CHANGE_DATA_OTH", oth: value, listData: data, index: index });
     //onChangeSisaHutang(value, data, index);
+  };
+
+  const metodePembayaran = (value) => {
+    router.push("/dashboard/biaya/piutang/metode_pembayaran/" + value);
   };
 
   const content = (row, idx) => (
@@ -114,7 +119,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   const columns = [
     {
       name: "Tindakan",
-      width: "150px",
+      width: "100px",
       selector: (row, idx) => (
         <>
             <Popover content={content(row, idx)} placement="bottom" trigger="click">
@@ -167,152 +172,167 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     //  },
     //},
     {
-      name: "No LPB",
+      name: "No Invoice",
       width: "200px",
-      selector: (row) => row.attributes?.no_purchasing,
+      selector: (row) => row.attributes?.no_sales_sale,
     },
     {
-      name: "Nota Supplier",
+      name: "Tanggal",
+      width: "100px",
+      selector: (row) => row.attributes?.sale_date,
+    },
+    {
+      name: "Pelanggan",
       width: "150px",
-      selector: (row) => row.attributes?.no_nota_suppplier,
+      selector: (row) => row.attributes?.customer.data.attributes?.name,
     },
     {
-      name: "Nilai LPB",
+      name: "Sales",
       width: "150px",
-      selector: (row) => formatter.format(row.attributes?.total_purchasing),
+      selector: (row) => console.log("row tabel",row),
     },
     {
-      name: "Total Nilai Retur Beli",
+      name: "Nilai Invoice",
+      width: "150px",
+      selector: (row) => formatter.format(row.attributes?.total),
+    },
+    {
+      name: "Total Retur Jual",
       width: "150px",
       selector: (row) => formatter.format(row.subtotal),
     },
     {
-      name: "Hutang Jatuh Tempo",
+      name: "Total Pembayaran",
       width: "150px",
-      selector: (row) => formatter.format(row.hutangJatuhTempo),
+      //selector: (row) => formatter.format(row.hutangJatuhTempo),
     },
-    {
-      name: "ACC Tunai",
-      width: "150px",
-      selector: (row, idx) => {
-        var defaultAccTunai = 0;
+    //{
+    //  name: "Hutang Jatuh Tempo",
+    //  width: "150px",
+    //  selector: (row) => formatter.format(row.hutangJatuhTempo),
+    //},
+    //{
+    //  name: "ACC Tunai",
+    //  width: "150px",
+    //  selector: (row, idx) => {
+    //    var defaultAccTunai = 0;
 
-        return (
-          <Row align="bottom" justify="center">
-            <Form.Item name={["AccTunai", `${idx}`]} noStyle>
-              <InputNumber
-                defaultValue={defaultAccTunai}
-                //formatter={(value) => `${value}%`}
-                min={0}
-                onChange={(e) => onChangeTunai(e, row, idx)}
-                style={{
-                  width: "100px",
-                  marginRight: "10px",
-                }}
-              />
-            </Form.Item>
-          </Row>
-        );
-      },
-    },
-    {
-      name: "ACC Bank Transfer",
-      width: "150px",
-      selector: (row, idx) => {
-        var defaultAccBankTf = 0;
+    //    return (
+    //      <Row align="bottom" justify="center">
+    //        <Form.Item name={["AccTunai", `${idx}`]} noStyle>
+    //          <InputNumber
+    //            defaultValue={defaultAccTunai}
+    //            //formatter={(value) => `${value}%`}
+    //            min={0}
+    //            onChange={(e) => onChangeTunai(e, row, idx)}
+    //            style={{
+    //              width: "100px",
+    //              marginRight: "10px",
+    //            }}
+    //          />
+    //        </Form.Item>
+    //      </Row>
+    //    );
+    //  },
+    //},
+    //{
+    //  name: "ACC Bank Transfer",
+    //  width: "150px",
+    //  selector: (row, idx) => {
+    //    var defaultAccBankTf = 0;
 
-        return (
-          <Row align="bottom" justify="center">
-            <Form.Item name={["AccBankTf", `${idx}`]} noStyle>
-              <InputNumber
-                defaultValue={defaultAccBankTf}
-                //formatter={(value) => `${value}%`}
-                min={0}
-                onChange={(e) => onChangeTransfer(e, row, idx)}
-                style={{
-                  width: "100px",
-                  marginRight: "10px",
-                }}
-              />
-            </Form.Item>
-          </Row>
-        );
-      },
-    },
-    {
-      name: "ACC Bank Giro",
-      width: "150px",
-      selector: (row, idx) => {
-        var defaultAccBankGiro = 0;
+    //    return (
+    //      <Row align="bottom" justify="center">
+    //        <Form.Item name={["AccBankTf", `${idx}`]} noStyle>
+    //          <InputNumber
+    //            defaultValue={defaultAccBankTf}
+    //            //formatter={(value) => `${value}%`}
+    //            min={0}
+    //            onChange={(e) => onChangeTransfer(e, row, idx)}
+    //            style={{
+    //              width: "100px",
+    //              marginRight: "10px",
+    //            }}
+    //          />
+    //        </Form.Item>
+    //      </Row>
+    //    );
+    //  },
+    //},
+    //{
+    //  name: "ACC Bank Giro",
+    //  width: "150px",
+    //  selector: (row, idx) => {
+    //    var defaultAccBankGiro = 0;
 
-        return (
-          <Row align="bottom" justify="center">
-            <Form.Item name={["AccBankGiro", `${idx}`]} noStyle>
-              <InputNumber
-                defaultValue={defaultAccBankGiro}
-                //formatter={(value) => `${value}%`}
-                min={0}
-                onChange={(e) => onChangeGiro(e, row, idx)}
-                style={{
-                  width: "100px",
-                  marginRight: "10px",
-                }}
-              />
-            </Form.Item>
-          </Row>
-        );
-      },
-    },
-    {
-      name: "ACC CN",
-      width: "150px",
-      selector: (row, idx) => {
-        var defaultAccCN = 0;
+    //    return (
+    //      <Row align="bottom" justify="center">
+    //        <Form.Item name={["AccBankGiro", `${idx}`]} noStyle>
+    //          <InputNumber
+    //            defaultValue={defaultAccBankGiro}
+    //            //formatter={(value) => `${value}%`}
+    //            min={0}
+    //            onChange={(e) => onChangeGiro(e, row, idx)}
+    //            style={{
+    //              width: "100px",
+    //              marginRight: "10px",
+    //            }}
+    //          />
+    //        </Form.Item>
+    //      </Row>
+    //    );
+    //  },
+    //},
+    //{
+    //  name: "ACC CN",
+    //  width: "150px",
+    //  selector: (row, idx) => {
+    //    var defaultAccCN = 0;
 
-        return (
-          <Row align="bottom" justify="center">
-            <Form.Item name={["AccCN", `${idx}`]} noStyle>
-              <InputNumber
-                defaultValue={defaultAccCN}
-                //formatter={(value) => `${value}%`}
-                min={0}
-                onChange={(e) => onChangeCn(e, row, idx)}
-                style={{
-                  width: "100px",
-                  marginRight: "10px",
-                }}
-              />
-            </Form.Item>
-          </Row>
-        );
-      },
-    },
-    {
-      name: "ACC OTH",
-      width: "150px",
-      selector: (row, idx) => {
-        var defaultAccOTH = 0;
+    //    return (
+    //      <Row align="bottom" justify="center">
+    //        <Form.Item name={["AccCN", `${idx}`]} noStyle>
+    //          <InputNumber
+    //            defaultValue={defaultAccCN}
+    //            //formatter={(value) => `${value}%`}
+    //            min={0}
+    //            onChange={(e) => onChangeCn(e, row, idx)}
+    //            style={{
+    //              width: "100px",
+    //              marginRight: "10px",
+    //            }}
+    //          />
+    //        </Form.Item>
+    //      </Row>
+    //    );
+    //  },
+    //},
+    //{
+    //  name: "ACC OTH",
+    //  width: "150px",
+    //  selector: (row, idx) => {
+    //    var defaultAccOTH = 0;
 
-        return (
-          <Row align="bottom" justify="center">
-            <Form.Item name={["AccOTH", `${idx}`]} noStyle>
-              <InputNumber
-                defaultValue={defaultAccOTH}
-                //formatter={(value) => `${value}%`}
-                min={0}
-                onChange={(e) => onChangeOth(e, row, idx)}
-                style={{
-                  width: "100px",
-                  marginRight: "10px",
-                }}
-              />
-            </Form.Item>
-          </Row>
-        );
-      },
-    },
+    //    return (
+    //      <Row align="bottom" justify="center">
+    //        <Form.Item name={["AccOTH", `${idx}`]} noStyle>
+    //          <InputNumber
+    //            defaultValue={defaultAccOTH}
+    //            //formatter={(value) => `${value}%`}
+    //            min={0}
+    //            onChange={(e) => onChangeOth(e, row, idx)}
+    //            style={{
+    //              width: "100px",
+    //              marginRight: "10px",
+    //            }}
+    //          />
+    //        </Form.Item>
+    //      </Row>
+    //    );
+    //  },
+    //},
     {
-      name: "Sisa Hutang Jt",
+      name: "Sisa Piutang Jt",
       width: "150px",
       selector: (row, idx) => calculatePriceTotal(row, idx),
     },

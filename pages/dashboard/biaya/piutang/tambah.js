@@ -18,27 +18,43 @@ import Customer from "@iso/components/Form/AddCost/CustomerForm";
 import nookies from "nookies";
 
 
-Hutang.getInitialProps = async (context) => {
+Piutang.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
 
   const req = await fetchData(cookies);
   const user = await req.json();
 
-  const reqLPB = await fetchDataPurchasing(cookies);
-  const LPB = await reqLPB.json();
+  const reqPiutang = await fetchPiutang(cookies);
+  const piutang = await reqPiutang.json();
 
-  const reqReturLPB = await fetchRetur(cookies);
-  const returLPB = await reqReturLPB.json();
+  const reqSales = await fetchSales(cookies);
+  const sales = await reqSales.json();
 
-  const reqHutang = await fetchHutang(cookies);
-  const hutang = await reqHutang.json();
+  const reqReturSales = await fetchReturSales(cookies);
+  const returSales = await reqReturSales.json();
+
+  const reqPanel = await fetchPanel(cookies);
+  const panel = await reqPanel.json();
+
+  const reqReturPanel = await fetchReturPanel(cookies);
+  const returPanel = await reqReturPanel.json();
+
+  const reqNonPanel = await fetchNonPanel(cookies);
+  const nonPanel = await reqNonPanel.json();
+
+  const reqReturNonPanel = await fetchReturNonPanel(cookies);
+  const returNonPanel = await reqReturNonPanel.json();
 
   return {
     props: {
       user,
-      LPB,
-      returLPB,
-      hutang,
+      piutang,
+      sales,
+      returSales,
+      panel,
+      returPanel,
+      nonPanel,
+      reqReturNonPanel
     },
   };
 };
@@ -57,8 +73,22 @@ const fetchData = async (cookies) => {
   return req;
 };
 
-const fetchDataPurchasing = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=deep";
+const fetchPiutang = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/credits?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchReturSales = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-sales-sales?populate=deep";
     const options = {
         method: "GET",
         headers: {
@@ -71,8 +101,8 @@ const fetchDataPurchasing = async (cookies) => {
     return req;
 };
 
-const fetchRetur = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-lpbs?populate=deep";
+const fetchSales = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?populate=deep";
     const options = {
         method: "GET",
         headers: {
@@ -85,8 +115,8 @@ const fetchRetur = async (cookies) => {
     return req;
 };
 
-const fetchHutang = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate=deep";
+const fetchReturPanel = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-panel-sales?populate=deep";
     const options = {
         method: "GET",
         headers: {
@@ -99,7 +129,49 @@ const fetchHutang = async (cookies) => {
     return req;
 };
 
-function Hutang({ props }) {
+const fetchPanel = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/panel-sales?populate=deep";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
+};
+
+const fetchReturNonPanel = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-non-panel-sales?populate=deep";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
+};
+
+const fetchNonPanel = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/non-panel-sales?populate=deep";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
+};
+
+function Piutang({ props }) {
   const biaya = useSelector((state) => state.Cost);
   const dispatch = useDispatch();
 
@@ -107,8 +179,12 @@ function Hutang({ props }) {
   //const locations = props.locations.data;
   const user = props.user;
   //const inven = props.inven.data;
-  const lpb = props.LPB.data;
-  const returLPB = props.returLPB.data;
+  const sales = props.sales.data;
+  const returSales = props.returSales.data;
+  const panel = props.panel.data;
+  const returPanel = props.returPanel.data;
+  const nonPanel = props.nonPanel.data;
+  const returNonPanel = props.returNonPanel;
   //const customerData = props.customer.data[0];
   const [supplier, setSupplier] = useState();
   const [dataTabel, setDataTabel] =  useState([]);
@@ -141,9 +217,9 @@ function Hutang({ props }) {
   // customer
   const [customer, setCustomer] = useState();
 
-  // NO Hutang
-  var noHutang = String(props.hutang?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`PH/ET/${user.id}/${noHutang}/${mm}/${yyyy}`);
+  // NO Piutang
+  var noPiutang = String(props.piutang?.meta?.pagination.total + 1).padStart(3, "0");
+  const [categorySale, setCategorySale] = useState(`PH/ET/${user.id}/${noPiutang}/${mm}/${yyyy}`);
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -166,7 +242,7 @@ function Hutang({ props }) {
     //});
     //createMaster(values);
     setDataValues(values);
-    setLoading(false); console.log("values", values)
+    setLoading(false);
   };
 
   const createDetail = async () => {
@@ -174,7 +250,7 @@ function Hutang({ props }) {
     await createDetails(dataValues, dataTabel, biaya, sisaHutang, setListId, "/debt-details");
   };
 
-  const createMaster = async (values) => { console.log("master", listId)
+  const createMaster = async (values) => {
     values.total_item = dataTabel.length;
     values.total_hutang_jatuh_tempo = totalHutangJatuhTempo();
     values.total_pembayaran = totalPembayaran();
@@ -192,16 +268,16 @@ function Hutang({ props }) {
     return formatter.format(total);
   };
 
-  const totalHutangJatuhTempo = () => {
-    var total = 0;
-    if(biaya.info != null){
+  //const totalHutangJatuhTempo = () => {
+  //  var total = 0;
+  //  if(biaya.info != null){
 
-      for(let row in biaya.info) {
-        if(biaya.info[row].pilihData == "pilih") total = total + biaya.info[row].totalHutangJatuhTempo;
-      };
-    }
-    return total;
-  };
+  //    for(let row in biaya.info) {
+  //      if(biaya.info[row].pilihData == "pilih") total = total + biaya.info[row].totalHutangJatuhTempo;
+  //    };
+  //  }
+  //  return total;
+  //};
 
   const totalPembayaran = () => {
     var total = 0;
@@ -224,20 +300,20 @@ function Hutang({ props }) {
     return total;
   };
 
-  const sisaHutangJatuhTempo = () => {
-    var total = 0;
-    var totalHutang = totalHutangJatuhTempo();
-    var totalBayar = totalPembayaran();
-    total = totalHutang - totalBayar;
-    return total;
-  };
+  //const sisaHutangJatuhTempo = () => {
+  //  var total = 0;
+  //  var totalHutang = totalHutangJatuhTempo();
+  //  var totalBayar = totalPembayaran();
+  //  total = totalHutang - totalBayar;
+  //  return total;
+  //};
 
   useEffect(() => {
     //if (dataValues && info == "sukses") createDetailSale();
     if (dataValues) createDetail();
   }, [dataValues]);
 
-  useEffect(() => { console.log("data list",listId)
+  useEffect(() => {
     if (listId.length > 0) {
       createMaster(dataValues);
     }
@@ -247,80 +323,59 @@ function Hutang({ props }) {
     // used to reset redux from value before
     clearData();
 
-    var lpbId = 0;
-    lpb.forEach((row) => {
-        var tempoDate = new Date(row.attributes?.date_purchasing);
-        var tempoTime = parseInt(row.attributes?.tempo_days ?? 0);
-        var today = new Date();
-        var isTempo = false;
-        var statusPembayaran = row.attributes?.status_pembayaran;
-        var purchasingHistory = row.attributes?.purchasing_payments.data;
-        var status = "Sebagian";
+    // lpb data
 
-        if (row.attributes?.tempo_time === "Hari") {
-            tempoDate.setDate(tempoDate.getDate() + tempoTime);
+    sales.forEach((row) => { console.log("sales",row)
+        const lastIndex = row.attributes.purchasing_payments?.data?.length;
+        const lastPayment =
+            row.attributes.purchasing_payments.data[lastIndex - 1];
+        if (
+            lastPayment?.attributes.payment_remaining ===
+            lastPayment?.attributes.total_payment
+        ) {
+            row.status = "Belum Dibayar";
+        } else if (
+            lastPayment?.attributes.payment_remaining > 0 &&
+            lastPayment?.attributes.payment_remaining <
+            lastPayment?.attributes.total_payment
+        ) {
+            row.status = "Dibayar Sebagian";
+        } else if (lastPayment?.attributes.payment_remaining <= 0) {
+            row.status = "Selesai";
         } else {
-            tempoDate.setDate(tempoDate.getMonth() + tempoTime);
+            row.status = "Dibayar Sebagian";
         }
 
-        if (tempoDate < today) {
-            isTempo = true;
+        if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian") {
+            if (dataTabel.length > 0) dataTabel[dataTabel.length + 1] = row;
+            else dataTabel[0] = row;
+            //biaya.list.push(row);
+            dispatch({ type: "ADD_LIST", list: row });
         }
-
-        if (isTempo) {
-            if (statusPembayaran === "Belum Lunas") {
-                status = "Tempo";
-            } else if (statusPembayaran === "Dibayar Sebagian") {
-                status = "Sebagian";
-            } else if (statusPembayaran === "Lunas") {
-                status = "Selesai";
-            }
-        } else {
-            if (
-                statusPembayaran === "Belum Lunas" &&
-                purchasingHistory.length > 0
-            ) {
-                status = "Tempo";
-            } else if (
-                statusPembayaran === "Dibayar Sebagian" &&
-                purchasingHistory.length > 0
-            ) {
-                status = "Sebagian";
-            } else if (
-                statusPembayaran === "Lunas" &&
-                purchasingHistory.length > 0
-            ) {
-                status = "Selesai";
-            } else {
-                status = "Menunggu";
-            }
-        }
-
-        if (status == "Tempo" || statusPembayaran == "Dibayar Sebagian") {
-          dataTabel[lpbId] = row;
-          //biaya.list.push(row);
-          dispatch({ type: "ADD_LIST", list: row });
-        }
-        lpbId++;
     });
 
-    //dataTabel.push(biaya.list);
-    lpbId = 0;
+    returSales.forEach((row) => {
+        row.subtotal = 0;
 
-      returLPB.forEach((row) => {
-          row.subtotal = 0;
-          dataTabel.forEach((element) => {
-              if (element.attributes.no_purchasing == row.attributes.purchasing.data.attributes.no_purchasing) {
-                  row.attributes.retur_lpb_details.data.forEach((detail) => {
-                      row.subtotal += parseInt(detail.attributes.sub_total);
-                  });
-                  dataRetur[lpbId] = { id: element.attributes.no_purchasing, subtotal: row.subtotal };
-              }
-          });
-          lpbId++;
-      });
+        dataTabel.forEach((element) => {
+            element.subtotal = 0;
 
+            if (element.attributes?.no_sales_sale == row.attributes?.sales_sale?.data.attributes.no_sales_sale) { console.log("row",row)
+                row.attributes.retur_sales_sale_details.data.forEach((detail) => {
+                    row.subtotal += parseInt(detail.attributes.sub_total);
+                });
+
+                element.subtotal = row.subtotal;
+
+                if (dataRetur.length > 0) dataRetur[dataRetur.length + 1] = { id: element.attributes.no_sales_sale, subtotal: row.subtotal };
+                else dataRetur[0] = { id: element.attributes.no_sales_sale, subtotal: row.subtotal };
+            }
+        });
+        //lpbId++;
+    });
   }, []);
+
+    console.log("biaya", biaya, dataRetur)
 
   const validateError = () => {
     var listError = form.getFieldsError();
@@ -332,7 +387,7 @@ function Hutang({ props }) {
         });
       }
     });
-  }; console.log("biaya coba",biaya, dataTabel)
+  };
 
   return (
     <>
@@ -356,12 +411,12 @@ function Hutang({ props }) {
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-4">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    name="no_hutang"
+                    name="no_piutang"
                     initialValue={categorySale}
                     rules={[
                         {
                             required: true,
-                            message: "Nomor Hutang tidak boleh kosong!",
+                            message: "Nomor Piutang tidak boleh kosong!",
                         },
                     ]}
                     >
@@ -495,13 +550,13 @@ function Hutang({ props }) {
                   <span> TOTAL ITEM </span> <span> : {dataTabel.length}</span>
                 </Form.Item>
                 <Form.Item name="total_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> TOTAL HUTANG JATUH TEMPO </span> <span> : {formatter.format(totalHutangJatuhTempo())}</span>
+                  <span> TOTAL HUTANG JATUH TEMPO </span> <span> : {/*{formatter.format(totalHutangJatuhTempo())}*/}</span>
                 </Form.Item>
                 <Form.Item name="total_pembayaran" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> TOTAL PEMBAYARAN </span> <span> : {formatter.format(totalPembayaran())}</span>
+                  <span> TOTAL PEMBAYARAN </span> <span> : {/*{formatter.format(totalPembayaran())}*/}</span>
                 </Form.Item>
                 <Form.Item name="sisa_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> SISA HUTANG JATUH TEMPO </span> <span> : {formatter.format(sisaHutangJatuhTempo())}</span>
+                  <span> SISA HUTANG JATUH TEMPO </span> <span> : {/*{formatter.format(sisaHutangJatuhTempo())}*/}</span>
                 </Form.Item>
               </div>
 
@@ -560,4 +615,4 @@ function Hutang({ props }) {
   );
 }
 
-export default Hutang;
+export default Piutang;
