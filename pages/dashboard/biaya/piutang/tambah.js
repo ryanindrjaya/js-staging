@@ -352,6 +352,8 @@ function Piutang({ props }) {
             //biaya.list.push(row);
             dispatch({ type: "ADD_LIST", list: row });
         }
+
+        row.keterangan = "sales";
     });
 
     returSales.forEach((row) => {

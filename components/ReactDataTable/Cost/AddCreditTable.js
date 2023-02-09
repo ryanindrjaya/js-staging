@@ -1,6 +1,6 @@
 import DataTable from "react-data-table-component";
 import AlertDialog from "../../Alert/Alert";
-import { Input, InputNumber, Select, Form, Row, DatePicker, Checkbox, Popover } from "antd";
+import { Form, Select, InputNumber, Checkbox, Popover, Modal } from "antd";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
 import { PrinterOutlined } from "@ant-design/icons";
@@ -8,6 +8,9 @@ import router from "next/router";
 
 export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal }) {
   const dispatch = useDispatch();
+  const [open, setOpen] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   var unit = 1;
   var priceUnit = 1;
@@ -76,8 +79,29 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     //onChangeSisaHutang(value, data, index);
   };
 
-  const metodePembayaran = (value) => {
-    router.push("/dashboard/biaya/piutang/metode_pembayaran/" + value);
+  const metodePembayaran = (value) => { console.log("pembayaran",value)
+    //router.push("/dashboard/biaya/piutang/metode_pembayaran/" + value.id + value.keterangan);
+    var totalPiutang = parseInt(value.attributes.total) - value.subtotal;
+    router.push({
+      pathname: '/dashboard/biaya/piutang/metode_pembayaran',
+      query: { id: value.id, ket: value.keterangan, total: totalPiutang },
+    });
+  };
+
+  const showModal = () => {
+    setOpen(true);
+  };
+  const handleOk = () => {
+    setModalText('The modal will be closed after two seconds');
+    setConfirmLoading(true);
+    setTimeout(() => {
+      setOpen(false);
+      setConfirmLoading(false);
+    }, 2000);
+  };
+  const handleCancel = () => {
+    console.log('Clicked cancel button');
+    setOpen(false);
   };
 
   const content = (row, idx) => (
@@ -87,12 +111,284 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
         </div>
         <div>
             <button
-                onClick={() => metodePembayaran(row)}
+                //onClick={() => metodePembayaran(row)}
+                onClick={showModal}
                 className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
             >
                 <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
                 Metode Pembayaran
             </button>
+
+            <Modal
+                title="Title"
+                open={open}
+                onOk={handleOk}
+                confirmLoading={confirmLoading}
+                onCancel={handleCancel}
+            >
+                  <div className="w-full flex justify-start">
+                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0 text-center">
+                          <span className="font-bold">TOTAL PIUTANG</span>
+                      </div>
+                  </div>
+
+                  <div className="w-full flex justify-start mb-4">
+                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0 text-center">
+                          <span className="font-bold">{formatter.format(row.attributes?.total - row.subtotal)}</span>
+                      </div>
+                  </div>
+
+                  <div className="w-full flex justify-start">
+                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
+                          <Form.Item name="metode_bayar1" noStyle>
+                              <Select
+                                  size="large"
+                                  style={{
+                                      width: "100%",
+                                  }}
+                                  placeholder="Akun Pembayaran"
+                                  onChange={(value) => onChangeMetode(value)}
+                              >
+                                  <Select.Option value="tunai" key="tunai">
+                                      Tunai
+                                  </Select.Option>
+                                  <Select.Option value="transfer" key="transfer">
+                                      Bank Transfer
+                                  </Select.Option>
+                                  <Select.Option value="giro" key="giro">
+                                      Bank Giro
+                                  </Select.Option>
+                                  <Select.Option value="cn" key="cn">
+                                      CN
+                                  </Select.Option>
+                                  <Select.Option value="oth" key="oth">
+                                      OTH
+                                  </Select.Option>
+                              </Select>
+                          </Form.Item>
+                      </div>
+                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
+                          <Form.Item name="bayar1" noStyle>
+                              <InputNumber
+                                  size="large"
+                                  max={data.total}
+                                  min={0}
+                                  style={{
+                                      width: "100%",
+                                      marginRight: "10px",
+                                  }}
+                                  onChange={(value) => onChangeBayar(value, metode)}
+                              />
+                          </Form.Item>
+                      </div>
+                  </div>
+
+                  <div className="w-full flex justify-start">
+                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
+                          <Form.Item name="metode_bayar2" noStyle>
+                              <Select
+                                  size="large"
+                                  style={{
+                                      width: "100%",
+                                  }}
+                                  placeholder="Akun Pembayaran"
+                                  onChange={(value) => onChangeMetode(value)}
+                              >
+                                  <Select.Option value="tunai" key="tunai">
+                                      Tunai
+                                  </Select.Option>
+                                  <Select.Option value="transfer" key="transfer">
+                                      Bank Transfer
+                                  </Select.Option>
+                                  <Select.Option value="giro" key="giro">
+                                      Bank Giro
+                                  </Select.Option>
+                                  <Select.Option value="cn" key="cn">
+                                      CN
+                                  </Select.Option>
+                                  <Select.Option value="oth" key="oth">
+                                      OTH
+                                  </Select.Option>
+                              </Select>
+                          </Form.Item>
+                      </div>
+                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
+                          <Form.Item name="bayar2" noStyle>
+                              <InputNumber
+                                  size="large"
+                                  min={0}
+                                  style={{
+                                      width: "100%",
+                                      marginRight: "10px",
+                                  }}
+                                  onChange={(value) => onChangeBayar(value, metode)}
+                              />
+                          </Form.Item>
+                      </div>
+                  </div>
+
+                  <div className="w-full flex justify-start">
+                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
+                          <Form.Item name="metode_bayar3" noStyle>
+                              <Select
+                                  size="large"
+                                  style={{
+                                      width: "100%",
+                                  }}
+                                  placeholder="Akun Pembayaran"
+                                  onChange={(value) => onChangeMetode(value)}
+                              >
+                                  <Select.Option value="tunai" key="tunai">
+                                      Tunai
+                                  </Select.Option>
+                                  <Select.Option value="transfer" key="transfer">
+                                      Bank Transfer
+                                  </Select.Option>
+                                  <Select.Option value="giro" key="giro">
+                                      Bank Giro
+                                  </Select.Option>
+                                  <Select.Option value="cn" key="cn">
+                                      CN
+                                  </Select.Option>
+                                  <Select.Option value="oth" key="oth">
+                                      OTH
+                                  </Select.Option>
+                              </Select>
+                          </Form.Item>
+                      </div>
+                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
+                          <Form.Item name="bayar3" noStyle>
+                              <InputNumber
+                                  size="large"
+                                  min={0}
+                                  style={{
+                                      width: "100%",
+                                      marginRight: "10px",
+                                  }}
+                                  onChange={(value) => onChangeBayar(value, metode)}
+                              />
+                          </Form.Item>
+                      </div>
+                  </div>
+
+                  <div className="w-full flex justify-start">
+                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
+                          <Form.Item name="metode_bayar4" noStyle>
+                              <Select
+                                  size="large"
+                                  style={{
+                                      width: "100%",
+                                  }}
+                                  placeholder="Akun Pembayaran"
+                                  onChange={(value) => onChangeMetode(value)}
+                              >
+                                  <Select.Option value="tunai" key="tunai">
+                                      Tunai
+                                  </Select.Option>
+                                  <Select.Option value="transfer" key="transfer">
+                                      Bank Transfer
+                                  </Select.Option>
+                                  <Select.Option value="giro" key="giro">
+                                      Bank Giro
+                                  </Select.Option>
+                                  <Select.Option value="cn" key="cn">
+                                      CN
+                                  </Select.Option>
+                                  <Select.Option value="oth" key="oth">
+                                      OTH
+                                  </Select.Option>
+                              </Select>
+                          </Form.Item>
+                      </div>
+                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
+                          <Form.Item name="bayar4" noStyle>
+                              <InputNumber
+                                  size="large"
+                                  min={0}
+                                  style={{
+                                      width: "100%",
+                                      marginRight: "10px",
+                                  }}
+                                  onChange={(value) => onChangeBayar(value, metode)}
+                              />
+                          </Form.Item>
+                      </div>
+                  </div>
+
+                  <div className="w-full flex justify-start">
+                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
+                          <Form.Item name="metode_bayar5" noStyle>
+                              <Select
+                                  size="large"
+                                  style={{
+                                      width: "100%",
+                                  }}
+                                  placeholder="Akun Pembayaran"
+                                  onChange={(value) => onChangeMetode(value)}
+                              >
+                                  <Select.Option value="tunai" key="tunai">
+                                      Tunai
+                                  </Select.Option>
+                                  <Select.Option value="transfer" key="transfer">
+                                      Bank Transfer
+                                  </Select.Option>
+                                  <Select.Option value="giro" key="giro">
+                                      Bank Giro
+                                  </Select.Option>
+                                  <Select.Option value="cn" key="cn">
+                                      CN
+                                  </Select.Option>
+                                  <Select.Option value="oth" key="oth">
+                                      OTH
+                                  </Select.Option>
+                              </Select>
+                          </Form.Item>
+                      </div>
+                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
+                          <Form.Item name="bayar5" noStyle>
+                              <InputNumber
+                                  size="large"
+                                  min={0}
+                                  style={{
+                                      width: "100%",
+                                      marginRight: "10px",
+                                  }}
+                                  onChange={(value) => onChangeBayar(value, metode)}
+                              />
+                          </Form.Item>
+                      </div>
+                  </div>
+
+                  <div className="w-full flex justify-start mt-4">
+                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0 text-center">
+                          <span className="font-bold">SISA PIUTANG</span>
+                      </div>
+                  </div>
+
+                  <div className="w-full flex justify-start mb-4">
+                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0 text-center">
+                          <span className="font-bold">{formatter.format(sisaPiutang)}</span>
+                      </div>
+                  </div>
+
+                  <div className="w-full flex justify-start">
+                      <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0 text-center">
+                          <Form.Item>
+                              {loading ? (
+                                  <div className=" flex float-left ml-3 ">
+                                      <Spin />
+                                  </div>
+                              ) : (
+                                  <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm px-4">
+                                      <p className="px-4 py-2 m-0 text-white">
+                                          SIMPAN
+                                      </p>
+                                  </button>
+                              )}
+                          </Form.Item>
+                      </div>
+                  </div>
+            </Modal>
         </div>
     </div>
   );
