@@ -18,7 +18,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   var stock = 0;
   var returSubtotal = 0;
   var sisaPiutang = {};
+  const [modalSisa, setModalSisa] = useState(0);
   const [dataRetur, setDataRetur] = useState("tidak");
+  const [metode, setMetode] = useState("");
+  const [biayaData, setBiayaData] = useState(0);
 
   var index = 0;
   data.forEach((element) => {
@@ -88,6 +91,39 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     });
   };
 
+  const onChangeMetode = (value) => {
+    setMetode(value);
+    //onChangeBayar(biaya,value);
+  };
+
+  let tunai = 0;
+  var transfer = 0;
+  var giro = 0;
+  var cn = 0;
+  var oth = 0;
+  const onChangeBayar = (value, metode, row) => {
+
+    setBiayaData(value);
+    if (metode == "tunai") tunai = value;
+    else if (metode == "transfer") transfer = value;
+    else if (metode == "giro") giro = value;
+    if (metode == "cn") cn = value;
+    if (metode == "oth") oth = value; 
+    console.log("data bayar", row, biaya);
+
+    //tunai = biaya.info[idx]?.tunai ?? 0;
+    //transfer = biaya.info[idx]?.transfer ?? 0;
+    //giro = biaya.info[idx]?.giro ?? 0;
+    //cn = biaya.info[idx]?.cn ?? 0;
+    //oth = biaya.info[idx]?.oth ?? 0;
+
+    setModalSisa(
+        (parseInt(row.attributes.total) - row.subtotal) - (tunai + transfer + giro + cn + oth)
+    );
+    //dispatch({ type: "CHANGE_DATA_GIRO", giro: value, listData: data, index: index });
+    //onChangeSisaHutang(value, data, index);
+  };
+
   const showModal = () => {
     setOpen(true);
   };
@@ -125,6 +161,16 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                 onOk={handleOk}
                 confirmLoading={confirmLoading}
                 onCancel={handleCancel}
+                footer={[
+                  <button className="border border-cyan-700 rounded-md m-1 text-sm px-6 py-2" key="back" onClick={handleCancel}>
+                    Cancel
+                  </button>,
+                  <button className="bg-cyan-700 rounded-md m-1 text-sm px-4" key="submit" loading={loading} onClick={handleOk}>
+                    <p className="px-4 py-2 m-0 text-white">
+                        SIMPAN
+                    </p>
+                  </button>
+                ]}
             >
                   <div className="w-full flex justify-start">
                       <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0 text-center">
@@ -177,7 +223,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                                       width: "100%",
                                       marginRight: "10px",
                                   }}
-                                  onChange={(value) => onChangeBayar(value, metode)}
+                                  onChange={(value) => onChangeBayar(value, metode, row)}
                               />
                           </Form.Item>
                       </div>
@@ -221,7 +267,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                                       width: "100%",
                                       marginRight: "10px",
                                   }}
-                                  onChange={(value) => onChangeBayar(value, metode)}
+                                  onChange={(value) => onChangeBayar(value, metode, row)}
                               />
                           </Form.Item>
                       </div>
@@ -265,7 +311,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                                       width: "100%",
                                       marginRight: "10px",
                                   }}
-                                  onChange={(value) => onChangeBayar(value, metode)}
+                                  onChange={(value) => onChangeBayar(value, metode, row)}
                               />
                           </Form.Item>
                       </div>
@@ -309,7 +355,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                                       width: "100%",
                                       marginRight: "10px",
                                   }}
-                                  onChange={(value) => onChangeBayar(value, metode)}
+                                  onChange={(value) => onChangeBayar(value, metode, row)}
                               />
                           </Form.Item>
                       </div>
@@ -353,7 +399,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                                       width: "100%",
                                       marginRight: "10px",
                                   }}
-                                  onChange={(value) => onChangeBayar(value, metode)}
+                                  onChange={(value) => onChangeBayar(value, metode, row)}
                               />
                           </Form.Item>
                       </div>
@@ -367,27 +413,27 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
 
                   <div className="w-full flex justify-start mb-4">
                       <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0 text-center">
-                          <span className="font-bold">{formatter.format(sisaPiutang)}</span>
+                          <span className="font-bold">{formatter.format(modalSisa)}</span>
                       </div>
                   </div>
 
-                  <div className="w-full flex justify-start">
-                      <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0 text-center">
-                          <Form.Item>
-                              {loading ? (
-                                  <div className=" flex float-left ml-3 ">
-                                      <Spin />
-                                  </div>
-                              ) : (
-                                  <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm px-4">
-                                      <p className="px-4 py-2 m-0 text-white">
-                                          SIMPAN
-                                      </p>
-                                  </button>
-                              )}
-                          </Form.Item>
-                      </div>
-                  </div>
+                  {/*<div className="w-full flex justify-start">*/}
+                  {/*    <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0 text-center">*/}
+                  {/*        <Form.Item>*/}
+                  {/*            {loading ? (*/}
+                  {/*                <div className=" flex float-left ml-3 ">*/}
+                  {/*                    <Spin />*/}
+                  {/*                </div>*/}
+                  {/*            ) : (*/}
+                  {/*                <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm px-4">*/}
+                  {/*                    <p className="px-4 py-2 m-0 text-white">*/}
+                  {/*                        SIMPAN*/}
+                  {/*                    </p>*/}
+                  {/*                </button>*/}
+                  {/*            )}*/}
+                  {/*        </Form.Item>*/}
+                  {/*    </div>*/}
+                  {/*</div>*/}
             </Modal>
         </div>
     </div>
