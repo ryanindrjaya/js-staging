@@ -54,7 +54,7 @@ Piutang.getInitialProps = async (context) => {
       panel,
       returPanel,
       nonPanel,
-      reqReturNonPanel
+      returNonPanel
     },
   };
 };
@@ -184,7 +184,7 @@ function Piutang({ props }) {
   const panel = props.panel.data;
   const returPanel = props.returPanel.data;
   const nonPanel = props.nonPanel.data;
-  const returNonPanel = props.returNonPanel;
+  const returNonPanel = props.returNonPanel.data;
   //const customerData = props.customer.data[0];
   const [supplier, setSupplier] = useState();
   const [dataTabel, setDataTabel] =  useState([]);
@@ -322,10 +322,10 @@ function Piutang({ props }) {
   useEffect(() => {
     // used to reset redux from value before
     clearData();
+    var sisaHutang = 0;
 
-    // lpb data
-
-    sales.forEach((row) => { console.log("sales",row)
+    // sales data
+    sales.forEach((row) => {
         const lastIndex = row.attributes.purchasing_payments?.data?.length;
         const lastPayment =
             row.attributes.purchasing_payments.data[lastIndex - 1];
@@ -347,7 +347,7 @@ function Piutang({ props }) {
         }
 
         if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian") {
-            if (dataTabel.length > 0) dataTabel[dataTabel.length + 1] = row;
+            if (dataTabel.length > 0) dataTabel[dataTabel.length] = row;
             else dataTabel[0] = row;
             //biaya.list.push(row);
             dispatch({ type: "ADD_LIST", list: row });
@@ -362,22 +362,131 @@ function Piutang({ props }) {
         dataTabel.forEach((element) => {
             element.subtotal = 0;
 
-            if (element.attributes?.no_sales_sale == row.attributes?.sales_sale?.data.attributes.no_sales_sale) { console.log("row",row)
+            if (element.attributes?.no_sales_sale == row.attributes?.sales_sale?.data.attributes.no_sales_sale) {
                 row.attributes.retur_sales_sale_details.data.forEach((detail) => {
                     row.subtotal += parseInt(detail.attributes.sub_total);
                 });
 
                 element.subtotal = row.subtotal;
 
-                if (dataRetur.length > 0) dataRetur[dataRetur.length + 1] = { id: element.attributes.no_sales_sale, subtotal: row.subtotal };
+                if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_sales_sale, subtotal: row.subtotal };
                 else dataRetur[0] = { id: element.attributes.no_sales_sale, subtotal: row.subtotal };
+
+                element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
+            }
+        });
+        //lpbId++;
+    });
+
+    // panel data
+    panel.forEach((row) => {
+        const lastIndex = row.attributes.purchasing_payments?.data?.length;
+        const lastPayment =
+            row.attributes.purchasing_payments.data[lastIndex - 1];
+        if (
+            lastPayment?.attributes.payment_remaining ===
+            lastPayment?.attributes.total_payment
+        ) {
+            row.status = "Belum Dibayar";
+        } else if (
+            lastPayment?.attributes.payment_remaining > 0 &&
+            lastPayment?.attributes.payment_remaining <
+            lastPayment?.attributes.total_payment
+        ) {
+            row.status = "Dibayar Sebagian";
+        } else if (lastPayment?.attributes.payment_remaining <= 0) {
+            row.status = "Selesai";
+        } else {
+            row.status = "Dibayar Sebagian";
+        }
+
+        if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian") {
+            if (dataTabel.length > 0) dataTabel[dataTabel.length] = row;
+            else dataTabel[0] = row;
+            //biaya.list.push(row);
+            dispatch({ type: "ADD_LIST", list: row });
+        }
+
+        row.keterangan = "panel";
+    });
+
+    returPanel.forEach((row) => {
+        row.subtotal = 0;
+
+        dataTabel.forEach((element) => {
+            element.subtotal = 0;
+
+            if (element.attributes?.no_panel_sale == row.attributes?.panel_sale?.data.attributes.no_panel_sale) {
+                row.attributes.retur_panel_sale_details.data.forEach((detail) => {
+                    row.subtotal += parseInt(detail.attributes.sub_total);
+                });
+
+                element.subtotal = row.subtotal;
+
+                if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_panel_sale, subtotal: row.subtotal };
+                else dataRetur[0] = { id: element.attributes.no_panel_sale, subtotal: row.subtotal };
+
+                element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
+            }
+        });
+        //lpbId++;
+    });
+
+    // non panel data
+    nonPanel.forEach((row) => {
+        const lastIndex = row.attributes.purchasing_payments?.data?.length;
+        const lastPayment =
+            row.attributes.purchasing_payments.data[lastIndex - 1];
+        if (
+            lastPayment?.attributes.payment_remaining ===
+            lastPayment?.attributes.total_payment
+        ) {
+            row.status = "Belum Dibayar";
+        } else if (
+            lastPayment?.attributes.payment_remaining > 0 &&
+            lastPayment?.attributes.payment_remaining <
+            lastPayment?.attributes.total_payment
+        ) {
+            row.status = "Dibayar Sebagian";
+        } else if (lastPayment?.attributes.payment_remaining <= 0) {
+            row.status = "Selesai";
+        } else {
+            row.status = "Dibayar Sebagian";
+        }
+
+        if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian") {
+            if (dataTabel.length > 0) dataTabel[dataTabel.length] = row;
+            else dataTabel[0] = row;
+            //biaya.list.push(row);
+            dispatch({ type: "ADD_LIST", list: row });
+        }
+
+        row.keterangan = "nonpanel";
+    });
+
+    returNonPanel.forEach((row) => {
+        row.subtotal = 0;
+
+        dataTabel.forEach((element) => {
+            element.subtotal = 0;
+
+            if (element.attributes?.no_non_panel_sale == row.attributes?.non_panel_sale?.data.attributes.no_non_panel_sale) {
+                row.attributes.retur_non_panel_sale_details.data.forEach((detail) => {
+                    row.subtotal += parseInt(detail.attributes.sub_total);
+                });
+
+                element.subtotal = row.subtotal;
+
+                if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_non_panel_sale, subtotal: row.subtotal };
+                else dataRetur[0] = { id: element.attributes.no_non_panel_sale, subtotal: row.subtotal };
+
+                element.sisaHutang = parseInt(element.attributes.total);
+                //element.sisaHutang = element.sisaHutang - element.subtotal;
             }
         });
         //lpbId++;
     });
   }, []);
-
-    console.log("biaya", biaya, dataRetur)
 
   const validateError = () => {
     var listError = form.getFieldsError();

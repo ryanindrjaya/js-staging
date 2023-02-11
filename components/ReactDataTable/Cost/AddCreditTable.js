@@ -25,9 +25,18 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
 
   var index = 0;
   data.forEach((element) => {
+  returSubtotal = 0;
 
     retur.forEach((row) => {
       if(element.attributes.no_sales_sale == row.id)
+      {
+        returSubtotal += row.subtotal;
+      }
+      if(element.attributes.no_panel_sale == row.id)
+      {
+        returSubtotal += row.subtotal;
+      }
+      if(element.attributes.no_non_panel_sale == row.id)
       {
         returSubtotal += row.subtotal;
       }
@@ -96,20 +105,38 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     //onChangeBayar(biaya,value);
   };
 
-  let tunai = 0;
-  var transfer = 0;
-  var giro = 0;
-  var cn = 0;
-  var oth = 0;
-  const onChangeBayar = (value, metode, row) => {
+  const [tunai, setTunai] = useState(0);
+  const [transfer, setTransfer] = useState(0);
+  const [giro, setGiro] = useState(0);
+  const [cn, setCn] = useState(0);
+  const [oth, setOth] = useState(0);
+
+  //var tunai = 0;
+  //var transfer = 0;
+  //var giro = 0;
+  //var cn = 0;
+  //var oth = 0;
+
+  const onChangeBayar = (value, metode, row, idx) => {
 
     setBiayaData(value);
-    if (metode == "tunai") tunai = value;
-    else if (metode == "transfer") transfer = value;
-    else if (metode == "giro") giro = value;
-    if (metode == "cn") cn = value;
-    if (metode == "oth") oth = value; 
-    console.log("data bayar", row, biaya);
+    //if (metode == "tunai") setTunai(value);
+    //if (metode == "transfer") setTransfer(value);
+    //if (metode == "giro") setGiro(value);
+    //if (metode == "cn") setCn(value);
+    //if (metode == "oth") setOth(value); console.log("bayar", tunai, transfer, giro, cn, oth)
+
+    //if (metode == "tunai") tunai = value;
+    //if (metode == "transfer") transfer = value;
+    //if (metode == "giro") giro = value;
+    //if (metode == "cn") cn = value;
+    //if (metode == "oth") oth = value; console.log("bayar", tunai, transfer, giro, cn, oth)
+
+    if (metode == "tunai") onChangeTunai(value, row, idx);
+    if (metode == "transfer") onChangeTransfer(value, row, idx);
+    //if (metode == "giro") giro = value;
+    //if (metode == "cn") cn = value;
+    //if (metode == "oth") oth = value; console.log("bayar", tunai, transfer, giro, cn, oth)
 
     //tunai = biaya.info[idx]?.tunai ?? 0;
     //transfer = biaya.info[idx]?.transfer ?? 0;
@@ -117,9 +144,9 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     //cn = biaya.info[idx]?.cn ?? 0;
     //oth = biaya.info[idx]?.oth ?? 0;
 
-    setModalSisa(
-        (parseInt(row.attributes.total) - row.subtotal) - (tunai + transfer + giro + cn + oth)
-    );
+    //dataModalSisa(row, tunai, transfer, giro, cn, oth);
+
+    setModalSisa(calculatePriceTotal(row, idx)); console.log("data calculate", modalSisa, biaya)
     //dispatch({ type: "CHANGE_DATA_GIRO", giro: value, listData: data, index: index });
     //onChangeSisaHutang(value, data, index);
   };
@@ -223,7 +250,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                                       width: "100%",
                                       marginRight: "10px",
                                   }}
-                                  onChange={(value) => onChangeBayar(value, metode, row)}
+                                  onChange={(value) => onChangeBayar(value, metode, row, idx)}
                               />
                           </Form.Item>
                       </div>
@@ -267,7 +294,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                                       width: "100%",
                                       marginRight: "10px",
                                   }}
-                                  onChange={(value) => onChangeBayar(value, metode, row)}
+                                  onChange={(value) => onChangeBayar(value, metode, row, idx)}
                               />
                           </Form.Item>
                       </div>
@@ -531,7 +558,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     {
       name: "Sales",
       width: "150px",
-      selector: (row) => console.log("row tabel",row),
+      //selector: (row) => console.log("row tabel",row),
     },
     {
       name: "Nilai Invoice",
