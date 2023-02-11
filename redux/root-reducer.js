@@ -1,5 +1,6 @@
 import { combineReducers } from "redux";
 import Order from "@iso/redux/application/order/reducer";
+import Cost from "@iso/redux/application/cost/reducer";
 import Auth from "../authentication/reducer";
 import App from "@iso/redux/app/reducer";
 import Mails from "@iso/redux/mail/reducer";
@@ -28,6 +29,7 @@ import session from "@iso/redux/session/reducer";
 
 export default combineReducers({
   Order,
+  Cost,
   Auth,
   App,
   ThemeSwitcher,

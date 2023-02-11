@@ -13,8 +13,7 @@ const createDetailSale = (
   productTotalPrice,
   productSubTotal,
   setListId,
-  url,
-  setLoading
+  url
 ) => {
   products.productList.forEach((element) => {
     // default value
@@ -60,8 +59,7 @@ const createDetailSale = (
       d2,
       //d3,
       margin,
-      url,
-      setLoading
+      url
     );
     id++;
     subtotalId++;
@@ -83,22 +81,21 @@ const POSTSaleDetail = async (
   d2,
   //d3,
   margin,
-  url,
-  setLoading
+  url
 ) => {
   var data = {
     data: {
-      qty: qty,
-      unit: unit,
-      unit_price: unitPrice,
+      qty : qty,
+      unit : unit,
+      unit_price : unitPrice,
       sub_total: parseInt(subTotal),
       product: { id: elementId },
       disc: parseInt(disc),
       expired_date: expDate,
-      disc1: d1,
-      disc2: d2,
+      disc1 : d1,
+      disc2 : d2,
       //disc3 : d3,
-      margin: margin,
+      margin : margin
     },
   };
 
@@ -121,8 +118,6 @@ const POSTSaleDetail = async (
     if (tempListId.length === products.productList.length) {
       setListId(tempListId);
     }
-  } else {
-    setLoading(false);
   }
 };
 

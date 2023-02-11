@@ -14,6 +14,7 @@ import {
   SidebarContactIcon,
   SidebarEcommerceIcon,
   SidebarPurchasesIcon,
+  SidebarNotesIcon,
 } from "../../config/icon.config";
 import { IoIosArrowRoundUp } from "react-icons/io";
 
@@ -150,6 +151,23 @@ export default function Sidebar(props) {
               </Menu.Item>
             </SubMenu>
 
+            {/* KELOLA PENGGUNA */}
+            <SubMenu
+              key="kelola_customer"
+              title={
+                <span className="isoMenuHolder" style={submenuColor}>
+                  <SidebarPersonIcon size={18} />
+                  <span className="nav-text">Kelola Customer</span>
+                </span>
+              }
+            >
+              <Menu.Item style={submenuStyle} key="customer">
+                <Link href="/dashboard/customer">
+                  <a>Customer</a>
+                </Link>
+              </Menu.Item>
+            </SubMenu>
+
             {/* SUPPLIER */}
             <SubMenu
               key="kontak"
@@ -264,6 +282,28 @@ export default function Sidebar(props) {
               <Menu.Item style={submenuStyle} key="penjualan_panel">
                 <Link href="/dashboard/penjualan/panel">
                   <a>Penjualan Panel</a>
+                </Link>
+              </Menu.Item>
+            </SubMenu>
+
+            {/* Biaya  */}
+            <SubMenu
+              key="biaya"
+              title={
+                <span className="isoMenuHolder" style={submenuColor}>
+                  <SidebarNotesIcon size={18} />
+                  <span className="nav-text">Biaya</span>
+                </span>
+              }
+            >
+              <Menu.Item style={submenuStyle} key="hutang">
+                <Link href="/dashboard/biaya/hutang">
+                  <a>Hutang</a>
+                </Link>
+              </Menu.Item>
+              <Menu.Item style={submenuStyle} key="piutang">
+                <Link href="/dashboard/biaya/piutang">
+                  <a>Piutang</a>
                 </Link>
               </Menu.Item>
             </SubMenu>

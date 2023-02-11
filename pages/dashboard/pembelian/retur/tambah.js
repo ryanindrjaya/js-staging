@@ -5,7 +5,7 @@ import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLay
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
-import { Form, Input, DatePicker, Button, message, Upload, Select, Spin , notification } from "antd";
+import { Form, Input, DatePicker, Button, message, Upload, Select, Spin } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import nookies from "nookies";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
@@ -182,8 +182,9 @@ function Retur({ props }) {
     }
   };
 
-  const calculatePriceAfterDisc = (row,index) => {
-    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice,index);
+  const calculatePriceAfterDisc = (row) => {
+    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
+
     return formatter.format(total);
   };
 
@@ -224,7 +225,6 @@ function Retur({ props }) {
 
   useEffect(() => {
     setGrandTotal(totalPrice);
-    
   }, [totalPrice]);
 
   useEffect(() => {
@@ -322,7 +322,7 @@ function Retur({ props }) {
                         required: true,
                         message: "Tanggal tidak boleh kosong!",
                       },
-                    ]} 
+                    ]}
                   >
                     <DatePicker placeholder="Tanggal Retur" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
                   </Form.Item>
@@ -397,7 +397,6 @@ function Retur({ props }) {
                     calculatePriceAfterDisc={calculatePriceAfterDisc}
                     productSubTotal={productSubTotal}
                     locations={locations}
-                    setProductSubTotal={setProductSubTotal}
                     formObj={form}
                   />
                 </div>
