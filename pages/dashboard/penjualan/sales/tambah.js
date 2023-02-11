@@ -41,7 +41,7 @@ Toko.getInitialProps = async (context) => {
       locations,
       inven,
       salesSale,
-      salesOrder,
+      salesOrder
     },
   };
 };
@@ -61,17 +61,17 @@ const fetchData = async (cookies) => {
 };
 
 const fetchSalesSale = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?populate=deep";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?populate=deep";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
 
-  const req = await fetch(endpoint, options);
-  return req;
+    const req = await fetch(endpoint, options);
+    return req;
 };
 
 const fetchLocation = async (cookies) => {
@@ -89,31 +89,31 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchInven = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/inventories?populate=deep";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/inventories?populate=deep";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
 
-  const req = await fetch(endpoint, options);
-  return req;
+    const req = await fetch(endpoint, options);
+    return req;
 };
 
 const fetchSalesSell = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sells?populate=deep";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sells?populate=deep";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
 
-  const req = await fetch(endpoint, options);
-  return req;
+    const req = await fetch(endpoint, options);
+    return req;
 };
 
 function Toko({ props }) {
@@ -154,7 +154,7 @@ function Toko({ props }) {
   var today = new Date();
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
-  var date = today.getDate() + "/" + mm + "/" + yyyy;
+  var date = today.getDate()+'/'+mm+'/'+yyyy;
   var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 
   // DPP & PPN
@@ -174,13 +174,11 @@ function Toko({ props }) {
 
   // NO Sales Sale
   var noSalesSale = String(salesSale?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(
-    `PS/ET/${user?.id}/${noSalesSale}/${mm}/${yyyy}`
-  );
+  const [categorySale, setCategorySale] = useState(`PS/ET/${user.id}/${noSalesSale}/${mm}/${yyyy}`);
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);
-  };
+  }; 
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -193,26 +191,20 @@ function Toko({ props }) {
     setInfo("sukses");
     salesSale.data.forEach((element) => {
       if (values.no_sales_sale == element.attributes.no_sales_sale) {
-        notification["error"]({
-          message: "Gagal menambahkan data",
-          description: "Data gagal ditambahkan, karena no penjualan sama",
-        });
-        setInfo("gagal");
-      }
+          notification["error"]({
+              message: "Gagal menambahkan data",
+              description:
+                  "Data gagal ditambahkan, karena no penjualan sama",
+          });
+          setInfo("gagal");
+      } 
     });
     setDataValues(values);
     setLoading(false);
   };
 
   const createDetailSale = async () => {
-    await createDetailSaleFunc(
-      dataValues,
-      products,
-      productTotalPrice,
-      productSubTotal,
-      setListId,
-      "/sales-sale-details"
-    );
+    await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/sales-sale-details");
   };
 
   const createSale = async (values) => {
@@ -222,17 +214,7 @@ function Toko({ props }) {
     values.dpp = dpp;
     values.ppn = ppn;
     values.customer = customer;
-    await createSaleFunc(
-      grandTotal,
-      totalPrice,
-      values,
-      listId,
-      form,
-      router,
-      "/sales-sales/",
-      "sales sale",
-      locations
-    );
+    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/sales-sales/", "sales sale", locations);
   };
 
   const onChangeProduct = async () => {
@@ -254,14 +236,7 @@ function Toko({ props }) {
   };
 
   const calculatePriceAfterDisc = (row, index) => {
-    const total = calculatePrice(
-      row,
-      products,
-      productTotalPrice,
-      productSubTotal,
-      setTotalPrice,
-      index
-    );
+    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index);
     return formatter.format(total);
   };
 
@@ -276,6 +251,7 @@ function Toko({ props }) {
     setBiayaTambahan(newTotal);
   };
 
+  
   const setTotalWithDisc = () => {
     const disc = form.getFieldsValue(["disc_type", "disc_value"]);
 
@@ -332,7 +308,7 @@ function Toko({ props }) {
 
     const req = await fetch(endpoint, options);
     const res = await req.json();
-
+      
     const dataSalesSell = res.data.attributes;
     const sales_sell_details = dataSalesSell.sales_sell_details.data;
 
@@ -380,7 +356,7 @@ function Toko({ props }) {
         },
       });
 
-      //SET INITIAL PRODUCT
+       //SET INITIAL PRODUCT
       dispatch({
         type: "SET_INITIAL_PRODUCT",
         product: element.attributes.product.data,
@@ -416,14 +392,15 @@ function Toko({ props }) {
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
 
   useEffect(() => {
-    if (products.productList.length > 0) {
-      inven.forEach((element) => {
-        products.productList.forEach((data) => {
-          if (data.id == element?.attributes?.products?.data[0]?.id) {
-            data.stock = element?.attributes?.total_stock;
+    if(products.productList.length > 0){ 
+        inven.forEach((element) => {
+            products.productList.forEach((data) => {
+              if (data.id == element.attributes.products.data[0].id) {
+                data.stock = element.attributes.total_stock;
+              }  
+            });
           }
-        });
-      });
+        );
     }
   }, [products.productList]);
 
@@ -443,7 +420,7 @@ function Toko({ props }) {
 
   useEffect(() => {
     // set dpp
-    if (dppActive == "DPP") {
+    if(dppActive == "DPP"){
       setDPP(grandTotal / 1.11);
     } else {
       setDPP(0);
@@ -452,8 +429,8 @@ function Toko({ props }) {
 
   useEffect(() => {
     // set ppn
-    if (ppnActive == "PPN") {
-      setPPN(((grandTotal / 1.11) * 11) / 100);
+    if(ppnActive == "PPN"){
+      setPPN((grandTotal / 1.11) * 11 / 100);
     } else {
       setPPN(0);
     }
@@ -493,19 +470,19 @@ function Toko({ props }) {
           <TitlePage titleText={"Penjualan Sales"} />
           <LayoutContent>
             <div className="w-full flex justify-between mx-2 mt-1">
-              <div className="w-full justify-start md:w-1/3">
-                <p>
-                  {date} {time}
-                </p>
-              </div>
-              <div className="w-full flex justify-center md:w-1/3">
-                <button className="bg-cyan-700 rounded-md m-1 text-sm">
-                  <p className="px-4 py-2 m-0 text-white">Laporan Penjualan Hari Ini</p>
-                </button>
-              </div>
-              <div className="w-full flex justify-end text-right md:w-1/3">
-                <p>{user.name}</p>
-              </div>
+                <div className="w-full justify-start md:w-1/3">
+                  <p>{date} {time}</p>
+                </div>
+                <div className="w-full flex justify-center md:w-1/3">
+                  <button
+                    className="bg-cyan-700 rounded-md m-1 text-sm"
+                  >
+                    <p className="px-4 py-2 m-0 text-white">Laporan Penjualan Hari Ini</p>
+                  </button>
+                </div>
+                <div className="w-full flex justify-end text-right md:w-1/3">
+                  <p>{user.name}</p>
+                </div>
             </div>
 
             <Form
@@ -517,18 +494,19 @@ function Toko({ props }) {
               onFinish={onFinish}
               onFinishFailed={validateError}
             >
+
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-5">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="no_sales_sale"
                     initialValue={categorySale}
                     rules={[
-                      {
-                        required: true,
-                        message: "Nomor Penjualan tidak boleh kosong!",
-                      },
+                        {
+                            required: true,
+                            message: "Nomor Penjualan tidak boleh kosong!",
+                        },
                     ]}
-                  >
+                    >
                     <Input style={{ height: "40px" }} placeholder="No. Penjualan" />
                   </Form.Item>
                 </div>
@@ -607,60 +585,60 @@ function Toko({ props }) {
               </div>
 
               <div className="w-full flex md:w-4/4 mb-2 mt-2">
-                <Form.Item name="no_sales_sell">
-                  <Select
-                    placeholder="Pilih Nomor Penjualan"
-                    size="large"
-                    onChange={(e) => fetchSalesSaledata(e)}
-                    style={{
-                      width: "100%",
-                    }}
-                  >
-                    {salesOrder.map((element) => {
-                      return (
-                        <Select.Option value={element.id} key={element.id}>
-                          {element.attributes.no_sales_sell}
-                        </Select.Option>
-                      );
-                    })}
-                  </Select>
-                </Form.Item>
+                  <Form.Item name="no_sales_sell">
+                    <Select
+                        placeholder="Pilih Nomor Penjualan"
+                        size="large"
+                        onChange={(e) => fetchSalesSaledata(e)}
+                        style={{
+                            width: "100%",
+                        }}
+                    >
+
+                        {salesOrder.map((element) => {
+                          return (
+                            <Select.Option value={element.id} key={element.id}>
+                                {element.attributes.no_sales_sell}
+                            </Select.Option>
+                          );
+                        })}
+
+                    </Select>
+                  </Form.Item>
               </div>
 
               <div className="w-full flex md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
-                <SearchBar
-                  form={form}
-                  tempList={tempList}
-                  onChange={onChangeProduct}
-                  user={user}
-                  selectedProduct={selectedProduct}
-                  isBasedOnLocation={false}
-                />
+                  <SearchBar
+                    form={form}
+                    tempList={tempList}
+                    onChange={onChangeProduct}
+                    user={user}
+                    selectedProduct={selectedProduct}
+                    isBasedOnLocation={false}
+                  />
               </div>
 
               {isFetchinData ? (
-                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
-                  <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
-                    <LoadingAnimations />
+                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
+                    <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
+                      <LoadingAnimations />
+                    </div>
+                    <div className="text-sm align-middle text-center animate-pulse text-slate-400">Sedang Mengambil Data</div>
                   </div>
-                  <div className="text-sm align-middle text-center animate-pulse text-slate-400">
-                    Sedang Mengambil Data
+                ) : (
+                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
+                    <StoreSaleTable
+                      products={products}
+                      productTotalPrice={productTotalPrice}
+                      setTotalPrice={setTotalPrice}
+                      setProductTotalPrice={setProductTotalPrice}
+                      calculatePriceAfterDisc={calculatePriceAfterDisc}
+                      productSubTotal={productSubTotal}
+                      setProductSubTotal={setProductSubTotal}
+                      locations={locations}
+                      formObj={form}
+                    />
                   </div>
-                </div>
-              ) : (
-                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                  <StoreSaleTable
-                    products={products}
-                    productTotalPrice={productTotalPrice}
-                    setTotalPrice={setTotalPrice}
-                    setProductTotalPrice={setProductTotalPrice}
-                    calculatePriceAfterDisc={calculatePriceAfterDisc}
-                    productSubTotal={productSubTotal}
-                    setProductSubTotal={setProductSubTotal}
-                    locations={locations}
-                    formObj={form}
-                  />
-                </div>
               )}
 
               <div className="w-full flex flex-wrap -mx-3 mb-1">
@@ -831,34 +809,18 @@ function Toko({ props }) {
                 <Form.Item name="ppn" value={ppn} className="w-full h-2 md:w-1/2 mx-2">
                   <span> PPN </span> <span>: {formatter.format(ppn)}</span>
                 </Form.Item>
-                <Form.Item
-                  name="grandtotal"
-                  value={totalPrice}
-                  className="w-full h-2 md:w-1/2 mx-2"
-                >
+                <Form.Item name="grandtotal" value={totalPrice} className="w-full h-2 md:w-1/2 mx-2">
                   <span> Total </span> <span>: {formatter.format(totalPrice)}</span>
                 </Form.Item>
-                <Form.Item
-                  name="biayaPengiriman"
-                  value={biayaPengiriman}
-                  className="w-full h-2 md:w-1/2 mx-2"
-                >
+                <Form.Item name="biayaPengiriman" value={biayaPengiriman} className="w-full h-2 md:w-1/2 mx-2">
                   <span> Biaya Pengiriman </span> <span>: {formatter.format(biayaPengiriman)}</span>
                 </Form.Item>
-                <Form.Item
-                  name="biayaTambahan"
-                  value={biayaTambahan}
-                  className="w-full h-2 md:w-1/2 mx-2"
-                >
+                <Form.Item name="biayaTambahan" value={biayaTambahan} className="w-full h-2 md:w-1/2 mx-2">
                   <span> Biaya Tambahan </span> <span>: {formatter.format(biayaTambahan)}</span>
                 </Form.Item>
 
-                <Form.Item
-                  name="grandTotal"
-                  value={grandTotal}
-                  className="w-full h-2 md:w-1/2 mx-2 mt-3 text-lg"
-                >
-                  <span> Total </span> <span>: {formatter.format(grandTotal)}</span>
+                <Form.Item name="grandTotal" value={grandTotal} className="w-full h-2 md:w-1/2 mx-2 mt-3 text-lg">
+                  <span> Total </span>  <span>: {formatter.format(grandTotal)}</span>
                 </Form.Item>
               </div>
 
@@ -871,20 +833,20 @@ function Toko({ props }) {
                 </Form.Item>
               </div>
 
-              <div className="w-full flex justify-center">
-                <Form.Item>
-                  {loading ? (
-                    <div className=" flex float-left ml-3 ">
-                      <Spin />
-                    </div>
-                  ) : (
-                    <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
-                      <p className="px-4 py-2 m-0 text-white">
-                        SIMPAN DAN CETAK UNTUK PEMBAYARAN PIUTANG
-                      </p>
-                    </button>
-                  )}
-                </Form.Item>
+              <div  className="w-full flex justify-center">
+                  <Form.Item>
+                    {loading ? (
+                      <div className=" flex float-left ml-3 ">
+                        <Spin />
+                      </div>
+                    ) : (
+                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
+                        <p className="px-4 py-2 m-0 text-white">
+                          SIMPAN DAN CETAK UNTUK PEMBAYARAN PIUTANG
+                        </p>
+                      </button>
+                    )}
+                  </Form.Item>
               </div>
             </Form>
           </LayoutContent>

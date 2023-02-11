@@ -4,18 +4,7 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import {
-  Form,
-  Input,
-  DatePicker,
-  Button,
-  message,
-  Upload,
-  Select,
-  Spin,
-  notification,
-  InputNumber,
-} from "antd";
+import { Form, Input, DatePicker, Button, message, Upload, Select, Spin, notification, InputNumber } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import nookies from "nookies";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
@@ -27,8 +16,6 @@ import createSaleFunc from "../../utility/createSale";
 import { useRouter } from "next/router";
 import moment from "moment";
 import LoadingAnimations from "@iso/components/Animations/Loading";
-import { ExclamationCircleOutlined } from "@ant-design/icons";
-import confirm from "antd/lib/modal/confirm";
 
 ReturPanel.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -69,7 +56,7 @@ ReturPanel.getInitialProps = async (context) => {
       data,
       locations,
       dataReturPanel,
-      user,
+      user
     },
   };
 };
@@ -104,21 +91,21 @@ const fetchData = async (cookies) => {
 };
 
 const fetchUser = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=*";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=*";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
 
-  const req = await fetch(endpoint, options);
-  return req;
+    const req = await fetch(endpoint, options);
+    return req;
 };
 
 function ReturPanel({ props }) {
-  const products = useSelector((state) => state.Order);
+const products = useSelector((state) => state.Order);
   const dispatch = useDispatch();
 
   var selectedProduct = products?.productList;
@@ -154,7 +141,7 @@ function ReturPanel({ props }) {
   var today = new Date();
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
-  var date = today.getDate() + "/" + mm + "/" + yyyy;
+  var date = today.getDate()+'/'+mm+'/'+yyyy;
   var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 
   // DPP & PPN
@@ -173,9 +160,7 @@ function ReturPanel({ props }) {
   const [faktur, setFaktur] = useState(panel.data.attributes.faktur);
   const [customer, setCustomer] = useState(panel.data.attributes.customer.data.attributes.name);
   const [saleDate, setSaleDate] = useState(panel.data.attributes.sale_date);
-  const [locationStore, setLocationStore] = useState(
-    panel.data.attributes.location.data.attributes.name
-  );
+  const [locationStore, setLocationStore] = useState(panel.data.attributes.location.data.attributes.name);
   const [addFee1Desc, setaddFee1Desc] = useState(panel.data.attributes.additional_fee_1_desc);
   const [addFee2Desc, setaddFee2Desc] = useState(panel.data.attributes.additional_fee_2_desc);
   const [addFee3Desc, setaddFee3Desc] = useState(panel.data.attributes.additional_fee_3_desc);
@@ -185,16 +170,14 @@ function ReturPanel({ props }) {
   const [btnAddFee1, setBtnAddFee1] = useState("Uninclude");
   const [btnAddFee2, setBtnAddFee2] = useState("Uninclude");
   const [btnAddFee3, setBtnAddFee3] = useState("Uninclude");
-  const [exceedTotal, setExceedTotal] = useState(false);
-  const [totalPenjualan, setTotalPenjualan] = useState(0);
 
   // NO panel
-  var noPanel = String(returPanel?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`RPN/ET/${user.id}/${noPanel}/${mm}/${yyyy}`);
+    var noPanel = String(returPanel?.meta?.pagination.total + 1).padStart(3, "0");
+    const [categorySale, setCategorySale] = useState(`RPN/ET/${user.id}/${noPanel}/${mm}/${yyyy}`);
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);
-  };
+  }; 
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -202,46 +185,26 @@ function ReturPanel({ props }) {
     maximumFractionDigits: 2,
   });
 
-  const confirmSubmit = (values) => {
-    confirm({
-      title: "Apakah anda yakin?",
-      icon: <ExclamationCircleOutlined />,
-      content: "Total retur melebihi nota total penjualan",
-      onOk() {
-        onFinish(values);
-      },
-      onCancel() {
-        console.log("Cancel");
-      },
-    });
-  };
-
   const onFinish = (values) => {
     setLoading(true);
     setInfo("sukses");
     //values.status_pembayaran = simpanData;
     returPanel.data.forEach((element) => {
-      if (values.no_retur_panel_sale == element.attributes.no_retur_panel_sale) {
-        notification["error"]({
-          message: "Gagal menambahkan data",
-          description: "Data gagal ditambahkan, karena no penjualan sama",
-        });
-        setInfo("gagal");
-      }
+        if (values.no_retur_panel_sale == element.attributes.no_retur_panel_sale) {
+          notification["error"]({
+              message: "Gagal menambahkan data",
+              description:
+                  "Data gagal ditambahkan, karena no penjualan sama",
+          });
+          setInfo("gagal");
+      } 
     });
     setDataValues(values);
     setLoading(false);
   };
 
   const createDetailSale = async () => {
-    await createDetailSaleFunc(
-      dataValues,
-      products,
-      productTotalPrice,
-      productSubTotal,
-      setListId,
-      "/retur-panel-sale-details"
-    );
+    await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/retur-panel-sale-details");
   };
 
   const createSale = async (values) => {
@@ -254,33 +217,13 @@ function ReturPanel({ props }) {
     values.additional_fee_2_desc = addFee2Desc;
     values.additional_fee_3_desc = addFee3Desc;
     values.panel_sale = panel.data.id;
-    const masterId = products?.preorderData?.data?.data?.id || null;
-    await createSaleFunc(
-      grandTotal,
-      totalPrice,
-      values,
-      listId,
-      form,
-      router,
-      "/retur-panel-sales/",
-      "panel sale",
-      locations,
-      masterId
-    );
+    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/retur-panel-sales/", "panel sale", locations);
   };
 
   const calculatePriceAfterDisc = (row, index) => {
-    const total = calculatePrice(
-      row,
-      products,
-      productTotalPrice,
-      productSubTotal,
-      setTotalPrice,
-      index,
-      setProductSubTotal
-    );
+      const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index, setProductSubTotal);
 
-    return formatter.format(total);
+      return formatter.format(total);
   };
 
   const sumAdditionalPrice = () => {
@@ -359,7 +302,7 @@ function ReturPanel({ props }) {
 
   useEffect(() => {
     // set dpp
-    if (dppActive == "DPP") {
+    if(dppActive == "DPP"){
       setDPP(grandTotal / 1.11);
     } else {
       setDPP(0);
@@ -368,8 +311,8 @@ function ReturPanel({ props }) {
 
   useEffect(() => {
     // set ppn
-    if (ppnActive == "PPN") {
-      setPPN(((grandTotal / 1.11) * 11) / 100);
+    if(ppnActive == "PPN"){
+      setPPN((grandTotal / 1.11) * 11 / 100);
     } else {
       setPPN(0);
     }
@@ -400,82 +343,70 @@ function ReturPanel({ props }) {
     var productId = 0;
 
     retur_details.forEach((element) => {
-      var indexUnit = 1;
-      var unitOrder = element.attributes.unit_order;
-      var productUnit = element.attributes.product.data.attributes;
+        var indexUnit = 1;
+        var unitOrder = element.attributes.unit_order;
+        var productUnit = element.attributes.product.data.attributes;
 
-      for (let index = 1; index < 6; index++) {
-        if (unitOrder === productUnit[`unit_${index}`]) {
-          indexUnit = index;
+        for (let index = 1; index < 6; index++) {
+            if (unitOrder === productUnit[`unit_${index}`]) {
+                indexUnit = index;
+            }
         }
-      }
 
-      var dateString = element.attributes.expired_date;
-      var momentObj = moment(dateString, "YYYY-MM-DD");
-      var momentString = momentObj.format("MM-DD-YYYY");
+        var dateString = element.attributes.expired_date;
+        var momentObj = moment(dateString, "YYYY-MM-DD");
+        var momentString = momentObj.format("MM-DD-YYYY");
 
-      form.setFieldsValue({
-        jumlah_qty: {
-          [productId]: element.attributes.qty,
-        },
-        jumlah_option: {
-          [productId]: element.attributes.unit,
-        },
-        disc_rp: {
-          [productId]: element.attributes.disc,
-        },
-        disc_rp1: {
-          [productId]: element.attributes.disc1,
-        },
-        disc_rp2: {
-          [productId]: element.attributes.disc2,
-        },
-        margin: {
-          [productId]: element.attributes.margin,
-        },
-        expired_date: {
-          [productId]: moment(momentString),
-        },
-      });
+        form.setFieldsValue({
+            jumlah_qty: {
+                [productId]: element.attributes.qty,
+            },
+            jumlah_option: {
+                [productId]: element.attributes.unit,
+            },
+            disc_rp: {
+                [productId]: element.attributes.disc,
+            },
+            disc_rp1: {
+                [productId]: element.attributes.disc1,
+            },
+            disc_rp2: {
+                [productId]: element.attributes.disc2,
+            },
+            margin: {
+                [productId]: element.attributes.margin,
+            },
+            expired_date: {
+                [productId]: moment(momentString),
+            },
+        });
 
-      //SET INITIAL PRODUCT
-      dispatch({
-        type: "SET_SALE_INITIAL_PRODUCT",
-        product: element.attributes.product.data,
-        qty: element.attributes.qty,
-        unit: element.attributes.unit,
-        unitIndex: indexUnit,
-        disc: element.attributes.disc,
-        margin: element.attributes.margin,
-        d1: element.attributes.disc1,
-        d2: element.attributes.disc2,
-        expired_date: element.attributes.expired_date,
-        //priceAfterDisc,
-        //subTotal,
-        //unit: element.attributes.unit_order,
-        //unitIndex,
-        priceUnit: element.attributes.unit_price,
-        index: productId,
-      });
-      productId++;
+        //SET INITIAL PRODUCT
+        dispatch({
+            type: "SET_SALE_INITIAL_PRODUCT",
+            product: element.attributes.product.data,
+            qty: element.attributes.qty,
+            unit: element.attributes.unit,
+            unitIndex: indexUnit,
+            disc: element.attributes.disc,
+            margin: element.attributes.margin,
+            d1: element.attributes.disc1,
+            d2: element.attributes.disc2,
+            expired_date: element.attributes.expired_date,
+            //priceAfterDisc,
+            //subTotal,
+            //unit: element.attributes.unit_order,
+            //unitIndex,
+            priceUnit: element.attributes.unit_price,
+            index: productId,
+        });
+        productId++;
     });
 
     setTimeout(() => {
       setIsFetchingData(false);
     }, 3000);
   }, []);
-
-  useEffect(() => {
-    const grandTotalPenjualan = parseFloat(products?.preorderData?.data?.data?.attributes?.total);
-    setTotalPenjualan(grandTotalPenjualan);
-
-    console.log({ grandTotal, grandTotalPenjualan });
-    if (grandTotal > grandTotalPenjualan) {
-      setExceedTotal(true);
-    } else {
-      setExceedTotal(false);
-    }
-  }, [grandTotal]);
 
   const validateError = () => {
     var listError = form.getFieldsError();
@@ -498,20 +429,16 @@ function ReturPanel({ props }) {
         <LayoutWrapper style={{}}>
           <TitlePage titleText={"Retur Penjualan Panel"} />
           <LayoutContent>
+
             <Form
               form={form}
               name="add"
               initialValues={{
                 remember: true,
               }}
-              onFinish={(values) => {
-                if (exceedTotal) {
-                  confirmSubmit(values);
-                } else {
-                  onFinish(values);
-                }
-              }}
+              onFinish={onFinish}
             >
+
               <div className="w-full flex flex-wrap justify-start -mx-3 mt-1">
                 <div className="w-full md:w-1/3 px-3 mt-2 md:mb-0">
                   {/*<p className="text-sm text-start ml-9">No Faktur : {faktur}</p>*/}
@@ -532,7 +459,9 @@ function ReturPanel({ props }) {
 
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-3 mt-2">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="no_panel_sale">
+                  <Form.Item
+                    name="no_panel_sale"
+                    >
                     <Input style={{ height: "40px" }} disabled />
                   </Form.Item>
                 </div>
@@ -541,12 +470,12 @@ function ReturPanel({ props }) {
                     name="no_retur_panel_sale"
                     initialValue={categorySale}
                     rules={[
-                      {
-                        required: true,
-                        message: "Nomor Penjualan tidak boleh kosong!",
-                      },
+                        {
+                            required: true,
+                            message: "Nomor Penjualan tidak boleh kosong!",
+                        },
                     ]}
-                  >
+                    >
                     <Input style={{ height: "40px" }} placeholder="No. Penjualan" />
                   </Form.Item>
                 </div>
@@ -587,39 +516,32 @@ function ReturPanel({ props }) {
                       },
                     ]}
                   >
-                    <DatePicker
-                      placeholder="Tanggal Retur"
-                      size="large"
-                      format={"DD/MM/YYYY"}
-                      style={{ width: "100%" }}
-                    />
+                    <DatePicker placeholder="Tanggal Retur" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
                   </Form.Item>
                 </div>
               </div>
 
               {isFetchinData ? (
-                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
-                  <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
-                    <LoadingAnimations />
+                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
+                    <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
+                      <LoadingAnimations />
+                    </div>
+                    <div className="text-sm align-middle text-center animate-pulse text-slate-400">Sedang Mengambil Data</div>
                   </div>
-                  <div className="text-sm align-middle text-center animate-pulse text-slate-400">
-                    Sedang Mengambil Data
+                ) : (
+                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
+                    <StoreSaleTable
+                      products={products}
+                      productTotalPrice={productTotalPrice}
+                      setTotalPrice={setTotalPrice}
+                      setProductTotalPrice={setProductTotalPrice}
+                      calculatePriceAfterDisc={calculatePriceAfterDisc}
+                      productSubTotal={productSubTotal}
+                      setProductSubTotal={setProductSubTotal}
+                      locations={locations}
+                      formObj={form}
+                    />
                   </div>
-                </div>
-              ) : (
-                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                  <StoreSaleTable
-                    products={products}
-                    productTotalPrice={productTotalPrice}
-                    setTotalPrice={setTotalPrice}
-                    setProductTotalPrice={setProductTotalPrice}
-                    calculatePriceAfterDisc={calculatePriceAfterDisc}
-                    productSubTotal={productSubTotal}
-                    setProductSubTotal={setProductSubTotal}
-                    locations={locations}
-                    formObj={form}
-                  />
-                </div>
               )}
 
               <div className="w-full flex flex-wrap -mx-3 mb-1">
@@ -654,28 +576,17 @@ function ReturPanel({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/6 px-3 mt-5 ">
-                  {btnDisc === "Uninclude" ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTotalWithDisc();
-                        setBtnDisc("Include");
-                      }}
-                      className="bg-cyan-700 rounded-md m-1 text-sm"
-                    >
-                      <p className="px-4 py-2 m-0 text-white">INC. RETUR</p>
+                 {btnDisc === "Uninclude" ? (
+                    <button type="button" onClick={() => { setTotalWithDisc(); setBtnDisc("Include") } } className="bg-cyan-700 rounded-md m-1 text-sm">
+                      <p className="px-4 py-2 m-0 text-white">
+                        INC. RETUR
+                      </p>
                     </button>
                   ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTotalWithDisc();
-                        setBtnDisc("Uninclude");
-                        Uninclude();
-                      }}
-                      className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm"
-                    >
-                      <p className="px-4 py-2 m-0 text-cyan">INC. RETUR</p>
+                    <button type="button" onClick={() => { setTotalWithDisc(); setBtnDisc("Uninclude"); Uninclude(); } } className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm">
+                      <p className="px-4 py-2 m-0 text-cyan">
+                        INC. RETUR
+                      </p>
                     </button>
                   )}
                 </div>
@@ -715,45 +626,22 @@ function ReturPanel({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full flex flex-wrap md:w-1/3 justify-start -mt-14 mb-3">
-                  <Form.Item name="dpp" value={dpp} className="w-full h-2 md:w-1/2 mx-2">
-                    <span> DPP </span> <span>: {formatter.format(dpp)}</span>
-                  </Form.Item>
-                  <Form.Item name="ppn" value={ppn} className="w-full h-2 md:w-1/2 mx-2">
-                    <span> PPN </span> <span>: {formatter.format(ppn)}</span>
-                  </Form.Item>
-                  <Form.Item
-                    name="grandtotal"
-                    value={totalPrice}
-                    className="w-full h-2 md:w-1/2 mx-2"
-                  >
-                    <span> Total </span> <span>: {formatter.format(totalPrice)}</span>
-                  </Form.Item>
-                  <Form.Item
-                    name="biayaTambahan"
-                    value={biayaTambahan}
-                    className="w-full h-2 md:w-1/2 mx-2"
-                  >
-                    <span> Biaya Tambahan </span> <span>: {formatter.format(biayaTambahan)}</span>
-                  </Form.Item>
+                    <Form.Item name="dpp" value={dpp} className="w-full h-2 md:w-1/2 mx-2">
+                        <span> DPP </span> <span>: {formatter.format(dpp)}</span>
+                    </Form.Item>
+                    <Form.Item name="ppn" value={ppn} className="w-full h-2 md:w-1/2 mx-2">
+                        <span> PPN </span> <span>: {formatter.format(ppn)}</span>
+                    </Form.Item>
+                    <Form.Item name="grandtotal" value={totalPrice} className="w-full h-2 md:w-1/2 mx-2">
+                        <span> Total </span> <span>: {formatter.format(totalPrice)}</span>
+                    </Form.Item>
+                    <Form.Item name="biayaTambahan" value={biayaTambahan} className="w-full h-2 md:w-1/2 mx-2">
+                        <span> Biaya Tambahan </span> <span>: {formatter.format(biayaTambahan)}</span>
+                    </Form.Item>
 
-                  <Form.Item
-                    name="grandTotal"
-                    value={grandTotal}
-                    className="w-full h-2 md:w-1/2 mx-2 mt-3 text-lg"
-                  >
-                    <span> Total </span> <span>: {formatter.format(grandTotal)}</span>
-                  </Form.Item>
-                  {exceedTotal && (
-                    <>
-                      <p className="text-red-500 text-sm w-full my-0 mx-2">
-                        Total retur lebih besar dari nota penjualan
-                      </p>
-                      <p className="text-red-500 text-sm w-full my-0 mx-2">
-                        Total nota penjualan:{" "}
-                        <span className="font-bold">{formatter.format(totalPenjualan || 0)}</span>
-                      </p>
-                    </>
-                  )}
+                    <Form.Item name="grandTotal" value={grandTotal} className="w-full h-2 md:w-1/2 mx-2 mt-3 text-lg">
+                        <span> Total </span>  <span>: {formatter.format(grandTotal)}</span>
+                    </Form.Item>
                 </div>
               </div>
 
@@ -815,120 +703,117 @@ function ReturPanel({ props }) {
                 </div>
                 <div className="w-full md:w-1/6 px-1 mb-2 text-center md:mb-0 mt-10">
                   <Form.Item>
-                    {btnAddFee1 === "Uninclude" ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setBtnAddFee1("Include");
-                          setAdditionalFee({
-                            ...additionalFee,
-                            additional_fee_1_sub: panel.data.attributes?.additional_fee_1_sub,
-                          });
-                        }}
-                        className="bg-cyan-700 rounded-md m-1 text-sm"
-                      >
-                        <p className="px-4 py-2 m-0 text-white">INC. RETUR</p>
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setBtnAddFee1("Uninclude");
-                          setAdditionalFee({
-                            ...additionalFee,
-                            additional_fee_1_sub: 0,
-                          });
-                        }}
-                        className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm"
-                      >
-                        <p className="px-4 py-2 m-0 text-cyan">INC. RETUR</p>
-                      </button>
-                    )}
+                  {btnAddFee1 === "Uninclude" ? (
+                    <button type="button" 
+                      onClick={() => { 
+                        setBtnAddFee1("Include");
+                        setAdditionalFee({
+                          ...additionalFee,
+                          additional_fee_1_sub: panel.data.attributes?.additional_fee_1_sub,
+                        })
+                      }}
+                    className="bg-cyan-700 rounded-md m-1 text-sm">
+                      <p className="px-4 py-2 m-0 text-white">
+                        INC. RETUR
+                      </p>
+                    </button>
+                  ) : (
+                    <button type="button"
+                      onClick={() => {
+                        setBtnAddFee1("Uninclude");
+                        setAdditionalFee({
+                          ...additionalFee,
+                          additional_fee_1_sub: 0,
+                        })
+                      }}
+                    className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm">
+                      <p className="px-4 py-2 m-0 text-cyan">
+                        INC. RETUR
+                      </p>
+                    </button>
+                  )}
                   </Form.Item>
                   <Form.Item>
-                    {btnAddFee2 === "Uninclude" ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setBtnAddFee2("Include");
-                          setAdditionalFee({
-                            ...additionalFee,
-                            additional_fee_2_sub: panel.data.attributes?.additional_fee_2_sub,
-                          });
-                        }}
-                        className="bg-cyan-700 rounded-md m-1 text-sm"
-                      >
-                        <p className="px-4 py-2 m-0 text-white">INC. RETUR</p>
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setBtnAddFee2("Uninclude");
-                          setAdditionalFee({
-                            ...additionalFee,
-                            additional_fee_2_sub: 0,
-                          });
-                        }}
-                        className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm"
-                      >
-                        <p className="px-4 py-2 m-0 text-cyan">INC. RETUR</p>
-                      </button>
-                    )}
+                  {btnAddFee2 === "Uninclude" ? (
+                    <button type="button" 
+                      onClick={() => { 
+                        setBtnAddFee2("Include");
+                        setAdditionalFee({
+                          ...additionalFee,
+                          additional_fee_2_sub: panel.data.attributes?.additional_fee_2_sub,
+                        })
+                      }}
+                    className="bg-cyan-700 rounded-md m-1 text-sm">
+                      <p className="px-4 py-2 m-0 text-white">
+                        INC. RETUR
+                      </p>
+                    </button>
+                  ) : (
+                    <button type="button"
+                      onClick={() => {
+                        setBtnAddFee2("Uninclude");
+                        setAdditionalFee({
+                          ...additionalFee,
+                          additional_fee_2_sub: 0,
+                        })
+                      }}
+                    className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm">
+                      <p className="px-4 py-2 m-0 text-cyan">
+                        INC. RETUR
+                      </p>
+                    </button>
+                  )}
                   </Form.Item>
                   <Form.Item>
-                    {btnAddFee3 === "Uninclude" ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setBtnAddFee3("Include");
-                          setAdditionalFee({
-                            ...additionalFee,
-                            additional_fee_3_sub: panel.data.attributes?.additional_fee_3_sub,
-                          });
-                        }}
-                        className="bg-cyan-700 rounded-md m-1 text-sm"
-                      >
-                        <p className="px-4 py-2 m-0 text-white">INC. RETUR</p>
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setBtnAddFee3("Uninclude");
-                          setAdditionalFee({
-                            ...additionalFee,
-                            additional_fee_3_sub: 0,
-                          });
-                        }}
-                        className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm"
-                      >
-                        <p className="px-4 py-2 m-0 text-cyan">INC. RETUR</p>
-                      </button>
-                    )}
+                  {btnAddFee3 === "Uninclude" ? (
+                    <button type="button" 
+                      onClick={() => { 
+                        setBtnAddFee3("Include");
+                        setAdditionalFee({
+                          ...additionalFee,
+                          additional_fee_3_sub: panel.data.attributes?.additional_fee_3_sub,
+                        })
+                      }}
+                    className="bg-cyan-700 rounded-md m-1 text-sm">
+                      <p className="px-4 py-2 m-0 text-white">
+                        INC. RETUR
+                      </p>
+                    </button>
+                  ) : (
+                    <button type="button"
+                      onClick={() => {
+                        setBtnAddFee3("Uninclude");
+                        setAdditionalFee({
+                          ...additionalFee,
+                          additional_fee_3_sub: 0,
+                        })
+                      }}
+                    className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm">
+                      <p className="px-4 py-2 m-0 text-cyan">
+                        INC. RETUR
+                      </p>
+                    </button>
+                  )}
                   </Form.Item>
                 </div>
               </div>
 
-              <div className="w-full flex justify-center">
-                <Form.Item>
-                  {loading ? (
-                    <div className=" flex float-left ml-3 ">
-                      <Spin />
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        validateError();
-                        setSimpanData("Bayar");
-                      }}
-                      htmlType="submit"
-                      className="bg-cyan-700 rounded-md m-1 text-sm"
-                    >
-                      <p className="px-8 py-2 m-0 text-white">SIMPAN DAN CETAK</p>
-                    </button>
-                  )}
-                </Form.Item>
+
+
+              <div  className="w-full flex justify-center">
+                  <Form.Item>
+                    {loading ? (
+                      <div className=" flex float-left ml-3 ">
+                        <Spin />
+                      </div>
+                    ) : (
+                      <button onClick={validateError} onClick={() => setSimpanData("Bayar")} htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
+                        <p className="px-8 py-2 m-0 text-white">
+                          SIMPAN DAN CETAK
+                        </p>
+                      </button>
+                    )}
+                  </Form.Item>
               </div>
             </Form>
           </LayoutContent>
