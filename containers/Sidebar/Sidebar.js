@@ -151,7 +151,6 @@ export default function Sidebar(props) {
               </Menu.Item>
             </SubMenu>
 
-            {/* KELOLA PENGGUNA */}
             <SubMenu
               key="kelola_customer"
               title={
