@@ -117,7 +117,6 @@ const POSTPurchaseDetail = async (
   const req = await fetch(endpoint, options);
   const res = await req.json();
 
-  console.log(data);
   console.log("res create detail", res);
 
   if (req.status === 200) {

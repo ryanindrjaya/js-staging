@@ -5,7 +5,7 @@ import { useDispatch } from "react-redux";
 
 export default function ReactDataTable({ calculatePriceAfterDisc, productSubTotal, setProductSubTotal, products, setTotalPrice, formObj }) {
   const dispatch = useDispatch();
-  console.log(setProductSubTotal)
+
   var defaultDp1 = 0;
   var defaultDp2 = 0;
   var defaultDp3 = 0;

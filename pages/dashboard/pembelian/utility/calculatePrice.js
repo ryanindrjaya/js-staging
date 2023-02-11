@@ -1,13 +1,13 @@
 import React from "react";
 
-export default function calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index = 0, setProductSubTotal) {
+export default function calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index, setProductSubTotal) {
   var priceUnit = row.attributes[`buy_price_1`];
   var qty = 1;
   var disc = 0;
-  console.log(index)
+
   var Dp1 = row.attributes?.unit_1_dp1;
   var Dp2 = row.attributes?.unit_1_dp2;
-  var Dp3 = row.attributes?.unit_1_dp3; 
+  var Dp3 = row.attributes?.unit_1_dp3;
 
   // check if Dp1, Dp2, Dp3 changed
   if (products.productInfo[index]?.d1) {
@@ -51,13 +51,13 @@ export default function calculatePrice(row, products, productTotalPrice, product
   // set product price after disc & sub total
   productTotalPrice[index] = price3;
   productSubTotal[index] = price3 * qty;
+
   // set all product total
   var total = 0;
   for (var key in productSubTotal) {
     total = total + productSubTotal[key];
   }
   setTotalPrice(total);
-  
   return productTotalPrice[index];
 }
 
