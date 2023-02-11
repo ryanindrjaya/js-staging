@@ -121,12 +121,12 @@ export default function ReactDataTable({
         {
           name: "Area",
           width: "150px",
-          //selector: (row) => row.attributes?.customer.data.attributes?.name ?? "-",
+          //selector: (row) => row.attributes?.customer?.data?.attributes?.name ?? "-",
         },
         {
           name: "Wilayah",
           width: "150px",
-          //selector: (row) => row.attributes?.customer.data.attributes?.name ?? "-",
+          //selector: (row) => row.attributes?.customer?.data?.attributes?.name ?? "-",
         },
         {
           name: "Tanggal",

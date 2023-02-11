@@ -113,7 +113,7 @@ const Edit = ({ props }) => {
               <div className="flex flex-wrap -mx-3 mb-6">
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    initialValue={customer.data.attributes.name}
+                    initialValue={customer?.data?.attributes.name}
                     name="name"
                     rules={[
                       {
@@ -137,7 +137,7 @@ const Edit = ({ props }) => {
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="address"
-                    initialValue={customer.data.attributes.address}
+                    initialValue={customer?.data?.attributes.address}
                     rules={[
                       {
                         required: true,
