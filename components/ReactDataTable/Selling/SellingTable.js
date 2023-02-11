@@ -2,344 +2,479 @@ import DataTable from "react-data-table-component";
 import AlertDialog from "../../Alert/Alert";
 import { Popover, Select, Row, Tag, notification } from "antd";
 import {
-    EditOutlined,
-    PrinterOutlined,
-    UnorderedListOutlined,
-    CalculatorOutlined,
-    CloseOutlined,
-    BarcodeOutlined,
-    BankOutlined,
-    UndoOutlined,
-    SyncOutlined
+  EditOutlined,
+  PrinterOutlined,
+  UnorderedListOutlined,
+  CalculatorOutlined,
+  CloseOutlined,
+  BarcodeOutlined,
+  BankOutlined,
+  UndoOutlined,
+  SyncOutlined,
 } from "@ant-design/icons";
 import { useRouter } from "next/router";
+import { useState } from "react";
+import moment from "moment";
 
 export default function ReactDataTable({
-    data,
-    onDelete,
-    onPageChange,
-    onChangeStatusPengiriman,
-    onChangeStatus,
-    returPage,
+  data,
+  onDelete,
+  onPageChange,
+  onChangeStatusPengiriman,
+  onChangeStatus,
+  returPage,
+  bayarRetur,
+  view,
 }) {
-    const router = useRouter(); console.log("data :",data)
-    const { Option } = Select;
+  const router = useRouter();
 
-    const tagRed = process.env.TAG_RED;
-    const tagGreen = process.env.TAG_GREEN;
-    const tagOrange = process.env.TAG_ORANGE;
+  const { Option } = Select;
 
-    const openNotificationWithIcon = (type, title, message) => {
-        notification[type]({
-            message: title,
-            description: message,
-        });
-    };
+  const tagRed = process.env.TAG_RED;
+  const tagGreen = process.env.TAG_GREEN;
+  const tagOrange = process.env.TAG_ORANGE;
 
-    const lihat = (row) => {
-        openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
-        //router.push("order_pembelian/print/" + row.id);
-    };
+  const openNotificationWithIcon = (type, title, message) => {
+    notification[type]({
+      message: title,
+      description: message,
+    });
+  };
 
-    const print = (row) => {
-        openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
-        //router.push("order_pembelian/print/" + row.id);
-    };
-
-    const returPenjualan = (row) => {
-        if (row.attributes.status != "Diretur") {
-            if (returPage == "toko") router.push("toko/retur/" + row.id);
-            if (returPage == "sales") router.push("sales/retur/" + row.id);
-            if (returPage == "nonpanel") router.push("non_panel/retur/" + row.id);
-            if (returPage == "panel") router.push("panel/retur/" + row.id);
-        } else {
-            openNotificationWithIcon(
-                "error",
-                "Maaf tidak bisa diretur",
-                "Karena status lembar pembelian barang sudah diretur."
-            );
-        }
-        //router.push("toko/retur/" + row.id);
-    };
-
-    const onConfirm = (id) => {
-        console.log(id);
-        onDelete(id);
-    };
-
-    const onCancel = () => {
-        console.log("onCancel");
-    };
-
-    function formatMyDate(value, locale = "id-ID") {
-        return new Date(value).toLocaleDateString(locale);
+  const pembayaran = (row) => {
+    if (row?.attributes?.retur_store_sale?.data !== null) {
+      bayarRetur(row);
+    } else {
+      openNotificationWithIcon(
+        "info",
+        "Work In Progress",
+        "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
+      );
     }
+  };
 
-    var formatter = new Intl.NumberFormat("id-ID", {
-        style: "currency",
-        currency: "IDR",
-        maximumFractionDigits: 0,
+  const returPenjualan = (row) => {
+    if (row.attributes.status !== "Diretur") {
+      if (returPage == "toko") router.push("toko/retur/" + row.id);
+      if (returPage == "sales") router.push("sales/retur/" + row.id);
+      if (returPage == "nonpanel") router.push("non_panel/retur/" + row.id);
+      if (returPage == "panel") router.push("panel/retur/" + row.id);
+    } else {
+      openNotificationWithIcon(
+        "error",
+        "Lembar pembelian telah diretur",
+        "Karena status lembar pembelian barang sudah diretur."
+      );
+    }
+    //router.push("toko/retur/" + row.id);
+  };
+
+  const onConfirm = (id) => {
+    onDelete(id);
+  };
+
+  const onCancel = () => {};
+
+  function formatMyDate(value, locale = "id-ID") {
+    return new Date(value).toLocaleDateString(locale);
+  }
+
+  var formatter = new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  });
+
+  const isLunas = (row) => {
+    const lastIndex = row.attributes.payments?.data?.length;
+    const lastPayment = row.attributes.payments.data[lastIndex - 1];
+
+    if (lastPayment?.attributes.payment_remaining <= 0) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  const content = (row) => (
+    <div>
+      <div>
+        <button
+          onClick={() => lihat(row)}
+          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+        >
+          <UnorderedListOutlined className="mr-2 mt-0.5 float float-left" />
+          Melihat
+        </button>
+      </div>
+      <div>
+        <button
+          onClick={() => print(row)}
+          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+        >
+          <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
+          Cetak
+        </button>
+      </div>
+      <div>
+        <button
+          onClick={() => edit(row)}
+          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+        >
+          <EditOutlined className="mr-2 mt-0.5 float float-left" />
+          Edit
+        </button>
+      </div>
+      <div>
+        <button
+          //onClick={() => edit(row)}
+          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+        >
+          <CloseOutlined className="mr-2 mt-0.5 float float-left" />
+          Batal
+        </button>
+      </div>
+      <div>
+        <button
+          onClick={() => piutang(row)}
+          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+        >
+          <CalculatorOutlined className="mr-2 mt-0.5 float float-left" />
+          Jadikan Piutang
+        </button>
+      </div>
+      <div hidden={isLunas(row)}>
+        <button
+          onClick={() => pembayaran(row)}
+          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+        >
+          <BankOutlined className="mr-2 mt-0.5 float float-left" />
+          Pembayaran
+        </button>
+      </div>
+      <div>
+        <button
+          onClick={() => lihatPembayaran(row)}
+          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+        >
+          <BankOutlined className="mr-2 mt-0.5 float float-left" />
+          Lihat Pembayaran
+        </button>
+      </div>
+      <div>
+        <button
+          onClick={() => updateStatus(row)}
+          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+        >
+          <SyncOutlined className="mr-2 mt-0.5 float float-left" />
+          Update Status
+        </button>
+      </div>
+      <div>
+        <button
+          onClick={() => returPenjualan(row)}
+          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+        >
+          <UndoOutlined className="mr-2 mt-0.5 float float-left" />
+          Retur Penjualan
+        </button>
+      </div>
+      <div>
+        <button
+          onClick={() => cetakLabel(row)}
+          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+        >
+          <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
+          Cetak Label
+        </button>
+      </div>
+      <div>
+        <button
+          onClick={() => cetakBarcode(row)}
+          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+        >
+          <BarcodeOutlined className="mr-2 mt-0.5 float float-left" />
+          Cetak Barcode
+        </button>
+      </div>
+
+      <AlertDialog
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+        title="Hapus Kategori"
+        message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
+        id={row.id}
+      />
+    </div>
+  );
+
+  const customStyles = {
+    headerStyle: { textAlign: "center" },
+    headCells: {
+      style: {
+        color: "white",
+        background: "#036B82",
+      },
+    },
+  };
+
+  const getGrandTotal = (row) => {
+    var total = 0;
+
+    if (row.attributes?.retur_store_sale?.data?.attributes) {
+      const dataRetur = row.attributes.retur_store_sale.data.attributes;
+
+      for (let index = 1; index < 4; index++) {
+        total =
+          total + parseFloat(dataRetur?.[`additional_fee_${index}_sub`] || 0);
+      }
+
+      total = total + parseFloat(dataRetur?.total);
+
+      if (dataRetur?.disc_value) {
+        switch (dataRetur?.disc_type) {
+          case "Persentase":
+            total = total - (total * dataRetur?.disc_value) / 100;
+            break;
+          case "Tetap":
+            total = total - dataRetur?.disc_value;
+            break;
+          default:
+            break;
+        }
+      }
+
+      return numberFormat(parseFloat(total).toFixed(2));
+    } else {
+      for (let index = 1; index < 4; index++) {
+        total =
+          total +
+          parseFloat(row.attributes?.[`additional_fee_${index}_sub`] || 0);
+      }
+
+      total = total + parseFloat(row.attributes?.total);
+
+      if (row.attributes?.disc_value) {
+        switch (row.attributes?.disc_type) {
+          case "Persentase":
+            total = total - (total * row.attributes?.disc_value) / 100;
+            break;
+          case "Tetap":
+            total = total - row.attributes?.disc_value;
+            break;
+          default:
+            break;
+        }
+      }
+
+      return numberFormat(parseFloat(total).toFixed(2));
+    }
+  };
+
+  const getTotalPayed = (payments) => {
+    var total = 0;
+    payments.forEach((element) => {
+      total = total + parseFloat(element.attributes?.payment);
     });
 
-    const content = (row) => (
-        <div>
-            <div>
-                <button
-                    onClick={() => lihat(row)}
-                    className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-                >
-                    <UnorderedListOutlined className="mr-2 mt-0.5 float float-left" />
-                    Melihat
-                </button>
-            </div>
-            <div>
-                <button
-                    onClick={() => print(row)}
-                    className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-                >
-                    <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
-                    Cetak
-                </button>
-            </div>
-            <div>
-                <button
-                    onClick={() => edit(row)}
-                    className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-                >
-                    <EditOutlined className="mr-2 mt-0.5 float float-left" />
-                    Edit
-                </button>
-            </div>
-            <div>
-                <button
-                    //onClick={() => edit(row)}
-                    className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-                >
-                    <CloseOutlined className="mr-2 mt-0.5 float float-left" />
-                    Batal
-                </button>
-            </div>
-            <div>
-                <button
-                    onClick={() => piutang(row)}
-                    className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-                >
-                    <CalculatorOutlined className="mr-2 mt-0.5 float float-left" />
-                    Jadikan Piutang
-                </button>
-            </div>
-            <div>
-                <button
-                    onClick={() => pembayaran(row)}
-                    className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-                >
-                    <BankOutlined className="mr-2 mt-0.5 float float-left" />
-                    Pembayaran
-                </button>
-            </div>
-            <div>
-                <button
-                    onClick={() => lihatPembayaran(row)}
-                    className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-                >
-                    <BankOutlined className="mr-2 mt-0.5 float float-left" />
-                    Lihat Pembayaran
-                </button>
-            </div>
-            <div>
-                <button
-                    onClick={() => updateStatus(row)}
-                    className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-                >
-                    <SyncOutlined className="mr-2 mt-0.5 float float-left" />
-                    Update Status
-                </button>
-            </div>
-            <div>
-                <button
-                    onClick={() => returPenjualan(row)}
-                    className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-                >
-                    <UndoOutlined className="mr-2 mt-0.5 float float-left" />
-                    Retur Penjualan
-                </button>
-            </div>
-            <div>
-                <button
-                    onClick={() => cetakLabel(row)}
-                    className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-                >
-                    <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
-                    Cetak Label
-                </button>
-            </div>
-            <div>
-                <button
-                    onClick={() => cetakBarcode(row)}
-                    className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-                >
-                    <BarcodeOutlined className="mr-2 mt-0.5 float float-left" />
-                    Cetak Barcode
-                </button>
-            </div>
+    return numberFormat(parseFloat(total).toFixed(2));
+  };
 
-            <AlertDialog
-                onCancel={onCancel}
-                onConfirm={onConfirm}
-                title="Hapus Kategori"
-                message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
-                id={row.id}
-            />
-        </div>
-    );
+  const numberFormat = (value) => {
+    let angka = value;
 
-    const customStyles = {
-        headerStyle: { textAlign: "center" },
-        headCells: {
-            style: {
-                color: "white",
-                background: "#036B82",
-            },
-        },
-    };
+    // cek apakah value merupakan angka bulat
+    if (value % 1 === 0) {
+      angka = parseInt(value);
+    }
 
-    const columns = [
-        {
-          name: "Tanggal",
-          width: "150px",
-          selector: (row) => formatMyDate(row.attributes?.sale_date),
-        },
-        {
-          name: "Customer",
-          width: "180px",
-          selector: (row) => row.attributes?.customer.data.attributes.name ?? "-",
-        },
-        {
-          name: "NO Faktur",
-          width: "180px",
-          selector: (row) => row.attributes?.faktur ?? "-",
-        },
-        {
-          name: <div className="ml-6">Status</div>,
-          width: "150px",
-          selector: (row) => {
-            return (
-              <Select
-                defaultValue={row.attributes.status}
-                bordered={false}
-                disabled={row.attributes.status === "Diterima"}
-                onChange={(e) => onChangeStatus(e, row)}
-              >
-                <Option value="Dipesan">
-                  <Tag color="default">Dipesan</Tag>
-                </Option>
-                <Option value="Diterima">
-                  <Tag color="success">Diterima</Tag>
-                </Option>
-                <Option value="Diretur">
-                  <Tag color="blue">Diretur</Tag>
-                </Option>
-              </Select>
-            );
-          },
-        },
-        {
-          name: "Metode Pembayaran",
-          width: "180px",
-          //selector: (row) => row.attributes.purchasing.data.attributes?.no_purchasing ?? "-",
-        },
-        {
-          name: "Jumlah Total",
-          width: "180px",
-          selector: (row) => formatter.format(row.attributes?.total ?? "-"),
-        },
-        {
-          name: "Total Dibayar",
-          width: "180px",
-          //selector: (row) => formatter.format(row.attributes?.total ?? "-"),
-        },
-        {
-          name: "Sisa Pembayaran",
-          width: "200px",
-          //selector: (row) => row.attributes?.location.data.attributes.name,
-        },
-        {
-          name: "Status Pembayaran",
-          width: "150px",
-          selector: (row) => {
-            const lastIndex = row.attributes.purchasing_payments?.data?.length;
-            const lastPayment =
-              row.attributes.purchasing_payments.data[lastIndex - 1];
+    var formatted = `${angka}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
-            if (
-              lastPayment?.attributes.payment_remaining ===
-              lastPayment?.attributes.total_payment
-            ) {
-              return <Tag color={tagRed}>Belum Dibayar</Tag>;
-            } else if (
-              lastPayment?.attributes.payment_remaining > 0 &&
-              lastPayment?.attributes.payment_remaining <
-                lastPayment?.attributes.total_payment
-            ) {
-              return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
-            } else if (lastPayment?.attributes.payment_remaining <= 0) {
-              return <Tag color={tagGreen}>Selesai</Tag>;
-            } else {
-              return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
-            }
-          },
-        },
-        {
-          name: "Faktur Jatuh Tempo",
-          width: "180px",
-          //selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
-        },
-        {
-          name: "Lokasi Penjualan",
-          width: "180px",
-          //selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
-          selector: (row) => row.attributes?.location.data.attributes.name ?? "-",
-        },
-        {
-          name: "Catatan Staff",
-          width: "180px",
-          selector: (row) => row.attributes?.sale_staff ?? "-",
-        },
-        {
-          name: "Catatan Penjualan",
-          width: "180px",
-          selector: (row) => row.attributes?.sale_note ?? "-",
-        },
-        {
-          name: "Ditambah Oleh",
-          width: "180px",
-          selector: (row) => row.attributes?.added_by ?? "-",
-        },
-        {
-            name: "Tindakan",
-            width: "250px",
-            selector: (row) => (
-                <>
-                    <Popover content={content(row)} placement="bottom" trigger="click">
-                        <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
-                            Tindakan
-                        </button>
-                    </Popover>
-                </>
-            ),
-        },
-    ];
+    return formatted;
+  };
 
-    return (
-        <DataTable
-            customStyles={customStyles}
-            onChangePage={onPageChange}
-            paginationRowsPerPageOptions={[10]}
-            paginationTotalRows={data?.meta?.pagination?.total}
-            columns={columns}
-            data={data.data}
-            pagination
-            noDataComponent={"Belum ada data Penjualan Toko"}
-        />
-    );
+  const columns = [
+    {
+      name: "Tanggal",
+      width: "150px",
+      selector: (row) => formatMyDate(row.attributes?.sale_date),
+    },
+    {
+      name: "Customer",
+      width: "180px",
+      selector: (row) => row.attributes?.customer_name ?? "-",
+    },
+    {
+      name: "NO Faktur",
+      width: "180px",
+      selector: (row) => row.attributes?.faktur ?? "-",
+    },
+    {
+      name: <div className="ml-6">Status</div>,
+      width: "150px",
+      selector: (row) => {
+        return (
+          <Select
+            defaultValue={row.attributes.status}
+            bordered={false}
+            disabled={row.attributes.status === "Diterima"}
+            onChange={(e) => onChangeStatus(e, row)}
+          >
+            <Option value="Draft">
+              <Tag color="default">Draft</Tag>
+            </Option>
+            <Option value="Dipesan">
+              <Tag color="blue">Dipesan</Tag>
+            </Option>
+            <Option value="Diterima">
+              <Tag color="success">Diterima</Tag>
+            </Option>
+            <Option value="Diretur">
+              <Tag color="error">Diretur</Tag>
+            </Option>
+          </Select>
+        );
+      },
+    },
+    {
+      name: "Metode Pembayaran",
+      width: "180px",
+      selector: (row) => {
+        const paymentData =
+          row?.attributes?.payments?.data[
+            row?.attributes?.payments?.data.length - 1
+          ]?.attributes;
+        if (!paymentData) {
+          return "";
+        }
+
+        var metodes = paymentData.payment_method_1;
+
+        for (let i = 2; i < 4; i++) {
+          if (paymentData[`payment_method_${i}`]) {
+            metodes += ", " + paymentData[`payment_method_${i}`];
+          }
+        }
+
+        return metodes;
+      },
+    },
+    {
+      name: "Jumlah Total",
+      width: "180px",
+      selector: (row) => getGrandTotal(row),
+    },
+    {
+      name: "Total Dibayar",
+      width: "180px",
+      selector: (row) =>
+        row?.attributes?.payments?.data[0]?.attributes?.payment
+          ? getTotalPayed(row?.attributes?.payments?.data)
+          : "",
+    },
+    {
+      name: "Sisa Pembayaran",
+      width: "200px",
+      selector: (row) =>
+        row?.attributes?.payments?.data[0]?.attributes?.payment_remaining
+          ? row?.attributes?.payments?.data[
+              row?.attributes?.payments?.data.length - 1
+            ]?.attributes?.payment_remaining > 0
+            ? numberFormat(
+                row?.attributes?.payments?.data[
+                  row?.attributes?.payments?.data.length - 1
+                ]?.attributes?.payment_remaining
+              )
+            : ""
+          : "",
+    },
+    {
+      name: "Status Pembayaran",
+      width: "150px",
+      selector: (row) => {
+        const lastIndex = row.attributes.payments?.data?.length;
+        const lastPayment = row.attributes.payments.data[lastIndex - 1];
+
+        if (
+          lastPayment?.attributes.payment_remaining ===
+          lastPayment?.attributes.total_payment
+        ) {
+          return <Tag color={tagRed}>Belum Dibayar</Tag>;
+        } else if (
+          lastPayment?.attributes.payment_remaining > 0 &&
+          lastPayment?.attributes.payment_remaining <
+            lastPayment?.attributes.total_payment
+        ) {
+          return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
+        } else if (lastPayment?.attributes.payment_remaining <= 0) {
+          return <Tag color={tagGreen}>Selesai</Tag>;
+        } else {
+          return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
+        }
+      },
+    },
+    {
+      name: "Faktur Jatuh Tempo",
+      width: "180px",
+      selector: (row) =>
+        moment(row.attributes?.sale_date)
+          .add(
+            parseInt(row?.attributes?.tempo_days || 0),
+            row?.attributes?.tempo_time === "Bulan" ? "months" : "days"
+          )
+          .format("DD/MM/YYYY"),
+    },
+    {
+      name: "Lokasi Penjualan",
+      width: "180px",
+      //selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
+      selector: (row) => row.attributes?.location.data.attributes.name ?? "-",
+    },
+    {
+      name: "Catatan Staff",
+      width: "180px",
+      selector: (row) => row.attributes?.sale_staff ?? "-",
+    },
+    {
+      name: "Catatan Penjualan",
+      width: "180px",
+      selector: (row) => row.attributes?.sale_note ?? "-",
+    },
+    {
+      name: "Ditambah Oleh",
+      width: "180px",
+      selector: (row) => row.attributes?.added_by ?? "-",
+    },
+    {
+      name: "Tindakan",
+      width: "250px",
+      selector: (row) => (
+        <>
+          <Popover
+            content={content(row)}
+            placement="bottom"
+            trigger="click"
+            zIndex={9999}
+          >
+            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
+              Tindakan
+            </button>
+          </Popover>
+        </>
+      ),
+    },
+  ];
+
+  return (
+    <DataTable
+      customStyles={customStyles}
+      onChangePage={onPageChange}
+      paginationRowsPerPageOptions={[10]}
+      paginationTotalRows={data?.meta?.pagination?.total}
+      columns={columns}
+      data={data.data}
+      pagination
+      noDataComponent={"Belum ada data Penjualan Toko"}
+    />
+  );
 }
