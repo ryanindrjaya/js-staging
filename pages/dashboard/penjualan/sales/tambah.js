@@ -322,7 +322,7 @@ function Toko({ props }) {
       tempo_days: dataSalesSell.tempo_days,
       tempo_time: dataSalesSell.tempo_time,
       sale_note: dataSalesSell.sale_note,
-      customer: dataSalesSell.customer.data.attributes.name,
+      customer: dataSalesSell.customer?.data?.attributes.name,
     });
     setCustomer(dataSalesSell.customer.data);
 

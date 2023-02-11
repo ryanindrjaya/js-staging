@@ -526,7 +526,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     {
       name: "Pelanggan",
       width: "150px",
-      selector: (row) => row.attributes?.customer.data.attributes?.name,
+      selector: (row) => row.attributes?.customer?.data?.attributes?.name,
     },
     {
       name: "Sales",
