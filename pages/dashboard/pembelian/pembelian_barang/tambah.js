@@ -184,7 +184,7 @@ function Tambah({ props }) {
     setLoading(false);
   };
 
-  const createDetailOrder = async () => {
+  const createDetailOrder = async () => { console.log("discprice", discPrice)
     createDetailPurchasing(
       dataValues,
       products,
@@ -270,14 +270,13 @@ function Tambah({ props }) {
     const dataPO = res.data.attributes;
     const purchase_details = dataPO.purchase_details.data;
     const supplier = dataPO.supplier.data;
-
-    setDiscPrice(0);
+    
     setPreOrderData(res.data);
     setSupplier(supplier);
     setGrandTotal(dataPO.delivery_total);
     setBiayaPengiriman(dataPO.delivery_fee);
 
-    var dateString = dataPO.order_date;
+    var dateString = new Date();;
     var momentObj = moment(dateString, "YYYY-MM-DD");
     var momentString = momentObj.format("MM-DD-YYYY");
 
@@ -321,12 +320,13 @@ function Tambah({ props }) {
       data: res.data,
     });
 
+    var priceAfterDisc = 0;
     purchase_details.forEach((element, index) => {
       var indexUnit = 1;
       var unitOrder = element.attributes.unit_order;
-      console.log("product :");
-      console.log(element.attributes.products);
       var productUnit = element.attributes.products.data[0].attributes;
+
+      priceAfterDisc = priceAfterDisc + element.attributes.unit_price_after_disc;
 
       for (let index = 1; index < 6; index++) {
         if (unitOrder === productUnit[`unit_${index}`]) {
@@ -370,6 +370,8 @@ function Tambah({ props }) {
     //console.log("initial product"); console.log(products); console.log(productTotalPrice);
     //console.log(setTotalPrice); console.log(setProductTotalPrice); console.log(calculatePriceAfterDisc);
     //console.log(productSubTotal); console.log(locations);
+    setDiscPrice(priceAfterDisc);
+
     setTimeout(() => {
       setIsFetchingData(false);
     }, 3000);
