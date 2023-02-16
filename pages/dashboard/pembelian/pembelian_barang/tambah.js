@@ -26,6 +26,7 @@ import {
 } from "antd";
 import createDetailPurchasing from "../utility/createDetail";
 import createPurchasing from "../utility/createPurchasing";
+import updateOrder from "../utility/updateOrder";
 import calculatePrice from "../utility/calculatePrice";
 
 Tambah.getInitialProps = async (context) => {
@@ -150,7 +151,7 @@ function Tambah({ props }) {
   const [tempoOption, setTempoOption] = useState("Hari");
   const [productTotalPrice, setProductTotalPrice] = useState({});
   const [productSubTotal, setProductSubTotal] = useState({});
-  const [preorderData, setPreOrderData] = useState();
+  const [preorderData, setPreOrderData] = useState(); console.log("preorderData", preorderData)
   const router = useRouter();
   const { TextArea } = Input;
   var today = new Date();
@@ -184,15 +185,15 @@ function Tambah({ props }) {
     setLoading(false);
   };
 
-  const createDetailOrder = async () => { console.log("discprice", discPrice)
-    createDetailPurchasing(
-      dataValues,
-      products,
-      productTotalPrice,
-      productSubTotal,
-      setListId,
-      "/purchasing-details"
-    );
+  const createDetailOrder = async () => { updateOrderData(preorderData);
+    //createDetailPurchasing(
+    //  dataValues,
+    //  products,
+    //  productTotalPrice,
+    //  productSubTotal,
+    //  setListId,
+    //  "/purchasing-details"
+    //);
   };
 
   const createOrder = async (values) => {
@@ -206,6 +207,10 @@ function Tambah({ props }) {
       form,
       router
     );
+  };
+
+  const updateOrderData = async (values) => {
+    await updateOrder(preorderData);
   };
 
   const onChange = async () => {
@@ -622,7 +627,7 @@ function Tambah({ props }) {
                     >
                       {deliveredOrder.map((element) => {
                         if (supplier != undefined) {
-                          if (supplier.id == element.attributes.supplier.data.id) {
+                          if (supplier.id == element.attributes.supplier.data.id && element.attributes.status == "Selesai sebagian") {
                             return (
                               <Select.Option value={element.id} key={element.id}>
                                 {element.attributes.no_po}

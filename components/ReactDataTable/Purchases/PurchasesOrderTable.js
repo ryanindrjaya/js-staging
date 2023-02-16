@@ -121,7 +121,7 @@ export default function ReactDataTable({
     },
     {
       name: <div className="ml-6">Status</div>,
-      width: "150px",
+      width: "180px",
       selector: (row) => {
         return (
           <Select
@@ -129,13 +129,16 @@ export default function ReactDataTable({
             bordered={false}
             disabled={row.attributes.status === "Diterima"}
             onChange={(e) => onChangeStatus(e, row)}
+            style={{width: 140}}
           >
             <Option value="Dipesan">
-             
               <Tag color="default">Dipesan</Tag>
             </Option>
             <Option value="Diterima">
-            <Tag color="success">Diterima</Tag>
+              <Tag color="success">Diterima</Tag>
+            </Option>
+            <Option value="Selesai sebagian">
+              <Tag color="warning">Selesai sebagian</Tag>
             </Option>
           </Select>
         );
