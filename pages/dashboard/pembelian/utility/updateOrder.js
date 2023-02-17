@@ -4,120 +4,47 @@ import { notification } from "antd";
 
 const cookies = nookies.get(null, "token");
 var tempProductListId = [];
-var tempSupplierId = 0;
-var tempLocationId;
 
-const UpdateOrder = async (values) => {
+const UpdateOrder = async (values, status) => {
   // CLEANING DATA
-  values.attributes.status = "Selesai";
+  if(status == "Selesai") values.attributes.status = "Selesai";
+  else values.attributes.status = "Selesai sebagian";
+
   values.attributes.location = values.attributes.location.data.id;
   values.attributes.supplier = values.attributes.supplier.data.id;
+  if (values.attributes.document.data == null){
+  values.attributes.document = null; }
 
   values.attributes.purchase_details.data.forEach((element) => {
     tempProductListId.push({ id: element.id });
   });
 
   values.attributes.purchase_details = tempProductListId;
-    console.log("UpdateOrder", values)
-  //var data = {
-  //  data: values,
-  //};
 
-  //const req = await createData(data);
-  //const res = await req.json();
+  var data = {
+    data: values.attributes,
+  };
 
-  //const JSONdata = JSON.stringify(data);
-  //const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/" + values.id;
-  //const options = {
-  //  method: "PUT",
-  //  headers: {
-  //    "Content-Type": "application/json",
-  //    Authorization: "Bearer " + cookies.token,
-  //  },
-  //  body: JSONdata,
-  //};
-
-  //if (req.status === 200) {
-  //  //await putRelationOrder(res.data.id, res.data.attributes, form, router);
-  //} else {
-  //  openNotificationWithIcon("error");
-  //}
-  tempProductListId = [];
-};
-
-//const createData = async (data) => {
-//  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases";
-//  const JSONdata = JSON.stringify(data);
-
-//  const options = {
-//    method: "POST",
-//    headers: {
-//      "Content-Type": "application/json",
-//      Authorization: "Bearer " + cookies.token,
-//    },
-//    body: JSONdata,
-//  };
-
-//  const req = await fetch(endpoint, options);
-
-//  return req;
-//};
-
-//const putRelationOrder = async (id, value, form, router) => {
-//  const user = await getUserMe();
-//  const dataOrder = {
-//    data: value,
-//  };
-
-//  dataOrder.data.supplier = { id: tempSupplierId };
-//  dataOrder.data.purchase_details = tempProductListId;
-//  dataOrder.data.added_by = user.name;
-//  dataOrder.data.locations = { id: tempLocationId };
-
-//  // clean object
-//  for (var key in dataOrder) {
-//    if (dataOrder[key] === null || dataOrder[key] === undefined) {
-//      delete dataOrder[key];
-//    }
-//  }
-
-//  const JSONdata = JSON.stringify(dataOrder);
-//  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/" + id;
-//  const options = {
-//    method: "PUT",
-//    headers: {
-//      "Content-Type": "application/json",
-//      Authorization: "Bearer " + cookies.token,
-//    },
-//    body: JSONdata,
-//  };
-
-//  const req = await fetch(endpoint, options);
-//  const res = await req.json();
-
-//  if (req.status === 200) {
-//    form.resetFields();
-//    router.replace("/dashboard/pembelian/order_pembelian");
-//    openNotificationWithIcon("success");
-//  } else {
-//    openNotificationWithIcon("error");
-//  }
-//};
-
-const getUserMe = async () => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me";
+  const JSONdata = JSON.stringify(data);
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/" + values.id;
   const options = {
-    method: "GET",
+    method: "PUT",
     headers: {
       "Content-Type": "application/json",
       Authorization: "Bearer " + cookies.token,
     },
+    body: JSONdata,
   };
 
   const req = await fetch(endpoint, options);
   const res = await req.json();
 
-  return res;
+  if (req.status === 200) { 
+    openNotificationWithIcon("success");
+  } else {
+    openNotificationWithIcon("error");
+  }
+  tempProductListId = [];
 };
 
 const openNotificationWithIcon = (type) => {

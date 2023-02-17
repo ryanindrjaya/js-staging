@@ -127,18 +127,21 @@ export default function ReactDataTable({
           <Select
             defaultValue={row.attributes.status}
             bordered={false}
-            disabled={row.attributes.status === "Diterima"}
+            disabled/*={row.attributes.status === "Diterima" || row.attributes.status === "Selesai"}*/
             onChange={(e) => onChangeStatus(e, row)}
             style={{width: 140}}
           >
             <Option value="Dipesan">
               <Tag color="default">Dipesan</Tag>
             </Option>
-            <Option value="Diterima">
-              <Tag color="success">Diterima</Tag>
-            </Option>
+            {/*<Option value="Diterima">*/}
+            {/*  <Tag color="success">Diterima</Tag>*/}
+            {/*</Option>*/}
             <Option value="Selesai sebagian">
               <Tag color="warning">Selesai sebagian</Tag>
+            </Option>
+            <Option value="Selesai">
+              <Tag color="success">Selesai</Tag>
             </Option>
           </Select>
         );

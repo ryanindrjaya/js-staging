@@ -27,6 +27,7 @@ import {
 import createDetailPurchasing from "../utility/createDetail";
 import createPurchasing from "../utility/createPurchasing";
 import updateOrder from "../utility/updateOrder";
+import updateProduct from "../utility/updateProduct";
 import calculatePrice from "../utility/calculatePrice";
 
 Tambah.getInitialProps = async (context) => {
@@ -151,7 +152,7 @@ function Tambah({ props }) {
   const [tempoOption, setTempoOption] = useState("Hari");
   const [productTotalPrice, setProductTotalPrice] = useState({});
   const [productSubTotal, setProductSubTotal] = useState({});
-  const [preorderData, setPreOrderData] = useState(); console.log("preorderData", preorderData)
+  const [preorderData, setPreOrderData] = useState();
   const router = useRouter();
   const { TextArea } = Input;
   var today = new Date();
@@ -185,7 +186,7 @@ function Tambah({ props }) {
     setLoading(false);
   };
 
-  const createDetailOrder = async () => { updateOrderData(preorderData);
+  const createDetailOrder = async () => { console.log("datavalues", dataValues, products)
     //createDetailPurchasing(
     //  dataValues,
     //  products,
@@ -205,13 +206,27 @@ function Tambah({ props }) {
       listId,
       discPrice,
       form,
-      router
+      router,
+      updateOrderData,
     );
+    
   };
 
-  const updateOrderData = async (values) => {
-    await updateOrder(preorderData);
+  const updateOrderData = async () => {
+    if (dataValues.status == "Selesai") {
+      await updateOrder(preorderData, "Selesai");
+    }
+    else await updateOrder(preorderData, "Tidak");
   };
+
+  const updateProductHarga = async (id, values) => {
+    var data = null;
+    values.data.forEach((element) => {
+      if(id == element.id) data = element.attributes.purchasing_details.data;
+    });
+    console.log("update data",data)
+    //updateProduct();
+  }
 
   const onChange = async () => {
     var isDuplicatedData = false;
@@ -627,7 +642,7 @@ function Tambah({ props }) {
                     >
                       {deliveredOrder.map((element) => {
                         if (supplier != undefined) {
-                          if (supplier.id == element.attributes.supplier.data.id && element.attributes.status == "Selesai sebagian") {
+                          if (supplier.id == element.attributes.supplier.data.id && element.attributes.status != "Selesai") {
                             return (
                               <Select.Option value={element.id} key={element.id}>
                                 {element.attributes.no_po}
