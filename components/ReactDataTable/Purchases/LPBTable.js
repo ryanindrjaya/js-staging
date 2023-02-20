@@ -23,9 +23,9 @@ export default function ReactDataTable({
   var defaultDp1 = 0;
   var defaultDp2 = 0;
   var defaultDp3 = 0;
-  var unit = 1;
+  var unit = [];
   var priceUnit = 1;
-  var tempIndex = 0;
+  var tempIndex = products.productList.length;
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -38,7 +38,7 @@ export default function ReactDataTable({
   };
 
   const onChangeUnit = (value, data, index) => {
-    unit = value;
+    unit[index] = value;
     if (value == 1) {
       priceUnit = data.attributes.buy_price_1;
     } else if (value == 2) {
@@ -75,8 +75,8 @@ export default function ReactDataTable({
   };
 
   const onChangePriceUnit = (value, data, index, indexRow) => {
+    var dataForm = formObj.getFieldsValue();
     var tempPriceUnit = [];
-    console.log("value", value, data, index);
 
     tempPriceUnit.push(data.attributes.buy_price_1);
     tempPriceUnit.push(data.attributes.buy_price_2);
@@ -90,9 +90,11 @@ export default function ReactDataTable({
     data.attributes.buy_price_4 = value;
     data.attributes.buy_price_5 = value;
 
-    if (tempIndex != index) {
-      tempIndex = index;
-      onChangeUnit(index, data, indexRow);
+    if (tempIndex != indexRow) {
+      tempIndex = indexRow;
+      if(dataForm.jumlah_option[indexRow] == undefined) dataForm.jumlah_option[indexRow] = unit[indexRow];
+      unit[indexRow] = dataForm.jumlah_option[indexRow];
+      onChangeUnit(unit[indexRow], data, indexRow);
     }
 
     data.attributes.buy_price_1 = tempPriceUnit[0];
@@ -187,7 +189,7 @@ export default function ReactDataTable({
                 <InputNumber
                   defaultValue={priceUnit}
                   min={0}
-                  onChange={(e) => onChangePriceUnit(e, row, unit, idx)}
+                  onChange={(e) => onChangePriceUnit(e, row, unit[idx], idx)}
                   style={{
                     width: "150px",
                     marginRight: "10px",
@@ -216,6 +218,8 @@ export default function ReactDataTable({
         if (products.productInfo[idx]?.unitIndex) {
           defaultIndex = products.productInfo[idx].unitIndex;
         }
+
+        unit[idx] = defaultIndex;
 
         return (
           <>

@@ -186,15 +186,15 @@ function Tambah({ props }) {
     setLoading(false);
   };
 
-  const createDetailOrder = async () => { console.log("datavalues", dataValues, products)
-    //createDetailPurchasing(
-    //  dataValues,
-    //  products,
-    //  productTotalPrice,
-    //  productSubTotal,
-    //  setListId,
-    //  "/purchasing-details"
-    //);
+  const createDetailOrder = async () => {
+    createDetailPurchasing(
+      dataValues,
+      products,
+      productTotalPrice,
+      productSubTotal,
+      setListId,
+      "/purchasing-details"
+    );
   };
 
   const createOrder = async (values) => {
@@ -215,17 +215,17 @@ function Tambah({ props }) {
   const updateOrderData = async () => {
     if (dataValues.status == "Selesai") {
       await updateOrder(preorderData, "Selesai");
+      updateProductHarga(products);
     }
     else await updateOrder(preorderData, "Tidak");
   };
 
-  const updateProductHarga = async (id, values) => {
-    var data = null;
-    values.data.forEach((element) => {
-      if(id == element.id) data = element.attributes.purchasing_details.data;
+  const updateProductHarga = async (values) => {
+    var index = 0;
+    values.productList.forEach((element) => {
+      updateProduct(element, values.productInfo[index]);
+      index++;
     });
-    console.log("update data",data)
-    //updateProduct();
   }
 
   const onChange = async () => {
@@ -390,7 +390,7 @@ function Tambah({ props }) {
     //console.log("initial product"); console.log(products); console.log(productTotalPrice);
     //console.log(setTotalPrice); console.log(setProductTotalPrice); console.log(calculatePriceAfterDisc);
     //console.log(productSubTotal); console.log(locations);
-    setDiscPrice(priceAfterDisc);
+    //setDiscPrice(priceAfterDisc);
 
     setTimeout(() => {
       setIsFetchingData(false);

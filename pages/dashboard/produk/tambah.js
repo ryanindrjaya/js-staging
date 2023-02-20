@@ -335,24 +335,32 @@ const Tambah = ({ props }) => {
   };
 
   useEffect(() => {
-    var valueData = 0;
-    var manufactures = 0;
-    var groups = 0;
-    var manufacturesData = 0;
+    //var valueData = 0;
+    var manufactures = "00";
+    var groups = "0000";
+    var manufacturesData = "000";
     var kodeProduct = 0;
+    var categoryData = "00";
 
     product.data.forEach((element) => {
       if(element.attributes.manufacture.data.id == selectedManufactures) manufacturesData++;
     });
-    //if (manufactures)
-    //if (category != null && manufactures) { console.log("wakwaw", selectedGroups);
       manufacturesData = String(manufacturesData + 1).padStart(3, "0");
-      manufactures = String(selectedManufactures).padStart(2, "0");
-      groups = String(selectedGroups).padStart(4, "0");
-      kodeProduct = category + "/" + manufactures + "/" + groups + "/" + manufacturesData;
-      form.setFieldsValue({ SKU: kodeProduct});
+      kodeProduct = categoryData + "/" + manufactures + "/" + groups + "/" + manufacturesData;
+
+    if(selectedManufactures) manufactures = String(selectedManufactures).padStart(2, "0");
+
+    if(selectedGroups) groups = String(selectedGroups).padStart(4, "0");
+
+    if(category) categoryData = category;
+
+    if(category && selectedManufactures && selectedGroups){
+      kodeProduct = categoryData + "/" + manufactures + "/" + groups + "/" + manufacturesData;
+    }
+
+    form.setFieldsValue({ SKU: kodeProduct });
     //}
-  }, [category]); console.log("data log", valueSKU);
+  }, [category, selectedManufactures, selectedGroups]); console.log("data log", valueSKU);
 
   const onFinishFailed = () => {
     const error = form.getFieldsError();

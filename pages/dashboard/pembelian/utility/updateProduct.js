@@ -7,17 +7,20 @@ var tempLocationId = [];
 var tempImageId = [];
 var tempInventoriesId = [];
 
-const UpdateProduct = async (values) => {
+const UpdateProduct = async (listValue, values) => {
   // CLEANING DATA
-  var value = values.attributes.product.data.attributes;
+  var value = listValue.attributes;
   value.category = value.category.data.id;
   value.group = value.group.data.id;
   value.manufacture = value.manufacture.data.id;
   value.sub_category = value.sub_category.data.id;
 
-  value.image.data.forEach((element) => {
-    tempImageId.push({ id: element.id });
-  });
+  if(value.image.data != null) {
+    value.image.data.forEach((element) => {
+      if(element != null) tempImageId.push({ id: element.id });
+      else tempImageId.push({ id: null });
+    });
+  } else { tempImageId.push(null); }
 
   value.inventories.data.forEach((element) => {
     tempInventoriesId.push({ id: element.id });
@@ -31,30 +34,18 @@ const UpdateProduct = async (values) => {
   value.inventories = tempInventoriesId;
   value.locations = tempLocationId;
 
-  if(values.attributes.unit_order == value.unit_1) value.buy_price_1 = values.attributes.unit_price;
-  else if(values.attributes.unit_order == value.unit_2) value.buy_price_2 = values.attributes.unit_price;
-  else if(values.attributes.unit_order == value.unit_3) value.buy_price_3 = values.attributes.unit_price;
-  else if(values.attributes.unit_order == value.unit_4) value.buy_price_4 = values.attributes.unit_price;
-  else if(values.attributes.unit_order == value.unit_5) value.buy_price_5 = values.attributes.unit_price;
-
-  //values.attributes.status = "Selesai";
-  //values.attributes.location = values.attributes.location.data.id;
-  //values.attributes.supplier = values.attributes.supplier.data.id;
-  //if (values.attributes.document.data == null){
-  //values.attributes.document = null; }
-
-  //values.attributes.purchase_details.data.forEach((element) => {
-  //  tempProductListId.push({ id: element.id });
-  //});
-
-  //values.attributes.purchase_details = tempProductListId;
+  if(values.unit == value.unit_1) value.buy_price_1 = values.priceUnit;
+  else if(values.unit == value.unit_2) value.buy_price_2 = values.priceUnit;
+  else if(values.unit == value.unit_3) value.buy_price_3 = values.priceUnit;
+  else if(values.unit == value.unit_4) value.buy_price_4 = values.priceUnit;
+  else if(values.unit == value.unit_5) value.buy_price_5 = values.priceUnit;
 
   var data = {
-    data: values.attributes,
+    data: value,
   };
 
   const JSONdata = JSON.stringify(data);
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/products/" + values.id;
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/products/" + listValue.id;
   const options = {
     method: "PUT",
     headers: {
@@ -72,7 +63,10 @@ const UpdateProduct = async (values) => {
   } else {
     openNotificationWithIcon("error");
   }
-  tempProductListId = [];
+  //tempProductListId = [];
+  tempLocationId = [];
+  tempImageId = [];
+  tempInventoriesId = [];
 };
 
 const openNotificationWithIcon = (type) => {
