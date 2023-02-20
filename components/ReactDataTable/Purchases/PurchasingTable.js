@@ -188,11 +188,7 @@ export default function ReactDataTable({
             <Select
               defaultValue={row.attributes.status}
               bordered={false}
-              disabled={
-                row.attributes.status === "Selesai" ||
-                row.attributes.status === "Dibatalkan" 
-                //row.attributes.status === "Diretur"
-              }
+              disabled
               onChange={(e) => onChangeStatus(e, row)}
               style={{
                 width: "150px",

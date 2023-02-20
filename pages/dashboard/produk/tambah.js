@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
@@ -28,7 +28,7 @@ import setDiskonValue from "./utility/setDiskonValue";
 import setHargaValue, { setHargaNew } from "./utility/setHargaValue";
 import ConfirmDialog from "../../../components/Alert/ConfirmDialog";
 import debounce from "./utility/debounce";
-import UploadDokumen from "../../../components/ReactDataTable/Product/UploadDokumen";
+//import UploadDokumen from "../../../components/ReactDataTable/Product/UploadDokumen";
 
 const Tambah = ({ props }) => {
   const [image, setImage] = useState();
@@ -62,6 +62,9 @@ const Tambah = ({ props }) => {
 
   const [descUnit, setDescUnit] = useState();
   const [file, setFile] = useState();
+
+  const [valueSKU, setValueSKU] = useState("data sku");
+  const [product, setProduct] = useState(props.dataProduct);
 
   const imageLoader = ({ src }) => {
     return NEXT_PUBLIC_URL + image;
@@ -331,6 +334,33 @@ const Tambah = ({ props }) => {
     setDescUnit(descUnit);
   };
 
+  useEffect(() => {
+    var manufactures = "00";
+    var groups = "0000";
+    var manufacturesData = "000";
+    var kodeProduct = 0;
+    var categoryData = "00";
+
+    product.data.forEach((element) => {
+      if(element.attributes.manufacture.data.id == selectedManufactures) manufacturesData++;
+    });
+      manufacturesData = String(manufacturesData + 1).padStart(3, "0");
+      kodeProduct = categoryData + manufactures + groups + manufacturesData;
+
+    if(selectedManufactures) manufactures = String(selectedManufactures).padStart(2, "0");
+
+    if(selectedGroups) groups = String(selectedGroups).padStart(4, "0");
+
+    if(category) categoryData = category;
+
+    if (category != undefined && selectedManufactures.length > 0 && selectedGroups.length > 0){
+      kodeProduct = categoryData + manufactures + groups + manufacturesData;
+    }
+
+    form.setFieldsValue({ SKU: kodeProduct });
+    
+  }, [category, selectedManufactures, selectedGroups]);
+
   const onFinishFailed = () => {
     const error = form.getFieldsError();
     error.forEach((value) => {
@@ -414,9 +444,10 @@ const Tambah = ({ props }) => {
                     ]}
                   >
                     <Input
-                      onKeyDown={(e) =>
-                        e.key == "Enter" ? e.preventDefault() : ""
-                      }
+                      //onKeyDown={(e) =>
+                      //  e.key == "Enter" ? e.preventDefault() : ""
+                      //}
+                      //defaultValue={valueSKU}
                       style={{ height: "40px" }}
                       placeholder="SKU"
                     />
@@ -520,12 +551,16 @@ Tambah.getInitialProps = async (context) => {
   const reqSubCategories = await fetchDataSubCategories(cookies);
   const subCategories = await reqSubCategories.json();
 
+  const reqDataProduct = await fetchDataProduct(cookies);
+  const dataProduct = await reqDataProduct.json();
+
   if (
     reqCategories.status !== 200 ||
     reqGroups.status !== 200 ||
     reqLocations.status !== 200 ||
     reqManufactures.status !== 200 ||
-    reqSubCategories.status !== 200
+    reqSubCategories.status !== 200 ||
+    reqDataProduct.status !== 200
   ) {
     context.res.writeHead(302, {
       Location: "/signin?session=false",
@@ -543,6 +578,7 @@ Tambah.getInitialProps = async (context) => {
       locations,
       manufactures,
       subCategories,
+      dataProduct
     },
   };
 };
@@ -615,6 +651,20 @@ const fetchDataLocations = async (cookies) => {
 
   const req = await fetch(endpoint, options);
   return req;
+};
+
+const fetchDataProduct = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/products?populate=deep";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
 };
 
 export default Tambah;

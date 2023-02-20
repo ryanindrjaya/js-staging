@@ -26,6 +26,8 @@ import {
 } from "antd";
 import createDetailPurchasing from "../utility/createDetail";
 import createPurchasing from "../utility/createPurchasing";
+import updateOrder from "../utility/updateOrder";
+import updateProduct from "../utility/updateProduct";
 import calculatePrice from "../utility/calculatePrice";
 
 Tambah.getInitialProps = async (context) => {
@@ -204,9 +206,27 @@ function Tambah({ props }) {
       listId,
       discPrice,
       form,
-      router
+      router,
+      updateOrderData,
     );
+    
   };
+
+  const updateOrderData = async () => {
+    if (dataValues.status == "Selesai") {
+      await updateOrder(preorderData, "Selesai");
+      updateProductHarga(products);
+    }
+    else await updateOrder(preorderData, "Tidak");
+  };
+
+  const updateProductHarga = async (values) => {
+    var index = 0;
+    values.productList.forEach((element) => {
+      updateProduct(element, values.productInfo[index]);
+      index++;
+    });
+  }
 
   const onChange = async () => {
     var isDuplicatedData = false;
@@ -270,14 +290,13 @@ function Tambah({ props }) {
     const dataPO = res.data.attributes;
     const purchase_details = dataPO.purchase_details.data;
     const supplier = dataPO.supplier.data;
-
-    setDiscPrice(0);
+    
     setPreOrderData(res.data);
     setSupplier(supplier);
     setGrandTotal(dataPO.delivery_total);
     setBiayaPengiriman(dataPO.delivery_fee);
 
-    var dateString = dataPO.order_date;
+    var dateString = new Date();;
     var momentObj = moment(dateString, "YYYY-MM-DD");
     var momentString = momentObj.format("MM-DD-YYYY");
 
@@ -321,12 +340,13 @@ function Tambah({ props }) {
       data: res.data,
     });
 
+    var priceAfterDisc = 0;
     purchase_details.forEach((element, index) => {
       var indexUnit = 1;
       var unitOrder = element.attributes.unit_order;
-      console.log("product :");
-      console.log(element.attributes.products);
       var productUnit = element.attributes.products.data[0].attributes;
+
+      priceAfterDisc = priceAfterDisc + element.attributes.unit_price_after_disc;
 
       for (let index = 1; index < 6; index++) {
         if (unitOrder === productUnit[`unit_${index}`]) {
@@ -370,6 +390,8 @@ function Tambah({ props }) {
     //console.log("initial product"); console.log(products); console.log(productTotalPrice);
     //console.log(setTotalPrice); console.log(setProductTotalPrice); console.log(calculatePriceAfterDisc);
     //console.log(productSubTotal); console.log(locations);
+    //setDiscPrice(priceAfterDisc);
+
     setTimeout(() => {
       setIsFetchingData(false);
     }, 3000);
@@ -620,7 +642,7 @@ function Tambah({ props }) {
                     >
                       {deliveredOrder.map((element) => {
                         if (supplier != undefined) {
-                          if (supplier.id == element.attributes.supplier.data.id) {
+                          if (supplier.id == element.attributes.supplier.data.id && element.attributes.status != "Selesai") {
                             return (
                               <Select.Option value={element.id} key={element.id}>
                                 {element.attributes.no_po}

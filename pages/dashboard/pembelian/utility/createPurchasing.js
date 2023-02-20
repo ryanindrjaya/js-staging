@@ -5,7 +5,7 @@ import * as moment from "moment";
 
 const cookies = nookies.get(null, "token");
 
-const CreateOrder = async (products, grandTotal, totalPrice, values, listId, discPrice, form, router) => {
+const CreateOrder = async(products, grandTotal, totalPrice, values, listId, discPrice, form, router, updateOrderData) => {
   // CLEANING DATA
   var date = new Date(values.order_date);
   var newDate = moment
@@ -56,7 +56,7 @@ const CreateOrder = async (products, grandTotal, totalPrice, values, listId, dis
   const res = await req.json();
 
   if (req.status === 200) {
-    await putRelationOrder(res.data.id, res.data.attributes, values, form, router);
+    await putRelationOrder(res.data.id, res.data.attributes, values, form, router, updateOrderData);
   } else {
     openNotificationWithIcon("error");
   }
@@ -79,7 +79,7 @@ const createData = async (data) => {
   return req;
 };
 
-const putRelationOrder = async (id, value, values, form, router) => {
+const putRelationOrder = async (id, value, values, form, router, updateOrderData) => {
   const user = await getUserMe();
   const dataOrder = {
     data: value,
@@ -119,6 +119,7 @@ const putRelationOrder = async (id, value, values, form, router) => {
     form.resetFields();
     router.replace("/dashboard/pembelian/pembelian_barang");
     openNotificationWithIcon("success");
+    updateOrderData();
   } else {
     openNotificationWithIcon("error");
   }
