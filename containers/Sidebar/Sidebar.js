@@ -286,7 +286,7 @@ export default function Sidebar(props) {
             </SubMenu>
 
             {/* Biaya  */}
-            <SubMenu
+            {/* <SubMenu
               key="biaya"
               title={
                 <span className="isoMenuHolder" style={submenuColor}>
@@ -305,7 +305,7 @@ export default function Sidebar(props) {
                   <a>Piutang</a>
                 </Link>
               </Menu.Item>
-            </SubMenu>
+            </SubMenu> */}
           </Menu>
         </Scrollbars>
       </Sider>
