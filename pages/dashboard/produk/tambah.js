@@ -335,7 +335,6 @@ const Tambah = ({ props }) => {
   };
 
   useEffect(() => {
-    //var valueData = 0;
     var manufactures = "00";
     var groups = "0000";
     var manufacturesData = "000";
@@ -346,7 +345,7 @@ const Tambah = ({ props }) => {
       if(element.attributes.manufacture.data.id == selectedManufactures) manufacturesData++;
     });
       manufacturesData = String(manufacturesData + 1).padStart(3, "0");
-      kodeProduct = categoryData + "/" + manufactures + "/" + groups + "/" + manufacturesData;
+      kodeProduct = categoryData + manufactures + groups + manufacturesData;
 
     if(selectedManufactures) manufactures = String(selectedManufactures).padStart(2, "0");
 
@@ -354,13 +353,13 @@ const Tambah = ({ props }) => {
 
     if(category) categoryData = category;
 
-    if(category && selectedManufactures && selectedGroups){
-      kodeProduct = categoryData + "/" + manufactures + "/" + groups + "/" + manufacturesData;
+    if (category != undefined && selectedManufactures.length > 0 && selectedGroups.length > 0){
+      kodeProduct = categoryData + manufactures + groups + manufacturesData;
     }
 
     form.setFieldsValue({ SKU: kodeProduct });
-    //}
-  }, [category, selectedManufactures, selectedGroups]); console.log("data log", valueSKU);
+    
+  }, [category, selectedManufactures, selectedGroups]);
 
   const onFinishFailed = () => {
     const error = form.getFieldsError();
