@@ -156,7 +156,7 @@ function Retur({ props }) {
   };
 
   const createDetailRetur = async () => {
-    console.log("info total", productTotalPrice, productSubTotal);
+    console.log("info total", productTotalPrice, productSubTotal, products, dataValues);
     createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-details", dataValues);
   };
 
@@ -182,11 +182,25 @@ function Retur({ props }) {
     }
   };
 
-  const calculatePriceAfterDisc = (row) => {
-    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
+  const calculatePriceAfterDisc = (row, index) => {
+    const total = calculatePrice(
+      row,
+      products,
+      productTotalPrice,
+      productSubTotal,
+      setTotalPrice,
+      index,
+      setProductSubTotal
+    );
 
     return formatter.format(total);
   };
+
+  //const calculatePriceAfterDisc = (row) => {
+  //  const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
+
+  //  return formatter.format(total);
+  //};
 
   const fetchReturdata = async (id) => {
     //clearData();
@@ -210,7 +224,7 @@ function Retur({ props }) {
     });
   };
 
-  const setProductValue = async () => {
+  const setProductValue = async () => { console.log("products",products)
     if (products.productList.length != 0) {
       products.productList.forEach((element) => {
         console.log("masuk");

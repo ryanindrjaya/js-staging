@@ -79,7 +79,15 @@ export default function ReactDataTable({
           Lihat
         </button>
       </div>
-
+      <div>
+        <button
+          onClick={() => lihat(row)}
+          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+        >
+          <EditOutlined className="mr-2 mt-0.5 float float-left" />
+          Edit
+        </button>
+      </div>
       <AlertDialog
         onCancel={onCancel}
         onConfirm={onConfirm}
@@ -262,7 +270,7 @@ export default function ReactDataTable({
       columns={columns}
       data={data.data}
       pagination
-      noDataComponent={"Belum ada data Order Pembelian"}
+      noDataComponent={"Belum ada data Retur Pembelian"}
     />
   );
 }
