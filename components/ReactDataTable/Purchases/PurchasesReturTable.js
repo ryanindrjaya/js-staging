@@ -1,12 +1,13 @@
 import DataTable from "react-data-table-component";
 import AlertDialog from "../../Alert/Alert";
-import { Popover, Select, Row, Tag, notification } from "antd";
+import { Popover, Select, Row, Tag, notification, Modal, Input } from "antd";
 import {
   EditOutlined,
   PrinterOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
 import { useRouter } from "next/router";
+import { useState } from "react";
 
 export default function ReactDataTable({
   data,
@@ -17,6 +18,16 @@ export default function ReactDataTable({
 }) {
   const router = useRouter(); 
   const { Option } = Select;
+  const [open, setOpen] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const { TextArea } = Input;
+  var formatter = new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 2,
+  });
 
   const openNotificationWithIcon = (type, title, message) => {
     notification[type]({
@@ -33,6 +44,11 @@ export default function ReactDataTable({
   const lihat = (row) => {
     openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
     //router.push("order_pembelian/print/" + row.id);
+  };
+
+  const edit = (row) => {
+    //openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
+    router.push("/dashboard/pembelian/retur/edit/" + row.id);
   };
 
   const returLpb = (row) => {
@@ -59,6 +75,23 @@ export default function ReactDataTable({
     maximumFractionDigits: 0,
   });
 
+  const showModal = () => {
+    setOpen(true);
+  };
+  const handleOk = () => {
+    setModalText('The modal will be closed after two seconds');
+    setConfirmLoading(true);
+    setTimeout(() => {
+      setOpen(false);
+      setConfirmLoading(false);
+    }, 2000);
+  };
+  const handleCancel = () => {
+    console.log('Clicked cancel button');
+    setOpen(false);
+    //this.myFormRef.reset();
+  };
+
   const content = (row) => (
     <div>
       <div>
@@ -81,13 +114,76 @@ export default function ReactDataTable({
       </div>
       <div>
         <button
-          onClick={() => lihat(row)}
+          onClick={() => edit(row)}
           className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
         >
           <EditOutlined className="mr-2 mt-0.5 float float-left" />
           Edit
         </button>
       </div>
+      <div>
+        <button
+            //onClick={() => metodePembayaran(row)}
+            onClick={showModal}
+            className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+        >
+            <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
+            Metode Pembayaran
+        </button>
+
+          <Modal
+            title="Pembayaran Retur Pembelian"
+            open={open}
+            onOk={handleOk}
+            confirmLoading={confirmLoading}
+            onCancel={handleCancel}
+            //ref={(modal) => this.myFormRef = modal}
+            footer={[
+                <button className="border border-cyan-700 rounded-md m-1 text-sm px-6 py-2" key="back" onClick={handleCancel}>
+                Cancel
+                </button>,
+                <button className="bg-cyan-700 rounded-md m-1 text-sm px-4" key="submit" loading={loading} onClick={handleOk}>
+                <p className="px-4 py-2 m-0 text-white">
+                    SIMPAN
+                </p>
+                </button>
+            ]}
+          >
+                <div className="w-full flex justify-start">
+                    <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-left">
+                        <span className="font-bold">Supplier : </span>
+                    </div>
+                    <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-center">
+                        <span className="font-bold">Nomer : </span>
+                    </div>
+                    <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-right">
+                        <span className="font-bold">Jumlah Total : </span>
+                    </div>
+                </div>
+
+                 <div className="w-full flex justify-start">
+                    <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-left">
+                        <span className="font-bold">alamat</span>
+                    </div>
+                    <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-center">
+                        <div>
+                          <span className="font-bold">Tanggal : </span>
+                        </div>
+                        <div>
+                          <span className="font-bold">Lokasi Gudang : </span>
+                        </div>
+                    </div>
+                    <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-right">
+                        <span className="font-bold">Catatan : </span>
+                        <span className="font-bold">Pembayaran : </span>
+                    </div>
+                  </div>
+
+                  <div className="w-full flex justify-start">
+                      <TextArea rows={4} placeholder="Catatan Tambahan" />
+                  </div>
+          </Modal>
+        </div>
       <AlertDialog
         onCancel={onCancel}
         onConfirm={onConfirm}
