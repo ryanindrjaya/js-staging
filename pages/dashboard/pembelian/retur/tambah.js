@@ -11,7 +11,7 @@ import nookies from "nookies";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import { useSelector, useDispatch } from "react-redux";
 import calculatePrice from "../utility/calculatePrice";
-import LPBTable from "@iso/components/ReactDataTable/Purchases/LPBTable";
+import DataReturTable from "@iso/components/ReactDataTable/Purchases/DataReturTable";
 import createDetailReturFunc from "../utility/createReturDetail";
 import createReturFunc from "../utility/createRetur";
 import { useRouter } from "next/router";
@@ -183,17 +183,30 @@ function Retur({ props }) {
   };
 
   const calculatePriceAfterDisc = (row, index) => {
-    const total = calculatePrice(
-      row,
-      products,
-      productTotalPrice,
-      productSubTotal,
-      setTotalPrice,
-      index,
-      setProductSubTotal
-    );
+    var total = 0;
+    var qty = 1;
+    var priceUnit = row.attributes[`buy_price_1`];
 
-    return formatter.format(total);
+    // check if price changed
+    if (products.productInfo[index]?.priceUnit) {
+      priceUnit = products.productInfo[index].priceUnit ?? row.attributes[`buy_price_1`];
+    }
+    // check if qty changed
+    if (products.productInfo[index]?.qty) {
+      qty = products.productInfo[index]?.qty ?? 1;
+    }
+
+    // set product price after disc & sub total
+    productTotalPrice[index] = priceUnit;
+    productSubTotal[index] = priceUnit * qty;
+
+    // set all product total
+    var total = 0;
+    for (var key in productSubTotal) {
+      total = total + productSubTotal[key];
+    }
+      setTotalPrice(total);
+    return formatter.format(productTotalPrice[index]);
   };
 
   //const calculatePriceAfterDisc = (row) => {
@@ -403,14 +416,14 @@ function Retur({ props }) {
                   <SearchBar form={form} tempList={tempList} onChange={onChangeProduct} user={user}  selectedProduct={selectedProduct} isBasedOnLocation={false}/>
                 </div>
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                  <LPBTable
+                  <DataReturTable
                     products={products}
                     productTotalPrice={productTotalPrice}
                     setTotalPrice={setTotalPrice}
                     setProductTotalPrice={setProductTotalPrice}
                     calculatePriceAfterDisc={calculatePriceAfterDisc}
                     productSubTotal={productSubTotal}
-                    locations={locations}
+                    //locations={locations}
                     formObj={form}
                   />
                 </div>

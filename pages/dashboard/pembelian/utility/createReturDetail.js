@@ -45,7 +45,7 @@ const createReturDetail = (
     var subTotal = unitPriceAfterDisc * qty;
     var batch = value?.batch[id];
     var expired_date = new Date(value?.expired_date[id]);
-    var location = value?.product_location[id];
+    //var location = value?.product_location[id];
     //console.log("detail", qty, disc, unit, unitPrice, unitPriceAfterDisc, subTotal, id, batch, expired_date, location);
     POSTReturDetail(
       qty,
@@ -59,7 +59,7 @@ const createReturDetail = (
       products,
       batch,
       expired_date,
-      location,
+      //location,
       url
     );
 
@@ -81,7 +81,7 @@ const POSTReturDetail = async (
   products,
   batch,
   expired_date,
-  location,
+  //location,
   url
 ) => {
   var data = {
@@ -94,7 +94,7 @@ const POSTReturDetail = async (
       products: { id: id },
       batch: batch,
       expired_date: expired_date,
-      location: location,
+      //location: location,
     },
   };
 

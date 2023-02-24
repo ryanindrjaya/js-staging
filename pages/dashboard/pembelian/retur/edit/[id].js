@@ -11,7 +11,7 @@ import nookies from "nookies";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import { useSelector, useDispatch } from "react-redux";
 import calculatePrice from "../../utility/calculatePrice";
-import LPBTable from "@iso/components/ReactDataTable/Purchases/LPBTable";
+import DataReturTable from "@iso/components/ReactDataTable/Purchases/DataReturTable";
 import createDetailReturFunc from "../../utility/createReturDetail";
 import createReturFunc from "../../utility/createRetur";
 import { useRouter } from "next/router";
@@ -157,10 +157,10 @@ function Retur({ props }) {
     setLoading(false);
   };
 
-  //const createDetailRetur = async () => {
-  //  console.log("info total", productTotalPrice, productSubTotal, products, dataValues);
-  //  createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-details", dataValues);
-  //};
+  const createDetailRetur = async () => { console.log("info total", dataValues);
+    //console.log("info total", productTotalPrice, productSubTotal, products, dataValues);
+    //createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-details", dataValues);
+  };
 
   //const createRetur = async (values) => {
   //  createReturFunc(grandTotal, totalPrice, values, listId, form, router);
@@ -185,17 +185,30 @@ function Retur({ props }) {
   };
 
   const calculatePriceAfterDisc = (row, index) => {
-    const total = calculatePrice(
-      row,
-      products,
-      productTotalPrice,
-      productSubTotal,
-      setTotalPrice,
-      index,
-      setProductSubTotal
-    );
+    var total = 0;
+    var qty = 1;
+    var priceUnit = row.attributes[`buy_price_1`];
 
-    return formatter.format(total);
+    // check if price changed
+    if (products.productInfo[index]?.priceUnit) {
+      priceUnit = products.productInfo[index].priceUnit ?? row.attributes[`buy_price_1`];
+    }
+    // check if qty changed
+    if (products.productInfo[index]?.qty) {
+      qty = products.productInfo[index]?.qty ?? 1;
+    }
+
+    // set product price after disc & sub total
+    productTotalPrice[index] = priceUnit;
+    productSubTotal[index] = priceUnit * qty;
+
+    // set all product total
+    var total = 0;
+    for (var key in productSubTotal) {
+      total = total + productSubTotal[key];
+    }
+      setTotalPrice(total);
+    return formatter.format(productTotalPrice[index]);
   };
 
   //const calculatePriceAfterDisc = (row) => {
@@ -281,14 +294,23 @@ function Retur({ props }) {
     var labelSupplier = `${returData.attributes.supplier.data.attributes.id_supplier} - ${returData.attributes.supplier.data.attributes.name}`
 
     setSupplier(returData.attributes.supplier.data);
-    form.setFieldsValue({
 
+    form.setFieldsValue({
     catatan: returData.attributes.catatan,
     supplier_id: {
       label: labelSupplier,
       value: returData.attributes.supplier.data.id,
     },
     no_retur: returData.attributes.no_retur,
+    location: {
+      label: returData.attributes.location.data.attributes.name,
+      value: returData.attributes.location.data.id,
+    },
+    purchasing: {
+      label: returData.attributes.purchasing.data.attributes.name,
+      value: returData.attributes.purchasing.data.id,
+    },
+    pajak: returData.attributes.pajak,
     //tanggal_retur: returData.attributes.tanggal_retur,
     //tanggal_retur: moment(momentString),
     //  location: dataSalesSell.location.data.attributes.name,
@@ -296,8 +318,22 @@ function Retur({ props }) {
     //  tempo_time: dataSalesSell.tempo_time,
     //  sale_note: dataSalesSell.sale_note,
     //  customer: dataSalesSell.customer.data.attributes.name,
-    }); console.log("data label", labelSupplier);
-  }, []); console.log("supplier", supplier);
+    });
+
+    returData.attributes.retur_details.data.forEach((element, index) => {
+      dispatch({ 
+        type: "ADD_PRODUCT",
+        product: element.attributes.products.data[0],
+        qty: element.attributes.qty,
+        unit: element.attributes.unit,
+        //unitIndex: indexUnit,
+        priceUnit: element.attributes.harga_satuan,
+        priceAfterDisc: element.attributes.harga_satuan,
+        subTotal: element.attributes.sub_total,
+        index,
+      });
+    });
+  }, []);
 
   const data = {
     name: "file",
@@ -435,18 +471,18 @@ function Retur({ props }) {
                   <Form.Item name="no_nota_supplier"></Form.Item>
                   <Form.Item name="tanggal_pembelian"></Form.Item>
                 </div>
-                <div className="w-full md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
-                  <SearchBar form={form} tempList={tempList} onChange={onChangeProduct} user={user}  selectedProduct={selectedProduct} isBasedOnLocation={false}/>
-                </div>
-                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                  <LPBTable
+                {/*<div className="w-full md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">*/}
+                {/*  <SearchBar form={form} tempList={tempList} onChange={onChangeProduct} user={user}  selectedProduct={selectedProduct} isBasedOnLocation={false}/>*/}
+                {/*</div>*/}
+                <div className="w-full md:w-4/4 px-3 mb-2 mt-2 md:mb-0">
+                  <DataReturTable
                     products={products}
                     productTotalPrice={productTotalPrice}
                     setTotalPrice={setTotalPrice}
                     setProductTotalPrice={setProductTotalPrice}
                     calculatePriceAfterDisc={calculatePriceAfterDisc}
                     productSubTotal={productSubTotal}
-                    locations={locations}
+                    //locations={locations}
                     formObj={form}
                   />
                 </div>

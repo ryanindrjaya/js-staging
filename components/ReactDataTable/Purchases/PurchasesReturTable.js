@@ -42,8 +42,8 @@ export default function ReactDataTable({
   };
 
   const lihat = (row) => {
-    openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
-    //router.push("order_pembelian/print/" + row.id);
+    //openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
+    router.push("/dashboard/pembelian/retur/print/" + row.id);
   };
 
   const edit = (row) => {
