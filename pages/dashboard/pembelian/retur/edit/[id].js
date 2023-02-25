@@ -12,9 +12,10 @@ import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import { useSelector, useDispatch } from "react-redux";
 import calculatePrice from "../../utility/calculatePrice";
 import DataReturTable from "@iso/components/ReactDataTable/Purchases/DataReturTable";
-import createDetailReturFunc from "../../utility/createReturDetail";
+import updateRetur from "../../utility/updateRetur";
 import createReturFunc from "../../utility/createRetur";
 import { useRouter } from "next/router";
+import LoadingAnimations from "@iso/components/Animations/Loading";
 
 Retur.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -131,6 +132,7 @@ function Retur({ props }) {
   //temp
   const tempList = [];
   const cookies = nookies.get(null, "token");
+  const [isFetchinData, setIsFetchingData] = useState(false);
 
   var totalReturs = String(props.returs?.meta?.pagination.total + 1).padStart(3, "0");
   var today = new Date();
@@ -157,32 +159,32 @@ function Retur({ props }) {
     setLoading(false);
   };
 
-  const createDetailRetur = async () => { console.log("info total", dataValues);
-    //console.log("info total", productTotalPrice, productSubTotal, products, dataValues);
-    //createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-details", dataValues);
+  const createDetailRetur = async () => {
+    console.log("info total", productTotalPrice, productSubTotal, products, dataValues);
+    updateRetur(products, productTotalPrice, productSubTotal, setListId, "/retur-details", dataValues, props.returs);
   };
 
   //const createRetur = async (values) => {
   //  createReturFunc(grandTotal, totalPrice, values, listId, form, router);
   //};
 
-  const onChangeProduct = async () => {
-    var isDuplicatedData = false;
+  //const onChangeProduct = async () => {
+  //  var isDuplicatedData = false;
 
-    tempList.find((item) => {
-      productList.forEach((element) => {
-        if (element.id === item.id) isDuplicatedData = true;
-      });
-    });
+  //  tempList.find((item) => {
+  //    productList.forEach((element) => {
+  //      if (element.id === item.id) isDuplicatedData = true;
+  //    });
+  //  });
 
-    if (!isDuplicatedData) {
-      setProductList((productList) => [...productList, tempList[0]]);
-      toast.success("Produk berhasil ditambahkan!", {
-        position: toast.POSITION.TOP_RIGHT,
-        autoClose: 1000,
-      });
-    }
-  };
+  //  if (!isDuplicatedData) {
+  //    setProductList((productList) => [...productList, tempList[0]]);
+  //    toast.success("Produk berhasil ditambahkan!", {
+  //      position: toast.POSITION.TOP_RIGHT,
+  //      autoClose: 1000,
+  //    });
+  //  }
+  //};
 
   const calculatePriceAfterDisc = (row, index) => {
     var total = 0;
@@ -263,11 +265,11 @@ function Retur({ props }) {
     }
   }, [totalPrice]);
 
-  useEffect(() => {
-    if (listId.length > 0) {
-      createRetur(dataValues);
-    }
-  }, [listId]);
+  //useEffect(() => {
+  //  if (listId.length > 0) {
+  //    createRetur(dataValues);
+  //  }
+  //}, [listId]);
 
   useEffect(() => {
     if (dataValues) createDetailRetur();
@@ -275,6 +277,7 @@ function Retur({ props }) {
 
   useEffect(() => {
     dispatch({ type: "CLEAR_DATA" });
+    setIsFetchingData(true);
     setProductValue();
 
     var returData = null;
@@ -285,12 +288,11 @@ function Retur({ props }) {
       }
     });
 
-    console.log("retur data",returData);
+    //dispatch({
+    //  type: "SET_PREORDER_DATA",
+    //  data: res.data,
+    //});
 
-    //const supplierResult = res.data.map((supplier) => ({
-    //  label: `${supplier.attributes.id_supplier} - ${supplier.attributes.name}`,
-    //  value: supplier.id,
-    //}));
     var labelSupplier = `${returData.attributes.supplier.data.attributes.id_supplier} - ${returData.attributes.supplier.data.attributes.name}`
 
     setSupplier(returData.attributes.supplier.data);
@@ -319,20 +321,39 @@ function Retur({ props }) {
     //  sale_note: dataSalesSell.sale_note,
     //  customer: dataSalesSell.customer.data.attributes.name,
     });
-
+    
     returData.attributes.retur_details.data.forEach((element, index) => {
+      var indexUnit = 1;
+
+      if(element.attributes.products?.data[0]?.attributes.unit_1 == element.attributes.unit){
+        indexUnit = 1;
+      } else if (element.attributes.products?.data[0]?.attributes.unit_2 == element.attributes.unit) {
+        indexUnit = 2;
+      } else if (element.attributes.products?.data[0]?.attributes.unit_3 == element.attributes.unit) {
+        indexUnit = 3;
+      } else if (element.attributes.products?.data[0]?.attributes.unit_4 == element.attributes.unit) {
+        indexUnit = 4;
+      } else if (element.attributes.products?.data[0]?.attributes.unit_5 == element.attributes.unit) {
+        indexUnit = 5;
+      } else indexUnit = 1;
+
       dispatch({ 
-        type: "ADD_PRODUCT",
+        type: "SET_INITIAL_PRODUCT",
         product: element.attributes.products.data[0],
         qty: element.attributes.qty,
         unit: element.attributes.unit,
-        //unitIndex: indexUnit,
-        priceUnit: element.attributes.harga_satuan,
-        priceAfterDisc: element.attributes.harga_satuan,
-        subTotal: element.attributes.sub_total,
+        unitIndex: indexUnit,
+        priceUnit: parseInt(element.attributes.harga_satuan),
+        priceAfterDisc: parseInt(element.attributes.harga_satuan),
+        subTotal: parseInt(element.attributes.sub_total),
         index,
       });
+
     });
+
+    setTimeout(() => {
+      setIsFetchingData(false);
+    }, 3000);
   }, []);
 
   const data = {
@@ -475,16 +496,29 @@ function Retur({ props }) {
                 {/*  <SearchBar form={form} tempList={tempList} onChange={onChangeProduct} user={user}  selectedProduct={selectedProduct} isBasedOnLocation={false}/>*/}
                 {/*</div>*/}
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-2 md:mb-0">
-                  <DataReturTable
-                    products={products}
-                    productTotalPrice={productTotalPrice}
-                    setTotalPrice={setTotalPrice}
-                    setProductTotalPrice={setProductTotalPrice}
-                    calculatePriceAfterDisc={calculatePriceAfterDisc}
-                    productSubTotal={productSubTotal}
-                    //locations={locations}
-                    formObj={form}
-                  />
+                  {isFetchinData ? (
+                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
+                    <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
+                      <LoadingAnimations />
+                    </div>
+                    <div className="text-sm align-middle text-center animate-pulse text-slate-400">
+                      Sedang Mengambil Data
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
+                    <DataReturTable
+                        products={products}
+                        productTotalPrice={productTotalPrice}
+                        setTotalPrice={setTotalPrice}
+                        setProductTotalPrice={setProductTotalPrice}
+                        calculatePriceAfterDisc={calculatePriceAfterDisc}
+                        productSubTotal={productSubTotal}
+                        //locations={locations}
+                        formObj={form}
+                    />
+                  </div>
+                )}
                 </div>
               </div>
               <div className="flex justify-start md:justify-between">
@@ -529,7 +563,7 @@ function Retur({ props }) {
                   </div>
                 ) : (
                   <Button onClick={validateError} htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
-                    Tambah
+                    Simpan
                   </Button>
                 )}
               </Form.Item>

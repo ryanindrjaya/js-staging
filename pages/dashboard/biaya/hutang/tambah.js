@@ -323,7 +323,7 @@ function Hutang({ props }) {
       returLPB.forEach((row) => {
           row.subtotal = 0;
           dataTabel.forEach((element) => {
-              if (element.attributes.no_purchasing == row.attributes.purchasing.data.attributes.no_purchasing) {
+              if (element.attributes.no_purchasing == row.attributes.purchasing.data?.attributes.no_purchasing) {
                   row.attributes.retur_lpb_details.data.forEach((detail) => {
                       row.subtotal += parseInt(detail.attributes.sub_total);
                   });

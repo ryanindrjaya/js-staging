@@ -65,14 +65,14 @@ export default function ReactDataTable({
     });
   };
 
-  const onChangeDisc = (value, data, index) => {
-    dispatch({
-      type: "CHANGE_PRODUCT_DISC",
-      disc: value,
-      product: data,
-      index,
-    });
-  };
+  //const onChangeDisc = (value, data, index) => {
+  //  dispatch({
+  //    type: "CHANGE_PRODUCT_DISC",
+  //    disc: value,
+  //    product: data,
+  //    index,
+  //  });
+  //};
 
   const onChangePriceUnit = (value, data, index, indexRow) => {
     var dataForm = formObj.getFieldsValue();
@@ -110,54 +110,54 @@ export default function ReactDataTable({
     });
   };
 
-  const onChangeD1D2D3 = (value, data, type, index) => {
-    switch (type) {
-      case "d1":
-        dispatch({
-          type: "CHANGE_PRODUCT_D1",
-          d1: value,
-          product: data,
-          index,
-        });
-        break;
-      case "d2":
-        dispatch({
-          type: "CHANGE_PRODUCT_D2",
-          d2: value,
-          product: data,
-          index,
-        });
-        break;
-      case "d3":
-        dispatch({
-          type: "CHANGE_PRODUCT_D3",
-          d3: value,
-          product: data,
-          index,
-        });
-        break;
-      default:
-        break;
-    }
-  };
+  //const onChangeD1D2D3 = (value, data, type, index) => {
+  //  switch (type) {
+  //    case "d1":
+  //      dispatch({
+  //        type: "CHANGE_PRODUCT_D1",
+  //        d1: value,
+  //        product: data,
+  //        index,
+  //      });
+  //      break;
+  //    case "d2":
+  //      dispatch({
+  //        type: "CHANGE_PRODUCT_D2",
+  //        d2: value,
+  //        product: data,
+  //        index,
+  //      });
+  //      break;
+  //    case "d3":
+  //      dispatch({
+  //        type: "CHANGE_PRODUCT_D3",
+  //        d3: value,
+  //        product: data,
+  //        index,
+  //      });
+  //      break;
+  //    default:
+  //      break;
+  //  }
+  //};
 
-  const onConfirm = (id) => {
-    var newSubTotalProduct = productSubTotal;
-    var newProductInfo = products.productInfo;
+  //const onConfirm = (id) => {
+  //  var newSubTotalProduct = productSubTotal;
+  //  var newProductInfo = products.productInfo;
 
-    delete newSubTotalProduct[id];
-    delete newProductInfo[id];
+  //  delete newSubTotalProduct[id];
+  //  delete newProductInfo[id];
 
-    setProductSubTotal(newSubTotalProduct);
+  //  setProductSubTotal(newSubTotalProduct);
 
-    const subtotal = productSubTotal[id];
-    setTotalPrice((prev) => prev - subtotal);
-    onDeleteProduct(id);
-  };
+  //  const subtotal = productSubTotal[id];
+  //  setTotalPrice((prev) => prev - subtotal);
+  //  onDeleteProduct(id);
+  //};
 
-  const onCancel = () => {
-    console.log("onCancel");
-  };
+  //const onCancel = () => {
+  //  console.log("onCancel");
+  //};
 
   const customStyles = {
     headCells: {
