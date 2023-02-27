@@ -8,10 +8,10 @@ import { useRouter } from "next/router";
 import TitlePage from "../../../components/TitlePage/TitlePage";
 import { toast } from "react-toastify";
 import nookies from "nookies";
-import UploadProduk from "../../../components/Form/UploadProduk";
 import ExportProduk from "../../../components/Form/ExportProduk";
-import DownloadTemplate from "../../../components/Form/DownloadTemplate";
 import { Badge, Button, Descriptions, Input, Modal, Select, Tag } from "antd";
+import UploadCustomer from "../../../components/Form/UploadCustomer";
+import ExportCustomer from "../../../components/Form/ExportCustomer";
 
 Customer.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -185,6 +185,13 @@ function Customer({ props }) {
     }
   };
 
+  const formatNPWP = (npwp) => {
+    if (npwp) {
+      return npwp.replace(/(\d{2})(\d{3})(\d{3})(\d{1})(\d{3})/, "$1.$2.$3.$4-$5");
+    }
+    return "";
+  };
+
   return (
     <>
       <Head>
@@ -301,6 +308,21 @@ function Customer({ props }) {
                       )}
                     </Descriptions.Item>
                   </Descriptions>
+                  {/* INFO NPWP */}
+                  <Descriptions className="mt-3" size="middle" title="Data NPWP & NIK" bordered>
+                    <Descriptions.Item label="Nama NPWP" span={2}>
+                      {selectedCustomer?.attributes?.nama_npwp}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Nomor NPWP">
+                      {formatNPWP(selectedCustomer?.attributes?.nomor_npwp)}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Alamat NPWP" span={3}>
+                      {selectedCustomer?.attributes?.alamat_npwp}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Nomor NIK">
+                      {selectedCustomer?.attributes?.nik}
+                    </Descriptions.Item>
+                  </Descriptions>
                 </>
               )}
             </Modal>
@@ -376,9 +398,16 @@ function Customer({ props }) {
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-x-4 w-full">
-                  <UploadProduk fetchData={fetchData} />
-                  <ExportProduk />
-                  <DownloadTemplate />
+                  <UploadCustomer setCustomer={setUser} />
+                  <ExportCustomer />
+                  <a href={"/template/Template Excel Data Customer.xlsx"}>
+                    <button
+                      type="button"
+                      className="bg-cyan-700 text-xs font-bold text-white w-full rounded h-10 hover:bg-cyan-800  shadow-sm flex items-center justify-center float-right"
+                    >
+                      Download Template
+                    </button>
+                  </a>
                 </div>
               </div>
             </div>

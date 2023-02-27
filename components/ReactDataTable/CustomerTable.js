@@ -94,17 +94,17 @@ export default function ReactDataTable({ data, onDelete, onUpdate }) {
       name: "Nama Sales",
       width: "140px",
       sortable: true,
-      selector: ({ attributes }) => attributes?.sales_name || "admin",
+      selector: ({ attributes }) => attributes?.sales_name || "",
     },
     {
       name: "Area",
       sortable: true,
-      selector: ({ attributes }) => attributes?.area?.data?.attributes?.name || "tes area",
+      selector: ({ attributes }) => attributes?.area?.data?.attributes?.name || "",
     },
     {
       name: "Wilayah",
       sortable: true,
-      selector: ({ attributes }) => attributes?.wilayah?.data?.attributes?.name || "tes wilayah",
+      selector: ({ attributes }) => attributes?.wilayah?.data?.attributes?.name || "",
     },
     {
       name: "Batas Kredit",
