@@ -209,9 +209,9 @@ function Retur({ props }) {
     return formatter.format(productTotalPrice[index]);
   };
 
-  //const calculatePriceAfterDisc = (row) => {
+  //const calculatePriceAfterDisc = (row, index) => {
   //  const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
-
+  //  productSubTotal[index] = total;
   //  return formatter.format(total);
   //};
 

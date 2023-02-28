@@ -16,6 +16,7 @@ import updateRetur from "../../utility/updateRetur";
 import createReturFunc from "../../utility/createRetur";
 import { useRouter } from "next/router";
 import LoadingAnimations from "@iso/components/Animations/Loading";
+import moment from "moment";
 
 Retur.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -133,6 +134,8 @@ function Retur({ props }) {
   const tempList = [];
   const cookies = nookies.get(null, "token");
   const [isFetchinData, setIsFetchingData] = useState(false);
+  const [expProduct, setExpProduct] = useState([]);
+  const [batch, setBatch] = useState([]);
 
   var totalReturs = String(props.returs?.meta?.pagination.total + 1).padStart(3, "0");
   var today = new Date();
@@ -297,6 +300,10 @@ function Retur({ props }) {
 
     setSupplier(returData.attributes.supplier.data);
 
+    var dateString = new Date(returData.attributes.tanggal_retur);
+    var momentObj = moment(dateString, "YYYY-MM-DD");
+    var momentString = momentObj.format("MM-DD-YYYY");
+
     form.setFieldsValue({
     catatan: returData.attributes.catatan,
     supplier_id: {
@@ -313,17 +320,19 @@ function Retur({ props }) {
       value: returData.attributes.purchasing.data.id,
     },
     pajak: returData.attributes.pajak,
-    //tanggal_retur: returData.attributes.tanggal_retur,
-    //tanggal_retur: moment(momentString),
-    //  location: dataSalesSell.location.data.attributes.name,
-    //  tempo_days: dataSalesSell.tempo_days,
-    //  tempo_time: dataSalesSell.tempo_time,
-    //  sale_note: dataSalesSell.sale_note,
-    //  customer: dataSalesSell.customer.data.attributes.name,
+    tanggal_retur: moment(momentString),
+    status: returData.attributes.status,
     });
     
-    returData.attributes.retur_details.data.forEach((element, index) => {
+    returData.attributes.retur_details.data.forEach((element, index) => { console.log("retur details", element)
       var indexUnit = 1;
+
+      var dateStringDetail = new Date(element.attributes.expired_date);
+      var momentObjDetail = moment(dateStringDetail, "YYYY-MM-DD");
+      var momentStringDetail = momentObjDetail.format("MM-DD-YYYY");
+
+      expProduct.push(moment(momentStringDetail));
+      batch.push(element.attributes.batch);
 
       if(element.attributes.products?.data[0]?.attributes.unit_1 == element.attributes.unit){
         indexUnit = 1;
@@ -488,6 +497,25 @@ function Retur({ props }) {
                     </Select>
                   </Form.Item>
                 </div>
+                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
+                  <Form.Item name="status">
+                    <Select
+                      placeholder="Pilih Status"
+                      size="large"
+                      //onChange={(e) => fetchReturdata(e)}
+                      style={{
+                        width: "100%",
+                      }}
+                    >
+                        <Select.Option value="Draft" key="Draft">
+                          Draft
+                        </Select.Option>
+                        <Select.Option value="Selesai" key="Selesai">
+                          Selesai
+                        </Select.Option>
+                    </Select>
+                  </Form.Item>
+                </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0" hidden>
                   <Form.Item name="no_nota_supplier"></Form.Item>
                   <Form.Item name="tanggal_pembelian"></Form.Item>
@@ -516,6 +544,8 @@ function Retur({ props }) {
                         productSubTotal={productSubTotal}
                         //locations={locations}
                         formObj={form}
+                        expProduct={expProduct}
+                        batch={batch}
                     />
                   </div>
                 )}

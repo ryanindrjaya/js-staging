@@ -12,12 +12,24 @@ export default function ReactDataTable({
   locations,
   setTotalPrice,
   formObj,
+  expProduct,
+  batch,
 }) {
   const dispatch = useDispatch();
 
   useEffect(() => {
     console.log("products", products);
     console.log("product sub total", productSubTotal);
+
+    //var index = 0;
+    //products.productList.forEach((element) => {
+    //  formObj.setFieldsValue({
+    //    expired_date: expProduct[index],
+    //    batch: batch[index],
+    //  });
+    //  index++;
+    //});
+    //index = 0;
   }, [products]);
 
   var defaultDp1 = 0;
@@ -110,54 +122,54 @@ export default function ReactDataTable({
     });
   };
 
-  //const onChangeD1D2D3 = (value, data, type, index) => {
-  //  switch (type) {
-  //    case "d1":
-  //      dispatch({
-  //        type: "CHANGE_PRODUCT_D1",
-  //        d1: value,
-  //        product: data,
-  //        index,
-  //      });
-  //      break;
-  //    case "d2":
-  //      dispatch({
-  //        type: "CHANGE_PRODUCT_D2",
-  //        d2: value,
-  //        product: data,
-  //        index,
-  //      });
-  //      break;
-  //    case "d3":
-  //      dispatch({
-  //        type: "CHANGE_PRODUCT_D3",
-  //        d3: value,
-  //        product: data,
-  //        index,
-  //      });
-  //      break;
-  //    default:
-  //      break;
-  //  }
-  //};
+  const onChangeD1D2D3 = (value, data, type, index) => {
+    switch (type) {
+      case "d1":
+        dispatch({
+          type: "CHANGE_PRODUCT_D1",
+          d1: value,
+          product: data,
+          index,
+        });
+        break;
+      case "d2":
+        dispatch({
+          type: "CHANGE_PRODUCT_D2",
+          d2: value,
+          product: data,
+          index,
+        });
+        break;
+      case "d3":
+        dispatch({
+          type: "CHANGE_PRODUCT_D3",
+          d3: value,
+          product: data,
+          index,
+        });
+        break;
+      default:
+        break;
+    }
+  };
 
-  //const onConfirm = (id) => {
-  //  var newSubTotalProduct = productSubTotal;
-  //  var newProductInfo = products.productInfo;
+  const onConfirm = (id) => {
+    var newSubTotalProduct = productSubTotal;
+    var newProductInfo = products.productInfo;
 
-  //  delete newSubTotalProduct[id];
-  //  delete newProductInfo[id];
+    delete newSubTotalProduct[id];
+    delete newProductInfo[id];
 
-  //  setProductSubTotal(newSubTotalProduct);
+    setProductSubTotal(newSubTotalProduct);
 
-  //  const subtotal = productSubTotal[id];
-  //  setTotalPrice((prev) => prev - subtotal);
-  //  onDeleteProduct(id);
-  //};
+    const subtotal = productSubTotal[id];
+    setTotalPrice((prev) => prev - subtotal);
+    onDeleteProduct(id);
+  };
 
-  //const onCancel = () => {
-  //  console.log("onCancel");
-  //};
+  const onCancel = () => {
+    console.log("onCancel");
+  };
 
   const customStyles = {
     headCells: {
@@ -291,133 +303,133 @@ export default function ReactDataTable({
         );
       },
     },
-    //{
-    //  name: "Diskon",
-    //  width: "150px",
-    //  selector: (row, idx) => {
-    //    var defaultDisc = 0;
-    //    if (products.productInfo[idx]?.disc) {
-    //      defaultDisc = products.productInfo[idx].disc;
-    //    }
+    {
+      name: "Diskon",
+      width: "150px",
+      selector: (row, idx) => {
+        var defaultDisc = 0;
+        if (products.productInfo[idx]?.disc) {
+          defaultDisc = products.productInfo[idx].disc;
+        }
 
-    //    return (
-    //      <Row align="bottom" justify="center">
-    //        <Form.Item name={["disc_rp", `${idx}`]} noStyle>
-    //          <InputNumber
-    //            defaultValue={defaultDisc}
-    //            min={0}
-    //            onChange={(e) => onChangeDisc(e, row, idx)}
-    //            style={{
-    //              width: "100px",
-    //              marginRight: "10px",
-    //            }}
-    //            formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-    //            parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-    //          />
-    //        </Form.Item>
-    //      </Row>
-    //    );
-    //  },
-    //},
-    //{
-    //  name: "D1",
-    //  width: "100px",
-    //  selector: (row, idx) => {
-    //    defaultDp1 = row.attributes?.unit_1_dp1 || 0;
-    //    if (products.productInfo[idx]?.d1) {
-    //      defaultDp1 = products.productInfo[idx].d1;
-    //    }
+        return (
+          <Row align="bottom" justify="center">
+            <Form.Item name={["disc_rp", `${idx}`]} noStyle>
+              <InputNumber
+                defaultValue={defaultDisc}
+                min={0}
+                onChange={(e) => onChangeDisc(e, row, idx)}
+                style={{
+                  width: "100px",
+                  marginRight: "10px",
+                }}
+                formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+              />
+            </Form.Item>
+          </Row>
+        );
+      },
+    },
+    {
+      name: "D1",
+      width: "100px",
+      selector: (row, idx) => {
+        defaultDp1 = row.attributes?.unit_1_dp1 || 0;
+        if (products.productInfo[idx]?.d1) {
+          defaultDp1 = products.productInfo[idx].d1;
+        }
 
-    //    if (products.productInfo[idx]) {
-    //      if (products.productInfo[idx].unit) {
-    //        defaultDp1 = products.productInfo[idx].d1;
-    //      }
-    //    }
+        if (products.productInfo[idx]) {
+          if (products.productInfo[idx].unit) {
+            defaultDp1 = products.productInfo[idx].d1;
+          }
+        }
 
-    //    return (
-    //      <div className="disabled:bg-white">
-    //        <InputNumber
-    //          controls={false}
-    //          formatter={(value) => `${value}%`}
-    //          max={100}
-    //          min={0}
-    //          value={defaultDp1}
-    //          name={`disc_rp1_${idx}`}
-    //          onChange={(e) => onChangeD1D2D3(e, row, "d1", idx)}
-    //          style={{
-    //            width: "60px",
-    //          }}
-    //        />
-    //      </div>
-    //    );
-    //  },
-    //},
-    //{
-    //  name: "D2",
-    //  width: "100px",
-    //  selector: (row, idx) => {
-    //    defaultDp2 = row.attributes?.unit_1_dp2 || 0;
-    //    if (products.productInfo[idx]?.d2) {
-    //      defaultDp2 = products.productInfo[idx].d2;
-    //    }
+        return (
+          <div className="disabled:bg-white">
+            <InputNumber
+              controls={false}
+              formatter={(value) => `${value}%`}
+              max={100}
+              min={0}
+              value={defaultDp1}
+              name={`disc_rp1_${idx}`}
+              onChange={(e) => onChangeD1D2D3(e, row, "d1", idx)}
+              style={{
+                width: "60px",
+              }}
+            />
+          </div>
+        );
+      },
+    },
+    {
+      name: "D2",
+      width: "100px",
+      selector: (row, idx) => {
+        defaultDp2 = row.attributes?.unit_1_dp2 || 0;
+        if (products.productInfo[idx]?.d2) {
+          defaultDp2 = products.productInfo[idx].d2;
+        }
 
-    //    if (products.productInfo[idx]) {
-    //      if (products.productInfo[idx].unit) {
-    //        defaultDp2 = products.productInfo[idx].d2;
-    //      }
-    //    }
+        if (products.productInfo[idx]) {
+          if (products.productInfo[idx].unit) {
+            defaultDp2 = products.productInfo[idx].d2;
+          }
+        }
 
-    //    return (
-    //      <div className="disabled:bg-white">
-    //        <InputNumber
-    //          controls={false}
-    //          formatter={(value) => `${value}%`}
-    //          max={100}
-    //          min={0}
-    //          name={["disc_rp2", `${idx}`]}
-    //          value={defaultDp2}
-    //          onChange={(e) => onChangeD1D2D3(e, row, "d2", idx)}
-    //          style={{
-    //            width: "60px",
-    //          }}
-    //        />
-    //      </div>
-    //    );
-    //  },
-    //},
-    //{
-    //  name: "D3",
-    //  width: "100px",
-    //  selector: (row, idx) => {
-    //    defaultDp3 = row.attributes?.unit_1_dp3 || 0;
-    //    if (products.productInfo[idx]?.d3) {
-    //      defaultDp3 = products.productInfo[idx].d3;
-    //    }
+        return (
+          <div className="disabled:bg-white">
+            <InputNumber
+              controls={false}
+              formatter={(value) => `${value}%`}
+              max={100}
+              min={0}
+              name={["disc_rp2", `${idx}`]}
+              value={defaultDp2}
+              onChange={(e) => onChangeD1D2D3(e, row, "d2", idx)}
+              style={{
+                width: "60px",
+              }}
+            />
+          </div>
+        );
+      },
+    },
+    {
+      name: "D3",
+      width: "100px",
+      selector: (row, idx) => {
+        defaultDp3 = row.attributes?.unit_1_dp3 || 0;
+        if (products.productInfo[idx]?.d3) {
+          defaultDp3 = products.productInfo[idx].d3;
+        }
 
-    //    if (products.productInfo[idx]) {
-    //      if (products.productInfo[idx].unit) {
-    //        defaultDp3 = products.productInfo[idx].d3;
-    //      }
-    //    }
+        if (products.productInfo[idx]) {
+          if (products.productInfo[idx].unit) {
+            defaultDp3 = products.productInfo[idx].d3;
+          }
+        }
 
-    //    return (
-    //      <div className="disabled:bg-white">
-    //        <InputNumber
-    //          controls={false}
-    //          formatter={(value) => `${value}%`}
-    //          max={100}
-    //          min={0}
-    //          name={["disc_rp3", `${idx}`]}
-    //          value={defaultDp3}
-    //          onChange={(e) => onChangeD1D2D3(e, row, "d3", idx)}
-    //          style={{
-    //            width: "60px",
-    //          }}
-    //        />
-    //      </div>
-    //    );
-    //  },
-    //},
+        return (
+          <div className="disabled:bg-white">
+            <InputNumber
+              controls={false}
+              formatter={(value) => `${value}%`}
+              max={100}
+              min={0}
+              name={["disc_rp3", `${idx}`]}
+              value={defaultDp3}
+              onChange={(e) => onChangeD1D2D3(e, row, "d3", idx)}
+              style={{
+                width: "60px",
+              }}
+            />
+          </div>
+        );
+      },
+    },
     //{
     //  name: "Lokasi",
     //  width: "250px",
@@ -462,20 +474,17 @@ export default function ReactDataTable({
       width: "150px",
       sortable: true,
       selector: (row, idx) => {
+        var defaultEXP = null;
+        if(expProduct != undefined) defaultEXP = expProduct[idx]; 
+
         return (
           <>
             <Form.Item
               label={"exp date"}
               name={["expired_date", `${idx}`]}
-              rules={[
-                {
-                  required: true,
-                  message: "Tanggal EXP tidak boleh kosong!",
-                },
-              ]}
               noStyle
             >
-              <DatePicker placeholder="EXP. Date" size="normal" format={"DD/MM/YYYY"} />
+              <DatePicker defaultValue={defaultEXP} placeholder="EXP. Date" size="normal" format={"DD/MM/YYYY"} />
             </Form.Item>
           </>
         );
@@ -486,10 +495,13 @@ export default function ReactDataTable({
       width: "150px",
       sortable: true,
       selector: (row, idx) => {
+        var defaultBatch = null;
+        if(batch != undefined) defaultBatch = batch[idx];
+
         return (
           <>
             <Form.Item label={"Batch"} name={["batch", `${idx}`]} noStyle>
-              <Input size="normal" />
+              <Input defaultValue={defaultBatch} size="normal" />
             </Form.Item>
           </>
         );
@@ -505,19 +517,19 @@ export default function ReactDataTable({
       width: "200px",
       selector: (row, idx) => formatter.format(productSubTotal[idx]),
     },
-    //{
-    //  name: "Hapus",
-    //  width: "150px",
-    //  selector: (row, idx) => (
-    //    <AlertDialog
-    //      onCancel={onCancel}
-    //      onConfirm={onConfirm}
-    //      title="Hapus Produk"
-    //      message="Produk akan dihapus dari daftar ini. Lanjutkan?"
-    //      id={idx}
-    //    />
-    //  ),
-    //},
+    {
+      name: "Hapus",
+      width: "150px",
+      selector: (row, idx) => (
+        <AlertDialog
+          onCancel={onCancel}
+          onConfirm={onConfirm}
+          title="Hapus Produk"
+          message="Produk akan dihapus dari daftar ini. Lanjutkan?"
+          id={idx}
+        />
+      ),
+    },
   ];
 
   return (

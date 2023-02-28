@@ -16,11 +16,12 @@ export default function ReactDataTable({
   onChangeStatusPengiriman,
   onChangeStatus,
 }) {
-  const router = useRouter(); 
+  const router = useRouter(); console.log("data index",data)
   const { Option } = Select;
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [editStatus, setEditStatus] = useState(false);
 
   const { TextArea } = Input;
   var formatter = new Intl.NumberFormat("id-ID", {
@@ -112,15 +113,21 @@ export default function ReactDataTable({
           Lihat
         </button>
       </div>
-      <div>
-        <button
-          onClick={() => edit(row)}
-          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-        >
-          <EditOutlined className="mr-2 mt-0.5 float float-left" />
-          Edit
-        </button>
-      </div>
+
+      {editStatus ? (
+        <div hidden></div>
+      ) : (
+        <div>
+          <button
+              onClick={() => edit(row)}
+              className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+          >
+              <EditOutlined className="mr-2 mt-0.5 float float-left" />
+              Edit
+          </button>
+        </div>
+      )}
+
       <div>
         <button
             //onClick={() => metodePembayaran(row)}
@@ -345,15 +352,21 @@ export default function ReactDataTable({
     {
       name: "Tindakan",
       width: "250px",
-      selector: (row) => (
-        <>
-          <Popover content={content(row)} placement="bottom" trigger="click">
-            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
-              Tindakan
-            </button>
-          </Popover>
-        </>
-      ),
+      selector: (row) => {
+          
+        if(row.attributes.status == "Selesai") setEditStatus(true);
+        else setEditStatus(false);
+
+        return(
+          <>
+            <Popover content={content(row)} placement="bottom" trigger="click">
+              <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
+                Tindakan
+              </button>
+            </Popover>
+          </>
+        );
+      },
     },
   ];
 
