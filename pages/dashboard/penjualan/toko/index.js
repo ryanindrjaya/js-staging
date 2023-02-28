@@ -73,7 +73,6 @@ const fetchStore = async (cookies) => {
 };
 
 function Toko({ props }) {
-
   const user = props.user;
   const locations = props.locations.data;
   const data = props.store;
@@ -215,8 +214,6 @@ function Toko({ props }) {
   };
 
   return (
-
-  
     <>
       <Head>
         <title>Penjualan Toko</title>
@@ -456,9 +453,6 @@ function Toko({ props }) {
         </LayoutWrapper>
       </DashboardLayout>
     </>
-  
-  
-  
   );
 }
 
