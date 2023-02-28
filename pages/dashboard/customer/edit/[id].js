@@ -13,7 +13,7 @@ import { useRouter } from "next/router";
 
 const Tambah = ({ props }) => {
   const [form] = Form.useForm();
-  const { wilayah, area, customer } = props;
+  const { wilayah, area, customer, users } = props;
   const { attributes: initial } = customer;
   const [loading, setLoading] = useState(false);
   const [customerType, setCustomerType] = useState(initial.customer_type || "TOKO");
@@ -63,33 +63,6 @@ const Tambah = ({ props }) => {
 
     setLoading(false);
   };
-
-  useEffect(() => {
-    async function getProfile() {
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me";
-      const options = {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + cookies.token,
-        },
-      };
-
-      const req = await fetch(endpoint, options);
-      const res = await req.json();
-      console.log("user profile ==>", res);
-
-      if (req.status === 200) {
-        form.setFieldsValue({
-          sales_name: res?.name || "admin",
-        });
-      }
-    }
-
-    if (customerType !== "TOKO") {
-      getProfile();
-    }
-  }, [customerType]);
 
   const getLatestCustomerCode = async (value) => {
     let code = "";
@@ -143,6 +116,9 @@ const Tambah = ({ props }) => {
 
   const setCustomerCode = async (value) => {
     setCustomerType(value);
+    form.setFieldsValue({
+      customer_type: value,
+    });
     let code = "";
 
     const latestNumber = await getLatestCustomerCode(value);
@@ -312,13 +288,20 @@ const Tambah = ({ props }) => {
                   ]}
                   initialValue="TOKO"
                 >
-                  <Select onChange={setCustomerCode} placeholder="Golongan Customer *">
+                  <Select
+                    defaultValue={initial?.customer_type}
+                    onChange={setCustomerCode}
+                    placeholder="Golongan Customer *"
+                  >
                     <Select.Option value="PANEL">PANEL</Select.Option>
                     <Select.Option value="NON PANEL">NON PANEL</Select.Option>
                     <Select.Option value="SALES">SALES</Select.Option>
                     <Select.Option value="KARYAWAN">KARYAWAN</Select.Option>
                     <Select.Option value="TOKO">TOKO</Select.Option>
                   </Select>
+                  <span className="absolute -top-5 border-none text-sm left-0 text-gray-400 z-40">
+                    Golongan Customer
+                  </span>
                 </Form.Item>
                 <Form.Item
                   className="w-full"
@@ -372,8 +355,22 @@ const Tambah = ({ props }) => {
               {/* AREA SALES */}
               <div hidden={!showForm.area}>
                 <div className="flex md:flex-row flex-col gap-x-10 w-full">
-                  <Form.Item className="w-full" name="sales_name">
-                    <Input readOnly placeholder="Nama Sales" />
+                  <Form.Item initialValue={initial.sales_name} className="w-full" name="sales_name">
+                    <Select
+                      optionFilterProp="children"
+                      filterOption={(input, option) =>
+                        (option?.label ?? "").toLowerCase().includes(input)
+                      }
+                      filterSort={(optionA, optionB) =>
+                        (optionA?.label ?? "")
+                          .toLowerCase()
+                          .localeCompare((optionB?.label ?? "").toLowerCase())
+                      }
+                      showSearch
+                      options={users}
+                      placeholder="Nama Sales"
+                      allowClear
+                    />
                   </Form.Item>
                   <Form.Item className="w-full pointer-events-none hidden md:block opacity-0">
                     <Input disabled />
@@ -421,12 +418,13 @@ const Tambah = ({ props }) => {
                       <Form.Item
                         noStyle
                         className="w-full relative"
-                        initialValue={0}
+                        initialValue={initial?.credit_limit_duration || 0}
                         name="credit_limit_duration"
                       >
                         <InputNumber
                           onChange={(e) => form.setFieldsValue({ credit_limit_duration: e })}
                           disabled={customerType === "TOKO"}
+                          defaultValue={initial?.credit_limit_duration || 0}
                           style={{ width: "30%" }}
                         />
                         <span className="absolute -top-5 border-none text-sm left-0 text-gray-400 z-40">
@@ -559,6 +557,13 @@ Tambah.getInitialProps = async (context) => {
   const reqWilayah = await fetchData(cookies, "/wilayahs");
   const resWilayah = await reqWilayah.json();
 
+  const userEntity = await fetchData(cookies, "/users").then((res) => res.json());
+  console.log("userEntity", userEntity);
+  const users = userEntity?.map((user) => ({
+    value: user.name,
+    label: user.name,
+  }));
+
   if (req.status !== 200) {
     context.res.writeHead(302, {
       Location: "/signin?session=false",
@@ -574,6 +579,7 @@ Tambah.getInitialProps = async (context) => {
       area: res.data,
       wilayah: resWilayah.data,
       customer: customer.data,
+      users,
     },
   };
 };

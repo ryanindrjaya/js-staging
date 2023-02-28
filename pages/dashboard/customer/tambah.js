@@ -525,21 +525,7 @@ const Tambah = ({ props }) => {
                 </div>
 
                 <div className="flex md:flex-row flex-col gap-x-10 w-full">
-                  <Form.Item
-                    rules={[
-                      {
-                        min: 16,
-                        max: 16,
-                        message: "NIK tidak valid",
-                      },
-                      {
-                        pattern: new RegExp(/^[0-9]+$/),
-                        message: "NIK tidak valid",
-                      },
-                    ]}
-                    className="w-full"
-                    name="nik"
-                  >
+                  <Form.Item className="w-full" name="nik">
                     <Input
                       onInput={(e) => (e.target.value = e.target.value.toUpperCase())}
                       placeholder="Nomor NIK"
@@ -588,7 +574,7 @@ Tambah.getInitialProps = async (context) => {
   const userEntity = await fetchData(cookies, "/users").then((res) => res.json());
   console.log("userEntity", userEntity);
   const users = userEntity?.map((user) => ({
-    value: user.id,
+    value: user.name,
     label: user.name,
   }));
 
