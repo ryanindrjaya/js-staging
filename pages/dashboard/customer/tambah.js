@@ -13,7 +13,7 @@ import { useRouter } from "next/router";
 
 const Tambah = ({ props }) => {
   const [form] = Form.useForm();
-  const { wilayah, area } = props;
+  const { wilayah, area, users = [] } = props;
   const [loading, setLoading] = useState(false);
   const [customerType, setCustomerType] = useState("TOKO");
   const [showForm, setShowForm] = useState({
@@ -61,33 +61,6 @@ const Tambah = ({ props }) => {
 
     setLoading(false);
   };
-
-  useEffect(() => {
-    async function getProfile() {
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me";
-      const options = {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + cookies.token,
-        },
-      };
-
-      const req = await fetch(endpoint, options);
-      const res = await req.json();
-      console.log("user profile ==>", res);
-
-      if (req.status === 200) {
-        form.setFieldsValue({
-          sales_name: res?.name || "admin",
-        });
-      }
-    }
-
-    if (customerType !== "TOKO") {
-      getProfile();
-    }
-  }, [customerType]);
 
   const getLatestCustomerCode = async (value) => {
     let code = "";
@@ -141,6 +114,9 @@ const Tambah = ({ props }) => {
 
   const setCustomerCode = async (value) => {
     setCustomerType(value);
+    form.setFieldsValue({
+      customer_type: value,
+    });
     let code = "";
 
     const latestNumber = await getLatestCustomerCode(value);
@@ -246,6 +222,7 @@ const Tambah = ({ props }) => {
                   <Input
                     disabled={customerType === "TOKO"}
                     placeholder="Nama Customer *"
+                    onInput={(e) => (e.target.value = e.target.value.toUpperCase())}
                     required
                   />
                 </Form.Item>
@@ -262,7 +239,12 @@ const Tambah = ({ props }) => {
                     },
                   ]}
                 >
-                  <Input disabled={customerType === "TOKO"} placeholder="Alamat *" required />
+                  <Input
+                    onInput={(e) => (e.target.value = e.target.value.toUpperCase())}
+                    disabled={customerType === "TOKO"}
+                    placeholder="Alamat *"
+                    required
+                  />
                 </Form.Item>
                 <Form.Item
                   className="w-full"
@@ -274,7 +256,12 @@ const Tambah = ({ props }) => {
                     },
                   ]}
                 >
-                  <Input disabled={customerType === "TOKO"} placeholder="Kota *" required />
+                  <Input
+                    onInput={(e) => (e.target.value = e.target.value.toUpperCase())}
+                    disabled={customerType === "TOKO"}
+                    placeholder="Kota *"
+                    required
+                  />
                 </Form.Item>
               </div>
 
@@ -287,6 +274,10 @@ const Tambah = ({ props }) => {
                       required: true,
                       message: "Nomor Telepon tidak boleh kosong!",
                     },
+                    {
+                      pattern: new RegExp(/^[0-9\b]+$/),
+                      message: "Nomor Telepon hanya boleh angka!",
+                    },
                   ]}
                 >
                   <Input disabled={customerType === "TOKO"} placeholder="Telepon *" required />
@@ -298,7 +289,7 @@ const Tambah = ({ props }) => {
 
               <div className="flex md:flex-row flex-col gap-x-10 w-full">
                 <Form.Item
-                  className="w-full"
+                  className="w-full relative"
                   name="customer_type"
                   rules={[
                     {
@@ -308,13 +299,20 @@ const Tambah = ({ props }) => {
                   ]}
                   initialValue="TOKO"
                 >
-                  <Select onChange={setCustomerCode} placeholder="Golongan Customer *">
+                  <Select
+                    defaultValue={"TOKO"}
+                    onChange={setCustomerCode}
+                    placeholder="Golongan Customer *"
+                  >
                     <Select.Option value="PANEL">PANEL</Select.Option>
                     <Select.Option value="NON PANEL">NON PANEL</Select.Option>
                     <Select.Option value="SALES">SALES</Select.Option>
                     <Select.Option value="KARYAWAN">KARYAWAN</Select.Option>
                     <Select.Option value="TOKO">TOKO</Select.Option>
                   </Select>
+                  <span className="absolute -top-5 border-none text-sm left-0 text-gray-400 z-40">
+                    Golongan Customer
+                  </span>
                 </Form.Item>
                 <Form.Item
                   className="w-full"
@@ -335,7 +333,6 @@ const Tambah = ({ props }) => {
                     <Select.Option value="PANEL">PANEL</Select.Option>
                     <Select.Option value="NON PANEL">NON PANEL</Select.Option>
                     <Select.Option value="SALES">SALES</Select.Option>
-                    <Select.Option value="KARYAWAN">KARYAWAN</Select.Option>
                   </Select>
                 </Form.Item>
               </div>
@@ -369,7 +366,21 @@ const Tambah = ({ props }) => {
               <div hidden={!showForm.area}>
                 <div className="flex md:flex-row flex-col gap-x-10 w-full">
                   <Form.Item className="w-full" name="sales_name">
-                    <Input readOnly placeholder="Nama Sales" />
+                    <Select
+                      optionFilterProp="children"
+                      filterOption={(input, option) =>
+                        (option?.label ?? "").toLowerCase().includes(input)
+                      }
+                      filterSort={(optionA, optionB) =>
+                        (optionA?.label ?? "")
+                          .toLowerCase()
+                          .localeCompare((optionB?.label ?? "").toLowerCase())
+                      }
+                      showSearch
+                      options={users}
+                      placeholder="Nama Sales"
+                      allowClear
+                    />
                   </Form.Item>
                   <Form.Item className="w-full pointer-events-none hidden md:block opacity-0">
                     <Input disabled />
@@ -485,28 +496,60 @@ const Tambah = ({ props }) => {
               <div hidden={!showForm.npwp}>
                 <div className="flex md:flex-row flex-col gap-x-10 w-full">
                   <Form.Item className="w-full" name="nama_npwp">
-                    <Input placeholder="Nama NPWP" />
+                    <Input
+                      onInput={(e) => (e.target.value = e.target.value.toUpperCase())}
+                      placeholder="Nama NPWP"
+                    />
                   </Form.Item>
                   <Form.Item className="w-full" name="nomor_npwp">
-                    <Input placeholder="Nomor NPWP" />
+                    <Input
+                      onInput={(e) => (e.target.value = e.target.value.toUpperCase())}
+                      placeholder="Nomor NPWP"
+                    />
                   </Form.Item>
                 </div>
 
                 <div className="flex md:flex-row flex-col gap-x-10 w-full">
                   <Form.Item className="w-full" name="alamat_npwp">
-                    <Input placeholder="Alamat NPWP" />
+                    <Input
+                      onInput={(e) => (e.target.value = e.target.value.toUpperCase())}
+                      placeholder="Alamat NPWP"
+                    />
                   </Form.Item>
                   <Form.Item className="w-full pointer-events-none hidden md:block opacity-0">
-                    <Input disabled />
+                    <Input
+                      onInput={(e) => (e.target.value = e.target.value.toUpperCase())}
+                      disabled
+                    />
                   </Form.Item>
                 </div>
 
                 <div className="flex md:flex-row flex-col gap-x-10 w-full">
-                  <Form.Item className="w-full" name="nik">
-                    <Input placeholder="Nomor NIK" />
+                  <Form.Item
+                    rules={[
+                      {
+                        min: 16,
+                        max: 16,
+                        message: "NIK tidak valid",
+                      },
+                      {
+                        pattern: new RegExp(/^[0-9]+$/),
+                        message: "NIK tidak valid",
+                      },
+                    ]}
+                    className="w-full"
+                    name="nik"
+                  >
+                    <Input
+                      onInput={(e) => (e.target.value = e.target.value.toUpperCase())}
+                      placeholder="Nomor NIK"
+                    />
                   </Form.Item>
                   <Form.Item className="w-full pointer-events-none hidden md:block opacity-0">
-                    <Input disabled />
+                    <Input
+                      onInput={(e) => (e.target.value = e.target.value.toUpperCase())}
+                      disabled
+                    />
                   </Form.Item>
                 </div>
               </div>
@@ -542,6 +585,13 @@ Tambah.getInitialProps = async (context) => {
   const reqWilayah = await fetchData(cookies, "/wilayahs");
   const resWilayah = await reqWilayah.json();
 
+  const userEntity = await fetchData(cookies, "/users").then((res) => res.json());
+  console.log("userEntity", userEntity);
+  const users = userEntity?.map((user) => ({
+    value: user.id,
+    label: user.name,
+  }));
+
   if (req.status !== 200) {
     context.res.writeHead(302, {
       Location: "/signin?session=false",
@@ -556,6 +606,7 @@ Tambah.getInitialProps = async (context) => {
     props: {
       area: res.data,
       wilayah: resWilayah.data,
+      users,
     },
   };
 };
