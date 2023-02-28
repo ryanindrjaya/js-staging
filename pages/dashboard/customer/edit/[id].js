@@ -1,52 +1,37 @@
-import nookies from "nookies";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
 import { UserOutlined, ShopOutlined } from "@ant-design/icons";
-import { Button, Select, Form, Input } from "antd";
+import { Button, Select, Form, Input, InputNumber } from "antd";
+import nookies from "nookies";
 import { toast } from "react-toastify";
 import { Spin } from "antd";
 import { useRouter } from "next/router";
-import Locations from "../../../../components/Form/Locations";
 
-const Edit = ({ props }) => {
+const Tambah = ({ props }) => {
   const [form] = Form.useForm();
+  const { wilayah, area, customer } = props;
+  const { attributes: initial } = customer;
   const [loading, setLoading] = useState(false);
-  const [selectLocations, setSelectLocation] = useState({});
+  const [customerType, setCustomerType] = useState(initial.customer_type || "TOKO");
+  const [showForm, setShowForm] = useState({
+    area: false,
+    npwp: false,
+  });
   const cookies = nookies.get(null, "token");
   const router = useRouter();
 
-  //const role = props?.role?.roles;
-  const customer = props?.data; console.log("cust",customer)
-  //const userRole = props?.user.role;
-  //const userLocation = props?.user.locations;
-  //const locations = props?.locations;
-
   const onFinish = async (values) => {
     setLoading(true);
-    //const role = await getRole(values.role_id);
-    var data = { data: values};
+    values.tipe_penjualan_query = values.tipe_penjualan?.map((item) => item).join(", ");
+    var data = { data: values };
 
-    //let newLocation = [];
-    //try {
-    //  data.locations.forEach((element) => {
-    //    if (element.value) {
-    //      newLocation.push(element.value);
-    //    } else{
-    //      newLocation.push(element);
-    //    }
-    //  });
-    //} catch (error) {
-    //  console.log("no location detected");
-    //}
+    console.log("data", values);
 
-    //data.locations = newLocation;
-    //console.log(data);
-
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/customers/" + customer.data.id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/customers/" + customer.id;
     const JSONdata = JSON.stringify(data);
 
     const options = {
@@ -62,137 +47,481 @@ const Edit = ({ props }) => {
     const res = await req.json();
 
     if (req.status === 200) {
+      form.resetFields();
+      toast.success("Data Customer berhasil diubah!", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
       router.replace("/dashboard/customer");
-      toast.success("Data Pengguna berhasil diperbarui!", {
-        position: toast.POSITION.TOP_RIGHT,
-      });
     } else {
-      toast.error("Tidak dapat memperbarui Pengguna", {
+      //res.error?.details.errors.map((error) => {
+      //  const ErrorMsg = error.path[0];
+      toast.error("Tidak dapat mengubah Customer", {
         position: toast.POSITION.TOP_RIGHT,
       });
-      console.log("error", res);
+      //});
     }
 
     setLoading(false);
   };
 
-  //const getRole = async (roleId) => {
-  //  const endpoint =
-  //    process.env.NEXT_PUBLIC_URL + "/users-permissions/roles/" + roleId;
-  //  const options = {
-  //    method: "GET",
-  //    headers: {
-  //      "Content-Type": "application/json",
-  //      Authorization: "Bearer " + cookies.token,
-  //    },
-  //  };
+  useEffect(() => {
+    async function getProfile() {
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me";
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+      };
 
-  //  const req = await fetch(endpoint, options);
-  //  const res = await req.json();
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
+      console.log("user profile ==>", res);
 
-  //  return res.role;
-  //};
+      if (req.status === 200) {
+        form.setFieldsValue({
+          sales_name: res?.name || "admin",
+        });
+      }
+    }
+
+    if (customerType !== "TOKO") {
+      getProfile();
+    }
+  }, [customerType]);
+
+  const getLatestCustomerCode = async (value) => {
+    let code = "";
+
+    switch (value) {
+      case "TOKO":
+        return;
+      case "PANEL":
+        code = "PA";
+        break;
+      case "NON PANEL":
+        code = "TS";
+        break;
+      case "SALES":
+        code = "SO";
+        break;
+      case "KARYAWAN":
+        return;
+      default:
+        return;
+    }
+
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL +
+      "/customers?sort[0]=createdAt:desc&pagination[limit]=1&filters[code][$contains]=" +
+      code;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    console.log(res);
+
+    if (req.status === 200) {
+      const lastCustomer = res.data[0];
+      const lastCustomerId = parseInt(lastCustomer?.attributes?.code?.split(code)[1] || 0);
+
+      return lastCustomerId + 1;
+    } else {
+      toast.error("Tidak dapat menambahkan Customer", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
+    }
+  };
+
+  const setCustomerCode = async (value) => {
+    setCustomerType(value);
+    let code = "";
+
+    const latestNumber = await getLatestCustomerCode(value);
+
+    switch (value) {
+      case "TOKO":
+        code = "WALK IN CUSTOMER";
+        break;
+      case "PANEL":
+        code = "PA" + String(latestNumber).padStart(5, "0");
+        break;
+      case "NON PANEL":
+        code = "TS" + String(latestNumber).padStart(5, "0");
+        break;
+      case "SALES":
+        code = "SO" + String(latestNumber).padStart(5, "0");
+        break;
+      case "KARYAWAN":
+        code = "";
+        break;
+      default:
+        code = "WALK IN CUSTOMER";
+        break;
+    }
+
+    if (value === "TOKO") {
+      form.setFieldsValue({
+        tipe_penjualan: ["TOKO"],
+        name: null,
+        address: null,
+        phone: null,
+        city: null,
+        description: null,
+      });
+      setShowForm({
+        area: false,
+        npwp: false,
+      });
+    } else {
+      const tokoIndex = form.getFieldValue("tipe_penjualan").indexOf("TOKO");
+      console.log("tokoIndex", tokoIndex);
+      if (tokoIndex > -1) {
+        const old = form.getFieldsValue().tipe_penjualan;
+        const newValue = old.filter((item) => item !== "TOKO");
+        console.log("newValue", newValue);
+        form.setFieldsValue({
+          tipe_penjualan: newValue,
+        });
+      }
+    }
+
+    form.setFieldsValue({
+      code: code,
+    });
+  };
 
   return (
     <>
       <Head>
-        <title>Edit Pengguna</title>
+        <title>Tambahkan Customer</title>
       </Head>
       <DashboardLayout>
         <LayoutWrapper style={{}}>
-          <TitlePage titleText={"Edit Pengguna"} />
+          <TitlePage titleText={"Tambahkan Customer"} />
           <LayoutContent>
             <Form
               form={form}
-              name="add_customer"
+              name="add_user"
               initialValues={{
-                remember: true,
+                ...initial,
+                area: initial?.area?.data?.name,
+                wilayah: initial?.wilayah?.data?.name,
               }}
               onFinish={onFinish}
             >
-              <div className="flex flex-wrap -mx-3 mb-6">
-                <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    initialValue={customer?.data?.attributes.name}
-                    name="name"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Nama tidak boleh kosong!",
-                      },
-                    ]}
+              {/* GENERAL FORM */}
+              <div className="flex md:flex-row flex-col gap-x-10 w-full">
+                <Form.Item
+                  className="w-full"
+                  name="code"
+                  initialValue="WALK IN CUSTOMER"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Kode Customer tidak boleh kosong!",
+                    },
+                  ]}
+                >
+                  <Input
+                    readOnly={customerType !== "KARYAWAN"}
+                    placeholder="Kode Customer *"
+                    required
+                  />
+                </Form.Item>
+                <Form.Item
+                  className="w-full"
+                  name="name"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Nama Customer tidak boleh kosong!",
+                    },
+                  ]}
+                >
+                  <Input
+                    disabled={customerType === "TOKO"}
+                    placeholder="Nama Customer *"
+                    required
+                  />
+                </Form.Item>
+              </div>
+
+              <div className="flex md:flex-row flex-col gap-x-10 w-full">
+                <Form.Item
+                  className="w-full"
+                  name="address"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Alamat Customer tidak boleh kosong!",
+                    },
+                  ]}
+                >
+                  <Input disabled={customerType === "TOKO"} placeholder="Alamat *" required />
+                </Form.Item>
+                <Form.Item
+                  className="w-full"
+                  name="city"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Kota tidak boleh kosong!",
+                    },
+                  ]}
+                >
+                  <Input disabled={customerType === "TOKO"} placeholder="Kota *" required />
+                </Form.Item>
+              </div>
+
+              <div className="flex md:flex-row flex-col gap-x-10 w-full">
+                <Form.Item
+                  className="w-full"
+                  name="phone"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Nomor Telepon tidak boleh kosong!",
+                    },
+                  ]}
+                >
+                  <Input disabled={customerType === "TOKO"} placeholder="Telepon *" required />
+                </Form.Item>
+                <Form.Item className="w-full" name="description">
+                  <Input disabled={customerType === "TOKO"} placeholder="Deskripsi" />
+                </Form.Item>
+              </div>
+
+              <div className="flex md:flex-row flex-col gap-x-10 w-full">
+                <Form.Item
+                  className="w-full"
+                  name="customer_type"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Golongan Customer tidak boleh kosong!",
+                    },
+                  ]}
+                  initialValue="TOKO"
+                >
+                  <Select onChange={setCustomerCode} placeholder="Golongan Customer *">
+                    <Select.Option value="PANEL">PANEL</Select.Option>
+                    <Select.Option value="NON PANEL">NON PANEL</Select.Option>
+                    <Select.Option value="SALES">SALES</Select.Option>
+                    <Select.Option value="KARYAWAN">KARYAWAN</Select.Option>
+                    <Select.Option value="TOKO">TOKO</Select.Option>
+                  </Select>
+                </Form.Item>
+                <Form.Item
+                  className="w-full"
+                  name="tipe_penjualan"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Tipe Penjualan tidak boleh kosong!",
+                    },
+                  ]}
+                  initialValue={["TOKO"]}
+                >
+                  <Select
+                    disabled={customerType === "TOKO"}
+                    placeholder="Tipe Penjualan *"
+                    mode="multiple"
                   >
-                    <Input
-                      style={{ height: "50px" }}
-                      prefix={
-                        <UserOutlined
-                          style={{ fontSize: "150%" }}
-                          className="site-form-item-icon mr-5"
-                        />
-                      }
-                      placeholder="Nama"
-                    />
+                    <Select.Option value="PANEL">PANEL</Select.Option>
+                    <Select.Option value="NON PANEL">NON PANEL</Select.Option>
+                    <Select.Option value="SALES">SALES</Select.Option>
+                    <Select.Option value="KARYAWAN">KARYAWAN</Select.Option>
+                  </Select>
+                </Form.Item>
+              </div>
+
+              {/* AREA SALES & KREDIT LIMIT */}
+              <div
+                className={`w-full flex mb-3 justify-center border-b ${
+                  customerType !== "TOKO" ? "border-b-[#036b82]" : ""
+                }`}
+              >
+                <Button
+                  disabled={customerType === "TOKO"}
+                  onClick={() =>
+                    setShowForm({
+                      ...showForm,
+                      area: !showForm.area,
+                    })
+                  }
+                  className={`${
+                    customerType !== "TOKO"
+                      ? "text-white hover:bg-cyan-700/90 focus:bg-cyan-700 bg-cyan-700 border"
+                      : ""
+                  } w-3/4 md:w-1/4 `}
+                  type="primary"
+                >
+                  AREA SALES & KREDIT LIMIT
+                </Button>
+              </div>
+
+              {/* AREA SALES */}
+              <div hidden={!showForm.area}>
+                <div className="flex md:flex-row flex-col gap-x-10 w-full">
+                  <Form.Item className="w-full" name="sales_name">
+                    <Input readOnly placeholder="Nama Sales" />
+                  </Form.Item>
+                  <Form.Item className="w-full pointer-events-none hidden md:block opacity-0">
+                    <Input disabled />
                   </Form.Item>
                 </div>
-                <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
+
+                <div className="flex md:flex-row flex-col gap-x-10 w-full">
+                  <Form.Item initialValue={initial.area.data.id} className="w-full" name="area">
+                    <Select showSearch placeholder="Area">
+                      {area.map((item) => (
+                        <Select.Option key={item.id} value={item.id}>
+                          {item.attributes.name}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
                   <Form.Item
-                    name="address"
-                    initialValue={customer?.data?.attributes.address}
-                    rules={[
-                      {
-                        required: true,
-                        message: "Alamat tidak boleh kosong!",
-                      },
-                    ]}
+                    initialValue={initial.wilayah.data.id}
+                    className="w-full"
+                    name="wilayah"
                   >
-                    <Input
-                      style={{ height: "50px" }}
-                      prefix={
-                        <ShopOutlined
-                          style={{ fontSize: "150%" }}
-                          className="site-form-item-icon mr-5"
-                        />
-                      }
-                      placeholder="Alamat"
+                    <Select showSearch placeholder="Wilayah">
+                      {wilayah.map((item) => (
+                        <Select.Option key={item.id} value={item.id}>
+                          {item.attributes.name}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </div>
+
+                <div className="flex md:flex-row flex-col gap-x-10 w-full">
+                  <Form.Item className="w-full" name="credit_limit">
+                    <InputNumber
+                      className="w-full"
+                      disabled={customerType === "TOKO"}
+                      placeholder="Batas Kredit"
+                      formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                      parser={(value) => parseInt(value.replace(/(,*)/g, ""))}
+                      controls={false}
                     />
+                  </Form.Item>
+                  <Form.Item className="w-full">
+                    <Input.Group compact>
+                      <Form.Item
+                        noStyle
+                        className="w-full relative"
+                        initialValue={0}
+                        name="credit_limit_duration"
+                      >
+                        <InputNumber
+                          onChange={(e) => form.setFieldsValue({ credit_limit_duration: e })}
+                          disabled={customerType === "TOKO"}
+                          style={{ width: "30%" }}
+                        />
+                        <span className="absolute -top-5 border-none text-sm left-0 text-gray-400 z-40">
+                          Termin Pembayaran
+                        </span>
+                      </Form.Item>
+                      <Form.Item
+                        noStyle
+                        className="w-full"
+                        name="credit_limit_duration_type"
+                        initialValue="Hari"
+                      >
+                        <Select
+                          disabled={customerType === "TOKO"}
+                          style={{ width: "70%" }}
+                          defaultValue="Hari"
+                        >
+                          <Select.Option value="Hari">Hari</Select.Option>
+                          <Select.Option value="Bulan">Bulan</Select.Option>
+                        </Select>
+                      </Form.Item>
+                    </Input.Group>
+                  </Form.Item>
+                </div>
+
+                <div className="flex md:flex-row flex-col gap-x-10 w-full">
+                  <Form.Item className="w-full" name="saldo_awal">
+                    <InputNumber
+                      className="w-full"
+                      disabled={customerType === "TOKO"}
+                      placeholder="Saldo Awal"
+                      formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                      parser={(value) => parseInt(value.replace(/(,*)/g, ""))}
+                      controls={false}
+                    />
+                  </Form.Item>
+                  <Form.Item className="w-full pointer-events-none hidden md:block opacity-0">
+                    <Input disabled />
                   </Form.Item>
                 </div>
               </div>
 
-              {/*<Form.Item*/}
-              {/*  name="role_id"*/}
-              {/*  className="w-1/4 mb-5 ml-1"*/}
-              {/*  initialValue={userRole.id}*/}
-              {/*>*/}
-              {/*  <Select placeholder="Role">*/}
-              {/*    {role.map((role) =>*/}
-              {/*      role.name === "Authenticated" || role.name === "Public" ? (*/}
-              {/*        <Select.Option hidden disabled={true} value={role.id}>*/}
-              {/*          {role.name}*/}
-              {/*        </Select.Option>*/}
-              {/*      ) : (*/}
-              {/*        <Select.Option value={role.id}>{role.name}</Select.Option>*/}
-              {/*      )*/}
-              {/*    )}*/}
-              {/*  </Select>*/}
-              {/*</Form.Item>*/}
+              {/* NPWP */}
+              <div
+                className={`w-full flex mb-3 justify-center border-b ${
+                  customerType !== "TOKO" ? "border-b-[#036b82]" : ""
+                }`}
+              >
+                <Button
+                  disabled={customerType === "TOKO"}
+                  onClick={() =>
+                    setShowForm({
+                      ...showForm,
+                      npwp: !showForm.npwp,
+                    })
+                  }
+                  className={`${
+                    customerType !== "TOKO"
+                      ? "text-white hover:bg-cyan-700/90 focus:bg-cyan-700 bg-cyan-700 border"
+                      : ""
+                  } w-3/4 md:w-1/4 `}
+                  type="primary"
+                >
+                  Data NPWP & NIK
+                </Button>
+              </div>
 
-              <Form.Item name="type" className="w-1/4 mb-5 ml-1">
-                <Select size="large" placeholder="Type">
-                  <Select.Option value="Toko" key="Toko">
-                    Toko
-                  </Select.Option>
-                  <Select.Option value="Sales" key="Sales">
-                    Sales
-                  </Select.Option>
-                  <Select.Option value="Panel" key="Panel">
-                    Panel
-                  </Select.Option>
-                  <Select.Option value="Dokter" key="Dokter">
-                    Dokter
-                  </Select.Option>
-                </Select>
-              </Form.Item>
+              <div hidden={!showForm.npwp}>
+                <div className="flex md:flex-row flex-col gap-x-10 w-full">
+                  <Form.Item className="w-full" name="nama_npwp">
+                    <Input placeholder="Nama NPWP" />
+                  </Form.Item>
+                  <Form.Item className="w-full" name="nomor_npwp">
+                    <Input placeholder="Nomor NPWP" />
+                  </Form.Item>
+                </div>
+
+                <div className="flex md:flex-row flex-col gap-x-10 w-full">
+                  <Form.Item className="w-full" name="alamat_npwp">
+                    <Input placeholder="Alamat NPWP" />
+                  </Form.Item>
+                  <Form.Item className="w-full pointer-events-none hidden md:block opacity-0">
+                    <Input disabled />
+                  </Form.Item>
+                </div>
+
+                <div className="flex md:flex-row flex-col gap-x-10 w-full">
+                  <Form.Item className="w-full" name="nik">
+                    <Input placeholder="Nomor NIK" />
+                  </Form.Item>
+                  <Form.Item className="w-full pointer-events-none hidden md:block opacity-0">
+                    <Input disabled />
+                  </Form.Item>
+                </div>
+              </div>
 
               <Form.Item>
                 {loading ? (
@@ -202,7 +531,7 @@ const Edit = ({ props }) => {
                 ) : (
                   <Button
                     htmlType="submit"
-                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
+                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700"
                   >
                     Submit
                   </Button>
@@ -216,29 +545,21 @@ const Edit = ({ props }) => {
   );
 };
 
-Edit.getInitialProps = async (context) => {
+Tambah.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/customers/" + id + "?populate=*";
+  const customer = await fetchData(cookies, `/customers/${id}?populate=*`).then((res) =>
+    res.json()
+  );
 
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
-  const res = await fetch(endpoint, options);
-  const data = await res.json();
+  const req = await fetchData(cookies, "/areas");
+  const res = await req.json();
 
-  //const resRole = await fetchRole(cookies);
-  //const role = await resRole.json();
+  const reqWilayah = await fetchData(cookies, "/wilayahs");
+  const resWilayah = await reqWilayah.json();
 
-  //const reqLocations = await fetchDataLocation(cookies, "/locations");
-  //const resLocations = await reqLocations.json();
-
-  if (res.status !== 200) {
+  if (req.status !== 200) {
     context.res.writeHead(302, {
       Location: "/signin?session=false",
       "Content-Type": "text/html; charset=utf-8",
@@ -250,39 +571,25 @@ Edit.getInitialProps = async (context) => {
 
   return {
     props: {
-      data,
-      //role,
-      //locations: resLocations,
+      area: res.data,
+      wilayah: resWilayah.data,
+      customer: customer.data,
     },
   };
 };
 
-//const fetchRole = async (cookies) => {
-//  const endpoint = process.env.NEXT_PUBLIC_URL + "/users-permissions/roles";
-//  const options = {
-//    method: "GET",
-//    headers: {
-//      "Content-Type": "application/json",
-//      Authorization: "Bearer " + cookies.token,
-//    },
-//  };
+const fetchData = async (cookies, url) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + url;
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
 
-//  const req = await fetch(endpoint, options);
-//  return req;
-//};
+  const req = await fetch(endpoint, options);
+  return req;
+};
 
-//const fetchDataLocation = async (cookies, url) => {
-//  const endpoint = process.env.NEXT_PUBLIC_URL + url;
-//  const options = {
-//    method: "GET",
-//    headers: {
-//      "Content-Type": "application/json",
-//      Authorization: "Bearer " + cookies.token,
-//    },
-//  };
-
-//  const req = await fetch(endpoint, options);
-//  return req;
-//};
-
-export default Edit;
+export default Tambah;
