@@ -37,6 +37,8 @@ export default function UploadProduk({ setCustomer }) {
           const req = await fetch(endpoint, options);
           const res = await req.json();
 
+          console.log("res", res);
+
           setPercent((prev) => Math.round(prev + increment));
 
           if (req.status == 200) {
@@ -115,6 +117,31 @@ export default function UploadProduk({ setCustomer }) {
     }
   };
 
+  const getRelationId = async (value, url) => {
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL +
+      `${url}?filters[$or][0][name][$containsi]=${value}&filters[$or][1][code][$containsi]=${value}`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    if (req.status === 200) {
+      const entity = res?.data?.[0];
+      return entity?.id;
+    } else {
+      toast.error("Tidak dapat menambahkan Customer", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
+    }
+  };
+
   const parseData = async (data) => {
     const parsedData = await Promise.all(
       data.map(async (row) => {
@@ -135,12 +162,47 @@ export default function UploadProduk({ setCustomer }) {
               break;
             case "TIPE PENJUALAN":
               result["tipe_penjualan"] = [row[key]];
+              result["tipe_penjualan_query"] = row[key];
               break;
             case "GOLONGAN CUSTOMER":
               result["customer_type"] = row[key];
               break;
             case "DESKRIPSI":
               result["description"] = row[key];
+              break;
+            case "NAMA SALES":
+              result["sales_name"] = row[key];
+              break;
+            case "AREA":
+              result["area"] = await getRelationId(row[key], "/areas");
+              break;
+            case "WILAYAH":
+              result["wilayah"] = await getRelationId(row[key], "/wilayahs");
+              break;
+            case "BATAS KREDIT":
+              result["credit_limit"] = parseInt(row?.[key] || 0);
+              break;
+            case "TERMIN PEMBAYARAN":
+              result["credit_limit_duration"] = row[key]?.split(" ")?.[0] || 0;
+              result["credit_limit_duration_type"] = row[key]?.split(" ")?.[1]
+                ? row[key]?.split(" ")?.[1]?.charAt(0)?.toUpperCase() +
+                  row[key]?.split(" ")?.[1]?.slice(1)
+                : "Hari";
+              break;
+            case "SALDO AWAL":
+              result["saldo_awal"] = parseInt(row?.[key] || 0);
+              break;
+            case "NAMA NPWP":
+              result["nama_npwp"] = row[key];
+              break;
+            case "NOMOR NPWP":
+              result["nomor_npwp"] = String(row[key]);
+              break;
+            case "ALAMAT NPWP":
+              result["alamat_npwp"] = row[key];
+              break;
+            case "NOMOR NIK":
+              result["nik"] = String(row[key]);
               break;
             default:
               break;
