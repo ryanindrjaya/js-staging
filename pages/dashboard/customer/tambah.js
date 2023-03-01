@@ -283,7 +283,11 @@ const Tambah = ({ props }) => {
                   <Input disabled={customerType === "TOKO"} placeholder="Telepon *" required />
                 </Form.Item>
                 <Form.Item className="w-full" name="description">
-                  <Input disabled={customerType === "TOKO"} placeholder="Deskripsi" />
+                  <Input
+                    onInput={(e) => (e.target.value = e.target.value.toUpperCase())}
+                    disabled={customerType === "TOKO"}
+                    placeholder="Deskripsi"
+                  />
                 </Form.Item>
               </div>
 

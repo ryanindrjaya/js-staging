@@ -77,7 +77,10 @@ const Tambah = () => {
                     },
                   ]}
                 >
-                  <Input placeholder="Kode Wilayah" />
+                  <Input
+                    onInput={(e) => (e.target.value = e.target.value.toUpperCase())}
+                    placeholder="Kode Wilayah"
+                  />
                 </Form.Item>
                 <Form.Item
                   className="w-full"
@@ -89,12 +92,19 @@ const Tambah = () => {
                     },
                   ]}
                 >
-                  <Input placeholder="Nama Wilayah" />
+                  <Input
+                    onInput={(e) => (e.target.value = e.target.value.toUpperCase())}
+                    placeholder="Nama Wilayah"
+                  />
                 </Form.Item>
               </div>
 
               <Form.Item className="w-full" name="description">
-                <Input.TextArea rows={6} placeholder="Deskripsi" />
+                <Input.TextArea
+                  onInput={(e) => (e.target.value = e.target.value.toUpperCase())}
+                  rows={6}
+                  placeholder="Deskripsi"
+                />
               </Form.Item>
 
               <Form.Item>
