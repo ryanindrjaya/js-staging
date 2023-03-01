@@ -3,12 +3,7 @@ import AlertDialog from "../Alert/Alert";
 import { Popover } from "antd";
 import { EditOutlined, BarsOutlined } from "@ant-design/icons";
 
-export default function ReactDataTable({
-  data,
-  onDelete,
-  onUpdate,
-  onPageChange,
-}) {
+export default function ReactDataTable({ data, onDelete, onUpdate, onView }) {
   console.log(data);
   const onConfirm = (id) => {
     onDelete(id);
@@ -25,12 +20,18 @@ export default function ReactDataTable({
   const content = (row) => (
     <div>
       <div>
-        <button className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md ">
+        <button
+          onClick={() => onView(row)}
+          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+        >
           <BarsOutlined className="mr-2 mt-0.5 float float-left" />
           Lihat
         </button>
       </div>
-      <button className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md ">
+      <button
+        onClick={() => onEdit(row.id)}
+        className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+      >
         <EditOutlined className="mr-2 mt-0.5 float float-left" />
         Edit
       </button>
@@ -55,14 +56,14 @@ export default function ReactDataTable({
 
   const columns = [
     {
-      name: "ID Supplier",
+      name: "Kode Supplier",
       width: "w-1/3",
       sortable: true,
 
       selector: (row) => row.attributes.id_supplier,
     },
     {
-      name: "Nama",
+      name: "Nama Supplier",
       width: "w-1/3",
       sortable: true,
 
@@ -103,6 +104,9 @@ export default function ReactDataTable({
       paginationTotalRows={data?.meta?.pagination.total}
       paginationRowsPerPageOptions={[10]}
       pagination
+      onRowClicked={(row) => onView(row)}
+      highlightOnHover
+      pointerOnHover
     />
   );
 }

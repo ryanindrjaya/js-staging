@@ -38,10 +38,10 @@ const Edit = ({ props }) => {
 
     if (req.status === 200) {
       form.resetFields();
-      toast.success("Wilayah berhasil diubah!", {
+      toast.success("Area berhasil diubah!", {
         position: toast.POSITION.TOP_RIGHT,
       });
-      router.push("/dashboard/customer/wilayah");
+      router.push("/dashboard/customer/area");
     } else {
       toast.error("Tidak dapat mengubah Wilayah", {
         position: toast.POSITION.TOP_RIGHT,
