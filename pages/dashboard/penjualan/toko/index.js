@@ -214,6 +214,7 @@ function Toko({ props }) {
   };
 
   return (
+    
     <>
       <Head>
         <title>Penjualan Toko</title>
@@ -453,7 +454,9 @@ function Toko({ props }) {
         </LayoutWrapper>
       </DashboardLayout>
     </>
-  );
+  
+  
+    );
 }
 
 export default Toko;
