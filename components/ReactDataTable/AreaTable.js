@@ -48,25 +48,25 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange 
   const columns = [
     {
       name: "Kode Area",
-      width: "250px",
+
       sortable: true,
       selector: (row) => row.attributes?.code,
     },
     {
       name: "Nama Area",
-      width: "250px",
+
       sortable: true,
       selector: (row) => row.attributes?.name,
     },
     {
       name: "Deskripsi",
-      width: "250px",
+
       sortable: true,
       selector: (row) => row.attributes?.description,
     },
     {
       name: "Tindakan",
-      width: "250px",
+
       selector: (row) => (
         <>
           <Popover content={content(row)} placement="bottom" trigger="click">
