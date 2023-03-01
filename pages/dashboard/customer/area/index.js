@@ -8,7 +8,7 @@ import TitlePage from "../../../../components/TitlePage/TitlePage";
 import { toast } from "react-toastify";
 import nookies from "nookies";
 import { Input, Select } from "antd";
-import WilayahTable from "@iso/components/ReactDataTable/WilayahTable";
+import AreaTable from "@iso/components/ReactDataTable/AreaTable";
 
 Customer.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -142,7 +142,7 @@ function Customer({ props }) {
               </button>
             </div>
 
-            <WilayahTable data={user || []} onDelete={handleDelete} onUpdate={handleUpdate} />
+            <AreaTable data={user || []} onDelete={handleDelete} onUpdate={handleUpdate} />
           </LayoutContent>
         </LayoutWrapper>
       </DashboardLayout>
