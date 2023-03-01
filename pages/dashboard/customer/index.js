@@ -352,7 +352,6 @@ function Customer({ props }) {
                   <Select.Option value="PANEL">PANEL</Select.Option>
                   <Select.Option value="NON PANEL">NON PANEL</Select.Option>
                   <Select.Option value="SALES">SALES</Select.Option>
-                  <Select.Option value="KARYAWAN">KARYAWAN</Select.Option>
                   <Select.Option value="TOKO">TOKO</Select.Option>
                 </Select>
                 <Select
@@ -399,7 +398,7 @@ function Customer({ props }) {
                 </div>
                 <div className="grid grid-cols-3 gap-x-4 w-full">
                   <UploadCustomer setCustomer={setUser} />
-                  <ExportCustomer />
+                  <ExportCustomer data={user?.data || []} />
                   <a href={"/template/Template Excel Data Customer.xlsx"}>
                     <button
                       type="button"
