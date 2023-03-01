@@ -322,7 +322,6 @@ const Tambah = ({ props }) => {
                     <Select.Option value="PANEL">PANEL</Select.Option>
                     <Select.Option value="NON PANEL">NON PANEL</Select.Option>
                     <Select.Option value="SALES">SALES</Select.Option>
-                    <Select.Option value="KARYAWAN">KARYAWAN</Select.Option>
                   </Select>
                 </Form.Item>
               </div>
