@@ -5,7 +5,7 @@ import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import { Form, Input, DatePicker, Button, message, Upload, Select, Spin } from "antd";
+import { Form, Input, DatePicker, Button, message, Upload, Select, Spin, notification } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import nookies from "nookies";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
@@ -134,6 +134,7 @@ function Retur({ props }) {
   const tempList = [];
   const cookies = nookies.get(null, "token");
   const [isFetchinData, setIsFetchingData] = useState(false);
+  const [locProduct, setLocProduct] = useState([]);
   const [expProduct, setExpProduct] = useState([]);
   const [batch, setBatch] = useState([]);
 
@@ -171,56 +172,55 @@ function Retur({ props }) {
   //  createReturFunc(grandTotal, totalPrice, values, listId, form, router);
   //};
 
-  //const onChangeProduct = async () => {
-  //  var isDuplicatedData = false;
+  const onChangeProduct = async () => {
+    var isDuplicatedData = false;
 
-  //  tempList.find((item) => {
-  //    productList.forEach((element) => {
-  //      if (element.id === item.id) isDuplicatedData = true;
-  //    });
-  //  });
+    tempList.find((item) => {
+      productList.forEach((element) => {
+        if (element.id === item.id) isDuplicatedData = true;
+      });
+    });
 
-  //  if (!isDuplicatedData) {
-  //    setProductList((productList) => [...productList, tempList[0]]);
-  //    toast.success("Produk berhasil ditambahkan!", {
-  //      position: toast.POSITION.TOP_RIGHT,
-  //      autoClose: 1000,
-  //    });
+    if (!isDuplicatedData) {
+      setProductList((productList) => [...productList, tempList[0]]);
+      toast.success("Produk berhasil ditambahkan!", {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 1000,
+      });
+    }
+  };
+
+  //const calculatePriceAfterDisc = (row, index) => {
+  //  var total = 0;
+  //  var qty = 1;
+  //  var priceUnit = row.attributes[`buy_price_1`];
+
+  //  // check if price changed
+  //  if (products.productInfo[index]?.priceUnit) {
+  //    priceUnit = products.productInfo[index].priceUnit ?? row.attributes[`buy_price_1`];
   //  }
+  //  // check if qty changed
+  //  if (products.productInfo[index]?.qty) {
+  //    qty = products.productInfo[index]?.qty ?? 1;
+  //  }
+
+  //  // set product price after disc & sub total
+  //  productTotalPrice[index] = priceUnit;
+  //  productSubTotal[index] = priceUnit * qty;
+
+  //  // set all product total
+  //  var total = 0;
+  //  for (var key in productSubTotal) {
+  //    total = total + productSubTotal[key];
+  //  }
+  //    setTotalPrice(total);
+  //  return formatter.format(productTotalPrice[index]);
   //};
 
   const calculatePriceAfterDisc = (row, index) => {
-    var total = 0;
-    var qty = 1;
-    var priceUnit = row.attributes[`buy_price_1`];
-
-    // check if price changed
-    if (products.productInfo[index]?.priceUnit) {
-      priceUnit = products.productInfo[index].priceUnit ?? row.attributes[`buy_price_1`];
-    }
-    // check if qty changed
-    if (products.productInfo[index]?.qty) {
-      qty = products.productInfo[index]?.qty ?? 1;
-    }
-
-    // set product price after disc & sub total
-    productTotalPrice[index] = priceUnit;
-    productSubTotal[index] = priceUnit * qty;
-
-    // set all product total
-    var total = 0;
-    for (var key in productSubTotal) {
-      total = total + productSubTotal[key];
-    }
-      setTotalPrice(total);
-    return formatter.format(productTotalPrice[index]);
+    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index, setProductSubTotal);
+    return formatter.format(total);
   };
-
-  //const calculatePriceAfterDisc = (row) => {
-  //  const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
-
-  //  return formatter.format(total);
-  //};
 
   const fetchReturdata = async (id) => {
     //clearData();
@@ -323,7 +323,7 @@ function Retur({ props }) {
     tanggal_retur: moment(momentString),
     status: returData.attributes.status,
     });
-    
+
     returData.attributes.retur_details.data.forEach((element, index) => { console.log("retur details", element)
       var indexUnit = 1;
 
@@ -331,6 +331,7 @@ function Retur({ props }) {
       var momentObjDetail = moment(dateStringDetail, "YYYY-MM-DD");
       var momentStringDetail = momentObjDetail.format("MM-DD-YYYY");
 
+      locProduct.push(element.attributes.location)
       expProduct.push(moment(momentStringDetail));
       batch.push(element.attributes.batch);
 
@@ -353,11 +354,32 @@ function Retur({ props }) {
         unit: element.attributes.unit,
         unitIndex: indexUnit,
         priceUnit: parseInt(element.attributes.harga_satuan),
+        disc: parseInt( element.attributes.disc),
         priceAfterDisc: parseInt(element.attributes.harga_satuan),
         subTotal: parseInt(element.attributes.sub_total),
         index,
       });
 
+      dispatch({
+        type: "CHANGE_PRODUCT_D1",
+        d1: element.attributes.d1,
+        product: element.attributes.products.data[0],
+        index,
+      });
+
+      dispatch({
+        type: "CHANGE_PRODUCT_D2",
+        d2: element.attributes.d2,
+        product: element.attributes.products.data[0],
+        index,
+      });
+
+      dispatch({
+        type: "CHANGE_PRODUCT_D3",
+        d3: element.attributes.d3,
+        product: element.attributes.products.data[0],
+        index,
+      });
     });
 
     setTimeout(() => {
@@ -520,9 +542,9 @@ function Retur({ props }) {
                   <Form.Item name="no_nota_supplier"></Form.Item>
                   <Form.Item name="tanggal_pembelian"></Form.Item>
                 </div>
-                {/*<div className="w-full md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">*/}
-                {/*  <SearchBar form={form} tempList={tempList} onChange={onChangeProduct} user={user}  selectedProduct={selectedProduct} isBasedOnLocation={false}/>*/}
-                {/*</div>*/}
+                <div className="w-full md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
+                  <SearchBar form={form} tempList={tempList} onChange={onChangeProduct} user={user}  selectedProduct={selectedProduct} isBasedOnLocation={false}/>
+                </div>
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-2 md:mb-0">
                   {isFetchinData ? (
                   <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
@@ -540,10 +562,12 @@ function Retur({ props }) {
                         productTotalPrice={productTotalPrice}
                         setTotalPrice={setTotalPrice}
                         setProductTotalPrice={setProductTotalPrice}
+                        setProductSubTotal={setProductSubTotal}
                         calculatePriceAfterDisc={calculatePriceAfterDisc}
                         productSubTotal={productSubTotal}
-                        //locations={locations}
+                        locations={locations}
                         formObj={form}
+                        locProduct={locProduct}
                         expProduct={expProduct}
                         batch={batch}
                     />

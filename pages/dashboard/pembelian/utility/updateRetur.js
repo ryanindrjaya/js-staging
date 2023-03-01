@@ -41,8 +41,12 @@ const updateRetur = (
     var subTotal = unitPriceAfterDisc * qty;
     var batch = value?.batch[id];
     var expired_date = value?.expired_date[id];
-    //var location = value?.product_location[id];
-    var location = null;
+    var location = value?.product_location[id];
+    var disc = products?.productInfo[id]?.disc ?? 0;
+    var d1 = products?.productInfo[id]?.d1 ?? element.attributes.unit_1_dp1 ?? 0; 
+    var d2 = products?.productInfo[id]?.d2 ?? element.attributes.unit_1_dp2 ?? 0;
+    var d3 = products?.productInfo[id]?.d3 ?? element.attributes.unit_1_dp3 ?? 0;
+    //var location = null;
 
     var idDetail = returData?.data[0]?.attributes.retur_details?.data[index].id;
     console.log("detail", element, returData, idDetail, value);
@@ -60,6 +64,10 @@ const updateRetur = (
     setListId,
     products,
     idDetail,
+    disc,
+    d1,
+    d2,
+    d3,
     );
 
     index++;
@@ -136,6 +144,10 @@ const PUTReturDetail = async (
   setListId,
   products,
   idDetail,
+  disc,
+  d1,
+  d2,
+  d3,
 ) => {
   var data = {
     data: {
@@ -146,6 +158,10 @@ const PUTReturDetail = async (
       batch: batch,
       expired_date: expired_date,
       location: location,
+      disc: disc,
+      d1: d1,
+      d2: d2,
+      d3: d3,
       products: { id: id },
     },
   };

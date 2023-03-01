@@ -40,12 +40,17 @@ const createReturDetail = (
     if(value?.harga_satuan[id] == undefined){
         unitPrice = element.attributes.buy_price_1;
     }
+    //var disc = products?.productInfo[id]?.disc ?? 0;
+    var d1 = products?.productInfo[id]?.d1 ?? element.attributes[`unit_1_dp1`] ?? 0;
+    var d2 = products?.productInfo[id]?.d2 ?? element.attributes[`unit_1_dp2`] ?? 0;
+    var d3 = products?.productInfo[id]?.d3 ?? element.attributes[`unit_1_dp3`] ?? 0;
 
-    var unitPriceAfterDisc = productTotalPrice[id] ?? element.attributes.buy_price_1;
-    var subTotal = unitPriceAfterDisc * qty;
+    var unitPriceAfterDisc = productTotalPrice[id];
+    var subTotal = productSubTotal?.[id];
+    //var subTotal = unitPriceAfterDisc * qty;]
     var batch = value?.batch[id];
     var expired_date = new Date(value?.expired_date[id]);
-    //var location = value?.product_location[id];
+    var location = value?.product_location[id];
     //console.log("detail", qty, disc, unit, unitPrice, unitPriceAfterDisc, subTotal, id, batch, expired_date, location);
     POSTReturDetail(
       qty,
@@ -53,13 +58,16 @@ const createReturDetail = (
       unit,
       unitPrice,
       unitPriceAfterDisc,
+      d1,
+      d2,
+      d3,
       subTotal,
       element.id,
       setListId,
       products,
       batch,
       expired_date,
-      //location,
+      location,
       url
     );
 
@@ -70,31 +78,38 @@ const createReturDetail = (
 };
 
 const POSTReturDetail = async (
-  qty,
-  disc,
-  unit,
-  unitPrice,
-  unitPriceAfterDisc,
-  subTotal,
-  id,
-  setListId,
-  products,
-  batch,
-  expired_date,
-  //location,
-  url
+    qty,
+    disc,
+    unit,
+    unitPrice,
+    unitPriceAfterDisc,
+    d1,
+    d2,
+    d3,
+    subTotal,
+    id,
+    setListId,
+    products,
+    batch,
+    expired_date,
+    location,
+    url
 ) => {
   var data = {
     data: {
       qty: String(qty),
       unit: unit,
+      d1: d1,
+      d2: d2,
+      d3: d3,
+      disc: disc,
       //harga_satuan: parseInt(unitPrice),
       harga_satuan: unitPrice,
       sub_total: parseInt(subTotal),
       products: { id: id },
       batch: batch,
       expired_date: expired_date,
-      //location: location,
+      location: location,
     },
   };
 

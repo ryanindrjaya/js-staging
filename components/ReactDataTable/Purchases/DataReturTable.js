@@ -12,6 +12,7 @@ export default function ReactDataTable({
   locations,
   setTotalPrice,
   formObj,
+  locProduct,
   expProduct,
   batch,
 }) {
@@ -38,6 +39,9 @@ export default function ReactDataTable({
   var unit = [];
   var priceUnit = 1;
   var tempIndex = products.productList.length;
+
+  var reqInput = true;
+  if(locProduct && expProduct && batch) reqInput = false;
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -77,14 +81,14 @@ export default function ReactDataTable({
     });
   };
 
-  //const onChangeDisc = (value, data, index) => {
-  //  dispatch({
-  //    type: "CHANGE_PRODUCT_DISC",
-  //    disc: value,
-  //    product: data,
-  //    index,
-  //  });
-  //};
+  const onChangeDisc = (value, data, index) => {
+    dispatch({
+      type: "CHANGE_PRODUCT_DISC",
+      disc: value,
+      product: data,
+      index,
+    });
+  };
 
   const onChangePriceUnit = (value, data, index, indexRow) => {
     var dataForm = formObj.getFieldsValue();
@@ -430,45 +434,49 @@ export default function ReactDataTable({
         );
       },
     },
-    //{
-    //  name: "Lokasi",
-    //  width: "250px",
-    //  sortable: true,
-    //  selector: (row, idx) => {
-    //    return (
-    //      <>
-    //        <Form.Item
-    //          label={"product_location"}
-    //          name={["product_location", `${idx}`]}
-    //          rules={[
-    //            {
-    //              required: true,
-    //              message: "Lokasi Produk tidak boleh kosong!",
-    //            },
-    //          ]}
-    //          noStyle
-    //        >
-    //          <Select
-    //            placeholder="Pilih Lokasi Produk"
-    //            size="normal"
-    //            style={{
-    //              width: "200px",
-    //              marginRight: "10px",
-    //            }}
-    //          >
-    //            {locations.map((element) => {
-    //              return (
-    //                <Select.Option value={element.id} key={element.attributes.name}>
-    //                  {element.attributes.name}
-    //                </Select.Option>
-    //              );
-    //            })}
-    //          </Select>
-    //        </Form.Item>
-    //      </>
-    //    );
-    //  },
-    //},
+    {
+      name: "Lokasi",
+      width: "250px",
+      sortable: true,
+      selector: (row, idx) => {
+        var defaultLoc = null;
+        if(locProduct != undefined) defaultLoc = locProduct[idx].data.id; 
+
+        return (
+          <>
+            <Form.Item
+              label={"product_location"}
+              name={["product_location", `${idx}`]}
+              rules={[
+                {
+                    required: reqInput,
+                    message: "Lokasi product tidak boleh kosong!",
+                },
+              ]}
+              noStyle
+            >
+              <Select
+                placeholder="Pilih Lokasi Produk"
+                size="normal"
+                style={{
+                  width: "200px",
+                  marginRight: "10px",
+                }}
+                defaultValue={defaultLoc}
+              >
+                {locations.map((element) => {
+                  return (
+                    <Select.Option value={element.id} key={element.attributes.name}>
+                      {element.attributes.name}
+                    </Select.Option>
+                  );
+                })}
+              </Select>
+            </Form.Item>
+          </>
+        );
+      },
+    },
     {
       name: "EXPDate",
       width: "150px",
@@ -482,6 +490,12 @@ export default function ReactDataTable({
             <Form.Item
               label={"exp date"}
               name={["expired_date", `${idx}`]}
+              rules={[
+                {
+                    required: reqInput,
+                    message: "Expired date product tidak boleh kosong!",
+                },
+              ]}
               noStyle
             >
               <DatePicker defaultValue={defaultEXP} placeholder="EXP. Date" size="normal" format={"DD/MM/YYYY"} />
@@ -500,7 +514,17 @@ export default function ReactDataTable({
 
         return (
           <>
-            <Form.Item label={"Batch"} name={["batch", `${idx}`]} noStyle>
+            <Form.Item 
+              label={"Batch"} 
+              name={["batch", `${idx}`]}
+              rules={[
+                {
+                    required: reqInput,
+                    message: "Batch product tidak boleh kosong!",
+                },
+              ]}
+              noStyle
+            >
               <Input defaultValue={defaultBatch} size="normal" />
             </Form.Item>
           </>

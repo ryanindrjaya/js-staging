@@ -5,7 +5,7 @@ import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLay
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
-import { Form, Input, DatePicker, Button, message, Upload, Select, Spin } from "antd";
+import { Form, Input, DatePicker, Button, message, Upload, Select, Spin, notification } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import nookies from "nookies";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
@@ -161,6 +161,7 @@ function Retur({ props }) {
   };
 
   const createRetur = async (values) => {
+    values.status = "Draft";
     createReturFunc(grandTotal, totalPrice, values, listId, form, router);
   };
 
@@ -182,38 +183,37 @@ function Retur({ props }) {
     }
   };
 
-  const calculatePriceAfterDisc = (row, index) => {
-    var total = 0;
-    var qty = 1;
-    var priceUnit = row.attributes[`buy_price_1`];
-
-    // check if price changed
-    if (products.productInfo[index]?.priceUnit) {
-      priceUnit = products.productInfo[index].priceUnit ?? row.attributes[`buy_price_1`];
-    }
-    // check if qty changed
-    if (products.productInfo[index]?.qty) {
-      qty = products.productInfo[index]?.qty ?? 1;
-    }
-
-    // set product price after disc & sub total
-    productTotalPrice[index] = priceUnit;
-    productSubTotal[index] = priceUnit * qty;
-
-    // set all product total
-    var total = 0;
-    for (var key in productSubTotal) {
-      total = total + productSubTotal[key];
-    }
-      setTotalPrice(total);
-    return formatter.format(productTotalPrice[index]);
-  };
-
   //const calculatePriceAfterDisc = (row, index) => {
-  //  const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
-  //  productSubTotal[index] = total;
-  //  return formatter.format(total);
+  //  var total = 0;
+  //  var qty = 1;
+  //  var priceUnit = row.attributes[`buy_price_1`];
+
+  //  // check if price changed
+  //  if (products.productInfo[index]?.priceUnit) {
+  //    priceUnit = products.productInfo[index].priceUnit ?? row.attributes[`buy_price_1`];
+  //  }
+  //  // check if qty changed
+  //  if (products.productInfo[index]?.qty) {
+  //    qty = products.productInfo[index]?.qty ?? 1;
+  //  }
+
+  //  // set product price after disc & sub total
+  //  productTotalPrice[index] = priceUnit;
+  //  productSubTotal[index] = priceUnit * qty;
+
+  //  // set all product total
+  //  var total = 0;
+  //  for (var key in productSubTotal) {
+  //    total = total + productSubTotal[key];
+  //  }
+  //    setTotalPrice(total);
+  //  return formatter.format(productTotalPrice[index]);
   //};
+
+  const calculatePriceAfterDisc = (row, index) => {
+    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index, setProductSubTotal);
+    return formatter.format(total);
+  };
 
   const fetchReturdata = async (id) => {
     //clearData();
@@ -421,9 +421,10 @@ function Retur({ props }) {
                     productTotalPrice={productTotalPrice}
                     setTotalPrice={setTotalPrice}
                     setProductTotalPrice={setProductTotalPrice}
+                    setProductSubTotal={setProductSubTotal}
                     calculatePriceAfterDisc={calculatePriceAfterDisc}
                     productSubTotal={productSubTotal}
-                    //locations={locations}
+                    locations={locations}
                     formObj={form}
                   />
                 </div>
