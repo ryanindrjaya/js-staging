@@ -39,11 +39,13 @@ export default function Categories({
   };
 
   const handleChangeCategory = (newValue) => {
+
     setSelectedSubCategory(0);
     fetchSubCategoriesById(newValue);
 
-    setCategory(newValue);
-    onSelectCategory(newValue);
+    // setCategory(newValue);
+    setCategory(data)
+    onSelectCategory(data);
   };
 
   const handleSearchCategory = (newValue) => {
@@ -78,6 +80,7 @@ export default function Categories({
           const categoriesResult = res.data.map((categories) => ({
             label: `${categories.attributes.category_id} - ${categories.attributes.name}`,
             value: categories.id,
+            category : categories.attributes
           }));
 
           callback(categoriesResult);

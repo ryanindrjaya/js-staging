@@ -360,7 +360,7 @@ const Tambah = ({ props }) => {
     group = String(group).padStart(2, "0");
     manufacture = String(manufacture).padStart(4, "0");
 
-    if (category) categoryData = category;
+    if (category) categoryData = category[0]?.category.category_id;
 
     if (
       category != undefined &&
