@@ -338,29 +338,12 @@ const Tambah = ({ props }) => {
     var categoryData = "0";
 
     product.data.forEach((element) => {
-      console.log(
-        "element manufacture",
-        element.attributes.manufacture.data.id,
-        selectedManufactures
-      );
-      console.log(
-        "element group",
-        element.attributes.group.data.id,
-        selectedGroups
-      );
-      console.log(
-        "element category",
-        element.attributes.category.data.id,
-        category
-      );
-
       if (
         element.attributes.manufacture.data.id == selectedManufactures &&
         element.attributes.group.data.id == selectedGroups &&
         element.attributes.category.data.id == category[0]?.category.category_id
       ) {
         manufacturesData++;
-        console.log("manufacturesData", manufacturesData);
       }
     });
     manufacturesData = String(manufacturesData + 1).padStart(3, "0");
