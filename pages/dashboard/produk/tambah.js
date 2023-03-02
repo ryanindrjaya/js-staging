@@ -335,8 +335,8 @@ const Tambah = ({ props }) => {
   };
 
   useEffect(() => {
-    var manufactures = "0000";
-    var groups = "00";
+    var manufacture = "0000";
+    var group = "00";
     var manufacturesData = "00";
     var kodeProduct = null;
     var categoryData = "0";
@@ -346,14 +346,21 @@ const Tambah = ({ props }) => {
     });
       manufacturesData = String(manufacturesData + 1).padStart(3, "0");
 
-    if(selectedManufactures) manufactures = String(selectedManufactures).padStart(4, "0");
+    groups.data.forEach((element) => {
+      if(element.id == selectedGroups) group = element.attributes.code;
+    });
 
-    if(selectedGroups) groups = String(selectedGroups).padStart(2, "0");
+    manufactures.data.forEach((element) => {
+      if(element.id == selectedManufactures) manufacture = element.attributes.code;
+    });
+
+    group = String(group).padStart(2, "0");
+    manufacture = String(manufacture).padStart(4, "0");
 
     if(category) categoryData = category;
 
     if (category != undefined && selectedManufactures.length > 0 && selectedGroups.length > 0){
-      kodeProduct = categoryData + groups + manufactures + manufacturesData;
+      kodeProduct = categoryData + group + manufacture + manufacturesData;
     }
 
     form.setFieldsValue({ SKU: kodeProduct });
