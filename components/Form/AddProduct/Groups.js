@@ -45,8 +45,9 @@ export default function Groups({ onSelect, selectedGroups, initialValue }) {
         const res = await req.json();
 
         if (req.status == 200) {
+         
           const manufactureResult = res.data.map((manufacture) => ({
-            alias : `${manufacture.attributes.alias}`,
+            alias : `${manufacture.attributes.code} `,
             label: `${manufacture.attributes.name}`,
             value: manufacture.id,
           }));

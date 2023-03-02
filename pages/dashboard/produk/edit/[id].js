@@ -366,7 +366,7 @@ const Edit = ({ props }) => {
       if (
         element.attributes.manufacture.data.id == selectedManufactures &&
         element.attributes.group.data.id == selectedGroups &&
-        element.attributes.category.data.id == category
+        element.attributes.category.data.id == category[0]?.category?.category_id
       ) {
         manufacturesData++;
       }
