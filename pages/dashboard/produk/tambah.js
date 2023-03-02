@@ -108,7 +108,6 @@ const Tambah = ({ props }) => {
   const onFinish = async (values) => {
     setLoading(true);
 
-  
     values.pricelist_1 = parseFloat(values.pricelist_1);
     values.pricelist_2 = parseFloat(values.pricelist_2);
     values.pricelist_3 = parseFloat(values.pricelist_3);
@@ -132,9 +131,6 @@ const Tambah = ({ props }) => {
     values.buy_price_3 = parseFloat(values.buy_price_3);
     values.buy_price_4 = parseFloat(values.buy_price_4);
     values.buy_price_5 = parseFloat(values.buy_price_5);
-
-
-
 
     const relationData = {
       category: values.category_id,
@@ -342,32 +338,39 @@ const Tambah = ({ props }) => {
     var categoryData = "0";
 
     product.data.forEach((element) => {
-      if(element.attributes.manufacture.data.id == selectedManufactures &&
+      if (
+        element.attributes.manufacture.data.id == selectedManufactures &&
         element.attributes.group.data.id == selectedGroups &&
         element.attributes.category.data.id == category
-      ) { manufacturesData++; }
+      ) {
+        manufacturesData++;
+      }
     });
-      manufacturesData = String(manufacturesData + 1).padStart(3, "0");
+    manufacturesData = String(manufacturesData + 1).padStart(3, "0");
 
     groups.data.forEach((element) => {
-      if(element.id == selectedGroups) group = element.attributes.code;
+      if (element.id == selectedGroups) group = element.attributes.code;
     });
 
     manufactures.data.forEach((element) => {
-      if(element.id == selectedManufactures) manufacture = element.attributes.code;
+      if (element.id == selectedManufactures)
+        manufacture = element.attributes.code;
     });
 
     group = String(group).padStart(2, "0");
     manufacture = String(manufacture).padStart(4, "0");
 
-    if(category) categoryData = category;
+    if (category) categoryData = category;
 
-    if (category != undefined && selectedManufactures.length > 0 && selectedGroups.length > 0){
+    if (
+      category != undefined &&
+      selectedManufactures.length > 0 &&
+      selectedGroups.length > 0
+    ) {
       kodeProduct = categoryData + group + manufacture + manufacturesData;
     }
 
     form.setFieldsValue({ SKU: kodeProduct });
-    
   }, [category, selectedManufactures, selectedGroups]);
 
   const onFinishFailed = () => {
@@ -435,9 +438,16 @@ const Tambah = ({ props }) => {
                     onSelect={setSelectedSubCategory}
                     selectedSubCategory={selectedSubCategory}
                   />
-                  <Form.Item name="description">
-                    <TextArea rows={4} placeholder="Deskripsi" />
-                  </Form.Item>
+                  <Groups
+                    data={groups}
+                    selectedGroups={selectedGroups}
+                    onSelect={setSelectedGroup}
+                  />
+                  <Manufactures
+                    data={manufactures.data}
+                    selectedManufactures={selectedManufactures}
+                    onSelect={setSelectedManufactures}
+                  />
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
                   <Form.Item
@@ -452,33 +462,19 @@ const Tambah = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input
-                      //onKeyDown={(e) =>
-                      //  e.key == "Enter" ? e.preventDefault() : ""
-                      //}
-                      //defaultValue={valueSKU}
-                      style={{ height: "40px" }}
-                      placeholder="SKU"
-                    />
+                    <Input style={{ height: "40px" }} placeholder="SKU" />
                   </Form.Item>
-                  <Manufactures
-                    data={manufactures.data}
-                    selectedManufactures={selectedManufactures}
-                    onSelect={setSelectedManufactures}
-                  />
-                  <Groups
-                    data={groups}
-                    selectedGroups={selectedGroups}
-                    onSelect={setSelectedGroup}
-                  />
                   <Locations
                     data={locations}
                     onSelect={setSelectLocation}
                     required={true}
                   />
+                  <Form.Item name="description">
+                    <TextArea rows={7} placeholder="Deskripsi" />
+                  </Form.Item>
                 </div>
 
-                <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
+                <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 pb-4">
                   <Dragger {...propsDagger}>
                     {image == null ? (
                       <>
@@ -494,7 +490,7 @@ const Tambah = ({ props }) => {
                       </>
                     ) : (
                       <Image
-                        style={{ width: "100%" }}
+                        style={{ width: "100%", height: "100%" }}
                         preview={false}
                         src={image}
                       />
@@ -587,7 +583,7 @@ Tambah.getInitialProps = async (context) => {
       locations,
       manufactures,
       subCategories,
-      dataProduct
+      dataProduct,
     },
   };
 };
@@ -663,17 +659,17 @@ const fetchDataLocations = async (cookies) => {
 };
 
 const fetchDataProduct = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/products?populate=deep";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/products?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
 
-    const req = await fetch(endpoint, options);
-    return req;
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
 export default Tambah;
