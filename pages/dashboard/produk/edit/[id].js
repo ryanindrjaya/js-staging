@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
@@ -58,6 +58,7 @@ const Edit = ({ props }) => {
 
   const [subCategories, setSubCategories] = useState([]);
   const [selectedSubCategory, setSelectedSubCategory] = useState();
+  const [products, setProducts] = useState(props.products);
 
   const [descUnit, setDescUnit] = useState();
 
@@ -341,6 +342,42 @@ const Edit = ({ props }) => {
     setDescUnit(descUnit);
   };
 
+  useEffect(() => {
+    var manufacture = "0000";
+    var group = "00";
+    var manufacturesData = "00";
+    var kodeProduct = product.attributes?.SKU ?? "";
+    var categoryData = "0";
+
+    products?.data?.forEach((element) => {
+      if(element.attributes.manufacture.data.id == selectedManufactures &&
+        element.attributes.group.data.id == selectedGroups &&
+        element.attributes.category.data.id == category
+      ) { manufacturesData++; }
+    });
+      manufacturesData = String(manufacturesData + 1).padStart(3, "0");
+
+    groups?.data?.forEach((element) => {
+      if(element.id == selectedGroups) group = element.attributes.code;
+    });
+
+    manufactures?.data?.forEach((element) => {
+      if(element.id == selectedManufactures) manufacture = element.attributes.code;
+    });
+
+    group = String(group).padStart(2, "0");
+    manufacture = String(manufacture).padStart(4, "0");
+
+    if(category) categoryData = category;
+
+    if (category != undefined && selectedManufactures.length > 0 && selectedGroups.length > 0){
+      kodeProduct = categoryData + group + manufacture + manufacturesData;
+    }
+
+    form.setFieldsValue({ SKU: kodeProduct });
+    
+  }, [category, selectedManufactures, selectedGroups]);
+
   const onFinishFailed = () => {
     const error = form.getFieldsError();
     error.forEach((value) => {
@@ -511,6 +548,9 @@ Edit.getInitialProps = async (context) => {
   const reqProduct = await fetchProduct(cookies, context);
   const product = await reqProduct.json();
 
+  const reqProducts = await fetchDataProduct(cookies, context);
+  const products = await reqProducts.json();
+
   const categoryId = product.data.attributes.category.data?.id;
 
   const reqCategories = await fetchDataCategories(cookies);
@@ -541,6 +581,7 @@ Edit.getInitialProps = async (context) => {
   return {
     props: {
       product,
+      products,
       categories,
       groups,
       locations,
@@ -563,6 +604,20 @@ const fetchProduct = async (cookies, context) => {
   const req = await fetch(endpoint, options);
 
   return req;
+};
+
+const fetchDataProduct = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/products?populate=deep";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
 };
 
 const fetchDataCategories = async (cookies) => {
