@@ -338,14 +338,13 @@ const Tambah = ({ props }) => {
     var manufactures = "0000";
     var groups = "00";
     var manufacturesData = "00";
-    var kodeProduct = 0;
+    var kodeProduct = null;
     var categoryData = "0";
 
     product.data.forEach((element) => {
       if(element.attributes.manufacture.data.id == selectedManufactures) manufacturesData++;
     });
       manufacturesData = String(manufacturesData + 1).padStart(3, "0");
-      kodeProduct = categoryData + groups + manufactures + manufacturesData;
 
     if(selectedManufactures) manufactures = String(selectedManufactures).padStart(4, "0");
 
