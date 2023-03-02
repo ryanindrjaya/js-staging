@@ -46,7 +46,7 @@ export default function Manufactures({ onSelect, initialValue, selectedManufacur
 
         if (req.status == 200) {
           const manufactureResult = res.data.map((manufacture) => ({
-            label: `${manufacture.attributes.name}`,
+            label: `${manufacture.attributes.code} - ${manufacture.attributes.name}`,
             value: manufacture.id,
           }));
 
