@@ -460,15 +460,15 @@ const Edit = ({ props }) => {
                       ""
                     }`}
                   />
-                  <Manufactures
-                    data={manufactures.data}
-                    initialValue={product.attributes?.manufacture?.data}
-                    onSelect={setSelectedManufactures}
-                  />
                   <Groups
                     data={groups}
                     onSelect={setSelectedGroup}
                     initialValue={product.attributes?.group?.data}
+                  />
+                  <Manufactures
+                    data={manufactures.data}
+                    initialValue={product.attributes?.manufacture?.data}
+                    onSelect={setSelectedManufactures}
                   />
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
