@@ -59,9 +59,17 @@ function Pembelian({ props }) {
     router.push("/dashboard/pembelian/order_pembelian/tambah");
   };
 
-  const handleUpdate = (id) => {
-    // router.push("/dashboard/pembelian/order_pembelian/edit/" + id);
-    openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
+  const handleUpdate = (row) => {
+    if (row?.attributes?.status !== "Diterima") {
+      router.push("/dashboard/pembelian/order_pembelian/edit/" + row.id);
+      // console.log("redirect om");
+    } else {
+      openNotificationWithIcon(
+        "info",
+        "Transaksi Selesai",
+        "Transaksi yang sudah memiliki status 'Diterima' tidak dapat diedit kembali"
+      );
+    }
   };
 
   const handleDelete = async (id) => {
@@ -91,7 +99,8 @@ function Pembelian({ props }) {
 
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases?pagination[page]=" + page;
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL + "/purchases?pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -117,7 +126,6 @@ function Pembelian({ props }) {
     }
   };
 
-
   const filterDuplicateData = (arr) => {
     const seen = new Set();
 
@@ -129,7 +137,6 @@ function Pembelian({ props }) {
 
     return filteredArr;
   };
-
 
   const onSearch = async (e) => {
     if (e.target.value.length >= 2) {
@@ -181,12 +188,18 @@ function Pembelian({ props }) {
   const handleChangeStatus = async (values, id) => {
     // clean object
     for (var key in values.attributes) {
-      if (values.attributes[key] === null || values.attributes[key] === undefined) {
+      if (
+        values.attributes[key] === null ||
+        values.attributes[key] === undefined
+      ) {
         delete values.attributes[key];
       }
     }
 
-    if (values.attributes?.document?.data === null || values.attributes?.document?.data === undefined) {
+    if (
+      values.attributes?.document?.data === null ||
+      values.attributes?.document?.data === undefined
+    ) {
       delete values.attributes?.document;
     }
 
@@ -222,9 +235,17 @@ function Pembelian({ props }) {
       const response = await fetchData(cookies);
       setPurchase(response);
 
-      openNotificationWithIcon("success", "Status berhasil dirubah", "Status berhasil dirubah. Silahkan cek detail order pembelian");
+      openNotificationWithIcon(
+        "success",
+        "Status berhasil dirubah",
+        "Status berhasil dirubah. Silahkan cek detail order pembelian"
+      );
     } else {
-      openNotificationWithIcon("error", "Status gagal dirubah", "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah");
+      openNotificationWithIcon(
+        "error",
+        "Status gagal dirubah",
+        "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah"
+      );
     }
   };
 
@@ -270,9 +291,15 @@ function Pembelian({ props }) {
                   width: 200,
                 }}
               />
-              <button onClick={handleAdd} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5">
+              <button
+                onClick={handleAdd}
+                type="button"
+                className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+              >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
+                  <a className="text-white no-underline text-xs sm:text-xs">
+                    + Tambah
+                  </a>
                 </div>
               </button>
             </div>

@@ -18,7 +18,7 @@ const CreateOrderSale = async (
     tempProductListId.push({ id: element });
   });
 
-  values.status = "Dipesan"
+  values.status = "Diproses"
   values.purchasing_payments = null;
 
   var data = {
