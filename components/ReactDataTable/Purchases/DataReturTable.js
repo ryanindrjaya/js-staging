@@ -440,7 +440,7 @@ export default function ReactDataTable({
       sortable: true,
       selector: (row, idx) => {
         var defaultLoc = null;
-        if(locProduct != undefined) defaultLoc = locProduct[idx].data.id; 
+        if(locProduct != undefined) defaultLoc = locProduct[idx]?.data.id; 
 
         return (
           <>
