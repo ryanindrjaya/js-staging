@@ -25,7 +25,7 @@ const CreateSale = async (
 
   values.total = grandTotal;
 
-  values.status = "Dipesan"
+  values.status = "Diproses"
   values.purchasing_payments = null;
 
   if(page == "sales sale"){
