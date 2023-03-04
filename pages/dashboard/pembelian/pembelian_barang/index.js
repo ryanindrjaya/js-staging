@@ -73,7 +73,8 @@ function Pembelian({ props }) {
 
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases?pagination[page]=" + page;
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL + "/purchases?pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -98,7 +99,6 @@ function Pembelian({ props }) {
       console.log(error);
     }
   };
-
 
   const filterDuplicateData = (arr) => {
     const seen = new Set();
@@ -149,77 +149,171 @@ function Pembelian({ props }) {
     onChangeStatus("Dibatalkan", row);
   };
 
-  const onChangeStatus = (status, row) => {
+  const onChangeStatus = async (status, row) => {
     row.attributes.status = status;
-    const dataStatus = row;
+    console.log(status);
+    // const dataStatus = row;
 
-    if (status === "Selesai") {
+    if (status === "Diterima" || status === "Sebagian Diterima") {
       // invetory handle
-      createInventory(row);
+      console.log("store to inventory");
+      // createInventory(row);
     }
 
-    handleChangeStatus(dataStatus, dataStatus.id);
+    const poData = row?.attributes?.purchase?.data;
+
+    await changeStatusLPB(row, row.id);
+    await changeStatusPO(poData, status);
   };
 
-  const handleChangeStatus = async (values, id) => {
-    // // clean object
-    delete values.attributes.purchase;
-    for (var key in values.attributes) {
-      if (values.attributes[key] === null || values.attributes[key] === undefined) {
-        delete values.attributes[key];
+  const changeStatusPO = async (poData, status) => {
+    try {
+      // cleaning
+      delete poData.attributes?.document;
+      for (var key in poData.attributes) {
+        if (
+          poData.attributes[key] === null ||
+          poData.attributes[key] === undefined
+        ) {
+          delete poData.attributes[key];
+        }
       }
-    }
 
-    if (values.attributes?.document?.data === null || values.attributes?.document?.data === undefined) {
-      delete values.attributes?.document;
-    }
+      poData.attributes.status = status;
+      poData.attributes.location = {
+        id: poData.attributes?.location?.data?.id,
+      };
+      poData.attributes.supplier = {
+        id: poData.attributes?.supplier?.data?.id,
+      };
+      poData.attributes.purchase_details =
+        poData.attributes?.purchase_details?.data;
 
-    var purchasing_details = [];
-    var purchasing_payments = [];
-    values.attributes.purchasing_details.data.forEach((element) => {
-      purchasing_details.push({ id: element.id });
-    });
-    values.attributes.purchasing_payments.data.forEach((element) => {
-      purchasing_payments.push({ id: element.id });
-    });
+      const values = {
+        data: poData.attributes,
+      };
 
-    values.attributes.supplier = { id: values.attributes.supplier.data.id };
-    values.attributes.location = { id: values.attributes.location.data.id };
-    values.attributes.purchasing_details = purchasing_details;
-    values.attributes.purchasing_payments = purchasing_payments;
+      console.log(values);
 
-    const newValues = {
-      data: values.attributes,
-    };
+      const JSONdata = JSON.stringify(values);
+      const cookies = nookies.get(null, "token");
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/" + poData.id;
+      const options = {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+        body: JSONdata,
+      };
 
-    const JSONdata = JSON.stringify(newValues);
-    const cookies = nookies.get(null, "token");
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings/" + id;
+      const req = await fetch(endpoint, options);
 
-    const options = {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-      body: JSONdata,
-    };
-
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
-
-    if (req.status === 200) {
-      const response = await fetchData(cookies);
-
-      if (res.data.attributes.status === "Dibatalkan") {
-        router.reload();
+      if (req.status === 200) {
+        openNotificationWithIcon(
+          "success",
+          "Status PO berhasil dirubah",
+          "Status PO berhasil dirubah. Silahkan cek tabel PO"
+        );
       } else {
-        setPurchase(response);
+        openNotificationWithIcon(
+          "error",
+          "Status PO gagal dirubah",
+          "Status PO gagal dirubah. Silahkan cek log untuk error detail"
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      openNotificationWithIcon(
+        "error",
+        "Status PO gagal dirubah",
+        "Status PO gagal dirubah. Silahkan cek log untuk error detail"
+      );
+    }
+  };
+
+  const changeStatusLPB = async (values, id) => {
+    try {
+      // // clean object
+      delete values.attributes.purchase;
+      for (var key in values.attributes) {
+        if (
+          values.attributes[key] === null ||
+          values.attributes[key] === undefined
+        ) {
+          delete values.attributes[key];
+        }
       }
 
-      openNotificationWithIcon("success", "Status berhasil dirubah", "Status berhasil dirubah. Silahkan cek LPB");
-    } else {
-      openNotificationWithIcon("error", "Status gagal dirubah", "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah");
+      if (
+        values.attributes?.document?.data === null ||
+        values.attributes?.document?.data === undefined
+      ) {
+        delete values.attributes?.document;
+      }
+
+      var purchasing_details = [];
+      var purchasing_payments = [];
+      values.attributes.purchasing_details.data.forEach((element) => {
+        purchasing_details.push({ id: element.id });
+      });
+      values.attributes.purchasing_payments.data.forEach((element) => {
+        purchasing_payments.push({ id: element.id });
+      });
+
+      values.attributes.supplier = { id: values.attributes.supplier.data.id };
+      values.attributes.location = { id: values.attributes.location.data.id };
+      values.attributes.purchasing_details = purchasing_details;
+      values.attributes.purchasing_payments = purchasing_payments;
+
+      const newValues = {
+        data: values.attributes,
+      };
+
+      const JSONdata = JSON.stringify(newValues);
+      const cookies = nookies.get(null, "token");
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings/" + id;
+
+      const options = {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+        body: JSONdata,
+      };
+
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
+
+      if (req.status === 200) {
+        const response = await fetchData(cookies);
+
+        if (res.data.attributes.status === "Dibatalkan") {
+          router.reload();
+        } else {
+          setPurchase(response);
+        }
+
+        openNotificationWithIcon(
+          "success",
+          "Status LPB berhasil dirubah",
+          "Status LPB berhasil dirubah. Silahkan cek LPB"
+        );
+      } else {
+        openNotificationWithIcon(
+          "error",
+          "Status LPB gagal dirubah",
+          "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah"
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      openNotificationWithIcon(
+        "error",
+        "Status LPB gagal dirubah",
+        "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah"
+      );
     }
   };
 
@@ -265,9 +359,15 @@ function Pembelian({ props }) {
                   width: 200,
                 }}
               />
-              <button onClick={handleAdd} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5">
+              <button
+                onClick={handleAdd}
+                type="button"
+                className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+              >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
+                  <a className="text-white no-underline text-xs sm:text-xs">
+                    + Tambah
+                  </a>
                 </div>
               </button>
             </div>

@@ -36,9 +36,7 @@ export default function ReactDataTable({
     console.log("onCancel");
   };
 
-  const onEdit = (id) => {
-    onUpdate(id);
-  };
+ 
 
   function formatMyDate(value, locale = "id-ID") {
     return new Date(value).toLocaleDateString(locale);
@@ -74,7 +72,7 @@ export default function ReactDataTable({
         <div></div>
       ) : (
         <button
-          onClick={() => onEdit(row.id)}
+          onClick={() =>  onUpdate(row)}
           className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
         >
           <EditOutlined className="mr-2 mt-0.5 float float-left" />
@@ -127,21 +125,18 @@ export default function ReactDataTable({
           <Select
             defaultValue={row.attributes.status}
             bordered={false}
-            disabled/*={row.attributes.status === "Diterima" || row.attributes.status === "Selesai"}*/
+            disabled /*={row.attributes.status === "Diterima" || row.attributes.status === "Selesai"}*/
             onChange={(e) => onChangeStatus(e, row)}
-            style={{width: 140}}
+            style={{ width: 140 }}
           >
             <Option value="Dipesan">
               <Tag color="default">Dipesan</Tag>
             </Option>
-            {/*<Option value="Diterima">*/}
-            {/*  <Tag color="success">Diterima</Tag>*/}
-            {/*</Option>*/}
-            <Option value="Selesai sebagian">
-              <Tag color="warning">Selesai sebagian</Tag>
+            <Option value="Sebagian Diterima">
+              <Tag color="warning">Sebagian Diterima</Tag>
             </Option>
-            <Option value="Selesai">
-              <Tag color="success">Selesai</Tag>
+            <Option value="Diterima">
+              <Tag color="success">Diterima</Tag>
             </Option>
           </Select>
         );

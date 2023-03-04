@@ -3,7 +3,14 @@ import AlertDialog from "../../Alert/Alert";
 import { InputNumber, Select, Form, Row } from "antd";
 import { useDispatch } from "react-redux";
 
-export default function ReactDataTable({ calculatePriceAfterDisc, productSubTotal, setProductSubTotal, products, setTotalPrice, formObj }) {
+export default function ReactDataTable({
+  calculatePriceAfterDisc,
+  productSubTotal,
+  setProductSubTotal,
+  products,
+  setTotalPrice,
+  formObj,
+}) {
   const dispatch = useDispatch();
 
   var defaultDp1 = 0;
@@ -16,7 +23,11 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    useGrouping: true,
+    groupingSeparator: ",",
+    decimalSeparator: ".",
   });
 
   const onDeleteProduct = (value) => {
@@ -37,7 +48,12 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
       priceUnit = data.attributes.buy_price_5;
     }
 
-    dispatch({ type: "CHANGE_PRODUCT_UNIT", unit: value, product: data, index });
+    dispatch({
+      type: "CHANGE_PRODUCT_UNIT",
+      unit: value,
+      product: data,
+      index,
+    });
     onChangePriceUnit(priceUnit, data, value, index);
     tempIndex = 0;
   };
@@ -89,6 +105,9 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
     formObj.setFieldsValue({
       harga_satuan: {
         [indexRow]: value,
+      },
+      disc_rp: {
+        [indexRow]: data.attributes[`purchase_discount_${index}`],
       },
     });
   };
@@ -178,7 +197,9 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
                     width: "150px",
                     marginRight: "10px",
                   }}
-                  formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                  formatter={(value) =>
+                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
                   parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                 />
               </Form.Item>
@@ -208,7 +229,6 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
             <Row>
               <Form.Item
                 name={["jumlah_qty", `${idx}`]}
-                // initialValue={products.productInfo[idx]?.qty ?? 1}
                 noStyle
               >
                 <InputNumber
@@ -228,7 +248,6 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
 
               <Form.Item
                 name={["jumlah_option", `${idx}`]}
-                // initialValue={defaultOption}
                 noStyle
               >
                 <Select
@@ -242,35 +261,50 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
                   {row.attributes?.unit_1 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_1 === null} value={1}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_1 === null}
+                      value={1}
+                    >
                       {row.attributes?.unit_1}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_2 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_2 === null} value={2}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_2 === null}
+                      value={2}
+                    >
                       {row.attributes?.unit_2}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_3 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_3 === null} value={3}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_3 === null}
+                      value={3}
+                    >
                       {row.attributes?.unit_3}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_4 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_4 === null} value={4}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_4 === null}
+                      value={4}
+                    >
                       {row.attributes?.unit_4}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_5 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_5 === null} value={5}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_5 === null}
+                      value={5}
+                    >
                       {row.attributes?.unit_5}
                     </Select.Option>
                   )}
@@ -287,7 +321,10 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
       selector: (row, idx) => {
         var defaultDisc = 0;
         if (products.productInfo[idx]?.disc) {
-          defaultDisc = products.productInfo[idx].disc;
+          defaultDisc = products?.productInfo[idx]?.disc;
+        } else {
+          defaultDisc =
+            products?.productList[idx]?.attributes?.purchase_discount_1;
         }
 
         return (
@@ -302,7 +339,9 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
                   width: "100px",
                   marginRight: "10px",
                 }}
-                formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                formatter={(value) =>
+                  value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
                 parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
               />
             </Form.Item>
