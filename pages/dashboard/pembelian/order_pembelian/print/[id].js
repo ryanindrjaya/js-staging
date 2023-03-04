@@ -7,8 +7,8 @@ const Print = ({ props }) => {
   const name = process.env.STAKEHOLDER_NAME;
   const noPO = props.purchases.data.attributes.no_po;
   const date = new Date(props.purchases.data.attributes.order_date).toLocaleDateString("id-ID");
-  const supplierName = props.purchases.data.attributes.supplier.data.attributes.name;
-  const supplierAddress = props.purchases.data.attributes.supplier.data.attributes.address;
+  const supplierName = props.purchases.data.attributes.supplier?.data?.attributes?.name;
+  const supplierAddress = props.purchases.data.attributes.supplier?.data?.attributes?.address;
 
   const destination = props.purchases.data.attributes.location.data.attributes;
   const destionationName = destination.name;
