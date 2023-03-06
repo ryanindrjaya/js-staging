@@ -324,14 +324,14 @@ function Retur({ props }) {
     status: returData.attributes.status,
     });
 
-    returData.attributes.retur_details.data.forEach((element, index) => { console.log("retur details", element)
+    returData.attributes.retur_details.data.forEach((element, index) => {
       var indexUnit = 1;
 
       var dateStringDetail = new Date(element.attributes.expired_date);
       var momentObjDetail = moment(dateStringDetail, "YYYY-MM-DD");
       var momentStringDetail = momentObjDetail.format("MM-DD-YYYY");
 
-      locProduct.push(element.attributes.location)
+      locProduct.push(element.attributes.location);
       expProduct.push(moment(momentStringDetail));
       batch.push(element.attributes.batch);
 

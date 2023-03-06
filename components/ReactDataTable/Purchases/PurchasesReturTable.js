@@ -235,12 +235,12 @@ export default function ReactDataTable({
     {
       name: "Lokasi",
       width: "200px",
-      selector: (row) => row.attributes?.location.data.attributes.name,
+      selector: (row) => row.attributes?.location?.data?.attributes?.name,
     },
     {
       name: "Supplier",
       width: "180px",
-      selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
+      selector: (row) => row.attributes?.supplier?.data?.attributes?.name ?? "-",
     },
     //{
     //  name: "Status Pembayaran",

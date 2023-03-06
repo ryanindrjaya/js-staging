@@ -330,7 +330,7 @@ function Retur({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="no_retur"
-                    initialValue={`Retur/ET/${totalReturs}/${mm}/${yyyy}`}
+                    initialValue={`RB/ET/${totalReturs}/${mm}/${yyyy}`}
                     rules={[
                       {
                         required: true,

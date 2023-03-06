@@ -8,8 +8,10 @@ import { Form, Input, DatePicker, Button, message, Upload, Select, Spin, notific
 import { UploadOutlined } from "@ant-design/icons";
 import nookies from "nookies";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
+import LoadingAnimations from "@iso/components/Animations/Loading";
 import { useSelector, useDispatch } from "react-redux";
 import calculatePrice from "../../utility/calculatePrice";
+import DataReturTable from "@iso/components/ReactDataTable/Purchases/DataReturTable";
 import LPBTable from "@iso/components/ReactDataTable/Purchases/LPBTable";
 import createDetailReturFunc from "../../utility/createReturDetail";
 import createReturLPBFunc from "../../utility/createReturLPB";
@@ -71,7 +73,7 @@ const fetchDataLocation = async (cookies) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-lpbs?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -110,6 +112,10 @@ function ReturLPB({ props }) {
   const router = useRouter();
 
   const tempList = [];
+  const [isFetchinData, setIsFetchingData] = useState(false);
+  const [locProduct, setLocProduct] = useState([]);
+  const [expProduct, setExpProduct] = useState([]);
+  const [batch, setBatch] = useState([]);
 
   var totalReturs = String(props.dataLPBPage?.meta?.pagination.total + 1).padStart(3, "0");
   var today = new Date();
@@ -136,14 +142,17 @@ function ReturLPB({ props }) {
     setLoading(false);
   };
 
-  const createDetailRetur = async () => {
-    console.log("dataValues cdr : ", dataValues);
-    createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-lpb-details", dataValues);
+  const createDetailRetur = async () => {  console.log("create", dataValues);
+    //dataValues.expired_date = expProduct;
+    //dataValues.product_location = locProduct;
+    //dataValues.batch = batch;
+    createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-details", dataValues);
   };
 
   const createRetur = async (values) => {
-    console.log("Retur");
-    console.log(values);
+    values.supplier = data.attributes.supplier.data;
+    values.location = data.attributes.location.data;
+    values.status = "Draft";
     createReturLPBFunc(grandTotal, totalPrice, values, listId, form, router, data);
   };
 
@@ -165,26 +174,46 @@ function ReturLPB({ props }) {
     }
   };
 
-  const calculatePriceAfterDisc = (row) => {
-    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
+  const calculatePriceAfterDisc = (row, index) => {
+    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index);
 
     return formatter.format(total);
   };
 
   const fetchReturdata = async (data) => {
     //clearData();
-    const dataRetur = data.data.data.attributes;
-    const purchase_details = dataRetur.purchasing_details.data;
+    const dataLpb = data.data.data.attributes;
+    const purchase_details = dataLpb.purchasing_details.data;
 
     dispatch({
       type: "SET_PREORDER_DATA",
       data: data.data,
     });
 
-    purchase_details.forEach((element) => {
+    purchase_details.forEach((element, index) => { console.log("el", element)
       var indexUnit = 1;
       var unitOrder = element.attributes.unit_order;
       var productUnit = element.attributes.product.data.attributes;
+
+      var dateStringDetail = new Date(element.attributes.expired_date);
+      var momentObjDetail = moment(dateStringDetail, "YYYY-MM-DD");
+      var momentStringDetail = momentObjDetail.format("MM-DD-YYYY");
+
+      locProduct.push(element.attributes.location);
+      expProduct.push(moment(momentStringDetail));
+      batch.push(element.attributes.batch);
+
+      form.setFieldsValue({
+          product_location: {
+            [element.attributes.product.data.id]: element.attributes.location,
+          },
+          expired_date: {
+            [element.attributes.product.data.id]: moment(momentStringDetail),
+          },
+          batch: {
+            [element.attributes.product.data.id]: element.attributes.batch,
+          },
+      });
 
       for (let index = 1; index < 6; index++) {
         if (unitOrder === productUnit[`unit_${index}`]) {
@@ -193,9 +222,9 @@ function ReturLPB({ props }) {
       }
 
       const productId = element.attributes.product.data.id;
-      var dateString = element.attributes.expired_date;
-      var momentObj = moment(dateString, "YYYY-MM-DD");
-      var momentString = momentObj.format("MM-DD-YYYY");
+      //var dateString = element.attributes.expired_date;
+      //var momentObj = moment(dateString, "YYYY-MM-DD");
+      //var momentString = momentObj.format("MM-DD-YYYY");
 
       var disc = 0;
       if (element.attributes.disc == null) {
@@ -204,50 +233,35 @@ function ReturLPB({ props }) {
         disc = element.attributes.disc;
       }
 
-      form.setFieldsValue({
-        product_location: {
-          [productId]: element.attributes.product.data.attributes.locations.data[0].id,
-        },
-        disc_rp: {
-          [productId]: disc,
-        },
-        jumlah_option: {
-          [productId]: element.attributes.unit_order,
-        },
-        jumlah_qty: {
-          [productId]: element.attributes.total_order,
-        },
-        harga_satuan: {
-          [productId]: parseInt(element.attributes.unit_price),
-        },
-        expired_date: {
-          [productId]: moment(momentString),
-        },
-        batch: {
-          [productId]: element.attributes.batch,
-        },
-      });
-
-      // SET INITIAL PRODUCT
-      dispatch({
+      //SET INITIAL PRODUCT
+      dispatch({ 
         type: "SET_INITIAL_PRODUCT",
         product: element.attributes.product.data,
-        qty: element.attributes.total_order,
+        qty: parseInt(element.attributes.total_order),
         unit: element.attributes.unit_order,
         unitIndex: indexUnit,
-        priceUnit: element.attributes.unit_price,
-        disc: element.attributes.disc,
+        priceUnit: parseInt(element.attributes.unit_price),
+        disc: parseInt(disc),
         priceAfterDisc: element.attributes.unit_price_after_disc,
         subTotal: element.attributes.sub_total,
-        d1: element.attributes.product.data.attributes.unit_1_dp1,
-        d2: element.attributes.product.data.attributes.unit_1_dp2,
-        d3: element.attributes.product.data.attributes.unit_1_dp3,
-        //batch: element.attributes.batch,
-        //expired_date: moment(momentString),
+        d1: element.attributes.dp1,
+        d2: element.attributes.dp2,
+        d3: element.attributes.dp3,
+        index,
       });
+
+      //products.productList.forEach((element) => {
+      //  console.log("masuk");
+      //  form.setFieldsValue({
+      //    harga_satuan: {
+      //      [element.id]: element.attributes.buy_price_1,
+      //    },
+      //  });
+      //});
+
     });
     setTimeout(() => {
-      //setIsFetchingData(false);
+      setIsFetchingData(false);
     }, 3000);
   };
 
@@ -283,6 +297,7 @@ function ReturLPB({ props }) {
 
   useEffect(() => {
     clearData();
+    setIsFetchingData(true);
     fetchReturdata(props);
   }, []);
 
@@ -318,8 +333,8 @@ function ReturLPB({ props }) {
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    name="no_retur_LPB"
-                    initialValue={`RB/${totalReturs}/${mm}/${yyyy}`}
+                    name="no_retur"
+                    initialValue={`RB/ET/${totalReturs}/${mm}/${yyyy}`}
                     rules={[
                       {
                         required: true,
@@ -356,17 +371,34 @@ function ReturLPB({ props }) {
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
                   <SearchBar form={form} tempList={tempList} onChange={onChangeProduct} selectedProduct={selectedProduct} />
                 </div>
-                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                  <LPBTable
-                    products={products}
-                    //productTotalPrice={productTotalPrice}
-                    setTotalPrice={setTotalPrice}
-                    //setProductTotalPrice={setProductTotalPrice}
-                    calculatePriceAfterDisc={calculatePriceAfterDisc}
-                    productSubTotal={productSubTotal}
-                    locations={locations}
-                    formObj={form}
-                  />
+                <div className="w-full md:w-4/4 px-3 mb-2 mt-2 md:mb-0">
+                  {isFetchinData ? (
+                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
+                    <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
+                      <LoadingAnimations />
+                    </div>
+                    <div className="text-sm align-middle text-center animate-pulse text-slate-400">
+                      Sedang Mengambil Data
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
+                    <DataReturTable
+                        products={products}
+                        productTotalPrice={productTotalPrice}
+                        setTotalPrice={setTotalPrice}
+                        setProductTotalPrice={setProductTotalPrice}
+                        setProductSubTotal={setProductSubTotal}
+                        calculatePriceAfterDisc={calculatePriceAfterDisc}
+                        productSubTotal={productSubTotal}
+                        locations={locations}
+                        formObj={form}
+                        locProduct={locProduct}
+                        expProduct={expProduct}
+                        batch={batch}
+                    />
+                  </div>
+                )}
                 </div>
               </div>
               <div className="flex justify-start md:justify-between">

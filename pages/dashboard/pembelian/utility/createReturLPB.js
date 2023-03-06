@@ -18,11 +18,9 @@ const CreateReturLPB = async (
   setListLPBdetail
 ) => {
   // CLEANING DATA
-  tempProductListId = []; console.log("masuk put relation", tempProductListId)
+  tempProductListId = [];
 
-    console.log("Masuk LPB"); console.log(values); console.log(dataLPB); 
-
-  listId.forEach((element) => { console.log("masuk put listid", listId)
+  listId.forEach((element) => {
     tempProductListId.push({ id: element });
   });
 
@@ -31,18 +29,18 @@ const CreateReturLPB = async (
   };
     
   const req = await createData(data); 
-  const res = await req.json();
-    console.log("ini data 1 : "); console.log(res);
+  const res = await req.json(); console.log("res", res.data.attributes);
+
   if (req.status === 200) {
-    //putStatus(values.purchasing, dataLPB, tempListId);
     await putRelationReturLPB(res.data.id, res.data.attributes, form, router);
+    await putStatus(values.purchasing, dataLPB, tempListId);
   } else {
     openNotificationWithIcon("error");
   }
 };
 
 const createData = async (data) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-lpbs";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs";
     const JSONdata = JSON.stringify(data);
 
   const options = {
@@ -62,12 +60,23 @@ const createData = async (data) => {
 const putStatus = async (id, value, listdetail) => {
     const dataLPB = {
         data: value.attributes,
-    };
+    }; console.log("put status", dataLPB);
+
+    var listLPBdetail = dataLPB.data.purchasing_details.data;
+    var lpbDetailId = [];
+    listLPBdetail?.forEach((element) => lpbDetailId.push(element.id));
+
+    var listLPBpayment = dataLPB.data.purchasing_payments.data;
+    var lpbPaymentId = [];
+    listLPBpayment?.forEach((element) => lpbPaymentId.push(element.id));
 
     dataLPB.data.status = "Diretur";
     dataLPB.data.supplier = dataLPB.data.supplier.data.id;
     dataLPB.data.location = dataLPB.data.location.data.id;
-    var listLPBdetailId = dataLPB.attributes.purchasing_details.data;
+    dataLPB.data.purchase = dataLPB.data.purchase.data.id;
+
+    dataLPB.data.purchasing_details = lpbDetailId;
+    dataLPB.data.purchasing_payments = lpbPaymentId;
 
     const JSONdata = JSON.stringify(dataLPB);
     const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings/" + id;
@@ -84,10 +93,10 @@ const putStatus = async (id, value, listdetail) => {
     //const res = await req.json();
 
     if (req.status === 200) {
-        listLPBdetailId.forEach((element) => {
+        //listLPBdetailId.forEach((element) => {
             //listLPBdetail.push(element.id);
-            console.log("creat nih : "); console.log(element);
-        });
+        console.log("put lpb sukses");
+        //});
         //tempListId.push(?.id);
     } else {
         openNotificationWithIcon("error");
@@ -100,7 +109,7 @@ const putRelationReturLPB = async (id, value, form, router) => {
     data: value,
   };
 
-  dataRetur.data.retur_lpb_details = tempProductListId;
+  dataRetur.data.retur_details = tempProductListId;
 
   // clean object
   for (var key in dataRetur) {
@@ -110,7 +119,7 @@ const putRelationReturLPB = async (id, value, form, router) => {
   }
 
   const JSONdata = JSON.stringify(dataRetur);
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-lpbs/" + id;
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs/" + id;
   const options = {
     method: "PUT",
     headers: {
@@ -123,7 +132,7 @@ const putRelationReturLPB = async (id, value, form, router) => {
   const req = await fetch(endpoint, options);
   //const res = await req.json();
 
-  if (req.status === 200) { console.log("req status :"); console.log(req);
+  if (req.status === 200) {
     form.resetFields();
     router.replace("/dashboard/pembelian/pembelian_barang");
     openNotificationWithIcon("success");

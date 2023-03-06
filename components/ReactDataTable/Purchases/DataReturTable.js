@@ -440,7 +440,7 @@ export default function ReactDataTable({
       sortable: true,
       selector: (row, idx) => {
         var defaultLoc = null;
-        if(locProduct != undefined) defaultLoc = locProduct[idx]?.data.id; 
+        if(locProduct) defaultLoc = locProduct[idx]?.data.id; 
 
         return (
           <>
@@ -483,7 +483,7 @@ export default function ReactDataTable({
       sortable: true,
       selector: (row, idx) => {
         var defaultEXP = null;
-        if(expProduct != undefined) defaultEXP = expProduct[idx]; 
+        if(expProduct) defaultEXP = expProduct[idx]; 
 
         return (
           <>
@@ -510,7 +510,7 @@ export default function ReactDataTable({
       sortable: true,
       selector: (row, idx) => {
         var defaultBatch = null;
-        if(batch != undefined) defaultBatch = batch[idx];
+        if(batch) defaultBatch = batch[idx];
 
         return (
           <>
@@ -532,7 +532,7 @@ export default function ReactDataTable({
       },
     },
     {
-      name: "Harga Satuan",
+      name: "Harga Satuan Setelah Diskon",
       width: "200px",
       selector: (row, idx) => calculatePriceAfterDisc(row, idx),
     },
