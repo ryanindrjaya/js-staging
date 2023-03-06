@@ -8,7 +8,9 @@ const cookies = nookies.get(null, "token");
 const getIndexUnit = (data, idx) => {
   var unitIndex = 1;
   for (let index = 1; index < 6; index++) {
-    if (data.attributes[`unit_${index}`] === data.attributes[`unit_${idx + 1}`]) {
+    if (
+      data.attributes[`unit_${index}`] === data.attributes[`unit_${idx + 1}`]
+    ) {
       unitIndex = index;
     }
   }
@@ -16,16 +18,23 @@ const getIndexUnit = (data, idx) => {
   return unitIndex;
 };
 
-const createDetailOrder = (values, products, productTotalPrice, productSubTotal, setListId, url) => {
+const createDetailOrder = (
+  values,
+  products,
+  productTotalPrice,
+  productSubTotal,
+  setListId,
+  url
+) => {
   // console.log(values);
   console.log("values", values);
   console.log("product", products);
   console.log("productList", products.productList);
   products.productList.forEach((element, idx) => {
-    var subTotal = unitPriceAfterDisc * qty;
-
     const id = element.id;
+    const unitByIndex = getIndexUnit(element, idx);
 
+    var subTotal = unitPriceAfterDisc * qty;
     var batch = values.batch[idx];
     var location = values.product_location[idx];
     var expDate = new Date(values.expired_date[idx]);
@@ -35,16 +44,38 @@ const createDetailOrder = (values, products, productTotalPrice, productSubTotal,
       .format();
 
     var qty = products.productInfo[idx]?.qty ?? 1;
-    var disc = products.productInfo[idx]?.disc ?? 0;
-    var unit = products.productInfo?.[idx]?.unit ?? element.attributes.unit_1;
-    var unitPrice = products.productInfo?.[idx]?.priceUnit ?? element.attributes.buy_price_1;
+    var disc =
+      products.productInfo[idx]?.disc ??
+      element.attributes[`purchase_discount_${unitByIndex}`];
+    var unit =
+      products.productInfo?.[idx]?.unit ??
+      element.attributes[`unit_${unitByIndex}`];
+    var dp1 =
+      products.productInfo?.[idx]?.d1 ??
+      element.attributes[`unit_${unitByIndex}_dp1`] ??
+      0;
+    var dp2 =
+      products.productInfo?.[idx]?.d2 ??
+      element.attributes[`unit_${unitByIndex}_dp2`] ??
+      0;
+    var dp3 =
+      products.productInfo?.[idx]?.d3 ??
+      element.attributes[`unit_${unitByIndex}_dp3`] ??
+      0;
+    var unitPrice =
+      products.productInfo?.[idx]?.priceUnit ?? element.attributes.buy_price_1;
     var unitPriceAfterDisc = productTotalPrice?.[idx];
     var subTotal = productSubTotal?.[idx];
-    var dp1 = products.productInfo?.[idx]?.d1 ?? element.attributes[`unit_1_dp1`] ?? 0;
-    var dp2 = products.productInfo?.[idx]?.d2 ?? element.attributes[`unit_1_dp2`] ?? 0;
-    var dp3 = products.productInfo?.[idx]?.d3 ?? element.attributes[`unit_1_dp3`] ?? 0;
 
-    console.log("new data", batch, location, expDate, newExptDate);
+    // console.log("qty", qty);
+    // console.log("disc", disc);
+    // console.log("unit", unit);
+    // console.log("dp1", dp1);
+    // console.log("dp2", dp2);
+    // console.log("dp3", dp3);
+    // console.log("unitPrice", unitPrice);
+    // console.log("unitPriceAfterDisc", unitPriceAfterDisc);
+    // console.log("subTotal", subTotal);
 
     POSTPurchaseDetail(
       qty,

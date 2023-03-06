@@ -56,7 +56,7 @@ export default function ReactDataTable({
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
   });
 
   const content = (row) => (

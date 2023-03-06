@@ -77,7 +77,8 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
+    minimumFractionDigits : 2,
   });
 
   const onCancel = () => {

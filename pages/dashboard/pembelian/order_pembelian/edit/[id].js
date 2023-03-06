@@ -60,7 +60,7 @@ const Edit = ({ props }) => {
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
   });
 
   const onFinish = async (values) => {
@@ -155,7 +155,7 @@ const Edit = ({ props }) => {
     values.order_date = orderDate;
     values.delivery_date = deliveryDate;
     values.supplier_id = supplierId;
-    values.status = "Dipesan";
+    values.status = "Diproses";
     values.delivery_total = grandTotal === 0 ? parseInt(totalPrice) : parseInt(grandTotal);
     values.purchase_details = null;
     values.supplier_id = null;

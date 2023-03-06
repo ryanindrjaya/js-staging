@@ -19,10 +19,6 @@ export default function ReactDataTable({
   const router = useRouter();
   const { Option } = Select;
 
-  const print = (row) => {
-    router.push("order_pembelian/print/" + row.id);
-  };
-
   const lihat = (row) => {
     router.push("order_pembelian/print/" + row.id);
   };
@@ -36,8 +32,6 @@ export default function ReactDataTable({
     console.log("onCancel");
   };
 
- 
-
   function formatMyDate(value, locale = "id-ID") {
     return new Date(value).toLocaleDateString(locale);
   }
@@ -45,23 +39,26 @@ export default function ReactDataTable({
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
   });
+
+  const openModal = (id) => {
+    router.replace(
+      {
+        pathname: "/dashboard/pembelian/order_pembelian",
+        query: { id: id },
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
 
   const content = (row) => (
     <div>
       <div>
         <button
-          onClick={() => print(row)}
-          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-        >
-          <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
-          Cetak
-        </button>
-      </div>
-      <div>
-        <button
-          onClick={() => lihat(row)}
+          onClick={() => openModal(row.id)}
           className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
         >
           <UnorderedListOutlined className="mr-2 mt-0.5 float float-left" />
@@ -72,7 +69,7 @@ export default function ReactDataTable({
         <div></div>
       ) : (
         <button
-          onClick={() =>  onUpdate(row)}
+          onClick={() => onUpdate(row)}
           className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
         >
           <EditOutlined className="mr-2 mt-0.5 float float-left" />
@@ -102,6 +99,19 @@ export default function ReactDataTable({
 
   const columns = [
     {
+      name: "Tindakan",
+      width: "180px",
+      selector: (row) => (
+        <>
+          <Popover content={content(row)} placement="bottom" trigger="click">
+            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
+              Tindakan
+            </button>
+          </Popover>
+        </>
+      ),
+    },
+    {
       name: "Tanggal",
       width: "150px",
       selector: (row) => formatMyDate(row.attributes?.order_date),
@@ -111,12 +121,17 @@ export default function ReactDataTable({
       width: "180px",
       selector: (row) => row.attributes?.no_po ?? "-",
     },
-
+    {
+      name: "Supplier",
+      width: "200px",
+      selector: (row) => row.attributes?.supplier?.data?.attributes?.name,
+    },
     {
       name: "Lokasi",
       width: "200px",
-      selector: (row) => row.attributes?.location.data.attributes.name,
+      selector: (row) => row.attributes?.location?.data?.attributes?.name,
     },
+
     {
       name: <div className="ml-6">Status</div>,
       width: "180px",
@@ -129,8 +144,8 @@ export default function ReactDataTable({
             onChange={(e) => onChangeStatus(e, row)}
             style={{ width: 140 }}
           >
-            <Option value="Dipesan">
-              <Tag color="default">Dipesan</Tag>
+            <Option value="Diproses">
+              <Tag color="default">Diproses</Tag>
             </Option>
             <Option value="Sebagian Diterima">
               <Tag color="warning">Sebagian Diterima</Tag>
@@ -176,19 +191,6 @@ export default function ReactDataTable({
       width: "150px",
       sortable: true,
       selector: (row) => row.attributes?.added_by ?? "-",
-    },
-    {
-      name: "Tindakan",
-      width: "250px",
-      selector: (row) => (
-        <>
-          <Popover content={content(row)} placement="bottom" trigger="click">
-            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
-              Tindakan
-            </button>
-          </Popover>
-        </>
-      ),
     },
   ];
 

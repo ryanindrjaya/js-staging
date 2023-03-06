@@ -221,10 +221,10 @@ function Tambah({ props }) {
   };
 
   const updateOrderData = async () => {
-    if (dataValues.status == "Selesai") {
-      await updateOrder(preorderData, "Selesai");
-      updateProductHarga(products);
-    } else await updateOrder(preorderData, "Tidak");
+    if (dataValues.status == "Diterima") {
+      await updateOrder(preorderData, "Diterima");
+      await updateProductHarga(products);
+    } else await updateOrder(preorderData, "Diproses");
   };
 
   const updateProductHarga = async (values) => {
@@ -590,14 +590,8 @@ function Tambah({ props }) {
                         width: "100%",
                       }}
                     >
-                      <Select.Option value="Dipesan" key={"Dipesan"}>
-                        Dipesan
-                      </Select.Option>
-                      <Select.Option
-                        value="Sebagian Diterima"
-                        key={"Sebagian Diterima"}
-                      >
-                        Sebagian Diterima
+                      <Select.Option value="Diproses" key={"Diproses"}>
+                        Diproses
                       </Select.Option>
                       <Select.Option value="Diterima" key={"Diterima"}>
                         Diterima
