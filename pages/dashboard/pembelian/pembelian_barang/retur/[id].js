@@ -142,10 +142,14 @@ function ReturLPB({ props }) {
     setLoading(false);
   };
 
-  const createDetailRetur = async () => {  console.log("create", dataValues);
-    //dataValues.expired_date = expProduct;
-    //dataValues.product_location = locProduct;
-    //dataValues.batch = batch;
+  const createDetailRetur = async () => {
+
+    for(let index = 0; index < products.productList.length; index++){
+      if(dataValues.expired_date[index] == undefined) dataValues.expired_date[index] = expProduct[index];
+      if(dataValues.product_location[index] == undefined) dataValues.product_location[index] = locProduct[index].data.id;
+      if(dataValues.batch[index] == undefined) dataValues.batch[index] = batch[index];
+    }
+
     createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-details", dataValues);
   };
 
