@@ -5,13 +5,13 @@ import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLay
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
-import { Form, Input, DatePicker, Button, message, Upload, Select, Spin } from "antd";
+import { Form, Input, DatePicker, Button, message, Upload, Select, Spin, notification } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import nookies from "nookies";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import { useSelector, useDispatch } from "react-redux";
 import calculatePrice from "../utility/calculatePrice";
-import LPBTable from "@iso/components/ReactDataTable/Purchases/LPBTable";
+import DataReturTable from "@iso/components/ReactDataTable/Purchases/DataReturTable";
 import createDetailReturFunc from "../utility/createReturDetail";
 import createReturFunc from "../utility/createRetur";
 import { useRouter } from "next/router";
@@ -156,11 +156,12 @@ function Retur({ props }) {
   };
 
   const createDetailRetur = async () => {
-    console.log("info total", productTotalPrice, productSubTotal);
+    console.log("info total", productTotalPrice, productSubTotal, products, dataValues);
     createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-details", dataValues);
   };
 
   const createRetur = async (values) => {
+    values.status = "Draft";
     createReturFunc(grandTotal, totalPrice, values, listId, form, router);
   };
 
@@ -182,9 +183,35 @@ function Retur({ props }) {
     }
   };
 
-  const calculatePriceAfterDisc = (row) => {
-    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
+  //const calculatePriceAfterDisc = (row, index) => {
+  //  var total = 0;
+  //  var qty = 1;
+  //  var priceUnit = row.attributes[`buy_price_1`];
 
+  //  // check if price changed
+  //  if (products.productInfo[index]?.priceUnit) {
+  //    priceUnit = products.productInfo[index].priceUnit ?? row.attributes[`buy_price_1`];
+  //  }
+  //  // check if qty changed
+  //  if (products.productInfo[index]?.qty) {
+  //    qty = products.productInfo[index]?.qty ?? 1;
+  //  }
+
+  //  // set product price after disc & sub total
+  //  productTotalPrice[index] = priceUnit;
+  //  productSubTotal[index] = priceUnit * qty;
+
+  //  // set all product total
+  //  var total = 0;
+  //  for (var key in productSubTotal) {
+  //    total = total + productSubTotal[key];
+  //  }
+  //    setTotalPrice(total);
+  //  return formatter.format(productTotalPrice[index]);
+  //};
+
+  const calculatePriceAfterDisc = (row, index) => {
+    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index, setProductSubTotal);
     return formatter.format(total);
   };
 
@@ -210,7 +237,7 @@ function Retur({ props }) {
     });
   };
 
-  const setProductValue = async () => {
+  const setProductValue = async () => { console.log("products",products)
     if (products.productList.length != 0) {
       products.productList.forEach((element) => {
         console.log("masuk");
@@ -303,7 +330,7 @@ function Retur({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="no_retur"
-                    initialValue={`Retur/ET/${totalReturs}/${mm}/${yyyy}`}
+                    initialValue={`RB/ET/${totalReturs}/${mm}/${yyyy}`}
                     rules={[
                       {
                         required: true,
@@ -389,11 +416,12 @@ function Retur({ props }) {
                   <SearchBar form={form} tempList={tempList} onChange={onChangeProduct} user={user}  selectedProduct={selectedProduct} isBasedOnLocation={false}/>
                 </div>
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                  <LPBTable
+                  <DataReturTable
                     products={products}
                     productTotalPrice={productTotalPrice}
                     setTotalPrice={setTotalPrice}
                     setProductTotalPrice={setProductTotalPrice}
+                    setProductSubTotal={setProductSubTotal}
                     calculatePriceAfterDisc={calculatePriceAfterDisc}
                     productSubTotal={productSubTotal}
                     locations={locations}
