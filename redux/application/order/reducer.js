@@ -39,6 +39,7 @@ export default function Reducer(state = initState, action) {
             d1: data[`unit_${unit}_dp1`],
             d2: data[`unit_${unit}_dp2`],
             d3: data[`unit_${unit}_dp3`],
+            disc: data[`purchase_discount_${unit}`],
           },
         },
       };
@@ -139,7 +140,6 @@ export default function Reducer(state = initState, action) {
         },
       };
 
-
     case "CHANGE_PRODUCT_PRICE":
       var unit_price = action.unit_price;
       var id = action.index;
@@ -208,6 +208,7 @@ export default function Reducer(state = initState, action) {
             d1: action.d1,
             d2: action.d2,
             d3: action.d3,
+            relation_id: action?.relation_id,
           },
         },
       };

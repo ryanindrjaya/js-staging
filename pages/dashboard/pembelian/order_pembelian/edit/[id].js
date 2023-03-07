@@ -8,40 +8,157 @@ import TitlePage from "@iso/components/TitlePage/TitlePage";
 import { UploadOutlined } from "@ant-design/icons";
 import nookies from "nookies";
 import { toast } from "react-toastify";
-import moment from "moment";
-import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
-// import EditOrderTable from "@iso/components/Form/AddOrder/EditOrderTable";
-import { Row, Form, Button, Spin, Input, DatePicker, Select, InputNumber, Upload, notification } from "antd";
+import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
+import OrderTable from "@iso/components/ReactDataTable/Purchases/OrderTable";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  Form,
+  Button,
+  Spin,
+  Input,
+  DatePicker,
+  Select,
+  InputNumber,
+  Upload,
+  notification,
+} from "antd";
+import createDetailOrderFunc from "../../utility/createOrderDetail";
+import createOrderFunc from "../../utility/createOrder";
+import calculatePrice from "../../utility/calculatePrice";
+import moment from "moment";
 
-const Edit = ({ props }) => {
-  const data = props.data;
-  const locations = props.locations;
+function getUnitIndex(data, selected) {
+  let unit = 0;
 
-  var initialProducts = [];
-  const products = data.data.attributes.purchase_details.data;
-  products.forEach((element) => {
-    initialProducts.push(element.attributes.products.data[0]);
-  });
+  for (let key in data) {
+    if (key.includes("unit_") && data[key] === selected) {
+      unit = parseInt(key.replace("unit_", ""));
+    }
+  }
 
-  //   var locations = props.locations.data;
-  const [selectedLocations, setSelectedLocations] = useState();
+  return unit;
+}
+
+Edit.getInitialProps = async (context) => {
+  const cookies = nookies.get(context);
+  const { id } = context.query;
+  let locations;
+  let purchases;
+  let user;
+
+  const req = await fetchData(cookies);
+  locations = await req.json();
+
+  const req2 = await fetchDataPurchases(cookies);
+  purchases = await req2.json();
+
+  const req3 = await fetchUser(cookies);
+  user = await req3.json();
+
+  const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/purchases/${id}?populate=deep`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  }).then((res) => res.json());
+
+  if (response.status === 401) {
+    context.res.writeHead(302, {
+      Location: "/signin?session=false",
+      "Content-Type": "text/html; charset=utf-8",
+    });
+    context?.res?.end();
+
+    return {};
+  }
+
+  if (req.status !== 200) {
+    context.res.writeHead(302, {
+      Location: "/signin?session=false",
+      "Content-Type": "text/html; charset=utf-8",
+    });
+    context?.res?.end();
+
+    return {};
+  }
+
+  return {
+    props: {
+      purchases,
+      locations,
+      user,
+      data: response?.data || {},
+    },
+  };
+};
+
+const fetchData = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchUser = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=*";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchDataPurchases = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+function Edit({ props }) {
+  var products = useSelector((state) => state.Order);
+  var selectedProduct = products?.productList;
+  const dispatch = useDispatch();
+
+  var locations = props.locations.data;
+  const initialValues = props.data;
+  const user = props.user;
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [mapPrice, setMapPrice] = useState({});
-  const [productList, setProductList] = useState(initialProducts);
-  const [supplier, setSupplier] = useState(data.data.attributes.supplier.data);
-  const [totalPrice, setTotalPrice] = useState(data.data.attributes.delivery_total);
+  const [productList, setProductList] = useState([]);
+  const [supplier, setSupplier] = useState(initialValues.attributes.supplier?.data);
+  const [totalPrice, setTotalPrice] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
   const [additionalFee, setAdditionalFee] = useState();
-  const [qty, setQty] = useState();
   const [listId, setListId] = useState([]);
-  const [price, setPrice] = useState();
   const [dataValues, setDataValues] = useState();
   const [tempoDays, setTempoDays] = useState(0);
   const [tempoOption, setTempoOption] = useState("Hari");
-  const [doneCreateDetail, setDoneCreateDetail] = useState(false);
+  const [productTotalPrice, setProductTotalPrice] = useState({});
+  const [productSubTotal, setProductSubTotal] = useState({});
   const router = useRouter();
+  const [fetching, setFetching] = useState(true);
 
   // temp
   const [biayaTambahan, setBiayaTambahan] = useState(0);
@@ -49,199 +166,170 @@ const Edit = ({ props }) => {
 
   const cookies = nookies.get(null, "token");
   const tempList = [];
+
   var tempListId = [];
   var tempProductListId = [];
   var tempSupplierId = 0;
   var tempLocationId;
 
-  const mapPriceList = {};
+  // NO PO
+  var totalPurchases = String(props.purchases?.meta?.pagination.total + 1).padStart(3, "0");
+  var today = new Date();
+  var dd = String(today.getDate()).padStart(2, "0");
+  var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
+  var yyyy = today.getFullYear();
 
   const { TextArea } = Input;
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
     maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
+    useGrouping: true,
+    groupingSeparator: ",",
+    decimalSeparator: ".",
   });
 
-  const onFinish = async (values) => {
-    setLoading(true);
-    setDataValues(values);
-    setLoading(false);
-  };
-
-  const createDetailOrder = async () => {
-    if (mapPrice) {
-      productList.forEach((element) => {
-        const id = element.id;
-        var qty = parseInt(dataValues.jumlah_qty[id] ?? 1);
-        var unit = "";
-        var subTotal = 0;
-
-        console.log(mapPrice);
-        console.log(id);
-        if (mapPrice[id]) {
-          var price = 0;
-          if (price[id]) {
-            price = price[id].price_1st;
-          }
-
-          subTotal = mapPrice[id]?.priceUnit - price;
-          var price1 = calculatePercentage(subTotal, mapPrice[id].dp1);
-          var price2 = calculatePercentage(price1, mapPrice[id].dp2);
-          var price3 = calculatePercentage(price2, mapPrice[id].dp3);
-          (unit = mapPrice[id].defaultUnit), (subTotal = price3 * qty);
-        } else {
-          subTotal = element.attributes.buy_price_1 - 0;
-          var price1 = calculatePercentage(subTotal, element.attributes.unit_1_dp1);
-          var price2 = calculatePercentage(price1, element.attributes.unit_1_dp2);
-          var price3 = calculatePercentage(price2, element.attributes.unit_1_dp3);
-
-          (unit = element.attributes.unit_1), (subTotal = price3 * qty);
-        }
-        POSTPurchaseDetail(qty, unit, subTotal, id);
-      });
-    }
-  };
-
-  const POSTPurchaseDetail = async (qty, unit, subTotal, productId) => {
-    var disc = 0;
-
-    if (price) if (price[productId]) disc = price[productId];
-
-    var data = {
-      data: {
-        total_order: String(qty),
-        unit_order: unit,
-        sub_total: parseInt(subTotal),
-        products: { id: productId },
-        disc: parseInt(disc),
-      },
-    };
-
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchase-details";
-    const JSONdata = JSON.stringify(data);
-
-    const options = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-      body: JSONdata,
-    };
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
-
-    if (req.status === 200) {
-      tempListId.push(res.data?.id);
-      if (tempListId.length === productList.length) {
-        setListId(tempListId);
-      }
-    }
-  };
-
-  const createOrder = async (values) => {
-    var orderDate = new Date(values.order_date);
-    var deliveryDate = new Date(values.delivery_date);
-    var supplierId = { id: parseInt(values.supplier_id) };
-
-    tempSupplierId = parseInt(values.supplier_id);
-    tempLocationId = parseInt(values.location);
-
-    listId.forEach((element) => {
-      tempProductListId.push({ id: element });
-    });
-
-    values.order_date = orderDate;
-    values.delivery_date = deliveryDate;
-    values.supplier_id = supplierId;
-    values.status = "Diproses";
-    values.delivery_total = grandTotal === 0 ? parseInt(totalPrice) : parseInt(grandTotal);
-    values.purchase_details = null;
-    values.supplier_id = null;
-
-    var data = {
-      data: values,
-    };
-
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases";
-    const JSONdata = JSON.stringify(data);
-
-    const options = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-      body: JSONdata,
-    };
-
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
-
-    if (req.status === 200) {
-      await putRelationOrder(res.data.id, res.data.attributes);
-    } else {
-      openNotificationWithIcon("error");
-    }
-  };
-
-  const putRelationOrder = async (id, value) => {
-    const user = await getUserMe();
-    const dataOrder = {
-      data: value,
-    };
-
-    dataOrder.data.supplier = { id: tempSupplierId };
-    dataOrder.data.purchase_details = tempProductListId;
-    dataOrder.data.added_by = user.name;
-    dataOrder.data.locations = { id: tempLocationId };
-
-    // clean object
-    for (var key in dataOrder) {
-      if (dataOrder[key] === null || dataOrder[key] === undefined) {
-        delete dataOrder[key];
+  const cleanData = (data) => {
+    const unusedKeys = ["disc_rp", "harga_satuan", "jumlah_option", "jumlah_qty"];
+    for (let key in data) {
+      if (data[key] === null || data[key] === undefined) {
+        delete data[key];
+      } else if (unusedKeys.includes(key)) {
+        delete data[key];
       }
     }
 
-    const JSONdata = JSON.stringify(dataOrder);
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/" + id;
+    return data;
+  };
+
+  const updateDetailData = async (data, id) => {
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/purchase-details/${id}`;
     const options = {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: "Bearer " + cookies.token,
       },
-      body: JSONdata,
+      body: JSON.stringify({ data }),
     };
 
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
-
-    if (req.status === 200) {
-      form.resetFields();
-      router.replace("/dashboard/pembelian/order_pembelian");
-      openNotificationWithIcon("success");
-    } else {
-      openNotificationWithIcon("error");
-    }
+    const res = await fetch(endpoint, options).then((res) => res.json());
+    return res;
   };
 
-  const getUserMe = async () => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me";
+  const createDetailData = async (data) => {
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/purchase-details`;
     const options = {
-      method: "GET",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: "Bearer " + cookies.token,
       },
+      body: JSON.stringify({ data }),
     };
 
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
-
+    const res = await fetch(endpoint, options).then((res) => res.json());
     return res;
   };
+
+  const updateMasterData = async (data, id) => {
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/purchases/${id}`;
+    const options = {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+      body: JSON.stringify({ data }),
+    };
+
+    const res = await fetch(endpoint, options).then((res) => res.json());
+    return res;
+  };
+
+  const onFinish = async (values) => {
+    /*
+     * Flow: update detail PO -> update master PO
+     *
+     * Data for Detail Order:
+     * - products (redux)
+     * - productTotalPrice
+     * - productSubTotal
+     *
+     */
+
+    setLoading(true);
+
+    // master PO
+    const sanitizedValues = cleanData(values);
+
+    const editedProduct = products.productInfo;
+    const detailsPO = products.productList?.map(({ attributes, id }, idx) => {
+      const qty = editedProduct?.[idx]?.qty || 1;
+      const unitPriceAfterDisc = parseFloat(
+        productTotalPrice?.[idx] || attributes?.buy_price_1
+      ).toFixed(2);
+      const subTotal = parseFloat(unitPriceAfterDisc * qty).toFixed(2);
+
+      return {
+        total_order: String(editedProduct?.[idx]?.qty || 1),
+        sub_total: subTotal,
+        unit_order: editedProduct?.[idx]?.unit || attributes?.unit_1,
+        disc: editedProduct?.[idx]?.disc || attributes?.purchase_discount_1,
+        unit_price: editedProduct?.[idx]?.price_unit || attributes?.buy_price_1,
+        unit_price_after_disc: unitPriceAfterDisc,
+        dp1: editedProduct?.[idx]?.d1 || attributes?.unit_1_dp1,
+        dp2: editedProduct?.[idx]?.d2 || attributes?.unit_1_dp2,
+        dp3: editedProduct?.[idx]?.d3 || attributes?.unit_1_dp3,
+        products: [id],
+        relation_id: editedProduct?.[idx]?.relation_id,
+      };
+    });
+
+    let detailsId = [];
+
+    for (let item in detailsPO) {
+      const detail = detailsPO[item];
+      const id = detail.relation_id;
+      const postDetail = cleanData(detail);
+
+      if (id) {
+        const res = await updateDetailData(postDetail, id);
+        console.log("response update detail ==>", res);
+        detailsId.push(res?.data?.id);
+      } else {
+        const res = await createDetailData(postDetail);
+        console.log("response create detail ==>", res);
+        detailsId.push(res?.data?.id);
+      }
+    }
+
+    // assign detail id to master PO and assign new totalPrice
+    sanitizedValues.purchase_details = detailsId;
+    sanitizedValues.delivery_total = grandTotal;
+
+    // update master PO
+    const res = await updateMasterData(sanitizedValues, initialValues.id);
+    console.log("response update master ==>", res);
+
+    if (res?.data?.id) {
+      notification.success({
+        message: "Berhasil mengubah data",
+        description: "Data PO berhasil diubah. Silahkan cek pada halaman Order Pembelian",
+      });
+      router.replace("/dashboard/pembelian/order_pembelian");
+    } else {
+      notification.error({
+        message: "Gagal mengubah data",
+        description: "Data PO gagal diubah. Silahkan cek data anda dan coba lagi",
+      });
+    }
+
+    setLoading(false);
+  };
+
+  console.log("tes min");
 
   const onChange = async () => {
     var isDuplicatedData = false;
@@ -261,15 +349,6 @@ const Edit = ({ props }) => {
     }
   };
 
-  const sumTotalPrice = () => {
-    var total = 0;
-    for (var key in mapPriceList) {
-      total = total + mapPriceList[key];
-    }
-
-    setTotalPrice(total);
-  };
-
   const sumDeliveryPrice = (price) => {
     setBiayaPengiriman(price);
   };
@@ -281,22 +360,23 @@ const Edit = ({ props }) => {
       newTotal = newTotal + additionalFee[key];
     }
 
-    var test = totalPrice + newTotal;
     setBiayaTambahan(newTotal);
   };
 
-  const changeQty = (values, data) => {
-    setQty({
-      ...qty,
-      [data.id]: {
-        qty: values,
-      },
-    });
-  };
+  const calculatePriceAfterDisc = (row, index) => {
+    const total = calculatePrice(
+      row,
+      products,
+      productTotalPrice,
+      productSubTotal,
+      setTotalPrice,
+      index
+    );
 
-  const calculatePercentage = (value, percent) => {
-    var newValue = value - (value * percent) / 100;
-    return newValue;
+    const formattedNumber = formatter.format(total);
+    console.log("harga setelah diskon", formattedNumber);
+
+    return formattedNumber;
   };
 
   useEffect(() => {
@@ -308,50 +388,15 @@ const Edit = ({ props }) => {
   }, [additionalFee]);
 
   useEffect(() => {
-    if (listId.length > 0) {
-      createOrder(dataValues);
+    var total = 0;
+    for (var key in productTotalPrice) {
+      total = total + productTotalPrice[key];
     }
-  }, [listId]);
+  }, [totalPrice]);
 
   useEffect(() => {
-    if (dataValues) createDetailOrder();
-  }, [dataValues]);
-
-  useEffect(() => {
-    console.log(price);
-  }, [price]);
-
-  useEffect(() => {
-    var testMap = {};
-    products.forEach((element) => {
-      const product = element.attributes.products.data[0].attributes;
-      const productId = element.attributes.products.data[0].id;
-      const defaultUnit = element.attributes.unit_order;
-
-      var dp1 = 0;
-      var dp2 = 0;
-      var dp3 = 0;
-      var priceUnit = 0;
-      for (let index = 1; index < 6; index++) {
-        if (product[`unit_${index}`] === defaultUnit) {
-          dp1 = product[`unit_${index}_dp1`];
-          dp2 = product[`unit_${index}_dp2`];
-          dp3 = product[`unit_${index}_dp3`];
-          priceUnit = product[`buy_price_${index}`];
-        }
-      }
-
-      testMap[productId] = {
-        defaultUnit: defaultUnit,
-        priceUnit: priceUnit,
-        dp1: dp1,
-        dp2: dp2,
-        dp3: dp3,
-      };
-
-      setMapPrice(testMap);
-    });
-  }, []);
+    console.log("products", products);
+  }, [products]);
 
   const openNotificationWithIcon = (type) => {
     if (type === "error") {
@@ -379,6 +424,71 @@ const Edit = ({ props }) => {
     });
   };
 
+  const onFinishFailed = () => {
+    const error = form.getFieldsError();
+    error.forEach((element) => {
+      if (element.errors.length > 0) {
+        console.log();
+        notification["error"]({
+          message: "Field Kosong",
+          description: element.errors[0],
+        });
+      }
+    });
+  };
+
+  useEffect(() => {
+    dispatch({ type: "CLEAR_DATA" });
+
+    if (initialValues) {
+      form.setFieldsValue({
+        ...initialValues.attributes,
+        order_date: moment(initialValues.attributes?.order_date),
+        delivery_date: moment(initialValues.attributes?.delivery_date),
+        supplier_id: initialValues.attributes?.supplier?.data?.id,
+        location: initialValues.attributes?.location?.data?.id,
+      });
+
+      if (initialValues.attributes.purchase_details?.data.length > 0) {
+        const details = initialValues.attributes.purchase_details.data;
+
+        details.forEach((element, index) => {
+          const product = element.attributes?.products?.data?.[0];
+          const unit = getUnitIndex(product?.attributes, element?.attributes?.unit_order);
+          dispatch({
+            type: "SET_INITIAL_PRODUCT",
+            product,
+            index,
+            qty: parseInt(element.attributes?.total_order || 0),
+            unit: element.attributes?.unit_order,
+            priceUnit: element.attributes?.unit_price || 0,
+            disc: element.attributes?.disc || 0,
+            d1: element.attributes?.dp1,
+            d2: element.attributes?.dp2,
+            d3: element.attributes?.dp3,
+            unitIndex: unit,
+            relation_id: element.id,
+          });
+
+          if (index === details.length - 1) {
+            setFetching(false);
+          }
+        });
+      }
+    } else {
+      notification["error"]({
+        message: "Gagal mengambil data",
+        description: "Data tidak ditemukan. Silahkan cek kembali",
+      });
+      router.replace("/dashboard/pembelian/order_pembelian");
+    }
+
+    // reset redux state when component unmount / ondestroy
+    return () => {
+      dispatch({ type: "CLEAR_DATA" });
+    };
+  }, []);
+
   return (
     <>
       <Head>
@@ -390,21 +500,23 @@ const Edit = ({ props }) => {
           <LayoutContent>
             <Form
               form={form}
+              // initialValues={initialValues?.attributes}
               name="add_order"
-              initialValues={{
-                remember: true,
-              }}
               onFinish={onFinish}
-              onFinishFailed={validateError}
+              onFinishFailed={onFinishFailed}
             >
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Supplier onChangeSupplier={setSupplier} initialValue={data.data.attributes.supplier} />
+                  <Supplier
+                    supplier={supplier}
+                    fetching={fetching}
+                    onChangeSupplier={setSupplier}
+                  />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    initialValue={data.data.attributes.no_po}
                     name="no_po"
+                    initialValue={`PO/ET/${totalPurchases}/${mm}/${yyyy}`}
                     rules={[
                       {
                         required: true,
@@ -412,12 +524,11 @@ const Edit = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input disabled style={{ height: "40px" }} placeholder="No.PO" />
+                    <Input style={{ height: "40px" }} placeholder="No.PO" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    initialValue={moment(data.data.attributes.order_date)}
                     name="order_date"
                     rules={[
                       {
@@ -426,12 +537,16 @@ const Edit = ({ props }) => {
                       },
                     ]}
                   >
-                    <DatePicker placeholder="Tanggal Pesanan" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
+                    <DatePicker
+                      placeholder="Tanggal Pesanan"
+                      size="large"
+                      format={"DD/MM/YYYY"}
+                      style={{ width: "100%" }}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    initialValue={moment(data.data.attributes.delivery_date)}
                     name="delivery_date"
                     rules={[
                       {
@@ -440,7 +555,12 @@ const Edit = ({ props }) => {
                       },
                     ]}
                   >
-                    <DatePicker placeholder="Tanggal Pengiriman" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
+                    <DatePicker
+                      placeholder="Tanggal Pengiriman"
+                      size="large"
+                      format={"DD/MM/YYYY"}
+                      style={{ width: "100%" }}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-3/4 px-3 mb-2 md:mb-0">
@@ -449,53 +569,64 @@ const Edit = ({ props }) => {
                   <p> {supplier?.attributes.phone}</p>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Input.Group compact>
-                    <Form.Item name="tempo_days" initialValue={data.data.attributes.tempo_days}>
-                      <Input
-                        size="large"
-                        style={{
-                          width: "100%",
-                        }}
-                        onChange={setTempoDays}
-                      />
-                    </Form.Item>
-                    <Form.Item name="tempo_time" initialValue={data.data.attributes.tempo_time}>
-                      <Select
-                        size="large"
-                        onChange={setTempoOption}
-                        style={{
-                          width: "100%",
-                        }}
-                      >
-                        <Select.Option value="Hari">Hari</Select.Option>
-                        <Select.Option value="Bulan">Bulan</Select.Option>
-                      </Select>
-                    </Form.Item>
-                  </Input.Group>
+                  <Form.Item name="tempo_days" initialValue={0} noStyle>
+                    <Input
+                      size="large"
+                      style={{
+                        width: "50%",
+                      }}
+                      onChange={setTempoDays}
+                    />
+                  </Form.Item>
+
+                  <Form.Item name="tempo_time" initialValue={"Hari"} noStyle>
+                    <Select
+                      size="large"
+                      onChange={setTempoOption}
+                      style={{
+                        width: "50%",
+                      }}
+                    >
+                      <Select.Option value="Hari" key="Hari">
+                        Hari
+                      </Select.Option>
+                      <Select.Option value="Bulan" key="Bulan">
+                        Bulan
+                      </Select.Option>
+                    </Select>
+                  </Form.Item>
                 </div>
 
-                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0">
-                  <SearchBar form={form} tempList={tempList} onChange={onChange} />
+                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
+                  <SearchBar
+                    form={form}
+                    tempList={tempList}
+                    onChange={onChange}
+                    selectedProduct={selectedProduct}
+                    user={user}
+                  />
                 </div>
-                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0">
-                  {/* <EditOrderTable
-                    initialValue={products}
-                    data={productList}
-                    setData={setProductList}
-                    mapPrice={mapPrice}
-                    setMapPrice={setMapPrice}
-                    mapPriceList={mapPriceList}
-                    sumTotalPrice={sumTotalPrice}
-                    qty={qty}
-                    changeQty={changeQty}
-                    price={price}
-                    setPrice={setPrice}
-                  /> */}
+                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
+                  {fetching ? (
+                    <div className="w-full flex items-center justify-center">
+                      <Spin size="large" />
+                    </div>
+                  ) : (
+                    <OrderTable
+                      products={products}
+                      productTotalPrice={productTotalPrice}
+                      setTotalPrice={setTotalPrice}
+                      calculatePriceAfterDisc={calculatePriceAfterDisc}
+                      productSubTotal={productSubTotal}
+                      setProductSubTotal={setProductSubTotal}
+                      formObj={form}
+                    />
+                  )}
                 </div>
               </div>
 
               <div className="flex justify-end">
-                <p className="font-bold">Total Item : {productList.length} </p>
+                <p className="font-bold">Total Item : {products.productList.length} </p>
               </div>
               <div className="flex justify-end">
                 <p className="font-bold">Total Harga : {formatter.format(totalPrice)} </p>
@@ -513,7 +644,14 @@ const Edit = ({ props }) => {
                 </div>
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item name="delivery_fee">
-                    <InputNumber onChange={sumDeliveryPrice} size="large" placeholder="Biaya Pengiriman" style={{ width: "100%" }} />
+                    <InputNumber
+                      onChange={sumDeliveryPrice}
+                      formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                      parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                      size="large"
+                      placeholder="Biaya Pengiriman"
+                      style={{ width: "100%" }}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 mt-5 md:mb-0">
@@ -534,7 +672,6 @@ const Edit = ({ props }) => {
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item
                     name="location"
-                    initialValue={data.data.attributes.location.data.attributes.name}
                     rules={[
                       {
                         required: true,
@@ -548,15 +685,24 @@ const Edit = ({ props }) => {
                         width: "100%",
                       }}
                     >
-                      {locations.data.map((element) => {
-                        return <Select.Option value={element.id}>{element.attributes.name}</Select.Option>;
+                      {locations.map((element) => {
+                        return (
+                          <Select.Option value={element.id}>
+                            {element.attributes.name}
+                          </Select.Option>
+                        );
                       })}
                     </Select>
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 mt-5 md:mb-0">
                   <Upload>
-                    <Button className="text-gray-500" style={{ width: "100%" }} size="large" icon={<UploadOutlined />}>
+                    <Button
+                      className="text-gray-500"
+                      style={{ width: "100%" }}
+                      size="large"
+                      icon={<UploadOutlined />}
+                    >
                       Upload Dokumen
                     </Button>
                   </Upload>
@@ -650,7 +796,8 @@ const Edit = ({ props }) => {
               </div>
               <div>
                 <p className="font-bold flex justify-end">
-                  Total Biaya : {grandTotal === 0 ? formatter.format(totalPrice) : formatter.format(grandTotal)}
+                  Total Order Pembelian :{" "}
+                  {grandTotal === 0 ? formatter.format(totalPrice) : formatter.format(grandTotal)}
                 </p>
               </div>
               <Form.Item name="additional_note">
@@ -663,8 +810,12 @@ const Edit = ({ props }) => {
                     <Spin />
                   </div>
                 ) : (
-                  <Button onClick={validateError} htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
-                    Edit
+                  <Button
+                    onClick={validateError}
+                    htmlType="submit"
+                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
+                  >
+                    Tambah
                   </Button>
                 )}
               </Form.Item>
@@ -674,56 +825,6 @@ const Edit = ({ props }) => {
       </DashboardLayout>
     </>
   );
-};
-
-Edit.getInitialProps = async (context) => {
-  const cookies = nookies.get(context);
-  const id = context.query.id;
-
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/" + id + "?populate=deep";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
-  const res = await fetch(endpoint, options);
-  const data = await res.json();
-
-  const req = await fetchDataLocation(cookies);
-  const locations = await req.json();
-
-  if (req.status !== 200) {
-    context.res.writeHead(302, {
-      Location: "/signin?session=false",
-      "Content-Type": "text/html; charset=utf-8",
-    });
-    context?.res?.end();
-
-    return {};
-  }
-
-  return {
-    props: {
-      data,
-      locations,
-    },
-  };
-};
-
-const fetchDataLocation = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
-
-  const req = await fetch(endpoint, options);
-  return req;
-};
+}
 
 export default Edit;

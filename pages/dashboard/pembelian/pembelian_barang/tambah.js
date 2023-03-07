@@ -179,9 +179,7 @@ function Tambah({ props }) {
   const tempList = [];
 
   // NO PO
-  var totalPurchases = String(
-    props.purchases?.meta?.pagination.total + 1
-  ).padStart(3, "0");
+  var totalPurchases = String(props.purchases?.meta?.pagination.total + 1).padStart(3, "0");
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -282,8 +280,7 @@ function Tambah({ props }) {
     clearData();
     setIsFetchingData(true);
 
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + `/purchases/${id}?populate=deep`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/purchases/${id}?populate=deep`;
     console.log(endpoint);
     const options = {
       method: "GET",
@@ -329,8 +326,8 @@ function Tambah({ props }) {
       delivery_fee: dataPO.delivery_fee,
       disc_type: null,
       disc_value: null,
-      DPP_active: null,
-      PPN_active: null,
+      DPP_active: true,
+      PPN_active: "PPN",
     });
 
     setAdditionalFee({
@@ -355,8 +352,7 @@ function Tambah({ props }) {
       var unitOrder = element.attributes.unit_order;
       var productUnit = element.attributes.products.data[0].attributes;
 
-      priceAfterDisc =
-        priceAfterDisc + element.attributes.unit_price_after_disc;
+      priceAfterDisc = priceAfterDisc + element.attributes.unit_price_after_disc;
 
       for (let index = 1; index < 6; index++) {
         if (unitOrder === productUnit[`unit_${index}`]) {
@@ -378,11 +374,7 @@ function Tambah({ props }) {
         },
       });
 
-      const test = form.getFieldsValue([
-        "disc_rp",
-        "jumlah_option",
-        "jumlah_qty",
-      ]);
+      const test = form.getFieldsValue(["disc_rp", "jumlah_option", "jumlah_qty"]);
 
       // SET INITIAL PRODUCT
       dispatch({
@@ -623,10 +615,7 @@ function Tambah({ props }) {
                     >
                       {locations.map((element) => {
                         return (
-                          <Select.Option
-                            value={element.id}
-                            key={element.attributes.name}
-                          >
+                          <Select.Option value={element.id} key={element.attributes.name}>
                             {element.attributes.name}
                           </Select.Option>
                         );
@@ -709,9 +698,7 @@ function Tambah({ props }) {
                 )}
               </div>
               <div className="flex justify-end">
-                <p className="font-bold">
-                  Total Item : {products.productList.length}{" "}
-                </p>
+                <p className="font-bold">Total Item : {products.productList.length} </p>
               </div>
               <div className="flex justify-end transition-all">
                 <Row>
@@ -724,9 +711,7 @@ function Tambah({ props }) {
                     </p>
                   )}
                   {discPrice === 0 ? (
-                    <p className="font-bold ml-2">
-                      {formatter.format(totalPrice || 0)}
-                    </p>
+                    <p className="font-bold ml-2">{formatter.format(totalPrice || 0)}</p>
                   ) : (
                     <p className="font-bold line-through ml-2 ">
                       {formatter.format(totalPrice || 0)}
@@ -741,9 +726,7 @@ function Tambah({ props }) {
                     <p></p>
                   ) : (
                     <p className="font-bold text-red-500 ml-2">
-                      {isDPPActive
-                        ? formatter.format(dppPrice - discValue)
-                        : formatter.format(0)}
+                      {isDPPActive ? formatter.format(dppPrice - discValue) : formatter.format(0)}
                     </p>
                   )}
 
@@ -751,15 +734,11 @@ function Tambah({ props }) {
 
                   {discPrice === 0 ? (
                     <p className="font-bold ml-2">
-                      {isDPPActive
-                        ? formatter.format(dppPrice)
-                        : formatter.format(0)}
+                      {isDPPActive ? formatter.format(dppPrice) : formatter.format(0)}
                     </p>
                   ) : (
                     <p className="font-bold line-through ml-2 ">
-                      {isDPPActive
-                        ? formatter.format(dppPrice)
-                        : formatter.format(0)}
+                      {isDPPActive ? formatter.format(dppPrice) : formatter.format(0)}
                     </p>
                   )}
                 </Row>
@@ -771,22 +750,16 @@ function Tambah({ props }) {
                     <p></p>
                   ) : (
                     <p className="font-bold text-red-500 ml-2">
-                      {isDPPActive
-                        ? formatter.format(ppnPrice - discValue)
-                        : formatter.format(0)}
+                      {isDPPActive ? formatter.format(ppnPrice - discValue) : formatter.format(0)}
                     </p>
                   )}
                   {discPrice === 0 ? (
                     <p className="font-bold ml-2">
-                      {isDPPActive
-                        ? formatter.format(ppnPrice)
-                        : formatter.format(0)}
+                      {isDPPActive ? formatter.format(ppnPrice) : formatter.format(0)}
                     </p>
                   ) : (
                     <p className="font-bold line-through ml-2 ">
-                      {isDPPActive
-                        ? formatter.format(ppnPrice)
-                        : formatter.format(0)}
+                      {isDPPActive ? formatter.format(ppnPrice) : formatter.format(0)}
                     </p>
                   )}
                 </Row>
@@ -835,7 +808,7 @@ function Tambah({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
-                  <Form.Item name="DPP_active">
+                  <Form.Item initialValue={true} name="DPP_active">
                     <Select
                       placeholder="Pakai DPP"
                       onChange={setIsDPPActive}
@@ -959,9 +932,7 @@ function Tambah({ props }) {
               <div>
                 <p className="font-bold flex justify-end">
                   Total Pembelian :{" "}
-                  {grandTotal === 0
-                    ? formatter.format(totalPrice)
-                    : formatter.format(grandTotal)}
+                  {grandTotal === 0 ? formatter.format(totalPrice) : formatter.format(grandTotal)}
                 </p>
               </div>
               <Form.Item name="additional_note">

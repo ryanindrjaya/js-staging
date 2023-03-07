@@ -1,11 +1,7 @@
 import DataTable from "react-data-table-component";
 import AlertDialog from "../../Alert/Alert";
 import { Popover, Select, Row, Tag } from "antd";
-import {
-  EditOutlined,
-  PrinterOutlined,
-  UnorderedListOutlined,
-} from "@ant-design/icons";
+import { EditOutlined, PrinterOutlined, UnorderedListOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
 
 export default function ReactDataTable({
@@ -204,6 +200,9 @@ export default function ReactDataTable({
       data={data.data}
       pagination
       noDataComponent={"Belum ada data Order Pembelian"}
+      highlightOnHover
+      pointerOnHover
+      onRowClicked={(row) => openModal(row.id)}
     />
   );
 }
