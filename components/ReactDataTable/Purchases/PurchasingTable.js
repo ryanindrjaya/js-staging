@@ -10,13 +10,7 @@ import {
 import { useRouter } from "next/router";
 import { IoIosSwap } from "react-icons/io";
 
-export default function ReactDataTable({
-  data,
-  onDelete,
-  onUpdate,
-  onPageChange,
-  onChangeStatus,
-}) {
+export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange, onChangeStatus }) {
   const router = useRouter();
   const { Option } = Select;
 
@@ -222,11 +216,7 @@ export default function ReactDataTable({
               <Option value="Diproses" key="Diproses" className="text-black">
                 <Tag color="default">Diproses</Tag>
               </Option>
-              <Option
-                value="Dibatalkan"
-                key="Dibatalkan"
-                className="text-black"
-              >
+              <Option value="Dibatalkan" key="Dibatalkan" className="text-black">
                 <Tag color="error">Dibatalkan</Tag>
               </Option>
               <Option value="Diretur" key="Diretur" className="text-black">
@@ -268,15 +258,9 @@ export default function ReactDataTable({
             return <Tag color="green">Selesai</Tag>;
           }
         } else {
-          if (
-            statusPembayaran === "Belum Lunas" &&
-            purchasingHistory.length > 0
-          ) {
+          if (statusPembayaran === "Belum Lunas" && purchasingHistory.length > 0) {
             return <Tag color={tagRed}>Tempo</Tag>;
-          } else if (
-            statusPembayaran === "Lunas" &&
-            purchasingHistory.length > 0
-          ) {
+          } else if (statusPembayaran === "Lunas" && purchasingHistory.length > 0) {
             return <Tag color={tagGreen}>Selesai</Tag>;
           } else {
             return <Tag color={tagOrange}>Menunggu</Tag>;
@@ -291,18 +275,13 @@ export default function ReactDataTable({
       width: "150px",
       selector: (row) => {
         const lastIndex = row.attributes.purchasing_payments?.data?.length;
-        const lastPayment =
-          row.attributes.purchasing_payments.data[lastIndex - 1];
+        const lastPayment = row.attributes.purchasing_payments.data[lastIndex - 1];
 
-        if (
-          lastPayment?.attributes.payment_remaining ===
-          lastPayment?.attributes.total_payment
-        ) {
+        if (lastPayment?.attributes.payment_remaining === lastPayment?.attributes.total_payment) {
           return <Tag color={tagRed}>Belum Dibayar</Tag>;
         } else if (
           lastPayment?.attributes.payment_remaining > 0 &&
-          lastPayment?.attributes.payment_remaining <
-            lastPayment?.attributes.total_payment
+          lastPayment?.attributes.payment_remaining < lastPayment?.attributes.total_payment
         ) {
           return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
         } else if (lastPayment?.attributes.payment_remaining <= 0) {
@@ -315,8 +294,7 @@ export default function ReactDataTable({
     {
       name: "Total Beli",
       width: "150px",
-      selector: (row) =>
-        formatter.format(row.attributes?.total_purchasing ?? 0),
+      selector: (row) => formatter.format(row.attributes?.total_purchasing ?? 0),
     },
   ];
 
@@ -330,6 +308,9 @@ export default function ReactDataTable({
       data={data.data}
       pagination
       noDataComponent={"Belum ada data Pembelian"}
+      pointerOnHover
+      highlightOnHover
+      onRowClicked={(row) => openModal(row.id)}
     />
   );
 }

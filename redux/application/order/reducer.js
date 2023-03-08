@@ -8,9 +8,23 @@ export default function Reducer(state = initState, action) {
   switch (action.type) {
     case "ADD_PRODUCT":
       state.productList.push(action.product);
+      let productInfo = state.productInfo;
+      const idx = state.productList.length - 1;
       return {
         ...state,
         productList: [...state.productList],
+        productInfo: {
+          ...productInfo,
+          [idx]: {
+            priceUnit: action.product.attributes.buy_price_1,
+            unit: action.product.attributes.unit_1,
+            d1: action.product.attributes.unit_1_dp1,
+            d2: action.product.attributes.unit_1_dp2,
+            d3: action.product.attributes.unit_1_dp3,
+            disc: action.product.attributes.purchase_discount_1,
+            qty: 1,
+          },
+        },
       };
 
     case "REMOVE_PRODUCT":
