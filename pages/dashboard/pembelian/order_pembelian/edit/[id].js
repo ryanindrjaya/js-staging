@@ -277,7 +277,7 @@ function Edit({ props }) {
         sub_total: subTotal,
         unit_order: editedProduct?.[idx]?.unit || attributes?.unit_1,
         disc: editedProduct?.[idx]?.disc || attributes?.purchase_discount_1,
-        unit_price: editedProduct?.[idx]?.price_unit || attributes?.buy_price_1,
+        unit_price: editedProduct?.[idx]?.priceUnit || attributes?.buy_price_1,
         unit_price_after_disc: unitPriceAfterDisc,
         dp1: editedProduct?.[idx]?.d1 || attributes?.unit_1_dp1,
         dp2: editedProduct?.[idx]?.d2 || attributes?.unit_1_dp2,
@@ -815,7 +815,7 @@ function Edit({ props }) {
                     htmlType="submit"
                     className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
                   >
-                    Tambah
+                    Submit
                   </Button>
                 )}
               </Form.Item>

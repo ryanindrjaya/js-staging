@@ -48,10 +48,15 @@ const createDetailOrder = (products, productTotalPrice, productSubTotal, setList
     var dp2 = products.productInfo?.[idx]?.d2 ?? element.attributes[`unit_${unitByIndex}_dp2`] ?? 0;
     var dp3 = products.productInfo?.[idx]?.d3 ?? element.attributes[`unit_${unitByIndex}_dp3`] ?? 0;
     //var unitPrice = getUnitPrice(element, unit);
-    var unitPrice = value.harga_satuan?.[idx];
-    if (value.harga_satuan?.[idx] == undefined) {
-      unitPrice = element.attributes.buy_price_1;
-    }
+    var unitPrice =
+      products.productInfo?.[idx]?.priceUnit ??
+      element?.attributes[`buy_price_${unitByIndex}`] ??
+      0;
+
+    console.log({
+      unitByIndex,
+      unitPrice,
+    });
 
     var unitPriceAfterDisc = productTotalPrice?.[idx] ?? element.attributes[`buy_price_${idx + 1}`];
     var subTotal = unitPriceAfterDisc * qty;
