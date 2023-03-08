@@ -10,8 +10,8 @@ import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import AddSellSalesTable from "@iso/components/ReactDataTable/Selling/AddSellSalesTable";
 import AddCreditTable from "@iso/components/ReactDataTable/Cost/AddCreditTable";
-import createData from "../utility/createHutang";
-import createDetails from "../utility/createDetailHutang";
+import createData from "../utility/create";
+import createDetails from "../utility/createDetail";
 import calculatePrice from "../utility/calculatePrice";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
 import Customer from "@iso/components/Form/AddCost/CustomerForm";
@@ -247,7 +247,7 @@ function Piutang({ props }) {
 
   const createDetail = async () => {
     //await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/sales-sale-details");
-    await createDetails(dataValues, dataTabel, biaya, sisaHutang, setListId, "/debt-details");
+    await createDetails(dataValues, dataTabel, biaya, sisaHutang, setListId, "/credit-details", "piutang");
   };
 
   const createMaster = async (values) => {
@@ -255,7 +255,7 @@ function Piutang({ props }) {
     values.total_hutang_jatuh_tempo = totalHutangJatuhTempo();
     values.total_pembayaran = totalPembayaran();
     values.sisa_hutang_jatuh_tempo = sisaHutangJatuhTempo();
-    await createData(sisaHutang, values, listId, form, router, "/debts/", "hutang");
+    await createData(sisaHutang, values, listId, form, router, "/credits/", "piutang");
   };
 
   const clearData = () => {
@@ -268,16 +268,17 @@ function Piutang({ props }) {
     return formatter.format(total);
   };
 
-  //const totalHutangJatuhTempo = () => {
-  //  var total = 0;
-  //  if(biaya.info != null){
+  const totalHutangJatuhTempo = () => {
+    var total = 0;
+    if(biaya.info != null){
 
-  //    for(let row in biaya.info) {
-  //      if(biaya.info[row].pilihData == "pilih") total = total + biaya.info[row].totalHutangJatuhTempo;
-  //    };
-  //  }
-  //  return total;
-  //};
+      for(let row in biaya.info) {
+        if(biaya.info[row].pilihData == "pilih") total = total + biaya.info[row].totalHutangJatuhTempo;
+        if(biaya.info[row].totalHutangJatuhTempo == undefined) total = 0;
+      };
+    }
+    return total;
+  };
 
   const totalPembayaran = () => {
     var total = 0;
@@ -300,13 +301,13 @@ function Piutang({ props }) {
     return total;
   };
 
-  //const sisaHutangJatuhTempo = () => {
-  //  var total = 0;
-  //  var totalHutang = totalHutangJatuhTempo();
-  //  var totalBayar = totalPembayaran();
-  //  total = totalHutang - totalBayar;
-  //  return total;
-  //};
+  const sisaHutangJatuhTempo = () => {
+    var total = 0;
+    var totalHutang = totalHutangJatuhTempo();
+    var totalBayar = totalPembayaran();
+    total = totalHutang - totalBayar;
+    return total;
+  };
 
   useEffect(() => {
     //if (dataValues && info == "sukses") createDetailSale();
@@ -361,6 +362,7 @@ function Piutang({ props }) {
 
         dataTabel.forEach((element) => {
             element.subtotal = 0;
+            element.sisaHutang = 0;
 
             if (element.attributes?.no_sales_sale == row.attributes?.sales_sale?.data.attributes.no_sales_sale) {
                 row.attributes.retur_sales_sale_details.data.forEach((detail) => {
@@ -372,6 +374,8 @@ function Piutang({ props }) {
                 if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_sales_sale, subtotal: row.subtotal };
                 else dataRetur[0] = { id: element.attributes.no_sales_sale, subtotal: row.subtotal };
 
+                element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
+            } else {
                 element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
             }
         });
@@ -415,6 +419,7 @@ function Piutang({ props }) {
 
         dataTabel.forEach((element) => {
             element.subtotal = 0;
+            element.sisaHutang = 0;
 
             if (element.attributes?.no_panel_sale == row.attributes?.panel_sale?.data.attributes.no_panel_sale) {
                 row.attributes.retur_panel_sale_details.data.forEach((detail) => {
@@ -426,6 +431,8 @@ function Piutang({ props }) {
                 if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_panel_sale, subtotal: row.subtotal };
                 else dataRetur[0] = { id: element.attributes.no_panel_sale, subtotal: row.subtotal };
 
+                element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
+            } else {
                 element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
             }
         });
@@ -469,6 +476,7 @@ function Piutang({ props }) {
 
         dataTabel.forEach((element) => {
             element.subtotal = 0;
+            element.sisaHutang = 0;
 
             if (element.attributes?.no_non_panel_sale == row.attributes?.non_panel_sale?.data.attributes.no_non_panel_sale) {
                 row.attributes.retur_non_panel_sale_details.data.forEach((detail) => {
@@ -480,8 +488,9 @@ function Piutang({ props }) {
                 if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_non_panel_sale, subtotal: row.subtotal };
                 else dataRetur[0] = { id: element.attributes.no_non_panel_sale, subtotal: row.subtotal };
 
-                element.sisaHutang = parseInt(element.attributes.total);
-                //element.sisaHutang = element.sisaHutang - element.subtotal;
+                element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
+            } else {
+                element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
             }
         });
         //lpbId++;
@@ -535,7 +544,7 @@ function Piutang({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Customer onChangeCustomer={setCustomer} />
+                  {/*<Customer onChangeCustomer={setCustomer} />*/}
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
                   <Form.Item name="status_pembayaran" //initialValue={"Hari"} 

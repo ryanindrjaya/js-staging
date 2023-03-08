@@ -57,12 +57,12 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   //  dispatch({ type: "CHANGE_DATA_SISAHUTANG", sisahutang: sisa, listData: data, index: index });
   //};
 
-  const onChangePilih = async (value, data, index, v) => {
+  const onChangePilih = async (value, data, index) => {
     var pilihData = "tidak";
     if(value.target.checked == true) pilihData = "pilih";
     else pilihData = "tidak";
     dispatch({ type: "CHANGE_PILIH_DATA", pilihData: pilihData, listData: data, index: index });
-    dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: data.sisaPiutang, listData: data, index: index });
+    dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: data.sisaHutang, listData: data, index: index });
   };
 
   const onChangeTunai = (value, data, index) => {
@@ -91,7 +91,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     //onChangeSisaHutang(value, data, index);
   };
 
-  const metodePembayaran = (value) => { console.log("pembayaran",value)
+  const metodePembayaran = (value) => {
     //router.push("/dashboard/biaya/piutang/metode_pembayaran/" + value.id + value.keterangan);
     var totalPiutang = parseInt(value.attributes.total) - value.subtotal;
     router.push({
@@ -146,7 +146,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
 
     //dataModalSisa(row, tunai, transfer, giro, cn, oth);
 
-    setModalSisa(calculatePriceTotal(row, idx)); console.log("data calculate", modalSisa, biaya)
+    setModalSisa(calculatePriceTotal(row, idx));
     //dispatch({ type: "CHANGE_DATA_GIRO", giro: value, listData: data, index: index });
     //onChangeSisaHutang(value, data, index);
   };
@@ -165,6 +165,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   const handleCancel = () => {
     console.log('Clicked cancel button');
     setOpen(false);
+    //this.myFormRef.reset();
   };
 
   const content = (row, idx) => (
@@ -188,6 +189,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                 onOk={handleOk}
                 confirmLoading={confirmLoading}
                 onCancel={handleCancel}
+                ref={(modal) => this.myFormRef = modal}
                 footer={[
                   <button className="border border-cyan-700 rounded-md m-1 text-sm px-6 py-2" key="back" onClick={handleCancel}>
                     Cancel
@@ -486,10 +488,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   };
 
   const columns = [
-    {
-      name: "Tindakan",
-      width: "100px",
-      selector: (row, idx) => (
+      {
+          name: "Tindakan",
+          width: "100px",
+          selector: (row, idx) => (
         <>
             <Popover content={content(row, idx)} placement="bottom" trigger="click">
                 <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
@@ -543,7 +545,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     {
       name: "No Invoice",
       width: "200px",
-      selector: (row) => row.attributes?.no_sales_sale,
+      selector: (row) => row.attributes?.no_sales_sale ?? row.attributes?.no_non_panel_sale ?? row.attributes?.no_panel_sale,
     },
     {
       name: "Tanggal",
@@ -574,6 +576,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       name: "Total Pembayaran",
       width: "150px",
       //selector: (row) => formatter.format(row.hutangJatuhTempo),
+      //selector: (row) => console.log("row", row),
     },
     //{
     //  name: "Hutang Jatuh Tempo",

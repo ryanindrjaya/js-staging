@@ -10,8 +10,8 @@ import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import AddSellSalesTable from "@iso/components/ReactDataTable/Selling/AddSellSalesTable";
 import AddDebtTable from "@iso/components/ReactDataTable/Cost/AddDebtTable";
-import createData from "../utility/createHutang";
-import createDetails from "../utility/createDetailHutang";
+import createData from "../utility/create";
+import createDetails from "../utility/createDetail";
 import calculatePrice from "../utility/calculatePrice";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
 import nookies from "nookies";
@@ -185,7 +185,7 @@ function Hutang({ props }) {
 
   const createDetail = async () => {
     //await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/sales-sale-details");
-    await createDetails(dataValues, dataTabel, biaya, sisaHutang, setListId, "/debt-details");
+    await createDetails(dataValues, dataTabel, biaya, sisaHutang, setListId, "/debt-details", "hutang");
   };
 
   const createMaster = async (values) => {

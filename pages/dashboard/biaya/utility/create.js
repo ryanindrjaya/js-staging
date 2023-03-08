@@ -7,7 +7,7 @@ var tempProductListId = [];
 var tempSupplierId = 0;
 var tempLocationId;
 
-const CreateHutang = async (
+const Create = async (
   sisaHutang,
   values,
   listId,
@@ -82,23 +82,25 @@ const CreateHutang = async (
   const res = await req.json();
 
   if (req.status === 200) {
-    akunHutang.forEach((element) => {
-      if (element.attributes.type == "Tunai" && element.attributes.setting == true) {
-        putAkunHutang(element.id, element.attributes, form, totalTunai);
-      }
-      else if (element.attributes.type == "Transfer" && element.attributes.setting == true) {
-        putAkunHutang(element.id, element.attributes, form, totalTransfer);
-      }
-      else if (element.attributes.type == "Giro" && element.attributes.setting == true) {
-        putAkunHutang(element.id, element.attributes, form, totalGiro);
-      }
-      else if (element.attributes.type == "CN" && element.attributes.setting == true) {
-        putAkunHutang(element.id, element.attributes, form, totalCN);
-      }
-      else if (element.attributes.type == "OTH" && element.attributes.setting == true) {
-        putAkunHutang(element.id, element.attributes, form, totalOTH);
-      }
-    });
+    if(page == "hutang"){
+      akunHutang.forEach((element) => {
+          if (element.attributes.type == "Tunai" && element.attributes.setting == true) {
+            putAkunHutang(element.id, element.attributes, form, totalTunai);
+          }
+          else if (element.attributes.type == "Transfer" && element.attributes.setting == true) {
+            putAkunHutang(element.id, element.attributes, form, totalTransfer);
+          }
+          else if (element.attributes.type == "Giro" && element.attributes.setting == true) {
+            putAkunHutang(element.id, element.attributes, form, totalGiro);
+          }
+          else if (element.attributes.type == "CN" && element.attributes.setting == true) {
+            putAkunHutang(element.id, element.attributes, form, totalCN);
+          }
+          else if (element.attributes.type == "OTH" && element.attributes.setting == true) {
+            putAkunHutang(element.id, element.attributes, form, totalOTH);
+          }
+      });
+    }
 
     await putRelationDetail(res.data.id, res.data.attributes, form, router, url, page);
   } else {
@@ -172,6 +174,7 @@ const putRelationDetail = async (id, value, form, router, url, page) => {
   };
 
   data.data.debt_details = tempProductListId;
+  data.data.credit_details = tempProductListId;
 
   // clean object
   for (var key in data) {
@@ -197,7 +200,8 @@ const putRelationDetail = async (id, value, form, router, url, page) => {
 
   if (req.status === 200) {
     form.resetFields();
-    router.replace("/dashboard/biaya/hutang");
+    if(page == "hutang") router.replace("/dashboard/biaya/hutang");
+    if(page == "piutang") router.replace("/dashboard/biaya/piutang");
     openNotificationWithIcon("success");
   } else {
     openNotificationWithIcon("error");
@@ -236,4 +240,4 @@ const openNotificationWithIcon = (type) => {
   }
 };
 
-export default CreateHutang;
+export default Create;
