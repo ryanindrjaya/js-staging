@@ -17,7 +17,7 @@ import ExportProduk from "../../../components/Form/ExportProduk";
 import UploadProduk from "../../../components/Form/UploadProduk";
 
 const Product = ({ props }) => {
-  const data = props.data;
+  const data = props?.data;
   const manufactures = props.manufactures;
   const categories = props.categories;
   const locations = props.locations;
