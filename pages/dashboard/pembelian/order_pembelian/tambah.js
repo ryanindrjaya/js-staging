@@ -153,7 +153,7 @@ function Tambah({ props }) {
     style: "currency",
     currency: "IDR",
     maximumFractionDigits: 2,
-    minimumFractionDigits: 0,
+    minimumFractionDigits: 2,
     useGrouping: true,
     groupingSeparator: ",",
     decimalSeparator: ".",

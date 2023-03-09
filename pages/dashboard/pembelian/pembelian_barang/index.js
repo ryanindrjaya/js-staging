@@ -1,15 +1,18 @@
 import Head from "next/head";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import { useRouter } from "next/router";
-import { Input, notification } from "antd";
+import { Button, Descriptions, Input, Modal, notification, Tag } from "antd";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
 import PurchasingTable from "../../../../components/ReactDataTable/Purchases/PurchasingTable";
 import nookies from "nookies";
+import { PrinterOutlined } from "@ant-design/icons";
 
+import updateProduct from "../utility/updateProduct";
 import createInventory from "../utility/createInventory";
+import { updateProductFromTable } from "../utility/updateProductFromTable";
 
 Pembelian.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -52,8 +55,11 @@ const fetchData = async (cookies) => {
 
 function Pembelian({ props }) {
   const data = props.data;
+  const [selectedLPB, setSelectedLPB] = useState();
   const [purchase, setPurchase] = useState(data);
+  const [openModal, setOpenModal] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const cookies = nookies.get(null, "token");
 
   const { Search } = Input;
   const router = useRouter();
@@ -73,8 +79,7 @@ function Pembelian({ props }) {
 
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/purchases?pagination[page]=" + page;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases?pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -149,19 +154,27 @@ function Pembelian({ props }) {
     onChangeStatus("Dibatalkan", row);
   };
 
+  const updateProductHarga = async (values) => {
+    var index = 0;
+    values.productList.forEach((element) => {
+      // updateProduct(element, values.productInfo[index]);
+      index++;
+    });
+  };
+
   const onChangeStatus = async (status, row) => {
     row.attributes.status = status;
-    console.log(status);
     // const dataStatus = row;
 
-    if (status === "Diterima" || status === "Sebagian Diterima") {
+    if (status === "Diterima") {
+      console.log("store to inventory && update product price");
       // invetory handle
-      console.log("store to inventory");
       // createInventory(row);
+
+      await updateProductFromTable(row);
     }
 
     const poData = row?.attributes?.purchase?.data;
-
     await changeStatusLPB(row, row.id);
     await changeStatusPO(poData, status);
   };
@@ -171,10 +184,7 @@ function Pembelian({ props }) {
       // cleaning
       delete poData.attributes?.document;
       for (var key in poData.attributes) {
-        if (
-          poData.attributes[key] === null ||
-          poData.attributes[key] === undefined
-        ) {
+        if (poData.attributes[key] === null || poData.attributes[key] === undefined) {
           delete poData.attributes[key];
         }
       }
@@ -186,8 +196,7 @@ function Pembelian({ props }) {
       poData.attributes.supplier = {
         id: poData.attributes?.supplier?.data?.id,
       };
-      poData.attributes.purchase_details =
-        poData.attributes?.purchase_details?.data;
+      poData.attributes.purchase_details = poData.attributes?.purchase_details?.data;
 
       const values = {
         data: poData.attributes,
@@ -237,10 +246,7 @@ function Pembelian({ props }) {
       // // clean object
       delete values.attributes.purchase;
       for (var key in values.attributes) {
-        if (
-          values.attributes[key] === null ||
-          values.attributes[key] === undefined
-        ) {
+        if (values.attributes[key] === null || values.attributes[key] === undefined) {
           delete values.attributes[key];
         }
       }
@@ -340,6 +346,68 @@ function Pembelian({ props }) {
     });
   };
 
+  // search query
+  useEffect(() => {
+    async function getLPBById(id) {
+      const endpoint = process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=*`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+      };
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
+
+      setSelectedLPB(res?.data);
+    }
+
+    if (router?.query?.id) {
+      const id = router.query.id;
+      getLPBById(id);
+    }
+  }, [router.query]);
+
+  useEffect(() => {
+    if (selectedLPB) {
+      setOpenModal(true);
+    }
+  }, [selectedLPB]);
+
+  var formatter = new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
+  });
+
+  const getTagColor = (type) => {
+    switch (type) {
+      case "Terkirim":
+        return "green";
+      case "Diterima":
+        return "GREEN";
+      case "Sebagian Diterima":
+        return "orange";
+      case "Diproses":
+        return "default";
+      default:
+        return "default";
+    }
+  };
+
+  const print = () => {
+    router.replace(
+      {
+        pathname: "/dashboard/pembelian/pembelian_barang",
+      },
+      undefined,
+      { shallow: true }
+    );
+    router.push("pembelian_barang/print/" + selectedLPB.id);
+  };
+
   return (
     <>
       <Head>
@@ -349,6 +417,81 @@ function Pembelian({ props }) {
         <LayoutWrapper style={{}}>
           <TitlePage titleText={"Lembar Pembelian Barang"} />
           <LayoutContent>
+            <Modal
+              open={openModal}
+              onClose={() => {
+                router.replace(
+                  {
+                    pathname: "/dashboard/pembelian/pembelian_barang",
+                  },
+                  undefined,
+                  { shallow: true }
+                );
+                setOpenModal(false);
+                setSelectedLPB();
+              }}
+              onCancel={() => {
+                router.replace(
+                  {
+                    pathname: "/dashboard/pembelian/pembelian_barang",
+                  },
+                  undefined,
+                  { shallow: true }
+                );
+                setOpenModal(false);
+                setSelectedLPB();
+              }}
+              width={1000}
+              okButtonProps={{ style: { display: "none" } }}
+              cancelText="Close"
+            >
+              {selectedLPB && (
+                <>
+                  <Descriptions
+                    extra={
+                      <Button
+                        onClick={print}
+                        className="bg-cyan-700 hover:bg-cyan-800 mr-7 border-none"
+                        type="primary"
+                      >
+                        <PrinterOutlined className="mr-2 mt-0.5 float float-left" /> Cetak
+                      </Button>
+                    }
+                    size="middle"
+                    title="INFORMASI PEMBELIAN BARANG"
+                    bordered
+                  >
+                    <Descriptions.Item label="Tanggal Pembelian" span={4}>
+                      {selectedLPB?.attributes?.date_purchasing}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="NO LPB" span={2}>
+                      {selectedLPB?.attributes?.no_purchasing}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Supplier">
+                      {selectedLPB?.attributes?.supplier?.data?.attributes?.name}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Status" span={2}>
+                      <Tag color={getTagColor(selectedLPB?.attributes?.status)}>
+                        {selectedLPB?.attributes?.status}
+                      </Tag>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Lokasi" span={2}>
+                      {selectedLPB?.attributes?.location?.data?.attributes?.name}
+                    </Descriptions.Item>
+                  </Descriptions>
+
+                  <Descriptions className="my-3" size="middle" title="PEMBAYARAN" bordered>
+                    <Descriptions.Item label="Termin Pembayaran" span={2}>
+                      {selectedLPB?.attributes?.tempo_days} {selectedLPB?.attributes?.tempo_time}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Total" className="font-bold">
+                      {formatter.format(selectedLPB?.attributes?.total_purchasing)}
+                    </Descriptions.Item>
+                  </Descriptions>
+                </>
+              )}
+            </Modal>
+
             <div className="w-full flex justify-between">
               <Search
                 className=""
@@ -365,9 +508,7 @@ function Pembelian({ props }) {
                 className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
               >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    + Tambah
-                  </a>
+                  <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
                 </div>
               </button>
             </div>

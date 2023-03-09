@@ -303,7 +303,7 @@ function NonPanelSale({ props }) {
                 {/*{locations.map((element) => {*/}
                 {/*  return (*/}
                     <Select.Option>
-                      Dipesan
+                      Diproses
                     </Select.Option>
                     <Select.Option>
                       Diterima

@@ -2,6 +2,7 @@ import DataTable from "react-data-table-component";
 import AlertDialog from "../../Alert/Alert";
 import { InputNumber, Select, Form, Row } from "antd";
 import { useDispatch } from "react-redux";
+import { useEffect, useState } from "react";
 
 export default function ReactDataTable({
   calculatePriceAfterDisc,
@@ -12,6 +13,7 @@ export default function ReactDataTable({
   formObj,
 }) {
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(true);
 
   var defaultDp1 = 0;
   var defaultDp2 = 0;
@@ -24,17 +26,24 @@ export default function ReactDataTable({
     style: "currency",
     currency: "IDR",
     maximumFractionDigits: 2,
-    minimumFractionDigits: 0,
+    minimumFractionDigits: 2,
     useGrouping: true,
     groupingSeparator: ",",
     decimalSeparator: ".",
   });
+
+  useEffect(() => {
+    if (products?.productList?.length > 0) {
+      setLoading(false);
+    }
+  }, [products]);
 
   const onDeleteProduct = (value) => {
     dispatch({ type: "REMOVE_PRODUCT", index: value });
   };
 
   const onChangeUnit = (value, data, index) => {
+    console.log("data change unit", data);
     unit = value;
     if (value == 1) {
       priceUnit = data.attributes.buy_price_1;
@@ -181,8 +190,8 @@ export default function ReactDataTable({
       width: "150px",
       selector: (row, idx) => {
         var priceUnit = row.attributes?.buy_price_1;
-        var priceUnit = row.attributes?.buy_price_1;
         if (products.productInfo[idx]?.priceUnit) {
+          console.log("price unit", products.productInfo[idx].priceUnit);
           priceUnit = products.productInfo[idx].priceUnit;
         }
         return (
@@ -197,9 +206,7 @@ export default function ReactDataTable({
                     width: "150px",
                     marginRight: "10px",
                   }}
-                  formatter={(value) =>
-                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                  }
+                  formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                   parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                 />
               </Form.Item>
@@ -227,10 +234,7 @@ export default function ReactDataTable({
         return (
           <>
             <Row>
-              <Form.Item
-                name={["jumlah_qty", `${idx}`]}
-                noStyle
-              >
+              <Form.Item name={["jumlah_qty", `${idx}`]} noStyle>
                 <InputNumber
                   defaultValue={defaultQty}
                   onChange={(e) => onChangeQty(e, row, idx)}
@@ -246,10 +250,7 @@ export default function ReactDataTable({
                 />
               </Form.Item>
 
-              <Form.Item
-                name={["jumlah_option", `${idx}`]}
-                noStyle
-              >
+              <Form.Item name={["jumlah_option", `${idx}`]} noStyle>
                 <Select
                   defaultValue={defaultIndex}
                   onChange={(value) => onChangeUnit(value, row, idx)}
@@ -261,50 +262,35 @@ export default function ReactDataTable({
                   {row.attributes?.unit_1 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_1 === null}
-                      value={1}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_1 === null} value={1}>
                       {row.attributes?.unit_1}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_2 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_2 === null}
-                      value={2}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_2 === null} value={2}>
                       {row.attributes?.unit_2}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_3 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_3 === null}
-                      value={3}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_3 === null} value={3}>
                       {row.attributes?.unit_3}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_4 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_4 === null}
-                      value={4}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_4 === null} value={4}>
                       {row.attributes?.unit_4}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_5 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_5 === null}
-                      value={5}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_5 === null} value={5}>
                       {row.attributes?.unit_5}
                     </Select.Option>
                   )}
@@ -323,8 +309,7 @@ export default function ReactDataTable({
         if (products.productInfo[idx]?.disc) {
           defaultDisc = products?.productInfo[idx]?.disc;
         } else {
-          defaultDisc =
-            products?.productList[idx]?.attributes?.purchase_discount_1;
+          defaultDisc = products?.productList[idx]?.attributes?.purchase_discount_1;
         }
 
         return (
@@ -339,9 +324,7 @@ export default function ReactDataTable({
                   width: "100px",
                   marginRight: "10px",
                 }}
-                formatter={(value) =>
-                  value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                }
+                formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                 parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
               />
             </Form.Item>
@@ -354,7 +337,7 @@ export default function ReactDataTable({
       width: "100px",
       selector: (row, idx) => {
         defaultDp1 = row.attributes?.unit_1_dp1 || 0;
-        if (products.productInfo[idx]?.d1) {
+        if (products.productInfo[idx]?.d1 !== undefined) {
           defaultDp1 = products.productInfo[idx].d1;
         }
 
@@ -387,7 +370,7 @@ export default function ReactDataTable({
       width: "100px",
       selector: (row, idx) => {
         defaultDp2 = row.attributes?.unit_1_dp2 || 0;
-        if (products.productInfo[idx]?.d2) {
+        if (products.productInfo[idx]?.d2 !== undefined) {
           defaultDp2 = products.productInfo[idx].d2;
         }
 
@@ -420,7 +403,7 @@ export default function ReactDataTable({
       width: "100px",
       selector: (row, idx) => {
         defaultDp3 = row.attributes?.unit_1_dp3 || 0;
-        if (products.productInfo[idx]?.d3) {
+        if (products.productInfo[idx]?.d3 !== undefined) {
           defaultDp3 = products.productInfo[idx].d3;
         }
 
@@ -475,10 +458,11 @@ export default function ReactDataTable({
 
   return (
     <DataTable
+      keyField=""
       customStyles={customStyles}
       paginationRowsPerPageOptions={[50]}
       columns={columns}
-      data={products.productList}
+      data={products?.productList || data || []}
       noDataComponent={`--Belum ada produk--`}
     />
   );

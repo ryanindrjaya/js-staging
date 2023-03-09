@@ -29,7 +29,7 @@ function SearchPO({ supplier, handleSelect }) {
       try {
         const endpoint =
           process.env.NEXT_PUBLIC_URL +
-          `/purchases/?populate=deep&filters[status][$eq]=Sebagian Diterima&filters[status][$eq]=Dipesan&filters[supplier][name][$eq]=${supplierName}`;
+          `/purchases/?populate=deep&filters[status][$eq]=Sebagian Diterima&filters[status][$eq]=Diproses&filters[supplier][name][$eq]=${supplierName}`;
         const options = {
           method: "GET",
           headers: {
@@ -56,7 +56,7 @@ function SearchPO({ supplier, handleSelect }) {
   };
 
   return (
-    <Form.Item name="no_po">
+    <Form.Item required name="no_po">
       <Select
         allowClear
         size="large"

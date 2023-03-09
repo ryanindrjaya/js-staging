@@ -38,7 +38,7 @@ export default function ReactDataTable({
   };
 
   const onChangeUnit = (value, data, index) => {
-    unit[index] = value;
+    unit = value;
     if (value == 1) {
       priceUnit = data.attributes.buy_price_1;
     } else if (value == 2) {
@@ -90,11 +90,9 @@ export default function ReactDataTable({
     data.attributes.buy_price_4 = value;
     data.attributes.buy_price_5 = value;
 
-    if (tempIndex != indexRow) {
-      tempIndex = indexRow;
-      if(dataForm.jumlah_option[indexRow] == undefined) dataForm.jumlah_option[indexRow] = unit[indexRow];
-      unit[indexRow] = dataForm.jumlah_option[indexRow];
-      onChangeUnit(unit[indexRow], data, indexRow);
+    if (tempIndex != index) {
+      tempIndex = index;
+      onChangeUnit(index, data, indexRow);
     }
 
     data.attributes.buy_price_1 = tempPriceUnit[0];
@@ -106,6 +104,9 @@ export default function ReactDataTable({
     formObj.setFieldsValue({
       harga_satuan: {
         [indexRow]: value,
+      },
+      disc_rp: {
+        [indexRow]: data.attributes[`purchase_discount_${index}`],
       },
     });
   };
@@ -295,7 +296,7 @@ export default function ReactDataTable({
       name: "Diskon",
       width: "150px",
       selector: (row, idx) => {
-        var defaultDisc = 0;
+        var defaultDisc = row?.attributes?.purchase_discount_1 || 0;
         if (products.productInfo[idx]?.disc) {
           defaultDisc = products.productInfo[idx].disc;
         }
