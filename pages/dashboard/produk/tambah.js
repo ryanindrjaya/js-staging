@@ -341,11 +341,13 @@ const Tambah = ({ props }) => {
       if (
         element.attributes.manufacture.data.id == selectedManufactures &&
         element.attributes.group.data.id == selectedGroups &&
-        element.attributes.category.data.id == category[0]?.category?.category_id
+        element.attributes.category.data.id ==
+          category[0]?.category?.category_id
       ) {
         manufacturesData++;
       }
     });
+
     manufacturesData = String(manufacturesData + 1).padStart(3, "0");
 
     groups.data.forEach((element) => {
@@ -371,7 +373,7 @@ const Tambah = ({ props }) => {
     }
 
     form.setFieldsValue({ SKU: kodeProduct });
-  }, [category, selectedManufactures, selectedGroups]);
+  }, [category, selectedManufactures, selectedGroups, product]);
 
   const onFinishFailed = () => {
     const error = form.getFieldsError();
