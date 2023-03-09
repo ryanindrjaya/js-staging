@@ -8,7 +8,7 @@ var tempProductListId = [];
 const UpdateOrder = async (values, status) => {
   // CLEANING DATA
   if(status == "Selesai") values.attributes.status = "Selesai";
-  else values.attributes.status = "Sebagian Diterima";
+  else values.attributes.status = "Diproses";
 
   values.attributes.location = values.attributes.location.data.id;
   values.attributes.supplier = values.attributes.supplier.data.id;

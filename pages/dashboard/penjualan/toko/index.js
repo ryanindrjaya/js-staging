@@ -59,17 +59,17 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchStore = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales?populate=deep";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
 
-    const req = await fetch(endpoint, options);
-    return req;
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
 function Toko({ props }) {
@@ -120,7 +120,8 @@ function Toko({ props }) {
 
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales?pagination[page]=" + page;
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL + "/store-sales?pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -154,12 +155,18 @@ function Toko({ props }) {
   const handleChangeStatus = async (values, id) => {
     // clean object
     for (var key in values.attributes) {
-      if (values.attributes[key] === null || values.attributes[key] === undefined) {
+      if (
+        values.attributes[key] === null ||
+        values.attributes[key] === undefined
+      ) {
         delete values.attributes[key];
       }
     }
 
-    if (values.attributes?.document?.data === null || values.attributes?.document?.data === undefined) {
+    if (
+      values.attributes?.document?.data === null ||
+      values.attributes?.document?.data === undefined
+    ) {
       delete values.attributes?.document;
     }
 
@@ -200,9 +207,17 @@ function Toko({ props }) {
     if (req.status === 200) {
       const response = await fetchStore(cookies);
       setSell(response);
-      openNotificationWithIcon("success", "Status berhasil dirubah", "Status berhasil dirubah. Silahkan cek penjualan toko");
+      openNotificationWithIcon(
+        "success",
+        "Status berhasil dirubah",
+        "Status berhasil dirubah. Silahkan cek penjualan toko"
+      );
     } else {
-      openNotificationWithIcon("error", "Status gagal dirubah", "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah");
+      openNotificationWithIcon(
+        "error",
+        "Status gagal dirubah",
+        "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah"
+      );
     }
   };
 
@@ -214,7 +229,6 @@ function Toko({ props }) {
   };
 
   return (
-    
     <>
       <Head>
         <title>Penjualan Toko</title>
@@ -224,7 +238,7 @@ function Toko({ props }) {
           <TitlePage titleText={"Daftar Penjualan Toko"} />
           <LayoutContent>
             <div className="w-full flex justify-start">
-              <div className="w-full md:w-1/5 px-3"> 
+              <div className="w-full md:w-1/5 px-3">
                 <Select
                   placeholder="Lokasi Gudang"
                   size="large"
@@ -233,16 +247,16 @@ function Toko({ props }) {
                     marginRight: "10px",
                   }}
                 >
-                {locations.map((element) => {
-                  return (
-                    <Select.Option value={element.id}>
-                      {element.attributes.name}
-                    </Select.Option>
-                  );
-                })}
+                  {locations.map((element) => {
+                    return (
+                      <Select.Option value={element.id}>
+                        {element.attributes.name}
+                      </Select.Option>
+                    );
+                  })}
                 </Select>
               </div>
-              <div className="w-full md:w-1/5 px-3"> 
+              <div className="w-full md:w-1/5 px-3">
                 <Select
                   placeholder="Lokasi Penjualan"
                   size="large"
@@ -251,16 +265,16 @@ function Toko({ props }) {
                     marginRight: "10px",
                   }}
                 >
-                {locations.map((element) => {
-                  return (
-                    <Select.Option value={element.id}>
-                      {element.attributes.name}
-                    </Select.Option>
-                  );
-                })}
+                  {locations.map((element) => {
+                    return (
+                      <Select.Option value={element.id}>
+                        {element.attributes.name}
+                      </Select.Option>
+                    );
+                  })}
                 </Select>
               </div>
-              <div className="w-full md:w-1/5 px-3"> 
+              <div className="w-full md:w-1/5 px-3">
                 <Select
                   placeholder="Status Pembayaran"
                   size="large"
@@ -269,25 +283,23 @@ function Toko({ props }) {
                     marginRight: "10px",
                   }}
                 >
-                {/*{locations.map((element) => {*/}
-                {/*  return (*/}
-                    <Select.Option>
-                      Belum Dibayar
-                    </Select.Option>
-                    <Select.Option>
-                      Dibayar Sebagian
-                    </Select.Option>
-                    <Select.Option>
-                      Selesai
-                    </Select.Option>
-                {/*  );*/}
-                {/*})}*/}
+                  {/*{locations.map((element) => {*/}
+                  {/*  return (*/}
+                  <Select.Option>Belum Dibayar</Select.Option>
+                  <Select.Option>Dibayar Sebagian</Select.Option>
+                  <Select.Option>Selesai</Select.Option>
+                  {/*  );*/}
+                  {/*})}*/}
                 </Select>
               </div>
-              <div className="w-full md:w-1/5 px-3">                
-                <DatePicker placeholder="Rentang Tanggal" size="large" style={{ width: "100%" }} />
+              <div className="w-full md:w-1/5 px-3">
+                <DatePicker
+                  placeholder="Rentang Tanggal"
+                  size="large"
+                  style={{ width: "100%" }}
+                />
               </div>
-              <div className="w-full md:w-1/5 px-3"> 
+              <div className="w-full md:w-1/5 px-3">
                 <Select
                   placeholder="Admin Penjualan"
                   size="large"
@@ -296,20 +308,19 @@ function Toko({ props }) {
                     marginRight: "10px",
                   }}
                 >
-                {user.map((element) => {
-                  return (
-                    <Select.Option value={element.id}>
-                      {element.name}
-                    </Select.Option>
-                  );
-                }
-                )}
+                  {user.map((element) => {
+                    return (
+                      <Select.Option value={element.id}>
+                        {element.name}
+                      </Select.Option>
+                    );
+                  })}
                 </Select>
               </div>
             </div>
 
             <div className="w-full flex justify-start mt-3">
-              <div className="w-full md:w-1/5 px-3"> 
+              <div className="w-full md:w-1/5 px-3">
                 <Select
                   placeholder="Pelanggan"
                   size="large"
@@ -318,16 +329,14 @@ function Toko({ props }) {
                     marginRight: "10px",
                   }}
                 >
-                {/*{locations.map((element) => {*/}
-                {/*  return (*/}
-                    <Select.Option>
-                      data
-                    </Select.Option>
-                {/*  );*/}
-                {/*})}*/}
+                  {/*{locations.map((element) => {*/}
+                  {/*  return (*/}
+                  <Select.Option>data</Select.Option>
+                  {/*  );*/}
+                  {/*})}*/}
                 </Select>
               </div>
-              <div className="w-full md:w-1/5 px-3"> 
+              <div className="w-full md:w-1/5 px-3">
                 <Select
                   placeholder="Sales"
                   size="large"
@@ -336,16 +345,14 @@ function Toko({ props }) {
                     marginRight: "10px",
                   }}
                 >
-                {/*{locations.map((element) => {*/}
-                {/*  return (*/}
-                    <Select.Option>
-                      data
-                    </Select.Option>
-                {/*  );*/}
-                {/*})}*/}
+                  {/*{locations.map((element) => {*/}
+                  {/*  return (*/}
+                  <Select.Option>data</Select.Option>
+                  {/*  );*/}
+                  {/*})}*/}
                 </Select>
               </div>
-              <div className="w-full md:w-1/5 px-3"> 
+              <div className="w-full md:w-1/5 px-3">
                 <Select
                   placeholder="Status Penyerahan"
                   size="large"
@@ -354,19 +361,15 @@ function Toko({ props }) {
                     marginRight: "10px",
                   }}
                 >
-                {/*{locations.map((element) => {*/}
-                {/*  return (*/}
-                    <Select.Option>
-                      Dipesan
-                    </Select.Option>
-                    <Select.Option>
-                      Diterima
-                    </Select.Option>
-                {/*  );*/}
-                {/*})}*/}
+                  {/*{locations.map((element) => {*/}
+                  {/*  return (*/}
+                  <Select.Option>Diproses</Select.Option>
+                  <Select.Option>Diterima</Select.Option>
+                  {/*  );*/}
+                  {/*})}*/}
                 </Select>
               </div>
-              <div className="w-full md:w-1/5 px-3"> 
+              <div className="w-full md:w-1/5 px-3">
                 <Select
                   placeholder="Jatuh Tempo"
                   size="large"
@@ -375,71 +378,77 @@ function Toko({ props }) {
                     marginRight: "10px",
                   }}
                 >
-                {/*{locations.map((element) => {*/}
-                {/*  return (*/}
-                    <Select.Option>
-                      data
-                    </Select.Option>
-                {/*  );*/}
-                {/*})}*/}
+                  {/*{locations.map((element) => {*/}
+                  {/*  return (*/}
+                  <Select.Option>data</Select.Option>
+                  {/*  );*/}
+                  {/*})}*/}
                 </Select>
               </div>
             </div>
 
             <div className="w-full flex justify-between mt-0 mb-2">
-              <span className="text-black text-md font-bold ml-1 mt-5">Semua Penjualan</span>
-              <button onClick={handleAdd} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5">
-                    <div className="text-white text-center text-sm font-bold">
-                        <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
-                    </div>
+              <span className="text-black text-md font-bold ml-1 mt-5">
+                Semua Penjualan
+              </span>
+              <button
+                onClick={handleAdd}
+                type="button"
+                className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+              >
+                <div className="text-white text-center text-sm font-bold">
+                  <a className="text-white no-underline text-xs sm:text-xs">
+                    + Tambah
+                  </a>
+                </div>
               </button>
             </div>
 
-            <div  className="w-full flex justify-between">
-                <button
-                    onClick={handleUpdate}
-                    type="button"
-                    className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
-                >
-                    <div className="text-white text-center text-sm font-bold">
-                      <a className="text-white no-underline text-xs sm:text-xs">
-                        Print PDF
-                      </a>
-                    </div>
-                </button>
-                <button
-                    onClick={handleUpdate}
-                    type="button"
-                    className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
-                >
-                    <div className="text-white text-center text-sm font-bold">
-                      <a className="text-white no-underline text-xs sm:text-xs">
-                        Print CSV
-                      </a>
-                    </div>
-                </button>
-                <button
-                    onClick={handleUpdate}
-                    type="button"
-                    className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
-                >
-                    <div className="text-white text-center text-sm font-bold">
-                      <a className="text-white no-underline text-xs sm:text-xs">
-                        Print XLS
-                      </a>
-                    </div>
-                </button>
-                <button
-                    onClick={handleUpdate}
-                    type="button"
-                    className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
-                >
-                    <div className="text-white text-center text-sm font-bold">
-                      <a className="text-white no-underline text-xs sm:text-xs">
-                        Kolom Tampak
-                      </a>
-                    </div>
-                </button>
+            <div className="w-full flex justify-between">
+              <button
+                onClick={handleUpdate}
+                type="button"
+                className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
+              >
+                <div className="text-white text-center text-sm font-bold">
+                  <a className="text-white no-underline text-xs sm:text-xs">
+                    Print PDF
+                  </a>
+                </div>
+              </button>
+              <button
+                onClick={handleUpdate}
+                type="button"
+                className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
+              >
+                <div className="text-white text-center text-sm font-bold">
+                  <a className="text-white no-underline text-xs sm:text-xs">
+                    Print CSV
+                  </a>
+                </div>
+              </button>
+              <button
+                onClick={handleUpdate}
+                type="button"
+                className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
+              >
+                <div className="text-white text-center text-sm font-bold">
+                  <a className="text-white no-underline text-xs sm:text-xs">
+                    Print XLS
+                  </a>
+                </div>
+              </button>
+              <button
+                onClick={handleUpdate}
+                type="button"
+                className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
+              >
+                <div className="text-white text-center text-sm font-bold">
+                  <a className="text-white no-underline text-xs sm:text-xs">
+                    Kolom Tampak
+                  </a>
+                </div>
+              </button>
             </div>
 
             <SellingTable
@@ -454,9 +463,7 @@ function Toko({ props }) {
         </LayoutWrapper>
       </DashboardLayout>
     </>
-  
-  
-    );
+  );
 }
 
 export default Toko;

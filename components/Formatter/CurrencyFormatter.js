@@ -15,7 +15,7 @@ export const formatterNumber = (value) => {
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency: "IDR",
-    // minimumFractionDigits: 0,
+    // minimumFractionDigits: 2,
   })
     .format(value)
     .replace("Rp", "")
