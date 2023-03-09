@@ -1,10 +1,7 @@
-import React from "react";
 import nookies from "nookies";
 import { notification } from "antd";
 
-export async function updateProductFromTable(data) {
-  //   console.log(data);
-
+const updateProductFromTable = async (data) => {
   const purchasingDetails = data?.attributes?.purchasing_details?.data;
   const promises = purchasingDetails.map((element) => {
     updateAPI(element);
@@ -16,7 +13,7 @@ export async function updateProductFromTable(data) {
   } catch (error) {
     console.error("Error updating data:", error);
   }
-}
+};
 
 const updateAPI = async (element) => {
   try {
@@ -109,3 +106,5 @@ const openNotificationWithIcon = (type) => {
     });
   }
 };
+
+export default updateProductFromTable;
