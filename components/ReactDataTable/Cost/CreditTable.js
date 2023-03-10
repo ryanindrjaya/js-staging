@@ -167,7 +167,7 @@ export default function ReactDataTable({
             columns={columns}
             data={data.data}
             pagination
-            noDataComponent={"Belum ada data hutang"}
+            noDataComponent={"Belum ada data piutang"}
         />
     );
 }

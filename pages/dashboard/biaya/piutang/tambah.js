@@ -252,9 +252,9 @@ function Piutang({ props }) {
 
   const createMaster = async (values) => {
     values.total_item = dataTabel.length;
-    values.total_hutang_jatuh_tempo = totalHutangJatuhTempo();
+    values.total_piutang_jatuh_tempo = totalPiutangJatuhTempo();
     values.total_pembayaran = totalPembayaran();
-    values.sisa_hutang_jatuh_tempo = sisaHutangJatuhTempo();
+    values.sisa_piutang_jatuh_tempo = sisaPiutangJatuhTempo();
     await createData(sisaHutang, values, listId, form, router, "/credits/", "piutang");
   };
 
@@ -268,7 +268,7 @@ function Piutang({ props }) {
     return formatter.format(total);
   };
 
-  const totalHutangJatuhTempo = () => {
+  const totalPiutangJatuhTempo = () => {
     var total = 0;
     if(biaya.info != null){
 
@@ -301,11 +301,11 @@ function Piutang({ props }) {
     return total;
   };
 
-  const sisaHutangJatuhTempo = () => {
+  const sisaPiutangJatuhTempo = () => {
     var total = 0;
-    var totalHutang = totalHutangJatuhTempo();
+    var totalPiutang = totalPiutangJatuhTempo();
     var totalBayar = totalPembayaran();
-    total = totalHutang - totalBayar;
+    total = totalPiutang - totalBayar;
     return total;
   };
 
@@ -357,30 +357,30 @@ function Piutang({ props }) {
         row.keterangan = "sales";
     });
 
-    returSales.forEach((row) => {
-        row.subtotal = 0;
+    //returSales.forEach((row) => {
+    //row.subtotal = 0;
 
-        dataTabel.forEach((element) => {
-            element.subtotal = 0;
-            element.sisaHutang = 0;
+    //  dataTabel.forEach((element) => {
+    //    element.subtotal = 0;
+    //    element.sisaHutang = 0;
 
-            if (element.attributes?.no_sales_sale == row.attributes?.sales_sale?.data.attributes.no_sales_sale) {
-                row.attributes.retur_sales_sale_details.data.forEach((detail) => {
-                    row.subtotal += parseInt(detail.attributes.sub_total);
-                });
+    //    if (element?.attributes?.no_sales_sale == row.attributes?.sales_sale?.data?.attributes.no_sales_sale) {
+    //        row.attributes.retur_sales_sale_details.data.forEach((detail) => {
+    //            row.subtotal += parseInt(detail.attributes.sub_total);
+    //        });
 
-                element.subtotal = row.subtotal;
+    //        element.subtotal = row.subtotal;
 
-                if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_sales_sale, subtotal: row.subtotal };
-                else dataRetur[0] = { id: element.attributes.no_sales_sale, subtotal: row.subtotal };
+    //        if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_sales_sale, subtotal: row.subtotal };
+    //        else dataRetur[0] = { id: element.attributes.no_sales_sale, subtotal: row.subtotal };
 
-                element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
-            } else {
-                element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
-            }
-        });
-        //lpbId++;
-    });
+    //        element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
+    //    } //else {
+    //        //element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
+    //    //}
+    //  });
+    ////lpbId++;
+    //});
 
     // panel data
     panel.forEach((row) => {
@@ -414,30 +414,30 @@ function Piutang({ props }) {
         row.keterangan = "panel";
     });
 
-    returPanel.forEach((row) => {
-        row.subtotal = 0;
+    //returPanel.forEach((row) => {
+    //row.subtotal = 0;
 
-        dataTabel.forEach((element) => {
-            element.subtotal = 0;
-            element.sisaHutang = 0;
+    //  dataTabel.forEach((element) => {
+    //    element.subtotal = 0;
+    //    element.sisaHutang = 0;
 
-            if (element.attributes?.no_panel_sale == row.attributes?.panel_sale?.data.attributes.no_panel_sale) {
-                row.attributes.retur_panel_sale_details.data.forEach((detail) => {
-                    row.subtotal += parseInt(detail.attributes.sub_total);
-                });
+    //    if (element.attributes?.no_panel_sale == row.attributes?.panel_sale?.data?.attributes.no_panel_sale) {
+    //        row.attributes.retur_panel_sale_details.data.forEach((detail) => {
+    //            row.subtotal += parseInt(detail.attributes.sub_total);
+    //        });
 
-                element.subtotal = row.subtotal;
+    //        element.subtotal = row.subtotal;
 
-                if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_panel_sale, subtotal: row.subtotal };
-                else dataRetur[0] = { id: element.attributes.no_panel_sale, subtotal: row.subtotal };
+    //        if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_panel_sale, subtotal: row.subtotal };
+    //        else dataRetur[0] = { id: element.attributes.no_panel_sale, subtotal: row.subtotal };
 
-                element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
-            } else {
-                element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
-            }
-        });
-        //lpbId++;
-    });
+    //        element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
+    //    } //else {
+    //        //element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
+    //    //}
+    //  });
+    ////lpbId++;
+    //});
 
     // non panel data
     nonPanel.forEach((row) => {
@@ -471,30 +471,92 @@ function Piutang({ props }) {
         row.keterangan = "nonpanel";
     });
 
-    returNonPanel.forEach((row) => {
+    
+    //returNonPanel.forEach((row) => {
+    //row.subtotal = 0;
+
+    //  dataTabel.forEach((element) => {
+    //    element.subtotal = 0;
+    //    element.sisaHutang = 0;
+
+    //    if (element.attributes?.no_non_panel_sale == row.attributes?.non_panel_sale?.data?.attributes.no_non_panel_sale) {
+    //        row.attributes.retur_non_panel_sale_details.data.forEach((detail) => {
+    //            row.subtotal += parseInt(detail.attributes.sub_total);
+    //        });
+
+    //        element.subtotal = row.subtotal;
+
+    //        if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_non_panel_sale, subtotal: row.subtotal };
+    //        else dataRetur[0] = { id: element.attributes.no_non_panel_sale, subtotal: row.subtotal };
+
+    //        element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
+    //    } //else {
+    //        //element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
+    //    //}
+    //    console.log("element non", element);
+    //  });
+    ////lpbId++;
+    //});
+
+    dataTabel.forEach((element) => {
+    element.subtotal = 0;
+    element.sisaHutang = 0;
+
+      returSales.forEach((row) => {
         row.subtotal = 0;
 
-        dataTabel.forEach((element) => {
-            element.subtotal = 0;
-            element.sisaHutang = 0;
+        if (element?.attributes?.no_sales_sale == row.attributes?.sales_sale?.data?.attributes.no_sales_sale) {
+            row.attributes.retur_sales_sale_details.data.forEach((detail) => {
+                row.subtotal += parseInt(detail.attributes.sub_total);
+            });
 
-            if (element.attributes?.no_non_panel_sale == row.attributes?.non_panel_sale?.data.attributes.no_non_panel_sale) {
-                row.attributes.retur_non_panel_sale_details.data.forEach((detail) => {
-                    row.subtotal += parseInt(detail.attributes.sub_total);
-                });
+            element.subtotal = row.subtotal;
 
-                element.subtotal = row.subtotal;
+            if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_sales_sale, subtotal: row.subtotal };
+            else dataRetur[0] = { id: element.attributes.no_sales_sale, subtotal: row.subtotal };
 
-                if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_non_panel_sale, subtotal: row.subtotal };
-                else dataRetur[0] = { id: element.attributes.no_non_panel_sale, subtotal: row.subtotal };
+            element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
+        }
+      });
 
-                element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
-            } else {
-                element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
-            }
-        });
-        //lpbId++;
+      returPanel.forEach((row) => {
+        row.subtotal = 0;
+
+        if (element.attributes?.no_panel_sale == row.attributes?.panel_sale?.data?.attributes.no_panel_sale) {
+            row.attributes.retur_panel_sale_details.data.forEach((detail) => {
+                row.subtotal += parseInt(detail.attributes.sub_total);
+            });
+
+            element.subtotal = row.subtotal;
+
+            if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_panel_sale, subtotal: row.subtotal };
+            else dataRetur[0] = { id: element.attributes.no_panel_sale, subtotal: row.subtotal };
+
+            element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
+        } 
+      });
+
+      returNonPanel.forEach((row) => {
+        row.subtotal = 0;
+
+        if (element.attributes?.no_non_panel_sale == row.attributes?.non_panel_sale?.data?.attributes.no_non_panel_sale) {
+            row.attributes.retur_non_panel_sale_details.data.forEach((detail) => {
+                row.subtotal += parseInt(detail.attributes.sub_total);
+            });
+
+            element.subtotal = row.subtotal;
+
+            if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_non_panel_sale, subtotal: row.subtotal };
+            else dataRetur[0] = { id: element.attributes.no_non_panel_sale, subtotal: row.subtotal };
+
+            element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
+        } 
+      });
+
+    console.log("element non", element);
     });
+
+    console.log("biaya", biaya, dataTabel);
   }, []);
 
   const validateError = () => {
@@ -662,6 +724,7 @@ function Piutang({ props }) {
                   biaya={biaya}
                   calculatePriceTotal={calculatePriceTotal}
                   sisaHutang={sisaHutang}
+                  form={form}
                 />
               </div>
 
@@ -670,13 +733,13 @@ function Piutang({ props }) {
                   <span> TOTAL ITEM </span> <span> : {dataTabel.length}</span>
                 </Form.Item>
                 <Form.Item name="total_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> TOTAL HUTANG JATUH TEMPO </span> <span> : {/*{formatter.format(totalHutangJatuhTempo())}*/}</span>
+                  <span> TOTAL HUTANG JATUH TEMPO </span> <span> : {formatter.format(totalPiutangJatuhTempo())}</span>
                 </Form.Item>
                 <Form.Item name="total_pembayaran" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> TOTAL PEMBAYARAN </span> <span> : {/*{formatter.format(totalPembayaran())}*/}</span>
+                  <span> TOTAL PEMBAYARAN </span> <span> : {formatter.format(totalPembayaran())}</span>
                 </Form.Item>
                 <Form.Item name="sisa_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> SISA HUTANG JATUH TEMPO </span> <span> : {/*{formatter.format(sisaHutangJatuhTempo())}*/}</span>
+                  <span> SISA HUTANG JATUH TEMPO </span> <span> : {formatter.format(sisaPiutangJatuhTempo())}</span>
                 </Form.Item>
               </div>
 

@@ -173,7 +173,7 @@ const products = useSelector((state) => state.Order);
 
   // NO non panel
     var noNonPanel = String(returNonPanel?.meta?.pagination.total + 1).padStart(3, "0");
-    const [categorySale, setCategorySale] = useState(`RPN/ET/${user.id}/${noNonPanel}/${mm}/${yyyy}`);
+    const [categorySale, setCategorySale] = useState(`RNP/ET/${user.id}/${noNonPanel}/${mm}/${yyyy}`);
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);

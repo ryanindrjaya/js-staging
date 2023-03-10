@@ -6,7 +6,7 @@ import { useState } from "react";
 import { PrinterOutlined } from "@ant-design/icons";
 import router from "next/router";
 
-export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal }) {
+export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal, form }) {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
@@ -118,7 +118,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   //var oth = 0;
 
   const onChangeBayar = (value, metode, row, idx) => {
-
+    //setModalSisa(0);
     setBiayaData(value);
     //if (metode == "tunai") setTunai(value);
     //if (metode == "transfer") setTransfer(value);
@@ -132,8 +132,14 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     //if (metode == "cn") cn = value;
     //if (metode == "oth") oth = value; console.log("bayar", tunai, transfer, giro, cn, oth)
 
-    if (metode == "tunai") onChangeTunai(value, row, idx);
-    if (metode == "transfer") onChangeTransfer(value, row, idx);
+    if (metode == "tunai") setTunai(value);
+    if (metode == "transfer") setTransfer(value);
+    if (metode == "giro") setGiro(value);
+    if (metode == "cn") setCn(value);
+    if (metode == "oth") setOth(value);
+    console.log("bayar", tunai, transfer, giro, cn, oth);
+    //if (metode == "tunai") onChangeTunai(value, row, idx);
+    //if (metode == "transfer") onChangeTransfer(value, row, idx);
     //if (metode == "giro") giro = value;
     //if (metode == "cn") cn = value;
     //if (metode == "oth") oth = value; console.log("bayar", tunai, transfer, giro, cn, oth)
@@ -145,8 +151,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     //oth = biaya.info[idx]?.oth ?? 0;
 
     //dataModalSisa(row, tunai, transfer, giro, cn, oth);
-
-    setModalSisa(calculatePriceTotal(row, idx));
+    //setModalSisa(calculatePriceTotal(row, idx));
     //dispatch({ type: "CHANGE_DATA_GIRO", giro: value, listData: data, index: index });
     //onChangeSisaHutang(value, data, index);
   };
@@ -154,17 +159,64 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   const showModal = () => {
     setOpen(true);
   };
-  const handleOk = () => {
-    setModalText('The modal will be closed after two seconds');
+
+  const handleOk = (row, idx, value) => {
+    //setModalText('The modal will be closed after two seconds');
     setConfirmLoading(true);
+
+    onChangeTunai(tunai, row, idx);
+    onChangeTransfer(transfer, row, idx);
+    onChangeGiro(giro, row, idx);
+    onChangeCn(cn, row, idx);
+    onChangeOth(oth, row, idx);
+
     setTimeout(() => {
       setOpen(false);
       setConfirmLoading(false);
-    }, 2000);
+
+      form.setFieldsValue({
+          metode_bayar1: null,
+          metode_bayar2: null,
+          metode_bayar3: null,
+          metode_bayar4: null,
+          metode_bayar5: null,
+          bayar1: null,
+          bayar2: null,
+          bayar3: null,
+          bayar4: null,
+          bayar5: null,
+      });
+
+      setTunai(0);
+      setTransfer(0);
+      setGiro(0);
+      setCn(0);
+      setOth(0);
+    }, 100);
   };
+
   const handleCancel = () => {
     console.log('Clicked cancel button');
     setOpen(false);
+
+    form.setFieldsValue({
+      metode_bayar1: null,
+      metode_bayar2: null,
+      metode_bayar3: null,
+      metode_bayar4: null,
+      metode_bayar5: null,
+      bayar1: null,
+      bayar2: null,
+      bayar3: null,
+      bayar4: null,
+      bayar5: null,
+    });
+
+    setTunai(0);
+    setTransfer(0);
+    setGiro(0);
+    setCn(0);
+    setOth(0);
     //this.myFormRef.reset();
   };
 
@@ -189,12 +241,12 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                 onOk={handleOk}
                 confirmLoading={confirmLoading}
                 onCancel={handleCancel}
-                ref={(modal) => this.myFormRef = modal}
+                //ref={(modal) => this.myFormRef = modal}
                 footer={[
                   <button className="border border-cyan-700 rounded-md m-1 text-sm px-6 py-2" key="back" onClick={handleCancel}>
                     Cancel
                   </button>,
-                  <button className="bg-cyan-700 rounded-md m-1 text-sm px-4" key="submit" loading={loading} onClick={handleOk}>
+                  <button className="bg-cyan-700 rounded-md m-1 text-sm px-4" key="submit" loading={loading} onClick={(value) => handleOk(row, idx, value)}>
                     <p className="px-4 py-2 m-0 text-white">
                         SIMPAN
                     </p>
