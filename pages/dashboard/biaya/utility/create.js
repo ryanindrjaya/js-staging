@@ -37,8 +37,6 @@ const Create = async (
   values.bayar4 = parseInt( values.bayar4 );
   values.bayar5 = parseInt( values.bayar5 );
 
-  values.total_pembayaran = values.total_hutang_jatuh_tempo - values.sisa_hutang_jatuh_tempo;
-
   if (values.metode_bayar1 == "tunai") totalTunai = values.bayar1;
   else if (values.metode_bayar2 == "tunai") totalTunai = values.bayar2;
   else if (values.metode_bayar3 == "tunai") totalTunai = values.bayar3;

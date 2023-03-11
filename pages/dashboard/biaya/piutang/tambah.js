@@ -553,10 +553,8 @@ function Piutang({ props }) {
         } 
       });
 
-    console.log("element non", element);
     });
 
-    console.log("biaya", biaya, dataTabel);
   }, []);
 
   const validateError = () => {

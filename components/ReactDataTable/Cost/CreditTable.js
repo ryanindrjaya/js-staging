@@ -131,17 +131,17 @@ export default function ReactDataTable({
         {
           name: "Tanggal",
           width: "120px",
-          //selector: (row) => formatMyDate(row.attributes?.tanggal_pembayaran ?? "-"),
+          selector: (row) => formatMyDate(row.attributes?.tanggal_pembayaran ?? "-"),
         },
         {
           name: "Status Penagihan",
           width: "150px",
-          //selector: (row) => row.attributes?.status ?? "-",
+          selector: (row) => row.attributes?.status ?? "-",
         },
         {
           name: "Total Penagihan",
           width: "150px",
-          //selector: (row) => formatter.format(row.attributes?.total_pembayaran ?? "-"),
+          selector: (row) => formatter.format(row.attributes?.total_pembayaran ?? "-"),
         },
         {
             name: "Tindakan",

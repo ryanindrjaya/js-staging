@@ -63,6 +63,16 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     else pilihData = "tidak";
     dispatch({ type: "CHANGE_PILIH_DATA", pilihData: pilihData, listData: data, index: index });
     dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: data.sisaHutang, listData: data, index: index });
+
+    if(pilihData){
+      onChangeTunai(0, data, index);
+      onChangeTransfer(0, data, index);
+      onChangeGiro(0, data, index);
+      onChangeCn(0, data, index);
+      onChangeOth(0, data, index);
+    }
+    //onChangeTunai(0, data, index);
+    console.log("pilih", data, biaya);
   };
 
   const onChangeTunai = (value, data, index) => {
@@ -111,49 +121,32 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   const [cn, setCn] = useState(0);
   const [oth, setOth] = useState(0);
 
-  //var tunai = 0;
-  //var transfer = 0;
-  //var giro = 0;
-  //var cn = 0;
-  //var oth = 0;
-
+  var tempTunai = 0;
+  var tempTransfer = 0;
+  var tempGiro = 0;
+  var tempCn = 0;
+  var tempOth = 0;
+  var tempIndex = 0;
   const onChangeBayar = (value, metode, row, idx) => {
+    //if(open == false){
+    //  tempTunai = 0;
+    //  tempTransfer = 0;
+    //  tempGiro = 0;
+    //  tempCn = 0;
+    //  tempOth = 0;
+    //}
     //setModalSisa(0);
     setBiayaData(value);
-    //if (metode == "tunai") setTunai(value);
-    //if (metode == "transfer") setTransfer(value);
-    //if (metode == "giro") setGiro(value);
-    //if (metode == "cn") setCn(value);
-    //if (metode == "oth") setOth(value); console.log("bayar", tunai, transfer, giro, cn, oth)
 
-    //if (metode == "tunai") tunai = value;
-    //if (metode == "transfer") transfer = value;
-    //if (metode == "giro") giro = value;
-    //if (metode == "cn") cn = value;
-    //if (metode == "oth") oth = value; console.log("bayar", tunai, transfer, giro, cn, oth)
-
-    if (metode == "tunai") setTunai(value);
-    if (metode == "transfer") setTransfer(value);
-    if (metode == "giro") setGiro(value);
-    if (metode == "cn") setCn(value);
-    if (metode == "oth") setOth(value);
+    if (metode == "tunai") { setTunai(value); tempTunai = value; }
+    if (metode == "transfer") { setTransfer(value); tempTransfer = value; }
+    if (metode == "giro") { setGiro(value); tempGiro = value; }
+    if (metode == "cn") { setCn(value); tempCn = value; }
+    if (metode == "oth") { setOth(value); tempOth = value; }
     console.log("bayar", tunai, transfer, giro, cn, oth);
-    //if (metode == "tunai") onChangeTunai(value, row, idx);
-    //if (metode == "transfer") onChangeTransfer(value, row, idx);
-    //if (metode == "giro") giro = value;
-    //if (metode == "cn") cn = value;
-    //if (metode == "oth") oth = value; console.log("bayar", tunai, transfer, giro, cn, oth)
 
-    //tunai = biaya.info[idx]?.tunai ?? 0;
-    //transfer = biaya.info[idx]?.transfer ?? 0;
-    //giro = biaya.info[idx]?.giro ?? 0;
-    //cn = biaya.info[idx]?.cn ?? 0;
-    //oth = biaya.info[idx]?.oth ?? 0;
-
-    //dataModalSisa(row, tunai, transfer, giro, cn, oth);
-    //setModalSisa(calculatePriceTotal(row, idx));
-    //dispatch({ type: "CHANGE_DATA_GIRO", giro: value, listData: data, index: index });
-    //onChangeSisaHutang(value, data, index);
+    //setModalSisa(tempTunai + tempTransfer + tempGiro + tempCn + tempOth);
+    setModalSisa(tunai + transfer + giro + cn + oth);
   };
 
   const showModal = () => {
@@ -494,7 +487,11 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
 
                   <div className="w-full flex justify-start mb-4">
                       <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0 text-center">
-                          <span className="font-bold">{formatter.format(modalSisa)}</span>
+                          <span className="font-bold">
+                              {formatter.format(
+                                (row.attributes?.total - row.subtotal) - (tunai + transfer + giro + cn + oth)
+                              )}
+                          </span>
                       </div>
                   </div>
 
