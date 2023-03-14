@@ -16,6 +16,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   var priceUnit = 1;
   var tempIndex = 0;
   var stock = 0;
+  var piutang = 0;
   var returSubtotal = 0;
   var sisaPiutang = {};
   const [modalSisa, setModalSisa] = useState(0);
@@ -24,19 +25,19 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   const [biayaData, setBiayaData] = useState(0);
 
   var index = 0;
-  data.forEach((element) => {
+  data?.forEach((element) => {
   returSubtotal = 0;
-
-    retur.forEach((row) => {
-      if(element.attributes.no_sales_sale == row.id)
+  
+    retur?.forEach((row) => {
+      if(element?.attributes?.no_sales_sale == row?.id)
       {
         returSubtotal += row.subtotal;
       }
-      if(element.attributes.no_panel_sale == row.id)
+      if(element?.attributes?.no_panel_sale == row?.id)
       {
         returSubtotal += row.subtotal;
       }
-      if(element.attributes.no_non_panel_sale == row.id)
+      if(element?.attributes?.no_non_panel_sale == row?.id)
       {
         returSubtotal += row.subtotal;
       }
@@ -45,7 +46,8 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     element.subtotal = returSubtotal;
     //element.hutangJatuhTempo = element.attributes.total_purchasing - element.subtotal;
     //element.sisaHutang = element.hutangJatuhTempo;
-    //element.sisaHutangFix = element.hutangJatuhTempo; 
+    //element.sisaHutangFix = element.hutangJatuhTempo;
+    element.sisaPiutang = element.attributes?.total - element?.subtotal;
     sisaPiutang[index] = element.sisaPiutang;
 
     index++;
@@ -72,7 +74,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       onChangeOth(0, data, index);
     }
     //onChangeTunai(0, data, index);
-    console.log("pilih", data, biaya);
+    //console.log("pilih", data, biaya);
   };
 
   const onChangeTunai = (value, data, index) => {
@@ -101,14 +103,14 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     //onChangeSisaHutang(value, data, index);
   };
 
-  const metodePembayaran = (value) => {
-    //router.push("/dashboard/biaya/piutang/metode_pembayaran/" + value.id + value.keterangan);
-    var totalPiutang = parseInt(value.attributes.total) - value.subtotal;
-    router.push({
-      pathname: '/dashboard/biaya/piutang/metode_pembayaran',
-      query: { id: value.id, ket: value.keterangan, total: totalPiutang },
-    });
-  };
+  //const metodePembayaran = (value) => {
+  //  //router.push("/dashboard/biaya/piutang/metode_pembayaran/" + value.id + value.keterangan);
+  //  var totalPiutang = parseInt(value.attributes.total) - value.subtotal;
+  //  router.push({
+  //    pathname: '/dashboard/biaya/piutang/metode_pembayaran',
+  //    query: { id: value.id, ket: value.keterangan, total: totalPiutang },
+  //  });
+  //};
 
   const onChangeMetode = (value) => {
     setMetode(value);
@@ -143,7 +145,6 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     if (metode == "giro") { setGiro(value); tempGiro = value; }
     if (metode == "cn") { setCn(value); tempCn = value; }
     if (metode == "oth") { setOth(value); tempOth = value; }
-    console.log("bayar", tunai, transfer, giro, cn, oth);
 
     //setModalSisa(tempTunai + tempTransfer + tempGiro + tempCn + tempOth);
     setModalSisa(tunai + transfer + giro + cn + oth);
@@ -523,6 +524,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     maximumFractionDigits: 2,
   });
 
+  function formatMyDate(value, locale = "id-ID") {
+    return new Date(value).toLocaleDateString(locale);
+  }
+
   const onCancel = () => {
     console.log("onCancel");
   };
@@ -599,7 +604,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     {
       name: "Tanggal",
       width: "100px",
-      selector: (row) => row.attributes?.sale_date,
+      selector: (row) => formatMyDate(row.attributes?.sale_date),
     },
     {
       name: "Pelanggan",
@@ -614,18 +619,19 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     {
       name: "Nilai Invoice",
       width: "150px",
-      selector: (row) => formatter.format(row.attributes?.total),
+      selector: (row) => formatter.format(row.attributes?.total ?? 0),
     },
     {
       name: "Total Retur Jual",
       width: "150px",
-      selector: (row) => formatter.format(row.subtotal),
+      selector: (row) => formatter.format(row?.subtotal ?? 0),
     },
     {
       name: "Total Pembayaran",
       width: "150px",
-      //selector: (row) => formatter.format(row.hutangJatuhTempo),
-      //selector: (row) => console.log("row", row),
+      selector: (row) => formatter.format( row.sisaHutang - row.sisaPiutang ),
+      //selector: (row, idx) => ((row.attributes?.total - row?.subtotal) - row?.sisaPiutang) ?? 0 ,
+      //selector: (row) => console.log("row total pem", row),
     },
     //{
     //  name: "Hutang Jatuh Tempo",

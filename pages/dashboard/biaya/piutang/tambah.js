@@ -15,6 +15,8 @@ import createDetails from "../utility/createDetail";
 import calculatePrice from "../utility/calculatePrice";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
 import Customer from "@iso/components/Form/AddCost/CustomerForm";
+import Area from "@iso/components/Form/AddCost/AreaForm";
+import Wilayah from "@iso/components/Form/AddCost/WilayahForm";
 import nookies from "nookies";
 
 
@@ -216,6 +218,10 @@ function Piutang({ props }) {
 
   // customer
   const [customer, setCustomer] = useState();
+  // area
+  const [area, setArea] = useState();
+  // wilayah
+  const [wilayah, setWilayah] = useState();
 
   // NO Piutang
   var noPiutang = String(props.piutang?.meta?.pagination.total + 1).padStart(3, "0");
@@ -255,6 +261,9 @@ function Piutang({ props }) {
     values.total_piutang_jatuh_tempo = totalPiutangJatuhTempo();
     values.total_pembayaran = totalPembayaran();
     values.sisa_piutang_jatuh_tempo = sisaPiutangJatuhTempo();
+    values.customer = customer;
+    values.area = area;
+    values.wilayah = wilayah; console.log("values create", values);
     await createData(sisaHutang, values, listId, form, router, "/credits/", "piutang");
   };
 
@@ -265,6 +274,7 @@ function Piutang({ props }) {
   const calculatePriceTotal = (row, index) => {
     const total = calculatePrice(row, biaya, sisaHutangTotal, index);
     sisaHutang[index] = total;
+    row.sisaPiutang = total;
     return formatter.format(total);
   };
 
@@ -604,7 +614,7 @@ function Piutang({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  {/*<Customer onChangeCustomer={setCustomer} />*/}
+                  <Customer onChangeCustomer={setCustomer} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
                   <Form.Item name="status_pembayaran" //initialValue={"Hari"} 
@@ -627,7 +637,7 @@ function Piutang({ props }) {
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    name="tanggal"
+                    name="tanggalRentang"
                     //initialValue={categorySale}
                     //rules={[
                     //    {
@@ -662,42 +672,10 @@ function Piutang({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item name="area" //initialValue={"Hari"} 
-                  noStyle>
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      placeholder="Area"
-                    >
-                      <Select.Option value="1" key="1">
-                        Wil 1
-                      </Select.Option>
-                      <Select.Option value="2" key="2">
-                        Wil 2
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
+                  <Area onChangeArea={setArea} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item name="wilayah" //initialValue={"Hari"} 
-                  noStyle>
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      placeholder="Wilayah"
-                    >
-                      <Select.Option value="1" key="1">
-                        Wil 1
-                      </Select.Option>
-                      <Select.Option value="2" key="2">
-                        Wil 2
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
+                  <Wilayah onChangeWilayah={setWilayah} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item

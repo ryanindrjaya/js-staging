@@ -16,7 +16,7 @@ export default function ReactDataTable({
     onChangeStatus,
     user,
 }) {
-    const router = useRouter();
+    const router = useRouter(); console.log("data table", data);
     const { Option } = Select;
 
     const tagRed = process.env.TAG_RED;
@@ -121,17 +121,17 @@ export default function ReactDataTable({
         {
           name: "Area",
           width: "150px",
-          //selector: (row) => row.attributes?.customer?.data?.attributes?.name ?? "-",
+          selector: (row) => row.attributes?.area?.data?.attributes?.name ?? "-",
         },
         {
           name: "Wilayah",
           width: "150px",
-          //selector: (row) => row.attributes?.customer?.data?.attributes?.name ?? "-",
+          selector: (row) => row.attributes?.wilayah?.data?.attributes?.name ?? "-",
         },
         {
           name: "Tanggal",
           width: "120px",
-          selector: (row) => formatMyDate(row.attributes?.tanggal_pembayaran ?? "-"),
+          selector: (row) => formatMyDate(row.attributes?.tanggal ?? "-"),
         },
         {
           name: "Status Penagihan",

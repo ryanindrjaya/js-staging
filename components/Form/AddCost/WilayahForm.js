@@ -5,13 +5,13 @@ import { useSelector } from "react-redux";
 
 import nookies from "nookies";
 
-export default function Customer({ onChangeCustomer }) {
+export default function Wilayah({ onChangeWilayah }) {
   const [data, setData] = useState([]);
   const cookies = nookies.get(null, "token");
   const order = useSelector((state) => state.Order);
 
   const handleChange = async (id) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/customers/${id}`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/wilayahs/${id}`;
     const options = {
       method: "GET",
       headers: {
@@ -22,12 +22,12 @@ export default function Customer({ onChangeCustomer }) {
     const req = await fetch(endpoint, options);
     const res = await req.json();
 
-    onChangeCustomer(res.data);
+    onChangeWilayah(res.data);
   };
 
   const handleSearch = (newValue) => {
     if (newValue) {
-      fetchCustomer(newValue, setData);
+      fetchWilayah(newValue, setData);
     } else {
       setData([]);
     }
@@ -37,14 +37,14 @@ export default function Customer({ onChangeCustomer }) {
     <Select.Option key={d.value}>{d.label}</Select.Option>
   ));
 
-  const fetchCustomer = async (query, callback) => {
+  const fetchWilayah = async (query, callback) => {
     if (!query) {
       callback([]);
     } else {
       try {
         const endpoint =
           process.env.NEXT_PUBLIC_URL +
-          `/customers?filters[$or][0][name][$contains]=${query}&filters[$or][1][customer_type][$contains]=${query}`;
+          `/wilayahs?filters[$or][0][name][$contains]=${query}&filters[$or][1][code][$contains]=${query}`;
         const options = {
           method: "GET",
           headers: {
@@ -54,15 +54,16 @@ export default function Customer({ onChangeCustomer }) {
         };
 
         const req = await fetch(endpoint, options);
-        const res = await req.json(); console.log("customer", res);
+        const res = await req.json();
 
         if (req.status == 200) {
-          const customerResult = res.data.map((customer) => ({
-            label: `${customer.attributes.name}`,
-            value: customer.id,
+          const wilayahResult = res.data.map((wilayah) => ({
+            //label: `${supplier.attributes.id_supplier} - ${supplier.attributes.name}`,
+            label: `${wilayah.attributes.name}`,
+            value: wilayah.id,
           }));
 
-          callback(customerResult);
+          callback(wilayahResult);
         }
       } catch (error) {
         console.log(error);
@@ -74,19 +75,19 @@ export default function Customer({ onChangeCustomer }) {
     <>
       <div className="w-full md:w-full mb-2 md:mb-0">
         <Form.Item
-          name="customer"
+          name="wilayah_id"
           style={{ width: "100%" }}
-          rules={[
-            {
-              required: true,
-              message: "Customer tidak boleh kosong!",
-            },
-          ]}
+          //rules={[
+          //  {
+          //    required: true,
+          //    message: "Supplier tidak boleh kosong!",
+          //  },
+          //]}
         >
           <Select
             size="large"
             showSearch
-            placeholder="Pilih Customer"
+            placeholder="Pilih Wilayah"
             onSearch={handleSearch}
             onChange={handleChange}
             filterOption={false}

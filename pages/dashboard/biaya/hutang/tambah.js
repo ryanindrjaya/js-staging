@@ -193,6 +193,7 @@ function Hutang({ props }) {
     values.total_hutang_jatuh_tempo = totalHutangJatuhTempo();
     values.total_pembayaran = totalPembayaran();
     values.sisa_hutang_jatuh_tempo = sisaHutangJatuhTempo();
+    values.supplier = supplier;
     await createData(sisaHutang, values, listId, form, router, "/debts/", "hutang", akunHutang);
   };
 
