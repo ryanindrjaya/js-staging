@@ -520,7 +520,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
   });
 
   const onCancel = () => {
@@ -604,7 +604,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     {
       name: "Pelanggan",
       width: "150px",
-      selector: (row) => row.attributes?.customer.data.attributes?.name,
+      selector: (row) => row.attributes?.customer?.data?.attributes?.name,
     },
     {
       name: "Sales",

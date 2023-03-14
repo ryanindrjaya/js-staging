@@ -56,7 +56,7 @@ export default function ReactDataTable({
     var formatter = new Intl.NumberFormat("id-ID", {
         style: "currency",
         currency: "IDR",
-        maximumFractionDigits: 0,
+        maximumFractionDigits: 2,
     });
 
     const content = (row) => (
@@ -199,7 +199,7 @@ export default function ReactDataTable({
         {
           name: "Customer",
           width: "100px",
-          selector: (row) => row.attributes?.customer.data.attributes?.name ?? "-",
+          selector: (row) => row.attributes?.customer?.data?.attributes?.name ?? "-",
         },
         {
           name: "NO Sales Order",

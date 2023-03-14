@@ -1,12 +1,21 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Select } from "antd";
 import { CaretDownOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 
 import nookies from "nookies";
 
-export default function Supplier({ onChangeSupplier }) {
-  const [data, setData] = useState([]);
+export default function Supplier({ onChangeSupplier, supplier, fetching }) {
+  const [data, setData] = useState(
+    supplier
+      ? [
+          {
+            label: `${supplier.attributes.id_supplier} - ${supplier.attributes.name}`,
+            value: supplier.id,
+          },
+        ]
+      : []
+  );
   const cookies = nookies.get(null, "token");
   const order = useSelector((state) => state.Order);
 
@@ -34,7 +43,9 @@ export default function Supplier({ onChangeSupplier }) {
   };
 
   const options = data.map((d) => (
-    <Select.Option key={d.value}>{d.label}</Select.Option>
+    <Select.Option key={d.value} value={d.value}>
+      {d.label}
+    </Select.Option>
   ));
 
   const fetchSupplier = async (query, callback) => {
@@ -73,29 +84,56 @@ export default function Supplier({ onChangeSupplier }) {
   return (
     <>
       <div className="w-full md:w-full mb-2 md:mb-0">
-        <Form.Item
-          name="supplier_id"
-          style={{ width: "100%" }}
-          rules={[
-            {
-              required: true,
-              message: "Supplier tidak boleh kosong!",
-            },
-          ]}
-        >
-          <Select
-            size="large"
-            showSearch
-            placeholder="Pilih Supplier"
-            onSearch={handleSearch}
-            onChange={handleChange}
-            filterOption={false}
-            defaultActiveFirstOption={false}
-            suffixIcon={<CaretDownOutlined />}
+        {supplier && !fetching ? (
+          <Form.Item
+            initialValue={supplier.id}
+            name="supplier_id"
+            style={{ width: "100%" }}
+            rules={[
+              {
+                required: true,
+                message: "Supplier tidak boleh kosong!",
+              },
+            ]}
           >
-            {options}
-          </Select>
-        </Form.Item>
+            <Select
+              size="large"
+              showSearch
+              placeholder="Pilih Supplier"
+              onSearch={handleSearch}
+              onChange={handleChange}
+              filterOption={false}
+              defaultActiveFirstOption={false}
+              suffixIcon={<CaretDownOutlined />}
+            >
+              {options}
+            </Select>
+          </Form.Item>
+        ) : (
+          <Form.Item
+            name="supplier_id"
+            style={{ width: "100%" }}
+            rules={[
+              {
+                required: true,
+                message: "Supplier tidak boleh kosong!",
+              },
+            ]}
+          >
+            <Select
+              size="large"
+              showSearch
+              placeholder="Pilih Supplier"
+              onSearch={handleSearch}
+              onChange={handleChange}
+              filterOption={false}
+              defaultActiveFirstOption={false}
+              suffixIcon={<CaretDownOutlined />}
+            >
+              {options}
+            </Select>
+          </Form.Item>
+        )}
       </div>
     </>
   );

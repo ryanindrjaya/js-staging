@@ -260,7 +260,7 @@ function PesananSales({ props }) {
     // used to reset redux from value before
     clearData();
     form.setFieldsValue({
-      customer: customerData.attributes.name,
+      customer: customerData?.attributes.name,
     });
     setCustomer(customerData);
   }, []);

@@ -1,11 +1,7 @@
 import DataTable from "react-data-table-component";
 import AlertDialog from "../../Alert/Alert";
 import { Popover, Select, Row, Tag } from "antd";
-import {
-  EditOutlined,
-  PrinterOutlined,
-  UnorderedListOutlined,
-} from "@ant-design/icons";
+import { EditOutlined, PrinterOutlined, UnorderedListOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
 
 export default function ReactDataTable({
@@ -18,10 +14,6 @@ export default function ReactDataTable({
 }) {
   const router = useRouter();
   const { Option } = Select;
-
-  const print = (row) => {
-    router.push("order_pembelian/print/" + row.id);
-  };
 
   const lihat = (row) => {
     router.push("order_pembelian/print/" + row.id);
@@ -36,10 +28,6 @@ export default function ReactDataTable({
     console.log("onCancel");
   };
 
-  const onEdit = (id) => {
-    onUpdate(id);
-  };
-
   function formatMyDate(value, locale = "id-ID") {
     return new Date(value).toLocaleDateString(locale);
   }
@@ -47,23 +35,26 @@ export default function ReactDataTable({
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
   });
+
+  const openModal = (id) => {
+    router.replace(
+      {
+        pathname: "/dashboard/pembelian/order_pembelian",
+        query: { id: id },
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
 
   const content = (row) => (
     <div>
       <div>
         <button
-          onClick={() => print(row)}
-          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-        >
-          <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
-          Cetak
-        </button>
-      </div>
-      <div>
-        <button
-          onClick={() => lihat(row)}
+          onClick={() => openModal(row.id)}
           className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
         >
           <UnorderedListOutlined className="mr-2 mt-0.5 float float-left" />
@@ -74,7 +65,7 @@ export default function ReactDataTable({
         <div></div>
       ) : (
         <button
-          onClick={() => onEdit(row.id)}
+          onClick={() => onUpdate(row)}
           className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
         >
           <EditOutlined className="mr-2 mt-0.5 float float-left" />
@@ -104,6 +95,19 @@ export default function ReactDataTable({
 
   const columns = [
     {
+      name: "Tindakan",
+      width: "180px",
+      selector: (row) => (
+        <>
+          <Popover content={content(row)} placement="bottom" trigger="click">
+            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
+              Tindakan
+            </button>
+          </Popover>
+        </>
+      ),
+    },
+    {
       name: "Tanggal",
       width: "150px",
       selector: (row) => formatMyDate(row.attributes?.order_date),
@@ -113,12 +117,17 @@ export default function ReactDataTable({
       width: "180px",
       selector: (row) => row.attributes?.no_po ?? "-",
     },
-
+    {
+      name: "Supplier",
+      width: "200px",
+      selector: (row) => row.attributes?.supplier?.data?.attributes?.name,
+    },
     {
       name: "Lokasi",
       width: "200px",
-      selector: (row) => row.attributes?.location.data.attributes.name,
+      selector: (row) => row.attributes?.location?.data?.attributes?.name,
     },
+
     {
       name: <div className="ml-6">Status</div>,
       width: "180px",
@@ -127,21 +136,18 @@ export default function ReactDataTable({
           <Select
             defaultValue={row.attributes.status}
             bordered={false}
-            disabled/*={row.attributes.status === "Diterima" || row.attributes.status === "Selesai"}*/
+            disabled /*={row.attributes.status === "Diterima" || row.attributes.status === "Selesai"}*/
             onChange={(e) => onChangeStatus(e, row)}
-            style={{width: 140}}
+            style={{ width: 140 }}
           >
-            <Option value="Dipesan">
-              <Tag color="default">Dipesan</Tag>
+            <Option value="Diproses">
+              <Tag color="default">Diproses</Tag>
             </Option>
-            {/*<Option value="Diterima">*/}
-            {/*  <Tag color="success">Diterima</Tag>*/}
-            {/*</Option>*/}
-            <Option value="Selesai sebagian">
-              <Tag color="warning">Selesai sebagian</Tag>
+            <Option value="Sebagian Diterima">
+              <Tag color="warning">Sebagian Diterima</Tag>
             </Option>
-            <Option value="Selesai">
-              <Tag color="success">Selesai</Tag>
+            <Option value="Diterima">
+              <Tag color="success">Diterima</Tag>
             </Option>
           </Select>
         );
@@ -182,19 +188,6 @@ export default function ReactDataTable({
       sortable: true,
       selector: (row) => row.attributes?.added_by ?? "-",
     },
-    {
-      name: "Tindakan",
-      width: "250px",
-      selector: (row) => (
-        <>
-          <Popover content={content(row)} placement="bottom" trigger="click">
-            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
-              Tindakan
-            </button>
-          </Popover>
-        </>
-      ),
-    },
   ];
 
   return (
@@ -207,6 +200,9 @@ export default function ReactDataTable({
       data={data.data}
       pagination
       noDataComponent={"Belum ada data Order Pembelian"}
+      highlightOnHover
+      pointerOnHover
+      onRowClicked={(row) => openModal(row.id)}
     />
   );
 }

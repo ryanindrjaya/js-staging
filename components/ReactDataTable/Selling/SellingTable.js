@@ -78,7 +78,7 @@ export default function ReactDataTable({
     var formatter = new Intl.NumberFormat("id-ID", {
         style: "currency",
         currency: "IDR",
-        maximumFractionDigits: 0,
+        maximumFractionDigits: 2,
     });
 
     const content = (row) => (
@@ -212,7 +212,7 @@ export default function ReactDataTable({
         {
           name: "Customer",
           width: "180px",
-          selector: (row) => row.attributes?.customer.data.attributes.name ?? "-",
+          selector: (row) => row.attributes?.customer?.data?.attributes.name ?? "-",
         },
         {
           name: "NO Faktur",
@@ -230,8 +230,8 @@ export default function ReactDataTable({
                 disabled={row.attributes.status === "Diterima"}
                 onChange={(e) => onChangeStatus(e, row)}
               >
-                <Option value="Dipesan">
-                  <Tag color="default">Dipesan</Tag>
+                <Option value="Diproses">
+                  <Tag color="default">Diproses</Tag>
                 </Option>
                 <Option value="Diterima">
                   <Tag color="success">Diterima</Tag>

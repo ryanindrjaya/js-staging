@@ -1,8 +1,16 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
-import { Button, Form, Input, message, Upload, notification, Image } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  message,
+  Upload,
+  notification,
+  Image,
+} from "antd";
 import nookies from "nookies";
 import { toast } from "react-toastify";
 import { Spin, Row } from "antd";
@@ -33,7 +41,9 @@ const Edit = ({ props }) => {
   const NEXT_PUBLIC_URL = process.env.IMAGE_URL;
 
   const [image, setImage] = useState(
-    product.attributes?.image?.data ? product.attributes?.image?.data?.attributes : null
+    product.attributes?.image?.data
+      ? product.attributes?.image?.data?.attributes
+      : null
   );
 
   const [category, setCategory] = useState();
@@ -58,6 +68,7 @@ const Edit = ({ props }) => {
 
   const [subCategories, setSubCategories] = useState([]);
   const [selectedSubCategory, setSelectedSubCategory] = useState();
+  const [products, setProducts] = useState(props.products);
 
   const [descUnit, setDescUnit] = useState();
 
@@ -266,7 +277,8 @@ const Edit = ({ props }) => {
     console.log(data);
 
     for (let index = 1; index < 6; index++) {
-      if (data[`purchase_discount_${index}`] === "-") delete data[`purchase_discount_${index}`];
+      if (data[`purchase_discount_${index}`] === "-")
+        delete data[`purchase_discount_${index}`];
     }
 
     const formData = new FormData();
@@ -275,7 +287,9 @@ const Edit = ({ props }) => {
     if (file) {
       if (product.attributes?.image?.data) {
         // delete old image
-        const deleteImage = await deleteOldImage(product.attributes?.image?.data.id);
+        const deleteImage = await deleteOldImage(
+          product.attributes?.image?.data.id
+        );
         console.log("deleteImage", deleteImage);
       }
       formData.append("files.image", file);
@@ -341,6 +355,44 @@ const Edit = ({ props }) => {
     setDescUnit(descUnit);
   };
 
+  useEffect(() => {
+    let productCode = product.attributes.SKU;
+    let categoryCode = String(productCode).slice(0, 1);
+    let groupCode = String(productCode).slice(1, 3);
+    let manufactureCode = String(productCode).slice(3, 7);
+    let manufacturesData = "00";
+
+    products?.data?.forEach((element) => {
+      if (
+        element.attributes.manufacture.data.id == selectedManufactures &&
+        element.attributes.group.data.id == selectedGroups &&
+        element.attributes.category.data.id == category[0]?.category?.category_id
+      ) {
+        manufacturesData++;
+      }
+    });
+
+    manufacturesData = String(manufacturesData + 1).padStart(3, "0");
+
+    groups.data.forEach((element) => {
+      if (element.id == selectedGroups) groupCode = element.attributes.code;
+    });
+
+    manufactures.data.forEach((element) => {
+      if (element.id == selectedManufactures)
+        manufactureCode = element.attributes.code;
+    });
+
+    groupCode = String(groupCode).padStart(2, "0");
+    manufactureCode = String(manufactureCode).padStart(4, "0");
+
+    if (category) categoryCode = category[0]?.category.category_id;
+
+    productCode = categoryCode + groupCode + manufactureCode + manufacturesData;
+
+    form.setFieldsValue({ SKU: productCode });
+  }, [category, selectedManufactures, selectedGroups]);
+
   const onFinishFailed = () => {
     const error = form.getFieldsError();
     error.forEach((value) => {
@@ -385,7 +437,10 @@ const Edit = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input style={{ height: "40px" }} placeholder="Nama Produk" />
+                    <Input
+                      style={{ height: "40px" }}
+                      placeholder="Nama Produk"
+                    />
                   </Form.Item>
                   <Categories
                     initialValue={`${initCategory.attributes.category_id} - ${initCategory.attributes.name}`}
@@ -401,15 +456,20 @@ const Edit = ({ props }) => {
                     onSelect={setSelectedSubCategory}
                     selectedSubCategory={selectedSubCategory}
                     initialValue={`${
-                      product.attributes?.sub_category?.data?.attributes.name ?? ""
+                      product.attributes?.sub_category?.data?.attributes.name ??
+                      ""
                     }`}
                   />
-                  <Form.Item
-                    name="description"
-                    initialValue={product.attributes?.description ?? ""}
-                  >
-                    <TextArea rows={4} placeholder="Deskripsi" />
-                  </Form.Item>
+                  <Groups
+                    data={groups}
+                    onSelect={setSelectedGroup}
+                    initialValue={product.attributes?.group?.data}
+                  />
+                  <Manufactures
+                    data={manufactures.data}
+                    initialValue={product.attributes?.manufacture?.data}
+                    onSelect={setSelectedManufactures}
+                  />
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
                   <Form.Item
@@ -424,32 +484,30 @@ const Edit = ({ props }) => {
                   >
                     <Input style={{ height: "40px" }} placeholder="SKU" />
                   </Form.Item>
-                  <Manufactures
-                    data={manufactures.data}
-                    initialValue={product.attributes?.manufacture?.data}
-                    onSelect={setSelectedManufactures}
-                  />
-                  <Groups
-                    data={groups}
-                    onSelect={setSelectedGroup}
-                    initialValue={product.attributes?.group?.data}
-                  />
                   <Locations
                     required={true}
                     data={locations}
                     onSelect={setSelectLocation}
                     initialValue={product.attributes?.locations.data}
                   />
+                  <Form.Item
+                    name="description"
+                    initialValue={product.attributes?.description ?? ""}
+                  >
+                    <TextArea rows={7} placeholder="Deskripsi" />
+                  </Form.Item>
                 </div>
 
-                <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
+                <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 pb-4">
                   <Dragger {...propsDagger}>
                     {image == null ? (
                       <>
                         <p className="ant-upload-drag-icon">
                           <FileImageOutlined />
                         </p>
-                        <p className="ant-upload-text">Klik atau tarik gambar ke kotak ini</p>
+                        <p className="ant-upload-text">
+                          Klik atau tarik gambar ke kotak ini
+                        </p>
                         <p className="ant-upload-hint  m-3">
                           Gambar akan digunakan sebagai contoh tampilan produk
                         </p>
@@ -511,6 +569,9 @@ Edit.getInitialProps = async (context) => {
   const reqProduct = await fetchProduct(cookies, context);
   const product = await reqProduct.json();
 
+  const reqProducts = await fetchDataProduct(cookies, context);
+  const products = await reqProducts.json();
+
   const categoryId = product.data.attributes.category.data?.id;
 
   const reqCategories = await fetchDataCategories(cookies);
@@ -541,6 +602,7 @@ Edit.getInitialProps = async (context) => {
   return {
     props: {
       product,
+      products,
       categories,
       groups,
       locations,
@@ -552,7 +614,8 @@ Edit.getInitialProps = async (context) => {
 
 const fetchProduct = async (cookies, context) => {
   const id = context?.query?.id;
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/products/" + id + "?populate=*";
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL + "/products/" + id + "?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -562,6 +625,20 @@ const fetchProduct = async (cookies, context) => {
   };
   const req = await fetch(endpoint, options);
 
+  return req;
+};
+
+const fetchDataProduct = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/products?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
   return req;
 };
 

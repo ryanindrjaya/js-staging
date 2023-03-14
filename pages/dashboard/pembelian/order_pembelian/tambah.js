@@ -12,11 +12,22 @@ import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import OrderTable from "@iso/components/ReactDataTable/Purchases/OrderTable";
 import { useSelector, useDispatch } from "react-redux";
-import { Form, Button, Spin, Input, DatePicker, Select, InputNumber, Upload, notification } from "antd";
+import {
+  Form,
+  Button,
+  Spin,
+  Input,
+  DatePicker,
+  Select,
+  InputNumber,
+  Upload,
+  notification,
+} from "antd";
 import createDetailOrderFunc from "../utility/createOrderDetail";
 import createOrderFunc from "../utility/createOrder";
 import calculatePrice from "../utility/calculatePrice";
 import setDiskonValue from "../../produk/utility/setDiskonValue";
+import moment from "moment";
 
 Tambah.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -129,7 +140,9 @@ function Tambah({ props }) {
   var tempLocationId;
 
   // NO PO
-  var totalPurchases = String(props.purchases?.meta?.pagination.total + 1).padStart(3, "0");
+  var totalPurchases = String(
+    props.purchases?.meta?.pagination.total + 1
+  ).padStart(3, "0");
   var today = new Date();
   var dd = String(today.getDate()).padStart(2, "0");
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
@@ -139,7 +152,11 @@ function Tambah({ props }) {
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
+    useGrouping: true,
+    groupingSeparator: ",",
+    decimalSeparator: ".",
   });
 
   const onFinish = async (values) => {
@@ -150,7 +167,14 @@ function Tambah({ props }) {
 
   const createDetailOrder = async () => {
     console.log("info total", productTotalPrice, productSubTotal);
-    createDetailOrderFunc(products, productTotalPrice, productSubTotal, setListId, "/purchase-details", dataValues);
+    createDetailOrderFunc(
+      products,
+      productTotalPrice,
+      productSubTotal,
+      setListId,
+      "/purchase-details",
+      dataValues
+    );
   };
 
   const createOrder = async (values) => {
@@ -190,9 +214,19 @@ function Tambah({ props }) {
   };
 
   const calculatePriceAfterDisc = (row, index) => {
-    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index);
+    const total = calculatePrice(
+      row,
+      products,
+      productTotalPrice,
+      productSubTotal,
+      setTotalPrice,
+      index
+    );
 
-    return formatter.format(total);
+    const formattedNumber = formatter.format(total);
+    console.log("harga setelah diskon", formattedNumber);
+
+    return formattedNumber;
   };
 
   useEffect(() => {
@@ -231,12 +265,14 @@ function Tambah({ props }) {
     if (type === "error") {
       notification[type]({
         message: "Gagal menambahkan data",
-        description: "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
+        description:
+          "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
       });
     } else if (type === "success") {
       notification[type]({
         message: "Berhasil menambahkan data",
-        description: "Produk berhasil ditambahkan. Silahkan cek pada halaman Order Pembelian",
+        description:
+          "Produk berhasil ditambahkan. Silahkan cek pada halaman Order Pembelian",
       });
     }
   };
@@ -265,6 +301,20 @@ function Tambah({ props }) {
       }
     });
   };
+
+  useEffect(() => {
+    console.log("supplier", supplier);
+    form.setFieldsValue({
+      tempo_days: supplier?.attributes?.credit_limit_duration ?? 0,
+      tempo_time: supplier?.attributes?.credit_limit_duration_type ?? "Hari",
+    });
+  }, [supplier]);
+
+  useEffect(() => {
+    form.setFieldsValue({
+      order_date: moment(),
+    });
+  }, []);
 
   return (
     <>
@@ -312,7 +362,12 @@ function Tambah({ props }) {
                       },
                     ]}
                   >
-                    <DatePicker placeholder="Tanggal Pesanan" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
+                    <DatePicker
+                      placeholder="Tanggal Pesanan"
+                      size="large"
+                      format={"DD/MM/YYYY"}
+                      style={{ width: "100%" }}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -325,7 +380,12 @@ function Tambah({ props }) {
                       },
                     ]}
                   >
-                    <DatePicker placeholder="Tanggal Pengiriman" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
+                    <DatePicker
+                      placeholder="Tanggal Pengiriman"
+                      size="large"
+                      format={"DD/MM/YYYY"}
+                      style={{ width: "100%" }}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-3/4 px-3 mb-2 md:mb-0">
@@ -363,7 +423,13 @@ function Tambah({ props }) {
                 </div>
 
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                  <SearchBar form={form} tempList={tempList} onChange={onChange} selectedProduct={selectedProduct} user={user} />
+                  <SearchBar
+                    form={form}
+                    tempList={tempList}
+                    onChange={onChange}
+                    selectedProduct={selectedProduct}
+                    user={user}
+                  />
                 </div>
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
                   <OrderTable
@@ -379,10 +445,14 @@ function Tambah({ props }) {
               </div>
 
               <div className="flex justify-end">
-                <p className="font-bold">Total Item : {products.productList.length} </p>
+                <p className="font-bold">
+                  Total Item : {products.productList.length}{" "}
+                </p>
               </div>
               <div className="flex justify-end">
-                <p className="font-bold">Total Harga : {formatter.format(totalPrice)} </p>
+                <p className="font-bold">
+                  Total Harga : {formatter.format(totalPrice)}{" "}
+                </p>
               </div>
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
@@ -399,7 +469,9 @@ function Tambah({ props }) {
                   <Form.Item name="delivery_fee">
                     <InputNumber
                       onChange={sumDeliveryPrice}
-                      formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                      formatter={(value) =>
+                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      }
                       parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                       size="large"
                       placeholder="Biaya Pengiriman"
@@ -439,14 +511,23 @@ function Tambah({ props }) {
                       }}
                     >
                       {locations.map((element) => {
-                        return <Select.Option value={element.id}>{element.attributes.name}</Select.Option>;
+                        return (
+                          <Select.Option value={element.id}>
+                            {element.attributes.name}
+                          </Select.Option>
+                        );
                       })}
                     </Select>
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 mt-5 md:mb-0">
                   <Upload>
-                    <Button className="text-gray-500" style={{ width: "100%" }} size="large" icon={<UploadOutlined />}>
+                    <Button
+                      className="text-gray-500"
+                      style={{ width: "100%" }}
+                      size="large"
+                      icon={<UploadOutlined />}
+                    >
                       Upload Dokumen
                     </Button>
                   </Upload>
@@ -540,7 +621,10 @@ function Tambah({ props }) {
               </div>
               <div>
                 <p className="font-bold flex justify-end">
-                  Total Biaya : {grandTotal === 0 ? formatter.format(totalPrice) : formatter.format(grandTotal)}
+                  Total Order Pembelian :{" "}
+                  {grandTotal === 0
+                    ? formatter.format(totalPrice)
+                    : formatter.format(grandTotal)}
                 </p>
               </div>
               <Form.Item name="additional_note">
@@ -553,7 +637,11 @@ function Tambah({ props }) {
                     <Spin />
                   </div>
                 ) : (
-                  <Button onClick={validateError} htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
+                  <Button
+                    onClick={validateError}
+                    htmlType="submit"
+                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
+                  >
                     Tambah
                   </Button>
                 )}

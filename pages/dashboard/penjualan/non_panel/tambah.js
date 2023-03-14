@@ -374,7 +374,7 @@ function Toko({ props }) {
     clearData();
     setProductSubTotal({});
     form.setFieldsValue({
-      customer: customerData.attributes.name,
+      customer: customerData?.attributes.name,
     });
     setCustomer(customerData);
   }, []);

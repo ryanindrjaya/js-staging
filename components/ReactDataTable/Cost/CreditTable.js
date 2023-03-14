@@ -54,7 +54,7 @@ export default function ReactDataTable({
     var formatter = new Intl.NumberFormat("id-ID", {
         style: "currency",
         currency: "IDR",
-        maximumFractionDigits: 0,
+        maximumFractionDigits: 2,
     });
 
     const content = (row) => (
@@ -121,12 +121,12 @@ export default function ReactDataTable({
         {
           name: "Area",
           width: "150px",
-          //selector: (row) => row.attributes?.customer.data.attributes?.name ?? "-",
+          //selector: (row) => row.attributes?.customer?.data?.attributes?.name ?? "-",
         },
         {
           name: "Wilayah",
           width: "150px",
-          //selector: (row) => row.attributes?.customer.data.attributes?.name ?? "-",
+          //selector: (row) => row.attributes?.customer?.data?.attributes?.name ?? "-",
         },
         {
           name: "Tanggal",

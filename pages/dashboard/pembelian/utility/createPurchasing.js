@@ -5,7 +5,17 @@ import * as moment from "moment";
 
 const cookies = nookies.get(null, "token");
 
-const CreateOrder = async(products, grandTotal, totalPrice, values, listId, discPrice, form, router, updateOrderData) => {
+const CreateOrder = async (
+  products,
+  grandTotal,
+  totalPrice,
+  values,
+  listId,
+  discPrice,
+  form,
+  router,
+  updateOrderData
+) => {
   // CLEANING DATA
   var date = new Date(values.order_date);
   var newDate = moment
@@ -47,6 +57,7 @@ const CreateOrder = async(products, grandTotal, totalPrice, values, listId, disc
   values.supplier_id = supplierId;
   values.status_pembayaran = "Belum Lunas";
   values.total_purchasing = grandTotal === 0 ? parseInt(totalPrice) : parseInt(grandTotal);
+  values.DPP_active = values?.DPP_active === true ? "DPP" : null;
 
   var data = {
     data: values,
@@ -54,6 +65,8 @@ const CreateOrder = async(products, grandTotal, totalPrice, values, listId, disc
 
   const req = await createData(data);
   const res = await req.json();
+
+  console.log("create LPB =>", res);
 
   if (req.status === 200) {
     await putRelationOrder(res.data.id, res.data.attributes, values, form, router, updateOrderData);

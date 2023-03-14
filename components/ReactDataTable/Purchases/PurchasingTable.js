@@ -10,13 +10,7 @@ import {
 import { useRouter } from "next/router";
 import { IoIosSwap } from "react-icons/io";
 
-export default function ReactDataTable({
-  data,
-  onDelete,
-  onUpdate,
-  onPageChange,
-  onChangeStatus,
-}) {
+export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange, onChangeStatus }) {
   const router = useRouter();
   const { Option } = Select;
 
@@ -26,8 +20,8 @@ export default function ReactDataTable({
 
   const openNotificationWithIcon = (type, title, message) => {
     notification[type]({
-        message: title,
-        description: message,
+      message: title,
+      description: message,
     });
   };
 
@@ -44,15 +38,16 @@ export default function ReactDataTable({
     router.push("pembelian_barang/pembayaran/" + row.id);
   };
 
-  const retur = (row) => { //console.log(row.attributes.status)
-    if (row.attributes.status != "Diretur") { 
-        router.push("pembelian_barang/retur/" + row.id);
+  const retur = (row) => {
+    //console.log(row.attributes.status)
+    if (row.attributes.status != "Diretur") {
+      router.push("pembelian_barang/retur/" + row.id);
     } else {
-        openNotificationWithIcon(
-            "error",
-            "Maaf tidak bisa diretur",
-            "Karena status lembar pembelian barang sudah diretur."
-        );
+      openNotificationWithIcon(
+        "error",
+        "Maaf tidak bisa diretur",
+        "Karena status lembar pembelian barang sudah diretur."
+      );
     }
     //router.push("pembelian_barang/retur/" + row.id);
   };
@@ -77,8 +72,19 @@ export default function ReactDataTable({
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
   });
+
+  const openModal = (id) => {
+    router.replace(
+      {
+        pathname: "/dashboard/pembelian/pembelian_barang",
+        query: { id: id },
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
 
   const content = (row) => (
     <div>
@@ -93,7 +99,7 @@ export default function ReactDataTable({
       </div>
       <div>
         <button
-          onClick={() => lihat(row)}
+          onClick={() => openModal(row.id)}
           className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
         >
           <UnorderedListOutlined className="mr-2 mt-0.5 float float-left" />
@@ -133,11 +139,11 @@ export default function ReactDataTable({
 
       <div>
         <button
-            onClick={() => retur(row)}
-            className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+          onClick={() => retur(row)}
+          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
         >
-            <IoIosSwap className="mr-2 mt-0.5 float float-left" />
-            Retur Pembelian
+          <IoIosSwap className="mr-2 mt-0.5 float float-left" />
+          Retur Pembelian
         </button>
       </div>
     </div>
@@ -155,6 +161,19 @@ export default function ReactDataTable({
 
   const columns = [
     {
+      name: "Tindakan",
+      width: "180px",
+      selector: (row) => (
+        <>
+          <Popover content={content(row)} placement="bottom" trigger="click">
+            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
+              Tindakan
+            </button>
+          </Popover>
+        </>
+      ),
+    },
+    {
       name: "NO LPB",
       width: "180px",
       selector: (row) => row.attributes?.no_purchasing ?? "-",
@@ -162,7 +181,7 @@ export default function ReactDataTable({
     {
       name: "Supplier",
       width: "180px",
-      selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
+      selector: (row) => row.attributes?.supplier?.data?.attributes?.name ?? "-",
     },
     {
       name: "Nota Supplier",
@@ -177,7 +196,7 @@ export default function ReactDataTable({
     {
       name: "Lokasi",
       width: "200px",
-      selector: (row) => row.attributes?.location.data.attributes.name,
+      selector: (row) => row.attributes?.location?.data?.attributes?.name,
     },
     {
       name: "Status",
@@ -187,8 +206,8 @@ export default function ReactDataTable({
           <>
             <Select
               defaultValue={row.attributes.status}
+              disabled={row.attributes.status === "Diterima"}
               bordered={false}
-              disabled
               onChange={(e) => onChangeStatus(e, row)}
               style={{
                 width: "150px",
@@ -197,18 +216,14 @@ export default function ReactDataTable({
               <Option value="Diproses" key="Diproses" className="text-black">
                 <Tag color="default">Diproses</Tag>
               </Option>
-              <Option
-                value="Dibatalkan"
-                key="Dibatalkan"
-                className="text-black"
-              >
+              <Option value="Dibatalkan" key="Dibatalkan" className="text-black">
                 <Tag color="error">Dibatalkan</Tag>
               </Option>
               <Option value="Diretur" key="Diretur" className="text-black">
                 <Tag color="blue">Diretur</Tag>
               </Option>
-              <Option value="Selesai" key="Selesai" className="text-black">
-                <Tag color="success">Selesai</Tag>
+              <Option value="Diterima" key="Diterima" className="text-black">
+                <Tag color="success">Diterima</Tag>
               </Option>
             </Select>
           </>
@@ -243,15 +258,9 @@ export default function ReactDataTable({
             return <Tag color="green">Selesai</Tag>;
           }
         } else {
-          if (
-            statusPembayaran === "Belum Lunas" &&
-            purchasingHistory.length > 0
-          ) {
+          if (statusPembayaran === "Belum Lunas" && purchasingHistory.length > 0) {
             return <Tag color={tagRed}>Tempo</Tag>;
-          } else if (
-            statusPembayaran === "Lunas" &&
-            purchasingHistory.length > 0
-          ) {
+          } else if (statusPembayaran === "Lunas" && purchasingHistory.length > 0) {
             return <Tag color={tagGreen}>Selesai</Tag>;
           } else {
             return <Tag color={tagOrange}>Menunggu</Tag>;
@@ -266,18 +275,13 @@ export default function ReactDataTable({
       width: "150px",
       selector: (row) => {
         const lastIndex = row.attributes.purchasing_payments?.data?.length;
-        const lastPayment =
-          row.attributes.purchasing_payments.data[lastIndex - 1];
+        const lastPayment = row.attributes.purchasing_payments.data[lastIndex - 1];
 
-        if (
-          lastPayment?.attributes.payment_remaining ===
-          lastPayment?.attributes.total_payment
-        ) {
+        if (lastPayment?.attributes.payment_remaining === lastPayment?.attributes.total_payment) {
           return <Tag color={tagRed}>Belum Dibayar</Tag>;
         } else if (
           lastPayment?.attributes.payment_remaining > 0 &&
-          lastPayment?.attributes.payment_remaining <
-            lastPayment?.attributes.total_payment
+          lastPayment?.attributes.payment_remaining < lastPayment?.attributes.total_payment
         ) {
           return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
         } else if (lastPayment?.attributes.payment_remaining <= 0) {
@@ -290,21 +294,7 @@ export default function ReactDataTable({
     {
       name: "Total Beli",
       width: "150px",
-      selector: (row) =>
-        formatter.format(row.attributes?.total_purchasing ?? 0),
-    },
-    {
-      name: "Tindakan",
-      width: "250px",
-      selector: (row) => (
-        <>
-          <Popover content={content(row)} placement="bottom" trigger="click">
-            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
-              Tindakan
-            </button>
-          </Popover>
-        </>
-      ),
+      selector: (row) => formatter.format(row.attributes?.total_purchasing ?? 0),
     },
   ];
 
@@ -318,6 +308,9 @@ export default function ReactDataTable({
       data={data.data}
       pagination
       noDataComponent={"Belum ada data Pembelian"}
+      pointerOnHover
+      highlightOnHover
+      onRowClicked={(row) => openModal(row.id)}
     />
   );
 }
