@@ -4,7 +4,7 @@ import { InputNumber, Select, Form, Row } from "antd";
 import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 
-export default function ReactDataTable({
+export default function OrderTable({
   calculatePriceAfterDisc,
   productSubTotal,
   setProductSubTotal,
@@ -86,6 +86,7 @@ export default function ReactDataTable({
   };
 
   const onChangePriceUnit = (value, data, index, indexRow) => {
+    console.log("get index", index, indexRow);
     var tempPriceUnit = [];
 
     tempPriceUnit.push(data.attributes.buy_price_1);
@@ -201,12 +202,28 @@ export default function ReactDataTable({
                 <InputNumber
                   defaultValue={priceUnit}
                   min={0}
-                  onChange={(e) => onChangePriceUnit(e, row, unit, idx)}
+                  onChange={(e) => {
+                    const selectedUnitIndex =
+                      formObj.getFieldValue("jumlah_option") ??
+                      products?.productInfo[idx]?.unitIndex ??
+                      "";
+
+                    // console.log("test data onchange", e, row, unit, idx);
+                    // console.log("selected unit", selectedUnitIndex);
+                    // onChangePriceUnit(e, row, unit, selectedUnitIndex[idx])
+
+                    // edit prupose
+                    // console.log("edit ", products?.productInfo[idx]?.unitIndex);
+
+                    onChangePriceUnit(e, row, selectedUnitIndex[idx], idx);
+                  }}
                   style={{
                     width: "150px",
                     marginRight: "10px",
                   }}
-                  formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                  formatter={(value) =>
+                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
                   parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                 />
               </Form.Item>
@@ -236,6 +253,7 @@ export default function ReactDataTable({
             <Row>
               <Form.Item name={["jumlah_qty", `${idx}`]} noStyle>
                 <InputNumber
+                  min={1}
                   defaultValue={defaultQty}
                   onChange={(e) => onChangeQty(e, row, idx)}
                   rules={[
@@ -262,35 +280,50 @@ export default function ReactDataTable({
                   {row.attributes?.unit_1 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_1 === null} value={1}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_1 === null}
+                      value={1}
+                    >
                       {row.attributes?.unit_1}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_2 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_2 === null} value={2}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_2 === null}
+                      value={2}
+                    >
                       {row.attributes?.unit_2}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_3 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_3 === null} value={3}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_3 === null}
+                      value={3}
+                    >
                       {row.attributes?.unit_3}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_4 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_4 === null} value={4}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_4 === null}
+                      value={4}
+                    >
                       {row.attributes?.unit_4}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_5 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_5 === null} value={5}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_5 === null}
+                      value={5}
+                    >
                       {row.attributes?.unit_5}
                     </Select.Option>
                   )}
@@ -306,10 +339,14 @@ export default function ReactDataTable({
       width: "150px",
       selector: (row, idx) => {
         var defaultDisc = 0;
+        console.log("test disc", products.productInfo[idx]?.disc);
+
+        
         if (products.productInfo[idx]?.disc) {
           defaultDisc = products?.productInfo[idx]?.disc;
         } else {
-          defaultDisc = products?.productList[idx]?.attributes?.purchase_discount_1;
+          defaultDisc =
+            products?.productList[idx]?.attributes?.purchase_discount_1;
         }
 
         return (
@@ -324,7 +361,9 @@ export default function ReactDataTable({
                   width: "100px",
                   marginRight: "10px",
                 }}
-                formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                formatter={(value) =>
+                  value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
                 parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
               />
             </Form.Item>

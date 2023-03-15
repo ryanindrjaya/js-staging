@@ -8,7 +8,7 @@ import TitlePage from "@iso/components/TitlePage/TitlePage";
 import nookies from "nookies";
 import { toast } from "react-toastify";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
-import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
+import Supplier from "../../../../components/Form/AddOrder/SupplierForm";
 import LPBTable from "@iso/components/ReactDataTable/Purchases/LPBTable";
 import { useSelector, useDispatch } from "react-redux";
 import LoadingAnimations from "@iso/components/Animations/Loading";
@@ -39,7 +39,7 @@ Tambah.getInitialProps = async (context) => {
   let user;
 
   const req = await fetchData(cookies);
-  locations = await req.json();
+  locations = await req.json(); 
 
   const req2 = await fetchDataPurchasing(cookies);
   purchases = await req2.json();
@@ -179,7 +179,9 @@ function Tambah({ props }) {
   const tempList = [];
 
   // NO PO
-  var totalPurchases = String(props.purchases?.meta?.pagination.total + 1).padStart(3, "0");
+  var totalPurchases = String(
+    props.purchases?.meta?.pagination.total + 1
+  ).padStart(3, "0");
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -189,8 +191,45 @@ function Tambah({ props }) {
 
   const onFinish = async (values) => {
     setLoading(true);
+    const isValid = await dataValidation();
+    if (!isValid) {
+      notification["error"]({
+        message: "SUPPLIER TIDAK COCOK",
+        description:
+          "Supplier tidak cocok dengan No.PO. Silahkan cek kembali data yang akan ditambahkan",
+      });
+      setLoading(false);
+      return;
+    }
+
     setDataValues(values);
     setLoading(false);
+  };
+
+  const dataValidation = async () => {
+    const nomorPO = preorderData?.attributes?.no_po;
+    const supplierName = supplier?.attributes?.name;
+    console.log("this is validate step", nomorPO, supplierName);
+
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL +
+      `/purchases/?populate=supplier&filters[status][$eq]=Diproses&filters[supplier][name][$eq]=${supplierName}&filters[no_po][$eq]=${nomorPO}`;
+    console.log(endpoint);
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    const isDataExist = res.data.length > 0;
+    console.log(isDataExist);
+
+    return isDataExist;
   };
 
   const createDetailOrder = async () => {
@@ -246,7 +285,7 @@ function Tambah({ props }) {
       setProductList((productList) => [...productList, tempList[0]]);
       toast.success("Produk berhasil ditambahkan!", {
         position: toast.POSITION.TOP_RIGHT,
-        autoClose: 1000,
+        autoClose: 1000, 
       });
     }
   };
@@ -280,7 +319,8 @@ function Tambah({ props }) {
     clearData();
     setIsFetchingData(true);
 
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/purchases/${id}?populate=deep`;
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL + `/purchases/${id}?populate=deep`;
     console.log(endpoint);
     const options = {
       method: "GET",
@@ -352,7 +392,8 @@ function Tambah({ props }) {
       var unitOrder = element.attributes.unit_order;
       var productUnit = element.attributes.products.data[0].attributes;
 
-      priceAfterDisc = priceAfterDisc + element.attributes.unit_price_after_disc;
+      priceAfterDisc =
+        priceAfterDisc + element.attributes.unit_price_after_disc;
 
       for (let index = 1; index < 6; index++) {
         if (unitOrder === productUnit[`unit_${index}`]) {
@@ -374,7 +415,11 @@ function Tambah({ props }) {
         },
       });
 
-      const test = form.getFieldsValue(["disc_rp", "jumlah_option", "jumlah_qty"]);
+      const test = form.getFieldsValue([
+        "disc_rp",
+        "jumlah_option",
+        "jumlah_qty",
+      ]);
 
       // SET INITIAL PRODUCT
       dispatch({
@@ -615,7 +660,10 @@ function Tambah({ props }) {
                     >
                       {locations.map((element) => {
                         return (
-                          <Select.Option value={element.id} key={element.attributes.name}>
+                          <Select.Option
+                            value={element.id}
+                            key={element.attributes.name}
+                          >
                             {element.attributes.name}
                           </Select.Option>
                         );
@@ -698,7 +746,9 @@ function Tambah({ props }) {
                 )}
               </div>
               <div className="flex justify-end">
-                <p className="font-bold">Total Item : {products.productList.length} </p>
+                <p className="font-bold">
+                  Total Item : {products.productList.length}{" "}
+                </p>
               </div>
               <div className="flex justify-end transition-all">
                 <Row>
@@ -711,7 +761,9 @@ function Tambah({ props }) {
                     </p>
                   )}
                   {discPrice === 0 ? (
-                    <p className="font-bold ml-2">{formatter.format(totalPrice || 0)}</p>
+                    <p className="font-bold ml-2">
+                      {formatter.format(totalPrice || 0)}
+                    </p>
                   ) : (
                     <p className="font-bold line-through ml-2 ">
                       {formatter.format(totalPrice || 0)}
@@ -726,7 +778,9 @@ function Tambah({ props }) {
                     <p></p>
                   ) : (
                     <p className="font-bold text-red-500 ml-2">
-                      {isDPPActive ? formatter.format(dppPrice - discValue) : formatter.format(0)}
+                      {isDPPActive
+                        ? formatter.format(dppPrice - discValue)
+                        : formatter.format(0)}
                     </p>
                   )}
 
@@ -734,11 +788,15 @@ function Tambah({ props }) {
 
                   {discPrice === 0 ? (
                     <p className="font-bold ml-2">
-                      {isDPPActive ? formatter.format(dppPrice) : formatter.format(0)}
+                      {isDPPActive
+                        ? formatter.format(dppPrice)
+                        : formatter.format(0)}
                     </p>
                   ) : (
                     <p className="font-bold line-through ml-2 ">
-                      {isDPPActive ? formatter.format(dppPrice) : formatter.format(0)}
+                      {isDPPActive
+                        ? formatter.format(dppPrice)
+                        : formatter.format(0)}
                     </p>
                   )}
                 </Row>
@@ -750,16 +808,22 @@ function Tambah({ props }) {
                     <p></p>
                   ) : (
                     <p className="font-bold text-red-500 ml-2">
-                      {isDPPActive ? formatter.format(ppnPrice - discValue) : formatter.format(0)}
+                      {isDPPActive
+                        ? formatter.format(ppnPrice - discValue)
+                        : formatter.format(0)}
                     </p>
                   )}
                   {discPrice === 0 ? (
                     <p className="font-bold ml-2">
-                      {isDPPActive ? formatter.format(ppnPrice) : formatter.format(0)}
+                      {isDPPActive
+                        ? formatter.format(ppnPrice)
+                        : formatter.format(0)}
                     </p>
                   ) : (
                     <p className="font-bold line-through ml-2 ">
-                      {isDPPActive ? formatter.format(ppnPrice) : formatter.format(0)}
+                      {isDPPActive
+                        ? formatter.format(ppnPrice)
+                        : formatter.format(0)}
                     </p>
                   )}
                 </Row>
@@ -932,7 +996,9 @@ function Tambah({ props }) {
               <div>
                 <p className="font-bold flex justify-end">
                   Total Pembelian :{" "}
-                  {grandTotal === 0 ? formatter.format(totalPrice) : formatter.format(grandTotal)}
+                  {grandTotal === 0
+                    ? formatter.format(totalPrice)
+                    : formatter.format(grandTotal)}
                 </p>
               </div>
               <Form.Item name="additional_note">

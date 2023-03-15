@@ -30,8 +30,8 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange,
     // router.push('/dashboard')
   };
 
-  const lihat = (row) => {
-    router.push("pembelian_barang/print/" + row.id);
+  const edit = (row) => {
+    router.push("pembelian_barang/edit/" + row.id);
   };
 
   const pembayaran = (row) => {
@@ -104,6 +104,15 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange,
         >
           <UnorderedListOutlined className="mr-2 mt-0.5 float float-left" />
           Lihat
+        </button>
+      </div>
+      <div>
+        <button
+          onClick={() => edit(row)}
+          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+        >
+          <EditOutlined className="mr-2 mt-0.5 float float-left" />
+          Edit
         </button>
       </div>
 

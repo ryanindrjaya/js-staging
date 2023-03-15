@@ -56,13 +56,16 @@ Edit.getInitialProps = async (context) => {
   const req3 = await fetchUser(cookies);
   user = await req3.json();
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/purchases/${id}?populate=deep`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  }).then((res) => res.json());
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_URL}/purchases/${id}?populate=deep`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    }
+  ).then((res) => res.json());
 
   if (response.status === 401) {
     context.res.writeHead(302, {
@@ -147,7 +150,9 @@ function Edit({ props }) {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [productList, setProductList] = useState([]);
-  const [supplier, setSupplier] = useState(initialValues.attributes.supplier?.data);
+  const [supplier, setSupplier] = useState(
+    initialValues.attributes.supplier?.data
+  );
   const [totalPrice, setTotalPrice] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
   const [additionalFee, setAdditionalFee] = useState();
@@ -173,7 +178,9 @@ function Edit({ props }) {
   var tempLocationId;
 
   // NO PO
-  var totalPurchases = String(props.purchases?.meta?.pagination.total + 1).padStart(3, "0");
+  var totalPurchases = String(
+    props.purchases?.meta?.pagination.total + 1
+  ).padStart(3, "0");
   var today = new Date();
   var dd = String(today.getDate()).padStart(2, "0");
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
@@ -191,7 +198,12 @@ function Edit({ props }) {
   });
 
   const cleanData = (data) => {
-    const unusedKeys = ["disc_rp", "harga_satuan", "jumlah_option", "jumlah_qty"];
+    const unusedKeys = [
+      "disc_rp",
+      "harga_satuan",
+      "jumlah_option",
+      "jumlah_qty",
+    ];
     for (let key in data) {
       if (data[key] === null || data[key] === undefined) {
         delete data[key];
@@ -293,6 +305,7 @@ function Edit({ props }) {
       const detail = detailsPO[item];
       const id = detail.relation_id;
       const postDetail = cleanData(detail);
+      console.log("post detail", postDetail);
 
       if (id) {
         const res = await updateDetailData(postDetail, id);
@@ -308,6 +321,8 @@ function Edit({ props }) {
     // assign detail id to master PO and assign new totalPrice
     sanitizedValues.purchase_details = detailsId;
     sanitizedValues.delivery_total = grandTotal;
+
+    console.log("sanitizedValues", sanitizedValues);
 
     // update master PO
     const res = await updateMasterData(sanitizedValues, initialValues.id);
@@ -402,12 +417,14 @@ function Edit({ props }) {
     if (type === "error") {
       notification[type]({
         message: "Gagal menambahkan data",
-        description: "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
+        description:
+          "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
       });
     } else if (type === "success") {
       notification[type]({
         message: "Berhasil menambahkan data",
-        description: "Produk berhasil ditambahkan. Silahkan cek pada halaman Order Pembelian",
+        description:
+          "Produk berhasil ditambahkan. Silahkan cek pada halaman Order Pembelian",
       });
     }
   };
@@ -446,7 +463,7 @@ function Edit({ props }) {
         order_date: moment(initialValues.attributes?.order_date),
         delivery_date: moment(initialValues.attributes?.delivery_date),
         supplier_id: initialValues.attributes?.supplier?.data?.id,
-        location: initialValues.attributes?.location?.data?.id,
+        // location: initialValues.attributes?.location?.data?.id,
       });
 
       if (initialValues.attributes.purchase_details?.data.length > 0) {
@@ -454,7 +471,10 @@ function Edit({ props }) {
 
         details.forEach((element, index) => {
           const product = element.attributes?.products?.data?.[0];
-          const unit = getUnitIndex(product?.attributes, element?.attributes?.unit_order);
+          const unit = getUnitIndex(
+            product?.attributes,
+            element?.attributes?.unit_order
+          );
           dispatch({
             type: "SET_INITIAL_PRODUCT",
             product,
@@ -626,10 +646,14 @@ function Edit({ props }) {
               </div>
 
               <div className="flex justify-end">
-                <p className="font-bold">Total Item : {products.productList.length} </p>
+                <p className="font-bold">
+                  Total Item : {products.productList.length}{" "}
+                </p>
               </div>
               <div className="flex justify-end">
-                <p className="font-bold">Total Harga : {formatter.format(totalPrice)} </p>
+                <p className="font-bold">
+                  Total Harga : {formatter.format(totalPrice)}{" "}
+                </p>
               </div>
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
@@ -646,7 +670,9 @@ function Edit({ props }) {
                   <Form.Item name="delivery_fee">
                     <InputNumber
                       onChange={sumDeliveryPrice}
-                      formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                      formatter={(value) =>
+                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      }
                       parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                       size="large"
                       placeholder="Biaya Pengiriman"
@@ -797,7 +823,9 @@ function Edit({ props }) {
               <div>
                 <p className="font-bold flex justify-end">
                   Total Order Pembelian :{" "}
-                  {grandTotal === 0 ? formatter.format(totalPrice) : formatter.format(grandTotal)}
+                  {grandTotal === 0
+                    ? formatter.format(totalPrice)
+                    : formatter.format(grandTotal)}
                 </p>
               </div>
               <Form.Item name="additional_note">
