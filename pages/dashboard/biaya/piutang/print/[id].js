@@ -6,14 +6,14 @@ import router from "next/router";
 
 const Print = ({ props }) => {
   const data = props.piutang.data;
-  const nopiutang = data.attributes.no_hutang;
+  //const nopiutang = data.attributes.no_piutang;
   //const date = new Date(data.attributes.tanggal_pembayaran).toLocaleDateString("id-ID");
-  //const details = data.attributes.debt_details.data;
+  const details = data.attributes.credit_details.data;
   //const sisa_hutang_jatuh_tempo = data.attributes.sisa_hutang_jatuh_tempo;
   //const total_hutang_jatuh_tempo = data.attributes.total_hutang_jatuh_tempo;
   //const total_pembayaran = data.attributes.total_pembayaran;
 
-  var index = 0;
+  var index = 0; console.log("data", data);
 
   const print = () => {
     window.print();
@@ -25,6 +25,10 @@ const Print = ({ props }) => {
     currency: "IDR",
     maximumFractionDigits: 2,
   });
+
+  function formatMyDate(value, locale = "id-ID") {
+    return new Date(value).toLocaleDateString(locale);
+  }
 
   return (
     <div className="m-3">
@@ -41,13 +45,13 @@ const Print = ({ props }) => {
       <div className="flex justify-between mb-5">
         <div>
           <div className="font-bold text-sm uppercase">Nama Sales : {/*{supplierName}*/}</div>
-          <div className="font-bold text-sm uppercase">Area : {/*{supplierName}*/}</div>
-          <div className="font-bold text-sm uppercase">Wilayah : {/*{supplierName}*/}</div>
+          <div className="font-bold text-sm uppercase">Area : {data?.attributes?.area?.data?.attributes?.name}</div>
+          <div className="font-bold text-sm uppercase">Wilayah : {data?.attributes?.wilayah?.data?.attributes?.name}</div>
           <div>{/*{supplierAddress}*/}</div>
         </div>
         <div>
-          <div className="font-bold  text-sm uppercase">No penagihan : {/*{noHutang}*/}</div>
-          <div className="font-bold  text-sm uppercase">Tanggal : {/*{date}*/}</div>
+          <div className="font-bold  text-sm uppercase">No penagihan : {data?.attributes?.no_piutang}</div>
+          <div className="font-bold  text-sm uppercase">Tanggal : {formatMyDate(data?.attributes?.tanggal)}</div>
         </div>
       </div>
       <div className="flex justify-between">
@@ -55,33 +59,59 @@ const Print = ({ props }) => {
           <tr className="p-2">
             <th className="border-2 p-2">NO INVOICE</th>
             <th className="border-2 p-2">TANGGAL INVOICE</th>
-            <th className="border-2 p-2">PELANGGANR</th>
+            <th className="border-2 p-2">PELANGGAN</th>
             <th className="border-2 p-2">NILAI INVOICE</th>
             <th className="border-2 p-2">TOTAL RETUR JUAL</th>
             <th className="border-2 p-2">TOTAL PEMBAYARAN</th>
             <th className="border-2 p-2">SISA PIUTANG</th>
           </tr>
-          {/*{details.map((element) => { console.log("element",element)*/}
-          {/*  index++;*/}
-          {/*  return (*/}
-          {/*    <tr>*/}
-          {/*      <td className="border-2 p-2">{index}</td>*/}
-          {/*      <td className="border-2 p-2">{element.attributes.purchasing.data.attributes.no_purchasing}</td>*/}
-          {/*      <td className="border-2 p-2">{element.attributes.purchasing.data.attributes.no_nota_suppplier}</td>*/}
-          {/*      <td className="border-2 p-2 text-end">{formatter.format(element.attributes.purchasing.data.attributes.total_purchasing)}</td>*/}
-          {/*      <td className="border-2 p-2 text-end">{formatter.format(element.attributes.total_retur)}</td>*/}
-          {/*      <td className="border-2 p-2 text-end">*/}
-          {/*        {formatter.format(element.attributes.purchasing.data.attributes.total_purchasing - element.attributes.total_retur)}*/}
-          {/*      </td>*/}
-          {/*      <td className="border-2 p-2 text-end">{formatter.format(element.attributes.tunai)}</td>*/}
-          {/*      <td className="border-2 p-2 text-end">{formatter.format(element.attributes.transfer)}</td>*/}
-          {/*      <td className="border-2 p-2 text-end">{formatter.format(element.attributes.giro)}</td>*/}
-          {/*      <td className="border-2 p-2 text-end">{formatter.format(element.attributes.cn)}</td>*/}
-          {/*      <td className="border-2 p-2 text-end">{formatter.format(element.attributes.oth)}</td>*/}
-          {/*      <td className="border-2 p-2 text-end">{formatter.format(element.attributes.sisa_hutang)}</td>*/}
-          {/*    </tr>*/}
-          {/*  );*/}
-          {/*})}*/}
+          {details.map((element) => { console.log("details", element);
+            index++;
+            return (
+              <tr>
+                {/*<td className="border-2 p-2">{index}</td>*/}
+                <td className="border-2 p-2">{
+                    element?.attributes?.sales_sale?.data?.attributes?.no_sales_sale ??
+                    element?.attributes?.panel_sale?.data?.attributes?.no_panel_sale ??
+                    element?.attributes?.non_panel_sale?.data?.attributes?.no_non_panel_sale
+                }</td>
+                <td className="border-2 p-2">{formatMyDate(
+                    element?.attributes?.sales_sale?.data?.attributes?.sale_date ??
+                    element?.attributes?.panel_sale?.data?.attributes?.sale_date ??
+                    element?.attributes?.non_panel_sale?.data?.attributes?.sale_date
+                )}</td>
+                <td className="border-2 p-2">{
+                    element?.attributes?.sales_sale?.data?.attributes?.customer?.data?.attributes?.name ??
+                    element?.attributes?.panel_sale?.data?.attributes?.customer?.data?.attributes?.name ??
+                    element?.attributes?.non_panel_sale?.data?.attributes?.customer?.data?.attributes?.name
+                }</td>
+                <td className="border-2 p-2">{formatter.format(
+                    element?.attributes?.sales_sale?.data?.attributes?.total ??
+                    element?.attributes?.panel_sale?.data?.attributes?.total ??
+                    element?.attributes?.non_panel_sale?.data?.attributes?.total
+                )}</td>
+                <td className="border-2 p-2">{formatter.format(element?.attributes?.total_retur)}</td>
+                <td className="border-2 p-2">{formatter.format(parseInt(
+                    element?.attributes?.sales_sale?.data?.attributes?.total ??
+                    element?.attributes?.panel_sale?.data?.attributes?.total ??
+                    element?.attributes?.non_panel_sale?.data?.attributes?.total
+                ) - element?.attributes?.total_retur - element?.attributes?.sisa_piutang )}</td>
+                <td className="border-2 p-2">{formatter.format(element?.attributes?.sisa_piutang)}</td>
+                {/*<td className="border-2 p-2">{element.attributes.purchasing.data.attributes.no_nota_suppplier}</td>*/}
+                {/*<td className="border-2 p-2 text-end">{formatter.format(element.attributes.purchasing.data.attributes.total_purchasing)}</td>*/}
+                {/*<td className="border-2 p-2 text-end">{formatter.format(element.attributes.total_retur)}</td>*/}
+                {/*<td className="border-2 p-2 text-end">*/}
+                {/*  {formatter.format(element.attributes.purchasing.data.attributes.total_purchasing - element.attributes.total_retur)}*/}
+                {/*</td>*/}
+                {/*<td className="border-2 p-2 text-end">{formatter.format(element.attributes.tunai)}</td>*/}
+                {/*<td className="border-2 p-2 text-end">{formatter.format(element.attributes.transfer)}</td>*/}
+                {/*<td className="border-2 p-2 text-end">{formatter.format(element.attributes.giro)}</td>*/}
+                {/*<td className="border-2 p-2 text-end">{formatter.format(element.attributes.cn)}</td>*/}
+                {/*<td className="border-2 p-2 text-end">{formatter.format(element.attributes.oth)}</td>*/}
+                {/*<td className="border-2 p-2 text-end">{formatter.format(element.attributes.sisa_hutang)}</td>*/}
+              </tr>
+            );
+          })}
         </table>
       </div>
       {/*<div className="font-bold text-sm uppercase mt-20 flex justify-end">TOTAL ITEM : {details.length}</div>*/}

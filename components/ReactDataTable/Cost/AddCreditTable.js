@@ -19,6 +19,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   var piutang = 0;
   var returSubtotal = 0;
   var sisaPiutang = {};
+  var pembayaran = {};
   const [modalSisa, setModalSisa] = useState(0);
   const [dataRetur, setDataRetur] = useState("tidak");
   const [metode, setMetode] = useState("");
@@ -115,6 +116,14 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   const onChangeMetode = (value) => {
     setMetode(value);
     //onChangeBayar(biaya,value);
+  };
+
+  const totalPembayaran = (row, idx) => {
+    //if(pembayaran[idx] == undefined || pembayaran[idx] == 0) pembayaran[idx] = parseInt(row?.attributes?.total) - row?.subtotal - row?.sisaPiutang ;
+    //if(0 pembayaran[idx] ) pembayaran[idx] = parseInt(row?.attributes?.total) - row?.subtotal - row?.sisaPiutang ;
+    //biaya.list[idx].sisaPiutang = row.sisaPiutang ;
+    
+    if(biaya.list.length > 0) return formatter.format(biaya.list[idx].sisaPiutang);
   };
 
   const [tunai, setTunai] = useState(0);
@@ -629,7 +638,8 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     {
       name: "Total Pembayaran",
       width: "150px",
-      selector: (row) => formatter.format( row.sisaHutang - row.sisaPiutang ),
+      //selector: (row) => formatter.format( row.sisaHutang - row.sisaPiutang ),
+      //selector: (row, idx) => totalPembayaran(row, idx) ,
       //selector: (row, idx) => ((row.attributes?.total - row?.subtotal) - row?.sisaPiutang) ?? 0 ,
       //selector: (row) => console.log("row total pem", row),
     },

@@ -47,6 +47,9 @@ Piutang.getInitialProps = async (context) => {
   const reqReturNonPanel = await fetchReturNonPanel(cookies);
   const returNonPanel = await reqReturNonPanel.json();
 
+  const reqAkunPiutang = await fetchAkunPiutang(cookies);
+  const akunPiutang = await reqAkunPiutang.json();
+
   return {
     props: {
       user,
@@ -56,7 +59,8 @@ Piutang.getInitialProps = async (context) => {
       panel,
       returPanel,
       nonPanel,
-      returNonPanel
+      returNonPanel,
+      akunPiutang
     },
   };
 };
@@ -173,6 +177,20 @@ const fetchNonPanel = async (cookies) => {
     return req;
 };
 
+const fetchAkunPiutang = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts?populate=deep";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
+};
+
 function Piutang({ props }) {
   const biaya = useSelector((state) => state.Cost);
   const dispatch = useDispatch();
@@ -193,6 +211,7 @@ function Piutang({ props }) {
   const [dataRetur, setDataRetur] = useState([]);
   const [sisaHutang, setSisaHutang] = useState([]);
   const [sisaHutangTotal, setSisaHutangTotal] = useState({});
+  const akunPiutang = props.akunPiutang.data;
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -209,7 +228,7 @@ function Piutang({ props }) {
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
   var date = today.getDate()+'/'+mm+'/'+yyyy;
-  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds(); 
 
   const cookies = nookies.get(null, "token");
   const tempList = [];
@@ -223,6 +242,13 @@ function Piutang({ props }) {
   // wilayah
   const [wilayah, setWilayah] = useState();
 
+  // metode pembayaran (total)
+  //const [tunai, setTunai] = useState(0);
+  //const [transfer, setTransfer] = useState(0);
+  //const [giro, setGiro] = useState(0);
+  //const [cn, setCn] = useState(0);
+  //const [oth, setOth] = useState(0);
+
   // NO Piutang
   var noPiutang = String(props.piutang?.meta?.pagination.total + 1).padStart(3, "0");
   const [categorySale, setCategorySale] = useState(`PH/ET/${user.id}/${noPiutang}/${mm}/${yyyy}`);
@@ -233,20 +259,39 @@ function Piutang({ props }) {
     maximumFractionDigits: 2,
   });
 
+  //const total = async (values) => {
+    
+  //};
+
   const onFinish = (values) => {
+    var biayaInfo = biaya.info; console.log("values finish", values, biayaInfo);
+
     setLoading(true);
-    //setInfo("sukses");
-    //sale.data.forEach((element) => {
-    //  if (values.no_sales_sell == element.attributes.no_sales_sell) {
-    //      notification["error"]({
-    //          message: "Gagal menambahkan data",
-    //          description:
-    //              "Data gagal ditambahkan, karena no penjualan sama",
-    //      });
-    //      setInfo("gagal");
-    //  }
-    //});
-    //createMaster(values);
+    setInfo("sukses");
+
+    values.metode_bayar1 = "tunai";
+    values.metode_bayar2 = "transfer";
+    values.metode_bayar3 = "giro";
+    values.metode_bayar4 = "cn";
+    values.metode_bayar5 = "oth";
+
+    //values.bayar1 = tunai;
+    //values.bayar2 = transfer;
+    //values.bayar3 = giro;
+    //values.bayar4 = cn;
+    //values.bayar5 = oth;
+
+    props.piutang.data.forEach((element) => {
+      if (values.no_piutang == element.attributes.no_piutang) {
+          notification["error"]({
+              message: "Gagal menambahkan data",
+              description:
+                  "Data gagal ditambahkan, karena no piutang sama",
+          });
+          setInfo("gagal");
+      }
+    });
+
     setDataValues(values);
     setLoading(false);
   };
@@ -263,8 +308,9 @@ function Piutang({ props }) {
     values.sisa_piutang_jatuh_tempo = sisaPiutangJatuhTempo();
     values.customer = customer;
     values.area = area;
-    values.wilayah = wilayah; console.log("values create", values);
-    await createData(sisaHutang, values, listId, form, router, "/credits/", "piutang");
+    values.wilayah = wilayah;
+
+    await createData(sisaHutang, values, listId, form, router, "/credits/", "piutang", akunPiutang);
   };
 
   const clearData = () => {
