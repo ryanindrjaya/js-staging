@@ -39,7 +39,7 @@ Tambah.getInitialProps = async (context) => {
   let user;
 
   const req = await fetchData(cookies);
-  locations = await req.json(); 
+  locations = await req.json();
 
   const req2 = await fetchDataPurchasing(cookies);
   purchases = await req2.json();
@@ -232,6 +232,43 @@ function Tambah({ props }) {
     return isDataExist;
   };
 
+  const POValidation = async (id) => {
+    console.log("validation PO", id);
+    // const supplierName = supplier?.attributes?.name;
+    // console.log("this is validate step", nomorPO, supplierName);
+
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL +
+      `/purchasings?populate=deep&filters[purchase][id][$eq]=` +
+      id;
+    console.log(endpoint);
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    const isDataExist = res.data.length > 0;
+    console.log(isDataExist);
+
+    if (isDataExist) {
+      clearData();
+      notification["error"]({
+        message: "Tidak dapat menambahkan data PO",
+        description:
+          "Data LPB ini sudah memilik LPB yang terpasang. Silahkan cek kembali atau gunakan dokumen PO lainnya ",
+      });
+    } else {
+      // fetch po
+      fetchPOdata(id);
+    }
+  };
+
   const createDetailOrder = async () => {
     createDetailPurchasing(
       dataValues,
@@ -285,7 +322,7 @@ function Tambah({ props }) {
       setProductList((productList) => [...productList, tempList[0]]);
       toast.success("Produk berhasil ditambahkan!", {
         position: toast.POSITION.TOP_RIGHT,
-        autoClose: 1000, 
+        autoClose: 1000,
       });
     }
   };
@@ -701,7 +738,7 @@ function Tambah({ props }) {
                 </div>
 
                 <div className="w-full md:w-1/4 px-3 mb-2 mt-5 md:mb-0">
-                  <SearchPO supplier={supplier} handleSelect={fetchPOdata} />
+                  <SearchPO supplier={supplier} handleSelect={POValidation} />
                 </div>
 
                 <div className="w-full md:w-1/4 px-3 mb-2 mt-5 md:mb-0">

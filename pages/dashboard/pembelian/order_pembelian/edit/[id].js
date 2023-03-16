@@ -344,7 +344,6 @@ function Edit({ props }) {
     setLoading(false);
   };
 
-  console.log("tes min");
 
   const onChange = async () => {
     var isDuplicatedData = false;
