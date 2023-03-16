@@ -41,7 +41,6 @@ export default function Reducer(state = initState, action) {
       var unit = action.unit;
       var id = action.index;
       var data = action.product.attributes;
-
       return {
         ...state,
         productInfo: {

@@ -3,13 +3,20 @@ import nookies from "nookies";
 import { PrinterOutlined } from "@ant-design/icons";
 
 const Print = ({ props }) => {
+  console.log("props", props);
   const name = process.env.STAKEHOLDER_NAME;
   const noLPB = props.purchases.data.attributes.no_purchasing;
-  const noPO = props?.purchases?.data?.attributes?.purchase?.data?.attributes?.no_po || "-";
+  const noPO =
+    props?.purchases?.data?.attributes?.purchase?.data?.attributes?.no_po ||
+    "-";
   const noNota = props.purchases.data.attributes.no_nota_suppplier ?? "-";
-  const date = new Date(props.purchases.data.attributes.date_purchasing).toLocaleDateString("id-ID");
-  const supplierName = props.purchases.data.attributes.supplier.data.attributes.name;
-  const supplierAddress = props.purchases.data.attributes.supplier.data.attributes.address;
+  const date = new Date(
+    props.purchases.data.attributes.date_purchasing
+  ).toLocaleDateString("id-ID");
+  const supplierName =
+    props.purchases.data.attributes.supplier.data.attributes.name;
+  const supplierAddress =
+    props.purchases.data.attributes.supplier.data.attributes.address;
 
   const destination = props.purchases.data.attributes.location.data.attributes;
   const destionationName = destination.name;
@@ -24,13 +31,16 @@ const Print = ({ props }) => {
 
   const getHargaSatuan = (unit, index) => {
     var price = 0;
-    const product = props.purchases.data.attributes.purchasing_details.data[index - 1].attributes.product.data;
+    price =
+    props.purchases.data.attributes.purchasing_details.data[index - 1]
+      .attributes.unit_price;
+    // const product = props.purchases.data.attributes.purchasing_details.data[index - 1].attributes.product.data;
 
-    for (let index = 1; index < 6; index++) {
-      if (product.attributes[`unit_${index}`] === unit) {
-        price = product.attributes[`buy_price_${index}`];
-      }
-    }
+    // for (let index = 1; index < 6; index++) {
+    //   if (product.attributes[`unit_${index}`] === unit) {
+    //     price = product.attributes[`buy_price_${index}`];
+    //   }
+    // }
 
     return formatter.format(price);
   };
@@ -40,11 +50,17 @@ const Print = ({ props }) => {
     var disc2 = 0;
     var disc3 = 0;
 
-    const discInput = props.purchases.data.attributes.purchasing_details.data[index - 1].attributes.disc;
+    const discInput =
+      props.purchases.data.attributes.purchasing_details.data[index - 1]
+        .attributes.disc;
 
-    const product = props.purchases.data.attributes.purchasing_details.data[index - 1].attributes.product.data;
+    const product =
+      props.purchases.data.attributes.purchasing_details.data[index - 1]
+        .attributes.product.data;
 
-    const detail = props.purchases.data.attributes.purchasing_details.data[index - 1].attributes;
+    const detail =
+      props.purchases.data.attributes.purchasing_details.data[index - 1]
+        .attributes;
 
     for (let index = 1; index < 6; index++) {
       if (product.attributes[`unit_${index}`] === unit) {
@@ -58,15 +74,19 @@ const Print = ({ props }) => {
   };
 
   const getSubTotal = (index) => {
-    var subTotal = props.purchases.data.attributes.purchasing_details.data[index - 1].attributes.sub_total;
+    var subTotal =
+      props.purchases.data.attributes.purchasing_details.data[index - 1]
+        .attributes.sub_total;
     return formatter.format(subTotal);
   };
 
   const getTotalProduct = () => {
     var total = 0;
-    props.purchases.data.attributes.purchasing_details.data.forEach((element) => {
-      total = total + element.attributes.sub_total;
-    });
+    props.purchases.data.attributes.purchasing_details.data.forEach(
+      (element) => {
+        total = total + element.attributes.sub_total;
+      }
+    );
 
     return formatter.format(total);
   };
@@ -78,11 +98,21 @@ const Print = ({ props }) => {
     var desc4 = props.purchases.data.attributes[`additional_fee_4_desc`];
     var desc5 = props.purchases.data.attributes[`additional_fee_5_desc`];
 
-    var disc1 = formatter.format(props.purchases.data.attributes[`additional_fee_1_sub`]);
-    var disc2 = formatter.format(props.purchases.data.attributes[`additional_fee_2_sub`]);
-    var disc3 = formatter.format(props.purchases.data.attributes[`additional_fee_3_sub`]);
-    var disc4 = formatter.format(props.purchases.data.attributes[`additional_fee_4_sub`]);
-    var disc5 = formatter.format(props.purchases.data.attributes[`additional_fee_5_sub`]);
+    var disc1 = formatter.format(
+      props.purchases.data.attributes[`additional_fee_1_sub`]
+    );
+    var disc2 = formatter.format(
+      props.purchases.data.attributes[`additional_fee_2_sub`]
+    );
+    var disc3 = formatter.format(
+      props.purchases.data.attributes[`additional_fee_3_sub`]
+    );
+    var disc4 = formatter.format(
+      props.purchases.data.attributes[`additional_fee_4_sub`]
+    );
+    var disc5 = formatter.format(
+      props.purchases.data.attributes[`additional_fee_5_sub`]
+    );
 
     return (
       <div className="text-right">
@@ -126,7 +156,9 @@ const Print = ({ props }) => {
   };
 
   const getProductPriceAfterDisc = (index) => {
-    var price = props.purchases.data.attributes.purchasing_details.data[index - 1].attributes.unit_price_after_disc;
+    var price =
+      props.purchases.data.attributes.purchasing_details.data[index - 1]
+        .attributes.unit_price_after_disc;
 
     return formatter.format(price);
   };
@@ -165,7 +197,10 @@ const Print = ({ props }) => {
   return (
     <div className="m-3">
       <div className="flex justify-end mb-5">
-        <button onClick={print} class="print:hidden rounded-full bg-sky-400 px-4 py-2 font-bold text-white">
+        <button
+          onClick={print}
+          class="print:hidden rounded-full bg-sky-400 px-4 py-2 font-bold text-white"
+        >
           <span>
             <PrinterOutlined className="mr-1 text-lg" />
           </span>{" "}
@@ -180,20 +215,32 @@ const Print = ({ props }) => {
           <div className="">Tanggal : {date}</div>
         </div>
       </div>
-      <div className="font-bold text-lg flex justify-center mb-5">LEMBAR PENERIMAAN BARANG</div>
+      <div className="font-bold text-lg flex justify-center mb-5">
+        LEMBAR PENERIMAAN BARANG
+      </div>
       <div className="flex justify-between mb-5">
         <div>
           <div className="font-bold text-sm">KEPADA</div>
-          <div className="font-bold text-sm uppercase">Nama Supplier : {supplierName}</div>
+          <div className="font-bold text-sm uppercase">
+            Nama Supplier : {supplierName}
+          </div>
           <div>{supplierAddress}</div>
-          <div className="font-bold  text-sm uppercase mt-4">NO SUPPLIER : {noPO}</div>
-          <div className="font-bold  text-sm uppercase">NO NOTA SUPPLIER : {noNota}</div>
+          <div className="font-bold  text-sm uppercase mt-4">
+            NO SUPPLIER : {noPO}
+          </div>
+          <div className="font-bold  text-sm uppercase">
+            NO NOTA SUPPLIER : {noNota}
+          </div>
         </div>
         <div>
-          <div className="font-bold  text-sm uppercase">ALAMAT PENGIRIMAN : {destionationName}</div>
+          <div className="font-bold  text-sm uppercase">
+            ALAMAT PENGIRIMAN : {destionationName}
+          </div>
           <div>{destinationStreet}</div>
           <div>{destinationAddress}</div>
-          <div className="font-bold  text-sm uppercase mt-4">NO PO : {noPO}</div>
+          <div className="font-bold  text-sm uppercase mt-4">
+            NO PO : {noPO}
+          </div>
         </div>
       </div>
       <div className="flex justify-between">
@@ -212,30 +259,57 @@ const Print = ({ props }) => {
             return (
               <tr>
                 <td className="border-2 p-2">{index}</td>
-                <td className="border-2 p-2">{element.attributes.product.data.attributes.name}</td>
-                <td className="border-2 p-2">{getHargaSatuan(element.attributes.unit_order, index)}</td>
                 <td className="border-2 p-2">
-                  {element.attributes.total_order} {element.attributes.unit_order}
+                  {element.attributes.product.data.attributes.name}
                 </td>
-                <td className="border-2 p-2">{getProductDisc(element.attributes.unit_order, index)}</td>
-                <td className="border-2 p-2">{getProductPriceAfterDisc(index)}</td>
+                <td className="border-2 p-2">
+                  {getHargaSatuan(element.attributes.unit_order, index)}
+                </td>
+                <td className="border-2 p-2">
+                  {element.attributes.total_order}{" "}
+                  {element.attributes.unit_order}
+                </td>
+                <td className="border-2 p-2">
+                  {getProductDisc(element.attributes.unit_order, index)}
+                </td>
+                <td className="border-2 p-2">
+                  {getProductPriceAfterDisc(index)}
+                </td>
                 <td className="border-2 p-2">{getSubTotal(index)}</td>
               </tr>
             );
           })}
         </table>
       </div>
-      <div className="font-bold  text-sm uppercase mt-3 flex justify-end">TOTAL HARGA : {getTotalProduct()}</div>
-      <div className="font-bold  text-sm uppercase mt-4 flex justify-end">DPP : {formatter.format(getDPP())}</div>
-      <div className="font-bold  text-sm uppercase flex justify-end">PPN : {formatter.format(getPPN())}</div>
-      <div className="font-bold  text-sm uppercase flex justify-end">BIAYA PENGIRIMAN : {formatter.format(deliveryFee)}</div>
-      <div className="font-bold  text-sm uppercase mt-4 flex justify-end">TAMBAHAN :</div>
-      <div className=" text-sm uppercase mt-2 flex justify-end">{getAdditionalFee()}</div>
+      <div className="font-bold  text-sm uppercase mt-3 flex justify-end">
+        TOTAL HARGA : {getTotalProduct()}
+      </div>
+      <div className="font-bold  text-sm uppercase mt-4 flex justify-end">
+        DPP : {formatter.format(getDPP())}
+      </div>
+      <div className="font-bold  text-sm uppercase flex justify-end">
+        PPN : {formatter.format(getPPN())}
+      </div>
+      <div className="font-bold  text-sm uppercase flex justify-end">
+        BIAYA PENGIRIMAN : {formatter.format(deliveryFee)}
+      </div>
+      <div className="font-bold  text-sm uppercase mt-4 flex justify-end">
+        TAMBAHAN :
+      </div>
+      <div className=" text-sm uppercase mt-2 flex justify-end">
+        {getAdditionalFee()}
+      </div>
 
-      <div className="font-bold  text-sm uppercase mt-4 flex justify-end">TOTAL PESANAN : {formatter.format(TotalHarga)}</div>
+      <div className="font-bold  text-sm uppercase mt-4 flex justify-end">
+        TOTAL PESANAN : {formatter.format(TotalHarga)}
+      </div>
 
-      <div className="font-bold  text-sm uppercase mt-10 flex justify-end">HORMAT KAMI</div>
-      <div className="font-bold  text-sm uppercase mt-10 flex justify-end">_____________________________</div>
+      <div className="font-bold  text-sm uppercase mt-10 flex justify-end">
+        HORMAT KAMI
+      </div>
+      <div className="font-bold  text-sm uppercase mt-10 flex justify-end">
+        _____________________________
+      </div>
     </div>
   );
 };
@@ -244,7 +318,8 @@ Print.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings/" + id + "?populate=deep";
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL + "/purchasings/" + id + "?populate=deep";
   const options = {
     method: "GET",
     headers: {
