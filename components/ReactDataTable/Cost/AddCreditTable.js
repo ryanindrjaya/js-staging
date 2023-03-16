@@ -149,11 +149,11 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     //setModalSisa(0);
     setBiayaData(value);
 
-    if (metode == "tunai") { setTunai(value); tempTunai = value; }
-    if (metode == "transfer") { setTransfer(value); tempTransfer = value; }
-    if (metode == "giro") { setGiro(value); tempGiro = value; }
-    if (metode == "cn") { setCn(value); tempCn = value; }
-    if (metode == "oth") { setOth(value); tempOth = value; }
+    if (metode == "tunai") { setTunai(value); }
+    if (metode == "transfer") { setTransfer(value); }
+    if (metode == "giro") { setGiro(value); }
+    if (metode == "cn") { setCn(value); }
+    if (metode == "oth") { setOth(value); }
 
     //setModalSisa(tempTunai + tempTransfer + tempGiro + tempCn + tempOth);
     setModalSisa(tunai + transfer + giro + cn + oth);

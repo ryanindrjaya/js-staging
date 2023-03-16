@@ -26,6 +26,9 @@ Piutang.getInitialProps = async (context) => {
   const req = await fetchData(cookies);
   const user = await req.json();
 
+  const reqDataUser = await fetchUserSales(cookies);
+  const dataUser = await reqDataUser.json();
+
   const reqPiutang = await fetchPiutang(cookies);
   const piutang = await reqPiutang.json();
 
@@ -53,6 +56,7 @@ Piutang.getInitialProps = async (context) => {
   return {
     props: {
       user,
+      dataUser,
       piutang,
       sales,
       returSales,
@@ -77,6 +81,20 @@ const fetchData = async (cookies) => {
 
   const req = await fetch(endpoint, options);
   return req;
+};
+
+const fetchUserSales = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/users?populate=deep&filters[role][name][$eq]=Sales&?filters[role][type][$eq]=Sales";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
 };
 
 const fetchPiutang = async (cookies) => {
@@ -200,6 +218,7 @@ function Piutang({ props }) {
   const user = props.user;
   //const inven = props.inven.data;
   const sales = props.sales.data;
+  const dataUser = props.dataUser;
   const returSales = props.returSales.data;
   const panel = props.panel.data;
   const returPanel = props.returPanel.data;
@@ -264,10 +283,23 @@ function Piutang({ props }) {
   //};
 
   const onFinish = (values) => {
-    var biayaInfo = biaya.info; console.log("values finish", values, biayaInfo);
+    var biayaInfo = biaya.info;
 
     setLoading(true);
     setInfo("sukses");
+
+    var totalTunai = 0;
+    var totalTransfer = 0;
+    var totalGiro = 0;
+    var totalCn = 0;
+    var totalOth = 0;
+    for (const key in biaya.info) {
+      totalTunai += biaya.info[key].tunai;
+      totalTransfer += biaya.info[key].transfer;
+      totalGiro += biaya.info[key].giro;
+      totalCn += biaya.info[key].cn;
+      totalOth += biaya.info[key].oth;
+    }
 
     values.metode_bayar1 = "tunai";
     values.metode_bayar2 = "transfer";
@@ -275,11 +307,11 @@ function Piutang({ props }) {
     values.metode_bayar4 = "cn";
     values.metode_bayar5 = "oth";
 
-    //values.bayar1 = tunai;
-    //values.bayar2 = transfer;
-    //values.bayar3 = giro;
-    //values.bayar4 = cn;
-    //values.bayar5 = oth;
+    values.bayar1 = totalTunai;
+    values.bayar2 = totalTransfer;
+    values.bayar3 = totalGiro;
+    values.bayar4 = totalCn;
+    values.bayar5 = totalOth;
 
     props.piutang.data.forEach((element) => {
       if (values.no_piutang == element.attributes.no_piutang) {
@@ -413,31 +445,6 @@ function Piutang({ props }) {
         row.keterangan = "sales";
     });
 
-    //returSales.forEach((row) => {
-    //row.subtotal = 0;
-
-    //  dataTabel.forEach((element) => {
-    //    element.subtotal = 0;
-    //    element.sisaHutang = 0;
-
-    //    if (element?.attributes?.no_sales_sale == row.attributes?.sales_sale?.data?.attributes.no_sales_sale) {
-    //        row.attributes.retur_sales_sale_details.data.forEach((detail) => {
-    //            row.subtotal += parseInt(detail.attributes.sub_total);
-    //        });
-
-    //        element.subtotal = row.subtotal;
-
-    //        if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_sales_sale, subtotal: row.subtotal };
-    //        else dataRetur[0] = { id: element.attributes.no_sales_sale, subtotal: row.subtotal };
-
-    //        element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
-    //    } //else {
-    //        //element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
-    //    //}
-    //  });
-    ////lpbId++;
-    //});
-
     // panel data
     panel.forEach((row) => {
         const lastIndex = row.attributes.purchasing_payments?.data?.length;
@@ -470,31 +477,6 @@ function Piutang({ props }) {
         row.keterangan = "panel";
     });
 
-    //returPanel.forEach((row) => {
-    //row.subtotal = 0;
-
-    //  dataTabel.forEach((element) => {
-    //    element.subtotal = 0;
-    //    element.sisaHutang = 0;
-
-    //    if (element.attributes?.no_panel_sale == row.attributes?.panel_sale?.data?.attributes.no_panel_sale) {
-    //        row.attributes.retur_panel_sale_details.data.forEach((detail) => {
-    //            row.subtotal += parseInt(detail.attributes.sub_total);
-    //        });
-
-    //        element.subtotal = row.subtotal;
-
-    //        if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_panel_sale, subtotal: row.subtotal };
-    //        else dataRetur[0] = { id: element.attributes.no_panel_sale, subtotal: row.subtotal };
-
-    //        element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
-    //    } //else {
-    //        //element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
-    //    //}
-    //  });
-    ////lpbId++;
-    //});
-
     // non panel data
     nonPanel.forEach((row) => {
         const lastIndex = row.attributes.purchasing_payments?.data?.length;
@@ -526,33 +508,6 @@ function Piutang({ props }) {
 
         row.keterangan = "nonpanel";
     });
-
-    
-    //returNonPanel.forEach((row) => {
-    //row.subtotal = 0;
-
-    //  dataTabel.forEach((element) => {
-    //    element.subtotal = 0;
-    //    element.sisaHutang = 0;
-
-    //    if (element.attributes?.no_non_panel_sale == row.attributes?.non_panel_sale?.data?.attributes.no_non_panel_sale) {
-    //        row.attributes.retur_non_panel_sale_details.data.forEach((detail) => {
-    //            row.subtotal += parseInt(detail.attributes.sub_total);
-    //        });
-
-    //        element.subtotal = row.subtotal;
-
-    //        if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_non_panel_sale, subtotal: row.subtotal };
-    //        else dataRetur[0] = { id: element.attributes.no_non_panel_sale, subtotal: row.subtotal };
-
-    //        element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
-    //    } //else {
-    //        //element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
-    //    //}
-    //    console.log("element non", element);
-    //  });
-    ////lpbId++;
-    //});
 
     dataTabel.forEach((element) => {
     element.subtotal = 0;
@@ -672,11 +627,11 @@ function Piutang({ props }) {
                       }}
                       placeholder="Status Pembayaran"
                     >
-                      <Select.Option value="1" key="1">
-                        Status 1
+                      <Select.Option value="Dibayar" key="Dibayar">
+                        Dibayar
                       </Select.Option>
-                      <Select.Option value="2" key="2">
-                        Status 2
+                      <Select.Option value="Belum Dibayar" key="Belum Dibayar">
+                        Belum Dibayar
                       </Select.Option>
                     </Select>
                   </Form.Item>
@@ -699,7 +654,7 @@ function Piutang({ props }) {
 
               <div className="w-full flex flex-wrap justify-start -mx-3 -mt-8">
                 <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item name="sales" //initialValue={"Hari"} 
+                  <Form.Item name="users_permissions_user" //initialValue={"Hari"} 
                   noStyle>
                     <Select
                       size="large"
@@ -708,12 +663,13 @@ function Piutang({ props }) {
                       }}
                       placeholder="Sales"
                     >
-                      <Select.Option value="1" key="1">
-                        Wil 1
-                      </Select.Option>
-                      <Select.Option value="2" key="2">
-                        Wil 2
-                      </Select.Option>
+                    {dataUser.map((element) => {
+                        return (
+                            <Select.Option value={element.id} key={element.name}>
+                            {element.name}
+                          </Select.Option>
+                        );
+                    })}
                     </Select>
                   </Form.Item>
                 </div>
@@ -755,13 +711,13 @@ function Piutang({ props }) {
                   <span> TOTAL ITEM </span> <span> : {dataTabel.length}</span>
                 </Form.Item>
                 <Form.Item name="total_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> TOTAL HUTANG JATUH TEMPO </span> <span> : {formatter.format(totalPiutangJatuhTempo())}</span>
+                  <span> TOTAL PIUTANG JATUH TEMPO </span> <span> : {formatter.format(totalPiutangJatuhTempo())}</span>
                 </Form.Item>
                 <Form.Item name="total_pembayaran" className="w-full h-2 mx-2 flex justify-end font-bold">
                   <span> TOTAL PEMBAYARAN </span> <span> : {formatter.format(totalPembayaran())}</span>
                 </Form.Item>
                 <Form.Item name="sisa_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> SISA HUTANG JATUH TEMPO </span> <span> : {formatter.format(sisaPiutangJatuhTempo())}</span>
+                  <span> SISA PIUTANG JATUH TEMPO </span> <span> : {formatter.format(sisaPiutangJatuhTempo())}</span>
                 </Form.Item>
               </div>
 
