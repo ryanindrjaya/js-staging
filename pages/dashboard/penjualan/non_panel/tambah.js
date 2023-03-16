@@ -176,7 +176,7 @@ function Toko({ props }) {
 
   // NO Non Panel Sale
   var noNonPanelSale = String(nonPanel?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`PN/ET/${user.id}/${noNonPanelSale}/${mm}/${yyyy}`);
+  const [categorySale, setCategorySale] = useState(`PNP/ET/${user.id}/${noNonPanelSale}/${mm}/${yyyy}`);
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);

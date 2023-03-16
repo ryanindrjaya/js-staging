@@ -15,6 +15,8 @@ import createDetails from "../utility/createDetail";
 import calculatePrice from "../utility/calculatePrice";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
 import Customer from "@iso/components/Form/AddCost/CustomerForm";
+import Area from "@iso/components/Form/AddCost/AreaForm";
+import Wilayah from "@iso/components/Form/AddCost/WilayahForm";
 import nookies from "nookies";
 
 
@@ -23,6 +25,9 @@ Piutang.getInitialProps = async (context) => {
 
   const req = await fetchData(cookies);
   const user = await req.json();
+
+  const reqDataUser = await fetchUserSales(cookies);
+  const dataUser = await reqDataUser.json();
 
   const reqPiutang = await fetchPiutang(cookies);
   const piutang = await reqPiutang.json();
@@ -45,16 +50,21 @@ Piutang.getInitialProps = async (context) => {
   const reqReturNonPanel = await fetchReturNonPanel(cookies);
   const returNonPanel = await reqReturNonPanel.json();
 
+  const reqAkunPiutang = await fetchAkunPiutang(cookies);
+  const akunPiutang = await reqAkunPiutang.json();
+
   return {
     props: {
       user,
+      dataUser,
       piutang,
       sales,
       returSales,
       panel,
       returPanel,
       nonPanel,
-      returNonPanel
+      returNonPanel,
+      akunPiutang
     },
   };
 };
@@ -71,6 +81,20 @@ const fetchData = async (cookies) => {
 
   const req = await fetch(endpoint, options);
   return req;
+};
+
+const fetchUserSales = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/users?populate=deep&filters[role][name][$eq]=Sales&?filters[role][type][$eq]=Sales";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
 };
 
 const fetchPiutang = async (cookies) => {
@@ -171,6 +195,20 @@ const fetchNonPanel = async (cookies) => {
     return req;
 };
 
+const fetchAkunPiutang = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts?populate=deep";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
+};
+
 function Piutang({ props }) {
   const biaya = useSelector((state) => state.Cost);
   const dispatch = useDispatch();
@@ -180,6 +218,7 @@ function Piutang({ props }) {
   const user = props.user;
   //const inven = props.inven.data;
   const sales = props.sales.data;
+  const dataUser = props.dataUser;
   const returSales = props.returSales.data;
   const panel = props.panel.data;
   const returPanel = props.returPanel.data;
@@ -191,6 +230,7 @@ function Piutang({ props }) {
   const [dataRetur, setDataRetur] = useState([]);
   const [sisaHutang, setSisaHutang] = useState([]);
   const [sisaHutangTotal, setSisaHutangTotal] = useState({});
+  const akunPiutang = props.akunPiutang.data;
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -207,7 +247,7 @@ function Piutang({ props }) {
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
   var date = today.getDate()+'/'+mm+'/'+yyyy;
-  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds(); 
 
   const cookies = nookies.get(null, "token");
   const tempList = [];
@@ -216,6 +256,17 @@ function Piutang({ props }) {
 
   // customer
   const [customer, setCustomer] = useState();
+  // area
+  const [area, setArea] = useState();
+  // wilayah
+  const [wilayah, setWilayah] = useState();
+
+  // metode pembayaran (total)
+  //const [tunai, setTunai] = useState(0);
+  //const [transfer, setTransfer] = useState(0);
+  //const [giro, setGiro] = useState(0);
+  //const [cn, setCn] = useState(0);
+  //const [oth, setOth] = useState(0);
 
   // NO Piutang
   var noPiutang = String(props.piutang?.meta?.pagination.total + 1).padStart(3, "0");
@@ -227,20 +278,52 @@ function Piutang({ props }) {
     maximumFractionDigits: 2,
   });
 
+  //const total = async (values) => {
+    
+  //};
+
   const onFinish = (values) => {
+    var biayaInfo = biaya.info;
+
     setLoading(true);
-    //setInfo("sukses");
-    //sale.data.forEach((element) => {
-    //  if (values.no_sales_sell == element.attributes.no_sales_sell) {
-    //      notification["error"]({
-    //          message: "Gagal menambahkan data",
-    //          description:
-    //              "Data gagal ditambahkan, karena no penjualan sama",
-    //      });
-    //      setInfo("gagal");
-    //  }
-    //});
-    //createMaster(values);
+    setInfo("sukses");
+
+    var totalTunai = 0;
+    var totalTransfer = 0;
+    var totalGiro = 0;
+    var totalCn = 0;
+    var totalOth = 0;
+    for (const key in biaya.info) {
+      totalTunai += biaya.info[key].tunai;
+      totalTransfer += biaya.info[key].transfer;
+      totalGiro += biaya.info[key].giro;
+      totalCn += biaya.info[key].cn;
+      totalOth += biaya.info[key].oth;
+    }
+
+    values.metode_bayar1 = "tunai";
+    values.metode_bayar2 = "transfer";
+    values.metode_bayar3 = "giro";
+    values.metode_bayar4 = "cn";
+    values.metode_bayar5 = "oth";
+
+    values.bayar1 = totalTunai;
+    values.bayar2 = totalTransfer;
+    values.bayar3 = totalGiro;
+    values.bayar4 = totalCn;
+    values.bayar5 = totalOth;
+
+    props.piutang.data.forEach((element) => {
+      if (values.no_piutang == element.attributes.no_piutang) {
+          notification["error"]({
+              message: "Gagal menambahkan data",
+              description:
+                  "Data gagal ditambahkan, karena no piutang sama",
+          });
+          setInfo("gagal");
+      }
+    });
+
     setDataValues(values);
     setLoading(false);
   };
@@ -252,10 +335,14 @@ function Piutang({ props }) {
 
   const createMaster = async (values) => {
     values.total_item = dataTabel.length;
-    values.total_hutang_jatuh_tempo = totalHutangJatuhTempo();
+    values.total_piutang_jatuh_tempo = totalPiutangJatuhTempo();
     values.total_pembayaran = totalPembayaran();
-    values.sisa_hutang_jatuh_tempo = sisaHutangJatuhTempo();
-    await createData(sisaHutang, values, listId, form, router, "/credits/", "piutang");
+    values.sisa_piutang_jatuh_tempo = sisaPiutangJatuhTempo();
+    values.customer = customer;
+    values.area = area;
+    values.wilayah = wilayah;
+
+    await createData(sisaHutang, values, listId, form, router, "/credits/", "piutang", akunPiutang);
   };
 
   const clearData = () => {
@@ -265,10 +352,11 @@ function Piutang({ props }) {
   const calculatePriceTotal = (row, index) => {
     const total = calculatePrice(row, biaya, sisaHutangTotal, index);
     sisaHutang[index] = total;
+    row.sisaPiutang = total;
     return formatter.format(total);
   };
 
-  const totalHutangJatuhTempo = () => {
+  const totalPiutangJatuhTempo = () => {
     var total = 0;
     if(biaya.info != null){
 
@@ -301,11 +389,11 @@ function Piutang({ props }) {
     return total;
   };
 
-  const sisaHutangJatuhTempo = () => {
+  const sisaPiutangJatuhTempo = () => {
     var total = 0;
-    var totalHutang = totalHutangJatuhTempo();
+    var totalPiutang = totalPiutangJatuhTempo();
     var totalBayar = totalPembayaran();
-    total = totalHutang - totalBayar;
+    total = totalPiutang - totalBayar;
     return total;
   };
 
@@ -357,31 +445,6 @@ function Piutang({ props }) {
         row.keterangan = "sales";
     });
 
-    returSales.forEach((row) => {
-        row.subtotal = 0;
-
-        dataTabel.forEach((element) => {
-            element.subtotal = 0;
-            element.sisaHutang = 0;
-
-            if (element.attributes?.no_sales_sale == row.attributes?.sales_sale?.data.attributes.no_sales_sale) {
-                row.attributes.retur_sales_sale_details.data.forEach((detail) => {
-                    row.subtotal += parseInt(detail.attributes.sub_total);
-                });
-
-                element.subtotal = row.subtotal;
-
-                if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_sales_sale, subtotal: row.subtotal };
-                else dataRetur[0] = { id: element.attributes.no_sales_sale, subtotal: row.subtotal };
-
-                element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
-            } else {
-                element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
-            }
-        });
-        //lpbId++;
-    });
-
     // panel data
     panel.forEach((row) => {
         const lastIndex = row.attributes.purchasing_payments?.data?.length;
@@ -412,31 +475,6 @@ function Piutang({ props }) {
         }
 
         row.keterangan = "panel";
-    });
-
-    returPanel.forEach((row) => {
-        row.subtotal = 0;
-
-        dataTabel.forEach((element) => {
-            element.subtotal = 0;
-            element.sisaHutang = 0;
-
-            if (element.attributes?.no_panel_sale == row.attributes?.panel_sale?.data.attributes.no_panel_sale) {
-                row.attributes.retur_panel_sale_details.data.forEach((detail) => {
-                    row.subtotal += parseInt(detail.attributes.sub_total);
-                });
-
-                element.subtotal = row.subtotal;
-
-                if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_panel_sale, subtotal: row.subtotal };
-                else dataRetur[0] = { id: element.attributes.no_panel_sale, subtotal: row.subtotal };
-
-                element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
-            } else {
-                element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
-            }
-        });
-        //lpbId++;
     });
 
     // non panel data
@@ -471,30 +509,63 @@ function Piutang({ props }) {
         row.keterangan = "nonpanel";
     });
 
-    returNonPanel.forEach((row) => {
+    dataTabel.forEach((element) => {
+    element.subtotal = 0;
+    element.sisaHutang = 0;
+
+      returSales.forEach((row) => {
         row.subtotal = 0;
 
-        dataTabel.forEach((element) => {
-            element.subtotal = 0;
-            element.sisaHutang = 0;
+        if (element?.attributes?.no_sales_sale == row.attributes?.sales_sale?.data?.attributes.no_sales_sale) {
+            row.attributes.retur_sales_sale_details.data.forEach((detail) => {
+                row.subtotal += parseInt(detail.attributes.sub_total);
+            });
 
-            if (element.attributes?.no_non_panel_sale == row.attributes?.non_panel_sale?.data.attributes.no_non_panel_sale) {
-                row.attributes.retur_non_panel_sale_details.data.forEach((detail) => {
-                    row.subtotal += parseInt(detail.attributes.sub_total);
-                });
+            element.subtotal = row.subtotal;
 
-                element.subtotal = row.subtotal;
+            if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_sales_sale, subtotal: row.subtotal };
+            else dataRetur[0] = { id: element.attributes.no_sales_sale, subtotal: row.subtotal };
 
-                if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_non_panel_sale, subtotal: row.subtotal };
-                else dataRetur[0] = { id: element.attributes.no_non_panel_sale, subtotal: row.subtotal };
+            element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
+        }
+      });
 
-                element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
-            } else {
-                element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
-            }
-        });
-        //lpbId++;
+      returPanel.forEach((row) => {
+        row.subtotal = 0;
+
+        if (element.attributes?.no_panel_sale == row.attributes?.panel_sale?.data?.attributes.no_panel_sale) {
+            row.attributes.retur_panel_sale_details.data.forEach((detail) => {
+                row.subtotal += parseInt(detail.attributes.sub_total);
+            });
+
+            element.subtotal = row.subtotal;
+
+            if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_panel_sale, subtotal: row.subtotal };
+            else dataRetur[0] = { id: element.attributes.no_panel_sale, subtotal: row.subtotal };
+
+            element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
+        } 
+      });
+
+      returNonPanel.forEach((row) => {
+        row.subtotal = 0;
+
+        if (element.attributes?.no_non_panel_sale == row.attributes?.non_panel_sale?.data?.attributes.no_non_panel_sale) {
+            row.attributes.retur_non_panel_sale_details.data.forEach((detail) => {
+                row.subtotal += parseInt(detail.attributes.sub_total);
+            });
+
+            element.subtotal = row.subtotal;
+
+            if (dataRetur.length > 0) dataRetur[dataRetur.length] = { id: element.attributes.no_non_panel_sale, subtotal: row.subtotal };
+            else dataRetur[0] = { id: element.attributes.no_non_panel_sale, subtotal: row.subtotal };
+
+            element.sisaHutang = parseInt(element.attributes.total) - element.subtotal;
+        } 
+      });
+
     });
+
   }, []);
 
   const validateError = () => {
@@ -544,7 +615,7 @@ function Piutang({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  {/*<Customer onChangeCustomer={setCustomer} />*/}
+                  <Customer onChangeCustomer={setCustomer} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
                   <Form.Item name="status_pembayaran" //initialValue={"Hari"} 
@@ -556,18 +627,18 @@ function Piutang({ props }) {
                       }}
                       placeholder="Status Pembayaran"
                     >
-                      <Select.Option value="1" key="1">
-                        Status 1
+                      <Select.Option value="Dibayar" key="Dibayar">
+                        Dibayar
                       </Select.Option>
-                      <Select.Option value="2" key="2">
-                        Status 2
+                      <Select.Option value="Belum Dibayar" key="Belum Dibayar">
+                        Belum Dibayar
                       </Select.Option>
                     </Select>
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    name="tanggal"
+                    name="tanggalRentang"
                     //initialValue={categorySale}
                     //rules={[
                     //    {
@@ -583,7 +654,7 @@ function Piutang({ props }) {
 
               <div className="w-full flex flex-wrap justify-start -mx-3 -mt-8">
                 <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item name="sales" //initialValue={"Hari"} 
+                  <Form.Item name="users_permissions_user" //initialValue={"Hari"} 
                   noStyle>
                     <Select
                       size="large"
@@ -592,52 +663,21 @@ function Piutang({ props }) {
                       }}
                       placeholder="Sales"
                     >
-                      <Select.Option value="1" key="1">
-                        Wil 1
-                      </Select.Option>
-                      <Select.Option value="2" key="2">
-                        Wil 2
-                      </Select.Option>
+                    {dataUser.map((element) => {
+                        return (
+                            <Select.Option value={element.id} key={element.name}>
+                            {element.name}
+                          </Select.Option>
+                        );
+                    })}
                     </Select>
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item name="area" //initialValue={"Hari"} 
-                  noStyle>
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      placeholder="Area"
-                    >
-                      <Select.Option value="1" key="1">
-                        Wil 1
-                      </Select.Option>
-                      <Select.Option value="2" key="2">
-                        Wil 2
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
+                  <Area onChangeArea={setArea} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item name="wilayah" //initialValue={"Hari"} 
-                  noStyle>
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      placeholder="Wilayah"
-                    >
-                      <Select.Option value="1" key="1">
-                        Wil 1
-                      </Select.Option>
-                      <Select.Option value="2" key="2">
-                        Wil 2
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
+                  <Wilayah onChangeWilayah={setWilayah} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
@@ -662,6 +702,7 @@ function Piutang({ props }) {
                   biaya={biaya}
                   calculatePriceTotal={calculatePriceTotal}
                   sisaHutang={sisaHutang}
+                  form={form}
                 />
               </div>
 
@@ -670,13 +711,13 @@ function Piutang({ props }) {
                   <span> TOTAL ITEM </span> <span> : {dataTabel.length}</span>
                 </Form.Item>
                 <Form.Item name="total_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> TOTAL HUTANG JATUH TEMPO </span> <span> : {/*{formatter.format(totalHutangJatuhTempo())}*/}</span>
+                  <span> TOTAL PIUTANG JATUH TEMPO </span> <span> : {formatter.format(totalPiutangJatuhTempo())}</span>
                 </Form.Item>
                 <Form.Item name="total_pembayaran" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> TOTAL PEMBAYARAN </span> <span> : {/*{formatter.format(totalPembayaran())}*/}</span>
+                  <span> TOTAL PEMBAYARAN </span> <span> : {formatter.format(totalPembayaran())}</span>
                 </Form.Item>
                 <Form.Item name="sisa_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> SISA HUTANG JATUH TEMPO </span> <span> : {/*{formatter.format(sisaHutangJatuhTempo())}*/}</span>
+                  <span> SISA PIUTANG JATUH TEMPO </span> <span> : {formatter.format(sisaPiutangJatuhTempo())}</span>
                 </Form.Item>
               </div>
 

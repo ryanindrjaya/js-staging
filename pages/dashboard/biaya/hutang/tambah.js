@@ -193,6 +193,7 @@ function Hutang({ props }) {
     values.total_hutang_jatuh_tempo = totalHutangJatuhTempo();
     values.total_pembayaran = totalPembayaran();
     values.sisa_hutang_jatuh_tempo = sisaHutangJatuhTempo();
+    values.supplier = supplier;
     await createData(sisaHutang, values, listId, form, router, "/debts/", "hutang", akunHutang);
   };
 
@@ -245,6 +246,38 @@ function Hutang({ props }) {
     total = totalHutang - totalBayar;
     return total;
   };
+
+  useEffect(() => {
+    var totalTunai = 0;
+    var totalTransfer = 0;
+    var totalGiro = 0;
+    var totalCn = 0;
+    var totalOth = 0;
+    var lastKey = 0;
+
+    if(biaya.info){
+        for (const key in biaya.info) {
+            totalTunai += biaya.info[key].tunai;
+            totalTransfer += biaya.info[key].transfer;
+            totalGiro += biaya.info[key].giro;
+            totalCn += biaya.info[key].cn;
+            totalOth += biaya.info[key].oth;
+        }
+
+        form.setFieldsValue({
+          metode_bayar1 : "tunai",
+          bayar1 : totalTunai,
+          metode_bayar2 : "transfer",
+          bayar2 : totalTransfer,
+          metode_bayar3 : "giro",
+          bayar3 : totalGiro,
+          metode_bayar4 : "cn",
+          bayar4 : totalCn,
+          metode_bayar5 : "oth",
+          bayar5 : totalOth,
+        });
+    }
+  }, [biaya.info]);
 
   useEffect(() => {
     if (dataValues && info == "sukses") createDetail();
@@ -394,11 +427,11 @@ function Hutang({ props }) {
                       }}
                       placeholder="Status Pembayaran"
                     >
-                      <Select.Option value="1" key="1">
-                        Status 1
+                      <Select.Option value="Dibayar" key="Dibayar">
+                        Dibayar
                       </Select.Option>
-                      <Select.Option value="2" key="2">
-                        Status 2
+                      <Select.Option value="Belum Dibayar" key="Belum Dibayar">
+                        Belum Dibayar
                       </Select.Option>
                     </Select>
                   </Form.Item>
@@ -437,6 +470,7 @@ function Hutang({ props }) {
                   biaya={biaya}
                   calculatePriceTotal={calculatePriceTotal}
                   sisaHutang={sisaHutang}
+                  form={form}
                 />
               </div>
 
