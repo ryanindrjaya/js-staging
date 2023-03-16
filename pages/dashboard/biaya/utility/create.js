@@ -15,7 +15,7 @@ const Create = async (
   router,
   url,
   page,
-  akunHutang
+  akun
   //locations
 ) => {
   // CLEANING DATA
@@ -36,8 +36,6 @@ const Create = async (
   values.bayar3 = parseInt( values.bayar3 );
   values.bayar4 = parseInt( values.bayar4 );
   values.bayar5 = parseInt( values.bayar5 );
-
-  values.total_pembayaran = values.total_hutang_jatuh_tempo - values.sisa_hutang_jatuh_tempo;
 
   if (values.metode_bayar1 == "tunai") totalTunai = values.bayar1;
   else if (values.metode_bayar2 == "tunai") totalTunai = values.bayar2;
@@ -82,22 +80,22 @@ const Create = async (
   const res = await req.json();
 
   if (req.status === 200) {
-    if(page == "hutang"){
-      akunHutang.forEach((element) => {
+    if(page == "hutang" || page == "piutang"){
+      akun.forEach((element) => {
           if (element.attributes.type == "Tunai" && element.attributes.setting == true) {
-            putAkunHutang(element.id, element.attributes, form, totalTunai);
+            putAkun(element.id, element.attributes, form, totalTunai, page);
           }
           else if (element.attributes.type == "Transfer" && element.attributes.setting == true) {
-            putAkunHutang(element.id, element.attributes, form, totalTransfer);
+            putAkun(element.id, element.attributes, form, totalTransfer, page);
           }
           else if (element.attributes.type == "Giro" && element.attributes.setting == true) {
-            putAkunHutang(element.id, element.attributes, form, totalGiro);
+            putAkun(element.id, element.attributes, form, totalGiro, page);
           }
           else if (element.attributes.type == "CN" && element.attributes.setting == true) {
-            putAkunHutang(element.id, element.attributes, form, totalCN);
+            putAkun(element.id, element.attributes, form, totalCN, page);
           }
           else if (element.attributes.type == "OTH" && element.attributes.setting == true) {
-            putAkunHutang(element.id, element.attributes, form, totalOTH);
+            putAkun(element.id, element.attributes, form, totalOTH, page);
           }
       });
     }
@@ -105,7 +103,7 @@ const Create = async (
     await putRelationDetail(res.data.id, res.data.attributes, form, router, url, page);
   } else {
     openNotificationWithIcon("error");
-  }
+  } console.log("list", tempProductListId);
 };
 
 const createData = async (data, url) => {
@@ -126,7 +124,7 @@ const createData = async (data, url) => {
   return req;
 };
 
-const putAkunHutang = async (id, value, form, total) => {
+const putAkun = async (id, value, form, total, page) => {
     var saldo = parseInt(value.saldo);
     saldo = saldo - total;
 
@@ -136,6 +134,10 @@ const putAkunHutang = async (id, value, form, total) => {
         data: value,
     };
 
+    var url = null;
+    if (page == "hutang") url = "/debt-accounts/";
+    if (page == "piutang") url = "/credit-accounts/";
+
     // clean object
     for (var key in data) {
         if (data[key] === null || data[key] === undefined) {
@@ -144,7 +146,7 @@ const putAkunHutang = async (id, value, form, total) => {
     }
 
     const JSONdata = JSON.stringify(data);
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts/" + id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + url + id;
     const options = {
         method: "PUT",
         headers: {
@@ -160,10 +162,10 @@ const putAkunHutang = async (id, value, form, total) => {
     if (req.status === 200) {
         //form.resetFields();
         //openNotificationWithIcon("success");
-        console.log("akun hutang sukses");
+        console.log("akun sukses diupdate");
     } else {
         //openNotificationWithIcon("error");
-        console.log("akun hutang error");
+        console.log("akun error atau tidak ada");
     }
 };
 

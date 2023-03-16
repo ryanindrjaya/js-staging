@@ -27,26 +27,45 @@ const updateAPI = async (element) => {
     const productData = product?.attributes;
     const productId = product?.id;
 
+    const dp1 = element?.attributes?.dp1;
+    const dp2 = element?.attributes?.dp2;
+    const dp3 = element?.attributes?.dp3;
+
+    productData.unit_1_dp1 = dp1;
+    productData.unit_1_dp2 = dp2;
+    productData.unit_1_dp3 = dp3;
+    
+    productData.unit_2_dp1 = dp1;
+    productData.unit_2_dp2 = dp2;
+    productData.unit_2_dp3 = dp3;
+
+    productData.unit_3_dp1 = dp1;
+    productData.unit_3_dp2 = dp2;
+    productData.unit_3_dp3 = dp3;
+
+    productData.unit_4_dp1 = dp1;
+    productData.unit_4_dp2 = dp2;
+    productData.unit_4_dp3 = dp3;
+
+    productData.unit_5_dp1 = dp1;
+    productData.unit_5_dp2 = dp2;
+    productData.unit_5_dp3 = dp3;
+    
+    
+    console.log("element coy", element);
+
+   
+
     if (unit === productData?.unit_1) {
-      console.log("UPDATE DISC & HARGA PEMBELIAN DI UNIT 1");
-      productData.buy_price_1 = unitPrice;
-      productData.purchase_discount_1 = disc;
+      updateAtProductUnit1(productData, unit, unitPrice, disc);
     } else if (unit === productData?.unit_2) {
-      console.log("UPDATE DISC & HARGA PEMBELIAN DI UNIT 2");
-      productData.buy_price_2 = unitPrice;
-      productData.purchase_discount_2 = disc;
+      updateAtProductUnit2(productData, unit, unitPrice, disc);
     } else if (unit === productData?.unit_3) {
-      console.log("UPDATE DISC & HARGA PEMBELIAN DI UNIT 3");
-      productData.buy_price_3 = unitPrice;
-      productData.purchase_discount_3 = disc;
+      updateAtProductUnit3(productData, unit, unitPrice, disc);
     } else if (unit === productData?.unit_4) {
-      console.log("UPDATE DISC & HARGA PEMBELIAN DI UNIT 4");
-      productData.buy_price_4 = unitPrice;
-      productData.purchase_discount_4 = disc;
+      updateAtProductUnit4(productData, unit, unitPrice, disc);
     } else if (unit === productData?.unit_5) {
-      console.log("UPDATE DISC & HARGA PEMBELIAN DI UNIT 5");
-      productData.buy_price_5 = unitPrice;
-      productData.purchase_discount_5 = disc;
+      updateAtProductUnit5(productData, unit, unitPrice, disc);
     } else {
       console.log("cannot updated price & disc");
     }
@@ -57,6 +76,7 @@ const updateAPI = async (element) => {
         delete productData[key];
       }
     }
+
     delete productData?.image;
     delete productData?.sub_category;
 
@@ -89,6 +109,146 @@ const updateAPI = async (element) => {
   } catch (error) {
     console.log(error);
   }
+};
+
+const updateAtProductUnit1 = (productData, unit, unitPrice, disc) => {
+  console.log("UPDATE DISC & HARGA PEMBELIAN DI UNIT 1");
+
+  //unit 1
+  productData.buy_price_1 = unitPrice;
+  productData.purchase_discount_1 = disc;
+
+  //unit 2
+  productData.buy_price_2 = productData.buy_price_1 / productData.qty_2;
+  productData.purchase_discount_2 =
+    productData.purchase_discount_1 / productData?.qty_1;
+
+  //unit 3
+  productData.buy_price_3 = productData.buy_price_2 / productData.qty_3;
+  productData.purchase_discount_3 =
+    productData.purchase_discount_2 / productData?.qty_2;
+
+  // unit 4
+  productData.buy_price_4 = productData.buy_price_3 / productData?.qty_4;
+  productData.purchase_discount_4 =
+    productData.purchase_discount_3 / productData?.qty_4;
+
+  // unit 5
+  productData.buy_price_5 = productData.buy_price_4 / productData?.qty_5;
+  productData.purchase_discount_5 =
+    productData.purchase_discount_4 / productData?.qty_5;
+};
+
+const updateAtProductUnit2 = (productData, unit, unitPrice, disc) => {
+  console.log("UPDATE DISC & HARGA PEMBELIAN DI UNIT 2");
+
+  //unit 2
+  productData.buy_price_2 = unitPrice;
+  productData.purchase_discount_2 = disc;
+
+  //unit 1
+  productData.buy_price_1 = productData.buy_price_2 * productData.qty_2;
+  productData.purchase_discount_1 =
+    productData.purchase_discount_2 * productData?.qty_2;
+
+  //unit 3
+  productData.buy_price_3 = productData.buy_price_2 / productData.qty_3;
+  productData.purchase_discount_3 =
+    productData.purchase_discount_2 / productData?.qty_2;
+
+  // unit 4
+  productData.buy_price_4 = productData.buy_price_3 / productData?.qty_4;
+  productData.purchase_discount_4 =
+    productData.purchase_discount_3 / productData?.qty_4;
+
+  // unit 5
+  productData.buy_price_5 = productData.buy_price_4 / productData?.qty_5;
+  productData.purchase_discount_5 =
+    productData.purchase_discount_4 / productData?.qty_5;
+};
+
+const updateAtProductUnit3 = (productData, unit, unitPrice, disc) => {
+  console.log("UPDATE DISC & HARGA PEMBELIAN DI UNIT 3");
+
+  //unit 3
+  productData.buy_price_3 = unitPrice;
+  productData.purchase_discount_3 = disc;
+
+  //unit 2
+  productData.buy_price_2 = productData.buy_price_3 * productData.qty_3;
+  productData.purchase_discount_2 =
+    productData.purchase_discount_3 * productData?.qty_3;
+
+  //unit 1
+  productData.buy_price_1 = productData.buy_price_2 * productData.qty_2;
+  productData.purchase_discount_1 =
+    productData.purchase_discount_2 * productData?.qty_2;
+
+  // unit 4
+  productData.buy_price_4 = productData.buy_price_3 / productData?.qty_4;
+  productData.purchase_discount_4 =
+    productData.purchase_discount_3 / productData?.qty_4;
+
+  // unit 5
+  productData.buy_price_5 = productData.buy_price_4 / productData?.qty_5;
+  productData.purchase_discount_5 =
+    productData.purchase_discount_4 / productData?.qty_5;
+};
+
+const updateAtProductUnit4 = (productData, unit, unitPrice, disc) => {
+  console.log("UPDATE DISC & HARGA PEMBELIAN DI UNIT 4");
+
+  //unit 4
+  productData.buy_price_4 = unitPrice;
+  productData.purchase_discount_4 = disc;
+
+  // unit 3
+  productData.buy_price_3 = productData.buy_price_4 * productData?.qty_4;
+  productData.purchase_discount_3 =
+    productData.purchase_discount_4 * productData?.qty_4;
+
+  //unit 2
+  productData.buy_price_2 = productData.buy_price_3 * productData.qty_3;
+  productData.purchase_discount_2 =
+    productData.purchase_discount_3 * productData?.qty_3;
+
+  //unit 1
+  productData.buy_price_1 = productData.buy_price_2 * productData.qty_2;
+  productData.purchase_discount_1 =
+    productData.purchase_discount_2 * productData?.qty_2;
+
+  // unit 5
+  productData.buy_price_5 = productData.buy_price_4 / productData?.qty_5;
+  productData.purchase_discount_5 =
+    productData.purchase_discount_4 / productData?.qty_5;
+};
+
+const updateAtProductUnit5 = (productData, unit, unitPrice, disc) => {
+  console.log("UPDATE DISC & HARGA PEMBELIAN DI UNIT 5");
+
+  //unit 5
+  productData.buy_price_5 = unitPrice;
+  productData.purchase_discount_5 = disc;
+
+  // unit 4
+  productData.buy_price_4 = productData.buy_price_5 * productData?.qty_5;
+  productData.purchase_discount_4 =
+    productData.purchase_discount_5 * productData?.qty_5;
+
+  // unit 3
+  productData.buy_price_3 = productData.buy_price_4 * productData?.qty_4;
+  productData.purchase_discount_3 =
+    productData.purchase_discount_4 * productData?.qty_4;
+
+  //unit 2
+  productData.buy_price_2 = productData.buy_price_3 * productData.qty_3;
+  productData.purchase_discount_2 =
+    productData.purchase_discount_3 * productData?.qty_3;
+
+  //unit 1
+  productData.buy_price_1 = productData.buy_price_2 * productData.qty_2;
+  productData.purchase_discount_1 =
+    productData.purchase_discount_2 * productData?.qty_2;
 };
 
 const openNotificationWithIcon = (type) => {

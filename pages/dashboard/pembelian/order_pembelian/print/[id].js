@@ -4,7 +4,7 @@ import { PrinterOutlined } from "@ant-design/icons";
 import ReactToPrint from "react-to-print";
 
 const Print = ({ props }) => {
-  console.log(props);
+  console.log("props", props);
   const name = process.env.STAKEHOLDER_NAME;
   const noPO = props.purchases.data.attributes.no_po;
   const date = new Date(
@@ -28,15 +28,22 @@ const Print = ({ props }) => {
 
   const getHargaSatuan = (unit, index) => {
     var price = 0;
-    const product =
-      props.purchases.data.attributes.purchase_details.data[index - 1]
-        .attributes.products.data[0];
 
-    for (let index = 1; index < 6; index++) {
-      if (product.attributes[`unit_${index}`] === unit) {
-        price = product.attributes[`buy_price_${index}`];
-      }
-    }
+    price =
+      props.purchases.data.attributes.purchase_details.data[index - 1]
+        .attributes.unit_price;
+
+    // const product =
+    //   props.purchases.data.attributes.purchase_details.data[index - 1]
+    //     .attributes.products.data[0];
+
+    // for (let index = 1; index < 6; index++) {
+    //   if (product.attributes[`unit_${index}`] === unit) {
+    //     price = product.attributes[`buy_price_${index}`];
+    //   }
+    // }
+
+    
 
     return formatter.format(price);
   };

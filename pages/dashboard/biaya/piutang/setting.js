@@ -1,14 +1,15 @@
 import Head from "next/head";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import router, { useRouter } from "next/router";
-import { Input, notification, Select, DatePicker, Form } from "antd";
+import { Input, notification, Select, DatePicker, Form, Spin } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import DebtTable from "@iso/components/ReactDataTable/Cost/DebtTable";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
+import DebtTable from "@iso/components/ReactDataTable/Cost/DebtAccountTable";
 import nookies from "nookies";
+import { toast } from "react-toastify";
 
 Setting.getInitialProps = async (context) => {
     const cookies = nookies.get(context);
@@ -16,18 +17,14 @@ Setting.getInitialProps = async (context) => {
     //const req = await fetchData(cookies);
     //const user = await req.json();
 
-    //const reqLocation = await fetchLocation(cookies);
-    //const locations = await reqLocation.json();
-
-    //const reqHutang = await fetchHutang(cookies);
-    //const hutang = await reqHutang.json();
+    const reqAkun = await fetchAkun(cookies);
+    const akun = await reqAkun.json();
 
     return {
-      props: {
-        //user,
-        //locations,
-        //hutang,
-      },
+        props: {
+            //user,
+            akun
+        },
     };
 };
 
@@ -45,22 +42,8 @@ const fetchData = async (cookies) => {
     return req;
 };
 
-const fetchLocation = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
-
-    const req = await fetch(endpoint, options);
-    return req;
-};
-
-const fetchHutang = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate=deep";
+const fetchAkun = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts?sort[0]=setting%3Adesc&sort[0]=type%3Aasc";
     const options = {
         method: "GET",
         headers: {
@@ -77,9 +60,15 @@ function Setting({ props }) {
     //const user = props.user;
     //const locations = props.locations.data;
     //const data = props.hutang;
-    //const router = useRouter();
+    const akunData = props.akun;
+    const router = useRouter();
     //const [hutang, setHutang] = useState(data);
     //const [supplier, setSupplier] = useState();
+    const [akun, setAkun] = useState(akunData);
+    const [loading, setLoading] = useState(false);
+    const [selected, setSelected] = useState();
+    const [tunaiData, setTunaiData] = useState();
+    const [transferData, setTransferData] = useState();
 
     //const handleSetting = () => {
     //    router.push("/dashboard/biaya/hutang/setting");
@@ -98,11 +87,167 @@ function Setting({ props }) {
     //    );
     //};
 
+    const handleDelete = async (id) => {
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts/" + id;
+        const cookies = nookies.get(null, "token");
+
+        const options = {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + cookies.token,
+            },
+        };
+
+        const req = await fetch(endpoint, options);
+        const res = await req.json();
+        if (res) {
+            const res = await fetchData(cookies);
+            openNotificationWithIcon(
+                "success",
+                "Berhasil menghapus data",
+                "Akun piutang yang dipilih telah berhasil dihapus. Silahkan cek kembali akun piutang"
+            );
+            setAkun(res);
+        }
+    };
+
+    const handlePageChange = async (page) => {
+        const cookies = nookies.get(null, "token");
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts?pagination[page]=" + page;
+
+        const options = {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + cookies.token,
+            },
+        };
+
+        try {
+            const req = await fetch(endpoint, options);
+            const res = await req.json();
+            if (res) {
+                setPurchase((prevData) => ({
+                    data: filterDuplicateData(prevData.data.concat(res.data)),
+                    meta: prevData.meta,
+                }));
+            } else {
+                console.log("something is wrong");
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const handleTambahAkun = () => {
+        router.push("/dashboard/biaya/piutang/tambahakun");
+    };
+
+    const onFinish = (values) => {
+        setLoading(true);
+        //setDataValues(values);
+        setLoading(false);
+    };
+
+    const onChangeSetting = (setting, row) => {
+        var aktifLength = 0;
+        //var length = 0;
+        akun.data.forEach((element) => {
+            if (element.attributes.type == row.attributes.type) {
+                if (element.attributes.setting == true) aktifLength++;
+            }
+
+            //length++;
+        });
+
+        //const cookies = nookies.get(length, "token");
+
+        if (aktifLength < 1 || setting == "Tidak Aktif") {
+            if (setting == "Tidak Aktif") row.attributes.setting = false;
+            if (setting == "Aktif") row.attributes.setting = true;
+            handleChangeSetting(row, row.id);
+        } else {
+            openNotificationWithIcon("error", "Setting gagal dirubah", "Karena tipe transaksi " + row.attributes.type + " memiliki lebih dari 1 akun aktif");
+            router.push("/dashboard/biaya/piutang/setting");
+        }
+    };
+
+    const handleChangeSetting = async (values, id) => {
+        // clean object
+        for (var key in values.attributes) {
+            if (values.attributes[key] === null || values.attributes[key] === undefined) {
+                delete values.attributes[key];
+            }
+        }
+
+        if (values.attributes?.document?.data === null || values.attributes?.document?.data === undefined) {
+            delete values.attributes?.document;
+        }
+
+        const newValues = {
+            data: values.attributes,
+        };
+
+        const JSONdata = JSON.stringify(newValues);
+        const cookies = nookies.get(null, "token");
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts/" + id;
+
+        const options = {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + cookies.token,
+            },
+            body: JSONdata,
+        };
+
+        const req = await fetch(endpoint, options);
+        const res = await req.json();
+
+        if (req.status === 200) {
+            const response = await fetchData(cookies);
+            setAkun(response);
+
+            openNotificationWithIcon("success", "Setting berhasil dirubah", "Setting berhasil dirubah. Silahkan cek setting piutang");
+        } else {
+            openNotificationWithIcon("error", "Setting gagal dirubah", "Tedapat kesalahan yang menyebabkan setting tidak dapat dirubah");
+        }
+    };
+
     const openNotificationWithIcon = (type, title, message) => {
         notification[type]({
             message: title,
             description: message,
         });
+    };
+
+    const validateError = () => {
+        var listError = form.getFieldsError();
+        listError.forEach((element) => {
+            if (element.errors[0]) {
+                notification["error"]({
+                    message: "Field Kosong",
+                    description: element.errors[0],
+                });
+            }
+        });
+    };
+
+    const fetchData = async (cookies) => {
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts?sort[0]=setting%3Adesc&sort[0]=type%3Aasc";
+        const options = {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + cookies.token,
+            },
+        };
+
+        const req = await fetch(endpoint, options);
+        const res = req.json();
+
+        return res;
     };
 
     return (
@@ -112,369 +257,38 @@ function Setting({ props }) {
             </Head>
             <DashboardLayout>
                 <LayoutWrapper style={{}}>
-                    <TitlePage titleText={"AKUN PEMBAYARAN HUTANG PEMBELIAN"} />
+                    <TitlePage titleText={"AKUN PEMBAYARAN PIUTANG PEMBELIAN"} />
                     <LayoutContent>
-                      <Form
-                          //form={form}
-                          //name="add"
-                          initialValues={{
-                            remember: true,
-                          }}
-                          //onFinish={onFinish}
-                          //onFinishFailed={validateError}
-                      >
-                        <div className="w-full flex justify-start">
-                          <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0 text-center">
-                            <span className="font-bold">METODE PEMBAYARAN</span>
-                          </div>
-                          <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0 text-center">
-                            <span className="font-bold">AKUN PEMBAYARAN</span>
-                          </div>
+
+                        <div className="w-full flex justify-end mb-3">
+                            <button htmlType="button" className="bg-cyan-700 rounded-md m-1 text-sm" onClick={handleTambahAkun}>
+                                <p className="px-4 py-2 m-0 text-white">
+                                    + Tambah Akun
+                                </p>
+                            </button>
                         </div>
 
-                        <div className="w-full flex justify-start">
-                            <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                                <Form.Item name="metode_bayar1" noStyle>
-                                    <Select
-                                        size="large"
-                                        style={{
-                                            width: "100%",
-                                        }}
-                                        placeholder="Metode Pembayaran"
-                                    >
-                                        <Select.Option value="tunai" key="tunai">
-                                            Tunai
-                                        </Select.Option>
-                                        <Select.Option value="transfer" key="transfer">
-                                            Bank Transfer
-                                        </Select.Option>
-                                        <Select.Option value="giro" key="giro">
-                                            Bank Giro
-                                        </Select.Option>
-                                        <Select.Option value="cn" key="cn">
-                                            CN
-                                        </Select.Option>
-                                        <Select.Option value="oth" key="oth">
-                                            OTH
-                                        </Select.Option>
-                                    </Select>
-                                </Form.Item>
-                            </div>
-                            <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                                <Form.Item name="akun_bayar1" noStyle>
-                                    <Select
-                                        size="large"
-                                        style={{
-                                            width: "100%",
-                                        }}
-                                        placeholder="Akun Pembayaran"
-                                    >
-                                        <Select.Option value="tunai" key="tunai">
-                                            Tunai
-                                        </Select.Option>
-                                        <Select.Option value="transfer" key="transfer">
-                                            Bank Transfer
-                                        </Select.Option>
-                                        <Select.Option value="giro" key="giro">
-                                            Bank Giro
-                                        </Select.Option>
-                                        <Select.Option value="cn" key="cn">
-                                            CN
-                                        </Select.Option>
-                                        <Select.Option value="oth" key="oth">
-                                            OTH
-                                        </Select.Option>
-                                    </Select>
-                                </Form.Item>
-                            </div>
-                        </div>
+                        <Form
+                            //form={form}
+                            //name="add"
+                            initialValues={{
+                                remember: true,
+                            }}
+                            onFinish={onFinish}
+                            onFinishFailed={validateError}
+                        >
 
-                        <div className="w-full flex justify-start">
-                            <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                                <Form.Item name="metode_bayar2" noStyle>
-                                    <Select
-                                        size="large"
-                                        style={{
-                                            width: "100%",
-                                        }}
-                                        placeholder="Metode Pembayaran"
-                                    >
-                                        <Select.Option value="tunai" key="tunai">
-                                            Tunai
-                                        </Select.Option>
-                                        <Select.Option value="transfer" key="transfer">
-                                            Bank Transfer
-                                        </Select.Option>
-                                        <Select.Option value="giro" key="giro">
-                                            Bank Giro
-                                        </Select.Option>
-                                        <Select.Option value="cn" key="cn">
-                                            CN
-                                        </Select.Option>
-                                        <Select.Option value="oth" key="oth">
-                                            OTH
-                                        </Select.Option>
-                                    </Select>
-                                </Form.Item>
-                            </div>
-                            <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                                <Form.Item name="akun_bayar2" noStyle>
-                                    <Select
-                                        size="large"
-                                        style={{
-                                            width: "100%",
-                                        }}
-                                        placeholder="Akun Pembayaran"
-                                    >
-                                        <Select.Option value="tunai" key="tunai">
-                                            Tunai
-                                        </Select.Option>
-                                        <Select.Option value="transfer" key="transfer">
-                                            Bank Transfer
-                                        </Select.Option>
-                                        <Select.Option value="giro" key="giro">
-                                            Bank Giro
-                                        </Select.Option>
-                                        <Select.Option value="cn" key="cn">
-                                            CN
-                                        </Select.Option>
-                                        <Select.Option value="oth" key="oth">
-                                            OTH
-                                        </Select.Option>
-                                    </Select>
-                                </Form.Item>
-                            </div>
-                        </div>
+                            <DebtTable
+                                data={akun}
+                                //onUpdate={handleUpdate}
+                                onDelete={handleDelete}
+                                onPageChange={handlePageChange}
+                                //onChangeStatus={onChangeStatus}
+                                onChangeSetting={onChangeSetting}
+                            //user={user}
+                            />
 
-                        <div className="w-full flex justify-start">
-                            <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                                <Form.Item name="metode_bayar3" noStyle>
-                                    <Select
-                                        size="large"
-                                        style={{
-                                            width: "100%",
-                                        }}
-                                        placeholder="Metode Pembayaran"
-                                    >
-                                        <Select.Option value="tunai" key="tunai">
-                                            Tunai
-                                        </Select.Option>
-                                        <Select.Option value="transfer" key="transfer">
-                                            Bank Transfer
-                                        </Select.Option>
-                                        <Select.Option value="giro" key="giro">
-                                            Bank Giro
-                                        </Select.Option>
-                                        <Select.Option value="cn" key="cn">
-                                            CN
-                                        </Select.Option>
-                                        <Select.Option value="oth" key="oth">
-                                            OTH
-                                        </Select.Option>
-                                    </Select>
-                                </Form.Item>
-                            </div>
-                            <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                                <Form.Item name="akun_bayar3" noStyle>
-                                    <Select
-                                        size="large"
-                                        style={{
-                                            width: "100%",
-                                        }}
-                                        placeholder="Akun Pembayaran"
-                                    >
-                                        <Select.Option value="tunai" key="tunai">
-                                            Tunai
-                                        </Select.Option>
-                                        <Select.Option value="transfer" key="transfer">
-                                            Bank Transfer
-                                        </Select.Option>
-                                        <Select.Option value="giro" key="giro">
-                                            Bank Giro
-                                        </Select.Option>
-                                        <Select.Option value="cn" key="cn">
-                                            CN
-                                        </Select.Option>
-                                        <Select.Option value="oth" key="oth">
-                                            OTH
-                                        </Select.Option>
-                                    </Select>
-                                </Form.Item>
-                            </div>
-                        </div>
-
-                        <div className="w-full flex justify-start">
-                            <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                                <Form.Item name="metode_bayar4" noStyle>
-                                    <Select
-                                        size="large"
-                                        style={{
-                                            width: "100%",
-                                        }}
-                                        placeholder="Metode Pembayaran"
-                                    >
-                                        <Select.Option value="tunai" key="tunai">
-                                            Tunai
-                                        </Select.Option>
-                                        <Select.Option value="transfer" key="transfer">
-                                            Bank Transfer
-                                        </Select.Option>
-                                        <Select.Option value="giro" key="giro">
-                                            Bank Giro
-                                        </Select.Option>
-                                        <Select.Option value="cn" key="cn">
-                                            CN
-                                        </Select.Option>
-                                        <Select.Option value="oth" key="oth">
-                                            OTH
-                                        </Select.Option>
-                                    </Select>
-                                </Form.Item>
-                            </div>
-                            <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                                <Form.Item name="akun_bayar4" noStyle>
-                                    <Select
-                                        size="large"
-                                        style={{
-                                            width: "100%",
-                                        }}
-                                        placeholder="Akun Pembayaran"
-                                    >
-                                        <Select.Option value="tunai" key="tunai">
-                                            Tunai
-                                        </Select.Option>
-                                        <Select.Option value="transfer" key="transfer">
-                                            Bank Transfer
-                                        </Select.Option>
-                                        <Select.Option value="giro" key="giro">
-                                            Bank Giro
-                                        </Select.Option>
-                                        <Select.Option value="cn" key="cn">
-                                            CN
-                                        </Select.Option>
-                                        <Select.Option value="oth" key="oth">
-                                            OTH
-                                        </Select.Option>
-                                    </Select>
-                                </Form.Item>
-                            </div>
-                        </div>
-
-                        <div className="w-full flex justify-start">
-                            <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                                <Form.Item name="metode_bayar5" noStyle>
-                                    <Select
-                                        size="large"
-                                        style={{
-                                            width: "100%",
-                                        }}
-                                        placeholder="Metode Pembayaran"
-                                    >
-                                        <Select.Option value="tunai" key="tunai">
-                                            Tunai
-                                        </Select.Option>
-                                        <Select.Option value="transfer" key="transfer">
-                                            Bank Transfer
-                                        </Select.Option>
-                                        <Select.Option value="giro" key="giro">
-                                            Bank Giro
-                                        </Select.Option>
-                                        <Select.Option value="cn" key="cn">
-                                            CN
-                                        </Select.Option>
-                                        <Select.Option value="oth" key="oth">
-                                            OTH
-                                        </Select.Option>
-                                    </Select>
-                                </Form.Item>
-                            </div>
-                            <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                                <Form.Item name="akun_bayar5" noStyle>
-                                    <Select
-                                        size="large"
-                                        style={{
-                                            width: "100%",
-                                        }}
-                                        placeholder="Akun Pembayaran"
-                                    >
-                                        <Select.Option value="tunai" key="tunai">
-                                            Tunai
-                                        </Select.Option>
-                                        <Select.Option value="transfer" key="transfer">
-                                            Bank Transfer
-                                        </Select.Option>
-                                        <Select.Option value="giro" key="giro">
-                                            Bank Giro
-                                        </Select.Option>
-                                        <Select.Option value="cn" key="cn">
-                                            CN
-                                        </Select.Option>
-                                        <Select.Option value="oth" key="oth">
-                                            OTH
-                                        </Select.Option>
-                                    </Select>
-                                </Form.Item>
-                            </div>
-                        </div>
-
-                        <div className="w-full flex justify-start">
-                            <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                                <Form.Item name="metode_bayar6" noStyle>
-                                    <Select
-                                        size="large"
-                                        style={{
-                                            width: "100%",
-                                        }}
-                                        placeholder="Metode Pembayaran"
-                                    >
-                                        <Select.Option value="tunai" key="tunai">
-                                            Tunai
-                                        </Select.Option>
-                                        <Select.Option value="transfer" key="transfer">
-                                            Bank Transfer
-                                        </Select.Option>
-                                        <Select.Option value="giro" key="giro">
-                                            Bank Giro
-                                        </Select.Option>
-                                        <Select.Option value="cn" key="cn">
-                                            CN
-                                        </Select.Option>
-                                        <Select.Option value="oth" key="oth">
-                                            OTH
-                                        </Select.Option>
-                                    </Select>
-                                </Form.Item>
-                            </div>
-                            <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                                <Form.Item name="akun_bayar6" noStyle>
-                                    <Select
-                                        size="large"
-                                        style={{
-                                            width: "100%",
-                                        }}
-                                        placeholder="Akun Pembayaran"
-                                    >
-                                        <Select.Option value="tunai" key="tunai">
-                                            Tunai
-                                        </Select.Option>
-                                        <Select.Option value="transfer" key="transfer">
-                                            Bank Transfer
-                                        </Select.Option>
-                                        <Select.Option value="giro" key="giro">
-                                            Bank Giro
-                                        </Select.Option>
-                                        <Select.Option value="cn" key="cn">
-                                            CN
-                                        </Select.Option>
-                                        <Select.Option value="oth" key="oth">
-                                            OTH
-                                        </Select.Option>
-                                    </Select>
-                                </Form.Item>
-                            </div>
-                        </div>
-
-                      </Form>
+                        </Form>
                     </LayoutContent>
                 </LayoutWrapper>
             </DashboardLayout>

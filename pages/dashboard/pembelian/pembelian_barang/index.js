@@ -168,7 +168,7 @@ function Pembelian({ props }) {
     if (status === "Diterima") {
       console.log("store to inventory && update product price");
       // invetory handle
-      // createInventory(row);
+      createInventory(row);
 
       await updateProductFromTable(row);
     }

@@ -17,20 +17,12 @@ Setting.getInitialProps = async (context) => {
     //const req = await fetchData(cookies);
     //const user = await req.json();
 
-    //const reqLocation = await fetchLocation(cookies);
-    //const locations = await reqLocation.json();
-
-    //const reqHutang = await fetchHutang(cookies);
-    //const hutang = await reqHutang.json();
-
     const reqAkun = await fetchAkun(cookies);
     const akun = await reqAkun.json();
 
     return {
       props: {
         //user,
-        //locations,
-        //hutang,
         akun
       },
     };
@@ -38,34 +30,6 @@ Setting.getInitialProps = async (context) => {
 
 const fetchData = async (cookies) => {
     const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
-
-    const req = await fetch(endpoint, options);
-    return req;
-};
-
-const fetchLocation = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
-
-    const req = await fetch(endpoint, options);
-    return req;
-};
-
-const fetchHutang = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate=deep";
     const options = {
         method: "GET",
         headers: {

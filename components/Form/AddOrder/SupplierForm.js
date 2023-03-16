@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 import nookies from "nookies";
 
-export default function Supplier({ onChangeSupplier, supplier, fetching }) {
+export default function Supplier({ onChangeSupplier, supplier, fetching, disabled }) {
   const [data, setData] = useState(
     supplier
       ? [
@@ -97,6 +97,7 @@ export default function Supplier({ onChangeSupplier, supplier, fetching }) {
             ]}
           >
             <Select
+              disabled={disabled}
               size="large"
               showSearch
               placeholder="Pilih Supplier"
@@ -121,6 +122,7 @@ export default function Supplier({ onChangeSupplier, supplier, fetching }) {
             ]}
           >
             <Select
+            disabled={disabled}
               size="large"
               showSearch
               placeholder="Pilih Supplier"

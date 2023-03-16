@@ -83,7 +83,6 @@ const getProductDisc = (products, index, defaultUnit) => {
 
     units.forEach((unit, idx) => {
       if (productInfoUnit === products.productList[index]?.attributes?.[unit]) {
-        console.log(products.productList[index].attributes[`purchase_discount_${idx + 1}`]);
         disc = products.productList[index].attributes[`purchase_discount_${idx + 1}`];
       }
     });
