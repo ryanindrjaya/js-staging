@@ -44,7 +44,7 @@ const Print = ({ props }) => {
       <div className="font-bold text-lg flex justify-center mb-5">DAFTAR PENAGIHAN PIUTANG</div>
       <div className="flex justify-between mb-5">
         <div>
-          <div className="font-bold text-sm uppercase">Nama Sales : {/*{supplierName}*/}</div>
+          <div className="font-bold text-sm uppercase">Nama Sales : {data?.attributes?.users_permissions_user?.data?.attributes?.name}</div>
           <div className="font-bold text-sm uppercase">Area : {data?.attributes?.area?.data?.attributes?.name}</div>
           <div className="font-bold text-sm uppercase">Wilayah : {data?.attributes?.wilayah?.data?.attributes?.name}</div>
           <div>{/*{supplierAddress}*/}</div>
