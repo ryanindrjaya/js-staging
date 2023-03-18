@@ -2,8 +2,9 @@ import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
+import ConfirmDialog from "@iso/components/Alert/ConfirmDialog";
 import { useSelector, useDispatch } from "react-redux";
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Row, Form, Input, InputNumber, Select, Button, Spin, notification, DatePicker } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
@@ -138,11 +139,13 @@ function Hutang({ props }) {
   const [loading, setLoading] = useState(false);
   //const [additionalFee, setAdditionalFee] = useState();
   const [isFetchinData, setIsFetchingData] = useState(false);
+  const [document, setDocument] = useState();
 
   const [dataValues, setDataValues] = useState();
 
   const [listId, setListId] = useState([]);
 
+  const submitBtn = useRef();
   const router = useRouter();
   const { TextArea } = Input;
   var today = new Date();
@@ -167,8 +170,36 @@ function Hutang({ props }) {
   });
 
   const onFinish = (values) => {
+    var totalTunai = 0;
+    var totalTransfer = 0;
+    var totalGiro = 0;
+    var totalCn = 0;
+    var totalOth = 0;
+
     setLoading(true);
     setInfo("sukses");
+
+    for (const key in biaya.info) {
+      totalTunai += biaya.info[key].tunai;
+      totalTransfer += biaya.info[key].transfer;
+      totalGiro += biaya.info[key].giro;
+      totalCn += biaya.info[key].cn;
+      totalOth += biaya.info[key].oth;
+    }
+
+    var totalBayar = values.bayar1 + values.bayar2 + values.bayar3 + values.bayar4 + values.bayar5;
+    var totalBayarProduk = totalTunai + totalTransfer + totalGiro + totalCn + totalOth;
+    if ((totalTunai != values.bayar1 || totalTransfer != values.bayar2 || totalGiro != values.bayar3 || totalCn != values.bayar4 || totalOth != values.bayar5)
+        && totalBayar != totalBayarProduk
+    ) {
+      notification["error"]({
+        message: "Gagal menambahkan data",
+        description:
+          "Total pembayaran dan yang dibayar tidak sesuai.",
+      });
+      setInfo("gagal");
+    }
+
     hutang.data.forEach((element) => {
       if (values.no_hutang == element.attributes.no_hutang) {
           notification["error"]({
@@ -194,6 +225,7 @@ function Hutang({ props }) {
     values.total_pembayaran = totalPembayaran();
     values.sisa_hutang_jatuh_tempo = sisaHutangJatuhTempo();
     values.supplier = supplier;
+    values.document = document;
     await createData(sisaHutang, values, listId, form, router, "/debts/", "hutang", akunHutang);
   };
 
@@ -257,25 +289,30 @@ function Hutang({ props }) {
 
     if(biaya.info){
         for (const key in biaya.info) {
+
             totalTunai += biaya.info[key].tunai;
             totalTransfer += biaya.info[key].transfer;
             totalGiro += biaya.info[key].giro;
             totalCn += biaya.info[key].cn;
             totalOth += biaya.info[key].oth;
-        }
 
-        form.setFieldsValue({
-          metode_bayar1 : "tunai",
-          bayar1 : totalTunai,
-          metode_bayar2 : "transfer",
-          bayar2 : totalTransfer,
-          metode_bayar3 : "giro",
-          bayar3 : totalGiro,
-          metode_bayar4 : "cn",
-          bayar4 : totalCn,
-          metode_bayar5 : "oth",
-          bayar5 : totalOth,
-        });
+            if (biaya.info[key].pilihData == "pilih") {
+                form.setFieldsValue({
+                    metode_bayar1: "tunai",
+                    bayar1: totalTunai,
+                    metode_bayar2: "transfer",
+                    bayar2: totalTransfer,
+                    metode_bayar3: "giro",
+                    bayar3: totalGiro,
+                    metode_bayar4: "cn",
+                    bayar4: totalCn,
+                    metode_bayar5: "oth",
+                    bayar5: totalOth,
+                });
+            } 
+
+        }
+        
     }
   }, [biaya.info]);
 
@@ -366,7 +403,7 @@ function Hutang({ props }) {
           lpbId++;
       });
 
-  }, []); console.log("biaya", biaya, dataRetur)
+  }, []);
 
   const validateError = () => {
     var listError = form.getFieldsError();
@@ -490,32 +527,14 @@ function Hutang({ props }) {
               </div>
 
               <div className="w-full md:w-1/4 px-3 -mx-3">
-                <Form.Item
-                    name="tanggal_pembayaran"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
-                    >
+                <Form.Item name="tanggal_pembayaran">
                     <DatePicker placeholder="Tanggal Pembayaran" size="large" style={{ width: "100%" }} />
                   </Form.Item>
               </div>
 
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 mt-8">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="bayar1"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
-                    >
+                  <Form.Item name="bayar1">
                     <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
                   </Form.Item>
                 </div>
@@ -551,16 +570,7 @@ function Hutang({ props }) {
 
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="bayar2"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
-                    >
+                  <Form.Item name="bayar2">
                     <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
                   </Form.Item>
                 </div>
@@ -595,16 +605,7 @@ function Hutang({ props }) {
 
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="bayar3"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
-                    >
+                  <Form.Item name="bayar3">
                     <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
                   </Form.Item>
                 </div>
@@ -639,16 +640,7 @@ function Hutang({ props }) {
 
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="bayar4"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
-                    >
+                  <Form.Item name="bayar4">
                     <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
                   </Form.Item>
                 </div>
@@ -683,16 +675,7 @@ function Hutang({ props }) {
 
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="bayar5"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
-                    >
+                  <Form.Item name="bayar5">
                     <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
                   </Form.Item>
                 </div>
@@ -738,7 +721,7 @@ function Hutang({ props }) {
                         <Spin />
                       </div>
                     ) : (
-                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
+                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm" onClick={() => setDocument("Draft")}>
                         <p className="px-4 py-2 m-0 text-white">
                           SIMPAN DAN PERBARUI
                         </p>
@@ -751,11 +734,22 @@ function Hutang({ props }) {
                         <Spin />
                       </div>
                     ) : (
-                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
-                        <p className="px-4 py-2 m-0 text-white">
-                          SIMPAN DAN CETAK
-                        </p>
-                      </button>
+                      <>
+                        <ConfirmDialog
+                          onConfirm={() => submitBtn?.current?.click()}
+                          onCancel={() => {}}
+                          title="Tambah Hutang"
+                          message="Silahkan cek kembali data yang telah dimasukkan, apakah anda yakin ingin menambahkan ?"
+                          component={
+                            <button type="button" className="bg-cyan-700 rounded-md m-1 text-sm" onClick={() => setDocument("Publish")}>
+                              <p className="px-4 py-2 m-0 text-white">
+                                SIMPAN DAN CETAK
+                              </p>
+                            </button>
+                          }
+                        />
+                        <Button htmlType="submit" ref={submitBtn}></Button>
+                      </>
                     )}
                   </Form.Item>
               </div>

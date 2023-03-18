@@ -45,6 +45,26 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     if(value.target.checked == true) pilihData = "pilih";
     else pilihData = "tidak";
 
+    if (pilihData) { 
+      form.setFieldsValue({
+        AccTunai: {
+          [index]: 0,
+        },
+        AccBankTf: {
+          [index]: 0,
+        },
+        AccBankGiro: {
+          [index]: 0,
+        },
+        AccCN: {
+          [index]: 0,
+        },
+        AccOTH: {
+          [index]: 0,
+        },
+      });
+    }
+
     dispatch({ type: "CHANGE_PILIH_DATA", pilihData: pilihData, listData: data, index: index });
     dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: data.sisaHutang, listData: data, index: index });
     onChangeTunai(0, data, index);
@@ -52,7 +72,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     onChangeGiro(0, data, index);
     onChangeCn(0, data, index);
     onChangeOth(0, data, index);
-
+    
   };
 
   const onChangeTunai = (value, data, index) => {

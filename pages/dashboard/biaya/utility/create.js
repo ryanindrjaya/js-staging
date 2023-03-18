@@ -80,7 +80,7 @@ const Create = async (
   const res = await req.json();
 
   if (req.status === 200) {
-    if(page == "hutang" || page == "piutang"){
+    if (values.document == "Publish") {
       akun.forEach((element) => {
           if (element.attributes.type == "Tunai" && element.attributes.setting == true) {
             putAkun(element.id, element.attributes, form, totalTunai, page);
@@ -103,7 +103,7 @@ const Create = async (
     await putRelationDetail(res.data.id, res.data.attributes, form, router, url, page);
   } else {
     openNotificationWithIcon("error");
-  } console.log("list", tempProductListId);
+  }
 };
 
 const createData = async (data, url) => {

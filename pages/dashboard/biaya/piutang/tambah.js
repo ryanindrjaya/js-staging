@@ -236,6 +236,7 @@ function Piutang({ props }) {
   const [loading, setLoading] = useState(false);
   //const [additionalFee, setAdditionalFee] = useState();
   const [isFetchinData, setIsFetchingData] = useState(false);
+  const [document, setDocument] = useState();
 
   const [dataValues, setDataValues] = useState();
 
@@ -341,7 +342,7 @@ function Piutang({ props }) {
     values.customer = customer;
     values.area = area;
     values.wilayah = wilayah;
-
+    values.document = document;
     await createData(sisaHutang, values, listId, form, router, "/credits/", "piutang", akunPiutang);
   };
 
@@ -734,7 +735,7 @@ function Piutang({ props }) {
                         <Spin />
                       </div>
                     ) : (
-                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm px-4">
+                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm px-4" onClick={() => setDocument("Draft")}>
                         <p className="px-4 py-2 m-0 text-white">
                           SIMPAN
                         </p>
@@ -747,7 +748,7 @@ function Piutang({ props }) {
                         <Spin />
                       </div>
                     ) : (
-                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm px-4">
+                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm px-4" onClick={() => setDocument("Draft")}>
                         <p className="px-4 py-2 m-0 text-white">
                           CETAK
                         </p>
@@ -760,7 +761,7 @@ function Piutang({ props }) {
                         <Spin />
                       </div>
                     ) : (
-                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm px-4">
+                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm px-4" onClick={() => setDocument("Publish")}>
                         <p className="px-4 py-2 m-0 text-white">
                           SELESAI
                         </p>
