@@ -563,48 +563,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             </Popover>
         </>
       ),
-      //name: "Pilih Dokumen",
-      //width: "150px",
-      //selector: (row, idx) => {
-      //  return (
-      //    <Row align="bottom" justify="center">
-      //      <Form.Item noStyle>
-      //          <Checkbox onChange={(value) => onChangePilih(value, row, idx)}> Pilih </Checkbox>
-      //      {/*{biaya.info[idx]?.pilihData == null || biaya.info[idx]?.pilihData == "tidak" ? (*/}
-      //      {/*  <button type="button" onClick={(value) => onChangePilih("tidak", row, idx, value)} className="bg-cyan-700 rounded-md m-1 text-sm">*/}
-      //      {/*    <p className="px-4 py-2 m-0 text-white">*/}
-      //      {/*    Pilih*/}
-      //      {/*    </p>*/}
-      //      {/*  </button>*/}
-      //      {/*) : (*/}
-      //      {/*  <button type="button" onClick={(value) => onChangePilih("pilih", row, idx, value)} className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm">*/}
-      //      {/*    <p className="px-4 py-2 m-0 text-black">*/}
-      //      {/*    Tidak*/}
-      //      {/*    </p>*/}
-      //      {/*  </button>*/}
-      //      {/*)}*/}
-      //      </Form.Item>
-      //    </Row>
-      //  )
-      //},
     },
-    //{
-    //  name: "Pilih Metode Bayar",
-    //  width: "150px",
-    //  selector: (row, idx) => {
-    //    return (
-    //      <Row align="bottom" justify="center">
-    //        <Form.Item noStyle>
-    //          <button className="bg-cyan-700 rounded-md m-1 text-sm px-4">
-    //            <p className="px-4 py-2 m-0 text-white">
-    //              metode 
-    //            </p>
-    //          </button>
-    //        </Form.Item>
-    //      </Row>
-    //    )
-    //  },
-    //},
     {
       name: "No Invoice",
       width: "200px",
@@ -643,131 +602,6 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       //selector: (row, idx) => ((row.attributes?.total - row?.subtotal) - row?.sisaPiutang) ?? 0 ,
       //selector: (row) => console.log("row total pem", row),
     },
-    //{
-    //  name: "Hutang Jatuh Tempo",
-    //  width: "150px",
-    //  selector: (row) => formatter.format(row.hutangJatuhTempo),
-    //},
-    //{
-    //  name: "ACC Tunai",
-    //  width: "150px",
-    //  selector: (row, idx) => {
-    //    var defaultAccTunai = 0;
-
-    //    return (
-    //      <Row align="bottom" justify="center">
-    //        <Form.Item name={["AccTunai", `${idx}`]} noStyle>
-    //          <InputNumber
-    //            defaultValue={defaultAccTunai}
-    //            //formatter={(value) => `${value}%`}
-    //            min={0}
-    //            onChange={(e) => onChangeTunai(e, row, idx)}
-    //            style={{
-    //              width: "100px",
-    //              marginRight: "10px",
-    //            }}
-    //          />
-    //        </Form.Item>
-    //      </Row>
-    //    );
-    //  },
-    //},
-    //{
-    //  name: "ACC Bank Transfer",
-    //  width: "150px",
-    //  selector: (row, idx) => {
-    //    var defaultAccBankTf = 0;
-
-    //    return (
-    //      <Row align="bottom" justify="center">
-    //        <Form.Item name={["AccBankTf", `${idx}`]} noStyle>
-    //          <InputNumber
-    //            defaultValue={defaultAccBankTf}
-    //            //formatter={(value) => `${value}%`}
-    //            min={0}
-    //            onChange={(e) => onChangeTransfer(e, row, idx)}
-    //            style={{
-    //              width: "100px",
-    //              marginRight: "10px",
-    //            }}
-    //          />
-    //        </Form.Item>
-    //      </Row>
-    //    );
-    //  },
-    //},
-    //{
-    //  name: "ACC Bank Giro",
-    //  width: "150px",
-    //  selector: (row, idx) => {
-    //    var defaultAccBankGiro = 0;
-
-    //    return (
-    //      <Row align="bottom" justify="center">
-    //        <Form.Item name={["AccBankGiro", `${idx}`]} noStyle>
-    //          <InputNumber
-    //            defaultValue={defaultAccBankGiro}
-    //            //formatter={(value) => `${value}%`}
-    //            min={0}
-    //            onChange={(e) => onChangeGiro(e, row, idx)}
-    //            style={{
-    //              width: "100px",
-    //              marginRight: "10px",
-    //            }}
-    //          />
-    //        </Form.Item>
-    //      </Row>
-    //    );
-    //  },
-    //},
-    //{
-    //  name: "ACC CN",
-    //  width: "150px",
-    //  selector: (row, idx) => {
-    //    var defaultAccCN = 0;
-
-    //    return (
-    //      <Row align="bottom" justify="center">
-    //        <Form.Item name={["AccCN", `${idx}`]} noStyle>
-    //          <InputNumber
-    //            defaultValue={defaultAccCN}
-    //            //formatter={(value) => `${value}%`}
-    //            min={0}
-    //            onChange={(e) => onChangeCn(e, row, idx)}
-    //            style={{
-    //              width: "100px",
-    //              marginRight: "10px",
-    //            }}
-    //          />
-    //        </Form.Item>
-    //      </Row>
-    //    );
-    //  },
-    //},
-    //{
-    //  name: "ACC OTH",
-    //  width: "150px",
-    //  selector: (row, idx) => {
-    //    var defaultAccOTH = 0;
-
-    //    return (
-    //      <Row align="bottom" justify="center">
-    //        <Form.Item name={["AccOTH", `${idx}`]} noStyle>
-    //          <InputNumber
-    //            defaultValue={defaultAccOTH}
-    //            //formatter={(value) => `${value}%`}
-    //            min={0}
-    //            onChange={(e) => onChangeOth(e, row, idx)}
-    //            style={{
-    //              width: "100px",
-    //              marginRight: "10px",
-    //            }}
-    //          />
-    //        </Form.Item>
-    //      </Row>
-    //    );
-    //  },
-    //},
     {
       name: "Sisa Piutang Jt",
       width: "150px",
@@ -782,7 +616,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       paginationTotalRows={[1]}
       columns={columns}
       data={data}
-      noDataComponent={`--Belum ada produk--`}
+      noDataComponent={`--Belum ada data penjualan--`}
     />
   );
 }

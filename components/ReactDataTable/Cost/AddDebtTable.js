@@ -307,7 +307,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       paginationTotalRows={[1]}
       columns={columns}
       data={data}
-      noDataComponent={`--Belum ada produk--`}
+      noDataComponent={`--Belum ada data LPB--`}
     />
   );
 }
