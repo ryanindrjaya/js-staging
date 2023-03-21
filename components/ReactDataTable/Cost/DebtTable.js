@@ -77,7 +77,8 @@ export default function ReactDataTable({
                     Cetak
                 </button>
             </div>
-            <div>
+            {row?.attributes?.document == "Draft" ? (
+              <div>
                 <button
                     onClick={() => lihat(row)}
                     className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
@@ -85,7 +86,10 @@ export default function ReactDataTable({
                     <EditOutlined className="mr-2 mt-0.5 float float-left" />
                     Edit
                 </button>
-            </div>
+              </div>
+            ) : (
+                <> </>
+            )}
 
             <AlertDialog
                 onCancel={onCancel}
@@ -110,7 +114,7 @@ export default function ReactDataTable({
     const columns = [
         {
           name: "No Pembayaran Hutang",
-          width: "200px",
+          width: "240px",
           selector: (row) => row.attributes?.no_hutang ?? "-",
         },
         {
@@ -119,28 +123,24 @@ export default function ReactDataTable({
           selector: (row) => console.log(row),
         },
         {
-          name: "Nota Supplier",
-          width: "150px",
-          //selector: (row) => row.attributes?.customer?.data?.attributes?.name ?? "-",
-        },
-        {
             name: "Nota Supplier",
             width: "150px",
             //selector: (row) => row.attributes?.customer?.data?.attributes?.name ?? "-",
+            selector: (row) => console.log("data row", row),
         },
         {
             name: "Supplier",
-            width: "120px",
-            //selector: (row) => row.attributes?.customer?.data?.attributes?.name ?? "-",
+            width: "180px",
+            selector: (row) => row.attributes?.supplier?.data?.attributes?.name ?? "-",
         },
         {
           name: "Tanggal",
-          width: "120px",
+          width: "150px",
           selector: (row) => formatMyDate(row.attributes?.tanggal_pembayaran ?? "-"),
         },
         {
           name: "Pembayaran",
-          width: "120px",
+          width: "150px",
           selector: (row) => row.attributes?.status ?? "-",
         },
         {
