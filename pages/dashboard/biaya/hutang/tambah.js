@@ -418,10 +418,8 @@ function Hutang({ props }) {
           status = "Menunggu";
         }
       }
-
-      // try fix
-      const trxStatus = row.attributes.status_pembayaran;
-      if (trxStatus == "Belum Lunas" || trxStatus == "Dibayar Sebagian") {
+      
+      if (status == "Tempo" || status == "Dibayar Sebagian") {
         dataTabel[lpbId] = row;
         //biaya.list.push(row);
         dispatch({ type: "ADD_LIST", list: row });
