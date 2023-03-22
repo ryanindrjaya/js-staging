@@ -227,7 +227,7 @@ function Tambah({ props }) {
     const res = await req.json();
 
     const isDataExist = res.data.length > 0;
-    console.log(isDataExist);
+    console.log("isDataExist", isDataExist);
 
     return isDataExist;
   };
@@ -276,17 +276,18 @@ function Tambah({ props }) {
       productTotalPrice,
       productSubTotal,
       setListId,
-      "/purchasing-details"
+      "/purchasing-details",
+      createOrder
     );
   };
 
-  const createOrder = async (values) => {
+  const createOrder = async (values, detailListId) => {
     await createPurchasing(
       products,
       grandTotal,
       totalPrice,
       values,
-      listId,
+      detailListId,
       discPrice,
       form,
       router,
@@ -369,6 +370,7 @@ function Tambah({ props }) {
 
     const req = await fetch(endpoint, options);
     const res = await req.json();
+    console.log(res);
 
     const dataPO = res.data.attributes;
     const purchase_details = dataPO.purchase_details.data;
@@ -570,17 +572,17 @@ function Tambah({ props }) {
 
   useEffect(() => {
     if (listId.length > 0) {
-      createOrder(dataValues);
+      // createOrder(dataValues);
     }
   }, [listId]);
 
   useEffect(() => {
-    if (dataValues) createDetailOrder();
+    if (dataValues) {
+      createDetailOrder();
+    }
   }, [dataValues]);
 
   useEffect(() => {
-    console.log("test");
-
     form.setFieldsValue({
       order_date: moment(),
       DPP_active: "DPP",
