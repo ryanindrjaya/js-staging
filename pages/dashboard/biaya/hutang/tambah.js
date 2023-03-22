@@ -418,8 +418,8 @@ function Hutang({ props }) {
           status = "Menunggu";
         }
       }
-      
-      if (status == "Tempo" || status == "Dibayar Sebagian") {
+
+      if (status == "Tempo" || statusPembayaran == "Dibayar Sebagian") {
         dataTabel[lpbId] = row;
         //biaya.list.push(row);
         dispatch({ type: "ADD_LIST", list: row });
