@@ -165,6 +165,10 @@ function Pembelian({ props }) {
     row.attributes.status = status;
     // const dataStatus = row;
 
+    const LPBLocationId = row.attributes.location?.data?.id;
+
+    console.log("data row status", LPBLocationId);
+
     if (status === "Diterima") {
       console.log("store to inventory && update product price");
       // invetory handle
@@ -175,10 +179,10 @@ function Pembelian({ props }) {
 
     const poData = row?.attributes?.purchase?.data;
     await changeStatusLPB(row, row.id);
-    await changeStatusPO(poData, status);
+    await changeStatusPO(poData, status, LPBLocationId);
   };
 
-  const changeStatusPO = async (poData, status) => {
+  const changeStatusPO = async (poData, status, LPBLocationId) => {
     try {
       // cleaning
       delete poData.attributes?.document;
@@ -193,7 +197,7 @@ function Pembelian({ props }) {
 
       poData.attributes.status = status;
       poData.attributes.location = {
-        id: poData.attributes?.location?.data?.id,
+        id: poData.attributes?.location?.data?.id ?? LPBLocationId,
       };
       poData.attributes.supplier = {
         id: poData.attributes?.supplier?.data?.id,
@@ -274,7 +278,9 @@ function Pembelian({ props }) {
       });
 
       values.attributes.supplier = { id: values.attributes.supplier.data.id };
-      values.attributes.location = { id: values.attributes.location.data.id };
+      values.attributes.location = {
+        id: values?.attributes?.location?.data?.id ?? LPBLocationId,
+      };
       values.attributes.purchasing_details = purchasing_details;
       values.attributes.purchasing_payments = purchasing_payments;
 
@@ -294,6 +300,8 @@ function Pembelian({ props }) {
         },
         body: JSONdata,
       };
+
+      console.log("jsondata put update", JSONdata);
 
       const req = await fetch(endpoint, options);
       const res = await req.json();
