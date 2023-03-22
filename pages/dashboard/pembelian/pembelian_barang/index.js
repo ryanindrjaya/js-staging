@@ -178,8 +178,10 @@ function Pembelian({ props }) {
     }
 
     const poData = row?.attributes?.purchase?.data;
-    await changeStatusLPB(row, row.id);
-    await changeStatusPO(poData, status, LPBLocationId);
+    const req = await changeStatusPO(poData, status, LPBLocationId);
+    if (req.status === 200) {
+      await changeStatusLPB(row, row.id);
+    }
   };
 
   const changeStatusPO = async (poData, status, LPBLocationId) => {
@@ -238,6 +240,8 @@ function Pembelian({ props }) {
           "Status PO gagal dirubah. Silahkan cek log untuk error detail"
         );
       }
+
+      return req;
     } catch (error) {
       console.log(error);
       openNotificationWithIcon(
@@ -245,6 +249,8 @@ function Pembelian({ props }) {
         "Status PO gagal dirubah",
         "Status PO gagal dirubah. Silahkan cek log untuk error detail"
       );
+
+      return null;
     }
   };
 
