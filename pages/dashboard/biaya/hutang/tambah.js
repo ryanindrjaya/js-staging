@@ -319,35 +319,7 @@ function Hutang({ props }) {
     }
   }, [biaya.info]);
 
-  //var id = 0;
-  //var tempSupplier = null;
-  //useEffect(() => {
-  //  //var id = 0;
 
-  //  //if(supplier != undefined && supplier != tempSupplier){
-  //  //  console.log("supp", supplier);
-  //  //  dataTabel.forEach((element) => {
-  //  //    console.log("el", element);
-  //  //    if(supplier.id == element.attributes.supplier.data.id){
-  //  //      dataShow[id] = element;
-  //  //      //dispatch({ type: "ADD_LIST", list: element });
-  //  //    }
-
-  //  //    id++;
-  //  //  });
-  //  //} else {
-  //  //  setDataShow([]);
-  //  //  console.log("else");
-  //  //}
-  //  console.log("biaya",biaya);
-  //  setIsFetchingData(true);
-  //  setTimeout(() => {
-  //    setIsFetchingData(false);
-  //    //tempSupplier = supplier;
-  //  }, 1000);
-  //}, [supplier]);
-
-  console.log("biaya",biaya);
   useEffect(() => {
     if (dataValues && info == "sukses") createDetail();
   }, [dataValues]);
