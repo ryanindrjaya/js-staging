@@ -44,7 +44,7 @@ export default function Customer({ onChangeCustomer }) {
       try {
         const endpoint =
           process.env.NEXT_PUBLIC_URL +
-          `/customers?filters[$or][0][name][$contains]=${query}&filters[$or][1][type][$contains]=${query}`;
+          `/customers?filters[$or][0][name][$contains]=${query}&filters[$or][1][customer_type][$contains]=${query}`;
         const options = {
           method: "GET",
           headers: {
@@ -54,7 +54,7 @@ export default function Customer({ onChangeCustomer }) {
         };
 
         const req = await fetch(endpoint, options);
-        const res = await req.json();
+        const res = await req.json(); console.log("customer", res);
 
         if (req.status == 200) {
           const customerResult = res.data.map((customer) => ({

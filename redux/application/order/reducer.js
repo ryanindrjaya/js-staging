@@ -8,9 +8,23 @@ export default function Reducer(state = initState, action) {
   switch (action.type) {
     case "ADD_PRODUCT":
       state.productList.push(action.product);
+      let productInfo = state.productInfo;
+      const idx = state.productList.length - 1;
       return {
         ...state,
         productList: [...state.productList],
+        productInfo: {
+          ...productInfo,
+          [idx]: {
+            priceUnit: action.product.attributes.buy_price_1,
+            unit: action.product.attributes.unit_1,
+            d1: action.product.attributes.unit_1_dp1,
+            d2: action.product.attributes.unit_1_dp2,
+            d3: action.product.attributes.unit_1_dp3,
+            disc: action.product.attributes.purchase_discount_1,
+            qty: 1,
+          },
+        },
       };
 
     case "REMOVE_PRODUCT":
@@ -27,7 +41,6 @@ export default function Reducer(state = initState, action) {
       var unit = action.unit;
       var id = action.index;
       var data = action.product.attributes;
-
       return {
         ...state,
         productInfo: {
@@ -39,6 +52,7 @@ export default function Reducer(state = initState, action) {
             d1: data[`unit_${unit}_dp1`],
             d2: data[`unit_${unit}_dp2`],
             d3: data[`unit_${unit}_dp3`],
+            disc: data[`purchase_discount_${unit}`],
           },
         },
       };
@@ -139,7 +153,6 @@ export default function Reducer(state = initState, action) {
         },
       };
 
-
     case "CHANGE_PRODUCT_PRICE":
       var unit_price = action.unit_price;
       var id = action.index;
@@ -208,6 +221,7 @@ export default function Reducer(state = initState, action) {
             d1: action.d1,
             d2: action.d2,
             d3: action.d3,
+            relation_id: action?.relation_id,
           },
         },
       };

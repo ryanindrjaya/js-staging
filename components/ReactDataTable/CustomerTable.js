@@ -1,7 +1,11 @@
+import { Popover } from "antd";
 import DataTable from "react-data-table-component";
 import AlertDialog from "../Alert/Alert";
+import { EditOutlined, BarsOutlined } from "@ant-design/icons";
+import { useRouter } from "next/router";
 
-export default function ReactDataTable({ data, onDelete, onUpdate }) { console.log("coba data",data)
+export default function ReactDataTable({ data, onDelete, onUpdate }) {
+  const router = useRouter();
   const onConfirm = (id) => {
     onDelete(id);
   };
@@ -23,69 +27,101 @@ export default function ReactDataTable({ data, onDelete, onUpdate }) { console.l
     },
   };
 
+  const openModal = (id) => {
+    router.replace(
+      {
+        pathname: "/dashboard/customer",
+        query: { id: id },
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
+
+  const content = (row) => (
+    <div>
+      <div>
+        <button
+          onClick={() => openModal(row.id)}
+          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+        >
+          <BarsOutlined className="mr-2 mt-0.5 float float-left" />
+          Lihat
+        </button>
+      </div>
+      <button
+        onClick={() => onEdit(row.id)}
+        className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+      >
+        <EditOutlined className="mr-2 mt-0.5 float float-left" />
+        Edit
+      </button>
+      <AlertDialog
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+        title="Hapus Kategori"
+        message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
+        id={row.id}
+      />
+    </div>
+  );
+
   const columns = [
-    //{
-    //  name: "Nama Pengguna",
-    //  width: "250px",
-    //  //sortable: true,
-    //  selector: (row) => row.name,
-    //},
     {
-      name: "Nama",
-      width: "250px",
-      //sortable: true,
-      selector: (row) => row.name,
+      name: "Kode Customer",
+      sortable: true,
+      width: "140px",
+      selector: ({ attributes }) => attributes.code,
+    },
+    {
+      name: "Nama Customer",
+      width: "140px",
+      sortable: true,
+      selector: ({ attributes }) => attributes.name,
     },
     {
       name: "Alamat",
-      width: "250px",
-      //sortable: true,
-      selector: (row) => row.address,
+      selector: ({ attributes }) => attributes.address,
     },
     {
-      name: "Type",
-      width: "250px",
-      //sortable: true,
-      selector: (row) => row.type,
+      name: "Tipe Penjualan",
+      sortable: true,
+      width: "140px",
+      selector: ({ attributes }) =>
+        attributes?.tipe_penjualan?.map((item) => item)?.join(", ") || "-",
+    },
+    {
+      name: "Nama Sales",
+      width: "140px",
+      sortable: true,
+      selector: ({ attributes }) => attributes?.sales_name || "",
+    },
+    {
+      name: "Area",
+      sortable: true,
+      selector: ({ attributes }) => attributes?.area?.data?.attributes?.name || "",
+    },
+    {
+      name: "Wilayah",
+      sortable: true,
+      selector: ({ attributes }) => attributes?.wilayah?.data?.attributes?.name || "",
+    },
+    {
+      name: "Batas Kredit",
+      width: "140px",
+      sortable: true,
+      selector: ({ attributes }) =>
+        `${attributes?.credit_limit || 0}`.replace(/\B(?=(\d{3})+(?!\d))/g, ","),
     },
     {
       name: "Tindakan",
-      width: "250px",
       selector: (row) => (
         <>
-          <div className="grid grid-cols-3 gap-2">
-            {row.deleteAble ? (
-              <button
-                onClick={() => onEdit(row.id)}
-                className="hover:bg-cyan-700  hover:text-white transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-              >
-                Edit
-              </button>
-            ) : (
-              <button
-                onClick={() => onEdit(row.id)}
-                className="invisible hover:bg-cyan-700  hover:text-white transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-              >
-                Edit
-              </button>
-            )}
-
-            {row.deleteAble ? (
-              <AlertDialog
-                onCancel={onCancel}
-                onConfirm={onConfirm}
-                title="Hapus Customer"
-                message="Data customer yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
-                id={row.id}
-              />
-            ) : (
-              <div className="invisible">
-                <button className="hover:bg-cyan-400  hover:text-white transition-colors  text-xs font-normal py-2 px-2 rounded-md ">
-                  Hapus
-                </button>
-              </div>
-            )}
-          </div>
+          <Popover content={content(row)} placement="bottom">
+            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
+              Tindakan
+            </button>
+          </Popover>
         </>
       ),
     },
@@ -97,7 +133,10 @@ export default function ReactDataTable({ data, onDelete, onUpdate }) { console.l
       columns={columns}
       data={data}
       paginationRowsPerPageOptions={[50]}
-      noDataComponent={`--Belum ada produk--`}
+      noDataComponent={`--Belum ada data customer--`}
+      onRowClicked={(row) => openModal(row.id)}
+      highlightOnHover
+      pointerOnHover
       //pagination
     />
   );

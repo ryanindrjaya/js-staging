@@ -7,7 +7,7 @@ import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import nookies from "nookies";
 import { toast } from "react-toastify";
-import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
+import SearchBar from "../../../../../components/Form/AddOrder/SearchBar";
 import Supplier from "../../../../../components/Form/AddOrder/SupplierForm";
 import LPBTable from "../../../../../components/ReactDataTable/Purchases/LPBTable";
 import { useSelector, useDispatch } from "react-redux";
@@ -200,8 +200,6 @@ function EditLPB({ props }) {
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
 
-  console.log("intiial supplier", supplier);
-
   // DPP & PPN
   let dppValue = 0;
   let ppnValue = 0;
@@ -224,9 +222,158 @@ function EditLPB({ props }) {
     maximumFractionDigits: 2,
   });
 
+  const cleanData = (data) => {
+    const unusedKeys = ["disc_rp", "harga_satuan", "jumlah_option", "jumlah_qty"];
+    for (let key in data) {
+      if (data[key] === null || data[key] === undefined) {
+        delete data[key];
+      } else if (unusedKeys.includes(key)) {
+        delete data[key];
+      }
+    }
+
+    return data;
+  };
+
+  const updateDetailData = async (data, id) => {
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/purchasing-details/${id}`;
+    const options = {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+      body: JSON.stringify({ data }),
+    };
+
+    const res = await fetch(endpoint, options).then((res) => res.json());
+    return res;
+  };
+
+  const createDetailData = async (data) => {
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/purchasing-details`;
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+      body: JSON.stringify({ data }),
+    };
+
+    const res = await fetch(endpoint, options).then((res) => res.json());
+    return res;
+  };
+
+  const updateMasterData = async (data, id) => {
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/purchasings/${id}`;
+    const options = {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+      body: JSON.stringify({ data }),
+    };
+
+    const res = await fetch(endpoint, options).then((res) => res.json());
+    return res;
+  };
+
   const onFinish = async (values) => {
     setLoading(true);
-    console.log("form values", values);
+    try {
+      const sanitizedValues = cleanData(values);
+      const editedProduct = products.productInfo;
+      // console.log("form values", values);
+      // console.log("editedProduct", editedProduct);
+      // console.log("products", products);
+
+      const detailsLPB = products.productList?.map(({ attributes, id }, idx) => {
+        console.log();
+
+        const qty = editedProduct?.[idx]?.qty || 1;
+        const unitPriceAfterDisc = parseFloat(
+          productTotalPrice?.[idx] || attributes?.buy_price_1
+        ).toFixed(2);
+        const subTotal = parseFloat(unitPriceAfterDisc * qty).toFixed(2);
+        const unitOrder = editedProduct?.[idx]?.unit || attributes?.unit_1;
+        const unitPrice = editedProduct?.[idx]?.priceUnit || attributes?.buy_price_1;
+
+        const discRp = form.getFieldValue("disc_rp");
+        const unitDisc =
+          discRp?.[idx] ?? editedProduct?.[idx]?.disc ?? attributes?.purchase_discount_1;
+
+        const expiredDate = sanitizedValues?.expired_date?.[idx];
+        const batch = sanitizedValues?.batch?.[idx];
+
+        return {
+          total_order: String(editedProduct?.[idx]?.qty || 1),
+          sub_total: subTotal,
+          unit_order: unitOrder,
+          disc: unitDisc,
+          unit_price: unitPrice,
+          unit_price_after_disc: unitPriceAfterDisc,
+          dp1: editedProduct?.[idx]?.d1 || attributes?.unit_1_dp1,
+          dp2: editedProduct?.[idx]?.d2 || attributes?.unit_1_dp2,
+          dp3: editedProduct?.[idx]?.d3 || attributes?.unit_1_dp3,
+          products: [id],
+          relation_id: editedProduct?.[idx]?.relation_id,
+          location: values?.product_location?.[idx],
+          expired_date: expiredDate,
+          batch: batch,
+        };
+      });
+
+      let detailsId = [];
+      for (let item in detailsLPB) {
+        const detail = detailsLPB[item];
+        const id = detail.relation_id;
+        const postDetail = cleanData(detail);
+        console.log("post detail", postDetail);
+        if (id) {
+          const res = await updateDetailData(postDetail, id);
+          console.log("response update detail ==>", res);
+          detailsId.push(res?.data?.id);
+        } else {
+          const res = await createDetailData(postDetail);
+          console.log("response create detail ==>", res);
+          detailsId.push(res?.data?.id);
+        }
+      }
+
+      // assign detail id to master PO and assign new totalPrice
+      sanitizedValues.purchasing_details = detailsId;
+      sanitizedValues.total_purchasing = grandTotal;
+      sanitizedValues.date_purchasing = sanitizedValues?.order_date;
+      sanitizedValues.location = { id: sanitizedValues.location.value };
+      sanitizedValues.supplier = { id: sanitizedValues.supplier_id };
+      sanitizedValues.purchase = {
+        id: initialValues?.attributes?.purchase?.data?.id,
+      };
+      console.log("purchases", initialValues?.attributes?.purchase?.data?.id);
+      console.log("sanitizedValues", sanitizedValues);
+
+      // update master PO
+      const res = await updateMasterData(sanitizedValues, initialValues.id);
+      console.log("response update master ==>", res);
+
+      if (res?.data?.id) {
+        notification.success({
+          message: "Berhasil mengubah data",
+          description: "Data LPB berhasil diubah. Silahkan cek pada halaman LPB",
+        });
+        router.replace("/dashboard/pembelian/pembelian_barang");
+      } else {
+        notification.error({
+          message: "Gagal mengubah data",
+          description: "Data LPB gagal diubah. Silahkan cek data anda dan coba lagi",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+
     // const isValid = await dataValidation();
     // if (!isValid) {
     //   notification["error"]({
@@ -245,7 +392,6 @@ function EditLPB({ props }) {
   const dataValidation = async () => {
     const nomorPO = preorderData?.attributes?.no_po;
     const supplierName = supplier?.attributes?.name;
-    console.log("this is validate step", nomorPO, supplierName);
 
     const endpoint =
       process.env.NEXT_PUBLIC_URL +
@@ -552,9 +698,6 @@ function EditLPB({ props }) {
 
     setdppPrice(dppValue);
     setppnPrice(ppnValue);
-
-    console.log("dpp ", dppPrice);
-    console.log("ppn ", ppnPrice);
   }, [isDPPActive]);
 
   useEffect(() => {
@@ -572,8 +715,6 @@ function EditLPB({ props }) {
   }, [dataValues]);
 
   useEffect(() => {
-    console.log("test");
-
     form.setFieldsValue({
       order_date: moment(),
       DPP_active: "DPP",
@@ -597,13 +738,12 @@ function EditLPB({ props }) {
 
   useEffect(() => {
     dispatch({ type: "CLEAR_DATA" });
-    console.log("initialValue", initialValues);
-    console.log("location", initialValues.attributes?.location?.data?.attributes?.name);
 
     if (initialValues) {
+      console.log(initialValues);
       form.setFieldsValue({
         ...initialValues.attributes,
-        date_purchasing: moment(initialValues.attributes?.order_date),
+        order_date: moment(initialValues.attributes?.order_date),
         no_purchasing: initialValues.attributes?.no_purchasing,
         no_po: initialValues.attributes?.purchase?.data?.attributes?.no_po,
         supplier_id: initialValues.attributes?.supplier?.data?.id,
@@ -623,7 +763,7 @@ function EditLPB({ props }) {
           form.setFieldsValue({
             ...initialValues.attributes,
             product_location: {
-              [index]: element.attributes?.location?.data?.attributes?.name,
+              [index]: element.attributes?.location?.data?.id,
             },
             expired_date: {
               [index]: moment(element.attributes?.expired_date),
@@ -661,9 +801,6 @@ function EditLPB({ props }) {
       router.replace("/dashboard/pembelian/order_pembelian");
     }
 
-    const testlocation = form.getFieldValue("location");
-    console.log("product in table", products);
-    console.log("testlocation", testlocation);
     // reset redux state when component unmount / ondestroy
     return () => {
       dispatch({ type: "CLEAR_DATA" });
@@ -690,7 +827,7 @@ function EditLPB({ props }) {
             >
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Supplier supplier={supplier} onChangeSupplier={setSupplier} />
+                  <Supplier disabled={true} supplier={supplier} onChangeSupplier={setSupplier} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
@@ -703,7 +840,7 @@ function EditLPB({ props }) {
                       },
                     ]}
                   >
-                    <Input style={{ height: "40px" }} placeholder="No.PO" />
+                    <Input disabled={true} style={{ height: "40px" }} placeholder="No.PO" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -804,7 +941,7 @@ function EditLPB({ props }) {
                 </div>
 
                 <div className="w-full md:w-1/4 px-3 mb-2 mt-5 md:mb-0">
-                  <SearchPO supplier={supplier} handleSelect={fetchPOdata} />
+                  <SearchPO disabled={true} supplier={supplier} handleSelect={fetchPOdata} />
                 </div>
 
                 <div className="w-full md:w-1/4 px-3 mb-2 mt-5 md:mb-0">
@@ -1086,7 +1223,7 @@ function EditLPB({ props }) {
                   {grandTotal === 0 ? formatter.format(totalPrice) : formatter.format(grandTotal)}
                 </p>
               </div>
-              {/* <Form.Item name="additional_note">
+              <Form.Item name="additional_note">
                 <TextArea rows={4} placeholder="Catatan Tambahan" />
               </Form.Item>
               <Form.Item className="mt-5">
@@ -1102,7 +1239,7 @@ function EditLPB({ props }) {
                     Perbarui
                   </Button>
                 )}
-              </Form.Item> */}
+              </Form.Item>
             </Form>
           </LayoutContent>
         </LayoutWrapper>

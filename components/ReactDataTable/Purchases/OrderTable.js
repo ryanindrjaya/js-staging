@@ -2,9 +2,18 @@ import DataTable from "react-data-table-component";
 import AlertDialog from "../../Alert/Alert";
 import { InputNumber, Select, Form, Row } from "antd";
 import { useDispatch } from "react-redux";
+import { useEffect, useState } from "react";
 
-export default function ReactDataTable({ calculatePriceAfterDisc, productSubTotal, setProductSubTotal, products, setTotalPrice, formObj }) {
+export default function OrderTable({
+  calculatePriceAfterDisc,
+  productSubTotal,
+  setProductSubTotal,
+  products,
+  setTotalPrice,
+  formObj,
+}) {
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(true);
 
   var defaultDp1 = 0;
   var defaultDp2 = 0;
@@ -16,14 +25,25 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
+    useGrouping: true,
+    groupingSeparator: ",",
+    decimalSeparator: ".",
   });
+
+  useEffect(() => {
+    if (products?.productList?.length > 0) {
+      setLoading(false);
+    }
+  }, [products]);
 
   const onDeleteProduct = (value) => {
     dispatch({ type: "REMOVE_PRODUCT", index: value });
   };
 
   const onChangeUnit = (value, data, index) => {
+    console.log("data change unit", data);
     unit = value;
     if (value == 1) {
       priceUnit = data.attributes.buy_price_1;
@@ -37,7 +57,12 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
       priceUnit = data.attributes.buy_price_5;
     }
 
-    dispatch({ type: "CHANGE_PRODUCT_UNIT", unit: value, product: data, index });
+    dispatch({
+      type: "CHANGE_PRODUCT_UNIT",
+      unit: value,
+      product: data,
+      index,
+    });
     onChangePriceUnit(priceUnit, data, value, index);
     tempIndex = 0;
   };
@@ -61,6 +86,7 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
   };
 
   const onChangePriceUnit = (value, data, index, indexRow) => {
+    console.log("get index", index, indexRow);
     var tempPriceUnit = [];
 
     tempPriceUnit.push(data.attributes.buy_price_1);
@@ -89,6 +115,9 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
     formObj.setFieldsValue({
       harga_satuan: {
         [indexRow]: value,
+      },
+      disc_rp: {
+        [indexRow]: data.attributes[`purchase_discount_${index}`],
       },
     });
   };
@@ -162,8 +191,8 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
       width: "150px",
       selector: (row, idx) => {
         var priceUnit = row.attributes?.buy_price_1;
-        var priceUnit = row.attributes?.buy_price_1;
         if (products.productInfo[idx]?.priceUnit) {
+          console.log("price unit", products.productInfo[idx].priceUnit);
           priceUnit = products.productInfo[idx].priceUnit;
         }
         return (
@@ -173,12 +202,28 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
                 <InputNumber
                   defaultValue={priceUnit}
                   min={0}
-                  onChange={(e) => onChangePriceUnit(e, row, unit, idx)}
+                  onChange={(e) => {
+                    const selectedUnitIndex =
+                      formObj.getFieldValue("jumlah_option") ??
+                      products?.productInfo[idx]?.unitIndex ??
+                      "";
+
+                    // console.log("test data onchange", e, row, unit, idx);
+                    // console.log("selected unit", selectedUnitIndex);
+                    // onChangePriceUnit(e, row, unit, selectedUnitIndex[idx])
+
+                    // edit prupose
+                    // console.log("edit ", products?.productInfo[idx]?.unitIndex);
+
+                    onChangePriceUnit(e, row, selectedUnitIndex[idx], idx);
+                  }}
                   style={{
                     width: "150px",
                     marginRight: "10px",
                   }}
-                  formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                  formatter={(value) =>
+                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
                   parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                 />
               </Form.Item>
@@ -206,12 +251,9 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
         return (
           <>
             <Row>
-              <Form.Item
-                name={["jumlah_qty", `${idx}`]}
-                // initialValue={products.productInfo[idx]?.qty ?? 1}
-                noStyle
-              >
+              <Form.Item name={["jumlah_qty", `${idx}`]} noStyle>
                 <InputNumber
+                  min={1}
                   defaultValue={defaultQty}
                   onChange={(e) => onChangeQty(e, row, idx)}
                   rules={[
@@ -226,11 +268,7 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
                 />
               </Form.Item>
 
-              <Form.Item
-                name={["jumlah_option", `${idx}`]}
-                // initialValue={defaultOption}
-                noStyle
-              >
+              <Form.Item name={["jumlah_option", `${idx}`]} noStyle>
                 <Select
                   defaultValue={defaultIndex}
                   onChange={(value) => onChangeUnit(value, row, idx)}
@@ -242,35 +280,50 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
                   {row.attributes?.unit_1 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_1 === null} value={1}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_1 === null}
+                      value={1}
+                    >
                       {row.attributes?.unit_1}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_2 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_2 === null} value={2}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_2 === null}
+                      value={2}
+                    >
                       {row.attributes?.unit_2}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_3 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_3 === null} value={3}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_3 === null}
+                      value={3}
+                    >
                       {row.attributes?.unit_3}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_4 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_4 === null} value={4}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_4 === null}
+                      value={4}
+                    >
                       {row.attributes?.unit_4}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_5 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_5 === null} value={5}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_5 === null}
+                      value={5}
+                    >
                       {row.attributes?.unit_5}
                     </Select.Option>
                   )}
@@ -286,8 +339,14 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
       width: "150px",
       selector: (row, idx) => {
         var defaultDisc = 0;
+        console.log("test disc", products.productInfo[idx]?.disc);
+
+        
         if (products.productInfo[idx]?.disc) {
-          defaultDisc = products.productInfo[idx].disc;
+          defaultDisc = products?.productInfo[idx]?.disc;
+        } else {
+          defaultDisc =
+            products?.productList[idx]?.attributes?.purchase_discount_1;
         }
 
         return (
@@ -302,7 +361,9 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
                   width: "100px",
                   marginRight: "10px",
                 }}
-                formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                formatter={(value) =>
+                  value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
                 parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
               />
             </Form.Item>
@@ -315,7 +376,7 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
       width: "100px",
       selector: (row, idx) => {
         defaultDp1 = row.attributes?.unit_1_dp1 || 0;
-        if (products.productInfo[idx]?.d1) {
+        if (products.productInfo[idx]?.d1 !== undefined) {
           defaultDp1 = products.productInfo[idx].d1;
         }
 
@@ -348,7 +409,7 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
       width: "100px",
       selector: (row, idx) => {
         defaultDp2 = row.attributes?.unit_1_dp2 || 0;
-        if (products.productInfo[idx]?.d2) {
+        if (products.productInfo[idx]?.d2 !== undefined) {
           defaultDp2 = products.productInfo[idx].d2;
         }
 
@@ -381,7 +442,7 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
       width: "100px",
       selector: (row, idx) => {
         defaultDp3 = row.attributes?.unit_1_dp3 || 0;
-        if (products.productInfo[idx]?.d3) {
+        if (products.productInfo[idx]?.d3 !== undefined) {
           defaultDp3 = products.productInfo[idx].d3;
         }
 
@@ -436,10 +497,11 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
 
   return (
     <DataTable
+      keyField=""
       customStyles={customStyles}
       paginationRowsPerPageOptions={[50]}
       columns={columns}
-      data={products.productList}
+      data={products?.productList || data || []}
       noDataComponent={`--Belum ada produk--`}
     />
   );

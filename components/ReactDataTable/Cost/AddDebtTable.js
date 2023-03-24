@@ -4,7 +4,7 @@ import { Input, InputNumber, Select, Form, Row, DatePicker, Checkbox } from "ant
 import { useDispatch } from "react-redux";
 import { useState } from "react";
 
-export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal }) {
+export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal, form }) {
   const dispatch = useDispatch();
 
   var unit = 1;
@@ -44,8 +44,35 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     var pilihData = "tidak";
     if(value.target.checked == true) pilihData = "pilih";
     else pilihData = "tidak";
+
+    if (pilihData) { 
+      form.setFieldsValue({
+        AccTunai: {
+          [index]: 0,
+        },
+        AccBankTf: {
+          [index]: 0,
+        },
+        AccBankGiro: {
+          [index]: 0,
+        },
+        AccCN: {
+          [index]: 0,
+        },
+        AccOTH: {
+          [index]: 0,
+        },
+      });
+    }
+
     dispatch({ type: "CHANGE_PILIH_DATA", pilihData: pilihData, listData: data, index: index });
     dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: data.sisaHutang, listData: data, index: index });
+    onChangeTunai(0, data, index);
+    onChangeTransfer(0, data, index);
+    onChangeGiro(0, data, index);
+    onChangeCn(0, data, index);
+    onChangeOth(0, data, index);
+    
   };
 
   const onChangeTunai = (value, data, index) => {
@@ -77,7 +104,8 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
+    minimumFractionDigits : 2,
   });
 
   const onCancel = () => {
@@ -149,7 +177,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       name: "ACC Tunai",
       width: "150px",
       selector: (row, idx) => {
-        var defaultAccTunai = 0;
+        var defaultAccTunai = biaya.info[idx]?.tunai ?? 0;
 
         return (
           <Row align="bottom" justify="center">
@@ -173,7 +201,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       name: "ACC Bank Transfer",
       width: "150px",
       selector: (row, idx) => {
-        var defaultAccBankTf = 0;
+        var defaultAccBankTf = biaya.info[idx]?.transfer ?? 0;
 
         return (
           <Row align="bottom" justify="center">
@@ -197,7 +225,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       name: "ACC Bank Giro",
       width: "150px",
       selector: (row, idx) => {
-        var defaultAccBankGiro = 0;
+        var defaultAccBankGiro = biaya.info[idx]?.giro ?? 0;
 
         return (
           <Row align="bottom" justify="center">
@@ -221,7 +249,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       name: "ACC CN",
       width: "150px",
       selector: (row, idx) => {
-        var defaultAccCN = 0;
+        var defaultAccCN = biaya.info[idx]?.cn ?? 0;
 
         return (
           <Row align="bottom" justify="center">
@@ -245,7 +273,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       name: "ACC OTH",
       width: "150px",
       selector: (row, idx) => {
-        var defaultAccOTH = 0;
+        var defaultAccOTH = biaya.info[idx]?.oth ?? 0;
 
         return (
           <Row align="bottom" justify="center">
@@ -279,7 +307,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       paginationTotalRows={[1]}
       columns={columns}
       data={data}
-      noDataComponent={`--Belum ada produk--`}
+      noDataComponent={`--Belum ada data LPB--`}
     />
   );
 }

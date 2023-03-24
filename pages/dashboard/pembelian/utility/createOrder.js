@@ -24,7 +24,7 @@ const CreateOrder = async (grandTotal, totalPrice, values, listId, form, router)
   values.order_date = orderDate;
   values.delivery_date = deliveryDate;
   values.supplier_id = supplierId;
-  values.status = "Dipesan";
+  values.status = "Diproses";
   values.delivery_total = grandTotal === 0 ? parseInt(totalPrice) : parseInt(grandTotal);
   values.purchase_details = null;
   values.supplier_id = null;

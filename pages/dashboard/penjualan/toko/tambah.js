@@ -13,7 +13,7 @@ import createSaleFunc from "../utility/createSale";
 import createDetailSaleFunc from "../utility/createDetailSale";
 import calculatePrice from "../utility/calculatePrice";
 import nookies from "nookies";
-import Customer from "@iso/components/Form/AddSale/CustomerForm";
+import Customer from "../../../../components/Form/AddSale/CustomerForm";
 
 Toko.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -317,7 +317,7 @@ function Toko({ props }) {
     if(products.productList.length > 0){ 
         inven.forEach((element) => {
             products.productList.forEach((data) => {
-              if (data.id == element.attributes.products.data[0].id) {
+              if (data.id == element.attributes.products.data[0]?.id) {
                 data.stock = element.attributes.total_stock;
               }  
             });
@@ -369,7 +369,7 @@ function Toko({ props }) {
     clearData();
     setProductSubTotal({});
     form.setFieldsValue({
-      customer: customerData.attributes.name,
+      customer: customerData?.attributes.name,
     });
     setCustomer(customerData);
   }, []);

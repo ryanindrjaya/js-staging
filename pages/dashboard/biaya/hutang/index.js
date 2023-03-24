@@ -4,11 +4,13 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import router, { useRouter } from "next/router";
+import { useSelector, useDispatch } from "react-redux";
 import { Input, notification, Select, DatePicker } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import DebtTable from "@iso/components/ReactDataTable/Cost/DebtTable";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
 import nookies from "nookies";
+import tokenVerify from "../../../../authentication/tokenVerify";
 
 Hutang.getInitialProps = async (context) => {
     const cookies = nookies.get(context);
@@ -21,6 +23,16 @@ Hutang.getInitialProps = async (context) => {
 
     const reqHutang = await fetchHutang(cookies);
     const hutang = await reqHutang.json();
+
+    //if (req.status !== 200) {
+    //    context.res.writeHead(302, {
+    //        Location: "/signin?session=false",
+    //        "Content-Type": "text/html; charset=utf-8",
+    //    });
+    //    context?.res?.end();
+
+    //    return {};
+    //}
 
     return {
       props: {
@@ -80,6 +92,7 @@ function Hutang({ props }) {
     const router = useRouter();
     const [hutang, setHutang] = useState(data);
     const [supplier, setSupplier] = useState();
+    const dispatch = useDispatch();
 
     const handleSetting = () => {
         router.push("/dashboard/biaya/hutang/setting");
@@ -170,6 +183,10 @@ function Hutang({ props }) {
         const res = req.json();
 
         return res;
+    };
+
+    const logOut = () => {
+        dispatch(logout());
     };
 
     return (
@@ -297,6 +314,8 @@ function Hutang({ props }) {
                           //onChangeStatus={onChangeStatus}
                           user={user}
                         />
+
+                        <tokenVerify logOut={logOut} />
                     </LayoutContent>
                 </LayoutWrapper>
             </DashboardLayout>

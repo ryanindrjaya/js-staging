@@ -8,7 +8,7 @@ import TitlePage from "@iso/components/TitlePage/TitlePage";
 import nookies from "nookies";
 import { toast } from "react-toastify";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
-import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
+import Supplier from "../../../../components/Form/AddOrder/SupplierForm";
 import LPBTable from "@iso/components/ReactDataTable/Purchases/LPBTable";
 import { useSelector, useDispatch } from "react-redux";
 import LoadingAnimations from "@iso/components/Animations/Loading";
@@ -29,6 +29,7 @@ import createPurchasing from "../utility/createPurchasing";
 import updateOrder from "../utility/updateOrder";
 import updateProduct from "../utility/updateProduct";
 import calculatePrice from "../utility/calculatePrice";
+import SearchPO from "../../../../components/Form/AddOrder/SearchPO";
 
 Tambah.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -138,6 +139,9 @@ function Tambah({ props }) {
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [isDPPActive, setIsDPPActive] = useState(true);
+  const [dppPrice, setdppPrice] = useState(0);
+  const [ppnPrice, setppnPrice] = useState(0);
   const [productList, setProductList] = useState([]);
   const [supplier, setSupplier] = useState();
   const [totalPrice, setTotalPrice] = useState(0);
@@ -148,6 +152,7 @@ function Tambah({ props }) {
   const [dataValues, setDataValues] = useState();
   const [discType, setDiscType] = useState();
   const [discPrice, setDiscPrice] = useState(0);
+  const [discValue, setDiscValue] = useState(0);
   const [tempoDays, setTempoDays] = useState(0);
   const [tempoOption, setTempoOption] = useState("Hari");
   const [productTotalPrice, setProductTotalPrice] = useState({});
@@ -161,6 +166,8 @@ function Tambah({ props }) {
   var yyyy = today.getFullYear();
 
   // DPP & PPN
+  let dppValue = 0;
+  let ppnValue = 0;
   const dpp = 1.11;
   var ppn = 0;
 
@@ -172,7 +179,9 @@ function Tambah({ props }) {
   const tempList = [];
 
   // NO PO
-  var totalPurchases = String(props.purchases?.meta?.pagination.total + 1).padStart(3, "0");
+  var totalPurchases = String(
+    props.purchases?.meta?.pagination.total + 1
+  ).padStart(3, "0");
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -182,8 +191,82 @@ function Tambah({ props }) {
 
   const onFinish = async (values) => {
     setLoading(true);
+    const isValid = await dataValidation();
+    if (!isValid) {
+      notification["error"]({
+        message: "SUPPLIER TIDAK COCOK",
+        description:
+          "Supplier tidak cocok dengan No.PO. Silahkan cek kembali data yang akan ditambahkan",
+      });
+      setLoading(false);
+      return;
+    }
+
     setDataValues(values);
     setLoading(false);
+  };
+
+  const dataValidation = async () => {
+    const nomorPO = preorderData?.attributes?.no_po;
+    const supplierName = supplier?.attributes?.name;
+    console.log("this is validate step", nomorPO, supplierName);
+
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL +
+      `/purchases/?populate=supplier&filters[status][$eq]=Diproses&filters[supplier][name][$eq]=${supplierName}&filters[no_po][$eq]=${nomorPO}`;
+    console.log(endpoint);
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    const isDataExist = res.data.length > 0;
+    console.log("isDataExist", isDataExist);
+
+    return isDataExist;
+  };
+
+  const POValidation = async (id) => {
+    console.log("validation PO", id);
+    // const supplierName = supplier?.attributes?.name;
+    // console.log("this is validate step", nomorPO, supplierName);
+
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL +
+      `/purchasings?populate=deep&filters[purchase][id][$eq]=` +
+      id;
+    console.log(endpoint);
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    const isDataExist = res.data.length > 0;
+    console.log(isDataExist);
+
+    if (isDataExist) {
+      clearData();
+      notification["error"]({
+        message: "Tidak dapat menambahkan data PO",
+        description:
+          "Data LPB ini sudah memilik LPB yang terpasang. Silahkan cek kembali atau gunakan dokumen PO lainnya ",
+      });
+    } else {
+      // fetch po
+      fetchPOdata(id);
+    }
   };
 
   const createDetailOrder = async () => {
@@ -193,31 +276,30 @@ function Tambah({ props }) {
       productTotalPrice,
       productSubTotal,
       setListId,
-      "/purchasing-details"
+      "/purchasing-details",
+      createOrder
     );
   };
 
-  const createOrder = async (values) => {
+  const createOrder = async (values, detailListId) => {
     await createPurchasing(
       products,
       grandTotal,
       totalPrice,
       values,
-      listId,
+      detailListId,
       discPrice,
       form,
       router,
-      updateOrderData,
+      updateOrderData
     );
-    
   };
 
   const updateOrderData = async () => {
-    if (dataValues.status == "Selesai") {
-      await updateOrder(preorderData, "Selesai");
-      updateProductHarga(products);
-    }
-    else await updateOrder(preorderData, "Tidak");
+    if (dataValues.status == "Diterima") {
+      await updateOrder(preorderData, "Diterima");
+      await updateProductHarga(products);
+    } else await updateOrder(preorderData, "Diproses");
   };
 
   const updateProductHarga = async (values) => {
@@ -226,7 +308,7 @@ function Tambah({ props }) {
       updateProduct(element, values.productInfo[index]);
       index++;
     });
-  }
+  };
 
   const onChange = async () => {
     var isDuplicatedData = false;
@@ -275,7 +357,9 @@ function Tambah({ props }) {
     clearData();
     setIsFetchingData(true);
 
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/purchases/${id}?populate=deep`;
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL + `/purchases/${id}?populate=deep`;
+    console.log(endpoint);
     const options = {
       method: "GET",
       headers: {
@@ -286,17 +370,18 @@ function Tambah({ props }) {
 
     const req = await fetch(endpoint, options);
     const res = await req.json();
+    console.log(res);
 
     const dataPO = res.data.attributes;
     const purchase_details = dataPO.purchase_details.data;
     const supplier = dataPO.supplier.data;
-    
+
     setPreOrderData(res.data);
     setSupplier(supplier);
     setGrandTotal(dataPO.delivery_total);
     setBiayaPengiriman(dataPO.delivery_fee);
 
-    var dateString = new Date();;
+    var dateString = new Date();
     var momentObj = moment(dateString, "YYYY-MM-DD");
     var momentString = momentObj.format("MM-DD-YYYY");
 
@@ -320,8 +405,8 @@ function Tambah({ props }) {
       delivery_fee: dataPO.delivery_fee,
       disc_type: null,
       disc_value: null,
-      DPP_active: null,
-      PPN_active: null,
+      DPP_active: true,
+      PPN_active: "PPN",
     });
 
     setAdditionalFee({
@@ -346,7 +431,8 @@ function Tambah({ props }) {
       var unitOrder = element.attributes.unit_order;
       var productUnit = element.attributes.products.data[0].attributes;
 
-      priceAfterDisc = priceAfterDisc + element.attributes.unit_price_after_disc;
+      priceAfterDisc =
+        priceAfterDisc + element.attributes.unit_price_after_disc;
 
       for (let index = 1; index < 6; index++) {
         if (unitOrder === productUnit[`unit_${index}`]) {
@@ -368,7 +454,11 @@ function Tambah({ props }) {
         },
       });
 
-      const test = form.getFieldsValue(["disc_rp", "jumlah_option", "jumlah_qty"]);
+      const test = form.getFieldsValue([
+        "disc_rp",
+        "jumlah_option",
+        "jumlah_qty",
+      ]);
 
       // SET INITIAL PRODUCT
       dispatch({
@@ -387,10 +477,6 @@ function Tambah({ props }) {
         index,
       });
     });
-    //console.log("initial product"); console.log(products); console.log(productTotalPrice);
-    //console.log(setTotalPrice); console.log(setProductTotalPrice); console.log(calculatePriceAfterDisc);
-    //console.log(productSubTotal); console.log(locations);
-    //setDiscPrice(priceAfterDisc);
 
     setTimeout(() => {
       setIsFetchingData(false);
@@ -429,6 +515,7 @@ function Tambah({ props }) {
 
     newTotal = totalPrice - disc.disc_value;
     setDiscPrice(newTotal);
+    setDiscValue(disc.disc_value);
   };
 
   const setTotalPriceWithPercentDisc = (disc) => {
@@ -437,17 +524,7 @@ function Tambah({ props }) {
     newTotal = totalPrice - (totalPrice * disc.disc_value) / 100;
     if (newTotal < 0) newTotal = 0;
     setDiscPrice(newTotal);
-  };
-
-  const setDPPActive = (value) => {
-    if (value) {
-      // fungsi gak guna karena balik lagi
-      form.setFieldsValue({ PPN_active: "PPN" });
-      var newTotal = grandTotal;
-      var afterDPP = newTotal / dpp;
-      ppn = newTotal - afterDPP;
-      // var total = afterDPP + ppn;
-    }
+    setDiscValue((totalPrice * disc.disc_value) / 100);
   };
 
   const clearData = () => {
@@ -464,7 +541,30 @@ function Tambah({ props }) {
     } else {
       setGrandTotal(totalPrice + biayaPengiriman + biayaTambahan);
     }
+
+    if (isDPPActive) {
+      dppValue = totalPrice / 1.11;
+      ppnValue = (dppValue * 11) / 100;
+      setdppPrice(dppValue);
+      setppnPrice(ppnValue);
+    }
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
+
+  useEffect(() => {
+    if (isDPPActive) {
+      dppValue = totalPrice / 1.11;
+      ppnValue = (dppValue * 11) / 100;
+    } else {
+      dppValue = 0;
+      ppnValue = 0;
+    }
+
+    setdppPrice(dppValue);
+    setppnPrice(ppnValue);
+
+    console.log("dpp ", dppPrice);
+    console.log("ppn ", ppnPrice);
+  }, [isDPPActive]);
 
   useEffect(() => {
     sumAdditionalPrice();
@@ -472,15 +572,21 @@ function Tambah({ props }) {
 
   useEffect(() => {
     if (listId.length > 0) {
-      createOrder(dataValues);
+      // createOrder(dataValues);
     }
   }, [listId]);
 
   useEffect(() => {
-    if (dataValues) createDetailOrder();
+    if (dataValues) {
+      createDetailOrder();
+    }
   }, [dataValues]);
 
   useEffect(() => {
+    form.setFieldsValue({
+      order_date: moment(),
+      DPP_active: "DPP",
+    });
     // used to reset redux from value before
     clearData();
   }, []);
@@ -563,8 +669,8 @@ function Tambah({ props }) {
                       <Select.Option value="Diproses" key={"Diproses"}>
                         Diproses
                       </Select.Option>
-                      <Select.Option value="Selesai" key={"Selesai"}>
-                        Selesai
+                      <Select.Option value="Diterima" key={"Diterima"}>
+                        Diterima
                       </Select.Option>
                     </Select>
                   </Form.Item>
@@ -593,7 +699,10 @@ function Tambah({ props }) {
                     >
                       {locations.map((element) => {
                         return (
-                          <Select.Option value={element.id} key={element.attributes.name}>
+                          <Select.Option
+                            value={element.id}
+                            key={element.attributes.name}
+                          >
                             {element.attributes.name}
                           </Select.Option>
                         );
@@ -631,28 +740,7 @@ function Tambah({ props }) {
                 </div>
 
                 <div className="w-full md:w-1/4 px-3 mb-2 mt-5 md:mb-0">
-                  <Form.Item name="no_po">
-                    <Select
-                      placeholder="Pilih Nomor PO"
-                      size="large"
-                      onChange={(e) => fetchPOdata(e)}
-                      style={{
-                        width: "100%",
-                      }}
-                    >
-                      {deliveredOrder.map((element) => {
-                        if (supplier != undefined) {
-                          if (supplier.id == element.attributes.supplier.data.id && element.attributes.status != "Selesai") {
-                            return (
-                              <Select.Option value={element.id} key={element.id}>
-                                {element.attributes.no_po}
-                              </Select.Option>
-                            );
-                          }
-                        }
-                      })}
-                    </Select>
-                  </Form.Item>
+                  <SearchPO supplier={supplier} handleSelect={POValidation} />
                 </div>
 
                 <div className="w-full md:w-1/4 px-3 mb-2 mt-5 md:mb-0">
@@ -696,9 +784,10 @@ function Tambah({ props }) {
                   </div>
                 )}
               </div>
-
               <div className="flex justify-end">
-                <p className="font-bold">Total Item : {products.productList.length} </p>
+                <p className="font-bold">
+                  Total Item : {products.productList.length}{" "}
+                </p>
               </div>
               <div className="flex justify-end transition-all">
                 <Row>
@@ -711,15 +800,73 @@ function Tambah({ props }) {
                     </p>
                   )}
                   {discPrice === 0 ? (
-                    <p className="font-bold ml-2">{formatter.format(totalPrice || 0)}</p>
+                    <p className="font-bold ml-2">
+                      {formatter.format(totalPrice || 0)}
+                    </p>
                   ) : (
                     <p className="font-bold line-through ml-2 ">
                       {formatter.format(totalPrice || 0)}
                     </p>
                   )}
                 </Row>
-              </div>
+              </div>{" "}
+              <div className="flex justify-end transition-all">
+                <Row>
+                  <p className="font-bold">DPP :</p>
+                  {discPrice === 0 ? (
+                    <p></p>
+                  ) : (
+                    <p className="font-bold text-red-500 ml-2">
+                      {isDPPActive
+                        ? formatter.format(dppPrice - discValue)
+                        : formatter.format(0)}
+                    </p>
+                  )}
 
+                  {""}
+
+                  {discPrice === 0 ? (
+                    <p className="font-bold ml-2">
+                      {isDPPActive
+                        ? formatter.format(dppPrice)
+                        : formatter.format(0)}
+                    </p>
+                  ) : (
+                    <p className="font-bold line-through ml-2 ">
+                      {isDPPActive
+                        ? formatter.format(dppPrice)
+                        : formatter.format(0)}
+                    </p>
+                  )}
+                </Row>
+              </div>
+              <div className="flex justify-end transition-all">
+                <Row>
+                  <p className="font-bold">PPN :</p>
+                  {discPrice === 0 ? (
+                    <p></p>
+                  ) : (
+                    <p className="font-bold text-red-500 ml-2">
+                      {isDPPActive
+                        ? formatter.format(ppnPrice - discValue)
+                        : formatter.format(0)}
+                    </p>
+                  )}
+                  {discPrice === 0 ? (
+                    <p className="font-bold ml-2">
+                      {isDPPActive
+                        ? formatter.format(ppnPrice)
+                        : formatter.format(0)}
+                    </p>
+                  ) : (
+                    <p className="font-bold line-through ml-2 ">
+                      {isDPPActive
+                        ? formatter.format(ppnPrice)
+                        : formatter.format(0)}
+                    </p>
+                  )}
+                </Row>
+              </div>
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item name="disc_type">
@@ -764,17 +911,19 @@ function Tambah({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
-                  <Form.Item name="DPP_active">
+                  <Form.Item initialValue={true} name="DPP_active">
                     <Select
-                      disabled={products.productList.length === 0}
                       placeholder="Pakai DPP"
-                      onChange={setDPPActive}
+                      onChange={setIsDPPActive}
                       size="large"
                       style={{
                         width: "100%",
                       }}
                     >
-                      <Select.Option value="DPP" key={"DPP"}>
+                      <Select.Option value={false} key={"non-DPP"}>
+                        Non DPP
+                      </Select.Option>
+                      <Select.Option value={true} key={"DPP"}>
                         DPP
                       </Select.Option>
                     </Select>
@@ -885,14 +1034,15 @@ function Tambah({ props }) {
               </div>
               <div>
                 <p className="font-bold flex justify-end">
-                  Total Harga :{" "}
-                  {grandTotal === 0 ? formatter.format(totalPrice) : formatter.format(grandTotal)}
+                  Total Pembelian :{" "}
+                  {grandTotal === 0
+                    ? formatter.format(totalPrice)
+                    : formatter.format(grandTotal)}
                 </p>
               </div>
               <Form.Item name="additional_note">
                 <TextArea rows={4} placeholder="Catatan Tambahan" />
               </Form.Item>
-
               <Form.Item className="mt-5">
                 {loading ? (
                   <div className=" flex float-left ml-3 ">

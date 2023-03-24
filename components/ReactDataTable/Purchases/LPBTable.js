@@ -15,17 +15,14 @@ export default function ReactDataTable({
 }) {
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    console.log("products", products);
-    console.log("product sub total", productSubTotal);
-  }, [products]);
+  useEffect(() => {}, [products]);
 
   var defaultDp1 = 0;
   var defaultDp2 = 0;
   var defaultDp3 = 0;
   var unit = [];
   var priceUnit = 1;
-  var tempIndex = products.productList.length;
+  var tempIndex = null;
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -35,25 +32,6 @@ export default function ReactDataTable({
 
   const onDeleteProduct = (value) => {
     dispatch({ type: "REMOVE_PRODUCT", index: value });
-  };
-
-  const onChangeUnit = (value, data, index) => {
-    unit[index] = value;
-    if (value == 1) {
-      priceUnit = data.attributes.buy_price_1;
-    } else if (value == 2) {
-      priceUnit = data.attributes.buy_price_2;
-    } else if (value == 3) {
-      priceUnit = data.attributes.buy_price_3;
-    } else if (value == 4) {
-      priceUnit = data.attributes.buy_price_4;
-    } else if (value == 5) {
-      priceUnit = data.attributes.buy_price_5;
-    }
-
-    dispatch({ type: "CHANGE_PRODUCT_UNIT", unit: value, product: data, index });
-    onChangePriceUnit(priceUnit, data, value, index);
-    tempIndex = 0;
   };
 
   const onChangeQty = (value, data, index) => {
@@ -74,9 +52,32 @@ export default function ReactDataTable({
     });
   };
 
+  const onChangeProductPrice = (unit_price, product, index) => {
+    dispatch({
+      type: "CHANGE_PRODUCT_PRICE",
+      unit_price: unit_price,
+      product: product,
+      index,
+    });
+  };
+
   const onChangePriceUnit = (value, data, index, indexRow) => {
-    var dataForm = formObj.getFieldsValue();
     var tempPriceUnit = [];
+
+    onChangeProductPrice(value, data, indexRow);
+
+    const selectedUnit =
+      formObj.getFieldValue(`jumlah_option`) || products.productInfo;
+    const selectedUnitIndex =
+      selectedUnit?.[indexRow]?.unitIndex || selectedUnit?.[indexRow] || index;
+
+    const discRp = formObj.getFieldValue(`disc_rp`) || products.productInfo;
+    const discRpIndex =
+      discRp?.[indexRow]?.disc ||
+      discRp?.[indexRow] ||
+      data.attributes[`purchase_discount_${selectedUnitIndex}`];
+    console.log("change discount to ", discRpIndex);
+    onChangeDisc(discRpIndex, data, indexRow);
 
     tempPriceUnit.push(data.attributes.buy_price_1);
     tempPriceUnit.push(data.attributes.buy_price_2);
@@ -90,11 +91,11 @@ export default function ReactDataTable({
     data.attributes.buy_price_4 = value;
     data.attributes.buy_price_5 = value;
 
-    if (tempIndex != indexRow) {
-      tempIndex = indexRow;
-      if(dataForm.jumlah_option[indexRow] == undefined) dataForm.jumlah_option[indexRow] = unit[indexRow];
-      unit[indexRow] = dataForm.jumlah_option[indexRow];
-      onChangeUnit(unit[indexRow], data, indexRow);
+    if (tempIndex != index) {
+      console.log("===== masuk siini =====");
+      tempIndex = index;
+      onChangeUnit(selectedUnitIndex, data, indexRow);
+      return;
     }
 
     data.attributes.buy_price_1 = tempPriceUnit[0];
@@ -103,11 +104,48 @@ export default function ReactDataTable({
     data.attributes.buy_price_4 = tempPriceUnit[3];
     data.attributes.buy_price_5 = tempPriceUnit[4];
 
+    console.log("harga satuan ", value);
     formObj.setFieldsValue({
       harga_satuan: {
         [indexRow]: value,
       },
+      disc_rp: {
+        [indexRow]: discRpIndex,
+      },
     });
+    console.log("product data", products);
+  };
+
+  const onChangeUnit = (value, data, index) => {
+    // reset disc on change
+    formObj.setFieldsValue({
+      disc_rp: {
+        [index]: null,
+      },
+    });
+
+    unit = value;
+    if (value == 1) {
+      priceUnit = data.attributes.buy_price_1;
+    } else if (value == 2) {
+      priceUnit = data.attributes.buy_price_2;
+    } else if (value == 3) {
+      priceUnit = data.attributes.buy_price_3;
+    } else if (value == 4) {
+      priceUnit = data.attributes.buy_price_4;
+    } else if (value == 5) {
+      priceUnit = data.attributes.buy_price_5;
+    }
+
+    dispatch({
+      type: "CHANGE_PRODUCT_UNIT",
+      unit: value,
+      product: data,
+      index,
+    });
+
+    onChangePriceUnit(priceUnit, data, value, index);
+    tempIndex = 0;
   };
 
   const onChangeD1D2D3 = (value, data, type, index) => {
@@ -194,7 +232,9 @@ export default function ReactDataTable({
                     width: "150px",
                     marginRight: "10px",
                   }}
-                  formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                  formatter={(value) =>
+                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
                   parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                 />
               </Form.Item>
@@ -252,35 +292,50 @@ export default function ReactDataTable({
                   {row.attributes?.unit_1 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_1 === null} value={1}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_1 === null}
+                      value={1}
+                    >
                       {row.attributes?.unit_1}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_2 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_2 === null} value={2}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_2 === null}
+                      value={2}
+                    >
                       {row.attributes?.unit_2}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_3 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_3 === null} value={3}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_3 === null}
+                      value={3}
+                    >
                       {row.attributes?.unit_3}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_4 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_4 === null} value={4}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_4 === null}
+                      value={4}
+                    >
                       {row.attributes?.unit_4}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_5 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_5 === null} value={5}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_5 === null}
+                      value={5}
+                    >
                       {row.attributes?.unit_5}
                     </Select.Option>
                   )}
@@ -295,7 +350,7 @@ export default function ReactDataTable({
       name: "Diskon",
       width: "150px",
       selector: (row, idx) => {
-        var defaultDisc = 0;
+        var defaultDisc = row?.attributes?.purchase_discount_1 || 0;
         if (products.productInfo[idx]?.disc) {
           defaultDisc = products.productInfo[idx].disc;
         }
@@ -311,7 +366,9 @@ export default function ReactDataTable({
                   width: "100px",
                   marginRight: "10px",
                 }}
-                formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                formatter={(value) =>
+                  value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
                 parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
               />
             </Form.Item>
@@ -446,7 +503,10 @@ export default function ReactDataTable({
               >
                 {locations.map((element) => {
                   return (
-                    <Select.Option value={element.id} key={element.attributes.name}>
+                    <Select.Option
+                      value={element.id}
+                      key={element.attributes.name}
+                    >
                       {element.attributes.name}
                     </Select.Option>
                   );
@@ -475,7 +535,11 @@ export default function ReactDataTable({
               ]}
               noStyle
             >
-              <DatePicker placeholder="EXP. Date" size="normal" format={"DD/MM/YYYY"} />
+              <DatePicker
+                placeholder="EXP. Date"
+                size="normal"
+                format={"DD/MM/YYYY"}
+              />
             </Form.Item>
           </>
         );

@@ -176,7 +176,7 @@ function Toko({ props }) {
 
   // NO Non Panel Sale
   var noNonPanelSale = String(nonPanel?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`PN/ET/${user.id}/${noNonPanelSale}/${mm}/${yyyy}`);
+  const [categorySale, setCategorySale] = useState(`PNP/ET/${user.id}/${noNonPanelSale}/${mm}/${yyyy}`);
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);
@@ -316,7 +316,7 @@ function Toko({ props }) {
     if(products.productList.length > 0){ 
         inven.forEach((element) => {
             products.productList.forEach((data) => {
-              if (data.id == element.attributes.products.data[0].id) {
+              if (data.id == element.attributes.products.data[0]?.id) {
                 data.stock = element.attributes.total_stock;
               }  
             });
@@ -374,7 +374,7 @@ function Toko({ props }) {
     clearData();
     setProductSubTotal({});
     form.setFieldsValue({
-      customer: customerData.attributes.name,
+      customer: customerData?.attributes.name,
     });
     setCustomer(customerData);
   }, []);

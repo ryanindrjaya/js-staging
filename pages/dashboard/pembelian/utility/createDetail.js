@@ -8,7 +8,9 @@ const cookies = nookies.get(null, "token");
 const getIndexUnit = (data, idx) => {
   var unitIndex = 1;
   for (let index = 1; index < 6; index++) {
-    if (data.attributes[`unit_${index}`] === data.attributes[`unit_${idx + 1}`]) {
+    if (
+      data.attributes[`unit_${index}`] === data.attributes[`unit_${idx + 1}`]
+    ) {
       unitIndex = index;
     }
   }
@@ -16,55 +18,81 @@ const getIndexUnit = (data, idx) => {
   return unitIndex;
 };
 
-const createDetailOrder = (values, products, productTotalPrice, productSubTotal, setListId, url) => {
-  // console.log(values);
-  console.log("values", values);
-  console.log("product", products);
-  console.log("productList", products.productList);
-  products.productList.forEach((element, idx) => {
-    var subTotal = unitPriceAfterDisc * qty;
+const createDetailOrder = async (
+  values,
+  products,
+  productTotalPrice,
+  productSubTotal,
+  setListId,
+  url,
+  createMasterData
+) => {
+  await Promise.all(
+    products.productList.map(async (element, idx) => {
+      try {
+        const id = element.id;
+        const unitByIndex = getIndexUnit(element, idx);
 
-    const id = element.id;
+        var subTotal = unitPriceAfterDisc * qty;
+        var batch = values.batch[idx];
+        var location = values.product_location[idx];
+        var expDate = new Date(values.expired_date[idx]);
+        var newExptDate = moment
+          .utc(expDate)
+          .utcOffset(7 * 60)
+          .format();
 
-    var batch = values.batch[idx];
-    var location = values.product_location[idx];
-    var expDate = new Date(values.expired_date[idx]);
-    var newExptDate = moment
-      .utc(expDate)
-      .utcOffset(7 * 60)
-      .format();
+        var qty = products.productInfo[idx]?.qty ?? 1;
+        var disc =
+          products.productInfo[idx]?.disc ??
+          element.attributes[`purchase_discount_${unitByIndex}`];
+        var unit =
+          products.productInfo?.[idx]?.unit ??
+          element.attributes[`unit_${unitByIndex}`];
+        var dp1 =
+          products.productInfo?.[idx]?.d1 ??
+          element.attributes[`unit_${unitByIndex}_dp1`] ??
+          0;
+        var dp2 =
+          products.productInfo?.[idx]?.d2 ??
+          element.attributes[`unit_${unitByIndex}_dp2`] ??
+          0;
+        var dp3 =
+          products.productInfo?.[idx]?.d3 ??
+          element.attributes[`unit_${unitByIndex}_dp3`] ??
+          0;
+        var unitPrice =
+          products.productInfo?.[idx]?.priceUnit ??
+          element.attributes.buy_price_1;
+        var unitPriceAfterDisc = productTotalPrice?.[idx];
+        var subTotal = productSubTotal?.[idx];
 
-    var qty = products.productInfo[idx]?.qty ?? 1;
-    var disc = products.productInfo[idx]?.disc ?? 0;
-    var unit = products.productInfo?.[idx]?.unit ?? element.attributes.unit_1;
-    var unitPrice = products.productInfo?.[idx]?.priceUnit ?? element.attributes.buy_price_1;
-    var unitPriceAfterDisc = productTotalPrice?.[idx];
-    var subTotal = productSubTotal?.[idx];
-    var dp1 = products.productInfo?.[idx]?.d1 ?? element.attributes[`unit_1_dp1`] ?? 0;
-    var dp2 = products.productInfo?.[idx]?.d2 ?? element.attributes[`unit_1_dp2`] ?? 0;
-    var dp3 = products.productInfo?.[idx]?.d3 ?? element.attributes[`unit_1_dp3`] ?? 0;
+        await POSTPurchaseDetail(
+          qty,
+          disc,
+          unit,
+          unitPrice,
+          unitPriceAfterDisc,
+          subTotal,
+          id,
+          setListId,
+          products,
+          batch,
+          location,
+          newExptDate,
+          url,
+          dp1,
+          dp2,
+          dp3
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    })
+  );
 
-    console.log("new data", batch, location, expDate, newExptDate);
-
-    POSTPurchaseDetail(
-      qty,
-      disc,
-      unit,
-      unitPrice,
-      unitPriceAfterDisc,
-      subTotal,
-      id,
-      setListId,
-      products,
-      batch,
-      location,
-      newExptDate,
-      url,
-      dp1,
-      dp2,
-      dp3
-    );
-  });
+  // create masterData
+  await createMasterData(values, tempListId);
 };
 
 const POSTPurchaseDetail = async (
@@ -90,10 +118,10 @@ const POSTPurchaseDetail = async (
       total_order: String(qty),
       unit_order: unit,
       unit_price: unitPrice,
-      unit_price_after_disc: parseInt(unitPriceAfterDisc),
-      sub_total: parseInt(subTotal),
+      unit_price_after_disc: parseFloat(unitPriceAfterDisc),
+      sub_total: parseFloat(subTotal),
       product: { id: id },
-      disc: parseInt(disc),
+      disc: parseFloat(disc),
       batch: batch,
       location: { id: location },
       expired_date: expDate,

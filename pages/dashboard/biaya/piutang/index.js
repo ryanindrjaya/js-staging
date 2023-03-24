@@ -76,7 +76,7 @@ const fetchPiutang = async (cookies) => {
 function Piutang({ props }) {
     const user = props.user;
     const locations = props.locations.data;
-    const data = props.piutang; console.log("piutang", props)
+    const data = props.piutang;
     const router = useRouter();
     const [piutang, setPiutang] = useState(data);
     const [supplier, setSupplier] = useState();
@@ -96,6 +96,57 @@ function Piutang({ props }) {
             "Work In Progress",
             "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
         );
+    };
+
+    const handleDelete = async (data) => {
+        handleDeleteRelation(data);
+
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/credits/" + data.id;
+        const cookies = nookies.get(null, "token");
+
+        const options = {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + cookies.token,
+            },
+        };
+
+        const req = await fetch(endpoint, options);
+        const res = await req.json();
+        if (res) {
+            const res = await fetchData(cookies);
+            openNotificationWithIcon(
+                "success",
+                "Berhasil menghapus data",
+                "Piutang yang dipilih telah berhasil dihapus. Silahkan cek kembali piutang"
+            );
+            setPiutang(res);
+        }
+    };
+
+    const handleDeleteRelation = async (data) => {
+        var id = 0;
+        data.attributes.credit_details.data.forEach((element) => {
+            id = element.id;
+
+            const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-details/" + id;
+            const cookies = nookies.get(null, "token");
+
+            const options = {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + cookies.token,
+                },
+            };
+
+            const req = fetch(endpoint, options);
+            //const res = req.json();
+            if (req) {
+                console.log("relation deleted");
+            }
+        });
     };
 
     const openNotificationWithIcon = (type, title, message) => {
@@ -283,9 +334,9 @@ function Piutang({ props }) {
                         </div>
 
                         <CreditTable
-                          data={data}
+                          data={piutang}
                           onUpdate={handleUpdate}
-                          //onDelete={handleDelete}
+                          onDelete={handleDelete}
                           //onPageChange={handlePageChange}
                           //onChangeStatus={onChangeStatus}
                           //user={user}

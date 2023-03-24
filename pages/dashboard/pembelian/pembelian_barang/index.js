@@ -1,15 +1,16 @@
 import Head from "next/head";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import { useRouter } from "next/router";
-import { Input, notification } from "antd";
+import { Button, Descriptions, Input, Modal, notification, Tag } from "antd";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
 import PurchasingTable from "../../../../components/ReactDataTable/Purchases/PurchasingTable";
 import nookies from "nookies";
-
+import { PrinterOutlined } from "@ant-design/icons";
 import createInventory from "../utility/createInventory";
+import updateProductFromTable from "../utility/updateProductFromTable";
 
 Pembelian.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -52,8 +53,11 @@ const fetchData = async (cookies) => {
 
 function Pembelian({ props }) {
   const data = props.data;
+  const [selectedLPB, setSelectedLPB] = useState();
   const [purchase, setPurchase] = useState(data);
+  const [openModal, setOpenModal] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const cookies = nookies.get(null, "token");
 
   const { Search } = Input;
   const router = useRouter();
@@ -73,7 +77,8 @@ function Pembelian({ props }) {
 
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases?pagination[page]=" + page;
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL + "/purchases?pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -98,7 +103,6 @@ function Pembelian({ props }) {
       console.log(error);
     }
   };
-
 
   const filterDuplicateData = (arr) => {
     const seen = new Set();
@@ -149,77 +153,193 @@ function Pembelian({ props }) {
     onChangeStatus("Dibatalkan", row);
   };
 
-  const onChangeStatus = (status, row) => {
-    row.attributes.status = status;
-    const dataStatus = row;
-
-    if (status === "Selesai") {
-      // invetory handle
-      createInventory(row);
-    }
-
-    handleChangeStatus(dataStatus, dataStatus.id);
+  const updateProductHarga = async (values) => {
+    var index = 0;
+    values.productList.forEach((element) => {
+      // updateProduct(element, values.productInfo[index]);
+      index++;
+    });
   };
 
-  const handleChangeStatus = async (values, id) => {
-    // // clean object
-    delete values.attributes.purchase;
-    for (var key in values.attributes) {
-      if (values.attributes[key] === null || values.attributes[key] === undefined) {
-        delete values.attributes[key];
-      }
+  const onChangeStatus = async (status, row) => {
+    row.attributes.status = status;
+    // const dataStatus = row;
+
+    const LPBLocationId = row.attributes.location?.data?.id;
+
+    console.log("data row status", LPBLocationId);
+
+    if (status === "Diterima") {
+      console.log("store to inventory && update product price");
+      // invetory handle
+      createInventory(row);
+
+      await updateProductFromTable(row);
     }
 
-    if (values.attributes?.document?.data === null || values.attributes?.document?.data === undefined) {
-      delete values.attributes?.document;
-    }
-
-    var purchasing_details = [];
-    var purchasing_payments = [];
-    values.attributes.purchasing_details.data.forEach((element) => {
-      purchasing_details.push({ id: element.id });
-    });
-    values.attributes.purchasing_payments.data.forEach((element) => {
-      purchasing_payments.push({ id: element.id });
-    });
-
-    values.attributes.supplier = { id: values.attributes.supplier.data.id };
-    values.attributes.location = { id: values.attributes.location.data.id };
-    values.attributes.purchasing_details = purchasing_details;
-    values.attributes.purchasing_payments = purchasing_payments;
-
-    const newValues = {
-      data: values.attributes,
-    };
-
-    const JSONdata = JSON.stringify(newValues);
-    const cookies = nookies.get(null, "token");
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings/" + id;
-
-    const options = {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-      body: JSONdata,
-    };
-
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
-
+    const poData = row?.attributes?.purchase?.data;
+    const req = await changeStatusPO(poData, status, LPBLocationId);
     if (req.status === 200) {
-      const response = await fetchData(cookies);
+      await changeStatusLPB(row, row.id);
+    }
+  };
 
-      if (res.data.attributes.status === "Dibatalkan") {
-        router.reload();
-      } else {
-        setPurchase(response);
+  const changeStatusPO = async (poData, status, LPBLocationId) => {
+    try {
+      // cleaning
+      delete poData.attributes?.document;
+      for (var key in poData.attributes) {
+        if (
+          poData.attributes[key] === null ||
+          poData.attributes[key] === undefined
+        ) {
+          delete poData.attributes[key];
+        }
       }
 
-      openNotificationWithIcon("success", "Status berhasil dirubah", "Status berhasil dirubah. Silahkan cek LPB");
-    } else {
-      openNotificationWithIcon("error", "Status gagal dirubah", "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah");
+      poData.attributes.status = status;
+      poData.attributes.location = {
+        id: poData.attributes?.location?.data?.id ?? LPBLocationId,
+      };
+      poData.attributes.supplier = {
+        id: poData.attributes?.supplier?.data?.id,
+      };
+      poData.attributes.purchase_details =
+        poData.attributes?.purchase_details?.data;
+
+      const values = {
+        data: poData.attributes,
+      };
+
+      console.log(values);
+
+      const JSONdata = JSON.stringify(values);
+      const cookies = nookies.get(null, "token");
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/" + poData.id;
+      const options = {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+        body: JSONdata,
+      };
+
+      const req = await fetch(endpoint, options);
+
+      if (req.status === 200) {
+        openNotificationWithIcon(
+          "success",
+          "Status PO berhasil dirubah",
+          "Status PO berhasil dirubah. Silahkan cek tabel PO"
+        );
+      } else {
+        openNotificationWithIcon(
+          "error",
+          "Status PO gagal dirubah",
+          "Status PO gagal dirubah. Silahkan cek log untuk error detail"
+        );
+      }
+
+      return req;
+    } catch (error) {
+      console.log(error);
+      openNotificationWithIcon(
+        "error",
+        "Status PO gagal dirubah",
+        "Status PO gagal dirubah. Silahkan cek log untuk error detail"
+      );
+
+      return null;
+    }
+  };
+
+  const changeStatusLPB = async (values, id) => {
+    try {
+      // // clean object
+      delete values.attributes.purchase;
+      for (var key in values.attributes) {
+        if (
+          values.attributes[key] === null ||
+          values.attributes[key] === undefined
+        ) {
+          delete values.attributes[key];
+        }
+      }
+
+      if (
+        values.attributes?.document?.data === null ||
+        values.attributes?.document?.data === undefined
+      ) {
+        delete values.attributes?.document;
+      }
+
+      var purchasing_details = [];
+      var purchasing_payments = [];
+      values.attributes.purchasing_details.data.forEach((element) => {
+        purchasing_details.push({ id: element.id });
+      });
+      values.attributes.purchasing_payments.data.forEach((element) => {
+        purchasing_payments.push({ id: element.id });
+      });
+
+      values.attributes.supplier = { id: values.attributes.supplier.data.id };
+      values.attributes.location = {
+        id: values?.attributes?.location?.data?.id ?? LPBLocationId,
+      };
+      values.attributes.purchasing_details = purchasing_details;
+      values.attributes.purchasing_payments = purchasing_payments;
+
+      const newValues = {
+        data: values.attributes,
+      };
+
+      const JSONdata = JSON.stringify(newValues);
+      const cookies = nookies.get(null, "token");
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings/" + id;
+
+      const options = {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+        body: JSONdata,
+      };
+
+      console.log("jsondata put update", JSONdata);
+
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
+
+      if (req.status === 200) {
+        const response = await fetchData(cookies);
+
+        if (res.data.attributes.status === "Dibatalkan") {
+          router.reload();
+        } else {
+          setPurchase(response);
+        }
+
+        openNotificationWithIcon(
+          "success",
+          "Status LPB berhasil dirubah",
+          "Status LPB berhasil dirubah. Silahkan cek LPB"
+        );
+      } else {
+        openNotificationWithIcon(
+          "error",
+          "Status LPB gagal dirubah",
+          "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah"
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      openNotificationWithIcon(
+        "error",
+        "Status LPB gagal dirubah",
+        "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah"
+      );
     }
   };
 
@@ -246,6 +366,69 @@ function Pembelian({ props }) {
     });
   };
 
+  // search query
+  useEffect(() => {
+    async function getLPBById(id) {
+      const endpoint =
+        process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=*`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+      };
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
+
+      setSelectedLPB(res?.data);
+    }
+
+    if (router?.query?.id) {
+      const id = router.query.id;
+      getLPBById(id);
+    }
+  }, [router.query]);
+
+  useEffect(() => {
+    if (selectedLPB) {
+      setOpenModal(true);
+    }
+  }, [selectedLPB]);
+
+  var formatter = new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
+  });
+
+  const getTagColor = (type) => {
+    switch (type) {
+      case "Terkirim":
+        return "green";
+      case "Diterima":
+        return "GREEN";
+      case "Sebagian Diterima":
+        return "orange";
+      case "Diproses":
+        return "default";
+      default:
+        return "default";
+    }
+  };
+
+  const print = () => {
+    router.replace(
+      {
+        pathname: "/dashboard/pembelian/pembelian_barang",
+      },
+      undefined,
+      { shallow: true }
+    );
+    router.push("pembelian_barang/print/" + selectedLPB.id);
+  };
+
   return (
     <>
       <Head>
@@ -255,6 +438,96 @@ function Pembelian({ props }) {
         <LayoutWrapper style={{}}>
           <TitlePage titleText={"Lembar Pembelian Barang"} />
           <LayoutContent>
+            <Modal
+              open={openModal}
+              onClose={() => {
+                router.replace(
+                  {
+                    pathname: "/dashboard/pembelian/pembelian_barang",
+                  },
+                  undefined,
+                  { shallow: true }
+                );
+                setOpenModal(false);
+                setSelectedLPB();
+              }}
+              onCancel={() => {
+                router.replace(
+                  {
+                    pathname: "/dashboard/pembelian/pembelian_barang",
+                  },
+                  undefined,
+                  { shallow: true }
+                );
+                setOpenModal(false);
+                setSelectedLPB();
+              }}
+              width={1000}
+              okButtonProps={{ style: { display: "none" } }}
+              cancelText="Close"
+            >
+              {selectedLPB && (
+                <>
+                  <Descriptions
+                    extra={
+                      <Button
+                        onClick={print}
+                        className="bg-cyan-700 hover:bg-cyan-800 mr-7 border-none"
+                        type="primary"
+                      >
+                        <PrinterOutlined className="mr-2 mt-0.5 float float-left" />{" "}
+                        Cetak
+                      </Button>
+                    }
+                    size="middle"
+                    title="INFORMASI PEMBELIAN BARANG"
+                    bordered
+                  >
+                    <Descriptions.Item label="Tanggal Pembelian" span={4}>
+                      {selectedLPB?.attributes?.date_purchasing}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="NO LPB" span={2}>
+                      {selectedLPB?.attributes?.no_purchasing}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Supplier">
+                      {
+                        selectedLPB?.attributes?.supplier?.data?.attributes
+                          ?.name
+                      }
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Status" span={2}>
+                      <Tag color={getTagColor(selectedLPB?.attributes?.status)}>
+                        {selectedLPB?.attributes?.status}
+                      </Tag>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Lokasi" span={2}>
+                      {
+                        selectedLPB?.attributes?.location?.data?.attributes
+                          ?.name
+                      }
+                    </Descriptions.Item>
+                  </Descriptions>
+
+                  <Descriptions
+                    className="my-3"
+                    size="middle"
+                    title="PEMBAYARAN"
+                    bordered
+                  >
+                    <Descriptions.Item label="Termin Pembayaran" span={2}>
+                      {selectedLPB?.attributes?.tempo_days}{" "}
+                      {selectedLPB?.attributes?.tempo_time}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Total" className="font-bold">
+                      {formatter.format(
+                        selectedLPB?.attributes?.total_purchasing
+                      )}
+                    </Descriptions.Item>
+                  </Descriptions>
+                </>
+              )}
+            </Modal>
+
             <div className="w-full flex justify-between">
               <Search
                 className=""
@@ -265,9 +538,15 @@ function Pembelian({ props }) {
                   width: 200,
                 }}
               />
-              <button onClick={handleAdd} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5">
+              <button
+                onClick={handleAdd}
+                type="button"
+                className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+              >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
+                  <a className="text-white no-underline text-xs sm:text-xs">
+                    + Tambah
+                  </a>
                 </div>
               </button>
             </div>

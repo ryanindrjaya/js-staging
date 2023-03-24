@@ -24,14 +24,6 @@ export default function ReactDataTable({
     const tagGreen = process.env.TAG_GREEN;
     const tagOrange = process.env.TAG_ORANGE;
 
-    //var tunai = 0;
-    //var tf = 0;
-    //var giro = 0;
-    //var cn = 0;
-    //var oth = 0;
-
-    //data.data.forEac
-
     const openNotificationWithIcon = (type, title, message) => {
         notification[type]({
             message: title,
@@ -64,7 +56,7 @@ export default function ReactDataTable({
     var formatter = new Intl.NumberFormat("id-ID", {
         style: "currency",
         currency: "IDR",
-        maximumFractionDigits: 0,
+        maximumFractionDigits: 2,
     });
 
     const customStyles = {
@@ -102,7 +94,6 @@ export default function ReactDataTable({
             if (row.attributes?.setting == false) setting = "Tidak Aktif";
             else if (row.attributes?.setting == true) setting = "Aktif";
             else setting = "-";
-            //row.attributes?.setting ?? "-"]
 
             return (
               <>
@@ -147,7 +138,7 @@ export default function ReactDataTable({
             columns={columns}
             data={data.data}
             pagination
-            noDataComponent={"Belum ada data hutang"}
+            noDataComponent={"Belum ada data akun"}
         />
     );
 }

@@ -166,6 +166,16 @@ export default function Sidebar(props) {
                   <a>Customer</a>
                 </Link>
               </Menu.Item>
+              <Menu.Item style={submenuStyle} key="area">
+                <Link href="/dashboard/customer/area">
+                  <a>Area</a>
+                </Link>
+              </Menu.Item>
+              <Menu.Item style={submenuStyle} key="wilayah">
+                <Link href="/dashboard/customer/wilayah">
+                  <a>Wilayah</a>
+                </Link>
+              </Menu.Item>
             </SubMenu>
 
             {/* SUPPLIER */}
@@ -210,14 +220,14 @@ export default function Sidebar(props) {
                   <a>Sub Kategori</a>
                 </Link>
               </Menu.Item>
-              <Menu.Item style={submenuStyle} key="pabrikasi">
-                <Link href="/dashboard/produk/pabrikasi">
-                  <a>Pabrikasi</a>
-                </Link>
-              </Menu.Item>
               <Menu.Item style={submenuStyle} key="golongan">
                 <Link href="/dashboard/produk/golongan">
                   <a>Golongan</a>
+                </Link>
+              </Menu.Item>
+              <Menu.Item style={submenuStyle} key="pabrikasi">
+                <Link href="/dashboard/produk/pabrikasi">
+                  <a>Pabrikasi</a>
                 </Link>
               </Menu.Item>
             </SubMenu>
@@ -304,6 +314,11 @@ export default function Sidebar(props) {
               <Menu.Item style={submenuStyle} key="piutang">
                 <Link href="/dashboard/biaya/piutang">
                   <a>Piutang</a>
+                </Link>
+              </Menu.Item>
+              <Menu.Item style={submenuStyle} key="jurnal">
+                <Link href="/dashboard/biaya/jurnal">
+                  <a>Jurnal</a>
                 </Link>
               </Menu.Item>
             </SubMenu>

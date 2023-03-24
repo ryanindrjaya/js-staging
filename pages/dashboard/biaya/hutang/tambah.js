@@ -2,19 +2,21 @@ import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
+import ConfirmDialog from "@iso/components/Alert/ConfirmDialog";
 import { useSelector, useDispatch } from "react-redux";
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Row, Form, Input, InputNumber, Select, Button, Spin, notification, DatePicker } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import AddSellSalesTable from "@iso/components/ReactDataTable/Selling/AddSellSalesTable";
 import AddDebtTable from "@iso/components/ReactDataTable/Cost/AddDebtTable";
-import createData from "../utility/createHutang";
-import createDetails from "../utility/createDetailHutang";
+import createData from "../utility/create";
+import createDetails from "../utility/createDetail";
 import calculatePrice from "../utility/calculatePrice";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
 import nookies from "nookies";
+import LoadingAnimations from "@iso/components/Animations/Loading";
 import DataTable from "react-data-table-component";
 
 Hutang.getInitialProps = async (context) => {
@@ -41,7 +43,7 @@ Hutang.getInitialProps = async (context) => {
       LPB,
       returLPB,
       hutang,
-      akunHutang
+      akunHutang,
     },
   };
 };
@@ -133,16 +135,20 @@ function Hutang({ props }) {
   const [dataRetur, setDataRetur] = useState([]);
   const [sisaHutang, setSisaHutang] = useState([]);
   const [sisaHutangTotal, setSisaHutangTotal] = useState({});
+  //const [dataShow, setDataShow] =  useState([]); console.log("data show", dataShow);
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   //const [additionalFee, setAdditionalFee] = useState();
   const [isFetchinData, setIsFetchingData] = useState(false);
+  const [document, setDocument] = useState();
+  const [tanggal, setTanggal] = useState();
 
   const [dataValues, setDataValues] = useState();
 
   const [listId, setListId] = useState([]);
 
+  const submitBtn = useRef();
   const router = useRouter();
   const { TextArea } = Input;
   var today = new Date();
@@ -167,8 +173,36 @@ function Hutang({ props }) {
   });
 
   const onFinish = (values) => {
+    var totalTunai = 0;
+    var totalTransfer = 0;
+    var totalGiro = 0;
+    var totalCn = 0;
+    var totalOth = 0;
+
     setLoading(true);
     setInfo("sukses");
+
+    for (const key in biaya.info) {
+      totalTunai += biaya.info[key].tunai;
+      totalTransfer += biaya.info[key].transfer;
+      totalGiro += biaya.info[key].giro;
+      totalCn += biaya.info[key].cn;
+      totalOth += biaya.info[key].oth;
+    }
+
+    var totalBayar = values.bayar1 + values.bayar2 + values.bayar3 + values.bayar4 + values.bayar5;
+    var totalBayarProduk = totalTunai + totalTransfer + totalGiro + totalCn + totalOth;
+    if ((totalTunai != values.bayar1 || totalTransfer != values.bayar2 || totalGiro != values.bayar3 || totalCn != values.bayar4 || totalOth != values.bayar5)
+        && totalBayar != totalBayarProduk
+    ) {
+      notification["error"]({
+        message: "Gagal menambahkan data",
+        description:
+          "Total pembayaran dan yang dibayar tidak sesuai.",
+      });
+      setInfo("gagal");
+    }
+
     hutang.data.forEach((element) => {
       if (values.no_hutang == element.attributes.no_hutang) {
           notification["error"]({
@@ -185,7 +219,7 @@ function Hutang({ props }) {
 
   const createDetail = async () => {
     //await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/sales-sale-details");
-    await createDetails(dataValues, dataTabel, biaya, sisaHutang, setListId, "/debt-details");
+    await createDetails(dataValues, dataTabel, biaya, sisaHutang, setListId, "/debt-details", "hutang");
   };
 
   const createMaster = async (values) => {
@@ -193,6 +227,8 @@ function Hutang({ props }) {
     values.total_hutang_jatuh_tempo = totalHutangJatuhTempo();
     values.total_pembayaran = totalPembayaran();
     values.sisa_hutang_jatuh_tempo = sisaHutangJatuhTempo();
+    values.supplier = supplier;
+    values.document = document;
     await createData(sisaHutang, values, listId, form, router, "/debts/", "hutang", akunHutang);
   };
 
@@ -247,6 +283,44 @@ function Hutang({ props }) {
   };
 
   useEffect(() => {
+    var totalTunai = 0;
+    var totalTransfer = 0;
+    var totalGiro = 0;
+    var totalCn = 0;
+    var totalOth = 0;
+    var lastKey = 0;
+
+    if(biaya.info){
+        for (const key in biaya.info) {
+
+            totalTunai += biaya.info[key].tunai;
+            totalTransfer += biaya.info[key].transfer;
+            totalGiro += biaya.info[key].giro;
+            totalCn += biaya.info[key].cn;
+            totalOth += biaya.info[key].oth;
+
+            if (biaya.info[key].pilihData == "pilih") {
+                form.setFieldsValue({
+                    metode_bayar1: "tunai",
+                    bayar1: totalTunai,
+                    metode_bayar2: "transfer",
+                    bayar2: totalTransfer,
+                    metode_bayar3: "giro",
+                    bayar3: totalGiro,
+                    metode_bayar4: "cn",
+                    bayar4: totalCn,
+                    metode_bayar5: "oth",
+                    bayar5: totalOth,
+                });
+            } 
+
+        }
+        
+    }
+  }, [biaya.info]);
+
+
+  useEffect(() => {
     if (dataValues && info == "sukses") createDetail();
   }, [dataValues]);
 
@@ -281,7 +355,7 @@ function Hutang({ props }) {
         }
 
         if (isTempo) {
-            if (statusPembayaran === "Belum Lunas") {
+            if (statusPembayaran === "Belum Lunas" || statusPembayaran === "Belum Dibayar") {
                 status = "Tempo";
             } else if (statusPembayaran === "Dibayar Sebagian") {
                 status = "Sebagian";
@@ -310,12 +384,14 @@ function Hutang({ props }) {
         }
 
         if (status == "Tempo" || statusPembayaran == "Dibayar Sebagian") {
-          dataTabel[lpbId] = row;
+          row.hidden = false;
+          dataTabel[lpbId] = row; console.log("row", row);
           //biaya.list.push(row);
           dispatch({ type: "ADD_LIST", list: row });
         }
         lpbId++;
     });
+
 
     //dataTabel.push(biaya.list);
     lpbId = 0;
@@ -323,7 +399,7 @@ function Hutang({ props }) {
       returLPB.forEach((row) => {
           row.subtotal = 0;
           dataTabel.forEach((element) => {
-              if (element.attributes.no_purchasing == row.attributes.purchasing.data.attributes.no_purchasing) {
+              if (element.attributes.no_purchasing == row.attributes.purchasing.data?.attributes.no_purchasing) {
                   row.attributes.retur_lpb_details.data.forEach((detail) => {
                       row.subtotal += parseInt(detail.attributes.sub_total);
                   });
@@ -333,7 +409,7 @@ function Hutang({ props }) {
           lpbId++;
       });
 
-  }, []); console.log("biaya", biaya, dataRetur)
+  }, []);
 
   const validateError = () => {
     var listError = form.getFieldsError();
@@ -394,11 +470,11 @@ function Hutang({ props }) {
                       }}
                       placeholder="Status Pembayaran"
                     >
-                      <Select.Option value="1" key="1">
-                        Status 1
+                      <Select.Option value="Dibayar" key="Dibayar">
+                        Dibayar
                       </Select.Option>
-                      <Select.Option value="2" key="2">
-                        Status 2
+                      <Select.Option value="Belum Dibayar" key="Belum Dibayar">
+                        Belum Dibayar
                       </Select.Option>
                     </Select>
                   </Form.Item>
@@ -414,7 +490,7 @@ function Hutang({ props }) {
                     //    },
                     //]}
                     >
-                    <DatePicker placeholder="Rentang Tanggal" size="large" style={{ width: "100%" }} />
+                    <DatePicker placeholder="Rentang Tanggal" size="large" style={{ width: "100%" }} onChange={(values) => setTanggal(values._d)} format="DD-MM-YY" />
                   </Form.Item>
                 </div>
               </div>
@@ -430,6 +506,16 @@ function Hutang({ props }) {
                   {/*/>*/}
               </div>
 
+              {isFetchinData ? (
+                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
+                    <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
+                      <LoadingAnimations />
+                    </div>
+                    <div className="text-sm align-middle text-center animate-pulse text-slate-400">
+                      Sedang Mengambil Data
+                    </div>
+                  </div>
+              ) : (
               <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
                 <AddDebtTable
                   data={dataTabel}
@@ -437,12 +523,15 @@ function Hutang({ props }) {
                   biaya={biaya}
                   calculatePriceTotal={calculatePriceTotal}
                   sisaHutang={sisaHutang}
+                  form={form}
+                  supplier={supplier}
                 />
               </div>
+              )}
 
               <div className="w-full flex flex-wrap mb-3">
                 <Form.Item name="total_item" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> TOTAL ITEM </span> <span> : {dataTabel.length}</span>
+                  <span> TOTAL ITEM </span> <span> : {dataTabel?.length ?? 0}</span>
                 </Form.Item>
                 <Form.Item name="total_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
                   <span> TOTAL HUTANG JATUH TEMPO </span> <span> : {formatter.format(totalHutangJatuhTempo())}</span>
@@ -456,32 +545,14 @@ function Hutang({ props }) {
               </div>
 
               <div className="w-full md:w-1/4 px-3 -mx-3">
-                <Form.Item
-                    name="tanggal_pembayaran"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
-                    >
+                <Form.Item name="tanggal_pembayaran">
                     <DatePicker placeholder="Tanggal Pembayaran" size="large" style={{ width: "100%" }} />
                   </Form.Item>
               </div>
 
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 mt-8">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="bayar1"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
-                    >
+                  <Form.Item name="bayar1">
                     <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
                   </Form.Item>
                 </div>
@@ -517,16 +588,7 @@ function Hutang({ props }) {
 
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="bayar2"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
-                    >
+                  <Form.Item name="bayar2">
                     <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
                   </Form.Item>
                 </div>
@@ -561,16 +623,7 @@ function Hutang({ props }) {
 
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="bayar3"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
-                    >
+                  <Form.Item name="bayar3">
                     <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
                   </Form.Item>
                 </div>
@@ -605,16 +658,7 @@ function Hutang({ props }) {
 
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="bayar4"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
-                    >
+                  <Form.Item name="bayar4">
                     <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
                   </Form.Item>
                 </div>
@@ -649,16 +693,7 @@ function Hutang({ props }) {
 
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="bayar5"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
-                    >
+                  <Form.Item name="bayar5">
                     <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
                   </Form.Item>
                 </div>
@@ -704,7 +739,7 @@ function Hutang({ props }) {
                         <Spin />
                       </div>
                     ) : (
-                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
+                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm" onClick={() => setDocument("Draft")}>
                         <p className="px-4 py-2 m-0 text-white">
                           SIMPAN DAN PERBARUI
                         </p>
@@ -717,11 +752,22 @@ function Hutang({ props }) {
                         <Spin />
                       </div>
                     ) : (
-                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
-                        <p className="px-4 py-2 m-0 text-white">
-                          SIMPAN DAN CETAK
-                        </p>
-                      </button>
+                      <>
+                        <ConfirmDialog
+                          onConfirm={() => submitBtn?.current?.click()}
+                          onCancel={() => {}}
+                          title="Tambah Hutang"
+                          message="Silahkan cek kembali data yang telah dimasukkan, apakah anda yakin ingin menambahkan ?"
+                          component={
+                            <button type="button" className="bg-cyan-700 rounded-md m-1 text-sm" onClick={() => setDocument("Publish")}>
+                              <p className="px-4 py-2 m-0 text-white">
+                                SIMPAN DAN CETAK
+                              </p>
+                            </button>
+                          }
+                        />
+                        <Button htmlType="submit" ref={submitBtn}></Button>
+                      </>
                     )}
                   </Form.Item>
               </div>
