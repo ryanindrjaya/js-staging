@@ -237,7 +237,7 @@ function PesananSales({ props }) {
     if(products.productList.length > 0){ 
         inven.forEach((element) => {
             products.productList.forEach((data) => {
-              if (data.id == element.attributes.products.data[0].id) {
+              if (data.id == element.attributes.products.data[0]?.id) {
                 data.stock = element.attributes.total_stock;
               }  
             });
