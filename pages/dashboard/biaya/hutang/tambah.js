@@ -16,7 +16,9 @@ import createDetails from "../utility/createDetail";
 import calculatePrice from "../utility/calculatePrice";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
 import nookies from "nookies";
+import LoadingAnimations from "@iso/components/Animations/Loading";
 import DataTable from "react-data-table-component";
+import * as moment from "moment";
 
 Hutang.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -130,17 +132,18 @@ function Hutang({ props }) {
   const akunHutang = props.akunHutang.data;
   const hutang = props.hutang;
   const [supplier, setSupplier] = useState();
-  const [dataTabel, setDataTabel] =  useState([]); console.log("data tabel", dataTabel);
+  const [dataTabel, setDataTabel] =  useState([]);
   const [dataRetur, setDataRetur] = useState([]);
   const [sisaHutang, setSisaHutang] = useState([]);
   const [sisaHutangTotal, setSisaHutangTotal] = useState({});
+  //const [dataShow, setDataShow] =  useState([]); console.log("data show", dataShow);
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   //const [additionalFee, setAdditionalFee] = useState();
   const [isFetchinData, setIsFetchingData] = useState(false);
   const [document, setDocument] = useState();
-  const [tanggal, setTanggal] = useState(); console.log("tanggal", tanggal);
+  const [tanggal, setTanggal] = useState();
 
   const [dataValues, setDataValues] = useState();
 
@@ -159,6 +162,12 @@ function Hutang({ props }) {
   const tempList = [];
 
   const [info, setInfo] = useState();
+
+  // status pembayaran dan rentang
+  const [statusPembayaran, setStatusPembayaran] = useState();
+
+  // Range Picker
+  const { RangePicker } = DatePicker;
 
   // NO Hutang
   var noHutang = String(props.hutang?.meta?.pagination.total + 1).padStart(3, "0");
@@ -317,16 +326,35 @@ function Hutang({ props }) {
     }
   }, [biaya.info]);
 
-  useEffect(() => {
-    if(supplier != undefined){
-      console.log("supp", supplier);
-      dataTabel.forEach((element) => {
-        console.log("el", element);
-        if(supplier.id == element.attributes.supplier.data.id) element.hidden = true;
-      });
-    }
-  }, [supplier]);
+  //var id = 0;
+  //var tempSupplier = null;
+  //useEffect(() => {
+  //  //var id = 0;
 
+  //  //if(supplier != undefined && supplier != tempSupplier){
+  //  //  console.log("supp", supplier);
+  //  //  dataTabel.forEach((element) => {
+  //  //    console.log("el", element);
+  //  //    if(supplier.id == element.attributes.supplier.data.id){
+  //  //      dataShow[id] = element;
+  //  //      //dispatch({ type: "ADD_LIST", list: element });
+  //  //    }
+
+  //  //    id++;
+  //  //  });
+  //  //} else {
+  //  //  setDataShow([]);
+  //  //  console.log("else");
+  //  //}
+  //  console.log("biaya",biaya);
+  //  setIsFetchingData(true);
+  //  setTimeout(() => {
+  //    setIsFetchingData(false);
+  //    //tempSupplier = supplier;
+  //  }, 1000);
+  //}, [supplier]);
+
+  console.log("biaya",biaya);
   useEffect(() => {
     if (dataValues && info == "sukses") createDetail();
   }, [dataValues]);
@@ -392,12 +420,13 @@ function Hutang({ props }) {
 
         if (status == "Tempo" || statusPembayaran == "Dibayar Sebagian") {
           row.hidden = false;
-          dataTabel[lpbId] = row;
+          dataTabel[lpbId] = row; console.log("row", row);
           //biaya.list.push(row);
           dispatch({ type: "ADD_LIST", list: row });
         }
         lpbId++;
     });
+
 
     //dataTabel.push(biaya.list);
     lpbId = 0;
@@ -475,6 +504,7 @@ function Hutang({ props }) {
                         width: "100%",
                       }}
                       placeholder="Status Pembayaran"
+                      onChange={setStatusPembayaran}
                     >
                       <Select.Option value="Dibayar" key="Dibayar">
                         Dibayar
@@ -496,7 +526,8 @@ function Hutang({ props }) {
                     //    },
                     //]}
                     >
-                    <DatePicker placeholder="Rentang Tanggal" size="large" style={{ width: "100%" }} onChange={(values) => setTanggal(values._d)} format="DD-MM-YY" />
+                    {/*<DatePicker placeholder="Rentang Tanggal" size="large" style={{ width: "100%" }} onChange={(values) => setTanggal(values._d)} format="DD-MM-YY" />*/}
+                    <RangePicker size="large" onChange={(values) => console.log("range picker", values[0]) }/>
                   </Form.Item>
                 </div>
               </div>
@@ -512,6 +543,16 @@ function Hutang({ props }) {
                   {/*/>*/}
               </div>
 
+              {isFetchinData ? (
+                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
+                    <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
+                      <LoadingAnimations />
+                    </div>
+                    <div className="text-sm align-middle text-center animate-pulse text-slate-400">
+                      Sedang Mengambil Data
+                    </div>
+                  </div>
+              ) : (
               <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
                 <AddDebtTable
                   data={dataTabel}
@@ -520,12 +561,15 @@ function Hutang({ props }) {
                   calculatePriceTotal={calculatePriceTotal}
                   sisaHutang={sisaHutang}
                   form={form}
+                  supplier={supplier}
+                  statusPembayaran={statusPembayaran}
                 />
               </div>
+              )}
 
               <div className="w-full flex flex-wrap mb-3">
                 <Form.Item name="total_item" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> TOTAL ITEM </span> <span> : {dataTabel.length}</span>
+                  <span> TOTAL ITEM </span> <span> : {dataTabel?.length ?? 0}</span>
                 </Form.Item>
                 <Form.Item name="total_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
                   <span> TOTAL HUTANG JATUH TEMPO </span> <span> : {formatter.format(totalHutangJatuhTempo())}</span>
