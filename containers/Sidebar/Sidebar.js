@@ -316,6 +316,11 @@ export default function Sidebar(props) {
                   <a>Piutang</a>
                 </Link>
               </Menu.Item>
+              <Menu.Item style={submenuStyle} key="jurnal">
+                <Link href="/dashboard/biaya/jurnal">
+                  <a>Jurnal</a>
+                </Link>
+              </Menu.Item>
             </SubMenu>
           </Menu>
         </Scrollbars>

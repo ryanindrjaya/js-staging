@@ -140,7 +140,8 @@ function Hutang({ props }) {
   const akunHutang = props.akunHutang.data;
   const hutang = props.hutang;
   const [supplier, setSupplier] = useState();
-  const [dataTabel, setDataTabel] = useState([]);
+  const [dataTabel, setDataTabel] =  useState([]); console.log("data tabel", dataTabel);
+
   const [dataRetur, setDataRetur] = useState([]);
   const [sisaHutang, setSisaHutang] = useState([]);
   const [sisaHutangTotal, setSisaHutangTotal] = useState({});
@@ -150,6 +151,7 @@ function Hutang({ props }) {
   //const [additionalFee, setAdditionalFee] = useState();
   const [isFetchinData, setIsFetchingData] = useState(false);
   const [document, setDocument] = useState();
+  const [tanggal, setTanggal] = useState(); console.log("tanggal", tanggal);
 
   const [dataValues, setDataValues] = useState();
 
@@ -357,6 +359,16 @@ function Hutang({ props }) {
   }, [biaya.info]);
 
   useEffect(() => {
+    if(supplier != undefined){
+      console.log("supp", supplier);
+      dataTabel.forEach((element) => {
+        console.log("el", element);
+        if(supplier.id == element.attributes.supplier.data.id) element.hidden = true;
+      });
+    }
+  }, [supplier]);
+
+  useEffect(() => {
     if (dataValues && info == "sukses") createDetail();
   }, [dataValues]);
 
@@ -390,41 +402,30 @@ function Hutang({ props }) {
         isTempo = true;
       }
 
-      if (isTempo) {
-        if (statusPembayaran === "Belum Lunas") {
-          status = "Tempo";
-        } else if (statusPembayaran === "Dibayar Sebagian") {
-          status = "Sebagian";
-        } else if (statusPembayaran === "Lunas") {
-          status = "Selesai";
-        }
-      } else {
-        if (
-          statusPembayaran === "Belum Lunas" &&
-          purchasingHistory.length > 0
-        ) {
-          status = "Tempo";
-        } else if (
-          statusPembayaran === "Dibayar Sebagian" &&
-          purchasingHistory.length > 0
-        ) {
-          status = "Sebagian";
-        } else if (
-          statusPembayaran === "Lunas" &&
-          purchasingHistory.length > 0
-        ) {
-          status = "Selesai";
+
+        if (isTempo) {
+            if (statusPembayaran === "Belum Lunas" || statusPembayaran === "Belum Dibayar") {
+                status = "Tempo";
+            } else if (statusPembayaran === "Dibayar Sebagian") {
+                status = "Sebagian";
+            } else if (statusPembayaran === "Lunas") {
+                status = "Selesai";
+            }
+
         } else {
           status = "Menunggu";
         }
       }
 
-      if (status == "Tempo" || statusPembayaran == "Dibayar Sebagian") {
-        dataTabel[lpbId] = row;
-        //biaya.list.push(row);
-        dispatch({ type: "ADD_LIST", list: row });
-      }
-      lpbId++;
+
+        if (status == "Tempo" || statusPembayaran == "Dibayar Sebagian") {
+          row.hidden = false;
+          dataTabel[lpbId] = row;
+          //biaya.list.push(row);
+          dispatch({ type: "ADD_LIST", list: row });
+        }
+        lpbId++;
+
     });
 
     //dataTabel.push(biaya.list);
@@ -532,12 +533,9 @@ function Hutang({ props }) {
                     //        message: "Nomor Penjualan tidak boleh kosong!",
                     //    },
                     //]}
-                  >
-                    <DatePicker
-                      placeholder="Rentang Tanggal"
-                      size="large"
-                      style={{ width: "100%" }}
-                    />
+                    >
+                    <DatePicker placeholder="Rentang Tanggal" size="large" style={{ width: "100%" }} onChange={(values) => setTanggal(values._d)} format="DD-MM-YY" />
+
                   </Form.Item>
                 </div>
               </div>
