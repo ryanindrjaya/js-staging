@@ -10,7 +10,7 @@ import nookies from "nookies";
 import { toast } from "react-toastify";
 import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
-import OrderTable from "@iso/components/ReactDataTable/Purchases/OrderTable";
+import OrderTable from "../../../../components/ReactDataTable/Purchases/OrderTable";
 import { useSelector, useDispatch } from "react-redux";
 import {
   Form,
@@ -166,7 +166,7 @@ function Tambah({ props }) {
   };
 
   const createDetailOrder = async () => {
-    console.log("info total", productTotalPrice, productSubTotal);
+    // console.log("info total", productTotalPrice, productSubTotal);
     createDetailOrderFunc(
       products,
       productTotalPrice,
@@ -521,7 +521,7 @@ function Tambah({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 mt-5 md:mb-0">
-                  <Upload>
+                  {/* <Upload>
                     <Button
                       className="text-gray-500"
                       style={{ width: "100%" }}
@@ -530,7 +530,7 @@ function Tambah({ props }) {
                     >
                       Upload Dokumen
                     </Button>
-                  </Upload>
+                  </Upload> */}
                 </div>
               </div>
               <div className="flex justify-end font-bold w-full mb-3 md:w-3/4">

@@ -3,7 +3,7 @@ import { CaretDownOutlined } from "@ant-design/icons";
 import nookies from "nookies";
 import { Form, Select } from "antd";
 
-function SearchPO({ supplier, handleSelect }) {
+function SearchPO({ supplier, handleSelect, disabled }) {
   const cookies = nookies.get(null, "token");
   const [data, setData] = useState([]);
   const [poData, setPoData] = useState();
@@ -58,6 +58,7 @@ function SearchPO({ supplier, handleSelect }) {
   return (
     <Form.Item required name="no_po">
       <Select
+        disabled={disabled}
         allowClear
         size="large"
         showSearch

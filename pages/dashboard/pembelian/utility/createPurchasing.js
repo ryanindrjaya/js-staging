@@ -33,11 +33,17 @@ const CreateOrder = async (
   });
 
   var supplierId = {
-    id: parseInt(Number.isNaN(parseInt(values?.supplier_id)) ? supplier?.id : values?.supplier_id),
+    id: parseInt(
+      Number.isNaN(parseInt(values?.supplier_id))
+        ? supplier?.id
+        : values?.supplier_id
+    ),
   };
 
   var locationId = {
-    id: parseInt(Number.isNaN(parseInt(values?.location)) ? location?.id : values?.location),
+    id: parseInt(
+      Number.isNaN(parseInt(values?.location)) ? location?.id : values?.location
+    ),
   };
 
   var purchaseOrderId = values?.no_po ? { id: values?.no_po } : null;
@@ -56,12 +62,15 @@ const CreateOrder = async (
   values.date_purchasing = orderDate;
   values.supplier_id = supplierId;
   values.status_pembayaran = "Belum Lunas";
-  values.total_purchasing = grandTotal === 0 ? parseInt(totalPrice) : parseInt(grandTotal);
+  values.total_purchasing =
+    grandTotal === 0 ? parseInt(totalPrice) : parseInt(grandTotal);
   values.DPP_active = values?.DPP_active === true ? "DPP" : null;
 
   var data = {
     data: values,
   };
+
+  console.log("data", data);
 
   const req = await createData(data);
   const res = await req.json();
@@ -69,7 +78,14 @@ const CreateOrder = async (
   console.log("create LPB =>", res);
 
   if (req.status === 200) {
-    await putRelationOrder(res.data.id, res.data.attributes, values, form, router, updateOrderData);
+    await putRelationOrder(
+      res.data.id,
+      res.data.attributes,
+      values,
+      form,
+      router,
+      updateOrderData
+    );
   } else {
     openNotificationWithIcon("error");
   }
@@ -92,7 +108,14 @@ const createData = async (data) => {
   return req;
 };
 
-const putRelationOrder = async (id, value, values, form, router, updateOrderData) => {
+const putRelationOrder = async (
+  id,
+  value,
+  values,
+  form,
+  router,
+  updateOrderData
+) => {
   const user = await getUserMe();
   const dataOrder = {
     data: value,
@@ -158,12 +181,14 @@ const openNotificationWithIcon = (type) => {
   if (type === "error") {
     notification[type]({
       message: "Gagal menambahkan data",
-      description: "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
+      description:
+        "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
     });
   } else if (type === "success") {
     notification[type]({
       message: "Berhasil menambahkan data",
-      description: "Produk berhasil ditambahkan. Silahkan cek pada halaman Pembelian Barang",
+      description:
+        "Produk berhasil ditambahkan. Silahkan cek pada halaman Pembelian Barang",
     });
   }
 };

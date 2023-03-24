@@ -10,7 +10,13 @@ import {
 import { useRouter } from "next/router";
 import { IoIosSwap } from "react-icons/io";
 
-export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange, onChangeStatus }) {
+export default function ReactDataTable({
+  data,
+  onDelete,
+  onUpdate,
+  onPageChange,
+  onChangeStatus,
+}) {
   const router = useRouter();
   const { Option } = Select;
 
@@ -30,8 +36,18 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange,
     // router.push('/dashboard')
   };
 
-  const lihat = (row) => {
-    router.push("pembelian_barang/print/" + row.id);
+  const edit = (row) => {
+    console.log("status transaksi", row, row.attributes.status);
+
+    if (row.attributes.status === "Diterima") {
+      openNotificationWithIcon(
+        "error",
+        "Transaksi Selesai",
+        "Transaksi yang sudah selesai / diterima tidak dapat diedit kembali"
+      );
+    } else {
+      router.push("pembelian_barang/edit/" + row.id);
+    }
   };
 
   const pembayaran = (row) => {
@@ -104,6 +120,15 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange,
         >
           <UnorderedListOutlined className="mr-2 mt-0.5 float float-left" />
           Lihat
+        </button>
+      </div>
+      <div>
+        <button
+          onClick={() => edit(row)}
+          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+        >
+          <EditOutlined className="mr-2 mt-0.5 float float-left" />
+          Edit
         </button>
       </div>
 
@@ -181,7 +206,8 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange,
     {
       name: "Supplier",
       width: "180px",
-      selector: (row) => row.attributes?.supplier?.data?.attributes?.name ?? "-",
+      selector: (row) =>
+        row.attributes?.supplier?.data?.attributes?.name ?? "-",
     },
     {
       name: "Nota Supplier",
@@ -216,7 +242,11 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange,
               <Option value="Diproses" key="Diproses" className="text-black">
                 <Tag color="default">Diproses</Tag>
               </Option>
-              <Option value="Dibatalkan" key="Dibatalkan" className="text-black">
+              <Option
+                value="Dibatalkan"
+                key="Dibatalkan"
+                className="text-black"
+              >
                 <Tag color="error">Dibatalkan</Tag>
               </Option>
               <Option value="Diretur" key="Diretur" className="text-black">
@@ -258,9 +288,15 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange,
             return <Tag color="green">Selesai</Tag>;
           }
         } else {
-          if (statusPembayaran === "Belum Lunas" && purchasingHistory.length > 0) {
+          if (
+            statusPembayaran === "Belum Lunas" &&
+            purchasingHistory.length > 0
+          ) {
             return <Tag color={tagRed}>Tempo</Tag>;
-          } else if (statusPembayaran === "Lunas" && purchasingHistory.length > 0) {
+          } else if (
+            statusPembayaran === "Lunas" &&
+            purchasingHistory.length > 0
+          ) {
             return <Tag color={tagGreen}>Selesai</Tag>;
           } else {
             return <Tag color={tagOrange}>Menunggu</Tag>;
@@ -275,13 +311,18 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange,
       width: "150px",
       selector: (row) => {
         const lastIndex = row.attributes.purchasing_payments?.data?.length;
-        const lastPayment = row.attributes.purchasing_payments.data[lastIndex - 1];
+        const lastPayment =
+          row.attributes.purchasing_payments.data[lastIndex - 1];
 
-        if (lastPayment?.attributes.payment_remaining === lastPayment?.attributes.total_payment) {
+        if (
+          lastPayment?.attributes.payment_remaining ===
+          lastPayment?.attributes.total_payment
+        ) {
           return <Tag color={tagRed}>Belum Dibayar</Tag>;
         } else if (
           lastPayment?.attributes.payment_remaining > 0 &&
-          lastPayment?.attributes.payment_remaining < lastPayment?.attributes.total_payment
+          lastPayment?.attributes.payment_remaining <
+            lastPayment?.attributes.total_payment
         ) {
           return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
         } else if (lastPayment?.attributes.payment_remaining <= 0) {
@@ -294,7 +335,8 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange,
     {
       name: "Total Beli",
       width: "150px",
-      selector: (row) => formatter.format(row.attributes?.total_purchasing ?? 0),
+      selector: (row) =>
+        formatter.format(row.attributes?.total_purchasing ?? 0),
     },
   ];
 
