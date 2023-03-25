@@ -26,13 +26,16 @@ const calculateTotalUnit = (unit, product) => {
     }
   }
 
-  for (let index = productIndex + 1; index < 6; index++) {
+  for (let index = productIndex; index < 6; index++) {
+    console.log("index", index);
     total = total * product.attributes[`qty_${index}`];
 
     if (total === 0) {
       total = 1;
     }
   }
+
+  console.log("total", total);
 
   return { total, productSmallestUnit };
 };
@@ -104,8 +107,7 @@ const updateAPI = async (resData, data, productId, locationId) => {
 
   const newData = { data: resData.attributes };
   const JSONdata = JSON.stringify(newData);
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/inventory-details/" + resData.id;
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/inventory-details/" + resData.id;
 
   const options = {
     method: "PUT",
@@ -141,7 +143,7 @@ const createAPI = async (data, productId, locationId) => {
 
   if (req.status === 200) {
     // check data location
-    createInventoryAPI(locationId, productId, data.data.stock, data);
+    createInventoryAPI(locationId, productId, data.data.stock, data, res?.data?.id);
   }
 };
 
@@ -162,10 +164,10 @@ const createInventoryHistory = async (data) => {
 };
 
 // ======================= MASTER INVENTORY =======================
-const createInventoryAPI = async (locationId, productId, quantity, data) => {
+const createInventoryAPI = async (locationId, productId, quantity, data, detailData) => {
   const endpoint =
     process.env.NEXT_PUBLIC_URL +
-    `/inventories?filters[locations][id][$eq]=${locationId}&filters[products][id][$eq]=${productId}&populate=locations`;
+    `/inventories?filters[locations][id][$eq]=${locationId}&filters[products][id][$eq]=${productId}&populate=*`;
   const options = {
     method: "GET",
     headers: {
@@ -177,20 +179,32 @@ const createInventoryAPI = async (locationId, productId, quantity, data) => {
   const res = await req.json();
 
   if (res.data.length > 0) {
+    const detailsId =
+      res.data[0].attributes?.inventory_details?.data?.map((item) => item?.id) || [];
+    if (!detailsId.includes(detailData)) {
+      detailsId.push(detailData);
+    }
+
+    console.log("detailsId", detailsId);
+
     // put existing data
     const totalStock = res.data[0].attributes.total_stock + quantity;
-    await putExistingData(res.data[0].id, res.data[0].attributes, totalStock);
+    await putExistingData(res.data[0].id, res.data[0].attributes, totalStock, detailsId);
   } else {
     // create new data
-    await createNewData(data, locationId);
+    await createNewData(data, locationId, detailData);
   }
 };
 
-const putExistingData = async (id, data, totalStock) => {
+const putExistingData = async (id, data, totalStock, detailData) => {
   data.total_stock = totalStock;
   data.locations = {
     id: data.locations.data[0].id,
   };
+  data.products = {
+    id: data.products.data[0].id,
+  };
+  data.inventory_details = detailData;
 
   const putData = { data: data };
 
@@ -208,9 +222,10 @@ const putExistingData = async (id, data, totalStock) => {
   const req = await fetch(endpoint, options);
 };
 
-const createNewData = async (data, locationId) => {
+const createNewData = async (data, locationId, detailData) => {
   data.data.total_stock = data.data.stock;
   data.data.locations = { id: locationId };
+  data.data.inventory_details = [detailData];
 
   const JSONdata = JSON.stringify(data);
   const endpoint = process.env.NEXT_PUBLIC_URL + "/inventories";
