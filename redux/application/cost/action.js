@@ -12,6 +12,13 @@ const actions = {
     index,
   }),
 
+  changeId: (id, listData, index) => ({
+    type: "CHANGE_ID",
+    id,
+    listData,
+    index,
+  }),
+
   changeTotalHutangJatuhTempo: (totalHutangJatuhTempo, listData, index) => ({
     type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO",
     totalHutangJatuhTempo,

@@ -18,6 +18,7 @@ import Supplier from "@iso/components/Form/AddCost/SupplierForm";
 import nookies from "nookies";
 import LoadingAnimations from "@iso/components/Animations/Loading";
 import DataTable from "react-data-table-component";
+import * as moment from "moment";
 
 Hutang.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -161,6 +162,12 @@ function Hutang({ props }) {
   const tempList = [];
 
   const [info, setInfo] = useState();
+
+  // status pembayaran dan rentang
+  const [statusPembayaran, setStatusPembayaran] = useState();
+
+  // Range Picker
+  const { RangePicker } = DatePicker;
 
   // NO Hutang
   var noHutang = String(props.hutang?.meta?.pagination.total + 1).padStart(3, "0");
@@ -319,7 +326,35 @@ function Hutang({ props }) {
     }
   }, [biaya.info]);
 
+  //var id = 0;
+  //var tempSupplier = null;
+  //useEffect(() => {
+  //  //var id = 0;
 
+  //  //if(supplier != undefined && supplier != tempSupplier){
+  //  //  console.log("supp", supplier);
+  //  //  dataTabel.forEach((element) => {
+  //  //    console.log("el", element);
+  //  //    if(supplier.id == element.attributes.supplier.data.id){
+  //  //      dataShow[id] = element;
+  //  //      //dispatch({ type: "ADD_LIST", list: element });
+  //  //    }
+
+  //  //    id++;
+  //  //  });
+  //  //} else {
+  //  //  setDataShow([]);
+  //  //  console.log("else");
+  //  //}
+  //  console.log("biaya",biaya);
+  //  setIsFetchingData(true);
+  //  setTimeout(() => {
+  //    setIsFetchingData(false);
+  //    //tempSupplier = supplier;
+  //  }, 1000);
+  //}, [supplier]);
+
+  console.log("biaya",biaya);
   useEffect(() => {
     if (dataValues && info == "sukses") createDetail();
   }, [dataValues]);
@@ -469,6 +504,7 @@ function Hutang({ props }) {
                         width: "100%",
                       }}
                       placeholder="Status Pembayaran"
+                      onChange={setStatusPembayaran}
                     >
                       <Select.Option value="Dibayar" key="Dibayar">
                         Dibayar
@@ -490,7 +526,8 @@ function Hutang({ props }) {
                     //    },
                     //]}
                     >
-                    <DatePicker placeholder="Rentang Tanggal" size="large" style={{ width: "100%" }} onChange={(values) => setTanggal(values._d)} format="DD-MM-YY" />
+                    {/*<DatePicker placeholder="Rentang Tanggal" size="large" style={{ width: "100%" }} onChange={(values) => setTanggal(values._d)} format="DD-MM-YY" />*/}
+                    <RangePicker size="large" onChange={(values) => console.log("range picker", values[0]) }/>
                   </Form.Item>
                 </div>
               </div>
@@ -525,6 +562,7 @@ function Hutang({ props }) {
                   sisaHutang={sisaHutang}
                   form={form}
                   supplier={supplier}
+                  statusPembayaran={statusPembayaran}
                 />
               </div>
               )}
