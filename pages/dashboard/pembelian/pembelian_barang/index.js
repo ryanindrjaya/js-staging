@@ -178,8 +178,8 @@ function Pembelian({ props }) {
     }
 
     const poData = row?.attributes?.purchase?.data;
-    const req = await changeStatusPO(poData, status, LPBLocationId);
-    if (req.status === 200) {
+    const res = await changeStatusPO(poData, status, LPBLocationId);
+    if (res.data) {
       await changeStatusLPB(row, row.id);
     }
   };
@@ -226,7 +226,7 @@ function Pembelian({ props }) {
       };
 
       const req = await fetch(endpoint, options);
-
+      const res = await req.json();
       if (req.status === 200) {
         openNotificationWithIcon(
           "success",
@@ -241,7 +241,7 @@ function Pembelian({ props }) {
         );
       }
 
-      return req;
+      return res;
     } catch (error) {
       console.log(error);
       openNotificationWithIcon(

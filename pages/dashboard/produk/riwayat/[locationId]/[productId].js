@@ -56,7 +56,8 @@ const fetchProduct = async (cookies, productId) => {
 
 const fetchInventory = async (cookies, productId, locationId) => {
   const endpoint =
-    process.env.NEXT_PUBLIC_URL + `/inventories?filters[locations][id][$eq]=${locationId}&filters[products][id][$eq]=${productId}&populate=*`;
+    process.env.NEXT_PUBLIC_URL +
+    `/inventories?filters[locations][id][$eq]=${locationId}&filters[products][id][$eq]=${productId}&populate=*`;
   const options = {
     method: "GET",
     headers: {
@@ -71,7 +72,8 @@ const fetchInventory = async (cookies, productId, locationId) => {
 
 const fetchHistory = async (cookies, productId, locationId) => {
   const endpoint =
-    process.env.NEXT_PUBLIC_URL + `/inventory-details?filters[locations][id][$eq]=${locationId}&filters[products][id][$eq]=${productId}&populate=*`;
+    process.env.NEXT_PUBLIC_URL +
+    `/inventory-details?filters[locations][id][$eq]=${locationId}&filters[products][id][$eq]=${productId}&populate=*`;
   const options = {
     method: "GET",
     headers: {
@@ -94,6 +96,10 @@ function History({ props }) {
   const historyList = props.history.data;
   const smallesUnit = historyList[0].attributes.smallest_unit;
 
+  function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
   console.log(props);
   return (
     <>
@@ -110,7 +116,7 @@ function History({ props }) {
                   <div className="font-bold text-lg mb-4 uppercase">{product.name}</div>
                   <div className="text-sm mb-2">SKU : {product?.SKU}</div>
                   <div className="text-sm">
-                    Total Stok : {inventory?.total_stock} {smallesUnit}
+                    Total Stok : {numberWithCommas(inventory?.total_stock)} {smallesUnit}
                   </div>
                 </div>
                 <div>
