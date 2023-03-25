@@ -262,12 +262,9 @@ function Piutang({ props }) {
   // wilayah
   const [wilayah, setWilayah] = useState();
 
-  // metode pembayaran (total)
-  //const [tunai, setTunai] = useState(0);
-  //const [transfer, setTransfer] = useState(0);
-  //const [giro, setGiro] = useState(0);
-  //const [cn, setCn] = useState(0);
-  //const [oth, setOth] = useState(0);
+  // Range Picker
+  const { RangePicker } = DatePicker;
+  const [rangePicker, setRangePicker] =  useState();
 
   // NO Piutang
   var noPiutang = String(props.piutang?.meta?.pagination.total + 1).padStart(3, "0");
@@ -278,10 +275,6 @@ function Piutang({ props }) {
     currency: "IDR",
     maximumFractionDigits: 2,
   });
-
-  //const total = async (values) => {
-    
-  //};
 
   const onFinish = (values) => {
     var biayaInfo = biaya.info;
@@ -638,17 +631,8 @@ function Piutang({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="tanggalRentang"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
-                    >
-                    <DatePicker placeholder="Rentang Tanggal" size="large" style={{ width: "100%" }} />
+                  <Form.Item name="tanggalRentang">
+                    <RangePicker size="large" onChange={(values) => setRangePicker(values) }/>
                   </Form.Item>
                 </div>
               </div>
