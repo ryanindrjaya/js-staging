@@ -171,7 +171,7 @@ function Pembelian({ props }) {
     if (status === "Diterima") {
       console.log("store to inventory && update product price");
       // invetory handle
-      createInventory(row);
+      await createInventory(row);
 
       await updateProductFromTable(row);
     }
@@ -205,8 +205,6 @@ function Pembelian({ props }) {
       const values = {
         data: poData.attributes,
       };
-
-      console.log(values);
 
       const JSONdata = JSON.stringify(values);
       const cookies = nookies.get(null, "token");

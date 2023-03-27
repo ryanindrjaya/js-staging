@@ -7,6 +7,27 @@ export default function ReactDataTable({ data, productId }) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
 
+  function getTotalStock(row) {
+    let stock = "";
+    const data = row.attributes;
+    const product = row.attributes?.product.data.attributes;
+
+    console.log("product", product);
+    console.log("data", data);
+
+    for (let i = 1; i <= 5; i++) {
+      if (product?.[`unit_${i}`]) {
+        if (i !== 1) {
+          stock += `, ${numberWithCommas(data[`stock_unit_${i}`])} ${product[`unit_${i}`]}`;
+        } else {
+          stock += `${numberWithCommas(data[`stock_unit_${i}`])} ${product[`unit_${i}`]}`;
+        }
+      }
+    }
+
+    return stock;
+  }
+
   const customStyles = {
     headCells: {
       style: {
@@ -21,13 +42,13 @@ export default function ReactDataTable({ data, productId }) {
       name: "Lokasi Unit",
       width: "w-1/4",
       sortable: true,
-      selector: (row) => row.attributes?.locations.data[0].attributes.name,
+      selector: (row) => row.attributes?.location.data.attributes.name,
     },
     {
       name: "Total Stok",
       width: "w-1/4",
       sortable: true,
-      selector: (row) => numberWithCommas(row.attributes?.total_stock),
+      selector: (row) => getTotalStock(row),
     },
     {
       name: "Total Unit Terjual",
@@ -40,12 +61,10 @@ export default function ReactDataTable({ data, productId }) {
       width: "w-1/4",
       sortable: true,
       selector: (row) => {
-        const locationId = row.attributes.locations.data[0].id;
+        const locationId = row.attributes.location.data.id;
         return (
           <>
-            <Link
-              href={"/dashboard/produk/riwayat/" + locationId + "/" + productId}
-            >
+            <Link href={`/dashboard/produk/riwayat?location=${locationId}&product=${productId}`}>
               <a className="no-underline">Riwayat Stok</a>
             </Link>
           </>
