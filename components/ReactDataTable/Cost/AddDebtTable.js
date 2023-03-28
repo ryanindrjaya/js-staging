@@ -4,7 +4,7 @@ import { Input, InputNumber, Select, Form, Row, DatePicker, Checkbox } from "ant
 import { useDispatch } from "react-redux";
 import { useState } from "react";
 
-export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal, form }) {
+export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal, form, supplier, statusPembayaran }) { console.log("console tabel", data, supplier, statusPembayaran);
   const dispatch = useDispatch();
 
   var unit = 1;
@@ -16,7 +16,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   const [dataRetur, setDataRetur] = useState("tidak");
 
   var index = 0;
-  data.forEach((element) => {
+  data?.forEach((element) => {
 
     retur.forEach((row) => {
       if(element.attributes.no_purchasing == row.id)
@@ -40,10 +40,25 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   //  dispatch({ type: "CHANGE_DATA_SISAHUTANG", sisahutang: sisa, listData: data, index: index });
   //};
 
-  const onChangePilih = async (value, data, index, v) => {
+  const cekData = (data) => {
+    for (const key in biaya.list) {
+      if(biaya.list[key].id == data.id) return key;
+    }
+  };
+
+  const calculate = (row, id) => {
+    id = cekData(row);
+    return calculatePriceTotal(row, id);
+  };
+
+  const onChangePilih = async (value, data, index, v) => { console.log("pilih", index);
+    var cek = "none";
+
     var pilihData = "tidak";
     if(value.target.checked == true) pilihData = "pilih";
     else pilihData = "tidak";
+
+    index = cekData(data, pilihData);
 
     if (pilihData) { 
       form.setFieldsValue({
@@ -65,40 +80,47 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       });
     }
 
-    dispatch({ type: "CHANGE_PILIH_DATA", pilihData: pilihData, listData: data, index: index });
-    dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: data.sisaHutang, listData: data, index: index });
-    onChangeTunai(0, data, index);
-    onChangeTransfer(0, data, index);
-    onChangeGiro(0, data, index);
-    onChangeCn(0, data, index);
-    onChangeOth(0, data, index);
-    
+    //if(cek == "none"){
+      dispatch({ type: "CHANGE_PILIH_DATA", pilihData: pilihData, listData: data, index: index });
+      dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: data.sisaHutang, listData: data, index: index });
+      onChangeTunai(0, data, index);
+      onChangeTransfer(0, data, index);
+      onChangeGiro(0, data, index);
+      onChangeCn(0, data, index);
+      onChangeOth(0, data, index);
+      onChangeId(data.id, data, index);
+    //}
+
+    //biaya.info[index].id = data.id;
+  };
+
+  const onChangeId = (value, data, index) => {
+    dispatch({ type: "CHANGE_ID", id: value, listData: data, index: index });
   };
 
   const onChangeTunai = (value, data, index) => {
-    //onChange(value, data, "tunai");
+    index = cekData(data);
     dispatch({ type: "CHANGE_DATA_TUNAI", tunai: value, listData: data, index: index });
-    //onChangeSisaHutang(value, data, index);
   };
 
   const onChangeTransfer = (value, data, index) => {
+    index = cekData(data);
     dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: value, listData: data, index: index });
-    //onChangeSisaHutang(value, data, index);
   };
 
   const onChangeGiro = (value, data, index) => {
+    index = cekData(data);
     dispatch({ type: "CHANGE_DATA_GIRO", giro: value, listData: data, index: index });
-    //onChangeSisaHutang(value, data, index);
   };
 
   const onChangeCn = (value, data, index) => {
+    index = cekData(data);
     dispatch({ type: "CHANGE_DATA_CN", cn: value, listData: data, index: index });
-    //onChangeSisaHutang(value, data, index);
   };
 
   const onChangeOth = (value, data, index) => {
+    index = cekData(data);
     dispatch({ type: "CHANGE_DATA_OTH", oth: value, listData: data, index: index });
-    //onChangeSisaHutang(value, data, index);
   };
 
   var formatter = new Intl.NumberFormat("id-ID", {
@@ -129,7 +151,12 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
         return (
           <Row align="bottom" justify="center">
             <Form.Item noStyle>
-                <Checkbox onChange={(value) => onChangePilih(value, row, idx)}> Pilih </Checkbox>
+                <Checkbox 
+                  //defaultChecked={true}
+                  onChange={(value) => onChangePilih(value, row, idx)}
+                >
+                        Pilih
+                </Checkbox>
             {/*{biaya.info[idx]?.pilihData == null || biaya.info[idx]?.pilihData == "tidak" ? (*/}
             {/*  <button type="button" onClick={(value) => onChangePilih("tidak", row, idx, value)} className="bg-cyan-700 rounded-md m-1 text-sm">*/}
             {/*    <p className="px-4 py-2 m-0 text-white">*/}
@@ -296,7 +323,8 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     {
       name: "Sisa Hutang Jt",
       width: "150px",
-      selector: (row, idx) => calculatePriceTotal(row, idx),
+      selector: (row, idx) => calculate(row, idx),
+          //calculatePriceTotal(row, idx),
     },
   ];
 
@@ -306,7 +334,14 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       paginationRowsPerPageOptions={[5]}
       paginationTotalRows={[1]}
       columns={columns}
-      data={data}
+      data={data.filter((item) => {
+        if(supplier?.id == item.attributes.supplier.data.id && statusPembayaran == item.attributes.status_pembayaran) {
+          return item;
+        } else if(supplier?.id == item.attributes.supplier.data.id && statusPembayaran == undefined) {
+          return item;
+        }
+      })}
+      //data={data}
       noDataComponent={`--Belum ada data LPB--`}
     />
   );

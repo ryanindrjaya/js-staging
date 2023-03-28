@@ -41,8 +41,6 @@ const Product = ({ props }) => {
   });
   const { Search } = Input;
 
-
-
   const handleSearch = (newValue, category) => {
     if (newValue) {
       fetchSearchOption(newValue, category);
@@ -59,8 +57,7 @@ const Product = ({ props }) => {
     const cookies = nookies.get(null);
     try {
       const endpoint =
-        process.env.NEXT_PUBLIC_URL +
-        `/${category}?filters[name][$containsi]=${query}`;
+        process.env.NEXT_PUBLIC_URL + `/${category}?filters[name][$containsi]=${query}`;
       const options = {
         method: "GET",
         headers: {
@@ -110,18 +107,14 @@ const Product = ({ props }) => {
 
       if (searchParameters.location.length > 0) {
         searchParameters.location.forEach((item, idx) => {
-          locationQuery +=
-            "&filters[$and][" + (idx + 4) + "][locations][id][$eq]=" + item;
+          locationQuery += "&filters[$and][" + (idx + 4) + "][locations][id][$eq]=" + item;
         });
       } else {
         locationQuery = "";
       }
 
       const endpoint =
-        process.env.NEXT_PUBLIC_URL +
-        "/products?populate=*&" +
-        query +
-        locationQuery;
+        process.env.NEXT_PUBLIC_URL + "/products?populate=*&" + query + locationQuery;
 
       console.log("endpoint", endpoint);
 
@@ -182,8 +175,7 @@ const Product = ({ props }) => {
 
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/products?pagination[page]=" + page;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/products?pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -225,8 +217,7 @@ const Product = ({ props }) => {
     setIsLoading(true);
     const cookies = nookies.get(null, "token");
     const endpoint =
-      process.env.NEXT_PUBLIC_URL +
-      `/inventories?filters[products][id][$eq]=${data.id}&populate=locations`;
+      process.env.NEXT_PUBLIC_URL + `/inventories?filters[product][id][$eq]=${data.id}&populate=*`;
     const options = {
       method: "GET",
       headers: {
@@ -238,7 +229,7 @@ const Product = ({ props }) => {
     const req = await fetch(endpoint, options);
     const res = await req.json();
     // return req;
-    // console.log(res);
+    console.log(res);
 
     setInventory(res.data);
 
@@ -288,12 +279,8 @@ const Product = ({ props }) => {
                   size="middle"
                   placeholder="LOKASI"
                   allowClear
-                  onChange={(e) =>
-                    setSearchParameters({ ...searchParameters, location: e })
-                  }
-                  onClear={() =>
-                    setSearchParameters({ ...searchParameters, location: [] })
-                  }
+                  onChange={(e) => setSearchParameters({ ...searchParameters, location: e })}
+                  onClear={() => setSearchParameters({ ...searchParameters, location: [] })}
                   onSearch={(e) => handleSearch(e, "locations")}
                 >
                   {searchOptionData.locations.map((data) => (
@@ -334,9 +321,7 @@ const Product = ({ props }) => {
                   className="bg-cyan-700 w-full cursor-pointer rounded px-5 h-10 hover:bg-cyan-800 shadow-sm flex items-center justify-center float-right"
                 >
                   <div className="text-white text-center text-sm font-bold">
-                    <a className="text-white no-underline text-xs sm:text-xs">
-                      + Tambah
-                    </a>
+                    <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-x-4 w-full">
@@ -365,11 +350,7 @@ const Product = ({ props }) => {
               }}
               footer={null}
             >
-              <ProductModal
-                data={modalProduct}
-                isLoading={isLoading}
-                inventory={inventory}
-              />
+              <ProductModal data={modalProduct} isLoading={isLoading} inventory={inventory} />
             </Modal>
 
             <ProductTable
@@ -431,8 +412,7 @@ const formatData = (data) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/products?sort=createdAt:desc&populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/products?sort=createdAt:desc&populate=*";
   const options = {
     method: "GET",
     headers: {
