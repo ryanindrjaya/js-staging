@@ -4,7 +4,7 @@ import { Input, InputNumber, Select, Form, Row, DatePicker, Checkbox } from "ant
 import { useDispatch } from "react-redux";
 import { useState } from "react";
 
-export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal, form, supplier, statusPembayaran }) { console.log("console tabel", data, supplier, statusPembayaran);
+export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal, form, supplier, statusPembayaran, rangePicker, search }) {
   const dispatch = useDispatch();
 
   var unit = 1;
@@ -14,6 +14,14 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   var returSubtotal = 0;
   var sisaHutang = {};
   const [dataRetur, setDataRetur] = useState("tidak");
+
+  var min = null;
+  var max = null;
+
+  if(rangePicker){
+    min = new Date(rangePicker[0]);
+    max = new Date(rangePicker[1]);
+  }
 
   var index = 0;
   data?.forEach((element) => {
@@ -51,14 +59,12 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     return calculatePriceTotal(row, id);
   };
 
-  const onChangePilih = async (value, data, index, v) => { console.log("pilih", index);
-    var cek = "none";
-
+  const onChangePilih = async (value, data, index, v) => {
     var pilihData = "tidak";
     if(value.target.checked == true) pilihData = "pilih";
     else pilihData = "tidak";
 
-    index = cekData(data, pilihData);
+    index = cekData(data);
 
     if (pilihData) { 
       form.setFieldsValue({
@@ -147,15 +153,20 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     {
       name: "Pilih Dokumen",
       width: "150px",
-      selector: (row, idx) => {
+      selector: (row, idx) => { console.log("row cek", idx, row);
+        var index = cekData(row);
+        var defaultCek = false;
+        if(biaya?.info[index]?.pilihData == "pilih") defaultCek = true;
+        else defaultCek = false;
+
         return (
           <Row align="bottom" justify="center">
             <Form.Item noStyle>
                 <Checkbox 
-                  //defaultChecked={true}
+                  defaultChecked={defaultCek}
                   onChange={(value) => onChangePilih(value, row, idx)}
                 >
-                        Pilih
+                  Pilih
                 </Checkbox>
             {/*{biaya.info[idx]?.pilihData == null || biaya.info[idx]?.pilihData == "tidak" ? (*/}
             {/*  <button type="button" onClick={(value) => onChangePilih("tidak", row, idx, value)} className="bg-cyan-700 rounded-md m-1 text-sm">*/}
@@ -335,9 +346,33 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       paginationTotalRows={[1]}
       columns={columns}
       data={data.filter((item) => {
-        if(supplier?.id == item.attributes.supplier.data.id && statusPembayaran == item.attributes.status_pembayaran) {
+        let man = new Date(item.attributes.date_purchasing); //date from data
+
+        if(supplier?.id == item.attributes.supplier.data.id && statusPembayaran == item.attributes.status_pembayaran &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            (item.attributes.no_purchasing.toLowerCase().indexOf(search?.toLowerCase()) !== -1 || search == undefined)
+        ) {
           return item;
-        } else if(supplier?.id == item.attributes.supplier.data.id && statusPembayaran == undefined) {
+        }
+        if(supplier?.id == item.attributes.supplier.data.id && statusPembayaran == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            (item.attributes.no_purchasing.toLowerCase().indexOf(search?.toLowerCase()) !== -1 || search == undefined)
+        ) {
+          return item;
+          }
+        if (supplier?.id == item.attributes.supplier.data.id && statusPembayaran == item.attributes.status_pembayaran && min == null && 
+            (item.attributes.no_purchasing.toLowerCase().indexOf(search?.toLowerCase()) !== -1 || search == undefined)
+        ) {
+          return item;
+        }
+        if(supplier?.id == item.attributes.supplier.data.id && statusPembayaran == undefined && min == null && item.attributes.no_purchasing.toLowerCase().indexOf(search?.toLowerCase()) !== -1) {
+          return item;
+        }
+        if(supplier?.id == item.attributes.supplier.data.id && statusPembayaran == undefined && min == null && search == undefined) {
           return item;
         }
       })}
