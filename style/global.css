@@ -26,7 +26,31 @@
 } */
 
 /*========= END CHANGE PLACEHOLDER COLOR ==============*/
+@media print {
+  .ant-table-thead .ant-table-cell {
+    background-color: transparent;
+    color: #000 !important;
+    /* prevent word break */
+    white-space: nowrap;
+  }
+  .ant-table-thead .child {
+    max-width: min-content;
+    color: #000 !important;
+  }
 
+  .ant-table-cell {
+    border: 1px solid #000;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    font-weight: 400;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .ant-table {
+    border-bottom: 1px solid #000;
+    border-right: 1px solid #000;
+  }
+}
 .ant-table-thead .ant-table-cell {
   background-color: #036b82;
   color: white;

@@ -247,9 +247,12 @@ export default function Riwayat({ defaultOptions }) {
 
   return (
     <>
+      <Head>
+        <title>Cetak Kartu Stok</title>
+      </Head>
       {printState ? (
         <div className="px-6 py-3">
-          <div className="flex justify-between mb-5">
+          <div className="flex justify-between items-center mb-5">
             <ArrowLeftOutlined
               title="Kembali"
               className="print:hidden cursor-pointer"
@@ -287,7 +290,7 @@ export default function Riwayat({ defaultOptions }) {
           </p>
 
           {history?.units?.length > 0 ? (
-            <Table pagination={false} loading={fetchingHistory} dataSource={history?.data}>
+            <Table bordered pagination={false} loading={fetchingHistory} dataSource={history?.data}>
               <Column
                 className="uppercase"
                 title="Tanggal"
