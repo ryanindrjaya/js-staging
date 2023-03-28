@@ -9,6 +9,7 @@ import useDebounce from "../../../hooks/useDebounce";
 import nookies from "nookies";
 import { SearchOutlined } from "@ant-design/icons";
 import DataTable from "react-data-table-component";
+import moment from "moment";
 
 export default function permintaanBarang() {
   const { token } = nookies.get();
@@ -117,6 +118,10 @@ export default function permintaanBarang() {
     },
   };
 
+  const generateRandomId = () => {
+    return moment().unix();
+  };
+
   useEffect(() => {
     async function fetchProducts() {
       const endpoint = `${process.env.NEXT_PUBLIC_URL}/inventories/stock?location=${selectedLocation1}&query=${debounceProducts}`;
@@ -144,7 +149,7 @@ export default function permintaanBarang() {
           products: response.data.map((data) => ({
             label: data.name,
             value: JSON.stringify({
-              unique_id: Math.random().toString(36),
+              unique_id: generateRandomId(),
               qty: 1,
               unit: data.available_units[0],
               ...data,
@@ -160,21 +165,6 @@ export default function permintaanBarang() {
       fetchProducts();
     }
   }, [debounceProducts]);
-
-  const getProductUnits = (product, unit) => {
-    const units = [];
-
-    for (let i = 1; i < 6; i++) {
-      if (unit === product.attributes?.[`unit_${i}`]) {
-        units.push({
-          label: product.attributes?.[`unit_${i}`],
-          value: product.attributes?.[`unit_${i}`],
-        });
-      }
-    }
-
-    return units;
-  };
 
   const columns = [
     {
@@ -354,7 +344,9 @@ export default function permintaanBarang() {
                 setSearchProduct(value);
               }}
               onSelect={(value) => {
-                setProducts([...products, JSON.parse(value)]);
+                const selectedProduct = JSON.parse(value);
+                selectedProduct.unique_id = generateRandomId();
+                setProducts([...products, selectedProduct]);
               }}
               value={null}
               size="large"
