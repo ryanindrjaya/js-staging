@@ -16,10 +16,14 @@ async function createInventory(row) {
   const purchasingDetails = row.attributes.purchasing_details.data;
 
   purchasingDetails.forEach((element) => {
+    console.log("element purchasing detail", element);
+
     const unitOrder = element.attributes.unit_order;
     const totalOrder = parseInt(element.attributes.total_order);
     const product = element.attributes.product.data;
     const location = element.attributes.location.data;
+    const expDate = element.attributes.expired_date;
+    const batch = element.attributes.batch;
 
     if (unitOrder && totalOrder && product && location) {
       const item = {
@@ -27,6 +31,8 @@ async function createInventory(row) {
         product: product.id,
         unit: unitOrder,
         qty: totalOrder,
+        exp_date: expDate,
+        batch,
       };
 
       data.push(item);

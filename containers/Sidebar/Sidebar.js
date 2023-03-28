@@ -245,11 +245,11 @@ export default function Sidebar(props) {
                 </Link>
               </Menu.Item>
               <Menu.Item style={submenuStyle} key="permintaan_barang">
-                <Link href="/dashboard/stok/req-barang">
+                <Link href="/dashboard/stok/permintaan-barang">
                   <a>Permintaan Barang</a>
                 </Link>
               </Menu.Item>
-              <Menu.Item style={submenuStyle} key="daftar_keluar_barang">
+              {/* <Menu.Item style={submenuStyle} key="daftar_keluar_barang">
                 <Link href="/dashboard/stok/daftar-keluar-barang">
                   <a>Daftar Barang Keluar</a>
                 </Link>
@@ -263,7 +263,7 @@ export default function Sidebar(props) {
                 <Link href="/dashboard/stok/penyesuaian">
                   <a>Penyesuaian Stok</a>
                 </Link>
-              </Menu.Item>
+              </Menu.Item> */}
             </SubMenu>
 
             {/* PEMBELIAN  */}
