@@ -163,7 +163,7 @@ function Hutang({ props }) {
 
   const [info, setInfo] = useState();
 
-  // status pembayaran dan rentang
+  // status pembayaran
   const [statusPembayaran, setStatusPembayaran] = useState();
 
   // Range Picker

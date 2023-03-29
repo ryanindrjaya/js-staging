@@ -153,7 +153,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     {
       name: "Pilih Dokumen",
       width: "150px",
-      selector: (row, idx) => { console.log("row cek", idx, row);
+      selector: (row, idx) => {
         var index = cekData(row);
         var defaultCek = false;
         if(biaya?.info[index]?.pilihData == "pilih") defaultCek = true;
@@ -335,7 +335,6 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       name: "Sisa Hutang Jt",
       width: "150px",
       selector: (row, idx) => calculate(row, idx),
-          //calculatePriceTotal(row, idx),
     },
   ];
 
@@ -347,6 +346,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       columns={columns}
       data={data.filter((item) => {
         let man = new Date(item.attributes.date_purchasing); //date from data
+        if(item.attributes.status_pembayaran == "Belum Lunas") item.attributes.status_pembayaran = "Belum Dibayar";
 
         if(supplier?.id == item.attributes.supplier.data.id && statusPembayaran == item.attributes.status_pembayaran &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -364,19 +364,18 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
         ) {
           return item;
           }
-        if (supplier?.id == item.attributes.supplier.data.id && statusPembayaran == item.attributes.status_pembayaran && min == null && 
+        if (supplier?.id == item.attributes.supplier.data.id && statusPembayaran == item.attributes.status_pembayaran && min == null && max == null && 
             (item.attributes.no_purchasing.toLowerCase().indexOf(search?.toLowerCase()) !== -1 || search == undefined)
         ) {
           return item;
         }
-        if(supplier?.id == item.attributes.supplier.data.id && statusPembayaran == undefined && min == null && item.attributes.no_purchasing.toLowerCase().indexOf(search?.toLowerCase()) !== -1) {
+        if(supplier?.id == item.attributes.supplier.data.id && statusPembayaran == undefined && min == null && max == null && item.attributes.no_purchasing.toLowerCase().indexOf(search?.toLowerCase()) !== -1) {
           return item;
         }
-        if(supplier?.id == item.attributes.supplier.data.id && statusPembayaran == undefined && min == null && search == undefined) {
+        if(supplier?.id == item.attributes.supplier.data.id && statusPembayaran == undefined && min == null && max == null && search == undefined) {
           return item;
         }
       })}
-      //data={data}
       noDataComponent={`--Belum ada data LPB--`}
     />
   );
