@@ -325,6 +325,7 @@ function Pembelian({ props }) {
           "Status LPB berhasil dirubah. Silahkan cek LPB"
         );
       } else {
+        console.log("error", res)
         openNotificationWithIcon(
           "error",
           "Status LPB gagal dirubah",
@@ -332,7 +333,7 @@ function Pembelian({ props }) {
         );
       }
     } catch (error) {
-      console.log(error);
+      console.log("error", res)
       openNotificationWithIcon(
         "error",
         "Status LPB gagal dirubah",
