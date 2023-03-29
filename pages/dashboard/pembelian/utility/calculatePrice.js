@@ -46,9 +46,10 @@ export default function calculatePrice(
   }
 
   // check if price changed
-  if (products.productInfo[index]?.unit_price) {
+  console.log("test product redux ", products.productInfo[index]);
+  if (products.productInfo[index]?.priceUnit) {
     priceUnit =
-      products.productInfo[index].unit_price ?? row.attributes[`buy_price_1`];
+      products.productInfo[index].priceUnit ?? row.attributes[`buy_price_1`];
   }
 
   // check if qty changed

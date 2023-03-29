@@ -420,12 +420,16 @@ function Tambah({ props }) {
 
       var purchasing_details = [];
       var purchasing_payments = [];
+      var returs = [];
       values.attributes.purchasing_details.data.forEach((element) => {
         purchasing_details.push({ id: element.id });
       });
       values.attributes.purchasing_payments.data.forEach((element) => {
         purchasing_payments.push({ id: element.id });
       });
+      values.attributes.returs.data.forEach((element) => {
+        returs.push({ id: element.id });
+      })
 
       values.attributes.supplier = { id: values.attributes.supplier.data.id };
       values.attributes.location = {
@@ -433,6 +437,7 @@ function Tambah({ props }) {
       };
       values.attributes.purchasing_details = purchasing_details;
       values.attributes.purchasing_payments = purchasing_payments;
+      values.attributes.returs = returs;
 
       const newValues = {
         data: values.attributes,
@@ -465,9 +470,10 @@ function Tambah({ props }) {
           "Status LPB berhasil dirubah. Silahkan cek LPB"
         );
       } else {
+        console.log("error", res);
         openNotificationWithIcon(
           "error",
-          "Status LPB gagal dirubah 1",
+          "Status LPB gagal dirubah ",
           "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah"
         );
       }
@@ -475,7 +481,7 @@ function Tambah({ props }) {
       console.log(error);
       openNotificationWithIcon(
         "error",
-        "Status LPB gagal dirubah 2",
+        "Status LPB gagal dirubah ",
         "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah"
       );
     }
