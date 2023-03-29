@@ -229,7 +229,7 @@ function Retur({ props }) {
     console.log("get payment remaining");
     let returPayments = 0;
     let returPaymentRemaining = 0;
-    const totalLPBPayment = lpbData?.attributes?.total_purchasing;
+    const totalLPBPayment = lpbData?.attributes?.total_purchasing ?? 0;
 
     // for (const data in lpbData?.attributes?.returs?.data) {
     //   console.log("retur payment ", data.);
