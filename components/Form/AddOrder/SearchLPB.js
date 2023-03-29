@@ -3,14 +3,33 @@ import { CaretDownOutlined } from "@ant-design/icons";
 import nookies from "nookies";
 import { Form, Select } from "antd";
 
-function SearchPO({ supplier, handleSelect, disabled }) {
+const fetchLPBById = async (id, callback) => {
+  const cookies = nookies.get(null, "token");
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=deep`;
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  const res = await req.json();
+
+  console.log("lpb detail ", res.data);
+  callback(res.data);
+};
+
+function SearchLPB({ supplier, handleSelect, disabled }) {
   const cookies = nookies.get(null, "token");
   const [data, setData] = useState([]);
-  const [poData, setPoData] = useState();
+  const [lpbData, setlpbData] = useState();
 
   const handleSearch = (newValue) => {
     if (newValue) {
-      fetchPO(newValue, setData);
+      fetchLPB(newValue, setData);
     } else {
       setData([]);
     }
@@ -20,7 +39,7 @@ function SearchPO({ supplier, handleSelect, disabled }) {
     <Select.Option key={d.value}>{d.label}</Select.Option>
   ));
 
-  const fetchPO = async (query, callback) => {
+  const fetchLPB = async (query, callback) => {
     if (!query) {
       callback([]);
     } else {
@@ -29,7 +48,7 @@ function SearchPO({ supplier, handleSelect, disabled }) {
       try {
         const endpoint =
           process.env.NEXT_PUBLIC_URL +
-          `/purchases/?populate=deep&filters[status][$eq]=Sebagian Diterima&filters[status][$eq]=Diproses&filters[supplier][name][$eq]=${supplierName}&filters[no_po][$contains]=${query}`;
+          `/purchasings/?populate=deep&filters[status_pembayaran][$eq]=Belum Lunas&filters[supplier][name][$eq]=${supplierName}&filters[no_purchasing][$contains]=${query}`;
         const options = {
           method: "GET",
           headers: {
@@ -41,15 +60,15 @@ function SearchPO({ supplier, handleSelect, disabled }) {
         const req = await fetch(endpoint, options);
         const res = await req.json();
 
-        console.log("result po", query, res);
+        console.log("result lpb", query, res);
 
         if (req.status == 200) {
-          const po = res?.data?.map((po) => ({
-            label: `${po.attributes.no_po}`,
-            value: po.id,
+          const lpb = res?.data?.map((lpb) => ({
+            label: `${lpb.attributes.no_purchasing}`,
+            value: lpb.id,
           }));
 
-          callback(po);
+          callback(lpb);
         }
       } catch (error) {
         console.log(error);
@@ -58,16 +77,18 @@ function SearchPO({ supplier, handleSelect, disabled }) {
   };
 
   return (
-    <Form.Item required name="no_po">
+    <Form.Item required name="no_purchasing">
       <Select
         disabled={disabled}
         allowClear
         size="large"
         showSearch
-        value={poData}
-        placeholder="Ketikan Nomor PO"
+        value={lpbData}
+        placeholder="Ketikan Nomor LPB"
         onSearch={handleSearch}
-        onSelect={handleSelect}
+        onSelect={(e) => {
+          fetchLPBById(e, handleSelect);
+        }}
         filterOption={false}
         defaultActiveFirstOption={false}
         suffixIcon={<CaretDownOutlined />}
@@ -79,4 +100,4 @@ function SearchPO({ supplier, handleSelect, disabled }) {
   );
 }
 
-export default SearchPO;
+export default SearchLPB;
