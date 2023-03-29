@@ -13,7 +13,8 @@ const CreateRetur = async (
   values,
   listId,
   form,
-  router
+  router,
+  lpbId
 ) => {
   // CLEANING DATA
 
@@ -28,28 +29,21 @@ const CreateRetur = async (
 
   values.tanggal_retur = values.tanggal_retur;
   values.supplier_id = supplierId;
-    grandTotal === 0 ? parseInt(totalPrice) : parseInt(grandTotal);
+  grandTotal === 0 ? parseFloat(totalPrice) : parseFloat(grandTotal);
   values.retur_details = null;
   values.supplier_id = null;
+  values.total_price = grandTotal;
 
   var data = {
     data: values,
   };
-    
-  const req = await createData(data); 
-  const res = await req.json();
-    console.log("ini data 1 : "); console.log(data); console.log(req);
-  if (req.status === 200) {
-    await putRelationRetur(res.data.id, res.data.attributes, form, router);
-  } else {
-    openNotificationWithIcon("error");
-  }
+
+  await createData(data, form, router, lpbId);
 };
 
-const createData = async (data) => {
+const createData = async (data, form, router, lpbId) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/returs";
-    const JSONdata = JSON.stringify(data);
-    console.log("ini data "); console.log(data)
+  const JSONdata = JSON.stringify(data);
   const options = {
     method: "POST",
     headers: {
@@ -60,11 +54,25 @@ const createData = async (data) => {
   };
 
   const req = await fetch(endpoint, options);
-  //const res = await req.json(); console.log(res)
-  return req;
+  const res = await req.json();
+
+  console.log("res", res);
+
+  if (req.status === 200) {
+    await putRelationRetur(
+      res.data.id,
+      res.data.attributes,
+      form,
+      router,
+      lpbId
+    );
+  } else {
+    console.log("error here");
+    openNotificationWithIcon("error");
+  }
 };
 
-const putRelationRetur = async (id, value, form, router) => {
+const putRelationRetur = async (id, value, form, router, lpbId) => {
   const user = await getUserMe();
   const dataRetur = {
     data: value,
@@ -73,6 +81,7 @@ const putRelationRetur = async (id, value, form, router) => {
   dataRetur.data.supplier = { id: tempSupplierId };
   dataRetur.data.retur_details = tempProductListId;
   dataRetur.data.locations = { id: tempLocationId };
+  dataRetur.data.purchasing = { id: lpbId };
 
   // clean object
   for (var key in dataRetur) {
@@ -92,9 +101,9 @@ const putRelationRetur = async (id, value, form, router) => {
     body: JSONdata,
   };
 
-
   const req = await fetch(endpoint, options);
-  //const res = await req.json();
+  const res = await req.json();
+  console.log("reponse put relation retur", res);
 
   if (req.status === 200) {
     form.resetFields();
@@ -126,7 +135,7 @@ const openNotificationWithIcon = (type) => {
     notification[type]({
       message: "Gagal menambahkan data",
       description:
-        "Retur gagal ditambahkan. Silahkan cek NO Retur atau kelengkapan data lainnya",
+        "Retur gagal ditambahkan 1. Silahkan cek NO Retur atau kelengkapan data lainnya",
     });
   } else if (type === "success") {
     notification[type]({

@@ -62,7 +62,7 @@ const createDetailOrder = async (
           element.attributes[`unit_${unitByIndex}_dp3`] ??
           0;
         var unitPrice =
-          products.productInfo?.[idx]?.priceUnit ??
+          products.productInfo?.[idx]?.unit_price ??
           element.attributes.buy_price_1;
         var unitPriceAfterDisc = productTotalPrice?.[idx];
         var subTotal = productSubTotal?.[idx];

@@ -61,10 +61,9 @@ export default function ReactDataTable({
     });
   };
 
-  const onChangePriceUnit = (value, data, index, indexRow) => {
+  const onChangePriceUnit = (value, data, index, indexRow, changedValue) => {
+    console.log("onChangePriceUnit", value, data, index, indexRow);
     var tempPriceUnit = [];
-
-    onChangeProductPrice(value, data, indexRow);
 
     const selectedUnit =
       formObj.getFieldValue(`jumlah_option`) || products.productInfo;
@@ -85,18 +84,11 @@ export default function ReactDataTable({
     tempPriceUnit.push(data.attributes.buy_price_4);
     tempPriceUnit.push(data.attributes.buy_price_5);
 
-    data.attributes.buy_price_1 = value;
-    data.attributes.buy_price_2 = value;
-    data.attributes.buy_price_3 = value;
-    data.attributes.buy_price_4 = value;
-    data.attributes.buy_price_5 = value;
-
-    if (tempIndex != index) {
-      console.log("===== masuk siini =====");
-      tempIndex = index;
-      onChangeUnit(selectedUnitIndex, data, indexRow);
-      return;
-    }
+    // data.attributes.buy_price_1 = value;
+    // data.attributes.buy_price_2 = value;
+    // data.attributes.buy_price_3 = value;
+    // data.attributes.buy_price_4 = value;
+    // data.attributes.buy_price_5 = value;
 
     data.attributes.buy_price_1 = tempPriceUnit[0];
     data.attributes.buy_price_2 = tempPriceUnit[1];
@@ -104,10 +96,18 @@ export default function ReactDataTable({
     data.attributes.buy_price_4 = tempPriceUnit[3];
     data.attributes.buy_price_5 = tempPriceUnit[4];
 
-    console.log("harga satuan ", value);
+    if (tempIndex != index) {
+      console.log("===== masuk siini =====");
+      tempIndex = index;
+      onChangeUnit(selectedUnitIndex, data, indexRow, changedValue);
+      return;
+    }
+
+    onChangeProductPrice(changedValue, data, indexRow);
+    console.log("product (redux)", products);
     formObj.setFieldsValue({
       harga_satuan: {
-        [indexRow]: value,
+        [indexRow]: changedValue,
       },
       disc_rp: {
         [indexRow]: discRpIndex,
@@ -116,7 +116,9 @@ export default function ReactDataTable({
     console.log("product data", products);
   };
 
-  const onChangeUnit = (value, data, index) => {
+  const onChangeUnit = (selectedUnitIndex, data, index, changedValue) => {
+    let priceEx = 0;
+
     // reset disc on change
     formObj.setFieldsValue({
       disc_rp: {
@@ -124,27 +126,29 @@ export default function ReactDataTable({
       },
     });
 
-    unit = value;
-    if (value == 1) {
-      priceUnit = data.attributes.buy_price_1;
-    } else if (value == 2) {
-      priceUnit = data.attributes.buy_price_2;
-    } else if (value == 3) {
-      priceUnit = data.attributes.buy_price_3;
-    } else if (value == 4) {
-      priceUnit = data.attributes.buy_price_4;
-    } else if (value == 5) {
-      priceUnit = data.attributes.buy_price_5;
+    unit = selectedUnitIndex;
+    if (selectedUnitIndex == 1) {
+      priceEx = data.attributes.buy_price_1;
+    } else if (selectedUnitIndex == 2) {
+      priceEx = data.attributes.buy_price_2;
+    } else if (selectedUnitIndex == 3) {
+      priceEx = data.attributes.buy_price_3;
+    } else if (selectedUnitIndex == 4) {
+      priceEx = data.attributes.buy_price_4;
+    } else if (selectedUnitIndex == 5) {
+      priceEx = data.attributes.buy_price_5;
     }
+
+    changedValue = changedValue || priceEx;
 
     dispatch({
       type: "CHANGE_PRODUCT_UNIT",
-      unit: value,
+      unit: selectedUnitIndex,
       product: data,
       index,
     });
 
-    onChangePriceUnit(priceUnit, data, value, index);
+    onChangePriceUnit(priceEx, data, selectedUnitIndex, index, changedValue);
     tempIndex = 0;
   };
 
@@ -227,7 +231,9 @@ export default function ReactDataTable({
                 <InputNumber
                   defaultValue={priceUnit}
                   min={0}
-                  onChange={(e) => onChangePriceUnit(e, row, unit[idx], idx)}
+                  onChange={(e) => {
+                    onChangePriceUnit(e, row, unit[idx], idx, e);
+                  }}
                   style={{
                     width: "150px",
                     marginRight: "10px",
@@ -283,7 +289,10 @@ export default function ReactDataTable({
               <Form.Item name={["jumlah_option", `${idx}`]} noStyle>
                 <Select
                   defaultValue={defaultIndex}
-                  onChange={(value) => onChangeUnit(value, row, idx)}
+                  onChange={(value) => {
+                    console.log("jumlah option  value ", value);
+                    onChangeUnit(value, row, idx);
+                  }}
                   name="jumlah_option"
                   style={{
                     width: "57%",

@@ -9,7 +9,7 @@ import nookies from "nookies";
 import { toast } from "react-toastify";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import Supplier from "../../../../components/Form/AddOrder/SupplierForm";
-import LPBTable from "@iso/components/ReactDataTable/Purchases/LPBTable";
+import LPBTable from "../../../../components/ReactDataTable/Purchases/LPBTable";
 import { useSelector, useDispatch } from "react-redux";
 import LoadingAnimations from "@iso/components/Animations/Loading";
 import moment from "moment";
