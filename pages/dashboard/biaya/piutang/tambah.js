@@ -274,6 +274,9 @@ function Piutang({ props }) {
 
   const [info, setInfo] = useState();
 
+  //total item
+  const [totalItem, setTotalItem] = useState(0);
+
   // customer
   const [customer, setCustomer] = useState();
   // area
@@ -414,6 +417,20 @@ function Piutang({ props }) {
     total = totalPiutang - totalBayar;
     return total;
   };
+
+  useEffect(() => {
+    var lastKey = 0;
+
+    if(biaya.info){
+        for (const key in biaya.info) {
+
+            if (biaya.info[key].pilihData == "pilih") {
+                lastKey++;
+            }
+        }
+        setTotalItem(lastKey);
+    }
+  }, [biaya.info]);
 
   useEffect(() => {
     //if (dataValues && info == "sukses") createDetailSale();
@@ -723,7 +740,7 @@ function Piutang({ props }) {
 
               <div className="w-full flex flex-wrap mb-3">
                 <Form.Item name="total_item" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> TOTAL ITEM </span> <span> : {dataTabel.length}</span>
+                  <span> TOTAL ITEM </span> <span> : {totalItem}</span>
                 </Form.Item>
                 <Form.Item name="total_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
                   <span> TOTAL PIUTANG JATUH TEMPO </span> <span> : {formatter.format(totalPiutangJatuhTempo())}</span>

@@ -341,6 +341,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                                       marginRight: "10px",
                                   }}
                                   onChange={(value) => onChangeBayar(value, metode, row, idx)}
+                                  formatter={(value) =>
+                                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                  }
+                                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                               />
                           </Form.Item>
                       </div>
@@ -385,6 +389,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                                       marginRight: "10px",
                                   }}
                                   onChange={(value) => onChangeBayar(value, metode, row, idx)}
+                                  formatter={(value) =>
+                                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                  }
+                                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                               />
                           </Form.Item>
                       </div>
@@ -429,6 +437,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                                       marginRight: "10px",
                                   }}
                                   onChange={(value) => onChangeBayar(value, metode, row)}
+                                  formatter={(value) =>
+                                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                  }
+                                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                               />
                           </Form.Item>
                       </div>
@@ -473,6 +485,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                                       marginRight: "10px",
                                   }}
                                   onChange={(value) => onChangeBayar(value, metode, row)}
+                                  formatter={(value) =>
+                                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                  }
+                                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                               />
                           </Form.Item>
                       </div>
@@ -517,6 +533,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                                       marginRight: "10px",
                                   }}
                                   onChange={(value) => onChangeBayar(value, metode, row)}
+                                  formatter={(value) =>
+                                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                  }
+                                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                               />
                           </Form.Item>
                       </div>
