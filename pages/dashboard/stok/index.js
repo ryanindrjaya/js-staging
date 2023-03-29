@@ -108,6 +108,8 @@ export default function Riwayat({ defaultOptions }) {
       .then((res) => res.json())
       .catch((err) => console.log(err));
 
+    console.log("response from fetchInventory", response);
+
     if (response?.data) {
       setData(response.data);
     } else {
@@ -247,120 +249,127 @@ export default function Riwayat({ defaultOptions }) {
 
   return (
     <>
-      <Head>
-        <title>Cetak Kartu Stok</title>
-      </Head>
       {printState ? (
-        <div className="px-6 py-3">
-          <div className="flex justify-between items-center mb-5">
-            <ArrowLeftOutlined
-              title="Kembali"
-              className="print:hidden cursor-pointer"
-              onClick={() => {
-                setPrintState(false);
-                setLoading({ ...loading, print: false });
-              }}
-            />
-            <button
-              onClick={handlePrint}
-              class="print:hidden rounded-full bg-sky-400 px-4 py-2 font-bold text-white"
-            >
-              <span>
-                <PrinterOutlined className="mr-1 text-lg" />
-              </span>{" "}
-              Cetak Dokumen
-            </button>
-          </div>
-          <div className="w-full mb-5 flex items-end justify-between">
-            <p className="uppercase font-bold text-xl">Kartu Stok</p>
-            <p className="uppercase text-sm">
-              Cetakan Tanggal : {moment().format("DD/MM/YYYY HH:mm:ss")}
-            </p>
-          </div>
-
-          <p className="font-bold uppercase mb-0">{productData?.name}</p>
-          <p className="uppercase mb-0">LOKASI PRODUK : {locationData?.name}</p>
-          <p className="uppercase mb-0">
-            RENTANG TANGGAL :{" "}
-            {date?.[0] && date?.[1]
-              ? `${moment(date?.[0]).format("DD/MM/YYYY")} - ${moment(date?.[0]).format(
-                  "DD/MM/YYYY"
-                )}`
-              : "-"}
-          </p>
-
-          {history?.units?.length > 0 ? (
-            <Table bordered pagination={false} loading={fetchingHistory} dataSource={history?.data}>
-              <Column
-                className="uppercase"
-                title="Tanggal"
-                render={(row) => {
-                  return moment(row.createdAt).format("DD/MM/YYYY");
+        <>
+          <Head>
+            <title>Cetak Kartu Stok</title>
+          </Head>
+          <div className="px-6 py-3">
+            <div className="flex justify-between items-center mb-5">
+              <ArrowLeftOutlined
+                title="Kembali"
+                className="print:hidden cursor-pointer"
+                onClick={() => {
+                  setPrintState(false);
+                  setLoading({ ...loading, print: false });
                 }}
-                key="createdAt"
               />
-              <Column
-                className="uppercase"
-                title="No refrensi"
-                dataIndex="no_referensi"
-                key="no_referensi"
-              />
-              <Column className="uppercase" title="Jenis" dataIndex="type" key="type" />
-              <ColumnGroup className="uppercase" title="MASUK">
-                {history?.units?.map((unit) => (
-                  <Column
-                    className="uppercase child text-center"
-                    title={unit}
-                    render={(_, record) => {
-                      return record.detail?.unit === unit && record.detail?.type === "Masuk"
-                        ? record.detail?.qty
-                        : "";
-                    }}
-                    dataIndex={unit}
-                    key={unit}
-                  />
-                ))}
-              </ColumnGroup>
-              <ColumnGroup className="uppercase" title="KELUAR">
-                {history?.units?.map((unit) => (
-                  <Column
-                    className="uppercase child text-center"
-                    title={unit}
-                    render={(_, record) => {
-                      return record.detail?.unit === unit && record.detail?.type === "Keluar"
-                        ? record.detail?.qty
-                        : "";
-                    }}
-                    dataIndex={unit}
-                    key={unit}
-                  />
-                ))}
-              </ColumnGroup>
-              <ColumnGroup className="uppercase" title="SISA STOK">
-                {history?.units?.map((unit) => (
-                  <Column
-                    className="uppercase child text-center"
-                    title={unit}
-                    render={(_, record) => {
-                      return record.detail?.remaining_stock?.[unit];
-                    }}
-                    dataIndex={unit}
-                    key={unit}
-                  />
-                ))}
-              </ColumnGroup>
-              <Column className="uppercase" title="Pembuat" dataIndex="author" key="author" />
-              <Column
-                className="uppercase"
-                title="Keterangan"
-                dataIndex="description"
-                key="description"
-              />
-            </Table>
-          ) : (
-            ""
-          )}
-        </div>
+              <button
+                onClick={handlePrint}
+                class="print:hidden rounded-full bg-sky-400 px-4 py-2 font-bold text-white"
+              >
+                <span>
+                  <PrinterOutlined className="mr-1 text-lg" />
+                </span>{" "}
+                Cetak Dokumen
+              </button>
+            </div>
+            <div className="w-full mb-5 flex items-end justify-between">
+              <p className="uppercase font-bold text-xl">Kartu Stok</p>
+              <p className="uppercase text-sm">
+                Cetakan Tanggal : {moment().format("DD/MM/YYYY HH:mm:ss")}
+              </p>
+            </div>
+
+            <p className="font-bold uppercase mb-0">{productData?.name}</p>
+            <p className="uppercase mb-0">LOKASI PRODUK : {locationData?.name}</p>
+            <p className="uppercase mb-0">
+              RENTANG TANGGAL :{" "}
+              {date?.[0] && date?.[1]
+                ? `${moment(date?.[0]).format("DD/MM/YYYY")} - ${moment(date?.[0]).format(
+                    "DD/MM/YYYY"
+                  )}`
+                : "-"}
+            </p>
+
+            {history?.units?.length > 0 ? (
+              <Table
+                bordered
+                pagination={false}
+                loading={fetchingHistory}
+                dataSource={history?.data}
+              >
+                <Column
+                  className="uppercase"
+                  title="Tanggal"
+                  render={(row) => {
+                    return moment(row.createdAt).format("DD/MM/YYYY");
+                  }}
+                  key="createdAt"
+                />
+                <Column
+                  className="uppercase"
+                  title="No refrensi"
+                  dataIndex="no_referensi"
+                  key="no_referensi"
+                />
+                <Column className="uppercase" title="Jenis" dataIndex="type" key="type" />
+                <ColumnGroup className="uppercase" title="MASUK">
+                  {history?.units?.map((unit) => (
+                    <Column
+                      className="uppercase child text-center"
+                      title={unit}
+                      render={(_, record) => {
+                        return record.detail?.unit === unit && record.detail?.type === "Masuk"
+                          ? record.detail?.qty
+                          : "";
+                      }}
+                      dataIndex={unit}
+                      key={unit}
+                    />
+                  ))}
+                </ColumnGroup>
+                <ColumnGroup className="uppercase" title="KELUAR">
+                  {history?.units?.map((unit) => (
+                    <Column
+                      className="uppercase child text-center"
+                      title={unit}
+                      render={(_, record) => {
+                        return record.detail?.unit === unit && record.detail?.type === "Keluar"
+                          ? record.detail?.qty
+                          : "";
+                      }}
+                      dataIndex={unit}
+                      key={unit}
+                    />
+                  ))}
+                </ColumnGroup>
+                <ColumnGroup className="uppercase" title="SISA STOK">
+                  {history?.units?.map((unit) => (
+                    <Column
+                      className="uppercase child text-center"
+                      title={unit}
+                      render={(_, record) => {
+                        return record.detail?.remaining_stock?.[unit];
+                      }}
+                      dataIndex={unit}
+                      key={unit}
+                    />
+                  ))}
+                </ColumnGroup>
+                <Column className="uppercase" title="Pembuat" dataIndex="author" key="author" />
+                <Column
+                  className="uppercase"
+                  title="Keterangan"
+                  dataIndex="description"
+                  key="description"
+                />
+              </Table>
+            ) : (
+              ""
+            )}
+          </div>
+        </>
       ) : (
         <>
           <Head>
@@ -456,7 +465,7 @@ export default function Riwayat({ defaultOptions }) {
                         </div>
                         <div className="w-full flex justify-between gap-2">
                           <p className="text-sm mb-0">STOK TRANSFER KELUAR</p>
-                          <p className="text-sm mb-0">{data.transfer_masuk}</p>
+                          <p className="text-sm mb-0">{data.transfer_keluar}</p>
                         </div>
                       </div>
                       <div className="w-full">

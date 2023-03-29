@@ -249,17 +249,17 @@ export default function Sidebar(props) {
                   <a>Permintaan Barang</a>
                 </Link>
               </Menu.Item>
-              {/* <Menu.Item style={submenuStyle} key="daftar_keluar_barang">
+              <Menu.Item style={submenuStyle} key="daftar_keluar_barang">
                 <Link href="/dashboard/stok/daftar-keluar-barang">
                   <a>Daftar Barang Keluar</a>
                 </Link>
               </Menu.Item>
-              <Menu.Item style={submenuStyle} key="daftar_terima_barang">
-                <Link href="/dashboard/stok/daftar-terima-barang">
+              <Menu.Item style={submenuStyle} key="daftar_masuk_barang">
+                <Link href="/dashboard/stok/daftar-masuk-barang">
                   <a>Daftar Barang Masuk</a>
                 </Link>
               </Menu.Item>
-              <Menu.Item style={submenuStyle} key="penyesuaian_stok">
+              {/* <Menu.Item style={submenuStyle} key="penyesuaian_stok">
                 <Link href="/dashboard/stok/penyesuaian">
                   <a>Penyesuaian Stok</a>
                 </Link>
