@@ -46,7 +46,7 @@ const CreateOrder = async (
     ),
   };
 
-  var purchaseOrderId = values?.no_po ? { id: values?.no_po } : null;
+  var purchaseOrderId = values?.no_po ? { id: parseInt(values?.no_po) } : null;
 
   // only in purchasing
   delete values?.delivery_date;
@@ -94,7 +94,7 @@ const CreateOrder = async (
 const createData = async (data) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings";
   const JSONdata = JSON.stringify(data);
-
+  console.log("jsondata", JSONdata);
   const options = {
     method: "POST",
     headers: {

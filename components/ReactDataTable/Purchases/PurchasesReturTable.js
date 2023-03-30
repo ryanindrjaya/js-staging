@@ -16,7 +16,8 @@ export default function ReactDataTable({
   onChangeStatusPengiriman,
   onChangeStatus,
 }) {
-  const router = useRouter(); console.log("data index",data)
+  const router = useRouter();
+  console.log("data index", data);
   const { Option } = Select;
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
@@ -38,7 +39,11 @@ export default function ReactDataTable({
   };
 
   const print = (row) => {
-    openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
+    openNotificationWithIcon(
+      "info",
+      "Work In Progress",
+      "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
+    );
     //router.push("order_pembelian/print/" + row.id);
   };
 
@@ -80,7 +85,7 @@ export default function ReactDataTable({
     setOpen(true);
   };
   const handleOk = () => {
-    setModalText('The modal will be closed after two seconds');
+    setModalText("The modal will be closed after two seconds");
     setConfirmLoading(true);
     setTimeout(() => {
       setOpen(false);
@@ -88,7 +93,7 @@ export default function ReactDataTable({
     }, 2000);
   };
   const handleCancel = () => {
-    console.log('Clicked cancel button');
+    console.log("Clicked cancel button");
     setOpen(false);
     //this.myFormRef.reset();
   };
@@ -119,78 +124,85 @@ export default function ReactDataTable({
       ) : (
         <div>
           <button
-              onClick={() => edit(row)}
-              className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+            onClick={() => edit(row)}
+            className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
           >
-              <EditOutlined className="mr-2 mt-0.5 float float-left" />
-              Edit
+            <EditOutlined className="mr-2 mt-0.5 float float-left" />
+            Edit
           </button>
         </div>
       )}
 
       <div>
         <button
-            //onClick={() => metodePembayaran(row)}
-            onClick={showModal}
-            className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+          //onClick={() => metodePembayaran(row)}
+          onClick={showModal}
+          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
         >
-            <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
-            Metode Pembayaran
+          <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
+          Metode Pembayaran
         </button>
 
-          <Modal
-            title="Pembayaran Retur Pembelian"
-            open={open}
-            onOk={handleOk}
-            confirmLoading={confirmLoading}
-            onCancel={handleCancel}
-            //ref={(modal) => this.myFormRef = modal}
-            footer={[
-                <button className="border border-cyan-700 rounded-md m-1 text-sm px-6 py-2" key="back" onClick={handleCancel}>
-                Cancel
-                </button>,
-                <button className="bg-cyan-700 rounded-md m-1 text-sm px-4" key="submit" loading={loading} onClick={handleOk}>
-                <p className="px-4 py-2 m-0 text-white">
-                    SIMPAN
-                </p>
-                </button>
-            ]}
-          >
-                <div className="w-full flex justify-start">
-                    <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-left">
-                        <span className="font-bold">Supplier : </span>
-                    </div>
-                    <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-center">
-                        <span className="font-bold">Nomer : </span>
-                    </div>
-                    <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-right">
-                        <span className="font-bold">Jumlah Total : </span>
-                    </div>
-                </div>
+        <Modal
+          title="Pembayaran Retur Pembelian"
+          open={open}
+          onOk={handleOk}
+          confirmLoading={confirmLoading}
+          onCancel={handleCancel}
+          //ref={(modal) => this.myFormRef = modal}
+          footer={[
+            <button
+              className="border border-cyan-700 rounded-md m-1 text-sm px-6 py-2"
+              key="back"
+              onClick={handleCancel}
+            >
+              Cancel
+            </button>,
+            <button
+              className="bg-cyan-700 rounded-md m-1 text-sm px-4"
+              key="submit"
+              loading={loading}
+              onClick={handleOk}
+            >
+              <p className="px-4 py-2 m-0 text-white">SIMPAN</p>
+            </button>,
+          ]}
+        >
+          <div className="w-full flex justify-start">
+            <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-left">
+              <span className="font-bold">Supplier : </span>
+            </div>
+            <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-center">
+              <span className="font-bold">Nomer : </span>
+            </div>
+            <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-right">
+              <span className="font-bold">Jumlah Total : </span>
+            </div>
+          </div>
 
-                 <div className="w-full flex justify-start">
-                    <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-left">
-                        <span className="font-bold">alamat</span>
-                    </div>
-                    <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-center">
-                        <div>
-                          <span className="font-bold">Tanggal : </span>
-                        </div>
-                        <div>
-                          <span className="font-bold">Lokasi Gudang : </span>
-                        </div>
-                    </div>
-                    <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-right">
-                        <span className="font-bold">Catatan : </span>
-                        <span className="font-bold">Pembayaran : </span>
-                    </div>
-                  </div>
+          <div className="w-full flex justify-start">
+            <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-left">
+              <span className="font-bold">alamat</span>
+            </div>
+            <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-center">
+              <div>
+                <span className="font-bold">Tanggal : </span>
+              </div>
+              <div>
+                <span className="font-bold">Lokasi Gudang : </span>
+              </div>
+            </div>
+            <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-right">
+              <span className="font-bold">Catatan : </span>
+              <span className="font-bold">Pembayaran : </span>
+            </div>
+          </div>
 
-                  <div className="w-full flex justify-start">
-                      <TextArea rows={4} placeholder="Catatan Tambahan" />
-                  </div>
-          </Modal>
-        </div>
+          <div className="w-full flex justify-start">
+            <TextArea rows={4} placeholder="Catatan Tambahan" />
+          </div>
+        </Modal>
+      </div>
       <AlertDialog
         onCancel={onCancel}
         onConfirm={onConfirm}
@@ -212,6 +224,24 @@ export default function ReactDataTable({
   };
 
   const columns = [
+    {
+      name: "Tindakan",
+      width: "150px",
+      selector: (row) => {
+        if (row.attributes.status == "Selesai") setEditStatus(true);
+        else setEditStatus(false);
+
+        return (
+          <>
+            <Popover content={content(row)} placement="bottom" trigger="click">
+              <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
+                Tindakan
+              </button>
+            </Popover>
+          </>
+        );
+      },
+    },
     {
       name: "Tanggal",
       width: "150px",
@@ -240,7 +270,8 @@ export default function ReactDataTable({
     {
       name: "Supplier",
       width: "180px",
-      selector: (row) => row.attributes?.supplier?.data?.attributes?.name ?? "-",
+      selector: (row) =>
+        row.attributes?.supplier?.data?.attributes?.name ?? "-",
     },
     //{
     //  name: "Status Pembayaran",
@@ -310,7 +341,7 @@ export default function ReactDataTable({
     //        onChange={(e) => onChangeStatus(e, row)}
     //      >
     //        <Option value="Dipesan">
-             
+
     //          <Tag color="default">Dipesan</Tag>
     //        </Option>
     //        <Option value="Diterima">
@@ -349,25 +380,6 @@ export default function ReactDataTable({
     //    );
     //  },
     //},
-    {
-      name: "Tindakan",
-      width: "250px",
-      selector: (row) => {
-          
-        if(row.attributes.status == "Selesai") setEditStatus(true);
-        else setEditStatus(false);
-
-        return(
-          <>
-            <Popover content={content(row)} placement="bottom" trigger="click">
-              <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
-                Tindakan
-              </button>
-            </Popover>
-          </>
-        );
-      },
-    },
   ];
 
   return (
