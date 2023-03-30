@@ -274,9 +274,14 @@ function Piutang({ props }) {
 
   const [info, setInfo] = useState();
 
+  //total item
+  const [totalItem, setTotalItem] = useState(0);
+
   // customer
   const [customer, setCustomer] = useState();
-  // area
+  // data penjualan
+  const [tipePenjualan, setTipePenjualan] = useState();
+  // sale
   const [salesSelect, setSalesSelect] = useState();
   // area
   const [area, setArea] = useState();
@@ -414,6 +419,20 @@ function Piutang({ props }) {
     total = totalPiutang - totalBayar;
     return total;
   };
+
+  useEffect(() => {
+    var lastKey = 0;
+
+    if(biaya.info){
+        for (const key in biaya.info) {
+
+            if (biaya.info[key].pilihData == "pilih") {
+                lastKey++;
+            }
+        }
+        setTotalItem(lastKey);
+    }
+  }, [biaya.info]);
 
   useEffect(() => {
     //if (dataValues && info == "sukses") createDetailSale();
@@ -664,6 +683,29 @@ function Piutang({ props }) {
 
               <div className="w-full flex flex-wrap justify-start -mx-3 -mt-8">
                 <div className="w-full md:w-1/4 px-3 mb-2">
+                  <Form.Item name="tipe_penjualan" //initialValue={"Hari"} 
+                  noStyle>
+                    <Select
+                      size="large"
+                      style={{
+                        width: "100%",
+                      }}
+                      placeholder="Tipe Penjualan"
+                      onChange={setTipePenjualan}
+                    >
+                      <Select.Option value="panel" key="panel">
+                        Panel
+                      </Select.Option>
+                      <Select.Option value="nonpanel" key="nonpanel">
+                        Non Panel
+                      </Select.Option>
+                      <Select.Option value="sales" key="sales">
+                        Sales
+                      </Select.Option>
+                    </Select>
+                  </Form.Item>
+                </div>
+                <div className="w-full md:w-1/4 px-3 mb-2">
                   <Form.Item name="users_permissions_user" //initialValue={"Hari"} 
                   noStyle>
                     <Select
@@ -690,16 +732,12 @@ function Piutang({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2">
                   <Wilayah onChangeWilayah={setWilayah} />
                 </div>
+              </div>
+
+              <div className="w-full flex flex-wrap justify-start -mx-3 -mt-2">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="tanggal"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
                     >
                     <DatePicker placeholder="Tanggal Penagihan" size="large" style={{ width: "100%" }} />
                   </Form.Item>
@@ -718,12 +756,15 @@ function Piutang({ props }) {
                   statusPembayaran={statusPembayaran}
                   customer={customer}
                   sales={salesSelect}
+                  area={area}
+                  wilayah={wilayah}
+                  tipePenjualan={tipePenjualan}
                 />
               </div>
 
               <div className="w-full flex flex-wrap mb-3">
                 <Form.Item name="total_item" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> TOTAL ITEM </span> <span> : {dataTabel.length}</span>
+                  <span> TOTAL ITEM </span> <span> : {totalItem}</span>
                 </Form.Item>
                 <Form.Item name="total_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
                   <span> TOTAL PIUTANG JATUH TEMPO </span> <span> : {formatter.format(totalPiutangJatuhTempo())}</span>
