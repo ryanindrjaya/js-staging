@@ -123,10 +123,7 @@ function Hutang({ props }) {
   const biaya = useSelector((state) => state.Cost);
   const dispatch = useDispatch();
 
-  //var selectedProduct = products?.productList;
-  //const locations = props.locations.data;
   const user = props.user;
-  //const inven = props.inven.data;
   const lpb = props.LPB.data;
   const returLPB = props.returLPB.data;
   const akunHutang = props.akunHutang.data;
@@ -136,11 +133,9 @@ function Hutang({ props }) {
   const [dataRetur, setDataRetur] = useState([]);
   const [sisaHutang, setSisaHutang] = useState([]);
   const [sisaHutangTotal, setSisaHutangTotal] = useState({});
-  //const [dataShow, setDataShow] =  useState([]); console.log("data show", dataShow);
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  //const [additionalFee, setAdditionalFee] = useState();
   const [isFetchinData, setIsFetchingData] = useState(false);
   const [document, setDocument] = useState();
   const [tanggal, setTanggal] = useState(moment());
@@ -162,6 +157,9 @@ function Hutang({ props }) {
   const tempList = [];
 
   const [info, setInfo] = useState();
+
+  //total item
+  const [totalItem, setTotalItem] = useState(0);
 
   // status pembayaran
   const [statusPembayaran, setStatusPembayaran] = useState();
@@ -331,14 +329,13 @@ function Hutang({ props }) {
                     metode_bayar5: "oth",
                     bayar5: totalOth,
                 });
-            } 
-
+                lastKey++;
+            }
         }
-        
+        setTotalItem(lastKey);
     }
   }, [biaya.info]);
 
-  console.log("biaya",biaya);
   useEffect(() => {
     if (dataValues && info == "sukses") createDetail();
   }, [dataValues]);
@@ -538,7 +535,7 @@ function Hutang({ props }) {
 
               <div className="w-full flex flex-wrap mb-3">
                 <Form.Item name="total_item" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> TOTAL ITEM </span> <span> : {dataTabel?.length ?? 0}</span>
+                  <span> TOTAL ITEM </span> <span> : {totalItem}</span>
                 </Form.Item>
                 <Form.Item name="total_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
                   <span> TOTAL HUTANG JATUH TEMPO </span> <span> : {formatter.format(totalHutangJatuhTempo())}</span>
@@ -560,7 +557,18 @@ function Hutang({ props }) {
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 mt-8">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="bayar1">
-                    <Input style={{ height: "40px" }} placeholder="Nominal Pembayaran" />
+                    <InputNumber placeholder="Nominal Pembayaran"
+                    formatter={(value) =>
+                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                    parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                    min={0}
+                    style={{
+                        height: "40px",
+                        width: "100%",
+                        marginRight: "10px",
+                    }}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -596,7 +604,18 @@ function Hutang({ props }) {
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="bayar2">
-                    <Input style={{ height: "40px" }} placeholder="Nominal Pembayaran" />
+                    <InputNumber placeholder="Nominal Pembayaran"
+                    formatter={(value) =>
+                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                    parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                    min={0}
+                    style={{
+                        height: "40px",
+                        width: "100%",
+                        marginRight: "10px",
+                    }}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -631,7 +650,18 @@ function Hutang({ props }) {
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="bayar3">
-                    <Input style={{ height: "40px" }} placeholder="Nominal Pembayaran" />
+                    <InputNumber placeholder="Nominal Pembayaran"
+                    formatter={(value) =>
+                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                    parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                    min={0}
+                    style={{
+                        height: "40px",
+                        width: "100%",
+                        marginRight: "10px",
+                    }}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -666,7 +696,18 @@ function Hutang({ props }) {
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="bayar4">
-                    <Input style={{ height: "40px" }} placeholder="Nominal Pembayaran" />
+                    <InputNumber placeholder="Nominal Pembayaran"
+                    formatter={(value) =>
+                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                    parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                    min={0}
+                    style={{
+                        height: "40px",
+                        width: "100%",
+                        marginRight: "10px",
+                    }}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -701,7 +742,18 @@ function Hutang({ props }) {
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="bayar5">
-                    <Input style={{ height: "40px" }} placeholder="Nominal Pembayaran" />
+                    <InputNumber placeholder="Nominal Pembayaran"
+                    formatter={(value) =>
+                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                    parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                    min={0}
+                    style={{
+                        height: "40px",
+                        width: "100%",
+                        marginRight: "10px",
+                    }}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">

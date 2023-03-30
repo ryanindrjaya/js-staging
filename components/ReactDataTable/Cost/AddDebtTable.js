@@ -66,7 +66,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
 
     index = cekData(data);
 
-    if (pilihData) { 
+    if (pilihData) {
       form.setFieldsValue({
         AccTunai: {
           [index]: 0,
@@ -222,7 +222,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             <Form.Item name={["AccTunai", `${idx}`]} noStyle>
               <InputNumber
                 defaultValue={defaultAccTunai}
-                //formatter={(value) => `${value}%`}
+                formatter={(value) =>
+                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                 min={0}
                 onChange={(e) => onChangeTunai(e, row, idx)}
                 style={{
@@ -246,7 +249,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             <Form.Item name={["AccBankTf", `${idx}`]} noStyle>
               <InputNumber
                 defaultValue={defaultAccBankTf}
-                //formatter={(value) => `${value}%`}
+                formatter={(value) =>
+                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                 min={0}
                 onChange={(e) => onChangeTransfer(e, row, idx)}
                 style={{
@@ -270,7 +276,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             <Form.Item name={["AccBankGiro", `${idx}`]} noStyle>
               <InputNumber
                 defaultValue={defaultAccBankGiro}
-                //formatter={(value) => `${value}%`}
+                formatter={(value) =>
+                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                 min={0}
                 onChange={(e) => onChangeGiro(e, row, idx)}
                 style={{
@@ -294,7 +303,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             <Form.Item name={["AccCN", `${idx}`]} noStyle>
               <InputNumber
                 defaultValue={defaultAccCN}
-                //formatter={(value) => `${value}%`}
+                formatter={(value) =>
+                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                 min={0}
                 onChange={(e) => onChangeCn(e, row, idx)}
                 style={{
@@ -318,7 +330,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             <Form.Item name={["AccOTH", `${idx}`]} noStyle>
               <InputNumber
                 defaultValue={defaultAccOTH}
-                //formatter={(value) => `${value}%`}
+                formatter={(value) =>
+                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                 min={0}
                 onChange={(e) => onChangeOth(e, row, idx)}
                 style={{
