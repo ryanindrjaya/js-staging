@@ -31,7 +31,10 @@ export default function Riwayat({ defaultOptions }) {
     print: false,
   });
   const [history, setHistory] = useState();
-  const [date, setDate] = useState();
+  const [date, setDate] = useState([
+    moment().startOf("month").format("YYYY-MM-DD"),
+    moment().endOf("month").format("YYYY-MM-DD"),
+  ]);
   const [selectedProduct, setSelectedProduct] = useState();
   const [selectedLocation, setSelectedLocation] = useState();
   const [fetchingHistory, setFetchingHistory] = useState(false);
