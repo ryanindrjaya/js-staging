@@ -162,15 +162,6 @@ export default function ReactDataTable({
         </button>
       </div>
 
-      <div>
-        <button
-          onClick={() => retur(row)}
-          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-        >
-          <IoIosSwap className="mr-2 mt-0.5 float float-left" />
-          Retur Pembelian
-        </button>
-      </div>
     </div>
   );
 
