@@ -36,5 +36,4 @@ yarn-error.log*
 components/Middleware.js
 yarn.lock
 
-# next.config.js
-next.config.js
+
