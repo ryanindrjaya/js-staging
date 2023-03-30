@@ -269,7 +269,7 @@ export default function ReactDataTable({
         var today = new Date();
         var isTempo = false;
         var statusPembayaran = row.attributes?.status_pembayaran;
-        var purchasingHistory = row.attributes?.purchasing_payments.data;
+        var purchasingHistory = row.attributes?.purchasing_payments?.data;
 
         if (row.attributes?.tempo_time === "Hari") {
           tempoDate.setDate(tempoDate.getDate() + tempoTime);
@@ -290,7 +290,7 @@ export default function ReactDataTable({
         } else {
           if (
             statusPembayaran === "Belum Lunas" &&
-            purchasingHistory.length > 0
+            purchasingHistory?.length > 0
           ) {
             return <Tag color={tagRed}>Tempo</Tag>;
           } else if (
@@ -312,7 +312,7 @@ export default function ReactDataTable({
       selector: (row) => {
         const lastIndex = row.attributes.purchasing_payments?.data?.length;
         const lastPayment =
-          row.attributes.purchasing_payments.data[lastIndex - 1];
+          row.attributes.purchasing_payments?.data[lastIndex - 1];
 
         if (
           lastPayment?.attributes.payment_remaining ===

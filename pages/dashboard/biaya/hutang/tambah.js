@@ -18,6 +18,7 @@ import Supplier from "@iso/components/Form/AddCost/SupplierForm";
 import nookies from "nookies";
 import LoadingAnimations from "@iso/components/Animations/Loading";
 import DataTable from "react-data-table-component";
+import * as moment from "moment";
 
 Hutang.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -142,7 +143,7 @@ function Hutang({ props }) {
   //const [additionalFee, setAdditionalFee] = useState();
   const [isFetchinData, setIsFetchingData] = useState(false);
   const [document, setDocument] = useState();
-  const [tanggal, setTanggal] = useState();
+  const [tanggal, setTanggal] = useState(moment());
 
   const [dataValues, setDataValues] = useState();
 
@@ -161,6 +162,17 @@ function Hutang({ props }) {
   const tempList = [];
 
   const [info, setInfo] = useState();
+
+  // status pembayaran
+  const [statusPembayaran, setStatusPembayaran] = useState();
+
+  // Range Picker
+  const { RangePicker } = DatePicker;
+  const [rangePicker, setRangePicker] =  useState();
+
+  // Search No LPB
+  const { Search } = Input;
+  const [searchNoLpb, setSearchNoLpb] =  useState();
 
   // NO Hutang
   var noHutang = String(props.hutang?.meta?.pagination.total + 1).padStart(3, "0");
@@ -229,6 +241,7 @@ function Hutang({ props }) {
     values.sisa_hutang_jatuh_tempo = sisaHutangJatuhTempo();
     values.supplier = supplier;
     values.document = document;
+    values.tanggal_pembayaran = tanggal;
     await createData(sisaHutang, values, listId, form, router, "/debts/", "hutang", akunHutang);
   };
 
@@ -282,6 +295,12 @@ function Hutang({ props }) {
     return total;
   };
 
+  const filterBySearch = (event) => {
+    // Access input value
+    const query = event.target.value;
+    if(event != undefined) setSearchNoLpb(query);
+  };
+
   useEffect(() => {
     var totalTunai = 0;
     var totalTransfer = 0;
@@ -319,7 +338,7 @@ function Hutang({ props }) {
     }
   }, [biaya.info]);
 
-
+  console.log("biaya",biaya);
   useEffect(() => {
     if (dataValues && info == "sukses") createDetail();
   }, [dataValues]);
@@ -385,7 +404,7 @@ function Hutang({ props }) {
 
         if (status == "Tempo" || statusPembayaran == "Dibayar Sebagian") {
           row.hidden = false;
-          dataTabel[lpbId] = row; console.log("row", row);
+          dataTabel[lpbId] = row;
           //biaya.list.push(row);
           dispatch({ type: "ADD_LIST", list: row });
         }
@@ -469,6 +488,7 @@ function Hutang({ props }) {
                         width: "100%",
                       }}
                       placeholder="Status Pembayaran"
+                      onChange={setStatusPembayaran}
                     >
                       <Select.Option value="Dibayar" key="Dibayar">
                         Dibayar
@@ -480,30 +500,14 @@ function Hutang({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="tanggal"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
-                    >
-                    <DatePicker placeholder="Rentang Tanggal" size="large" style={{ width: "100%" }} onChange={(values) => setTanggal(values._d)} format="DD-MM-YY" />
+                  <Form.Item name="tanggal">
+                    <RangePicker size="large" onChange={(values) => setRangePicker(values) }/>
                   </Form.Item>
                 </div>
               </div>
 
-              <div className="w-full flex md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
-                  {/*<SearchBar*/}
-                  {/*  form={form}*/}
-                  {/*  tempList={tempList}*/}
-                  {/*  onChange={onChangeProduct}*/}
-                  {/*  user={user}*/}
-                  {/*  selectedProduct={selectedProduct}*/}
-                  {/*  isBasedOnLocation={false}*/}
-                  {/*/>*/}
+              <div className="w-full md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
+                <Search size="large" id="searchBox" placeholder="Cari Nomor LPB" onChange={filterBySearch} />
               </div>
 
               {isFetchinData ? (
@@ -525,6 +529,9 @@ function Hutang({ props }) {
                   sisaHutang={sisaHutang}
                   form={form}
                   supplier={supplier}
+                  statusPembayaran={statusPembayaran}
+                  rangePicker={rangePicker}
+                  search={searchNoLpb}
                 />
               </div>
               )}
@@ -546,14 +553,14 @@ function Hutang({ props }) {
 
               <div className="w-full md:w-1/4 px-3 -mx-3">
                 <Form.Item name="tanggal_pembayaran">
-                    <DatePicker placeholder="Tanggal Pembayaran" size="large" style={{ width: "100%" }} />
-                  </Form.Item>
+                  <DatePicker defaultValue={tanggal} placeholder="Tanggal Pembayaran" size="large" style={{ width: "100%" }} onChange={value => setTanggal(value)}/>
+                </Form.Item>
               </div>
 
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 mt-8">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="bayar1">
-                    <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
+                    <Input style={{ height: "40px" }} placeholder="Nominal Pembayaran" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -589,7 +596,7 @@ function Hutang({ props }) {
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="bayar2">
-                    <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
+                    <Input style={{ height: "40px" }} placeholder="Nominal Pembayaran" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -624,7 +631,7 @@ function Hutang({ props }) {
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="bayar3">
-                    <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
+                    <Input style={{ height: "40px" }} placeholder="Nominal Pembayaran" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -659,7 +666,7 @@ function Hutang({ props }) {
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="bayar4">
-                    <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
+                    <Input style={{ height: "40px" }} placeholder="Nominal Pembayaran" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -694,7 +701,7 @@ function Hutang({ props }) {
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="bayar5">
-                    <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
+                    <Input style={{ height: "40px" }} placeholder="Nominal Pembayaran" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">

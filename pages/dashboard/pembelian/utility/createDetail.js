@@ -62,7 +62,7 @@ const createDetailOrder = async (
           element.attributes[`unit_${unitByIndex}_dp3`] ??
           0;
         var unitPrice =
-          products.productInfo?.[idx]?.priceUnit ??
+          products.productInfo?.[idx]?.unit_price ??
           element.attributes.buy_price_1;
         var unitPriceAfterDisc = productTotalPrice?.[idx];
         var subTotal = productSubTotal?.[idx];
@@ -90,6 +90,8 @@ const createDetailOrder = async (
       }
     })
   );
+
+  console.log("test", tempListId);
 
   // create masterData
   await createMasterData(values, tempListId);
@@ -142,6 +144,7 @@ const POSTPurchaseDetail = async (
     body: JSONdata,
   };
 
+  console.log(JSONdata);
   const req = await fetch(endpoint, options);
   const res = await req.json();
 

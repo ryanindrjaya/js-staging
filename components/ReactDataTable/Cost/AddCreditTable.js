@@ -5,8 +5,9 @@ import { useDispatch } from "react-redux";
 import { useState } from "react";
 import { PrinterOutlined } from "@ant-design/icons";
 import router from "next/router";
+import Item from "antd/lib/list/Item";
 
-export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal, form }) {
+export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal, form, customer, statusPembayaran, rangePicker, sales }) {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
@@ -24,6 +25,14 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   const [dataRetur, setDataRetur] = useState("tidak");
   const [metode, setMetode] = useState("");
   const [biayaData, setBiayaData] = useState(0);
+
+  var min = null;
+  var max = null;
+
+  if(rangePicker){
+    min = new Date(rangePicker[0]);
+    max = new Date(rangePicker[1]);
+  }
 
   var index = 0;
   data?.forEach((element) => {
@@ -60,10 +69,24 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   //  dispatch({ type: "CHANGE_DATA_SISAHUTANG", sisahutang: sisa, listData: data, index: index });
   //};
 
+  const cekData = (data) => {
+    for (const key in biaya.list) {
+      if(biaya.list[key].id == data.id) return key;
+    }
+  };
+
+  const calculate = (row, id) => {
+    id = cekData(row);
+    return calculatePriceTotal(row, id);
+  };
+
   const onChangePilih = async (value, data, index) => {
     var pilihData = "tidak";
     if(value.target.checked == true) pilihData = "pilih";
     else pilihData = "tidak";
+
+    index = cekData(data);
+
     dispatch({ type: "CHANGE_PILIH_DATA", pilihData: pilihData, listData: data, index: index });
     dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: data.sisaHutang, listData: data, index: index });
 
@@ -73,35 +96,39 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       onChangeGiro(0, data, index);
       onChangeCn(0, data, index);
       onChangeOth(0, data, index);
+      onChangeId(data.id, data, index);
     }
     //onChangeTunai(0, data, index);
     //console.log("pilih", data, biaya);
   };
 
+  const onChangeId = (value, data, index) => {
+    dispatch({ type: "CHANGE_ID", id: value, listData: data, index: index });
+  };
+
   const onChangeTunai = (value, data, index) => {
-    //onChange(value, data, "tunai");
+    index = cekData(data);
     dispatch({ type: "CHANGE_DATA_TUNAI", tunai: value, listData: data, index: index });
-    //onChangeSisaHutang(value, data, index);
   };
 
   const onChangeTransfer = (value, data, index) => {
+    index = cekData(data);
     dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: value, listData: data, index: index });
-    //onChangeSisaHutang(value, data, index);
   };
 
   const onChangeGiro = (value, data, index) => {
+    index = cekData(data);
     dispatch({ type: "CHANGE_DATA_GIRO", giro: value, listData: data, index: index });
-    //onChangeSisaHutang(value, data, index);
   };
 
   const onChangeCn = (value, data, index) => {
+    index = cekData(data);
     dispatch({ type: "CHANGE_DATA_CN", cn: value, listData: data, index: index });
-    //onChangeSisaHutang(value, data, index);
   };
 
   const onChangeOth = (value, data, index) => {
+    index = cekData(data);
     dispatch({ type: "CHANGE_DATA_OTH", oth: value, listData: data, index: index });
-    //onChangeSisaHutang(value, data, index);
   };
 
   //const metodePembayaran = (value) => {
@@ -223,10 +250,16 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     //this.myFormRef.reset();
   };
 
-  const content = (row, idx) => (
+  const content = (row, idx) => {
+    var index = cekData(row);
+    var defaultCek = false;
+    if (biaya?.info[index]?.pilihData == "pilih") defaultCek = true;
+    else defaultCek = false;
+
+    return (
     <div>
         <div>
-            <Checkbox className="text-xs font-normal py-2 px-2 rounded-md" onChange={(value) => onChangePilih(value, row, idx)}> Pilih </Checkbox>
+            <Checkbox className="text-xs font-normal py-2 px-2 rounded-md" defaultChecked={defaultCek} onChange={(value) => onChangePilih(value, row, idx)}> Pilih </Checkbox>
         </div>
         <div>
             <button
@@ -525,7 +558,8 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             </Modal>
         </div>
     </div>
-  );
+   );
+  }
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -605,7 +639,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     {
       name: "Sisa Piutang Jt",
       width: "150px",
-      selector: (row, idx) => calculatePriceTotal(row, idx),
+      selector: (row, idx) => calculate(row, idx),
     },
   ];
 
@@ -615,7 +649,139 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       paginationRowsPerPageOptions={[5]}
       paginationTotalRows={[1]}
       columns={columns}
-      data={data}
+      data={data.filter((item) => {
+        let man = new Date(item.attributes.sale_date); //date from data
+        let customerNama = item.attributes.customer.data.attributes.name;
+
+        if( statusPembayaran == item.status && customer?.attributes.name == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined
+        ) {
+          return item;
+        }
+        if( statusPembayaran == item.status && customer?.attributes.name == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == item.attributes.added_by
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == item.status && customer?.attributes.name == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined
+        ) {
+          return item;
+        }
+        if( statusPembayaran == item.status && customer?.attributes.name == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == item.attributes.added_by
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == undefined && customer?.attributes.name == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined
+        ) {
+          return item;
+        }
+        if( statusPembayaran == undefined && customer?.attributes.name == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == item.attributes.added_by
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == undefined && customer?.attributes.name == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined
+        ) {
+          return item;
+        }
+        if( statusPembayaran == undefined && customer?.attributes.name == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == item.attributes.added_by
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+
+        if( customer?.attributes.name == customerNama && statusPembayaran == undefined && min == null && max == null &&
+          sales == undefined
+        ){
+          return item;
+        }
+        if( customer?.attributes.name == customerNama && statusPembayaran == undefined && min == null && max == null &&
+          sales == item.attributes.added_by
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.attributes.name == customerNama && statusPembayaran == item.status && min == null && max == null &&
+          sales == undefined
+        ){
+          return item;
+        }
+        if( customer?.attributes.name == customerNama && statusPembayaran == item.status && min == null && max == null &&
+          sales == item.attributes.added_by
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.attributes.name == undefined && statusPembayaran == item.status && min == null && max == null ){
+          return item;
+        }
+
+        if( customer?.attributes.name == undefined && statusPembayaran == undefined && min == null && max == null &&
+          sales == item.attributes.added_by
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+
+        if( customer?.attributes.name == undefined && statusPembayaran == undefined && min == null && max == null &&
+          sales == undefined
+        ){
+          return item;
+        }
+
+        console.log("item", customerNama, customer?.attributes.name, item);
+        //if(supplier?.id == item.attributes.supplier.data.id && statusPembayaran == undefined &&
+        //    min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+        //    min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+        //    min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+        //    (item.attributes.no_purchasing.toLowerCase().indexOf(search?.toLowerCase()) !== -1 || search == undefined)
+        //) {
+        //  return item;
+        //  }
+        //if (supplier?.id == item.attributes.supplier.data.id && statusPembayaran == item.attributes.status_pembayaran && min == null && 
+        //    (item.attributes.no_purchasing.toLowerCase().indexOf(search?.toLowerCase()) !== -1 || search == undefined)
+        //) {
+        //  return item;
+        //}
+        //if(supplier?.id == item.attributes.supplier.data.id && statusPembayaran == undefined && min == null && item.attributes.no_purchasing.toLowerCase().indexOf(search?.toLowerCase()) !== -1) {
+        //  return item;
+        //}
+        //if(supplier?.id == item.attributes.supplier.data.id && statusPembayaran == undefined && min == null && search == undefined) {
+        //  return item;
+        //}
+      })}
       noDataComponent={`--Belum ada data penjualan--`}
     />
   );

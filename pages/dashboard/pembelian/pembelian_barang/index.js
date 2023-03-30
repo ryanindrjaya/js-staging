@@ -77,7 +77,8 @@ function Pembelian({ props }) {
 
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases?pagination[page]=" + page;
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL + "/purchases?pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -177,8 +178,8 @@ function Pembelian({ props }) {
     }
 
     const poData = row?.attributes?.purchase?.data;
-    const req = await changeStatusPO(poData, status, LPBLocationId);
-    if (req.status === 200) {
+    const res = await changeStatusPO(poData, status, LPBLocationId);
+    if (res.data) {
       await changeStatusLPB(row, row.id);
     }
   };
@@ -188,7 +189,10 @@ function Pembelian({ props }) {
       // cleaning
       delete poData.attributes?.document;
       for (var key in poData.attributes) {
-        if (poData.attributes[key] === null || poData.attributes[key] === undefined) {
+        if (
+          poData.attributes[key] === null ||
+          poData.attributes[key] === undefined
+        ) {
           delete poData.attributes[key];
         }
       }
@@ -200,7 +204,8 @@ function Pembelian({ props }) {
       poData.attributes.supplier = {
         id: poData.attributes?.supplier?.data?.id,
       };
-      poData.attributes.purchase_details = poData.attributes?.purchase_details?.data;
+      poData.attributes.purchase_details =
+        poData.attributes?.purchase_details?.data;
 
       const values = {
         data: poData.attributes,
@@ -219,7 +224,7 @@ function Pembelian({ props }) {
       };
 
       const req = await fetch(endpoint, options);
-
+      const res = await req.json();
       if (req.status === 200) {
         openNotificationWithIcon(
           "success",
@@ -234,7 +239,7 @@ function Pembelian({ props }) {
         );
       }
 
-      return req;
+      return res;
     } catch (error) {
       console.log(error);
       openNotificationWithIcon(
@@ -252,7 +257,10 @@ function Pembelian({ props }) {
       // // clean object
       delete values.attributes.purchase;
       for (var key in values.attributes) {
-        if (values.attributes[key] === null || values.attributes[key] === undefined) {
+        if (
+          values.attributes[key] === null ||
+          values.attributes[key] === undefined
+        ) {
           delete values.attributes[key];
         }
       }
@@ -317,6 +325,7 @@ function Pembelian({ props }) {
           "Status LPB berhasil dirubah. Silahkan cek LPB"
         );
       } else {
+        console.log("error", res)
         openNotificationWithIcon(
           "error",
           "Status LPB gagal dirubah",
@@ -324,7 +333,7 @@ function Pembelian({ props }) {
         );
       }
     } catch (error) {
-      console.log(error);
+      console.log("error", res)
       openNotificationWithIcon(
         "error",
         "Status LPB gagal dirubah",
@@ -359,7 +368,8 @@ function Pembelian({ props }) {
   // search query
   useEffect(() => {
     async function getLPBById(id) {
-      const endpoint = process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=*`;
+      const endpoint =
+        process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=*`;
       const options = {
         method: "GET",
         headers: {
@@ -464,7 +474,8 @@ function Pembelian({ props }) {
                         className="bg-cyan-700 hover:bg-cyan-800 mr-7 border-none"
                         type="primary"
                       >
-                        <PrinterOutlined className="mr-2 mt-0.5 float float-left" /> Cetak
+                        <PrinterOutlined className="mr-2 mt-0.5 float float-left" />{" "}
+                        Cetak
                       </Button>
                     }
                     size="middle"
@@ -478,7 +489,10 @@ function Pembelian({ props }) {
                       {selectedLPB?.attributes?.no_purchasing}
                     </Descriptions.Item>
                     <Descriptions.Item label="Supplier">
-                      {selectedLPB?.attributes?.supplier?.data?.attributes?.name}
+                      {
+                        selectedLPB?.attributes?.supplier?.data?.attributes
+                          ?.name
+                      }
                     </Descriptions.Item>
                     <Descriptions.Item label="Status" span={2}>
                       <Tag color={getTagColor(selectedLPB?.attributes?.status)}>
@@ -486,16 +500,27 @@ function Pembelian({ props }) {
                       </Tag>
                     </Descriptions.Item>
                     <Descriptions.Item label="Lokasi" span={2}>
-                      {selectedLPB?.attributes?.location?.data?.attributes?.name}
+                      {
+                        selectedLPB?.attributes?.location?.data?.attributes
+                          ?.name
+                      }
                     </Descriptions.Item>
                   </Descriptions>
 
-                  <Descriptions className="my-3" size="middle" title="PEMBAYARAN" bordered>
+                  <Descriptions
+                    className="my-3"
+                    size="middle"
+                    title="PEMBAYARAN"
+                    bordered
+                  >
                     <Descriptions.Item label="Termin Pembayaran" span={2}>
-                      {selectedLPB?.attributes?.tempo_days} {selectedLPB?.attributes?.tempo_time}
+                      {selectedLPB?.attributes?.tempo_days}{" "}
+                      {selectedLPB?.attributes?.tempo_time}
                     </Descriptions.Item>
                     <Descriptions.Item label="Total" className="font-bold">
-                      {formatter.format(selectedLPB?.attributes?.total_purchasing)}
+                      {formatter.format(
+                        selectedLPB?.attributes?.total_purchasing
+                      )}
                     </Descriptions.Item>
                   </Descriptions>
                 </>
@@ -518,7 +543,9 @@ function Pembelian({ props }) {
                 className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
               >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
+                  <a className="text-white no-underline text-xs sm:text-xs">
+                    + Tambah
+                  </a>
                 </div>
               </button>
             </div>
