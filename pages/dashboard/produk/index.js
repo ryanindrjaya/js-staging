@@ -18,9 +18,9 @@ import UploadProduk from "../../../components/Form/UploadProduk";
 
 const Product = ({ props }) => {
   const data = props?.data;
-  const manufactures = props.manufactures;
-  const categories = props.categories;
-  const locations = props.locations;
+  const manufactures = props?.manufactures;
+  const categories = props?.categories;
+  const locations = props?.locations;
   const [isLoading, setIsLoading] = useState(false);
   const [product, setProduct] = useState(data);
   const [modalProduct, setModalProduct] = useState();

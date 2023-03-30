@@ -162,7 +162,7 @@ const openNotificationWithIcon = (type) => {
     notification[type]({
       message: "Gagal menambahkan data",
       description:
-        "Retur gagal ditambahkan. Silahkan cek NO Retur atau kelengkapan data lainnya",
+        "Retur gagal ditambahkan 2. Silahkan cek NO Retur atau kelengkapan data lainnya",
     });
   } else if (type === "success") {
     notification[type]({

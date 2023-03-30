@@ -23,6 +23,22 @@ export default function Reducer(state = initState, action) {
         info: infoCopy,
       };
 
+    case "CHANGE_ID":
+    var dataId = action.id;
+    var id = action.index;
+    //var data = action.listData.attributes;
+
+      return {
+        ...state,
+        info: {
+          ...state.info,
+          [id]: {
+            ...state.info[id],
+            id: dataId,
+          },
+        },
+      };
+
     case "CHANGE_TOTAL_HUTANG_JATUH_TEMPO":
     var totalHutangJatuhTempo = action.totalHutangJatuhTempo;
     var id = action.index;

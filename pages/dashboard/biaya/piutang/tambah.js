@@ -26,7 +26,10 @@ Piutang.getInitialProps = async (context) => {
   const req = await fetchData(cookies);
   const user = await req.json();
 
-  const reqDataUser = await fetchUserSales(cookies);
+  const reqDataUserSales = await fetchUserSales(cookies);
+  const dataUserSales = await reqDataUserSales.json();
+
+  const reqDataUser = await fetchDataUser(cookies);
   const dataUser = await reqDataUser.json();
 
   const reqPiutang = await fetchPiutang(cookies);
@@ -56,6 +59,7 @@ Piutang.getInitialProps = async (context) => {
   return {
     props: {
       user,
+      dataUserSales,
       dataUser,
       piutang,
       sales,
@@ -71,6 +75,20 @@ Piutang.getInitialProps = async (context) => {
 
 const fetchData = async (cookies) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=*";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchDataUser = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -218,7 +236,8 @@ function Piutang({ props }) {
   const user = props.user;
   //const inven = props.inven.data;
   const sales = props.sales.data;
-  const dataUser = props.dataUser;
+  const dataUserSales = props.dataUserSales;
+  //const dataUser = props.dataUser;
   const returSales = props.returSales.data;
   const panel = props.panel.data;
   const returPanel = props.returPanel.data;
@@ -258,16 +277,18 @@ function Piutang({ props }) {
   // customer
   const [customer, setCustomer] = useState();
   // area
+  const [salesSelect, setSalesSelect] = useState();
+  // area
   const [area, setArea] = useState();
   // wilayah
   const [wilayah, setWilayah] = useState();
 
-  // metode pembayaran (total)
-  //const [tunai, setTunai] = useState(0);
-  //const [transfer, setTransfer] = useState(0);
-  //const [giro, setGiro] = useState(0);
-  //const [cn, setCn] = useState(0);
-  //const [oth, setOth] = useState(0);
+  // status pembayaran
+  const [statusPembayaran, setStatusPembayaran] = useState();
+
+  // Range Picker
+  const { RangePicker } = DatePicker;
+  const [rangePicker, setRangePicker] =  useState();
 
   // NO Piutang
   var noPiutang = String(props.piutang?.meta?.pagination.total + 1).padStart(3, "0");
@@ -278,10 +299,6 @@ function Piutang({ props }) {
     currency: "IDR",
     maximumFractionDigits: 2,
   });
-
-  //const total = async (values) => {
-    
-  //};
 
   const onFinish = (values) => {
     var biayaInfo = biaya.info;
@@ -627,6 +644,7 @@ function Piutang({ props }) {
                         width: "100%",
                       }}
                       placeholder="Status Pembayaran"
+                      onChange={setStatusPembayaran}
                     >
                       <Select.Option value="Dibayar" key="Dibayar">
                         Dibayar
@@ -638,17 +656,8 @@ function Piutang({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="tanggalRentang"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
-                    >
-                    <DatePicker placeholder="Rentang Tanggal" size="large" style={{ width: "100%" }} />
+                  <Form.Item name="tanggalRentang">
+                    <RangePicker size="large" onChange={(values) => setRangePicker(values) }/>
                   </Form.Item>
                 </div>
               </div>
@@ -663,10 +672,11 @@ function Piutang({ props }) {
                         width: "100%",
                       }}
                       placeholder="Sales"
+                      onChange={setSalesSelect}
                     >
-                    {dataUser.map((element) => {
+                    {dataUserSales.map((element) => {
                         return (
-                            <Select.Option value={element.id} key={element.name}>
+                            <Select.Option value={element.name} key={element.name}>
                             {element.name}
                           </Select.Option>
                         );
@@ -704,6 +714,10 @@ function Piutang({ props }) {
                   calculatePriceTotal={calculatePriceTotal}
                   sisaHutang={sisaHutang}
                   form={form}
+                  rangePicker={rangePicker}
+                  statusPembayaran={statusPembayaran}
+                  customer={customer}
+                  sales={salesSelect}
                 />
               </div>
 
