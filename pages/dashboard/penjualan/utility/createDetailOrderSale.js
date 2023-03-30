@@ -5,15 +5,9 @@ import * as moment from "moment";
 var tempListId = [];
 const cookies = nookies.get(null, "token");
 
-var id = 0;
-
-const createDetailOrderSale = (
-  values,
-  products,
-  setListId,
-  url
-) => {
-  products.productList.forEach((element) => { console.log("element",element,products)
+const createDetailOrderSale = (values, products, setListId, url, useIndex = false) => {
+  products.productList.forEach((element, idx) => {
+    console.log("element", element, products);
     //default value
     var qty = 1;
     var unit = element.attributes.unit_1;
@@ -21,26 +15,17 @@ const createDetailOrderSale = (
     var elementId = element.id;
     tempListId = [];
 
-    qty = products.productInfo[id]?.qty ?? 1;
-    unit = products.productInfo[id]?.unit ?? element.attributes.unit_1;
-    unitPrice = products.productInfo?.[id]?.unit_price ?? element.attributes.buy_price_1;
+    qty = products.productInfo[idx]?.qty ?? 1;
+    unit = products.productInfo[idx]?.unit ?? element.attributes.unit_1;
+    unitPrice =
+      products.productInfo?.[idx]?.priceUnit ||
+      products.productInfo?.[idx]?.unit_price ||
+      element.attributes.buy_price_1;
 
-    var d1 = products.productInfo[id]?.d1;
-    var d2 = products.productInfo[id]?.d2;
+    var d1 = products.productInfo[idx]?.d1;
+    var d2 = products.productInfo[idx]?.d2;
 
-    POSTSaleDetail(
-      qty,
-      unit,
-      unitPrice,
-      id,
-      setListId,
-      products,
-      elementId,
-      d1,
-      d2,
-      url
-    );
-    id++;
+    POSTSaleDetail(qty, unit, unitPrice, idx, setListId, products, elementId, d1, d2, url);
   });
 };
 
@@ -58,9 +43,9 @@ const POSTSaleDetail = async (
 ) => {
   var data = {
     data: {
-      qty : qty,
-      unit : unit,
-      unit_price : unitPrice,
+      qty: qty,
+      unit: unit,
+      unit_price: unitPrice,
       product: { id: elementId },
       disc1: d1,
       disc2: d2,

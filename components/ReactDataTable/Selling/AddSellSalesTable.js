@@ -3,7 +3,14 @@ import AlertDialog from "../../Alert/Alert";
 import { Input, InputNumber, Select, Form, Row, DatePicker } from "antd";
 import { useDispatch } from "react-redux";
 
-export default function ReactDataTable({ calculatePriceAfterDisc, productSubTotal, products, locations, setTotalPrice, formObj }) {
+export default function ReactDataTable({
+  calculatePriceAfterDisc,
+  productSubTotal,
+  products,
+  locations,
+  setTotalPrice,
+  formObj,
+}) {
   const dispatch = useDispatch();
 
   var unit = 1;
@@ -21,14 +28,14 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
     dispatch({ type: "REMOVE_PRODUCT", index: value });
   };
 
-  //const onChangeUnit = (value, data) => { 
+  //const onChangeUnit = (value, data) => {
   //  unit = value;
   //  if(value == 1){ priceUnit = data.attributes.buy_price_1; }
   //  else if(value == 2){ priceUnit = data.attributes.buy_price_2; }
   //  else if(value == 3){ priceUnit = data.attributes.buy_price_3; }
   //  else if(value == 4){ priceUnit = data.attributes.buy_price_4; }
   //  else if(value == 5){ priceUnit = data.attributes.buy_price_5; }
-    
+
   //  dispatch({ type: "CHANGE_PRODUCT_UNIT", index: value, product: data });
   //  onChangePriceUnit(priceUnit, data, value);
   //  tempIndex = 0;
@@ -39,30 +46,26 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
       type: "CHANGE_PRODUCT_QTY",
       qty: value,
       product: data,
-      index
+      index,
     });
   };
 
   const onChangeUnit = (data, value, index) => {
-    dispatch({ type: "CHANGE_PRODUCT_UNIT",  unit: data, product: value, index });
+    dispatch({ type: "CHANGE_PRODUCT_UNIT", unit: data, product: value, index });
     var hargaSatuan = 0;
-    if(data == 1){ 
-      hargaSatuan = value.attributes.buy_price_1; 
+    if (data == 1) {
+      hargaSatuan = value.attributes.buy_price_1;
       priceUnit = hargaSatuan;
-    }
-    else if (data == 2) {
+    } else if (data == 2) {
       hargaSatuan = value.attributes.buy_price_2;
       priceUnit = hargaSatuan;
-    }
-    else if(data == 3){ 
-      hargaSatuan = value.attributes.buy_price_3; 
+    } else if (data == 3) {
+      hargaSatuan = value.attributes.buy_price_3;
       priceUnit = hargaSatuan;
-    }
-    else if (data == 4) {
+    } else if (data == 4) {
       hargaSatuan = value.attributes.buy_price_4;
       priceUnit = hargaSatuan;
-    }
-    else if (data == 5) {
+    } else if (data == 5) {
       hargaSatuan = value.attributes.buy_price_5;
       priceUnit = hargaSatuan;
     }
@@ -70,11 +73,11 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
     //formObj.setFieldsValue({
     //  harga_satuan: hargaSatuan,
     //});
-    onChangePriceUnit(hargaSatuan,value,index);
+    onChangePriceUnit(hargaSatuan, value, index);
   };
 
   const onChangePriceUnit = (data, value, index) => {
-    dispatch({ type: "CHANGE_PRODUCT_PRICE",  unit_price: data, product: value, index });
+    dispatch({ type: "CHANGE_PRODUCT_PRICE", unit_price: data, product: value, index });
   };
 
   const onConfirm = (id) => {
@@ -102,30 +105,70 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
     },
   };
 
+  const onChangeD1D2D3 = (value, data, type, index) => {
+    switch (type) {
+      case "d1":
+        dispatch({
+          type: "CHANGE_PRODUCT_D1",
+          d1: value,
+          product: data,
+          index,
+        });
+        break;
+      case "d2":
+        dispatch({
+          type: "CHANGE_PRODUCT_D2",
+          d2: value,
+          product: data,
+          index,
+        });
+        break;
+      case "d3":
+        dispatch({
+          type: "CHANGE_PRODUCT_D3",
+          d3: value,
+          product: data,
+          index,
+        });
+        break;
+      default:
+        break;
+    }
+  };
+
   const columns = [
     {
       name: "Nama Produk",
-      width: "300px",
       selector: (row) => row.attributes?.name,
     },
     {
       name: "Jumlah Stock",
-      width: "170px",
-      selector: (row) => row?.stock,
+      selector: (row) => {
+        console.log("row stock", row.stock);
+        let result = [];
+        for (let unit in row?.stock) {
+          result.push(`${row?.stock?.[unit].stock}${row?.stock?.[unit].unit}`);
+        }
+
+        return result.join(", ");
+      },
     },
     {
       name: "Harga Satuan",
-      width: "180px",
       selector: (row, idx) => {
-        priceUnit = row.attributes?.buy_price_1;
-        return  (
-         <>
-          <Row>
-            <Form.Item name={["harga_satuan", `${idx}`]} noStyle>
+        var priceUnit = row.attributes?.buy_price_1;
+        if (products.productInfo[idx]?.priceUnit || products.productInfo[idx]?.unit_price) {
+          priceUnit = products.productInfo[idx]?.unit_price || products.productInfo[idx].priceUnit;
+        }
+
+        return (
+          <>
+            <Row>
               <InputNumber
-                defaultValue={priceUnit}
+                readOnly
+                value={priceUnit}
                 min={0}
-                onChange={(e) => onChangePriceUnit(e, row, idx)}
+                onChange={(e) => onChangePriceUnit(e, row, unit[idx], idx)}
                 style={{
                   width: "150px",
                   marginRight: "10px",
@@ -133,15 +176,14 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
                 formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                 parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
               />
-            </Form.Item>
-          </Row>
-         </>
-         );
+            </Row>
+          </>
+        );
       },
     },
     {
       name: "Jumlah Penjualan",
-      width: "280px",
+      width: "260px",
       selector: (row, idx) => {
         var defaultQty = 1;
         var defaultOption = row.attributes?.unit_1;
@@ -153,6 +195,10 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
 
         if (products.productInfo[idx]?.unitIndex) {
           defaultIndex = products.productInfo[idx].unitIndex;
+        }
+
+        if (products.productInfo[idx]?.unit) {
+          defaultOption = products.productInfo[idx].unit;
         }
 
         return (
@@ -168,6 +214,8 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
                       message: "Required",
                     },
                   ]}
+                  max={row.stock?.[defaultOption]?.stock || 0}
+                  min={1}
                   style={{
                     width: "30%",
                   }}
@@ -225,14 +273,64 @@ export default function ReactDataTable({ calculatePriceAfterDisc, productSubTota
         );
       },
     },
-    //{
-    //  name: "Subtotal",
-    //  width: "200px",
-    //  selector: (row) => formatter.format(productSubTotal[row.id]),
-    //},
+    {
+      name: "Diskon Jual (%)",
+      selector: (row, idx) => {
+        let defaultDp1 = row.attributes?.unit_1_dp1 || 0;
+        if (products.productInfo[idx]?.d1) {
+          defaultDp1 = products.productInfo[idx].d1;
+        }
+
+        if (products.productInfo[idx]) {
+          if (products.productInfo[idx].unit) {
+            defaultDp1 = products.productInfo[idx].d1;
+          }
+        }
+
+        return (
+          <div className="disabled:bg-white">
+            <InputNumber
+              controls={false}
+              formatter={(value) => `${value}%`}
+              onFocus={(e) => e.target.select()}
+              max={100}
+              min={0}
+              value={defaultDp1}
+              name={`disc_rp1_${idx}`}
+              onChange={(e) => onChangeD1D2D3(e, row, "d1", idx)}
+              style={{
+                width: "60px",
+              }}
+            />
+          </div>
+        );
+      },
+    },
+    {
+      name: "Subtotal",
+      selector: (row, idx) => {
+        let priceUnit = row.attributes?.buy_price_1;
+        let qty = 1;
+        let diskonJual = 0;
+        if (products.productInfo[idx]?.priceUnit || products.productInfo[idx]?.unit_price) {
+          priceUnit = products.productInfo[idx]?.unit_price || products.productInfo[idx].priceUnit;
+        }
+
+        if (products.productInfo[idx]?.qty) {
+          qty = products.productInfo[idx].qty;
+        }
+
+        if (products.productInfo[idx]?.d1) {
+          diskonJual = products.productInfo[idx].d1;
+        }
+
+        let subtotal = priceUnit * qty - (priceUnit * qty * diskonJual) / 100;
+
+        return formatter.format(subtotal);
+      },
+    },
     {
       name: "Hapus",
-      width: "200px",
       selector: (row) => (
         <AlertDialog
           onCancel={onCancel}

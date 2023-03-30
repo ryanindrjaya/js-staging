@@ -14,7 +14,10 @@ export default function SearchBar({
   selectedProduct,
   user,
   isBasedOnLocation = true,
+  available = false,
+  inventoryLocation,
 }) {
+  console.log("inventory location", inventoryLocation);
   const dispatch = useDispatch();
 
   const [product, setProduct] = useState();
@@ -83,7 +86,11 @@ export default function SearchBar({
 
         const endpoint =
           process.env.NEXT_PUBLIC_URL +
-          `/products?populate=locations&filters[name][$contains]=${query}&${queryLocations}`;
+          `/products?populate=*&filters[name][$contains]=${query}&${queryLocations}${
+            available && inventoryLocation
+              ? `filters[locations][inventories][total_stock][$gt]=0&filters[locations][id]=${inventoryLocation}`
+              : ""
+          }`;
         const options = {
           method: "GET",
           headers: {

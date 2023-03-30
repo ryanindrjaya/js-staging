@@ -33,18 +33,14 @@ export default function Customer({ onChangeCustomer }) {
     }
   };
 
-  const options = data.map((d) => (
-    <Select.Option key={d.value}>{d.label}</Select.Option>
-  ));
+  const options = data.map((d) => <Select.Option key={d.value}>{d.label}</Select.Option>);
 
   const fetchCustomer = async (query, callback) => {
     if (!query) {
       callback([]);
     } else {
       try {
-        const endpoint =
-          process.env.NEXT_PUBLIC_URL +
-          `/customers?filters[name][$contains]=${query}`;
+        const endpoint = process.env.NEXT_PUBLIC_URL + `/customers/type?query=${query}&type=sales`;
         const options = {
           method: "GET",
           headers: {
@@ -59,10 +55,11 @@ export default function Customer({ onChangeCustomer }) {
         console.log("res customer", res);
 
         if (req.status == 200) {
-          const customerResult = res.data.map((customer) => ({
-            label: `${customer.attributes.name}`,
-            value: customer.id,
-          }));
+          const customerResult =
+            res.data?.map((customer) => ({
+              label: `${customer.name}`,
+              value: customer.id,
+            })) || [];
 
           callback(customerResult);
         }
