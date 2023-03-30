@@ -484,6 +484,7 @@ function Hutang({ props }) {
                       style={{
                         width: "100%",
                       }}
+                      allowClear
                       placeholder="Status Pembayaran"
                       onChange={setStatusPembayaran}
                     >
