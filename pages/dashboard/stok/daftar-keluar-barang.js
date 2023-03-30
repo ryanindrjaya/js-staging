@@ -165,7 +165,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
         location_recipient: row.location_recipient.id,
         product: row.product.id,
         req_qty: row.qty,
-        qty: row.send_qty,
+        qty: row?.send_qty || 1,
         unit: row.send_unit,
         type: "Transfer Keluar",
         sended: row?.sended || 0,

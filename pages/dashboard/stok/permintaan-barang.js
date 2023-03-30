@@ -394,7 +394,7 @@ export default function permintaanBarang() {
         notification["success"]({
           message: "Berhasil",
           description:
-            "Berhasil membuat permintaan produk, harap cek data di 'Daftar Keluar Barang' dan 'Daftar Masuk Barang'",
+            "Berhasil membuat permintaan produk, harap cek data di 'Daftar Barang Keluar' dan 'Daftar Barang Masuk'",
         });
 
         form.resetFields();

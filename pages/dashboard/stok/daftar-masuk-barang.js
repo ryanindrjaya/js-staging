@@ -149,13 +149,14 @@ export default function daftarKeluarBarang({ companyOptions }) {
   };
 
   const handleAddToStock = async (row, index) => {
-    if (!(row?.send_qty <= 0)) {
+    if (row?.send_qty <= 0) {
       notification.error({
         message: "Gagal menerima ke stok",
         description: "Jumlah barang yang diterima tidak boleh 0",
       });
       return;
     }
+
     try {
       const data = {
         id: row.id,
