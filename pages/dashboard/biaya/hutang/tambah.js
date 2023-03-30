@@ -371,7 +371,7 @@ function Hutang({ props }) {
         }
 
         if (isTempo) {
-            if (statusPembayaran === "Belum Lunas" || statusPembayaran === "Belum Dibayar") {
+            if (statusPembayaran === "Belum Lunas") {
                 status = "Tempo";
             } else if (statusPembayaran === "Dibayar Sebagian") {
                 status = "Sebagian";
@@ -381,7 +381,7 @@ function Hutang({ props }) {
         } else {
             if (
                 statusPembayaran === "Belum Lunas" &&
-                purchasingHistory.length > 0
+                purchasingHistory.length == 0
             ) {
                 status = "Tempo";
             } else if (
@@ -405,6 +405,7 @@ function Hutang({ props }) {
           //biaya.list.push(row);
           dispatch({ type: "ADD_LIST", list: row });
         }
+        console.log("statusPembayaran", statusPembayaran, status);
         lpbId++;
     });
 
