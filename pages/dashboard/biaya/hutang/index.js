@@ -1,5 +1,5 @@
 import Head from "next/head";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
@@ -93,6 +93,11 @@ function Hutang({ props }) {
     const [hutang, setHutang] = useState(data);
     const [supplier, setSupplier] = useState();
     const dispatch = useDispatch();
+    const [searchParameters, setSearchParameters] = useState({});
+
+    // Range Picker
+    const { RangePicker } = DatePicker;
+    const [rangePicker, setRangePicker] = useState();
 
     const handleSetting = () => {
         router.push("/dashboard/biaya/hutang/setting");
@@ -109,6 +114,53 @@ function Hutang({ props }) {
             "Work In Progress",
             "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
         );
+    };
+
+    //var searchValueSupplier = null;
+    //var searchValueNoPembayaran = null;
+    //var searchValuePembayaran = null;
+    //var searchValueRentang = null;
+    const onSearch = async (value, type) => { console.log("tipe", value, type);
+        //var url = null;
+
+        //if (type == "supplier") {
+        //  searchValueSupplier = value.id;
+        //  //url = "/debts?populate=deep&filters["+ type +"\][id]="+ searchValueSupplier;
+        //}
+        //if (type == "nopembayaran") {
+        //  searchValueNoPembayaran = value;
+        //  //url = "/debts?populate=deep&&filters[no_hutang][$eq]="+ searchValueNoPembayaran;
+        //}
+        //if (type == "pembayaran") {
+        //  searchValuePembayaran = value;
+        //}
+        //if (type == "rentang") {
+        //  searchValueRentang = value;
+        //}
+        //if (searchValueSupplier != null && searchValueNoPembayaran != null) {
+        //  url = "/debts?populate=deep&filters["+ type +"\][id]="+ searchValueSupplier +"&filters[no_hutang]="+ searchValueNoPembayaran;
+        //}
+
+        //var url = "/debts?populate=deep&filters[" + type + "\][id]=" + value.id;
+        //url = "/debts?populate=deep&filters["+ type +"\][id]="+ searchValueSupplier +"&filters[no_hutang]="+ searchValueNoPembayaran;
+
+        const endpoint = process.env.NEXT_PUBLIC_URL + url;
+        const cookies = nookies.get(null, "token");
+        const options = {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + cookies.token,
+            },
+        };
+
+        const req = await fetch(endpoint, options);
+        const res = await req.json();
+
+        if (res) {
+          setHutang(res);
+        }
+        console.log("req", req, res);
     };
 
     const handleDelete = async (data) => {
@@ -189,6 +241,42 @@ function Hutang({ props }) {
         dispatch(logout());
     };
 
+    //useEffect(() => {
+    //    if (supplier) {
+    //      onSearch(supplier,"supplier");
+    //    }
+    //}, [supplier]);
+
+    //useEffect(() => {
+    //    if (rangePicker) {
+    //      onSearch(rangePicker,"rentang");
+    //    }
+    //}, [rangePicker]);
+
+    useEffect(() => {
+      for (const key in searchParameters) {
+        //if (searchParameters[key]?.length > 0) {
+        //console.log("search", searchParameters, searchParameters[key].length);
+          if (key === "supplier") {
+            console.log("supplier", searchParameters[key]?.length);
+            //const parameter = searchParameters[key].map((item) => item).join(", ");
+            //query += `filters[$and][${index}][tipe_penjualan_query][$contains]=${parameter}&`;
+            //index++;
+            //continue;
+          }
+
+        //  if (key === "area" || key === "wilayah") {
+        //    query += `filters[$and][${index}][${key}][name][$containsi]=${searchParameters[key]}&`;
+        //    index++;
+        //    continue;
+        //  }
+
+        //  query += `filters[$and][${index}][${key}][$containsi]=${searchParameters[key]}&`;
+        //  index++;
+        //}
+      }
+    }, [searchParameters]);
+
     return (
         <>
             <Head>
@@ -200,7 +288,9 @@ function Hutang({ props }) {
                     <LayoutContent>
                         <div className="w-full flex justify-start">
                             <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                                <Supplier onChangeSupplier={setSupplier} />
+                                <Supplier
+                                  onChangeSupplier={(e) => setSearchParameters({ ...searchParameters, supplier: e })}
+                                />
                             </div>
                             <div className="w-full md:w-1/4 px-3">
                                 <Select
@@ -210,14 +300,18 @@ function Hutang({ props }) {
                                         width: "100%",
                                         marginRight: "10px",
                                     }}
+                                    allowClear
+                                    onChange={(e) => setSearchParameters({ ...searchParameters, nopembayaran: e })}
+                                    //onClear={() => setSearchParameters({ ...searchParameters, nopembayaran: [] })}
+                                    //onChange={ value => onSearch(value, "nopembayaran")}
                                 >
-                                    {/*{locations.map((element) => {*/}
-                                    {/*  return (*/}
-                                    <Select.Option>
-                                        data
-                                    </Select.Option>
-                                    {/*  );*/}
-                                    {/*})}*/}
+                                    {data.data?.map((element) => {
+                                      return (
+                                        <Select.Option value={element.attributes.no_hutang} key={element.id}>
+                                          {element.attributes.no_hutang}
+                                        </Select.Option>
+                                      );
+                                    })}
                                 </Select>
                             </div>
                             <div className="w-full md:w-1/4 px-3">
@@ -228,18 +322,20 @@ function Hutang({ props }) {
                                         width: "100%",
                                         marginRight: "10px",
                                     }}
+                                    allowClear
+                                    onChange={(e) => setSearchParameters({ ...searchParameters, pembayaran: e })}
+                                    //onChange={value => onSearch(value, "pembayaran")}
                                 >
-                                    {/*{locations.map((element) => {*/}
-                                    {/*  return (*/}
-                                    <Select.Option>
-                                        data
+                                    <Select.Option value="Dibayar">
+                                        Dibayar
                                     </Select.Option>
-                                    {/*  );*/}
-                                    {/*})}*/}
+                                    <Select.Option value="Belum Dibayar">
+                                        Belum Dibayar
+                                    </Select.Option>
                                 </Select>
                             </div>
                             <div className="w-full md:w-1/4 px-3">
-                                <DatePicker placeholder="Rentang Tanggal" size="large" style={{ width: "100%" }} />
+                              <RangePicker size="large" onChange={(e) => setSearchParameters({ ...searchParameters, range: e })} />
                             </div>
                         </div>
 
