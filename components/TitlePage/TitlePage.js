@@ -3,9 +3,9 @@ import React from "react";
 export default function TitlePage({ titleText }) {
   return (
     <div className="mb-3">
-      <h5 className=" border-l-4 border-blue-900">
-        <span className="ml-4">{titleText}</span>{" "}
-      </h5>
+      <div className="font-medium text-lg border-l-4 uppercase border-[#036B82] pl-4">
+        {titleText}
+      </div>
     </div>
   );
 }

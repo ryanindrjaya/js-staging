@@ -65,8 +65,10 @@ export default function ReactDataTable({
     console.log("onChangePriceUnit", value, data, index, indexRow);
     var tempPriceUnit = [];
 
+
     const selectedUnit =
       formObj.getFieldValue(`jumlah_option`) || products.productInfo;
+
     const selectedUnitIndex =
       selectedUnit?.[indexRow]?.unitIndex || selectedUnit?.[indexRow] || index;
 
@@ -238,9 +240,7 @@ export default function ReactDataTable({
                     width: "150px",
                     marginRight: "10px",
                   }}
-                  formatter={(value) =>
-                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                  }
+                  formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                   parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                 />
               </Form.Item>
@@ -301,50 +301,35 @@ export default function ReactDataTable({
                   {row.attributes?.unit_1 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_1 === null}
-                      value={1}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_1 === null} value={1}>
                       {row.attributes?.unit_1}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_2 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_2 === null}
-                      value={2}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_2 === null} value={2}>
                       {row.attributes?.unit_2}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_3 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_3 === null}
-                      value={3}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_3 === null} value={3}>
                       {row.attributes?.unit_3}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_4 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_4 === null}
-                      value={4}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_4 === null} value={4}>
                       {row.attributes?.unit_4}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_5 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_5 === null}
-                      value={5}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_5 === null} value={5}>
                       {row.attributes?.unit_5}
                     </Select.Option>
                   )}
@@ -375,9 +360,7 @@ export default function ReactDataTable({
                   width: "100px",
                   marginRight: "10px",
                 }}
-                formatter={(value) =>
-                  value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                }
+                formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                 parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
               />
             </Form.Item>
@@ -512,10 +495,7 @@ export default function ReactDataTable({
               >
                 {locations.map((element) => {
                   return (
-                    <Select.Option
-                      value={element.id}
-                      key={element.attributes.name}
-                    >
+                    <Select.Option value={element.id} key={element.attributes.name}>
                       {element.attributes.name}
                     </Select.Option>
                   );
@@ -544,11 +524,7 @@ export default function ReactDataTable({
               ]}
               noStyle
             >
-              <DatePicker
-                placeholder="EXP. Date"
-                size="normal"
-                format={"DD/MM/YYYY"}
-              />
+              <DatePicker placeholder="EXP. Date" size="normal" format={"DD/MM/YYYY"} />
             </Form.Item>
           </>
         );
