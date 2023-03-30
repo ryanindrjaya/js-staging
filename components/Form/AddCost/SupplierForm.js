@@ -86,6 +86,7 @@ export default function Supplier({ onChangeSupplier }) {
           <Select
             size="large"
             showSearch
+            allowClear
             placeholder="Pilih Supplier"
             onSearch={handleSearch}
             onChange={handleChange}

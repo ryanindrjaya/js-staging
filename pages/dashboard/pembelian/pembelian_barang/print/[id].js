@@ -32,8 +32,8 @@ const Print = ({ props }) => {
   const getHargaSatuan = (unit, index) => {
     var price = 0;
     price =
-    props.purchases.data.attributes.purchasing_details.data[index - 1]
-      .attributes.unit_price;
+      props.purchases.data.attributes.purchasing_details.data[index - 1]
+        .attributes.unit_price;
     // const product = props.purchases.data.attributes.purchasing_details.data[index - 1].attributes.product.data;
 
     // for (let index = 1; index < 6; index++) {
@@ -165,8 +165,16 @@ const Print = ({ props }) => {
 
   const getDPP = () => {
     var isDPPactive = props.purchases.data.attributes.DPP_active;
+
+    var total = 0;
+    props.purchases.data.attributes.purchasing_details.data.forEach(
+      (element) => {
+        total = total + element.attributes.sub_total;
+      }
+    );
+
     if (isDPPactive) {
-      return props.purchases.data.attributes.price_after_disc / 1.11;
+      return total / 1.11;
     }
 
     return 0;
@@ -174,13 +182,18 @@ const Print = ({ props }) => {
 
   const getPPN = () => {
     var dppPrice = getDPP();
+    var ppnPrice = 0;
+    var isDPPactive = props.purchases.data.attributes.DPP_active;
 
-    var isPPNactive = props.purchases.data.attributes.PPN_active;
-    if (isPPNactive) {
-      return props.purchases.data.attributes.price_after_disc - dppPrice;
+
+    
+    if (isDPPactive) {
+      console.log("ppn price", dppPrice * 0.11);
+      ppnPrice = dppPrice * 0.11;
+      return ppnPrice;
     }
 
-    return 0;
+    return ppnPrice;
   };
 
   const print = () => {

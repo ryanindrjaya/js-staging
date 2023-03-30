@@ -504,6 +504,18 @@ export default function ReactDataTable({
       },
     },
     {
+      name: "Stok Gudang",
+      width: "150px",
+      selector: (row, idx) => {
+        var defaultStock = 0;
+        return (
+          <div className="disabled:bg-white italic text-gray-500">
+            {defaultStock == 0 ? "Pilih Gudang" : defaultStock}
+          </div>
+        );
+      },
+    },
+    {
       name: "Lokasi",
       width: "250px",
       sortable: true,
