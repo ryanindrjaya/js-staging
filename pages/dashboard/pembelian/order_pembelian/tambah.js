@@ -224,6 +224,7 @@ function Tambah({ props }) {
     );
 
     const formattedNumber = formatter.format(total);
+    console.log("product", products);
     console.log("harga setelah diskon", formattedNumber);
 
     return formattedNumber;
