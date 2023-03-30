@@ -137,7 +137,8 @@ export default function ReactDataTable({
     {
       name: "Jumlah Item",
       width: "120px",
-      //selector: (row) => formatter.format(row.attributes?.total ?? "-"),
+      selector: (row) =>
+        row.attributes?.total_item || row.attributes?.sales_sell_details?.data?.length || "-",
     },
     {
       name: "Catatan Penjualan",
