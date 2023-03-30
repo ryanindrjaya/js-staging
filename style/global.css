@@ -2,6 +2,73 @@
 @tailwind components;
 @tailwind utilities;
 
+/*============= OVERRIDE INPUT BORDER ==============*/
+
+/* .ant-select:not(.ant-select-customize-input) .ant-select-selector {
+  border: 2.5px solid #036b82 !important;
+  border-radius: 10px;
+}
+.ant-picker {
+  border: 2.5px solid #036b82 !important;
+  border-radius: 10px;
+} */
+/*============= END OVERRIDE INPUT BORDER ==============*/
+
+/*========= CHANGE PLACEHOLDER COLOR ==============*/
+/* 
+.ant-select-selection-placeholder {
+  color: #036b82 !important;
+}
+
+
+.ant-picker-input input::placeholder {
+  color: #036b82 !important;
+} */
+
+/*========= END CHANGE PLACEHOLDER COLOR ==============*/
+@media print {
+  .ant-table-thead .ant-table-cell {
+    background-color: transparent;
+    color: #000 !important;
+    /* prevent word break */
+    white-space: nowrap;
+  }
+  .ant-table-thead .child {
+    max-width: min-content;
+    color: #000 !important;
+  }
+
+  .ant-table-cell {
+    border: 1px solid #000;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    font-weight: 400;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .ant-table {
+    border-bottom: 1px solid #000;
+    border-right: 1px solid #000;
+  }
+}
+.ant-table-thead .ant-table-cell {
+  background-color: #036b82;
+  color: white;
+  /* prevent word break */
+  white-space: nowrap;
+}
+.ant-table-thead .child {
+  max-width: min-content;
+}
+
+.ant-table-cell {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  font-weight: 400;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 /********** Add Your Global CSS Here **********/
 h1,
 h2,
@@ -132,7 +199,9 @@ html[dir="rtl"] .ant-btn.ant-btn-loading:not(.ant-btn-circle):not(.ant-btn-circl
   padding-right: 29px;
 }
 
-html[dir="rtl"] .ant-btn.ant-btn-loading:not(.ant-btn-circle):not(.ant-btn-circle-outline) .anticon {
+html[dir="rtl"]
+  .ant-btn.ant-btn-loading:not(.ant-btn-circle):not(.ant-btn-circle-outline)
+  .anticon {
   margin-right: -14px;
   margin-left: 0;
 }

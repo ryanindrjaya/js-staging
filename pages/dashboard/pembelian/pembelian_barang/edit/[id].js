@@ -301,10 +301,9 @@ function EditLPB({ props }) {
       // console.log("editedProduct", editedProduct);
       // console.log("products", products);
 
+      console.log("redux products", products);
       const detailsLPB = products.productList?.map(
         ({ attributes, id }, idx) => {
-          console.log();
-
           const qty = editedProduct?.[idx]?.qty || 1;
           const unitPriceAfterDisc = parseFloat(
             productTotalPrice?.[idx] || attributes?.buy_price_1
@@ -312,7 +311,9 @@ function EditLPB({ props }) {
           const subTotal = parseFloat(unitPriceAfterDisc * qty).toFixed(2);
           const unitOrder = editedProduct?.[idx]?.unit || attributes?.unit_1;
           const unitPrice =
-            editedProduct?.[idx]?.priceUnit || attributes?.buy_price_1;
+            editedProduct?.[idx]?.unit_price ||
+            editedProduct?.[idx]?.priceUnit ||
+            attributes?.buy_price_1;
 
           const discRp = form.getFieldValue("disc_rp");
           const unitDisc =

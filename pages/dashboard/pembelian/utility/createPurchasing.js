@@ -155,7 +155,7 @@ const putRelationOrder = async (
     form.resetFields();
     router.replace("/dashboard/pembelian/pembelian_barang");
     openNotificationWithIcon("success");
-    updateOrderData();
+    updateOrderData(res.data?.id);
   } else {
     openNotificationWithIcon("error");
   }

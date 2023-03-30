@@ -5,16 +5,28 @@ import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLay
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
-import { Form, Input, DatePicker, Button, message, Upload, Select, Spin, notification } from "antd";
+import {
+  Form,
+  Input,
+  DatePicker,
+  Button,
+  message,
+  Upload,
+  Select,
+  Spin,
+  notification,
+} from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import nookies from "nookies";
-import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
+import SearchBar from "../../../../components/Form/AddOrder/SearchBar";
 import { useSelector, useDispatch } from "react-redux";
 import calculatePrice from "../utility/calculatePrice";
-import DataReturTable from "@iso/components/ReactDataTable/Purchases/DataReturTable";
+import DataReturTable from "../../../../components/ReactDataTable/Purchases/DataReturTable";
 import createDetailReturFunc from "../utility/createReturDetail";
 import createReturFunc from "../utility/createRetur";
 import { useRouter } from "next/router";
+import SearchLPB from "../../../../components/Form/AddOrder/SearchLPB";
+import moment from "moment";
 
 Retur.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -46,7 +58,7 @@ Retur.getInitialProps = async (context) => {
       location,
       returs,
       dataLPB,
-      user
+      user,
     },
   };
 };
@@ -125,12 +137,15 @@ function Retur({ props }) {
   const [grandTotal, setGrandTotal] = useState(0);
   const [listId, setListId] = useState([]);
   const router = useRouter();
+  const [lpbData, setLpbData] = useState();
 
   //temp
   const tempList = [];
   const cookies = nookies.get(null, "token");
-
-  var totalReturs = String(props.returs?.meta?.pagination.total + 1).padStart(3, "0");
+  var totalReturs = String(props.returs?.meta?.pagination.total + 1).padStart(
+    3,
+    "0"
+  );
   var today = new Date();
   var dd = String(today.getDate()).padStart(2, "0");
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
@@ -151,18 +166,45 @@ function Retur({ props }) {
 
   const onFinish = async (values) => {
     setLoading(true);
+    const payment = getPaymentRemaining();
+    console.log("validate payment", totalPrice, payment.returPaymentRemaining, totalPrice > payment.returPaymentRemaining);
+    if (totalPrice > payment.returPaymentRemaining) {
+      notification["error"]({
+        message: "Overprice",
+        description:
+        "Harga retur melebih dari Sisa pembayaran / Harga LPB",
+      });
+      setLoading(false);
+      return
+    }
+    
     setDataValues(values);
     setLoading(false);
   };
 
   const createDetailRetur = async () => {
-    console.log("info total", productTotalPrice, productSubTotal, products, dataValues);
-    createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-details", dataValues);
+    createDetailReturFunc(
+      products,
+      productTotalPrice,
+      productSubTotal,
+      setListId,
+      "/retur-details",
+      dataValues
+    );
   };
 
   const createRetur = async (values) => {
     values.status = "Draft";
-    createReturFunc(grandTotal, totalPrice, values, listId, form, router);
+
+    createReturFunc(
+      grandTotal,
+      totalPrice,
+      values,
+      listId,
+      form,
+      router,
+      lpbData?.id
+    );
   };
 
   const onChangeProduct = async () => {
@@ -183,41 +225,50 @@ function Retur({ props }) {
     }
   };
 
-  //const calculatePriceAfterDisc = (row, index) => {
-  //  var total = 0;
-  //  var qty = 1;
-  //  var priceUnit = row.attributes[`buy_price_1`];
+  const getPaymentRemaining = () => {
+    console.log("get payment remaining");
+    let returPayments = 0;
+    let returPaymentRemaining = 0;
+    const totalLPBPayment = lpbData?.attributes?.total_purchasing ?? 0;
 
-  //  // check if price changed
-  //  if (products.productInfo[index]?.priceUnit) {
-  //    priceUnit = products.productInfo[index].priceUnit ?? row.attributes[`buy_price_1`];
-  //  }
-  //  // check if qty changed
-  //  if (products.productInfo[index]?.qty) {
-  //    qty = products.productInfo[index]?.qty ?? 1;
-  //  }
+    // for (const data in lpbData?.attributes?.returs?.data) {
+    //   console.log("retur payment ", data.);
+    // }
+    lpbData?.attributes?.returs?.data.forEach((element) => {
+      returPayments = returPayments + element.attributes.total_price;
+    });
 
-  //  // set product price after disc & sub total
-  //  productTotalPrice[index] = priceUnit;
-  //  productSubTotal[index] = priceUnit * qty;
+    returPaymentRemaining = totalLPBPayment - returPayments;
+    const paymentData = {
+      LPBPayment: totalLPBPayment,
+      returPayment: returPayments,
+      returPaymentRemaining: returPaymentRemaining,
+    };
 
-  //  // set all product total
-  //  var total = 0;
-  //  for (var key in productSubTotal) {
-  //    total = total + productSubTotal[key];
-  //  }
-  //    setTotalPrice(total);
-  //  return formatter.format(productTotalPrice[index]);
-  //};
+    return paymentData;
+  };
+
+  useEffect(() => {
+    getPaymentRemaining();
+  }, [lpbData]);
 
   const calculatePriceAfterDisc = (row, index) => {
-    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index, setProductSubTotal);
+    const total = calculatePrice(
+      row,
+      products,
+      productTotalPrice,
+      productSubTotal,
+      setTotalPrice,
+      index,
+      setProductSubTotal
+    );
     return formatter.format(total);
   };
 
   const fetchReturdata = async (id) => {
     //clearData();
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=deep`;
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=deep`;
     const options = {
       method: "GET",
       headers: {
@@ -237,7 +288,8 @@ function Retur({ props }) {
     });
   };
 
-  const setProductValue = async () => { console.log("products",products)
+  const setProductValue = async () => {
+    console.log("products", products);
     if (products.productList.length != 0) {
       products.productList.forEach((element) => {
         console.log("masuk");
@@ -306,6 +358,28 @@ function Retur({ props }) {
     });
   };
 
+  const getDPP = () => {
+    var total = 0;
+
+    total = totalPrice / 1.11;
+
+    return total;
+  };
+
+  const getPPN = () => {
+    const isDPPActive = form.getFieldValue("pajak");
+
+    var total = 0;
+    let dpp = getDPP();
+    total = dpp * 0.11;
+
+    if (isDPPActive !== "Pajak Pembelian") {
+      total = 0;
+    }
+
+    return total;
+  };
+
   return (
     <>
       <Head>
@@ -344,6 +418,7 @@ function Retur({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="tanggal_retur"
+                    initialValue={moment()}
                     rules={[
                       {
                         required: true,
@@ -351,15 +426,13 @@ function Retur({ props }) {
                       },
                     ]}
                   >
-                    <DatePicker placeholder="Tanggal Retur" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
+                    <DatePicker
+                      placeholder="Tanggal Retur"
+                      size="large"
+                      format={"DD/MM/YYYY"}
+                      style={{ width: "100%" }}
+                    />
                   </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Upload {...data}>
-                    <Button size="large" icon={<UploadOutlined />}>
-                      Click to Upload
-                    </Button>
-                  </Upload>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
@@ -380,7 +453,10 @@ function Retur({ props }) {
                     >
                       {locations.map((element) => {
                         return (
-                          <Select.Option value={element.id} key={element.attributes.name}>
+                          <Select.Option
+                            value={element.id}
+                            key={element.attributes.name}
+                          >
                             {element.attributes.name}
                           </Select.Option>
                         );
@@ -389,31 +465,21 @@ function Retur({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="purchasing">
-                    <Select
-                      placeholder="Pilih Nomor LPB"
-                      size="large"
-                      onChange={(e) => fetchReturdata(e)}
-                      style={{
-                        width: "100%",
-                      }}
-                    >
-                      {dataLPB.map((element) => {
-                        return (
-                          <Select.Option value={element.id} key={element.id}>
-                            {element.attributes.no_purchasing}
-                          </Select.Option>
-                        );
-                      })}
-                    </Select>
-                  </Form.Item>
+                  <SearchLPB supplier={supplier} handleSelect={setLpbData} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0" hidden>
                   <Form.Item name="no_nota_supplier"></Form.Item>
                   <Form.Item name="tanggal_pembelian"></Form.Item>
                 </div>
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
-                  <SearchBar form={form} tempList={tempList} onChange={onChangeProduct} user={user}  selectedProduct={selectedProduct} isBasedOnLocation={false}/>
+                  <SearchBar
+                    form={form}
+                    tempList={tempList}
+                    onChange={onChangeProduct}
+                    user={user}
+                    selectedProduct={selectedProduct}
+                    isBasedOnLocation={false}
+                  />
                 </div>
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
                   <DataReturTable
@@ -433,6 +499,7 @@ function Retur({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="pajak"
+                    initialValue={"Pajak Pembelian"}
                     rules={[
                       {
                         required: true,
@@ -447,7 +514,10 @@ function Retur({ props }) {
                         width: "100%",
                       }}
                     >
-                      <Select.Option value="Pajak Pembelian" key="Pajak Pembelian">
+                      <Select.Option
+                        value="Pajak Pembelian"
+                        key="Pajak Pembelian"
+                      >
                         Pajak Pembelian
                       </Select.Option>
                       <Select.Option value="Non Pajak" key="Non Pajak">
@@ -456,11 +526,48 @@ function Retur({ props }) {
                     </Select>
                   </Form.Item>
                 </div>
-                <p className="font-bold">Total Item : {products.productList.length} </p>
+                <p className="font-bold">
+                  Total Item : {products.productList.length}{" "}
+                </p>
               </div>
               <div className="flex justify-end">
-                <p className="font-bold">Total Harga : {formatterTotal.format(totalPrice)} </p>
+                <p className="font-bold">
+                  DPP : {formatterTotal.format(getDPP())}
+                </p>
               </div>
+              <div className="flex justify-end">
+                <p className="font-bold">
+                  PPN : {formatterTotal.format(getPPN())}
+                </p>
+              </div>
+
+              <div className="flex justify-end">
+                <p className="font-bold">
+                  Total Harga : {formatterTotal.format(totalPrice)}{" "}
+                </p>
+              </div>
+
+              <div className="flex justify-end mt-5">
+                <p className="font-bold">
+                  Total LPB :{" "}
+                  {formatter.format(getPaymentRemaining().LPBPayment ?? 0)}{" "}
+                </p>
+              </div>
+              <div className="flex justify-end">
+                <p className="font-bold text-green-600">
+                  Pembayaran Sebelumnya :{" "}
+                  {formatter.format(getPaymentRemaining().returPayment ?? 0)}{" "}
+                </p>
+              </div>
+              <div className="flex justify-end">
+                <p className="font-bold text-red-400">
+                  Sisa Pembayaran :{" "}
+                  {formatter.format(
+                    getPaymentRemaining().returPaymentRemaining ?? 0
+                  )}{" "}
+                </p>
+              </div>
+
               <Form.Item name="catatan">
                 <TextArea rows={4} placeholder="Catatan Tambahan" />
               </Form.Item>
@@ -470,7 +577,11 @@ function Retur({ props }) {
                     <Spin />
                   </div>
                 ) : (
-                  <Button onClick={validateError} htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
+                  <Button
+                    onClick={validateError}
+                    htmlType="submit"
+                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
+                  >
                     Tambah
                   </Button>
                 )}

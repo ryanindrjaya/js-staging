@@ -2,12 +2,12 @@ import nookies from "nookies";
 import { notification } from "antd";
 
 const updateProductFromTable = async (data) => {
-  const purchasingDetails = data?.attributes?.purchasing_details?.data;
-  const promises = purchasingDetails.map((element) => {
-    updateAPI(element);
-  });
-
   try {
+    const purchasingDetails = data?.attributes?.purchasing_details?.data;
+    const promises = purchasingDetails.map((element) => {
+      updateAPI(element);
+    });
+
     await Promise.all(promises);
     console.log("Data updated successfully");
   } catch (error) {
@@ -34,7 +34,7 @@ const updateAPI = async (element) => {
     productData.unit_1_dp1 = dp1;
     productData.unit_1_dp2 = dp2;
     productData.unit_1_dp3 = dp3;
-    
+
     productData.unit_2_dp1 = dp1;
     productData.unit_2_dp2 = dp2;
     productData.unit_2_dp3 = dp3;
@@ -50,11 +50,8 @@ const updateAPI = async (element) => {
     productData.unit_5_dp1 = dp1;
     productData.unit_5_dp2 = dp2;
     productData.unit_5_dp3 = dp3;
-    
-    
-    console.log("element coy", element);
 
-   
+    console.log("element coy", element);
 
     if (unit === productData?.unit_1) {
       updateAtProductUnit1(productData, unit, unitPrice, disc);
@@ -101,9 +98,12 @@ const updateAPI = async (element) => {
     const req = await fetch(endpoint, options);
     const res = await req.json();
 
+    console.log("res updateProductFromTable", res, JSONdata);
+
     if (req.status === 200) {
       openNotificationWithIcon("success");
     } else {
+      console.log("error updateProductFromTable", res);
       openNotificationWithIcon("error");
     }
   } catch (error) {

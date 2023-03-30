@@ -172,14 +172,14 @@ function Pembelian({ props }) {
     if (status === "Diterima") {
       console.log("store to inventory && update product price");
       // invetory handle
-      createInventory(row);
+      await createInventory(row);
 
       await updateProductFromTable(row);
     }
 
     const poData = row?.attributes?.purchase?.data;
-    const req = await changeStatusPO(poData, status, LPBLocationId);
-    if (req.status === 200) {
+    const res = await changeStatusPO(poData, status, LPBLocationId);
+    if (res.data) {
       await changeStatusLPB(row, row.id);
     }
   };
@@ -211,8 +211,6 @@ function Pembelian({ props }) {
         data: poData.attributes,
       };
 
-      console.log(values);
-
       const JSONdata = JSON.stringify(values);
       const cookies = nookies.get(null, "token");
       const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/" + poData.id;
@@ -226,7 +224,7 @@ function Pembelian({ props }) {
       };
 
       const req = await fetch(endpoint, options);
-
+      const res = await req.json();
       if (req.status === 200) {
         openNotificationWithIcon(
           "success",
@@ -241,7 +239,7 @@ function Pembelian({ props }) {
         );
       }
 
-      return req;
+      return res;
     } catch (error) {
       console.log(error);
       openNotificationWithIcon(
@@ -327,6 +325,7 @@ function Pembelian({ props }) {
           "Status LPB berhasil dirubah. Silahkan cek LPB"
         );
       } else {
+        console.log("error", res)
         openNotificationWithIcon(
           "error",
           "Status LPB gagal dirubah",
@@ -334,7 +333,7 @@ function Pembelian({ props }) {
         );
       }
     } catch (error) {
-      console.log(error);
+      console.log("error", res)
       openNotificationWithIcon(
         "error",
         "Status LPB gagal dirubah",
