@@ -72,6 +72,19 @@ export default function ReactDataTable({
 
   const columns = [
     {
+      name: "Tindakan",
+      width: "w-1/5",
+      selector: (row) => (
+        <>
+          <Popover content={content(row)} placement="bottom">
+            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
+              Tindakan
+            </button>
+          </Popover>
+        </>
+      ),
+    },
+    {
       name: "SKU",
       width: "150px",
       sortable: true,
@@ -100,19 +113,6 @@ export default function ReactDataTable({
       width: "w-1/5",
       sortable: true,
       selector: (row) => row.attributes?.description,
-    },
-    {
-      name: "",
-      width: "w-1/5",
-      selector: (row) => (
-        <>
-          <Popover content={content(row)} placement="bottom">
-            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
-              Tindakan
-            </button>
-          </Popover>
-        </>
-      ),
     },
   ];
 

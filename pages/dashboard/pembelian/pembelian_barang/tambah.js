@@ -322,6 +322,7 @@ function Tambah({ props }) {
     }
 
     const poData = row.attributes?.purchase?.data;
+    console.log("po data test : ",  row.attributes);
     const resPO = await changeStatusPO(poData, trxStatus, LPBLocationId);
     if (resPO.data) {
       await changeStatusLPB(row, row.id);
@@ -429,7 +430,7 @@ function Tambah({ props }) {
       });
       values.attributes.returs.data.forEach((element) => {
         returs.push({ id: element.id });
-      })
+      });
 
       values.attributes.supplier = { id: values.attributes.supplier.data.id };
       values.attributes.location = {
