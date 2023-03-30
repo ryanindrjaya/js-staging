@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   IoMdMenu,
   IoIosSearch,
@@ -64,7 +64,8 @@ import {
   IoIosBrowsers,
   IoIosSettings,
   IoIosBusiness,
-} from 'react-icons/io';
+  IoLogoDropbox,
+} from "react-icons/io";
 
 // TopBar Icons
 export const TopbarMenuIcon = IoMdMenu; // Menu icon
@@ -75,16 +76,16 @@ export const TopbarMessageIcon = IoIosChatbubbles; // Chat icon
 export const TopbarCartIcon = IoMdCart; // Cart icon
 
 // SideBar Icons
-export const SidebarBussinesIcon = IoIosBusiness
-export const SidebarPersonIcon = IoIosPerson
-export const SidebarSettingsIcon = IoIosSettings
-export const SidebarReportIcon = IoIosBrowsers
-export const SidebarAccountPayment = IoIosAddCircleOutline
-export const SidebarReceiptIcon = IoIosSwap
-export const SidebarAdjustmentIcon = IoIosTrain
-export const SidebarSaleIcon = IoIosArrowRoundUp
-export const SidebarPurchasesIcon = IoIosArrowRoundDown
-export const SidebarProductIcon = IoIosCube
+export const SidebarBussinesIcon = IoIosBusiness;
+export const SidebarPersonIcon = IoIosPerson;
+export const SidebarSettingsIcon = IoIosSettings;
+export const SidebarReportIcon = IoIosBrowsers;
+export const SidebarAccountPayment = IoIosAddCircleOutline;
+export const SidebarReceiptIcon = IoIosSwap;
+export const SidebarAdjustmentIcon = IoIosTrain;
+export const SidebarSaleIcon = IoIosArrowRoundUp;
+export const SidebarPurchasesIcon = IoIosArrowRoundDown;
+export const SidebarProductIcon = IoIosCube;
 export const SidebarContactIcon = IoIosContact; // Email icon
 export const SidebarEmailIcon = IoMdMail; // Email icon
 export const SidebarChatIcon = IoIosChatbubbles; // Chat icon
@@ -110,6 +111,7 @@ export const SidebarPagesIcon = IoIosCopy; // Pages icon
 export const SidebarGithubIcon = IoLogoGithub; // Github Search icon
 export const SidebarBlankIcon = IoIosDocument; // Blank Page icon
 export const SidebarMenuLevelIcon = IoMdOptions; // Menu levels icon
+export const SidebarStockIcon = IoLogoDropbox; // Stock icon
 
 // Dashboard Widgets Icons
 export const StickerWidgetUnreadMailIcon = IoIosMailUnread; // Unread email icon

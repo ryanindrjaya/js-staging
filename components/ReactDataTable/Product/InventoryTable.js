@@ -64,7 +64,7 @@ export default function ReactDataTable({ data, productId }) {
         const locationId = row.attributes.location.data.id;
         return (
           <>
-            <Link href={`/dashboard/produk/riwayat?location=${locationId}&product=${productId}`}>
+            <Link href={`/dashboard/stok?location=${locationId}&product=${productId}`}>
               <a className="no-underline">Riwayat Stok</a>
             </Link>
           </>
