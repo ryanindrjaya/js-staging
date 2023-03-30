@@ -293,7 +293,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
         }
 
         if (row.status === "Selesai") {
-          maxQty = null;
+          maxQty = 999;
         }
 
         return (
