@@ -4,7 +4,7 @@ import { Input, InputNumber, Select, Form, Row, DatePicker, Checkbox } from "ant
 import { useDispatch } from "react-redux";
 import { useState } from "react";
 
-export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal, form, supplier, statusPembayaran, rangePicker, search }) { console.log("tabel biaya", biaya);
+export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal, form, supplier, statusPembayaran, rangePicker, search }) {
   const dispatch = useDispatch();
 
   var unit = 1;
