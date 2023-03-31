@@ -7,7 +7,15 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { CloseOutlined } from "@ant-design/icons";
 
-export default function AlertDialog({ onConfirm, onCancel, title, message, id, rowIndex }) {
+export default function AlertDialog({
+  onConfirm,
+  onCancel,
+  title,
+  message,
+  id,
+  rowIndex,
+  hidden = false,
+}) {
   const [open, setOpen] = React.useState(false);
 
   const handleClickOpen = () => {
@@ -33,7 +41,7 @@ export default function AlertDialog({ onConfirm, onCancel, title, message, id, r
   };
 
   return (
-    <div>
+    <div hidden={hidden}>
       <button
         type="button"
         className="hover:bg-red-400 text-red-600 hover:text-white transition-colors  text-xs font-normal py-2 px-2 rounded-md"
@@ -41,7 +49,12 @@ export default function AlertDialog({ onConfirm, onCancel, title, message, id, r
       >
         <CloseOutlined className="mr-2 mt-0.5 float float-left" /> Hapus
       </button>
-      <Dialog open={open} onClose={handleCancel} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+      <Dialog
+        open={open}
+        onClose={handleCancel}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
         <DialogTitle id="alert-dialog-title" className="font-bold">
           {" "}
           {title}

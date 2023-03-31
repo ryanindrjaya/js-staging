@@ -181,9 +181,7 @@ function Tambah({ props }) {
   const tempList = [];
 
   // NO PO
-  var totalPurchases = String(
-    props.purchases?.meta?.pagination.total + 1
-  ).padStart(3, "0");
+  var totalPurchases = String(props.purchases?.meta?.pagination.total + 1).padStart(3, "0");
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -240,9 +238,7 @@ function Tambah({ props }) {
     // console.log("this is validate step", nomorPO, supplierName);
 
     const endpoint =
-      process.env.NEXT_PUBLIC_URL +
-      `/purchasings?populate=deep&filters[purchase][id][$eq]=` +
-      id;
+      process.env.NEXT_PUBLIC_URL + `/purchasings?populate=deep&filters[purchase][id][$eq]=` + id;
     console.log(endpoint);
     const options = {
       method: "GET",
@@ -306,8 +302,7 @@ function Tambah({ props }) {
         Authorization: "Bearer " + cookies.token,
       },
     };
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=deep`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=deep`;
     const req = await fetch(endpoint, options);
     const res = await req.json();
     const row = res.data;
@@ -322,45 +317,23 @@ function Tambah({ props }) {
     }
 
     const poData = row.attributes?.purchase?.data;
-    console.log("po data test : ",  row.attributes);
-    const resPO = await changeStatusPO(poData, trxStatus, LPBLocationId);
+    const resPO = await changeStatusPO(poData?.id, trxStatus);
     if (resPO.data) {
-      await changeStatusLPB(row, row.id);
+      await changeStatusLPB(id, trxStatus);
     }
   };
 
-  const changeStatusPO = async (poData, status, LPBLocationId) => {
+  const changeStatusPO = async (id, status) => {
     try {
-      // cleaning
-      delete poData.attributes?.document;
-      for (var key in poData.attributes) {
-        if (
-          poData.attributes[key] === null ||
-          poData.attributes[key] === undefined
-        ) {
-          delete poData.attributes[key];
-        }
-      }
-
-      poData.attributes.status = status;
-      poData.attributes.location = {
-        id: poData.attributes?.location?.data?.id ?? LPBLocationId,
-      };
-      poData.attributes.supplier = {
-        id: poData.attributes?.supplier?.data?.id,
-      };
-      poData.attributes.purchase_details =
-        poData.attributes?.purchase_details?.data;
-
-      const values = {
-        data: poData.attributes,
+      const updateStatus = {
+        data: {
+          status,
+        },
       };
 
-      console.log(values);
-
-      const JSONdata = JSON.stringify(values);
+      const JSONdata = JSON.stringify(updateStatus);
       const cookies = nookies.get(null, "token");
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/" + poData.id;
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/" + id;
       const options = {
         method: "PUT",
         headers: {
@@ -399,49 +372,12 @@ function Tambah({ props }) {
     }
   };
 
-  const changeStatusLPB = async (values, id) => {
+  const changeStatusLPB = async (id, status) => {
     try {
-      // // clean object
-      delete values.attributes.purchase;
-      for (var key in values.attributes) {
-        if (
-          values.attributes[key] === null ||
-          values.attributes[key] === undefined
-        ) {
-          delete values.attributes[key];
-        }
-      }
-
-      if (
-        values.attributes?.document?.data === null ||
-        values.attributes?.document?.data === undefined
-      ) {
-        delete values.attributes?.document;
-      }
-
-      var purchasing_details = [];
-      var purchasing_payments = [];
-      var returs = [];
-      values.attributes.purchasing_details.data.forEach((element) => {
-        purchasing_details.push({ id: element.id });
-      });
-      values.attributes.purchasing_payments.data.forEach((element) => {
-        purchasing_payments.push({ id: element.id });
-      });
-      values.attributes.returs.data.forEach((element) => {
-        returs.push({ id: element.id });
-      });
-
-      values.attributes.supplier = { id: values.attributes.supplier.data.id };
-      values.attributes.location = {
-        id: values?.attributes?.location?.data?.id ?? LPBLocationId,
-      };
-      values.attributes.purchasing_details = purchasing_details;
-      values.attributes.purchasing_payments = purchasing_payments;
-      values.attributes.returs = returs;
-
       const newValues = {
-        data: values.attributes,
+        data: {
+          status,
+        },
       };
 
       const JSONdata = JSON.stringify(newValues);
@@ -456,8 +392,6 @@ function Tambah({ props }) {
         },
         body: JSONdata,
       };
-
-      console.log("jsondata put update", JSONdata);
 
       const req = await fetch(endpoint, options);
       const res = await req.json();
@@ -550,8 +484,7 @@ function Tambah({ props }) {
     clearData();
     setIsFetchingData(true);
 
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + `/purchases/${id}?populate=deep`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/purchases/${id}?populate=deep`;
     console.log(endpoint);
     const options = {
       method: "GET",
@@ -624,8 +557,7 @@ function Tambah({ props }) {
       var unitOrder = element.attributes.unit_order;
       var productUnit = element.attributes.products.data[0].attributes;
 
-      priceAfterDisc =
-        priceAfterDisc + element.attributes.unit_price_after_disc;
+      priceAfterDisc = priceAfterDisc + element.attributes.unit_price_after_disc;
 
       for (let index = 1; index < 6; index++) {
         if (unitOrder === productUnit[`unit_${index}`]) {
@@ -647,11 +579,7 @@ function Tambah({ props }) {
         },
       });
 
-      const test = form.getFieldsValue([
-        "disc_rp",
-        "jumlah_option",
-        "jumlah_qty",
-      ]);
+      const test = form.getFieldsValue(["disc_rp", "jumlah_option", "jumlah_qty"]);
 
       // SET INITIAL PRODUCT
       dispatch({
@@ -765,7 +693,7 @@ function Tambah({ props }) {
 
   useEffect(() => {
     if (listId.length > 0) {
-      // createOrder(dataValues);
+      createOrder(dataValues, listId);
     }
   }, [listId]);
 
@@ -892,10 +820,7 @@ function Tambah({ props }) {
                     >
                       {locations.map((element) => {
                         return (
-                          <Select.Option
-                            value={element.id}
-                            key={element.attributes.name}
-                          >
+                          <Select.Option value={element.id} key={element.attributes.name}>
                             {element.attributes.name}
                           </Select.Option>
                         );
@@ -978,9 +903,7 @@ function Tambah({ props }) {
                 )}
               </div>
               <div className="flex justify-end">
-                <p className="font-bold">
-                  Total Item : {products.productList.length}{" "}
-                </p>
+                <p className="font-bold">Total Item : {products.productList.length} </p>
               </div>
               <div className="flex justify-end transition-all">
                 <Row>
@@ -993,9 +916,7 @@ function Tambah({ props }) {
                     </p>
                   )}
                   {discPrice === 0 ? (
-                    <p className="font-bold ml-2">
-                      {formatter.format(totalPrice || 0)}
-                    </p>
+                    <p className="font-bold ml-2">{formatter.format(totalPrice || 0)}</p>
                   ) : (
                     <p className="font-bold line-through ml-2 ">
                       {formatter.format(totalPrice || 0)}
@@ -1010,9 +931,7 @@ function Tambah({ props }) {
                     <p></p>
                   ) : (
                     <p className="font-bold text-red-500 ml-2">
-                      {isDPPActive
-                        ? formatter.format(dppPrice - discValue)
-                        : formatter.format(0)}
+                      {isDPPActive ? formatter.format(dppPrice - discValue) : formatter.format(0)}
                     </p>
                   )}
 
@@ -1020,15 +939,11 @@ function Tambah({ props }) {
 
                   {discPrice === 0 ? (
                     <p className="font-bold ml-2">
-                      {isDPPActive
-                        ? formatter.format(dppPrice)
-                        : formatter.format(0)}
+                      {isDPPActive ? formatter.format(dppPrice) : formatter.format(0)}
                     </p>
                   ) : (
                     <p className="font-bold line-through ml-2 ">
-                      {isDPPActive
-                        ? formatter.format(dppPrice)
-                        : formatter.format(0)}
+                      {isDPPActive ? formatter.format(dppPrice) : formatter.format(0)}
                     </p>
                   )}
                 </Row>
@@ -1040,22 +955,16 @@ function Tambah({ props }) {
                     <p></p>
                   ) : (
                     <p className="font-bold text-red-500 ml-2">
-                      {isDPPActive
-                        ? formatter.format(ppnPrice - discValue)
-                        : formatter.format(0)}
+                      {isDPPActive ? formatter.format(ppnPrice - discValue) : formatter.format(0)}
                     </p>
                   )}
                   {discPrice === 0 ? (
                     <p className="font-bold ml-2">
-                      {isDPPActive
-                        ? formatter.format(ppnPrice)
-                        : formatter.format(0)}
+                      {isDPPActive ? formatter.format(ppnPrice) : formatter.format(0)}
                     </p>
                   ) : (
                     <p className="font-bold line-through ml-2 ">
-                      {isDPPActive
-                        ? formatter.format(ppnPrice)
-                        : formatter.format(0)}
+                      {isDPPActive ? formatter.format(ppnPrice) : formatter.format(0)}
                     </p>
                   )}
                 </Row>
@@ -1228,9 +1137,7 @@ function Tambah({ props }) {
               <div>
                 <p className="font-bold flex justify-end">
                   Total Pembelian :{" "}
-                  {grandTotal === 0
-                    ? formatter.format(totalPrice)
-                    : formatter.format(grandTotal)}
+                  {grandTotal === 0 ? formatter.format(totalPrice) : formatter.format(grandTotal)}
                 </p>
               </div>
               <Form.Item name="additional_note">
