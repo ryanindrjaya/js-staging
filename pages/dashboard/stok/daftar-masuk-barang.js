@@ -168,6 +168,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
         unit: row?.send_unit || row?.sended_unit || row?.unit,
         type: "Transfer Masuk",
         accepted: row?.accepted || 0,
+        no_referensi: row.no_referensi,
       };
 
       const endpoint = `${process.env.NEXT_PUBLIC_URL}/product-request/transfer`;
