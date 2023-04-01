@@ -97,7 +97,6 @@ function Hutang({ props }) {
 
     // Range Picker
     const { RangePicker } = DatePicker;
-    const [rangePicker, setRangePicker] = useState();
 
     const handleSetting = () => {
         router.push("/dashboard/biaya/hutang/setting");
@@ -114,53 +113,6 @@ function Hutang({ props }) {
             "Work In Progress",
             "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
         );
-    };
-
-    //var searchValueSupplier = null;
-    //var searchValueNoPembayaran = null;
-    //var searchValuePembayaran = null;
-    //var searchValueRentang = null;
-    const onSearch = async (value, type) => { console.log("tipe", value, type);
-        //var url = null;
-
-        //if (type == "supplier") {
-        //  searchValueSupplier = value.id;
-        //  //url = "/debts?populate=deep&filters["+ type +"\][id]="+ searchValueSupplier;
-        //}
-        //if (type == "nopembayaran") {
-        //  searchValueNoPembayaran = value;
-        //  //url = "/debts?populate=deep&&filters[no_hutang][$eq]="+ searchValueNoPembayaran;
-        //}
-        //if (type == "pembayaran") {
-        //  searchValuePembayaran = value;
-        //}
-        //if (type == "rentang") {
-        //  searchValueRentang = value;
-        //}
-        //if (searchValueSupplier != null && searchValueNoPembayaran != null) {
-        //  url = "/debts?populate=deep&filters["+ type +"\][id]="+ searchValueSupplier +"&filters[no_hutang]="+ searchValueNoPembayaran;
-        //}
-
-        //var url = "/debts?populate=deep&filters[" + type + "\][id]=" + value.id;
-        //url = "/debts?populate=deep&filters["+ type +"\][id]="+ searchValueSupplier +"&filters[no_hutang]="+ searchValueNoPembayaran;
-
-        const endpoint = process.env.NEXT_PUBLIC_URL + url;
-        const cookies = nookies.get(null, "token");
-        const options = {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + cookies.token,
-            },
-        };
-
-        const req = await fetch(endpoint, options);
-        const res = await req.json();
-
-        if (res) {
-          setHutang(res);
-        }
-        console.log("req", req, res);
     };
 
     const handleDelete = async (data) => {
@@ -241,40 +193,52 @@ function Hutang({ props }) {
         dispatch(logout());
     };
 
-    //useEffect(() => {
-    //    if (supplier) {
-    //      onSearch(supplier,"supplier");
-    //    }
-    //}, [supplier]);
-
-    //useEffect(() => {
-    //    if (rangePicker) {
-    //      onSearch(rangePicker,"rentang");
-    //    }
-    //}, [rangePicker]);
-
     useEffect(() => {
-      for (const key in searchParameters) {
-        //if (searchParameters[key]?.length > 0) {
-        //console.log("search", searchParameters, searchParameters[key].length);
-          if (key === "supplier") {
-            console.log("supplier", searchParameters[key]?.length);
-            //const parameter = searchParameters[key].map((item) => item).join(", ");
-            //query += `filters[$and][${index}][tipe_penjualan_query][$contains]=${parameter}&`;
-            //index++;
-            //continue;
-          }
+      const searchQuery = async () => {
+        let query = "";
+        let startDate = "";
+        let endDate = "";
 
-        //  if (key === "area" || key === "wilayah") {
-        //    query += `filters[$and][${index}][${key}][name][$containsi]=${searchParameters[key]}&`;
-        //    index++;
-        //    continue;
-        //  }
+        for (const key in searchParameters) {
 
-        //  query += `filters[$and][${index}][${key}][$containsi]=${searchParameters[key]}&`;
-        //  index++;
-        //}
+          if (key === "supplier" && searchParameters[key] !== null) {
+            query += `filters[${key}\][id]=${searchParameters[key].id}&`;
+          } else { query += ""; }
+
+          if (key === "no_hutang" || key === "status") {
+            if (searchParameters[key] !== undefined) {
+              query += `filters[${key}]=${searchParameters[key]}&`;
+            } else { query += ""; }
+          } else { query += ""; }
+
+          if(key == "range" && searchParameters[key] !== null ){
+            startDate = searchParameters?.range[0]?.format('YYYY-MM-DD');
+            endDate = searchParameters?.range[1]?.format('YYYY-MM-DD');
+
+            query += `filters[tanggal_pembayaran][$gte]=${startDate}&filters[tanggal_pembayaran][$lte]=${endDate}`;
+          } else { query += ""; }
+
+        }
+
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate=deep&" + query;
+
+        const cookies = nookies.get(null, "token");
+        const options = {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+        };
+
+        const req = await fetch(endpoint, options);
+        const res = await req.json();
+
+        setHutang(res);
+        console.log("endpoint", endpoint, res);
       }
+
+      searchQuery();
     }, [searchParameters]);
 
     return (
@@ -301,9 +265,7 @@ function Hutang({ props }) {
                                         marginRight: "10px",
                                     }}
                                     allowClear
-                                    onChange={(e) => setSearchParameters({ ...searchParameters, nopembayaran: e })}
-                                    //onClear={() => setSearchParameters({ ...searchParameters, nopembayaran: [] })}
-                                    //onChange={ value => onSearch(value, "nopembayaran")}
+                                    onChange={(e) => setSearchParameters({ ...searchParameters, no_hutang: e })}
                                 >
                                     {data.data?.map((element) => {
                                       return (
@@ -323,7 +285,7 @@ function Hutang({ props }) {
                                         marginRight: "10px",
                                     }}
                                     allowClear
-                                    onChange={(e) => setSearchParameters({ ...searchParameters, pembayaran: e })}
+                                    onChange={(e) => setSearchParameters({ ...searchParameters, status: e })}
                                     //onChange={value => onSearch(value, "pembayaran")}
                                 >
                                     <Select.Option value="Dibayar">

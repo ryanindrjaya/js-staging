@@ -14,6 +14,7 @@ const cookies = nookies.get(null, "token");
 async function createInventory(row) {
   const data = [];
   const purchasingDetails = row.attributes.purchasing_details.data;
+  const noLPB = row.attributes.no_purchasing;
 
   purchasingDetails.forEach((element) => {
     console.log("element purchasing detail", element);
@@ -42,6 +43,7 @@ async function createInventory(row) {
   if (data.length > 0) {
     const body = {
       data,
+      no_referensi: noLPB,
       type: "Pembelian",
     };
 

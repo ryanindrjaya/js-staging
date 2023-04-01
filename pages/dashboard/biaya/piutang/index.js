@@ -1,5 +1,5 @@
 import Head from "next/head";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
@@ -8,6 +8,7 @@ import { Input, notification, Select, DatePicker } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import CreditTable from "@iso/components/ReactDataTable/Cost/CreditTable";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
+import Customer from "@iso/components/Form/AddCost/CustomerForm";
 import nookies from "nookies";
 
 Piutang.getInitialProps = async (context) => {
@@ -80,6 +81,10 @@ function Piutang({ props }) {
     const router = useRouter();
     const [piutang, setPiutang] = useState(data);
     const [supplier, setSupplier] = useState();
+    const [searchParameters, setSearchParameters] = useState({}); console.log("data piutang", piutang);
+
+    // Range Picker
+    const { RangePicker } = DatePicker;
 
     const handleSetting = () => {
         router.push("/dashboard/biaya/piutang/setting");
@@ -156,6 +161,66 @@ function Piutang({ props }) {
         });
     };
 
+    useEffect(() => {
+      const searchQuery = async () => {
+        let query = "";
+        let startDate = "";
+        let endDate = "";
+
+        for (const key in searchParameters) {
+
+          //if (key === "supplier" && searchParameters[key] !== null) {
+          //  query += `filters[${key}\][id]=${searchParameters[key].id}&`;
+          //} else { query += ""; }
+          //if (key === "customer" && searchParameters[key] !== null) { console.log("search", searchParameters[key]);
+
+          //  for (const idPiutang in piutang) {
+          //    var details = piutang[idPiutang]?.attributes?.credit_details?.data;
+          //    for (const idDetail in details) {
+          //      var id = details[idDetail].id;
+          //      query += `filters[credit_details[${idDetail}]\]`;
+          //    } 
+          //  }
+
+          //  //query += `filters[${key}\][id]=${searchParameters[key].id}&`;
+          //} else { query += ""; }
+
+          if (key === "status_pembayaran") {
+            if (searchParameters[key] !== undefined) {
+              query += `filters[${key}]=${searchParameters[key]}&`;
+            } else { query += ""; }
+          } else { query += ""; }
+
+          if(key == "range" && searchParameters[key] !== null ){
+            startDate = searchParameters?.range[0]?.format('YYYY-MM-DD');
+            endDate = searchParameters?.range[1]?.format('YYYY-MM-DD');
+
+            query += `filters[tanggal][$gte]=${startDate}&filters[tanggal][$lte]=${endDate}`;
+          } else { query += ""; }
+
+        }
+
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/credits?populate=deep&" + query;
+
+        const cookies = nookies.get(null, "token");
+        const options = {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+        };
+
+        const req = await fetch(endpoint, options);
+        const res = await req.json();
+
+        setPiutang(res);
+        console.log("endpoint", endpoint, res, process.env.NEXT_PUBLIC_URL);
+      }
+
+      searchQuery();
+    }, [searchParameters]);
+
     return (
         <>
             <Head>
@@ -167,22 +232,7 @@ function Piutang({ props }) {
                     <LayoutContent>
                         <div className="w-full flex justify-start">
                             <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                                <Select
-                                    placeholder="Pelanggan"
-                                    size="large"
-                                    style={{
-                                        width: "100%",
-                                        marginRight: "10px",
-                                    }}
-                                >
-                                    {/*{locations.map((element) => {*/}
-                                    {/*  return (*/}
-                                    <Select.Option>
-                                        Pelanggan
-                                    </Select.Option>
-                                    {/*  );*/}
-                                    {/*})}*/}
-                                </Select>
+                              <Customer onChangeCustomer={(e) => setSearchParameters({ ...searchParameters, customer: e })} />
                             </div>
                             <div className="w-full md:w-1/4 px-3">
                                 <Select
@@ -192,18 +242,19 @@ function Piutang({ props }) {
                                         width: "100%",
                                         marginRight: "10px",
                                     }}
+                                    allowClear
+                                    onChange={(e) => setSearchParameters({ ...searchParameters, status_pembayaran: e })}
                                 >
-                                    {/*{locations.map((element) => {*/}
-                                    {/*  return (*/}
-                                    <Select.Option>
-                                        data
+                                    <Select.Option value="Dibayar">
+                                        Dibayar
                                     </Select.Option>
-                                    {/*  );*/}
-                                    {/*})}*/}
+                                    <Select.Option value="Belum Dibayar">
+                                        Belum Dibayar
+                                    </Select.Option>
                                 </Select>
                             </div>
                             <div className="w-full md:w-1/4 px-3">
-                                <DatePicker placeholder="Rentang Tanggal" size="large" style={{ width: "100%" }} />
+                              <RangePicker size="large" onChange={(e) => setSearchParameters({ ...searchParameters, range: e })} />
                             </div>
                             <div className="w-full md:w-1/4 mt-0 mb-2">
                                 <div className="float-right">
