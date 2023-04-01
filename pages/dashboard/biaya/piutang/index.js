@@ -9,6 +9,8 @@ import TitlePage from "@iso/components/TitlePage/TitlePage";
 import CreditTable from "@iso/components/ReactDataTable/Cost/CreditTable";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
 import Customer from "@iso/components/Form/AddCost/CustomerForm";
+import Area from "@iso/components/Form/AddCost/AreaForm";
+import Wilayah from "@iso/components/Form/AddCost/WilayahForm";
 import nookies from "nookies";
 
 Piutang.getInitialProps = async (context) => {
@@ -16,6 +18,9 @@ Piutang.getInitialProps = async (context) => {
 
     const req = await fetchData(cookies);
     const user = await req.json();
+
+    const reqDataUserSales = await fetchUserSales(cookies);
+    const dataUserSales = await reqDataUserSales.json();
 
     const reqLocation = await fetchLocation(cookies);
     const locations = await reqLocation.json();
@@ -26,6 +31,7 @@ Piutang.getInitialProps = async (context) => {
     return {
       props: {
         user,
+        dataUserSales,
         locations,
         piutang,
       },
@@ -34,6 +40,20 @@ Piutang.getInitialProps = async (context) => {
 
 const fetchData = async (cookies) => {
     const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
+};
+
+const fetchUserSales = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/users?populate=deep&filters[role][name][$eq]=Sales&?filters[role][type][$eq]=Sales";
     const options = {
         method: "GET",
         headers: {
@@ -78,10 +98,11 @@ function Piutang({ props }) {
     const user = props.user;
     const locations = props.locations.data;
     const data = props.piutang;
+    const dataUserSales = props.dataUserSales;
     const router = useRouter();
     const [piutang, setPiutang] = useState(data);
     const [supplier, setSupplier] = useState();
-    const [searchParameters, setSearchParameters] = useState({}); console.log("data piutang", piutang);
+    const [searchParameters, setSearchParameters] = useState({});
 
     // Range Picker
     const { RangePicker } = DatePicker;
@@ -169,21 +190,9 @@ function Piutang({ props }) {
 
         for (const key in searchParameters) {
 
-          //if (key === "supplier" && searchParameters[key] !== null) {
-          //  query += `filters[${key}\][id]=${searchParameters[key].id}&`;
-          //} else { query += ""; }
-          //if (key === "customer" && searchParameters[key] !== null) { console.log("search", searchParameters[key]);
-
-          //  for (const idPiutang in piutang) {
-          //    var details = piutang[idPiutang]?.attributes?.credit_details?.data;
-          //    for (const idDetail in details) {
-          //      var id = details[idDetail].id;
-          //      query += `filters[credit_details[${idDetail}]\]`;
-          //    } 
-          //  }
-
-          //  //query += `filters[${key}\][id]=${searchParameters[key].id}&`;
-          //} else { query += ""; }
+          if (key === "customer" && searchParameters[key] !== null) {
+            query += `filters[credit_details][customer][id]=${searchParameters[key].id}&`;
+          } else { query += ""; }
 
           if (key === "status_pembayaran") {
             if (searchParameters[key] !== undefined) {
@@ -198,6 +207,15 @@ function Piutang({ props }) {
             query += `filters[tanggal][$gte]=${startDate}&filters[tanggal][$lte]=${endDate}`;
           } else { query += ""; }
 
+          if (key === "sales" && searchParameters[key] !== undefined) {
+            query += `filters[credit_details][customer][sales_name]=${searchParameters[key]}&`;
+          } else { query += ""; }
+
+          if (key === "area" || key === "wilayah") {
+            if (searchParameters[key] !== null) {
+              query += `filters[credit_details][customer][${key}][id]=${searchParameters[key].id}&`;
+            } else { query += ""; }
+          } else { query += ""; }
         }
 
         const endpoint = process.env.NEXT_PUBLIC_URL + "/credits?populate=deep&" + query;
@@ -215,7 +233,7 @@ function Piutang({ props }) {
         const res = await req.json();
 
         setPiutang(res);
-        console.log("endpoint", endpoint, res, process.env.NEXT_PUBLIC_URL);
+        //console.log("endpoint", endpoint, res);
       }
 
       searchQuery();
@@ -270,57 +288,28 @@ function Piutang({ props }) {
                         <div className="w-full flex justify-start -mt-6">
                             <div className="w-full md:w-1/4 px-3">
                                 <Select
+                                    size="large"
+                                    style={{
+                                        width: "100%",
+                                    }}
                                     placeholder="Sales"
-                                    size="large"
-                                    style={{
-                                        width: "100%",
-                                        marginRight: "10px",
-                                    }}
+                                    allowClear
+                                    onChange={(e) => setSearchParameters({ ...searchParameters, sales: e })}
                                 >
-                                    {/*{locations.map((element) => {*/}
-                                    {/*  return (*/}
-                                    <Select.Option>
-                                        data
-                                    </Select.Option>
-                                    {/*  );*/}
-                                    {/*})}*/}
+                                    {dataUserSales?.map((element) => {
+                                        return (
+                                            <Select.Option value={element.name} key={element.id}>
+                                                {element.name}
+                                            </Select.Option>
+                                        );
+                                    })}
                                 </Select>
                             </div>
                             <div className="w-full md:w-1/4 px-3">
-                                <Select
-                                    placeholder="Area"
-                                    size="large"
-                                    style={{
-                                        width: "100%",
-                                        marginRight: "10px",
-                                    }}
-                                >
-                                    {/*{locations.map((element) => {*/}
-                                    {/*  return (*/}
-                                    <Select.Option>
-                                        data
-                                    </Select.Option>
-                                    {/*  );*/}
-                                    {/*})}*/}
-                                </Select>
+                                <Area onChangeArea={(e) => setSearchParameters({ ...searchParameters, area: e })} />
                             </div>
                             <div className="w-full md:w-1/4 px-3">
-                                <Select
-                                    placeholder="Wilayah"
-                                    size="large"
-                                    style={{
-                                        width: "100%",
-                                        marginRight: "10px",
-                                    }}
-                                >
-                                    {/*{locations.map((element) => {*/}
-                                    {/*  return (*/}
-                                    <Select.Option>
-                                        data
-                                    </Select.Option>
-                                    {/*  );*/}
-                                    {/*})}*/}
-                                </Select>
+                                <Wilayah onChangeWilayah={(e) => setSearchParameters({ ...searchParameters, wilayah: e })} />
                             </div>
                             <div className="w-full md:w-1/4 mt-0 mb-2">
                                 <div className="float-right">
