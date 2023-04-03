@@ -65,6 +65,7 @@ export default function ReactDataTable({
         <div></div>
       ) : (
         <button
+          hidden={row.attributes.purchasing?.data ? true : false}
           onClick={() => onUpdate(row)}
           className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
         >
