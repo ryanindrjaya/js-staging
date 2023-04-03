@@ -13,10 +13,19 @@ import { useRouter } from "next/router";
 
 const Tambah = ({ props }) => {
   const [form] = Form.useForm();
+  const user = props.user;
   const [loading, setLoading] = useState(false);
   const [selectLocations, setSelectLocation] = useState({});
+  const { TextArea } = Input;
   const cookies = nookies.get(null, "token");
   const router = useRouter();
+
+  var today = new Date();
+  var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
+  var yyyy = today.getFullYear();
+  // NO Akun
+  var noAkun = String(props.akun?.meta?.pagination.total + 1).padStart(3, "0");
+  const [kodeAkun, setKodeAkun] = useState(`AH/ET/${user.id}/${noAkun}/${mm}/${yyyy}`);
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -108,6 +117,29 @@ const Tambah = ({ props }) => {
               <div className="flex flex-wrap -mx-3 mb-6">
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
                   <Form.Item
+                    name="kode"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Kode akun tidak boleh kosong!",
+                      },
+                    ]}
+                    initialValue={kodeAkun}
+                  >
+                    <Input
+                      style={{ height: "50px" }}
+                      prefix={
+                        <ShopOutlined
+                          style={{ fontSize: "150%" }}
+                          className="site-form-item-icon mr-5"
+                        />
+                      }
+                      placeholder="Kode Akun"
+                    />
+                  </Form.Item>
+                </div>
+                <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
+                  <Form.Item
                     name="nama"
                     rules={[
                       {
@@ -175,6 +207,12 @@ const Tambah = ({ props }) => {
                 </Select>
               </Form.Item>
 
+              <div className="w-full mt-8 flex justify-between">
+                <Form.Item name="deskripsi" className="w-full mx-2">
+                  <TextArea rows={4} placeholder="Deskripsi" />
+                </Form.Item>
+              </div>
+
               <Form.Item>
                 {loading ? (
                   <div className=" flex float-left ml-3">
@@ -201,6 +239,11 @@ Tambah.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   let data;
 
+  const req = await fetchData(cookies);
+  const user = await req.json();
+
+  const reqAkun = await fetchAkun(cookies);
+  const akun = await reqAkun.json();
   //const req = await fetchData(cookies, "/users-permissions/roles");
   //data = await req.json();
 
@@ -220,9 +263,37 @@ Tambah.getInitialProps = async (context) => {
   return {
     props: {
       data,
+      user,
+      akun
       //locations: resLocations,
     },
   };
+};
+
+const fetchData = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=*";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+    const req = await fetch(endpoint, options);
+    return req;
+};
+
+const fetchAkun = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts?populate=deep";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+    const req = await fetch(endpoint, options);
+    return req;
 };
 
 //const fetchData = async (cookies, url) => {

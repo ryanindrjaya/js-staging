@@ -85,6 +85,7 @@ export default function Area({ onChangeArea }) {
           //]}
         >
           <Select
+            allowClear
             size="large"
             showSearch
             placeholder="Pilih Area"

@@ -85,6 +85,7 @@ export default function Wilayah({ onChangeWilayah }) {
           //]}
         >
           <Select
+            allowClear
             size="large"
             showSearch
             placeholder="Pilih Wilayah"
