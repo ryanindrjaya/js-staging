@@ -691,9 +691,9 @@ function Tambah({ props }) {
   }, [additionalFee]);
 
   useEffect(() => {
-    if (listId.length > 0) {
-      createOrder(dataValues, listId);
-    }
+    // if (listId.length > 0) {
+    //   createOrder(dataValues, listId);
+    // }
   }, [listId]);
 
   useEffect(() => {
