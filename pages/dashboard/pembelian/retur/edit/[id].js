@@ -314,6 +314,7 @@ function Retur({ props }) {
 
   const onFinish = async (values) => {
     setLoading(true);
+    console.log("values", values);
     const isShowingPopup = checkReturQty(values);
     if (isShowingPopup) {
       setLoading(false);
@@ -841,26 +842,6 @@ function Retur({ props }) {
               <div className="flex justify-end">
                 <p className="font-bold">
                   Total Harga : {formatterTotal.format(totalPrice)}{" "}
-                </p>
-              </div>
-              <div className="flex justify-end mt-5">
-                <p className="font-bold">
-                  Total LPB :{" "}
-                  {formatter.format(getPaymentRemaining().LPBPayment ?? 0)}{" "}
-                </p>
-              </div>
-              <div className="flex justify-end">
-                <p className="font-bold text-green-600">
-                  Pembayaran Sebelumnya :{" "}
-                  {formatter.format(getPaymentRemaining().returPayment ?? 0)}{" "}
-                </p>
-              </div>
-              <div className="flex justify-end">
-                <p className="font-bold text-red-400">
-                  Sisa Pembayaran :{" "}
-                  {formatter.format(
-                    getPaymentRemaining().returPaymentRemaining ?? 0
-                  )}{" "}
                 </p>
               </div>
               <Form.Item name="catatan">

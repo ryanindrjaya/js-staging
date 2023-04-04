@@ -23,6 +23,7 @@ export default function ReactDataTable({
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [editStatus, setEditStatus] = useState(false);
+  
 
   const { TextArea } = Input;
   var formatter = new Intl.NumberFormat("id-ID", {
@@ -92,10 +93,23 @@ export default function ReactDataTable({
       setConfirmLoading(false);
     }, 2000);
   };
+
+
   const handleCancel = () => {
     console.log("Clicked cancel button");
     setOpen(false);
     //this.myFormRef.reset();
+  };
+
+  const openModal = (id) => {
+    router.replace(
+      {
+        pathname: "/dashboard/pembelian/retur",
+        query: { id: id },
+      },
+      undefined,
+      { shallow: true }
+    );
   };
 
   const content = (row) => (
@@ -310,6 +324,8 @@ export default function ReactDataTable({
       data={data.data}
       pagination
       noDataComponent={"Belum ada data Retur Pembelian"}
+      highlightOnHover
+      onRowClicked={(row) => openModal(row.id)}
     />
   );
 }
