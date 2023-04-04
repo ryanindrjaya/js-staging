@@ -2,7 +2,8 @@ import DataTable from "react-data-table-component";
 import AlertDialog from "../../Alert/Alert";
 import { Input, InputNumber, Select, Form, Row, DatePicker } from "antd";
 import { useDispatch } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import nookies from "nookies";
 
 export default function ReactDataTable({
   calculatePriceAfterDisc,
@@ -15,8 +16,12 @@ export default function ReactDataTable({
   locProduct,
   expProduct,
   batch,
+  onSelectLocation,
+  stokString,
 }) {
   const dispatch = useDispatch();
+
+  const cookies = nookies.get(null, "token");
 
   useEffect(() => {
     console.log("products", products);
@@ -505,12 +510,11 @@ export default function ReactDataTable({
     },
     {
       name: "Stok Gudang",
-      width: "150px",
+      width: "300px",
       selector: (row, idx) => {
-        var defaultStock = 0;
         return (
           <div className="disabled:bg-white italic text-gray-500">
-            {defaultStock == 0 ? "Pilih Gudang" : defaultStock}
+            {stokString?.[idx] ?? "Pilih Gudang"}
           </div>
         );
       },
@@ -520,9 +524,6 @@ export default function ReactDataTable({
       width: "250px",
       sortable: true,
       selector: (row, idx) => {
-        var defaultLoc = null;
-        if (locProduct) defaultLoc = locProduct[idx]?.data.id;
-
         return (
           <>
             <Form.Item
@@ -537,13 +538,13 @@ export default function ReactDataTable({
               noStyle
             >
               <Select
+                onSelect={(e) => onSelectLocation(e, row, idx)}
                 placeholder="Pilih Lokasi Produk"
                 size="normal"
                 style={{
                   width: "200px",
                   marginRight: "10px",
                 }}
-                defaultValue={defaultLoc}
               >
                 {locations.map((element) => {
                   return (

@@ -349,7 +349,7 @@ export default function permintaanBarang() {
       });
       return;
     }
-
+    values.no_referensi = await fetchLatestNoReferensi();
     values.date = values?.date?.format("YYYY-MM-DD") || moment().format("YYYY-MM-DD");
     values.location_sender = selectedLocation1?.id;
     values.location_recipient = selectedLocation2?.id;
@@ -406,6 +406,7 @@ export default function permintaanBarang() {
         });
         setSelectedLocation1(null);
         setSelectedLocation2(null);
+        await fetchLatestNoReferensi();
       } else {
         console.log("response", response);
         notification["error"]({
@@ -435,39 +436,42 @@ export default function permintaanBarang() {
     });
   };
 
-  useEffect(() => {
-    // get latest no_referensi
-    async function fetchLatestNoReferensi() {
-      const endpoint = `${process.env.NEXT_PUBLIC_URL}/product-requests?sort[0]=id:desc&pagination[limit]=1`;
-      const headers = {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      };
+  // get latest no_referensi
+  async function fetchLatestNoReferensi() {
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/product-requests?sort[0]=id:desc&pagination[limit]=1`;
+    const headers = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    };
 
-      const response = await fetch(endpoint, headers)
-        .then((res) => {
-          return res.json();
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+    const response = await fetch(endpoint, headers)
+      .then((res) => {
+        return res.json();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
 
-      if (response) {
-        const latestId = response.data?.[0]?.id || 1;
-        const latestNoReferensi = `MT/${String(latestId).padStart(3, "0")}/${moment().format(
-          "DD/MM/YYYY"
-        )}`;
-        form.setFieldsValue({
-          no_referensi: latestNoReferensi,
-        });
-      }
-
-      console.log("response from fetchLatestNoReferensi", response);
+    if (response) {
+      const latestDaata = response.data?.[0];
+      const no = parseInt(latestDaata?.attributes?.no_referensi?.split("/")?.[1] || 0) + 1;
+      console.log("no", no);
+      const latestNoReferensi = `MT/${String(no).padStart(3, "0")}/${moment().format(
+        "DD/MM/YYYY"
+      )}`;
+      form.setFieldsValue({
+        no_referensi: latestNoReferensi,
+      });
+      return latestNoReferensi;
     }
 
+    console.log("response from fetchLatestNoReferensi", response);
+  }
+
+  useEffect(() => {
     fetchLatestNoReferensi();
   }, []);
 
@@ -680,7 +684,15 @@ export default function permintaanBarang() {
                     </div>
                   </div>
 
-                  <p className="uppercase text-[#036B82] font-bold text-xl mb-1">Produk Transfer</p>
+                  <span className="uppercase text-[#036B82] font-bold text-xl mb-1">
+                    Produk Transfer
+                  </span>
+                  {products.length > 0 && (
+                    <span className="text-xs text-gray-400 ml-3">
+                      *Jika terdapat unit yang tidak muncul, kemungkinan unit produk kosong di
+                      gudang pengirim
+                    </span>
+                  )}
                   <Select
                     disabled={!selectedLocation1}
                     onSearch={(value) => {
@@ -689,8 +701,16 @@ export default function permintaanBarang() {
                     }}
                     onSelect={(value) => {
                       const selectedProduct = JSON.parse(value);
-                      selectedProduct.unique_id = generateRandomId();
-                      setProducts([...products, selectedProduct]);
+
+                      if (selectedProduct.available_units.length > 0) {
+                        selectedProduct.unique_id = generateRandomId();
+                        setProducts([...products, selectedProduct]);
+                      } else {
+                        notification["error"]({
+                          message: "Produk kosong",
+                          description: "Stok produk kosong di gudang pengirim",
+                        });
+                      }
                     }}
                     value={null}
                     size="large"

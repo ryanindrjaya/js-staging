@@ -323,8 +323,8 @@ export default function Riwayat({ defaultOptions }) {
                       className="uppercase child text-center"
                       title={unit}
                       render={(_, record) => {
-                        return record.detail?.unit === unit && record.detail?.type === "Masuk"
-                          ? record.detail?.qty
+                        return record.detail?.type === "Masuk" && record.detail?.qty?.[unit] > 0
+                          ? record.detail?.qty?.[unit]
                           : "";
                       }}
                       dataIndex={unit}
@@ -338,8 +338,8 @@ export default function Riwayat({ defaultOptions }) {
                       className="uppercase child text-center"
                       title={unit}
                       render={(_, record) => {
-                        return record.detail?.unit === unit && record.detail?.type === "Keluar"
-                          ? record.detail?.qty
+                        return record.detail?.type === "Keluar" && record.detail?.qty?.[unit] > 0
+                          ? record.detail?.qty?.[unit]
                           : "";
                       }}
                       dataIndex={unit}
@@ -353,7 +353,9 @@ export default function Riwayat({ defaultOptions }) {
                       className="uppercase child text-center"
                       title={unit}
                       render={(_, record) => {
-                        return record.detail?.remaining_stock?.[unit];
+                        return record.detail?.remaining_stock?.[unit] > 0
+                          ? record.detail?.remaining_stock?.[unit]
+                          : "";
                       }}
                       dataIndex={unit}
                       key={unit}
@@ -376,11 +378,11 @@ export default function Riwayat({ defaultOptions }) {
       ) : (
         <>
           <Head>
-            <title>Riwayat Stok</title>
+            <title>Riwayat Inventory</title>
           </Head>
           <DashboardLayout>
             <LayoutWrapper>
-              <TitlePage titleText={"Riwayat Stok"} />
+              <TitlePage titleText={"Riwayat Inventory"} />
               <LayoutContent>
                 <div className="lg:w-3/4 w-full gap-3 grid grid-cols-3 mb-3">
                   <Select
@@ -510,9 +512,9 @@ export default function Riwayat({ defaultOptions }) {
                                 className="uppercase child text-center"
                                 title={unit}
                                 render={(_, record) => {
-                                  return record.detail?.unit === unit &&
-                                    record.detail?.type === "Masuk"
-                                    ? record.detail?.qty
+                                  return record.detail?.type === "Masuk" &&
+                                    record.detail?.qty?.[unit] > 0
+                                    ? record.detail?.qty?.[unit]
                                     : "";
                                 }}
                                 dataIndex={unit}
@@ -526,9 +528,9 @@ export default function Riwayat({ defaultOptions }) {
                                 className="uppercase child text-center"
                                 title={unit}
                                 render={(_, record) => {
-                                  return record.detail?.unit === unit &&
-                                    record.detail?.type === "Keluar"
-                                    ? record.detail?.qty
+                                  return record.detail?.type === "Keluar" &&
+                                    record.detail?.qty?.[unit] > 0
+                                    ? record.detail?.qty?.[unit]
                                     : "";
                                 }}
                                 dataIndex={unit}
@@ -542,7 +544,9 @@ export default function Riwayat({ defaultOptions }) {
                                 className="uppercase child text-center"
                                 title={unit}
                                 render={(_, record) => {
-                                  return record.detail?.remaining_stock?.[unit];
+                                  return record.detail?.remaining_stock?.[unit] > 0
+                                    ? record.detail?.remaining_stock?.[unit]
+                                    : "";
                                 }}
                                 dataIndex={unit}
                                 key={unit}

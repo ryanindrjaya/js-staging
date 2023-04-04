@@ -285,7 +285,7 @@ function Setting({ props }) {
                                 onPageChange={handlePageChange}
                                 //onChangeStatus={onChangeStatus}
                                 onChangeSetting={onChangeSetting}
-                            //user={user}
+                                //user={user}
                             />
 
                         </Form>

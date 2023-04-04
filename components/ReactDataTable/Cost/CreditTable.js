@@ -16,7 +16,7 @@ export default function ReactDataTable({
     onChangeStatus,
     user,
 }) {
-    const router = useRouter(); console.log("data table", data);
+    const router = useRouter();
     const { Option } = Select;
 
     const tagRed = process.env.TAG_RED;
@@ -121,7 +121,6 @@ export default function ReactDataTable({
             var salesName = "";
 
               for (const key in detail) {
-                console.log("data detail", key, detail[key]);
                 salesName += detail[key]?.attributes?.customer?.data?.attributes?.name +", ";
               }
 
