@@ -31,6 +31,10 @@ export default function ReactDataTable({
         });
     };
 
+    const edit = (row) => {
+      router.push("edittambahakun/" + row.id);
+    };
+
     const lihat = (row) => {
         openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
         //router.push("order_pembelian/print/" + row.id);
@@ -69,7 +73,34 @@ export default function ReactDataTable({
         },
     };
 
+    const content = (row) => (
+        <div>
+            <div>
+                <button
+                    onClick={() => edit(row)}
+                    className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+                >
+                    <EditOutlined className="mr-2 mt-0.5 float float-left" />
+                    Edit
+                </button>
+            </div>
+
+            <AlertDialog
+                onCancel={onCancel}
+                onConfirm={onConfirm}
+                title="Hapus Kategori"
+                message="Akun hutang yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
+                id={row.id}
+            />
+        </div>
+    );
+
     const columns = [
+        {
+          name: "Kode akun",
+          width: "180px",
+          selector: (row) => row.attributes?.kode ?? "-",
+        },
         {
           name: "Nama",
           width: "200px",
@@ -77,17 +108,22 @@ export default function ReactDataTable({
         },
         {
           name: "Saldo",
-          width: "200px",
+          width: "150px",
           selector: (row) => formatter.format( row.attributes?.saldo) ?? "-",
         },
         {
           name: "Tipe",
-          width: "120px",
+          width: "90px",
           selector: (row) => row.attributes?.type ?? "-",
         },
         {
+          name: "Deskripsi",
+          width: "230px",
+          selector: (row) => row.attributes?.deskripsi ?? "-",
+        },
+        {
           name: "Setting",
-          width: "170px",
+          width: "160px",
           selector: (row) => {
             var setting = "-";
 
@@ -118,13 +154,13 @@ export default function ReactDataTable({
             name: "Tindakan",
             width: "150px",
             selector: (row) => (
-                <AlertDialog
-                    onCancel={onCancel}
-                    onConfirm={onConfirm}
-                    title="Hapus Kategori"
-                    message="Akun hutang yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
-                    id={row.id}
-                />
+                <>
+                    <Popover content={content(row)} placement="bottom" trigger="click">
+                        <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
+                            Tindakan
+                        </button>
+                    </Popover>
+                </>
             ),
         },
     ];

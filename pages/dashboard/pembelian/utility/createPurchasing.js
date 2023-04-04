@@ -31,20 +31,14 @@ const CreateOrder = async (
   listId.forEach((element) => {
     tempProductListId.push(element);
   });
+  var supplierId = parseInt(
+    Number.isNaN(parseInt(values?.supplier_id)) ? supplier?.id : values?.supplier_id
+  );
 
-  var supplierId = {
-    id: parseInt(
-      Number.isNaN(parseInt(values?.supplier_id))
-        ? supplier?.id
-        : values?.supplier_id
-    ),
-  };
+  var locationId = parseInt(
+    Number.isNaN(parseInt(values?.location)) ? location?.id : values?.location
+  );
 
-  var locationId = {
-    id: parseInt(
-      Number.isNaN(parseInt(values?.location)) ? location?.id : values?.location
-    ),
-  };
 
   // only in purchasing
   delete values?.delivery_date;
@@ -56,10 +50,12 @@ const CreateOrder = async (
   values.purchasing_details = tempProductListId;
   values.purchase = parseInt(values?.no_po);
   values.location = locationId;
+
   values.date_purchasing = orderDate;
   values.status_pembayaran = "Belum Lunas";
   values.total_purchasing =
     grandTotal === 0 ? parseFloat(totalPrice) : parseFloat(grandTotal);
+
   values.DPP_active = values?.DPP_active === true ? "DPP" : null;
   values.returs = [];
 
@@ -74,11 +70,13 @@ const CreateOrder = async (
     data: values,
   };
 
+
   // get user creator
   const user = await getUserMe();
 
   data.data.supplier = supplierId;
   data.data.added_by = user.name;
+
 
   const req = await createData(data);
   const res = await req.json();
@@ -113,6 +111,8 @@ const createData = async (data) => {
   return req;
 };
 
+
+
 const getUserMe = async () => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me";
   const options = {
@@ -133,14 +133,15 @@ const openNotificationWithIcon = (type) => {
   if (type === "error") {
     notification[type]({
       message: "Gagal menambahkan data",
+
       description:
         "Produk gagal ditambahkan 2. Silahkan cek NO PO atau kelengkapan data lainnya",
+
     });
   } else if (type === "success") {
     notification[type]({
       message: "Berhasil menambahkan data",
-      description:
-        "Produk berhasil ditambahkan. Silahkan cek pada halaman Pembelian Barang",
+      description: "Produk berhasil ditambahkan. Silahkan cek pada halaman Pembelian Barang",
     });
   }
 };

@@ -76,14 +76,9 @@ export default function Customer({ onChangeCustomer }) {
         <Form.Item
           name="customer"
           style={{ width: "100%" }}
-          rules={[
-            {
-              required: true,
-              message: "Customer tidak boleh kosong!",
-            },
-          ]}
         >
           <Select
+            allowClear
             size="large"
             showSearch
             placeholder="Pilih Customer"

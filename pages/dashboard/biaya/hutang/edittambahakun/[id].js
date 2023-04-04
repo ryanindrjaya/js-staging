@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import DebtTable from "../../../../components/ReactDataTable/Cost/DebtAccountTable";
+import DebtTable from "@iso/components/ReactDataTable/Cost/DebtAccountTable";
 import { UserOutlined, ShopOutlined, BankOutlined } from "@ant-design/icons";
 import { Button, Select, Form, Input, InputNumber, notification } from "antd";
 import nookies from "nookies";
@@ -15,29 +15,25 @@ import { useRouter } from "next/router";
 const Tambah = ({ props }) => {
   const [form] = Form.useForm();
   const user = props.user;
+  const akun = props.akun;
   const [loading, setLoading] = useState(false);
-  const [selectLocations, setSelectLocation] = useState({});
   const { TextArea } = Input;
   const cookies = nookies.get(null, "token");
   const router = useRouter();
 
-  var today = new Date();
-  var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
-  var yyyy = today.getFullYear();
   // NO Akun
-  var noAkun = String(props.akun?.meta?.pagination.total + 1).padStart(3, "0");
-  const [kodeAkun, setKodeAkun] = useState(`AH/ET/${user.id}/${noAkun}/${mm}/${yyyy}`);
+  const [kodeAkun, setKodeAkun] = useState(akun.data.attributes.kode);
 
   const onFinish = async (values) => {
     setLoading(true);
-    values.setting = false;
+    values.setting = akun.data.attributes.setting;
     var data = { data: values};
 
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts/"+ akun.data.id;
     const JSONdata = JSON.stringify(data);
 
     const options = {
-      method: "POST",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: "Bearer " + cookies.token,
@@ -52,20 +48,20 @@ const Tambah = ({ props }) => {
       form.resetFields();
       openNotificationWithIcon(
         "success",
-        "Berhasil menambah data",
-        "Akun hutang telah berhasil ditambahkan. Silahkan cek kembali akun hutang"
+        "Berhasil mengubah data",
+        "Akun hutang telah berhasil diubah. Silahkan cek kembali akun hutang"
       );
       router.replace("/dashboard/biaya/hutang/setting");
     } else {
       //res.error?.details.errors.map((error) => {
       //  const ErrorMsg = error.path[0];
-        toast.error("Tidak dapat menambahkan Akun Hutang", {
+        toast.error("Tidak dapat mengubah Akun Hutang", {
           position: toast.POSITION.TOP_RIGHT,
         });
         openNotificationWithIcon(
             "error",
-            "Tidak dapat menambah data",
-            "Akun hutang tidak berhasil ditambahkan. Silahkan cek kembali akun hutang"
+            "Tidak dapat mengubah data",
+            "Akun hutang tidak berhasil diubah. Silahkan cek kembali akun hutang"
         );
       //});
 
@@ -81,22 +77,14 @@ const Tambah = ({ props }) => {
     });
   };
 
-  //const getRole = async (roleId) => {
-  //  const endpoint =
-  //    process.env.NEXT_PUBLIC_URL + "/users-permissions/roles/" + roleId;
-  //  const options = {
-  //    method: "GET",
-  //    headers: {
-  //      "Content-Type": "application/json",
-  //      Authorization: "Bearer " + cookies.token,
-  //    },
-  //  };
-
-  //  const req = await fetch(endpoint, options);
-  //  const res = await req.json();
-
-  //  return res.role;
-  //};
+  useEffect(() => {
+    form.setFieldsValue({
+      nama: akun.data.attributes.nama,
+      saldo: parseInt(akun.data.attributes.saldo),
+      type: akun.data.attributes.type,
+      deskripsi: akun.data.attributes.deskripsi,
+    });
+  }, []);
 
   return (
     <>
@@ -238,35 +226,18 @@ const Tambah = ({ props }) => {
 
 Tambah.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
-  let data;
+  const { id } = context.query;
 
   const req = await fetchData(cookies);
   const user = await req.json();
 
-  const reqAkun = await fetchAkun(cookies);
+  const reqAkun = await fetchAkun(cookies, id);
   const akun = await reqAkun.json();
-  //const req = await fetchData(cookies, "/users-permissions/roles");
-  //data = await req.json();
-
-  //const reqLocations = await fetchData(cookies, "/locations");
-  //const resLocations = await reqLocations.json();
-
-  //if (req.status !== 200) {
-  //  context.res.writeHead(302, {
-  //    Location: "/signin?session=false",
-  //    "Content-Type": "text/html; charset=utf-8",
-  //  });
-  //  context?.res?.end();
-
-  //  return {};
-  //}
 
   return {
     props: {
-      data,
       user,
       akun
-      //locations: resLocations,
     },
   };
 };
@@ -285,8 +256,8 @@ const fetchData = async (cookies) => {
     return req;
 };
 
-const fetchAkun = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=deep";
+const fetchAkun = async (cookies, id) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts/"+ id;
     const options = {
         method: "GET",
         headers: {
@@ -298,18 +269,5 @@ const fetchAkun = async (cookies) => {
     const req = await fetch(endpoint, options);
     return req;
 };
-//const fetchData = async (cookies, url) => {
-//  const endpoint = process.env.NEXT_PUBLIC_URL + url;
-//  const options = {
-//    method: "GET",
-//    headers: {
-//      "Content-Type": "application/json",
-//      Authorization: "Bearer " + cookies.token,
-//    },
-//  };
-
-//  const req = await fetch(endpoint, options);
-//  return req;
-//};
 
 export default Tambah;

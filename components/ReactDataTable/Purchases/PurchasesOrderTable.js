@@ -75,6 +75,7 @@ export default function ReactDataTable({
       )}
 
       <AlertDialog
+        hidden={row.attributes.purchasing.data ? true : false}
         onCancel={onCancel}
         onConfirm={onConfirm}
         title="Hapus Kategori"
@@ -133,11 +134,12 @@ export default function ReactDataTable({
       name: <div className="ml-6">Status</div>,
       width: "180px",
       selector: (row) => {
+        console.log(row);
         return (
           <Select
             defaultValue={row.attributes.status}
             bordered={false}
-            disabled /*={row.attributes.status === "Diterima" || row.attributes.status === "Selesai"}*/
+            disabled={row.attributes.status === "Diterima" || row.attributes.status === "Selesai"}
             onChange={(e) => onChangeStatus(e, row)}
             style={{ width: 140 }}
           >

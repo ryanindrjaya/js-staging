@@ -365,6 +365,7 @@ function Piutang({ props }) {
     values.area = area;
     values.wilayah = wilayah;
     values.document = document;
+    values.status_pembayaran = "Dibayar";
     await createData(sisaHutang, values, listId, form, router, "/credits/", "piutang", akunPiutang);
   };
 
@@ -739,7 +740,13 @@ function Piutang({ props }) {
                   <Form.Item
                     name="tanggal"
                     >
-                    <DatePicker placeholder="Tanggal Penagihan" size="large" style={{ width: "100%" }} />
+                    <DatePicker 
+                      rules={[
+                        {
+                          required: true,
+                          message: "Tanggal penagihan tidak boleh kosong!",
+                        },
+                      ]} placeholder="Tanggal Penagihan" size="large" style={{ width: "100%" }} />
                   </Form.Item>
                 </div>
               </div>
