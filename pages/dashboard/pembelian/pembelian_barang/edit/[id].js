@@ -24,7 +24,7 @@ import {
   notification,
   Row,
 } from "antd";
-import createDetailPurchasing from "../../utility/createDetail";
+import createDetailPurchasing from "../../utility/createPurchasingDetail";
 import createPurchasing from "../../utility/createPurchasing";
 import updateOrder from "../../utility/updateOrder";
 import updateProduct from "../../utility/updateProduct";
