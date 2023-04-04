@@ -2,8 +2,8 @@ import React from "react";
 import nookies from "nookies";
 import * as moment from "moment";
 
-var tempListId = [];
 const cookies = nookies.get(null, "token");
+let tempListId = [];
 
 const getIndexUnit = (data, idx) => {
   var unitIndex = 1;
@@ -27,6 +27,8 @@ const createDetailOrder = async (
   url,
   createMasterData
 ) => {
+  tempListId = [];
+
   await Promise.all(
     products.productList.map(async (element, idx) => {
       try {
@@ -91,8 +93,6 @@ const createDetailOrder = async (
     })
   );
 
-  console.log("test", tempListId);
-
   // create masterData
   await createMasterData(values, tempListId);
 };
@@ -144,7 +144,6 @@ const POSTPurchaseDetail = async (
     body: JSONdata,
   };
 
-  console.log(JSONdata);
   const req = await fetch(endpoint, options);
   const res = await req.json();
 

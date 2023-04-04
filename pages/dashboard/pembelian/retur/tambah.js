@@ -1,5 +1,5 @@
 import Head from "next/head";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, createContext } from "react";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
@@ -11,7 +11,7 @@ import {
   DatePicker,
   Button,
   message,
-  Upload,
+  Modal,
   Select,
   Spin,
   notification,
@@ -54,7 +54,7 @@ Retur.getInitialProps = async (context) => {
   }
 
   return {
-    props: {
+    props: { 
       location,
       returs,
       dataLPB,
@@ -138,6 +138,14 @@ function Retur({ props }) {
   const [listId, setListId] = useState([]);
   const router = useRouter();
   const [lpbData, setLpbData] = useState();
+  const [dataGudang, setDataGudang] = useState();
+  const [stokString, setStokString] = useState({});
+
+  const [modal, contextHolder] = Modal.useModal();
+  const [isTaxActive, setIsTaxActive] = useState(true);
+
+  const ReachableContext = createContext(null);
+  const UnreachableContext = createContext(null);
 
   //temp
   const tempList = [];
@@ -164,20 +172,157 @@ function Retur({ props }) {
     maximumFractionDigits: 2,
   });
 
+  const onSelectLocation = async (locationId, dataProduct, idx) => {
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/inventories?populate=location&filters[location][id]=${locationId}&filters[product][id]=${dataProduct.id}`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    if (res.data.length > 0) {
+      const product = dataProduct.attributes;
+      const stok = res.data[0].attributes;
+      let stokGudang = "";
+      setDataGudang({
+        ...dataGudang,
+        [idx]: res.data[0].attributes,
+      });
+
+      const unit1 = product.unit_1
+        ? stok.stock_unit_1 + " " + product.unit_1
+        : "";
+      const unit2 = product.unit_2
+        ? stok.stock_unit_2 + " " + product.unit_2
+        : "";
+      const unit3 = product.unit_3
+        ? stok.stock_unit_3 + " " + product.unit_3
+        : "";
+      const unit4 = product.unit_4
+        ? stok.stock_unit_4 + " " + product.unit_4
+        : "";
+      const unit5 = product.unit_5
+        ? stok.stock_unit_5 + " " + product.unit_5
+        : "";
+
+      stokGudang =
+        unit1 + " " + unit2 + " " + unit3 + " " + unit4 + " " + unit5;
+
+      setStokString({
+        ...stokString,
+        [idx]: stokGudang,
+      });
+    } else {
+      const product = dataProduct.attributes;
+      let stokGudang = "";
+      setDataGudang({
+        ...dataGudang,
+        [idx]: {},
+      });
+
+      const unit1 = product.unit_1 ? "0" + " " + product.unit_1 : "";
+      const unit2 = product.unit_2 ? "0" + " " + product.unit_2 : "";
+      const unit3 = product.unit_3 ? "0" + " " + product.unit_3 : "";
+      const unit4 = product.unit_4 ? "0" + " " + product.unit_4 : "";
+      const unit5 = product.unit_5 ? "0" + " " + product.unit_5 : "";
+
+      stokGudang =
+        unit1 + " " + unit2 + " " + unit3 + " " + unit4 + " " + unit5;
+
+      setStokString({
+        ...stokString,
+        [idx]: stokGudang,
+      });
+    }
+  };
+
+  const checkReturQty = (values) => {
+    let popUpDialog = false;
+    let cannotBeReturnedProducts = [];
+    console.log("ishowing dialog", popUpDialog);
+    // console.log("test for looping", values);
+    // console.log("test for looping", dataGudang);
+    // console.log("test for looping", products.productList);
+
+    for (const indextest in products.productList) {
+      console.log("test for looping", products.productList[indextest]);
+    }
+
+    for (let index in dataGudang) {
+      const qty = values?.jumlah_qty?.[index] ?? 1;
+      const unitIndex = values?.jumlah_option?.[index] ?? 1;
+      const productName = products.productList[index]?.attributes?.name;
+
+      const stokGudangUnit1 = dataGudang?.[index]?.stock_unit_1 ?? 0;
+      const stokGudangUnit2 = dataGudang?.[index]?.stock_unit_2 ?? 0;
+      const stokGudangUnit3 = dataGudang?.[index]?.stock_unit_3 ?? 0;
+      const stokGudangUnit4 = dataGudang?.[index]?.stock_unit_4 ?? 0;
+      const stokGudangUnit5 = dataGudang?.[index]?.stock_unit_5 ?? 0;
+
+      if (qty > eval(`stokGudangUnit${unitIndex}`)) {
+        let canBeReturned = false;
+        for (let i = unitIndex - 1; i >= 1; i--) {
+          if (eval(`stokGudangUnit${i}`) !== 0) {
+            canBeReturned = true;
+            break;
+          } else {
+            popUpDialog = true;
+            cannotBeReturnedProducts.push(productName);
+          }
+        }
+
+        if (!canBeReturned && productName !== undefined) {
+          popUpDialog = true;
+          cannotBeReturnedProducts.push(productName);
+        }
+      }
+    }
+
+    if (popUpDialog) {
+      Modal.error({
+        title: "Retur Gagal",
+        content: (
+          <div>
+            <p>
+              Item ini tidak bisa dilakukan retur. Silahkan cek kembali stok
+              gudang yang tersedia:
+            </p>
+            <ul>
+              {cannotBeReturnedProducts.map((product) => (
+                <li>{product === undefined ? "" : `- ${product}`} </li>
+              ))}
+            </ul>
+          </div>
+        ),
+      });
+    }
+
+    return popUpDialog;
+  };
+
   const onFinish = async (values) => {
     setLoading(true);
+    const isShowingPopup = checkReturQty(values);
+    if (isShowingPopup) {
+      setLoading(false);
+      return;
+    }
+
     const payment = getPaymentRemaining();
-    console.log("validate payment", totalPrice, payment.returPaymentRemaining, totalPrice > payment.returPaymentRemaining);
     if (totalPrice > payment.returPaymentRemaining) {
       notification["error"]({
         message: "Overprice",
-        description:
-        "Harga retur melebih dari Sisa pembayaran / Harga LPB",
+        description: "Harga retur melebih dari Sisa pembayaran / Harga LPB",
       });
       setLoading(false);
-      return
+      return;
     }
-    
+
     setDataValues(values);
     setLoading(false);
   };
@@ -226,7 +371,6 @@ function Retur({ props }) {
   };
 
   const getPaymentRemaining = () => {
-    console.log("get payment remaining");
     let returPayments = 0;
     let returPaymentRemaining = 0;
     const totalLPBPayment = lpbData?.attributes?.total_purchasing ?? 0;
@@ -359,23 +503,18 @@ function Retur({ props }) {
   };
 
   const getDPP = () => {
+    const isDPPActive = form.getFieldValue("DPP_PPN_active");
     var total = 0;
 
-    total = totalPrice / 1.11;
+    if (isDPPActive) total = totalPrice / 1.11;
 
     return total;
   };
 
   const getPPN = () => {
-    const isDPPActive = form.getFieldValue("pajak");
-
     var total = 0;
     let dpp = getDPP();
     total = dpp * 0.11;
-
-    if (isDPPActive !== "Pajak Pembelian") {
-      total = 0;
-    }
 
     return total;
   };
@@ -467,6 +606,27 @@ function Retur({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <SearchLPB supplier={supplier} handleSelect={setLpbData} />
                 </div>
+                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
+                  <Form.Item name="status" rules={[{
+                    required: true,
+                    message: "Status tidak boleh kosong!",
+                  }]}>
+                    <Select
+                      placeholder="Pilih Status"
+                      size="large"
+                      style={{
+                        width: "100%",
+                      }}
+                    >
+                      <Select.Option value="Draft" key="Draft">
+                        Draft
+                      </Select.Option>
+                      <Select.Option value="Selesai" key="Selesai">
+                        Selesai
+                      </Select.Option>
+                    </Select>
+                  </Form.Item>
+                </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0" hidden>
                   <Form.Item name="no_nota_supplier"></Form.Item>
                   <Form.Item name="tanggal_pembelian"></Form.Item>
@@ -492,14 +652,16 @@ function Retur({ props }) {
                     productSubTotal={productSubTotal}
                     locations={locations}
                     formObj={form}
+                    onSelectLocation={onSelectLocation}
+                    stokString={stokString}
                   />
                 </div>
               </div>
               <div className="flex justify-start md:justify-between">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    name="pajak"
-                    initialValue={"Pajak Pembelian"}
+                    name="DPP_PPN_active"
+                    initialValue={isTaxActive}
                     rules={[
                       {
                         required: true,
@@ -510,17 +672,15 @@ function Retur({ props }) {
                     <Select
                       placeholder="Pajak Pembelian"
                       size="large"
+                      onChange={setIsTaxActive}
                       style={{
                         width: "100%",
                       }}
                     >
-                      <Select.Option
-                        value="Pajak Pembelian"
-                        key="Pajak Pembelian"
-                      >
+                      <Select.Option value={true} key="Pajak Pembelian">
                         Pajak Pembelian
                       </Select.Option>
-                      <Select.Option value="Non Pajak" key="Non Pajak">
+                      <Select.Option value={false} key="Non Pajak">
                         Non Pajak
                       </Select.Option>
                     </Select>
@@ -571,21 +731,26 @@ function Retur({ props }) {
               <Form.Item name="catatan">
                 <TextArea rows={4} placeholder="Catatan Tambahan" />
               </Form.Item>
-              <Form.Item className="mt-5">
-                {loading ? (
-                  <div className=" flex float-left ml-3 ">
-                    <Spin />
-                  </div>
-                ) : (
-                  <Button
-                    onClick={validateError}
-                    htmlType="submit"
-                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
-                  >
-                    Tambah
-                  </Button>
-                )}
-              </Form.Item>
+              <ReachableContext.Provider value="Light">
+                <Form.Item className="mt-5">
+                  {loading ? (
+                    <div className=" flex float-left ml-3 ">
+                      <Spin />
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={validateError}
+                      htmlType="submit"
+                      className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
+                    >
+                      Tambah
+                    </Button>
+                  )}
+                </Form.Item>
+                {contextHolder}
+
+                <UnreachableContext.Provider value="Bamboo" />
+              </ReachableContext.Provider>
             </Form>
           </LayoutContent>
         </LayoutWrapper>

@@ -24,7 +24,7 @@ import {
   notification,
   Row,
 } from "antd";
-import createDetailPurchasing from "../utility/createDetail";
+import createDetailPurchasing from "../utility/createPurchasingDetail";
 import createPurchasing from "../utility/createPurchasing";
 import updateOrder from "../utility/updateOrder";
 import updateProduct from "../utility/updateProduct";
@@ -317,7 +317,9 @@ function Tambah({ props }) {
     }
 
     const poData = row.attributes?.purchase?.data;
+
     const resPO = await changeStatusPO(poData?.id, trxStatus);
+
     if (resPO.data) {
       await changeStatusLPB(id, trxStatus);
     }
@@ -345,28 +347,12 @@ function Tambah({ props }) {
 
       const req = await fetch(endpoint, options);
       const res = await req.json();
-      if (req.status === 200) {
-        openNotificationWithIcon(
-          "success",
-          "Status PO berhasil dirubah",
-          "Status PO berhasil dirubah. Silahkan cek tabel PO"
-        );
-      } else {
-        openNotificationWithIcon(
-          "error",
-          "Status PO gagal dirubah 1",
-          "Status PO gagal dirubah. Silahkan cek log untuk error detail"
-        );
-      }
+      console.log("po update from lpb ", res);
 
       return res;
     } catch (error) {
       console.log(error);
-      openNotificationWithIcon(
-        "error",
-        "Status PO gagal dirubah 2",
-        "Status PO gagal dirubah. Silahkan cek log untuk error detail"
-      );
+      console.log("po update from lpb ", res);
 
       return null;
     }

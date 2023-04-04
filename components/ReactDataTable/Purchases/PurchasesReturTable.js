@@ -23,6 +23,7 @@ export default function ReactDataTable({
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [editStatus, setEditStatus] = useState(false);
+  
 
   const { TextArea } = Input;
   var formatter = new Intl.NumberFormat("id-ID", {
@@ -92,10 +93,23 @@ export default function ReactDataTable({
       setConfirmLoading(false);
     }, 2000);
   };
+
+
   const handleCancel = () => {
     console.log("Clicked cancel button");
     setOpen(false);
     //this.myFormRef.reset();
+  };
+
+  const openModal = (id) => {
+    router.replace(
+      {
+        pathname: "/dashboard/pembelian/retur",
+        query: { id: id },
+      },
+      undefined,
+      { shallow: true }
+    );
   };
 
   const content = (row) => (
@@ -134,22 +148,12 @@ export default function ReactDataTable({
       )}
 
       <div>
-        <button
-          //onClick={() => metodePembayaran(row)}
-          onClick={showModal}
-          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-        >
-          <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
-          Metode Pembayaran
-        </button>
-
         <Modal
           title="Pembayaran Retur Pembelian"
           open={open}
           onOk={handleOk}
           confirmLoading={confirmLoading}
           onCancel={handleCancel}
-          //ref={(modal) => this.myFormRef = modal}
           footer={[
             <button
               className="border border-cyan-700 rounded-md m-1 text-sm px-6 py-2"
@@ -247,20 +251,36 @@ export default function ReactDataTable({
       width: "150px",
       selector: (row) => formatMyDate(row.attributes?.tanggal_retur),
     },
-    //{
-    //  name: "NO PO",
-    //  width: "180px",
-    //  selector: (row) => row.attributes?.no_po ?? "-",
-    //},
     {
-      name: "NO Retur",
+      name: "Status",
+      width: "150px",
+      selector: (row) => {
+        if (row.attributes.status == "Selesai") {
+          return (
+            <span className="bg-green-400 text-white rounded-md px-2 py-1 text-xs">
+              {row.attributes.status}
+            </span>
+          );
+        } else {
+          return (
+            <span className="bg-yellow-400 text-white rounded-md px-2 py-1 text-xs">
+              {row.attributes.status}
+            </span>
+          );
+        }
+      },
+    },
+
+    {
+      name: "No Retur",
       width: "180px",
       selector: (row) => row.attributes?.no_retur ?? "-",
     },
     {
       name: "NO LPB",
       width: "180px",
-      //selector: (row) => row.attributes.purchasing.data.attributes?.no_purchasing ?? "-",
+      selector: (row) =>
+        row.attributes.purchasing?.data?.attributes?.no_purchasing ?? "-",
     },
     {
       name: "Lokasi",
@@ -273,113 +293,25 @@ export default function ReactDataTable({
       selector: (row) =>
         row.attributes?.supplier?.data?.attributes?.name ?? "-",
     },
-    //{
-    //  name: "Status Pembayaran",
-    //  width: "150px",
-    //  selector: (row) => {
-    //    var tempoDate = new Date(row.attributes?.date_purchasing);
-    //    var tempoTime = parseInt(row.attributes?.tempo_days ?? 0);
-    //    var today = new Date();
-    //    var isTempo = false;
-    //    var statusPembayaran = row.attributes?.status_pembayaran;
-    //    var purchasingHistory = row.attributes?.purchasing_payments.data;
 
-    //    if (row.attributes?.tempo_time === "Hari") {
-    //      tempoDate.setDate(tempoDate.getDate() + tempoTime);
-    //    } else {
-    //      tempoDate.setDate(tempoDate.getMonth() + tempoTime);
-    //    }
-
-    //    if (tempoDate < today) {
-    //      isTempo = true;
-    //    }
-
-    //    if (isTempo) {
-    //      if (statusPembayaran === "Belum Lunas") {
-    //        return <Tag color="red">Tempo</Tag>;
-    //      } else if (statusPembayaran === "Lunas") {
-    //        return <Tag color="green">Lunas</Tag>;
-    //      }
-    //    } else {
-    //      if (
-    //        statusPembayaran === "Belum Lunas" &&
-    //        purchasingHistory.length > 0
-    //      ) {
-    //        return <Tag color={tagRed}>Tempo</Tag>;
-    //      } else if (
-    //        statusPembayaran === "Lunas" &&
-    //        purchasingHistory.length > 0
-    //      ) {
-    //        return <Tag color={tagGreen}>Lunas</Tag>;
-    //      } else {
-    //        return <Tag color={tagOrange}>Menunggu</Tag>;
-    //      }
-    //    }
-
-    //    return <Tag color={tagOrange}>Menunggu</Tag>;
-    //  },
-    //},
     {
       name: "Grand Total",
       width: "180px",
-      //selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
+      selector: (row) => {
+        const LPBTotal =
+          row.attributes?.purchasing?.data?.attributes?.total_purchasing;
+
+        return formatter.format(LPBTotal);
+      },
     },
     {
       name: "Pembayaran",
       width: "180px",
-      //selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
+      selector: (row) => {
+        let returTotal = row.attributes?.total_price;
+        return formatter.format(returTotal);
+      },
     },
-    //{
-    //  name: <div className="ml-6">Status</div>,
-    //  width: "150px",
-    //  selector: (row) => {
-    //    return (
-    //      <Select
-    //        defaultValue={row.attributes.status}
-    //        bordered={false}
-    //        disabled={row.attributes.status === "Diterima"}
-    //        onChange={(e) => onChangeStatus(e, row)}
-    //      >
-    //        <Option value="Dipesan">
-
-    //          <Tag color="default">Dipesan</Tag>
-    //        </Option>
-    //        <Option value="Diterima">
-    //        <Tag color="success">Diterima</Tag>
-    //        </Option>
-    //      </Select>
-    //    );
-    //  },
-    //},
-    //{
-    //  name: "Status Pengiriman",
-    //  width: "150px",
-    //  selector: (row) => {
-    //    return (
-    //      <>
-    //        <Select
-    //          defaultValue={row.attributes.delivery_status}
-    //          bordered={false}
-    //          disabled={row.attributes.delivery_status === "Terkirim"}
-    //          onChange={(e) => onChangeStatusPengiriman(e, row)}
-    //        >
-    //          <Option value="Loading">
-    //            <Tag color="default">Loading</Tag>
-    //          </Option>
-    //          <Option value="Pending">
-    //            <Tag color="warning">Pending</Tag>
-    //          </Option>
-    //          <Option value="Antrian">
-    //            <Tag color="processing">Antrian</Tag>
-    //          </Option>
-    //          <Option value="Terkirim">
-    //            <Tag color="success">Terkirim</Tag>
-    //          </Option>
-    //        </Select>
-    //      </>
-    //    );
-    //  },
-    //},
   ];
 
   return (
@@ -392,6 +324,8 @@ export default function ReactDataTable({
       data={data.data}
       pagination
       noDataComponent={"Belum ada data Retur Pembelian"}
+      highlightOnHover
+      onRowClicked={(row) => openModal(row.id)}
     />
   );
 }
