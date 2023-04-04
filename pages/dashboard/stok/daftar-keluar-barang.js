@@ -9,6 +9,7 @@ import {
   Empty,
   Input,
   InputNumber,
+  Modal,
   notification,
   Popconfirm,
   Select,
@@ -20,6 +21,7 @@ import nookies from "nookies";
 import { useRouter } from "next/router";
 import DataTable from "react-data-table-component";
 import { CloseCircleFilled, CheckCircleFilled, PrinterOutlined } from "@ant-design/icons";
+import Link from "next/link";
 
 export default function daftarKeluarBarang({ companyOptions }) {
   const { token } = nookies.get();
@@ -33,7 +35,17 @@ export default function daftarKeluarBarang({ companyOptions }) {
   const [statusFilter, setStatusFilter] = useState("Proses");
   const [data, setData] = useState([]);
   const [refetch, setRefetch] = useState(false);
+  const [cancelModal, setCancelModal] = useState({
+    visible: false,
+    id: null,
+    reason: "",
+    loading: false,
+    author: null,
+  });
   const router = useRouter();
+  const [filtered, setFiltered] = useState(null);
+  const [queryProduct, setQueryProduct] = useState("");
+  const [printable, setPrintable] = useState(false);
 
   const printPdf = () => {
     notification.info({
@@ -115,36 +127,64 @@ export default function daftarKeluarBarang({ companyOptions }) {
     },
   };
 
-  const handleDeleteData = async (id, idx) => {
+  const handleCancelData = async (id) => {
+    setCancelModal({
+      ...cancelModal,
+      loading: true,
+    });
+
     try {
+      const postData = {
+        data: {
+          status: "Dibatalkan",
+          cancel_reason: cancelModal?.reason,
+          cancel_author: cancelModal?.author,
+        },
+      };
       const endpoint = `${process.env.NEXT_PUBLIC_URL}/product-requests/${id}`;
       const req = await fetch(endpoint, {
-        method: "DELETE",
+        method: "PUT",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify(postData),
       });
 
       const response = await req.json();
 
-      console.log("response delete", response);
+      console.log("response cancel", response);
 
       if (response?.data) {
+        setCancelModal({
+          visible: false,
+          id: null,
+          reason: "",
+          loading: false,
+        });
         notification.success({
-          message: "Berhasil menghapus data",
-          description: "Data berhasil dihapus",
+          message: "Berhasil membatalkan data",
+          description: "Data berhasil dibatalkan.",
         });
         setRefetch(!refetch);
       } else {
+        setCancelModal({
+          ...cancelModal,
+          loading: false,
+        });
         notification.error({
-          message: response?.error || "Gagal menghapus data",
+          message: response?.error?.message || "Gagal membatalkan data",
           description: "Silahkan coba lagi",
         });
       }
     } catch (error) {
+      setCancelModal({
+        ...cancelModal,
+        loading: false,
+      });
       console.log("error delete", error);
       notification.error({
-        message: response?.error || "Gagal menghapus data",
+        message: response?.error || "Gagal membatalkan data",
         description: "Harap hubungi admin",
       });
     }
@@ -195,14 +235,39 @@ export default function daftarKeluarBarang({ companyOptions }) {
         setRefetch(!refetch);
       } else {
         notification.error({
-          message: response?.error || "Gagal mengirim ke stok",
-          desciption: "Stok gagal dikirim ke gudang tujuan, silahkan coba lagi",
+          message: response?.error?.message || response?.error || "Gagal mengirim ke stok",
+          description: (
+            <span
+              className="text-sm cursor-pointer m-0 text-blue-400 hover:text-blue-600"
+              onClick={() => {
+                router.replace(
+                  {
+                    pathname: "/dashboard/stok",
+                    query: {
+                      location: row.location_sender.id,
+                      product: row.product.id,
+                    },
+                  },
+                  undefined,
+                  { shallow: true }
+                );
+              }}
+            >
+              Lihat Stok
+            </span>
+          ),
         });
       }
     } catch (error) {
       console.log(error);
     }
   };
+
+  const activeBtn =
+    "bg-cyan-700 text-xs font-bold text-white w-full rounded h-10 hover:bg-cyan-800  shadow-sm flex items-center justify-center float-right";
+
+  const inactiveBtn =
+    "bg-gray-400 cursor-not-allowed text-xs font-bold text-gray-200 w-full rounded h-10 shadow-sm flex items-center justify-center float-right";
 
   const columns = [
     {
@@ -240,10 +305,13 @@ export default function daftarKeluarBarang({ companyOptions }) {
             color = "default";
             break;
           case "Sebagian":
-            color = "red";
+            color = "orange";
             break;
           case "Selesai":
             color = "green";
+            break;
+          case "Dibatalkan":
+            color = "red";
             break;
           default:
             color = "default";
@@ -264,11 +332,13 @@ export default function daftarKeluarBarang({ companyOptions }) {
     },
     {
       name: "Kadaluwarsa",
+      omit: statusFilter === "Dibatalkan",
       center: true,
       selector: (row) => (row?.exp_date ? moment(row.exp_date).format("DD/MM/YYYY") : "-"),
     },
     {
       name: "Qty Ditransfer",
+      omit: statusFilter === "Dibatalkan",
       width: "260px",
       selector: (row, index) => {
         const stockIndex = row?.stock?.findIndex((item) => item.id === row?.product.id);
@@ -349,21 +419,29 @@ export default function daftarKeluarBarang({ companyOptions }) {
     },
     {
       name: "Tindakan",
+      omit: statusFilter === "Dibatalkan",
       center: true,
       selector: (row, index) =>
         row.status !== "Selesai" ? (
           <div className="flex gap-x-4">
             <Popconfirm
-              title="Apakah anda yakin ingin menghapus permintaan ini?"
+              title="Apakah anda yakin ingin membatalkan permintaan ini?"
               okButtonProps={{
                 danger: true,
               }}
               okText="Ya"
               cancelText="Tidak"
-              onConfirm={() => handleDeleteData(row.id, index)}
+              onConfirm={() =>
+                setCancelModal({
+                  ...cancelModal,
+                  visible: true,
+                  id: row.id,
+                  author: row.location_sender.name,
+                })
+              }
               placement="topLeft"
             >
-              <CloseCircleFilled title="Hapus" className="text-3xl text-red-700" />
+              <CloseCircleFilled title="Batalkan" className="text-3xl text-red-700" />
             </Popconfirm>
             <Popconfirm
               placement="topLeft"
@@ -385,7 +463,33 @@ export default function daftarKeluarBarang({ companyOptions }) {
           />
         ),
     },
+    {
+      name: "Alasan",
+      omit: statusFilter !== "Dibatalkan",
+      selector: (row) => row?.cancel_reason || "-",
+    },
+    {
+      name: "Dibatalkan Oleh",
+      omit: statusFilter !== "Dibatalkan",
+      selector: (row) => row?.cancel_author || "-",
+    },
   ];
+
+  const handleFilterProducts = (e) => {
+    setQueryProduct(e.target.value);
+  };
+
+  useEffect(() => {
+    if (queryProduct !== "") {
+      const filteredProducts = data.filter((item) =>
+        item.product.name.toLowerCase().includes(queryProduct.toLowerCase())
+      );
+
+      setFiltered(filteredProducts);
+    } else {
+      setFiltered(null);
+    }
+  }, [queryProduct]);
 
   return (
     <>
@@ -422,6 +526,28 @@ export default function daftarKeluarBarang({ companyOptions }) {
             {selectedLocation ? (
               <>
                 <div className="w-full lg:w-3/4 grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                  <Modal
+                    title="Batalkan Permintaan?"
+                    open={cancelModal.visible}
+                    confirmLoading={cancelModal.loading}
+                    okButtonProps={{
+                      danger: true,
+                      disabled: cancelModal.reason === "",
+                    }}
+                    onOk={() => handleCancelData(cancelModal.id)}
+                    onCancel={() => {}}
+                  >
+                    <p>
+                      Apakah anda yakin akan membatalkan permintaan ini? Harap isi alasan pembatalan
+                      dibawah ini:
+                    </p>
+                    <Input.TextArea
+                      onInput={(e) => setCancelModal({ ...cancelModal, reason: e.target.value })}
+                      value={cancelModal.reason}
+                      placeholder="Alasan Pembatalan"
+                      className="mt-2"
+                    />
+                  </Modal>
                   <DatePicker.RangePicker
                     defaultValue={[moment().startOf("month"), moment().endOf("month")]}
                     className="w-full"
@@ -463,6 +589,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
                       { label: "Proses", value: "Proses" },
                       { label: "Sebagian", value: "Sebagian" },
                       { label: "Selesai", value: "Selesai" },
+                      { label: "Dibatalkan", value: "Dibatalkan" },
                     ]}
                     placeholder="Status"
                     className="w-full"
@@ -471,33 +598,25 @@ export default function daftarKeluarBarang({ companyOptions }) {
 
                 <p className="uppercase text-[#036B82] font-bold text-xl mb-1">Produk Transfer</p>
                 <div className="w-full lg:w-4/5 grid grid-cols-1 items-end md:grid-cols-4 gap-3 mb-3">
-                  <Input.Search size="large" placeholder="Nama Produk" className="w-full" />
+                  <Input.Search
+                    onChange={handleFilterProducts}
+                    size="large"
+                    placeholder="Nama Produk"
+                    className="w-full"
+                  />
                   <button
+                    title={!printable ? "Harap selesaikan semua permintaan terlebih dahulu" : ""}
                     onClick={printPdf}
-                    type="button"
-                    className="bg-cyan-700 text-xs font-bold text-white w-full rounded h-10 hover:bg-cyan-800  shadow-sm flex items-center justify-center float-right"
+                    disabled={!printable}
+                    className={printable ? activeBtn : inactiveBtn}
                   >
-                    PRINT PDF
-                  </button>
-                  <button
-                    onClick={printPdf}
-                    type="button"
-                    className="bg-cyan-700 text-xs font-bold text-white w-full rounded h-10 hover:bg-cyan-800  shadow-sm flex items-center justify-center float-right"
-                  >
-                    PRINT CSV
-                  </button>
-                  <button
-                    onClick={printPdf}
-                    type="button"
-                    className="bg-cyan-700 text-xs font-bold text-white w-full rounded h-10 hover:bg-cyan-800  shadow-sm flex items-center justify-center float-right"
-                  >
-                    PRINT XLS
+                    CETAK BUKTI KELUAR BARANG
                   </button>
                 </div>
 
                 <DataTable
                   columns={columns}
-                  data={data}
+                  data={filtered !== null ? filtered : data}
                   customStyles={customStyles}
                   noDataComponent={`--Tidak ada data--`}
                 />
