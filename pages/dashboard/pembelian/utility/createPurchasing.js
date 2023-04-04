@@ -18,6 +18,7 @@ const CreateOrder = async (
 ) => {
   // CLEANING DATA
   var date = new Date(values.order_date);
+  console.log('this is date', values)
   var newDate = moment
     .utc(date)
     .utcOffset(7 * 60)
@@ -42,7 +43,6 @@ const CreateOrder = async (
 
   // only in purchasing
   delete values?.delivery_date;
-  delete values?.order_date;
   delete values?.products;
 
   values.price_after_disc = parseFloat(discPrice);
