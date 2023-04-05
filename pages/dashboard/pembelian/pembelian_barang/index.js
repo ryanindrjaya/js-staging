@@ -164,10 +164,6 @@ function Pembelian({ props }) {
     row.attributes.status = status;
     // const dataStatus = row;
 
-    const LPBLocationId = row.attributes.location?.data?.id;
-
-    console.log("data row status", LPBLocationId);
-
     if (status === "Diterima") {
       // invetory handle
       await createInventory(row);
