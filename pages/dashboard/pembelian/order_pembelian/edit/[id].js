@@ -462,7 +462,7 @@ function Edit({ props }) {
         order_date: moment(initialValues.attributes?.order_date),
         delivery_date: moment(initialValues.attributes?.delivery_date),
         supplier_id: initialValues.attributes?.supplier?.data?.id,
-        // location: initialValues.attributes?.location?.data?.id,
+        location: initialValues.attributes?.location?.data?.id,
       });
 
       if (initialValues.attributes.purchase_details?.data.length > 0) {
@@ -705,6 +705,7 @@ function Edit({ props }) {
                     ]}
                   >
                     <Select
+                      placeholder="Pilih Lokasi"
                       size="large"
                       style={{
                         width: "100%",
@@ -719,18 +720,6 @@ function Edit({ props }) {
                       })}
                     </Select>
                   </Form.Item>
-                </div>
-                <div className="w-full md:w-1/3 px-3 mb-2 mt-5 md:mb-0">
-                  <Upload>
-                    <Button
-                      className="text-gray-500"
-                      style={{ width: "100%" }}
-                      size="large"
-                      icon={<UploadOutlined />}
-                    >
-                      Upload Dokumen
-                    </Button>
-                  </Upload>
                 </div>
               </div>
               <div className="flex justify-end font-bold w-full mb-3 md:w-3/4">
@@ -842,7 +831,7 @@ function Edit({ props }) {
                     htmlType="submit"
                     className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
                   >
-                    Submit
+                    Perbarui
                   </Button>
                 )}
               </Form.Item>
