@@ -27,6 +27,8 @@ const createDetailOrder = async (
   url,
   createMasterData
 ) => {
+  console.log("productinfo", products);
+
   tempListId = [];
 
   await Promise.all(
@@ -63,9 +65,13 @@ const createDetailOrder = async (
           products.productInfo?.[idx]?.d3 ??
           element.attributes[`unit_${unitByIndex}_dp3`] ??
           0;
+
         var unitPrice =
+          values?.harga_satuan?.[idx] ??
           products.productInfo?.[idx]?.unit_price ??
+          products.productInfo?.[idx]?.priceUnit ?? // add priceUnit for product with no unit
           element.attributes.buy_price_1;
+
         var unitPriceAfterDisc = productTotalPrice?.[idx];
         var subTotal = productSubTotal?.[idx];
 
@@ -92,6 +98,8 @@ const createDetailOrder = async (
       }
     })
   );
+
+  console.log("tempListId", tempListId);
 
   // create masterData
   await createMasterData(values, tempListId);
@@ -135,6 +143,7 @@ const POSTPurchaseDetail = async (
 
   const endpoint = process.env.NEXT_PUBLIC_URL + url;
   const JSONdata = JSON.stringify(data);
+  console.log("jsoondata", JSONdata);
   const options = {
     method: "POST",
     headers: {
@@ -151,9 +160,9 @@ const POSTPurchaseDetail = async (
 
   if (req.status === 200) {
     tempListId.push(res.data?.id);
-    if (tempListId.length === products.productList.length) {
-      setListId(tempListId);
-    }
+    // if (tempListId.length === products.productList.length) {
+    //   setListId(tempListId);
+    // }
   }
 };
 
