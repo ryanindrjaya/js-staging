@@ -11,9 +11,9 @@ import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import AddSellSalesTable from "@iso/components/ReactDataTable/Selling/AddSellSalesTable";
 import AddDebtTable from "@iso/components/ReactDataTable/Cost/AddDebtTable";
-import createData from "../utility/create";
-import createDetails from "../utility/createDetail";
-import calculatePrice from "../utility/calculatePrice";
+import createData from "../../utility/create";
+import updateDetails from "../../utility/updateDetail";
+import calculatePrice from "../../utility/calculatePrice";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
 import nookies from "nookies";
 import LoadingAnimations from "@iso/components/Animations/Loading";
@@ -22,6 +22,7 @@ import * as moment from "moment";
 
 Hutang.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
+  const { id } = context.query;
 
   const req = await fetchData(cookies);
   const user = await req.json();
@@ -45,6 +46,7 @@ Hutang.getInitialProps = async (context) => {
       returLPB,
       hutang,
       akunHutang,
+      id,
     },
   };
 };
@@ -120,7 +122,7 @@ const fetchAkunHutang = async (cookies) => {
 };
 
 function Hutang({ props }) {
-  const biaya = useSelector((state) => state.Cost);
+  const biaya = useSelector((state) => state.Cost); console.log("biaya nih", biaya);
   const dispatch = useDispatch();
 
   const user = props.user;
@@ -128,6 +130,7 @@ function Hutang({ props }) {
   const returLPB = props.returLPB.data;
   const akunHutang = props.akunHutang.data;
   const hutang = props.hutang;
+  const idEdit = props.id;
   const [supplier, setSupplier] = useState();
   const [dataTabel, setDataTabel] =  useState([]);
   const [dataRetur, setDataRetur] = useState([]);
@@ -141,6 +144,8 @@ function Hutang({ props }) {
   const [tanggal, setTanggal] = useState(moment());
 
   const [dataValues, setDataValues] = useState();
+  const [dataEdit, setDataEdit] = useState();
+  const [dataEditId, setDataEditId] = useState({}); console.log("details", dataEditId);
 
   const [listId, setListId] = useState([]);
 
@@ -182,6 +187,28 @@ function Hutang({ props }) {
     maximumFractionDigits: 2,
   });
 
+  const getEditHutang = async (id) => {
+    hutang.data.forEach((item) => {
+      if(id == item.id) return setDataEdit(item);
+    });
+  };
+
+  const updateDetail = async (data, id) => {
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/debt-details/${id}`;
+    const options = {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+      body: JSON.stringify(data),
+    };
+
+    const res = await fetch(endpoint, options).then((res) => res.json());
+    console.log("res", res, data);
+    return res;
+  };
+
   const onFinish = (values) => {
     var totalTunai = 0;
     var totalTransfer = 0;
@@ -213,36 +240,70 @@ function Hutang({ props }) {
       setInfo("gagal");
     }
 
-    hutang.data.forEach((element) => {
-      if (values.no_hutang == element.attributes.no_hutang) {
-          notification["error"]({
-              message: "Gagal menambahkan data",
-              description:
-                  "Data gagal ditambahkan, karena no hutang sama",
-          });
-          setInfo("gagal");
-      }
-    });
+    //hutang.data.forEach((element) => {
+    //  if (values.no_hutang == element.attributes.no_hutang) {
+    //      notification["error"]({
+    //          message: "Gagal menambahkan data",
+    //          description:
+    //              "Data gagal ditambahkan, karena no hutang sama",
+    //      });
+    //      setInfo("gagal");
+    //  }
+    //});
     setDataValues(values);
     setLoading(false);
   };
 
   const createDetail = async () => {
+    var data = null;
+    // cek update
+    for (const key in biaya?.list) {
+      var tunai = biaya.info[key]?.tunai ?? 0;
+      var transfer = biaya.info[key]?.transfer ?? 0;
+      var giro = biaya.info[key]?.giro ?? 0;
+      var cn = biaya.info[key]?.cn ?? 0;
+      var oth = biaya.info[key]?.oth ?? 0;
+      var sisa_hutang = sisaHutang[key] ?? 0;
+      var lpb = biaya?.list[key];
+      var total_retur = biaya?.list[key].subtotal;
+
+      data = {
+        data: {
+          tunai: tunai,
+          transfer: transfer,
+          giro: giro,
+          cn: cn,
+          oth: oth,
+          total_retur: total_retur,
+          sisa_hutang: sisa_hutang,
+          purchasing: { id: lpb.id },
+        },
+      };
+      
+
+      for (const keyEdit in dataEditId) {
+        if (dataEditId[keyEdit]?.attributes?.purchasing?.data?.id == biaya?.list[key].id){
+          console.log("id", key, keyEdit, data);
+          updateDetail(data ,dataEditId[keyEdit]?.id);
+        }
+      }
+    }
+    console.log("ada data juga", dataValues, dataTabel);
     //await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/sales-sale-details");
-    await createDetails(dataValues, dataTabel, biaya, sisaHutang, setListId, "/debt-details", "hutang");
+    //await updateDetails(dataValues, dataTabel, biaya, sisaHutang, setListId, "/debt-details", "hutang", dataEditId);
   };
 
-  const createMaster = async (values) => {
-    values.total_item = dataTabel.length;
-    values.total_hutang_jatuh_tempo = totalHutangJatuhTempo();
-    values.total_pembayaran = totalPembayaran();
-    values.sisa_hutang_jatuh_tempo = sisaHutangJatuhTempo();
-    values.supplier = supplier;
-    values.document = document;
-    values.tanggal_pembayaran = tanggal;
-    values.status_pembayaran = "Dibayar";
-    await createData(sisaHutang, values, listId, form, router, "/debts/", "hutang", akunHutang);
-  };
+  //const createMaster = async (values) => {
+  //  values.total_item = dataTabel.length;
+  //  values.total_hutang_jatuh_tempo = totalHutangJatuhTempo();
+  //  values.total_pembayaran = totalPembayaran();
+  //  values.sisa_hutang_jatuh_tempo = sisaHutangJatuhTempo();
+  //  values.supplier = supplier;
+  //  values.document = document;
+  //  values.tanggal_pembayaran = tanggal;
+  //  values.status_pembayaran = "Dibayar";
+  //  await createData(sisaHutang, values, listId, form, router, "/debts/", "hutang", akunHutang);
+  //};
 
   const clearData = () => {
     dispatch({ type: "CLEAR_DATA" });
@@ -348,6 +409,60 @@ function Hutang({ props }) {
   }, [listId]);
 
   useEffect(() => {
+    setSupplier(dataEdit?.attributes?.supplier?.data);
+
+    var dataEditDetail = {};
+    if(dataEdit){
+      for (const key in dataEdit?.attributes?.debt_details.data) {
+        dataEditDetail[key] = dataEdit?.attributes?.debt_details?.data[key];
+        //setDataEditId([...dataEditId, dataEdit.attributes.debt_details.data[key].attributes.purchasing.data.id]);
+      }
+    }
+    setDataEditId(dataEditDetail);
+  }, [dataEdit]);
+
+  useEffect(() => {
+      setIsFetchingData(true);
+
+      if(dataEdit != undefined && dataEditId != undefined){
+
+        for (const keyId in dataEditId){
+          for (const key in biaya.list) {
+            if(dataEditId[keyId].attributes.purchasing.data.id == biaya.list[key].id ){
+              dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "pilih", listData: biaya.list[key], index: key });
+              dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: parseInt(dataEditId[keyId].attributes.sisa_hutang), listData: biaya.list[key], index: key });
+              dispatch({ type: "CHANGE_DATA_TUNAI", tunai: parseInt(dataEditId[keyId].attributes.tunai), listData: biaya.list[key], index: key });
+              dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: parseInt(dataEditId[keyId].attributes.transfer), listData: biaya.list[key], index: key });
+              dispatch({ type: "CHANGE_DATA_GIRO", giro: parseInt(dataEditId[keyId].attributes.giro), listData: biaya.list[key], index: key });
+              dispatch({ type: "CHANGE_DATA_CN", cn: parseInt(dataEditId[keyId].attributes.cn), listData: biaya.list[key], index: key });
+              dispatch({ type: "CHANGE_DATA_OTH", oth: parseInt(dataEditId[keyId].attributes.oth), listData: biaya.list[key], index: key });
+              dispatch({ type: "CHANGE_ID", id: dataEditId[keyId].attributes.purchasing.data.id , listData: biaya.list[key], index: key });
+                console.log("biaya data edit", biaya, dataEditId[keyId]);
+            }
+
+          }
+        }
+      }
+
+      setTimeout(() => {
+        setIsFetchingData(false);
+      }, 3000);
+  }, [dataEditId]);
+
+  useEffect(() => {
+    if(supplier != undefined){
+      form.setFieldsValue({
+        no_hutang: dataEdit?.attributes?.no_hutang,
+        supplier_id: {
+            label: `${supplier?.attributes?.id_supplier} - ${supplier?.attributes?.name}`,
+            value: supplier?.id,
+        },
+        //tanggal: new Date (dataEdit?.attributes?.tanggal_pembayaran),
+      });
+    }
+  }, [supplier]);
+
+  useEffect(() => {
     // used to reset redux from value before
     clearData();
 
@@ -406,7 +521,6 @@ function Hutang({ props }) {
           //biaya.list.push(row);
           dispatch({ type: "ADD_LIST", list: row });
         }
-        console.log("statusPembayaran", statusPembayaran, status);
         lpbId++;
     });
 
@@ -426,6 +540,9 @@ function Hutang({ props }) {
           });
           lpbId++;
       });
+
+      // Set default velue untuk edit data
+      getEditHutang(idEdit);
 
   }, []);
 
@@ -472,7 +589,7 @@ function Hutang({ props }) {
                         },
                     ]}
                     >
-                    <Input style={{ height: "40px" }} placeholder="No. Hutang" />
+                    <Input style={{ height: "40px" }} placeholder="No. Hutang" disabled />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -532,6 +649,8 @@ function Hutang({ props }) {
                   statusPembayaran={statusPembayaran}
                   rangePicker={rangePicker}
                   search={searchNoLpb}
+                  dataEdit={dataEdit}
+                  dataEditId={dataEditId}
                 />
               </div>
               )}
