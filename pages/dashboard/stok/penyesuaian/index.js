@@ -320,7 +320,9 @@ export default function penyesuaian() {
     },
     {
       name: "Jenis Penyesuaian",
-      selector: ({ attributes }) => attributes?.status || "-",
+      selector: ({ attributes }) => (
+        <Tag color={attributes?.status === "Normal" ? "blue" : "red"}>{attributes?.status}</Tag>
+      ),
     },
     {
       name: "Total Dikembalikan",
