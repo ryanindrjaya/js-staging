@@ -23,7 +23,6 @@ export default function ReactDataTable({
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [editStatus, setEditStatus] = useState(false);
-  
 
   const { TextArea } = Input;
   var formatter = new Intl.NumberFormat("id-ID", {
@@ -94,7 +93,6 @@ export default function ReactDataTable({
     }, 2000);
   };
 
-
   const handleCancel = () => {
     console.log("Clicked cancel button");
     setOpen(false);
@@ -133,7 +131,7 @@ export default function ReactDataTable({
         </button>
       </div>
 
-      {editStatus ? (
+      {row.attributes.status === "Selesai" ? (
         <div hidden></div>
       ) : (
         <div>
@@ -232,9 +230,6 @@ export default function ReactDataTable({
       name: "Tindakan",
       width: "150px",
       selector: (row) => {
-        if (row.attributes.status == "Selesai") setEditStatus(true);
-        else setEditStatus(false);
-
         return (
           <>
             <Popover content={content(row)} placement="bottom" trigger="click">
@@ -255,19 +250,11 @@ export default function ReactDataTable({
       name: "Status",
       width: "150px",
       selector: (row) => {
-        if (row.attributes.status == "Selesai") {
-          return (
-            <span className="bg-green-400 text-white rounded-md px-2 py-1 text-xs">
-              {row.attributes.status}
-            </span>
-          );
-        } else {
-          return (
-            <span className="bg-yellow-400 text-white rounded-md px-2 py-1 text-xs">
-              {row.attributes.status}
-            </span>
-          );
-        }
+        return (
+          <Tag color={row.attributes.status === "Selesai" ? "green" : "orange"}>
+            {row.attributes.status}
+          </Tag>
+        );
       },
     },
 

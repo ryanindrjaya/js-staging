@@ -51,7 +51,7 @@ export async function createInventoryFromPenjualan(row) {
   store_sale_details.forEach((element) => {
     console.log("element store detail (penjualan)", element);
     const unitOrder = element.attributes.unit;
-    const totalOrder = parseInt(element.attributes.qty);
+    const totalOrder = parseFloat(element.attributes.qty);
     const product = element.attributes.product.data;
     const expDate = element.attributes.expired_date;
     const batch = element.attributes?.batch ?? "";
