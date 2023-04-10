@@ -121,6 +121,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
 
       const response = await req.json();
       console.log("response fetch barang keluar", response);
+      setPrintable(response?.isDone);
 
       if (response?.data) {
         setData(response.data);
