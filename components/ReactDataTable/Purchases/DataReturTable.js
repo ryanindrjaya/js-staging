@@ -567,9 +567,6 @@ export default function ReactDataTable({
       width: "150px",
       sortable: true,
       selector: (row, idx) => {
-        var defaultEXP = null;
-        if (expProduct) defaultEXP = expProduct[idx];
-
         return (
           <>
             <Form.Item
@@ -584,7 +581,6 @@ export default function ReactDataTable({
               noStyle
             >
               <DatePicker
-                defaultValue={defaultEXP}
                 placeholder="EXP. Date"
                 size="normal"
                 format={"DD/MM/YYYY"}
@@ -599,9 +595,6 @@ export default function ReactDataTable({
       width: "150px",
       sortable: true,
       selector: (row, idx) => {
-        var defaultBatch = null;
-        if (batch) defaultBatch = batch[idx];
-
         return (
           <>
             <Form.Item
@@ -615,7 +608,7 @@ export default function ReactDataTable({
               ]}
               noStyle
             >
-              <Input defaultValue={defaultBatch} size="normal" />
+              <Input size="normal" />
             </Form.Item>
           </>
         );
