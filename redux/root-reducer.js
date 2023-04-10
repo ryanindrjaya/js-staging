@@ -26,8 +26,11 @@ import quiz from "@iso/redux/quiz/reducer";
 import profile from "@iso/redux/profile/reducer";
 import githubSearch from "@iso/redux/githubSearch/reducers";
 import session from "@iso/redux/session/reducer";
+import Sales from "./application/sale/reducer";
+
 
 export default combineReducers({
+  Sales,
   Order,
   Cost,
   Auth,

@@ -27,6 +27,7 @@ import createReturFunc from "../utility/createRetur";
 import { useRouter } from "next/router";
 import SearchLPB from "../../../../components/Form/AddOrder/SearchLPB";
 import moment from "moment";
+import createInventoryRetur from "../utility/createInventoryRetur";
 
 Retur.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -54,7 +55,7 @@ Retur.getInitialProps = async (context) => {
   }
 
   return {
-    props: { 
+    props: {
       location,
       returs,
       dataLPB,
@@ -222,7 +223,13 @@ function Retur({ props }) {
       let stokGudang = "";
       setDataGudang({
         ...dataGudang,
-        [idx]: {},
+        [idx]: {
+          location: {
+            data: {
+              id: locationId,
+            },
+          },
+        },
       });
 
       const unit1 = product.unit_1 ? "0" + " " + product.unit_1 : "";
@@ -241,45 +248,43 @@ function Retur({ props }) {
     }
   };
 
-  const checkReturQty = (values) => {
+  const checkReturQty = async (values) => {
     let popUpDialog = false;
     let cannotBeReturnedProducts = [];
-    console.log("ishowing dialog", popUpDialog);
-    // console.log("test for looping", values);
-    // console.log("test for looping", dataGudang);
-    // console.log("test for looping", products.productList);
-
-    for (const indextest in products.productList) {
-      console.log("test for looping", products.productList[indextest]);
-    }
 
     for (let index in dataGudang) {
       const qty = values?.jumlah_qty?.[index] ?? 1;
       const unitIndex = values?.jumlah_option?.[index] ?? 1;
+      const productId = products.productList[index]?.id;
       const productName = products.productList[index]?.attributes?.name;
+      const productUnit =
+        products.productList[index]?.attributes?.["unit_" + unitIndex];
+      const gudangLocatioId = dataGudang?.[index].location?.data?.id ?? 0;
 
-      const stokGudangUnit1 = dataGudang?.[index]?.stock_unit_1 ?? 0;
-      const stokGudangUnit2 = dataGudang?.[index]?.stock_unit_2 ?? 0;
-      const stokGudangUnit3 = dataGudang?.[index]?.stock_unit_3 ?? 0;
-      const stokGudangUnit4 = dataGudang?.[index]?.stock_unit_4 ?? 0;
-      const stokGudangUnit5 = dataGudang?.[index]?.stock_unit_5 ?? 0;
+      const returData = {
+        location: gudangLocatioId,
+        product: productId,
+        unit: productUnit,
+        qty: qty,
+      };
 
-      if (qty > eval(`stokGudangUnit${unitIndex}`)) {
-        let canBeReturned = false;
-        for (let i = unitIndex - 1; i >= 1; i--) {
-          if (eval(`stokGudangUnit${i}`) !== 0) {
-            canBeReturned = true;
-            break;
-          } else {
-            popUpDialog = true;
-            cannotBeReturnedProducts.push(productName);
-          }
-        }
+      // fetch to api check
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/product/check";
+      const options = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+        body: JSON.stringify(returData),
+      };
 
-        if (!canBeReturned && productName !== undefined) {
-          popUpDialog = true;
-          cannotBeReturnedProducts.push(productName);
-        }
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
+      console.log(res);
+      if (!res?.available) {
+        popUpDialog = true;
+        cannotBeReturnedProducts.push(productName);
       }
     }
 
@@ -305,9 +310,13 @@ function Retur({ props }) {
     return popUpDialog;
   };
 
+  // ! COPY THIS INTO STORE RETUR
   const onFinish = async (values) => {
     setLoading(true);
-    const isShowingPopup = checkReturQty(values);
+
+    console.log("values", values);
+
+    const isShowingPopup = await checkReturQty(values);
     if (isShowingPopup) {
       setLoading(false);
       return;
@@ -339,17 +348,18 @@ function Retur({ props }) {
   };
 
   const createRetur = async (values) => {
-    values.status = "Draft";
-
-    createReturFunc(
+    await createReturFunc(
       grandTotal,
       totalPrice,
       values,
       listId,
       form,
       router,
-      lpbData?.id
+      lpbData?.id,
+      createInventoryRetur
     );
+
+    // create retur inventory
   };
 
   const onChangeProduct = async () => {
@@ -607,10 +617,15 @@ function Retur({ props }) {
                   <SearchLPB supplier={supplier} handleSelect={setLpbData} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="status" rules={[{
-                    required: true,
-                    message: "Status tidak boleh kosong!",
-                  }]}>
+                  <Form.Item
+                    name="status"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Status tidak boleh kosong!",
+                      },
+                    ]}
+                  >
                     <Select
                       placeholder="Pilih Status"
                       size="large"
