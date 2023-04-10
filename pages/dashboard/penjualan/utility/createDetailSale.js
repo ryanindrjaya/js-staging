@@ -13,9 +13,12 @@ const createDetailSale = (
   productTotalPrice,
   productSubTotal,
   setListId,
-  url
+  url,
+  form
 ) => {
-  products.productList.forEach((element) => {
+  console.log("create detail function", products);
+  console.log("tempList ni ===============", tempListId);
+  products.productList.forEach((element, index) => {
     // default value
     var qty = 1;
     var disc = 0;
@@ -24,6 +27,7 @@ const createDetailSale = (
     var unitPrice = element.attributes.buy_price_1;
     var unitPriceAfterDisc = element.attributes.buy_price_1;
     var subTotal = 0;
+    const productLoc = form.getFieldValue("product_location");
     tempListId = [];
 
     var expDate = values.expired_date?.[id];
@@ -36,13 +40,14 @@ const createDetailSale = (
     qty = products.productInfo[id]?.qty ?? 1;
     disc = products.productInfo[id]?.disc ?? 0;
     unit = products.productInfo[id]?.unit ?? element.attributes.unit_1;
-    unitPrice = products.productInfo[id]?.priceUnit ?? element.attributes.buy_price_1;
+    unitPrice =
+      products.productInfo[id]?.priceUnit ?? element.attributes.buy_price_1;
     unitPriceAfterDisc = productTotalPrice?.[id];
     subTotal = productSubTotal?.[subtotalId];
     var d1 = products.productInfo[id]?.d1 ?? element.attributes.unit_1_dp1;
     var d2 = products.productInfo[id]?.d2 ?? element.attributes.unit_1_dp2;
-    //var d3 = products.productInfo[id]?.d3 ?? element.attributes.unit_1_dp3;
     margin = products.productInfo[id]?.margin ?? 0;
+    var productLocationId = productLoc?.[index];
 
     POSTSaleDetail(
       qty,
@@ -59,6 +64,7 @@ const createDetailSale = (
       d2,
       //d3,
       margin,
+      productLocationId,
       url
     );
     id++;
@@ -81,21 +87,22 @@ const POSTSaleDetail = async (
   d2,
   //d3,
   margin,
+  productLocationId,
   url
 ) => {
   var data = {
     data: {
-      qty : qty,
-      unit : unit,
-      unit_price : unitPrice,
-      sub_total: parseInt(subTotal),
+      qty: qty,
+      unit: unit,
+      unit_price: unitPrice,
+      sub_total: parseFloat(subTotal),
       product: { id: elementId },
-      disc: parseInt(disc),
+      disc: parseFloat(disc),
       expired_date: expDate,
-      disc1 : d1,
-      disc2 : d2,
-      //disc3 : d3,
-      margin : margin
+      disc1: d1,
+      disc2: d2,
+      margin: margin,
+      location: productLocationId,
     },
   };
 
@@ -109,6 +116,8 @@ const POSTSaleDetail = async (
     },
     body: JSONdata,
   };
+
+  console.log("data", JSONdata);
 
   const req = await fetch(endpoint, options);
   const res = await req.json();
