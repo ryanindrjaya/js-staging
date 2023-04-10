@@ -263,11 +263,11 @@ export default function Sidebar(props) {
                   <a>Mutasi Barang Masuk</a>
                 </Link>
               </Menu.Item>
-              {/* <Menu.Item style={submenuStyle} key="penyesuaian_stok">
+              <Menu.Item style={submenuStyle} key="penyesuaian_stok">
                 <Link href="/dashboard/stok/penyesuaian">
                   <a>Penyesuaian Stok</a>
                 </Link>
-              </Menu.Item> */}
+              </Menu.Item>
             </SubMenu>
 
             {/* PEMBELIAN  */}
