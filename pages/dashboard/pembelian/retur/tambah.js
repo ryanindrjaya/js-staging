@@ -1,66 +1,71 @@
 import Head from "next/head";
+import React, { useState, useEffect, createContext } from "react";
 import LayoutContent from "@iso/components/utility/layoutContent";
-import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
+import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
-import ConfirmDialog from "@iso/components/Alert/ConfirmDialog";
-import { useSelector, useDispatch } from "react-redux";
-import { useRef, useState, useEffect } from "react";
-import { useRouter } from "next/router";
+import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
+import TitlePage from "../../../../components/TitlePage/TitlePage";
 import {
-  Row,
   Form,
   Input,
-  InputNumber,
-  Select,
+  DatePicker,
   Button,
+  message,
+  Modal,
+  Select,
   Spin,
   notification,
-  DatePicker,
 } from "antd";
-import TitlePage from "@iso/components/TitlePage/TitlePage";
-import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
-import AddSellSalesTable from "@iso/components/ReactDataTable/Selling/AddSellSalesTable";
-import AddDebtTable from "@iso/components/ReactDataTable/Cost/AddDebtTable";
-import createData from "../utility/create";
-import createDetails from "../utility/createDetail";
-import calculatePrice from "../utility/calculatePrice";
-import Supplier from "@iso/components/Form/AddCost/SupplierForm";
+import { UploadOutlined } from "@ant-design/icons";
 import nookies from "nookies";
-import LoadingAnimations from "@iso/components/Animations/Loading";
-import DataTable from "react-data-table-component";
-import * as moment from "moment";
+import SearchBar from "../../../../components/Form/AddOrder/SearchBar";
+import { useSelector, useDispatch } from "react-redux";
+import calculatePrice from "../utility/calculatePrice";
+import DataReturTable from "../../../../components/ReactDataTable/Purchases/DataReturTable";
+import createDetailReturFunc from "../utility/createReturDetail";
+import createReturFunc from "../utility/createRetur";
+import { useRouter } from "next/router";
+import SearchLPB from "../../../../components/Form/AddOrder/SearchLPB";
+import moment from "moment";
+import createInventoryRetur from "../utility/createInventoryRetur";
 
-Hutang.getInitialProps = async (context) => {
+Retur.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
 
-  const req = await fetchData(cookies);
-  const user = await req.json();
+  const reqLocation = await fetchLocation(cookies);
+  const location = await reqLocation.json();
 
-  const reqLPB = await fetchDataPurchasing(cookies);
-  const LPB = await reqLPB.json();
+  const reqDataRetur = await fetchDataRetur(cookies);
+  const returs = await reqDataRetur.json();
 
-  const reqReturLPB = await fetchRetur(cookies);
-  const returLPB = await reqReturLPB.json();
+  const reqDataLPB = await fetchDataLPB(cookies);
+  const dataLPB = await reqDataLPB.json();
 
-  const reqHutang = await fetchHutang(cookies);
-  const hutang = await reqHutang.json();
+  const reqUser = await fetchUser(cookies);
+  const user = await reqUser.json();
 
-  const reqAkunHutang = await fetchAkunHutang(cookies);
-  const akunHutang = await reqAkunHutang.json();
+  if (reqLocation.status !== 200) {
+    context.res.writeHead(302, {
+      Location: "/signin?session=false",
+      "Content-Type": "text/html; charset=utf-8",
+    });
+    context?.res?.end();
+
+    return {};
+  }
 
   return {
     props: {
+      location,
+      returs,
+      dataLPB,
       user,
-      LPB,
-      returLPB,
-      hutang,
-      akunHutang,
     },
   };
 };
 
-const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=*";
+const fetchLocation = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -73,7 +78,21 @@ const fetchData = async (cookies) => {
   return req;
 };
 
-const fetchDataPurchasing = async (cookies) => {
+const fetchDataRetur = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchDataLPB = async (cookies) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=deep";
   const options = {
     method: "GET",
@@ -87,8 +106,8 @@ const fetchDataPurchasing = async (cookies) => {
   return req;
 };
 
-const fetchRetur = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-lpbs?populate=deep";
+const fetchUser = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -101,379 +120,392 @@ const fetchRetur = async (cookies) => {
   return req;
 };
 
-const fetchHutang = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate=deep";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
-
-  const req = await fetch(endpoint, options);
-  return req;
-};
-
-const fetchAkunHutang = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=deep";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
-
-  const req = await fetch(endpoint, options);
-  return req;
-};
-
-function Hutang({ props }) {
-  const biaya = useSelector((state) => state.Cost);
-  const dispatch = useDispatch();
-
+function Retur({ props }) {
   const user = props.user;
-  const lpb = props.LPB.data;
-  const returLPB = props.returLPB.data;
-  const akunHutang = props.akunHutang.data;
-  const hutang = props.hutang;
-  const [supplier, setSupplier] = useState();
-  const [dataTabel, setDataTabel] = useState([]);
-  const [dataRetur, setDataRetur] = useState([]);
-  const [sisaHutang, setSisaHutang] = useState([]);
-  const [sisaHutangTotal, setSisaHutangTotal] = useState({});
+  const locations = props.location.data;
+  const dataLPB = props.dataLPB.data;
+  var products = useSelector((state) => state.Order);
+  var selectedProduct = products?.productList;
+  const dispatch = useDispatch();
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [isFetchinData, setIsFetchingData] = useState(false);
-  const [document, setDocument] = useState();
-  const [tanggal, setTanggal] = useState(moment());
-
   const [dataValues, setDataValues] = useState();
-
+  const [supplier, setSupplier] = useState();
+  const [productTotalPrice, setProductTotalPrice] = useState({});
+  const [productSubTotal, setProductSubTotal] = useState({});
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [grandTotal, setGrandTotal] = useState(0);
   const [listId, setListId] = useState([]);
-
-  const submitBtn = useRef();
   const router = useRouter();
-  const { TextArea } = Input;
-  var today = new Date();
-  var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
-  var yyyy = today.getFullYear();
-  var date = today.getDate() + "/" + mm + "/" + yyyy;
-  var time =
-    today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  const [lpbData, setLpbData] = useState();
+  const [dataGudang, setDataGudang] = useState();
+  const [stokString, setStokString] = useState({});
 
-  const cookies = nookies.get(null, "token");
+  const [modal, contextHolder] = Modal.useModal();
+  const [isTaxActive, setIsTaxActive] = useState(true);
+
+  const ReachableContext = createContext(null);
+  const UnreachableContext = createContext(null);
+
+  //temp
   const tempList = [];
-
-  const [info, setInfo] = useState();
-
-  //total item
-  const [totalItem, setTotalItem] = useState(0);
-
-  // status pembayaran
-  const [statusPembayaran, setStatusPembayaran] = useState();
-
-  // Range Picker
-  const { RangePicker } = DatePicker;
-  const [rangePicker, setRangePicker] = useState();
-
-  // Search No LPB
-  const { Search } = Input;
-  const [searchNoLpb, setSearchNoLpb] = useState();
-
-  // NO Hutang
-  var noHutang = String(props.hutang?.meta?.pagination.total + 1).padStart(
+  const cookies = nookies.get(null, "token");
+  var totalReturs = String(props.returs?.meta?.pagination.total + 1).padStart(
     3,
     "0"
   );
-  const [categorySale, setCategorySale] = useState(
-    `PH/ET/${user.id}/${noHutang}/${mm}/${yyyy}`
-  );
+  var today = new Date();
+  var dd = String(today.getDate()).padStart(2, "0");
+  var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
+  var yyyy = today.getFullYear();
 
+  const { TextArea } = Input;
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
     maximumFractionDigits: 2,
   });
 
-  const onFinish = (values) => {
-    var totalTunai = 0;
-    var totalTransfer = 0;
-    var totalGiro = 0;
-    var totalCn = 0;
-    var totalOth = 0;
+  var formatterTotal = new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 2,
+  });
 
-    setLoading(true);
-    setInfo("sukses");
+  const onSelectLocation = async (locationId, dataProduct, idx) => {
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/inventories?populate=location&filters[location][id]=${locationId}&filters[product][id]=${dataProduct.id}`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
 
-    for (const key in biaya.info) {
-      totalTunai += biaya.info[key].tunai;
-      totalTransfer += biaya.info[key].transfer;
-      totalGiro += biaya.info[key].giro;
-      totalCn += biaya.info[key].cn;
-      totalOth += biaya.info[key].oth;
-    }
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
 
-    var totalBayar =
-      values.bayar1 +
-      values.bayar2 +
-      values.bayar3 +
-      values.bayar4 +
-      values.bayar5;
-    var totalBayarProduk =
-      totalTunai + totalTransfer + totalGiro + totalCn + totalOth;
-    if (
-      (totalTunai != values.bayar1 ||
-        totalTransfer != values.bayar2 ||
-        totalGiro != values.bayar3 ||
-        totalCn != values.bayar4 ||
-        totalOth != values.bayar5) &&
-      totalBayar != totalBayarProduk
-    ) {
-      notification["error"]({
-        message: "Gagal menambahkan data",
-        description: "Total pembayaran dan yang dibayar tidak sesuai.",
+    if (res.data.length > 0) {
+      const product = dataProduct.attributes;
+      const stok = res.data[0].attributes;
+      let stokGudang = "";
+      setDataGudang({
+        ...dataGudang,
+        [idx]: res.data[0].attributes,
       });
-      setInfo("gagal");
+
+      const unit1 = product.unit_1
+        ? stok.stock_unit_1 + " " + product.unit_1
+        : "";
+      const unit2 = product.unit_2
+        ? stok.stock_unit_2 + " " + product.unit_2
+        : "";
+      const unit3 = product.unit_3
+        ? stok.stock_unit_3 + " " + product.unit_3
+        : "";
+      const unit4 = product.unit_4
+        ? stok.stock_unit_4 + " " + product.unit_4
+        : "";
+      const unit5 = product.unit_5
+        ? stok.stock_unit_5 + " " + product.unit_5
+        : "";
+
+      stokGudang =
+        unit1 + " " + unit2 + " " + unit3 + " " + unit4 + " " + unit5;
+
+      setStokString({
+        ...stokString,
+        [idx]: stokGudang,
+      });
+    } else {
+      const product = dataProduct.attributes;
+      let stokGudang = "";
+      setDataGudang({
+        ...dataGudang,
+        [idx]: {
+          location: {
+            data: {
+              id: locationId,
+            },
+          },
+        },
+      });
+
+      const unit1 = product.unit_1 ? "0" + " " + product.unit_1 : "";
+      const unit2 = product.unit_2 ? "0" + " " + product.unit_2 : "";
+      const unit3 = product.unit_3 ? "0" + " " + product.unit_3 : "";
+      const unit4 = product.unit_4 ? "0" + " " + product.unit_4 : "";
+      const unit5 = product.unit_5 ? "0" + " " + product.unit_5 : "";
+
+      stokGudang =
+        unit1 + " " + unit2 + " " + unit3 + " " + unit4 + " " + unit5;
+
+      setStokString({
+        ...stokString,
+        [idx]: stokGudang,
+      });
+    }
+  };
+
+  const checkReturQty = async (values) => {
+    let popUpDialog = false;
+    let cannotBeReturnedProducts = [];
+
+    for (let index in dataGudang) {
+      const qty = values?.jumlah_qty?.[index] ?? 1;
+      const unitIndex =
+        values?.jumlah_option?.[index] ??
+        products?.productInfo?.[index].unit ??
+        1;
+      const productId = products.productList[index]?.id;
+      const productName = products.productList[index]?.attributes?.name;
+      const productUnit =
+        products.productList[index]?.attributes?.["unit_" + unitIndex];
+      const gudangLocatioId = dataGudang?.[index].location?.data?.id ?? 0;
+
+      if (typeof unitIndex === "string") {
+        productUnit = unitIndex;
+      }
+
+      const returData = {
+        location: gudangLocatioId,
+        product: productId,
+        unit: productUnit,
+        qty: qty,
+      };
+
+      // fetch to api check
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/product/check";
+      const options = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+        body: JSON.stringify(returData),
+      };
+
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
+      console.log(res);
+      if (!res?.available) {
+        popUpDialog = true;
+        cannotBeReturnedProducts.push(productName);
+      }
     }
 
-    hutang.data.forEach((element) => {
-      if (values.no_hutang == element.attributes.no_hutang) {
-        notification["error"]({
-          message: "Gagal menambahkan data",
-          description: "Data gagal ditambahkan, karena no hutang sama",
-        });
-        setInfo("gagal");
-      }
-    });
+    if (popUpDialog) {
+      Modal.error({
+        title: "Retur Gagal",
+        content: (
+          <div>
+            <p>
+              Item ini tidak bisa dilakukan retur. Silahkan cek kembali stok
+              gudang yang tersedia:
+            </p>
+            <ul>
+              {cannotBeReturnedProducts.map((product) => (
+                <li>{product === undefined ? "" : `- ${product}`} </li>
+              ))}
+            </ul>
+          </div>
+        ),
+      });
+    }
+
+    return popUpDialog;
+  };
+
+  // ! COPY THIS INTO STORE RETUR
+  const onFinish = async (values) => {
+    setLoading(true);
+
+    console.log("values", values);
+
+    const isShowingPopup = await checkReturQty(values);
+    if (isShowingPopup) {
+      setLoading(false);
+      return;
+    }
+
+    const payment = getPaymentRemaining();
+    if (totalPrice > payment.returPaymentRemaining) {
+      notification["error"]({
+        message: "Overprice",
+        description: "Harga retur melebih dari Sisa pembayaran / Harga LPB",
+      });
+      setLoading(false);
+      return;
+    }
+
     setDataValues(values);
     setLoading(false);
   };
 
-  const createDetail = async () => {
-    //await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/sales-sale-details");
-    await createDetails(
-      dataValues,
-      dataTabel,
-      biaya,
-      sisaHutang,
+  const createDetailRetur = async () => {
+    createDetailReturFunc(
+      products,
+      productTotalPrice,
+      productSubTotal,
       setListId,
-      "/debt-details",
-      "hutang"
+      "/retur-details",
+      dataValues
     );
   };
 
-  const createMaster = async (values) => {
-    values.total_item = dataTabel.length;
-    values.total_hutang_jatuh_tempo = totalHutangJatuhTempo();
-    values.total_pembayaran = totalPembayaran();
-    values.sisa_hutang_jatuh_tempo = sisaHutangJatuhTempo();
-    values.supplier = supplier;
-    values.document = document;
-    values.tanggal_pembayaran = tanggal;
-    values.status_pembayaran = "Dibayar";
-    await createData(
-      sisaHutang,
+  const createRetur = async (values) => {
+    await createReturFunc(
+      grandTotal,
+      totalPrice,
       values,
       listId,
       form,
       router,
-      "/debts/",
-      "hutang",
-      akunHutang
+      lpbData?.id,
+      createInventoryRetur
     );
+
+    // create retur inventory
   };
 
-  const clearData = () => {
-    dispatch({ type: "CLEAR_DATA" });
+  const onChangeProduct = async () => {
+    var isDuplicatedData = false;
+
+    tempList.find((item) => {
+      productList.forEach((element) => {
+        if (element.id === item.id) isDuplicatedData = true;
+      });
+    });
+
+    if (!isDuplicatedData) {
+      setProductList((productList) => [...productList, tempList[0]]);
+      toast.success("Produk berhasil ditambahkan!", {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 1000,
+      });
+    }
   };
 
-  const calculatePriceTotal = (row, index) => {
-    const total = calculatePrice(row, biaya, sisaHutangTotal, index);
-    sisaHutang[index] = total;
+  const getPaymentRemaining = () => {
+    let returPayments = 0;
+    let returPaymentRemaining = 0;
+    const totalLPBPayment = lpbData?.attributes?.total_purchasing ?? 0;
+
+    // for (const data in lpbData?.attributes?.returs?.data) {
+    //   console.log("retur payment ", data.);
+    // }
+    lpbData?.attributes?.returs?.data.forEach((element) => {
+      returPayments = returPayments + element.attributes.total_price;
+    });
+
+    returPaymentRemaining = totalLPBPayment - returPayments;
+    const paymentData = {
+      LPBPayment: totalLPBPayment,
+      returPayment: returPayments,
+      returPaymentRemaining: returPaymentRemaining,
+    };
+
+    return paymentData;
+  };
+
+  useEffect(() => {
+    getPaymentRemaining();
+  }, [lpbData]);
+
+  const calculatePriceAfterDisc = (row, index) => {
+    const total = calculatePrice(
+      row,
+      products,
+      productTotalPrice,
+      productSubTotal,
+      setTotalPrice,
+      index,
+      setProductSubTotal
+    );
     return formatter.format(total);
   };
 
-  const totalHutangJatuhTempo = () => {
-    var total = 0;
-    if (biaya.info != null) {
-      for (let row in biaya.info) {
-        if (biaya.info[row].pilihData == "pilih")
-          total = total + biaya.info[row].totalHutangJatuhTempo;
-      }
+  const fetchReturdata = async (id) => {
+    //clearData();
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=deep`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    const dataRetur = res.data.attributes;
+
+    form.setFieldsValue({
+      no_nota_supplier: dataRetur.no_nota_suppplier,
+      tanggal_pembelian: dataRetur.date_purchasing,
+    });
+  };
+
+  const setProductValue = async () => {
+    console.log("products", products);
+    if (products.productList.length != 0) {
+      products.productList.forEach((element) => {
+        console.log("masuk");
+        form.setFieldsValue({
+          harga_satuan: {
+            [element.id]: element.attributes.buy_price_1,
+          },
+        });
+      });
     }
-    return total;
-  };
-
-  const totalPembayaran = () => {
-    var total = 0;
-    var tunai = 0;
-    var transfer = 0;
-    var giro = 0;
-    var cn = 0;
-    var oth = 0;
-    for (let row in biaya.info) {
-      if (biaya.info[row].pilihData == "pilih") {
-        if (biaya.info[row].tunai != null) tunai = biaya.info[row].tunai;
-        if (biaya.info[row].transfer != null)
-          transfer = biaya.info[row].transfer;
-        if (biaya.info[row].giro != null) giro = biaya.info[row].giro;
-        if (biaya.info[row].cn != null) cn = biaya.info[row].cn;
-        if (biaya.info[row].oth != null) oth = biaya.info[row].oth;
-
-        total = total + tunai + transfer + giro + cn + oth;
-      }
-    }
-    return total;
-  };
-
-  const sisaHutangJatuhTempo = () => {
-    var total = 0;
-    var totalHutang = totalHutangJatuhTempo();
-    var totalBayar = totalPembayaran();
-    total = totalHutang - totalBayar;
-    return total;
-  };
-
-  const filterBySearch = (event) => {
-    // Access input value
-    const query = event.target.value;
-    if (event != undefined) setSearchNoLpb(query);
   };
 
   useEffect(() => {
-    var totalTunai = 0;
-    var totalTransfer = 0;
-    var totalGiro = 0;
-    var totalCn = 0;
-    var totalOth = 0;
-    var lastKey = 0;
-
-    if (biaya.info) {
-      for (const key in biaya.info) {
-        totalTunai += biaya.info[key].tunai;
-        totalTransfer += biaya.info[key].transfer;
-        totalGiro += biaya.info[key].giro;
-        totalCn += biaya.info[key].cn;
-        totalOth += biaya.info[key].oth;
-
-        if (biaya.info[key].pilihData == "pilih") {
-          form.setFieldsValue({
-            metode_bayar1: "tunai",
-            bayar1: totalTunai,
-            metode_bayar2: "transfer",
-            bayar2: totalTransfer,
-            metode_bayar3: "giro",
-            bayar3: totalGiro,
-            metode_bayar4: "cn",
-            bayar4: totalCn,
-            metode_bayar5: "oth",
-            bayar5: totalOth,
-          });
-          lastKey++;
-        }
-      }
-      setTotalItem(lastKey);
-    }
-  }, [biaya.info]);
+    setGrandTotal(totalPrice);
+  }, [totalPrice]);
 
   useEffect(() => {
-    if (dataValues && info == "sukses") createDetail();
-  }, [dataValues]);
+    var total = 0;
+    for (var key in productTotalPrice) {
+      total = total + productTotalPrice[key];
+    }
+  }, [totalPrice]);
 
   useEffect(() => {
     if (listId.length > 0) {
-      createMaster(dataValues);
+      createRetur(dataValues);
     }
   }, [listId]);
 
   useEffect(() => {
-    // used to reset redux from value before
-    clearData();
+    if (dataValues) createDetailRetur();
+  }, [dataValues]);
 
-    var lpbId = 0;
-    lpb.forEach((row) => {
-      var tempoDate = new Date(row.attributes?.date_purchasing);
-      var tempoTime = parseInt(row.attributes?.tempo_days ?? 0);
-      var today = new Date();
-      var isTempo = false;
-      var statusPembayaran = row.attributes?.status_pembayaran;
-      var purchasingHistory = row.attributes?.purchasing_payments.data;
-      var status = "Sebagian";
-
-      if (row.attributes?.tempo_time === "Hari") {
-        tempoDate.setDate(tempoDate.getDate() + tempoTime);
-      } else {
-        tempoDate.setDate(tempoDate.getMonth() + tempoTime);
-      }
-
-      if (tempoDate < today) {
-        isTempo = true;
-      }
-
-      if (isTempo) {
-        if (statusPembayaran === "Belum Lunas") {
-          status = "Tempo";
-        } else if (statusPembayaran === "Dibayar Sebagian") {
-          status = "Sebagian";
-        } else if (statusPembayaran === "Lunas") {
-          status = "Selesai";
-        }
-      } else {
-        if (
-          statusPembayaran === "Belum Lunas" &&
-          purchasingHistory.length == 0
-        ) {
-          status = "Tempo";
-        } else if (
-          statusPembayaran === "Dibayar Sebagian" &&
-          purchasingHistory.length > 0
-        ) {
-          status = "Sebagian";
-        } else if (
-          statusPembayaran === "Lunas" &&
-          purchasingHistory.length > 0
-        ) {
-          status = "Selesai";
-        } else {
-          status = "Menunggu";
-        }
-      }
-
-      if (status == "Tempo" || statusPembayaran == "Dibayar Sebagian") {
-        row.hidden = false;
-        dataTabel[lpbId] = row;
-        //biaya.list.push(row);
-        dispatch({ type: "ADD_LIST", list: row });
-      }
-      console.log("statusPembayaran", statusPembayaran, status);
-      lpbId++;
-    });
-
-    //dataTabel.push(biaya.list);
-    lpbId = 0;
-
-    returLPB.forEach((row) => {
-      row.subtotal = 0;
-      dataTabel.forEach((element) => {
-        if (
-          element.attributes.no_purchasing ==
-          row.attributes.purchasing.data?.attributes.no_purchasing
-        ) {
-          row.attributes.retur_lpb_details.data.forEach((detail) => {
-            row.subtotal += parseInt(detail.attributes.sub_total);
-          });
-          dataRetur[lpbId] = {
-            id: element.attributes.no_purchasing,
-            subtotal: row.subtotal,
-          };
-        }
-      });
-      lpbId++;
-    });
+  useEffect(() => {
+    dispatch({ type: "CLEAR_DATA" });
+    setProductValue();
   }, []);
+
+  const data = {
+    name: "file",
+    action: "https://www.mocky.io/v2/5cc8019d300000980a055e76",
+    headers: {
+      authorization: "authorization-text",
+    },
+    onChange(info) {
+      if (info.file.status !== "uploading") {
+        console.log(info.file, info.fileList);
+      }
+      if (info.file.status === "done") {
+        message.success(`${info.file.name} file uploaded successfully`);
+      } else if (info.file.status === "error") {
+        message.error(`${info.file.name} file upload failed.`);
+      }
+    },
+  };
 
   const validateError = () => {
     var listError = form.getFieldsError();
@@ -487,443 +519,260 @@ function Hutang({ props }) {
     });
   };
 
+  const getDPP = () => {
+    const isDPPActive = form.getFieldValue("DPP_PPN_active");
+    var total = 0;
+
+    if (isDPPActive) total = totalPrice / 1.11;
+
+    return total;
+  };
+
+  const getPPN = () => {
+    var total = 0;
+    let dpp = getDPP();
+    total = dpp * 0.11;
+
+    return total;
+  };
+
   return (
     <>
       <Head>
-        <title>Pembayaran Pembelian</title>
+        <title>Tambah Retur</title>
       </Head>
       <DashboardLayout>
         <LayoutWrapper style={{}}>
-          <TitlePage titleText={"Pembayaran Pembelian"} />
+          <TitlePage titleText={"Tambah Retur Pembelian Barang"} />
           <LayoutContent>
             <Form
               form={form}
-              name="add"
+              name="retur"
               initialValues={{
                 remember: true,
               }}
               onFinish={onFinish}
-              onFinishFailed={validateError}
             >
-              <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-4">
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="no_hutang"
-                    initialValue={categorySale}
-                    rules={[
-                      {
-                        required: true,
-                        message: "Nomor Hutang tidak boleh kosong!",
-                      },
-                    ]}
-                  >
-                    <Input
-                      style={{ height: "40px" }}
-                      placeholder="No. Hutang"
-                    />
-                  </Form.Item>
-                </div>
+              <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Supplier onChangeSupplier={setSupplier} />
                 </div>
-                <div className="w-full md:w-1/4 px-3 mb-2">
+                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    name="status_pembayaran" //initialValue={"Hari"}
-                    noStyle
+                    name="no_retur"
+                    initialValue={`RB/ET/${totalReturs}/${mm}/${yyyy}`}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Nomor Retur tidak boleh kosong!",
+                      },
+                    ]}
+                  >
+                    <Input style={{ height: "40px" }} placeholder="No.Retur" />
+                  </Form.Item>
+                </div>
+                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
+                  <Form.Item
+                    name="tanggal_retur"
+                    initialValue={moment()}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Tanggal tidak boleh kosong!",
+                      },
+                    ]}
+                  >
+                    <DatePicker
+                      placeholder="Tanggal Retur"
+                      size="large"
+                      format={"DD/MM/YYYY"}
+                      style={{ width: "100%" }}
+                    />
+                  </Form.Item>
+                </div>
+                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
+                  <Form.Item
+                    name="location"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Lokasi tidak boleh kosong!",
+                      },
+                    ]}
                   >
                     <Select
+                      placeholder="Pilih Lokasi"
                       size="large"
                       style={{
                         width: "100%",
                       }}
-                      allowClear
-                      placeholder="Status Pembayaran"
-                      onChange={setStatusPembayaran}
                     >
-                      <Select.Option value="Dibayar" key="Dibayar">
-                        Dibayar
-                      </Select.Option>
-                      <Select.Option value="Belum Dibayar" key="Belum Dibayar">
-                        Belum Dibayar
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="tanggal">
-                    <RangePicker
-                      size="large"
-                      onChange={(values) => setRangePicker(values)}
-                    />
-                  </Form.Item>
-                </div>
-              </div>
-
-              <div className="w-full md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
-                <Search
-                  size="large"
-                  id="searchBox"
-                  placeholder="Cari Nomor LPB"
-                  onChange={filterBySearch}
-                />
-              </div>
-
-              {isFetchinData ? (
-                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
-                  <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
-                    <LoadingAnimations />
-                  </div>
-                  <div className="text-sm align-middle text-center animate-pulse text-slate-400">
-                    Sedang Mengambil Data
-                  </div>
-                </div>
-              ) : (
-                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                  <AddDebtTable
-                    data={dataTabel}
-                    retur={dataRetur}
-                    biaya={biaya}
-                    calculatePriceTotal={calculatePriceTotal}
-                    sisaHutang={sisaHutang}
-                    form={form}
-                    supplier={supplier}
-                    statusPembayaran={statusPembayaran}
-                    rangePicker={rangePicker}
-                    search={searchNoLpb}
-                  />
-                </div>
-              )}
-
-              <div className="w-full flex flex-wrap mb-3">
-                <Form.Item
-                  name="total_item"
-                  className="w-full h-2 mx-2 flex justify-end font-bold"
-                >
-                  <span> TOTAL ITEM </span> <span> : {totalItem}</span>
-                </Form.Item>
-                <Form.Item
-                  name="total_hutang_jatuh_tempo"
-                  className="w-full h-2 mx-2 flex justify-end font-bold"
-                >
-                  <span> TOTAL HUTANG JATUH TEMPO </span>{" "}
-                  <span> : {formatter.format(totalHutangJatuhTempo())}</span>
-                </Form.Item>
-                <Form.Item
-                  name="total_pembayaran"
-                  className="w-full h-2 mx-2 flex justify-end font-bold"
-                >
-                  <span> TOTAL PEMBAYARAN </span>{" "}
-                  <span> : {formatter.format(totalPembayaran())}</span>
-                </Form.Item>
-                <Form.Item
-                  name="sisa_hutang_jatuh_tempo"
-                  className="w-full h-2 mx-2 flex justify-end font-bold"
-                >
-                  <span> SISA HUTANG JATUH TEMPO </span>{" "}
-                  <span> : {formatter.format(sisaHutangJatuhTempo())}</span>
-                </Form.Item>
-              </div>
-
-              <div className="w-full md:w-1/4 px-3 -mx-3">
-                <Form.Item name="tanggal_pembayaran">
-                  <DatePicker
-                    defaultValue={tanggal}
-                    placeholder="Tanggal Pembayaran"
-                    size="large"
-                    style={{ width: "100%" }}
-                    onChange={(value) => setTanggal(value)}
-                  />
-                </Form.Item>
-              </div>
-
-              <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 mt-8">
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="bayar1">
-                    <InputNumber
-                      placeholder="Nominal Pembayaran"
-                      formatter={(value) =>
-                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                      }
-                      parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                      min={0}
-                      style={{
-                        height: "40px",
-                        width: "100%",
-                        marginRight: "10px",
-                      }}
-                    />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="metode_bayar1" noStyle>
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      placeholder="Metode Pembayaran"
-                    >
-                      <Select.Option value="tunai" key="tunai">
-                        Tunai
-                      </Select.Option>
-                      <Select.Option value="transfer" key="transfer">
-                        Bank Transfer
-                      </Select.Option>
-                      <Select.Option value="giro" key="giro">
-                        Bank Giro
-                      </Select.Option>
-                      <Select.Option value="cn" key="cn">
-                        CN
-                      </Select.Option>
-                      <Select.Option value="oth" key="oth">
-                        OTH
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
-                </div>
-              </div>
-
-              <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="bayar2">
-                    <InputNumber
-                      placeholder="Nominal Pembayaran"
-                      formatter={(value) =>
-                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                      }
-                      parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                      min={0}
-                      style={{
-                        height: "40px",
-                        width: "100%",
-                        marginRight: "10px",
-                      }}
-                    />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="metode_bayar2" noStyle>
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      placeholder="Metode Pembayaran"
-                    >
-                      <Select.Option value="tunai" key="tunai">
-                        Tunai
-                      </Select.Option>
-                      <Select.Option value="transfer" key="transfer">
-                        Bank Transfer
-                      </Select.Option>
-                      <Select.Option value="giro" key="giro">
-                        Bank Giro
-                      </Select.Option>
-                      <Select.Option value="cn" key="cn">
-                        CN
-                      </Select.Option>
-                      <Select.Option value="oth" key="oth">
-                        OTH
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
-                </div>
-              </div>
-
-              <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="bayar3">
-                    <InputNumber
-                      placeholder="Nominal Pembayaran"
-                      formatter={(value) =>
-                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                      }
-                      parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                      min={0}
-                      style={{
-                        height: "40px",
-                        width: "100%",
-                        marginRight: "10px",
-                      }}
-                    />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="metode_bayar3" noStyle>
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      placeholder="Metode Pembayaran"
-                    >
-                      <Select.Option value="tunai" key="tunai">
-                        Tunai
-                      </Select.Option>
-                      <Select.Option value="transfer" key="transfer">
-                        Bank Transfer
-                      </Select.Option>
-                      <Select.Option value="giro" key="giro">
-                        Bank Giro
-                      </Select.Option>
-                      <Select.Option value="cn" key="cn">
-                        CN
-                      </Select.Option>
-                      <Select.Option value="oth" key="oth">
-                        OTH
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
-                </div>
-              </div>
-
-              <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="bayar4">
-                    <InputNumber
-                      placeholder="Nominal Pembayaran"
-                      formatter={(value) =>
-                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                      }
-                      parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                      min={0}
-                      style={{
-                        height: "40px",
-                        width: "100%",
-                        marginRight: "10px",
-                      }}
-                    />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="metode_bayar4" noStyle>
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      placeholder="Metode Pembayaran"
-                    >
-                      <Select.Option value="tunai" key="tunai">
-                        Tunai
-                      </Select.Option>
-                      <Select.Option value="transfer" key="transfer">
-                        Bank Transfer
-                      </Select.Option>
-                      <Select.Option value="giro" key="giro">
-                        Bank Giro
-                      </Select.Option>
-                      <Select.Option value="cn" key="cn">
-                        CN
-                      </Select.Option>
-                      <Select.Option value="oth" key="oth">
-                        OTH
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
-                </div>
-              </div>
-
-              <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="bayar5">
-                    <InputNumber
-                      placeholder="Nominal Pembayaran"
-                      formatter={(value) =>
-                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                      }
-                      parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                      min={0}
-                      style={{
-                        height: "40px",
-                        width: "100%",
-                        marginRight: "10px",
-                      }}
-                    />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="metode_bayar5" noStyle>
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      placeholder="Metode Pembayaran"
-                    >
-                      <Select.Option value="tunai" key="tunai">
-                        Tunai
-                      </Select.Option>
-                      <Select.Option value="transfer" key="transfer">
-                        Bank Transfer
-                      </Select.Option>
-                      <Select.Option value="giro" key="giro">
-                        Bank Giro
-                      </Select.Option>
-                      <Select.Option value="cn" key="cn">
-                        CN
-                      </Select.Option>
-                      <Select.Option value="oth" key="oth">
-                        OTH
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
-                </div>
-              </div>
-
-              <div className="w-full mt-8 flex justify-between">
-                <Form.Item name="catatan" className="w-full mx-2">
-                  <TextArea rows={4} placeholder="Catatan Pembayaran" />
-                </Form.Item>
-              </div>
-
-              <div className="w-full flex justify-center">
-                <Form.Item>
-                  {loading ? (
-                    <div className=" flex float-left ml-3 ">
-                      <Spin />
-                    </div>
-                  ) : (
-                    <button
-                      htmlType="submit"
-                      className="bg-cyan-700 rounded-md m-1 text-sm"
-                      onClick={() => setDocument("Draft")}
-                    >
-                      <p className="px-4 py-2 m-0 text-white">
-                        SIMPAN DAN PERBARUI
-                      </p>
-                    </button>
-                  )}
-                </Form.Item>
-                <Form.Item>
-                  {loading ? (
-                    <div className=" flex float-left ml-3 ">
-                      <Spin />
-                    </div>
-                  ) : (
-                    <>
-                      <ConfirmDialog
-                        onConfirm={() => submitBtn?.current?.click()}
-                        onCancel={() => {}}
-                        title="Tambah Hutang"
-                        message="Silahkan cek kembali data yang telah dimasukkan, apakah anda yakin ingin menambahkan ?"
-                        component={
-                          <button
-                            type="button"
-                            className="bg-cyan-700 rounded-md m-1 text-sm"
-                            onClick={() => setDocument("Publish")}
+                      {locations.map((element) => {
+                        return (
+                          <Select.Option
+                            value={element.id}
+                            key={element.attributes.name}
                           >
-                            <p className="px-4 py-2 m-0 text-white">
-                              SIMPAN DAN CETAK
-                            </p>
-                          </button>
-                        }
-                      />
-                      <Button htmlType="submit" ref={submitBtn}></Button>
-                    </>
+                            {element.attributes.name}
+                          </Select.Option>
+                        );
+                      })}
+                    </Select>
+                  </Form.Item>
+                </div>
+                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
+                  <SearchLPB supplier={supplier} handleSelect={setLpbData} />
+                </div>
+                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
+                  <Form.Item
+                    name="status"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Status tidak boleh kosong!",
+                      },
+                    ]}
+                  >
+                    <Select
+                      placeholder="Pilih Status"
+                      size="large"
+                      style={{
+                        width: "100%",
+                      }}
+                    >
+                      <Select.Option value="Draft" key="Draft">
+                        Draft
+                      </Select.Option>
+                      <Select.Option value="Selesai" key="Selesai">
+                        Selesai
+                      </Select.Option>
+                    </Select>
+                  </Form.Item>
+                </div>
+                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0" hidden>
+                  <Form.Item name="no_nota_supplier"></Form.Item>
+                  <Form.Item name="tanggal_pembelian"></Form.Item>
+                </div>
+                <div className="w-full md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
+                  <SearchBar
+                    form={form}
+                    tempList={tempList}
+                    onChange={onChangeProduct}
+                    user={user}
+                    selectedProduct={selectedProduct}
+                    isBasedOnLocation={false}
+                  />
+                </div>
+                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
+                  <DataReturTable
+                    products={products}
+                    productTotalPrice={productTotalPrice}
+                    setTotalPrice={setTotalPrice}
+                    setProductTotalPrice={setProductTotalPrice}
+                    setProductSubTotal={setProductSubTotal}
+                    calculatePriceAfterDisc={calculatePriceAfterDisc}
+                    productSubTotal={productSubTotal}
+                    locations={locations}
+                    formObj={form}
+                    onSelectLocation={onSelectLocation}
+                    stokString={stokString}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-start md:justify-between">
+                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
+                  <Form.Item
+                    name="DPP_PPN_active"
+                    initialValue={isTaxActive}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Pajak tidak boleh kosong!",
+                      },
+                    ]}
+                  >
+                    <Select
+                      placeholder="Pajak Pembelian"
+                      size="large"
+                      onChange={setIsTaxActive}
+                      style={{
+                        width: "100%",
+                      }}
+                    >
+                      <Select.Option value={true} key="Pajak Pembelian">
+                        Pajak Pembelian
+                      </Select.Option>
+                      <Select.Option value={false} key="Non Pajak">
+                        Non Pajak
+                      </Select.Option>
+                    </Select>
+                  </Form.Item>
+                </div>
+                <p className="font-bold">
+                  Total Item : {products.productList.length}{" "}
+                </p>
+              </div>
+              <div className="flex justify-end">
+                <p className="font-bold">
+                  DPP : {formatterTotal.format(getDPP())}
+                </p>
+              </div>
+              <div className="flex justify-end">
+                <p className="font-bold">
+                  PPN : {formatterTotal.format(getPPN())}
+                </p>
+              </div>
+
+              <div className="flex justify-end">
+                <p className="font-bold">
+                  Total Harga : {formatterTotal.format(totalPrice)}{" "}
+                </p>
+              </div>
+
+              <div className="flex justify-end mt-5">
+                <p className="font-bold">
+                  Total LPB :{" "}
+                  {formatter.format(getPaymentRemaining().LPBPayment ?? 0)}{" "}
+                </p>
+              </div>
+              <div className="flex justify-end">
+                <p className="font-bold text-green-600">
+                  Pembayaran Sebelumnya :{" "}
+                  {formatter.format(getPaymentRemaining().returPayment ?? 0)}{" "}
+                </p>
+              </div>
+              <div className="flex justify-end">
+                <p className="font-bold text-red-400">
+                  Sisa Pembayaran :{" "}
+                  {formatter.format(
+                    getPaymentRemaining().returPaymentRemaining ?? 0
+                  )}{" "}
+                </p>
+              </div>
+
+              <Form.Item name="catatan">
+                <TextArea rows={4} placeholder="Catatan Tambahan" />
+              </Form.Item>
+              <ReachableContext.Provider value="Light">
+                <Form.Item className="mt-5">
+                  {loading ? (
+                    <div className=" flex float-left ml-3 ">
+                      <Spin />
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={validateError}
+                      htmlType="submit"
+                      className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
+                    >
+                      Tambah
+                    </Button>
                   )}
                 </Form.Item>
-              </div>
+                {contextHolder}
+
+                <UnreachableContext.Provider value="Bamboo" />
+              </ReachableContext.Provider>
             </Form>
           </LayoutContent>
         </LayoutWrapper>
@@ -932,4 +781,4 @@ function Hutang({ props }) {
   );
 }
 
-export default Hutang;
+export default Retur;
