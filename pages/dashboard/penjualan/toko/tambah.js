@@ -51,13 +51,14 @@ Toko.getInitialProps = async (context) => {
   //   return { props: {} };
   // }
 
-  const resCheckIn = await getCheckInUser(cookies, user);
-  if (resCheckIn.data.length === 0) {
-    // If resCheckIn is an empty array, redirect the user to a different page
-    context.res.writeHead(302, { Location: "/dashboard/penjualan/toko/kasir" });
-    context.res.end();
-    return;
-  }
+  // const resCheckIn = await getCheckInUser(cookies, user);
+  // if (resCheckIn.data.length === 0) {
+  //   console.log("isi context", context);
+  //   // If resCheckIn is an empty array, redirect the user to a different page
+  //   context.res.writeHead(302, { Location: "/dashboard/penjualan/toko/kasir" });
+  //   context.res.end();
+  //   return;
+  // }
 
   return {
     props: {
@@ -654,6 +655,20 @@ function Toko({ props }) {
       customer: customerData?.attributes.name,
     });
     setCustomer(customerData);
+  }, []);
+
+  useEffect(() => {
+    const checkForCheckInUser = async () => {
+      try {
+        const resCheckIn = await getCheckInUser(cookies, user);
+        if (resCheckIn?.data?.length === 0) {
+          router.replace("/dashboard/penjualan/toko/kasir");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    checkForCheckInUser();
   }, []);
 
   const validateError = () => {
