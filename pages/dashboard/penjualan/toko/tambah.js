@@ -46,20 +46,6 @@ Toko.getInitialProps = async (context) => {
   const userDoc = await reqUserDoc.json();
   const userLastDocNumber = userDoc.meta.pagination.total + 1;
 
-  // if (!context.res) {
-  //   // Return an empty object as props if context.res is undefined
-  //   return { props: {} };
-  // }
-
-  // const resCheckIn = await getCheckInUser(cookies, user);
-  // if (resCheckIn.data.length === 0) {
-  //   console.log("isi context", context);
-  //   // If resCheckIn is an empty array, redirect the user to a different page
-  //   context.res.writeHead(302, { Location: "/dashboard/penjualan/toko/kasir" });
-  //   context.res.end();
-  //   return;
-  // }
-
   return {
     props: {
       user,
@@ -70,35 +56,6 @@ Toko.getInitialProps = async (context) => {
       customer,
     },
   };
-};
-
-const getCheckInUser = async (cookies, user) => {
-  const today = new Date()
-    .toLocaleDateString("en-GB")
-    .split("/")
-    .reverse()
-    .join("-");
-  const tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000)
-    .toLocaleDateString("en-GB")
-    .split("/")
-    .reverse()
-    .join("-");
-
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL +
-    `/cashiers?filters[cashier_name][id][$eq]=${user.id}&populate=*&filters[createdAt][$gte]=${today}&filters[createdAt][$lte]=${tomorrow}`;
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
-
-  const req = await fetch(endpoint, options);
-  const res = await req.json();
-
-  return res;
 };
 
 const fetchUserDoc = async (cookies, userCodeName) => {
@@ -655,20 +612,6 @@ function Toko({ props }) {
       customer: customerData?.attributes.name,
     });
     setCustomer(customerData);
-  }, []);
-
-  useEffect(() => {
-    const checkForCheckInUser = async () => {
-      try {
-        const resCheckIn = await getCheckInUser(cookies, user);
-        if (resCheckIn?.data?.length === 0) {
-          router.replace("/dashboard/penjualan/toko/kasir");
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    checkForCheckInUser();
   }, []);
 
   const validateError = () => {
