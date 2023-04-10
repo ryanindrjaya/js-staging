@@ -254,12 +254,19 @@ function Retur({ props }) {
 
     for (let index in dataGudang) {
       const qty = values?.jumlah_qty?.[index] ?? 1;
-      const unitIndex = values?.jumlah_option?.[index] ?? 1;
+      const unitIndex =
+        values?.jumlah_option?.[index] ??
+        products?.productInfo?.[index].unit ??
+        1;
       const productId = products.productList[index]?.id;
       const productName = products.productList[index]?.attributes?.name;
       const productUnit =
         products.productList[index]?.attributes?.["unit_" + unitIndex];
       const gudangLocatioId = dataGudang?.[index].location?.data?.id ?? 0;
+
+      if (typeof unitIndex === "string") {
+        productUnit = unitIndex;
+      }
 
       const returData = {
         location: gudangLocatioId,

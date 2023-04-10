@@ -344,8 +344,8 @@ function PembayaranToko({ props }) {
                         dataPayment.length > 1
                           ? dataPayment.reduce(
                               (acc, curr) =>
-                                parseInt(acc) +
-                                parseInt(curr.attributes.payment),
+                                parseFloat(acc) +
+                                parseFloat(curr.attributes.payment),
                               0
                             )
                           : dataPayment.length === 1
@@ -380,7 +380,8 @@ function PembayaranToko({ props }) {
                       if (record.attributes.status === "Dibayar") {
                         const dataPaymentValue = dataPayment.reduce(
                           (acc, curr) =>
-                            parseInt(acc) + parseInt(curr.attributes.payment),
+                            parseFloat(acc) +
+                            parseFloat(curr.attributes.payment),
                           0
                         );
                         const kembali =

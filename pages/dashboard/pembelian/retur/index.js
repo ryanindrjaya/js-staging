@@ -200,14 +200,10 @@ function Retur({ props }) {
 
   const getTagColor = (type) => {
     switch (type) {
-      case "Terkirim":
-        return "green";
-      case "Diterima":
-        return "GREEN";
-      case "Sebagian Diterima":
+      case "Draft":
         return "orange";
-      case "Diproses":
-        return "default";
+      case "Selesai":
+        return "green";
       default:
         return "default";
     }
@@ -346,7 +342,7 @@ function Retur({ props }) {
                     )}
 
                     <Descriptions.Item
-                      label="Total Retur"
+                      label="Total Maksimal Retur"
                       span={2}
                       className="mt-5 font-bold"
                     >
@@ -367,11 +363,7 @@ function Retur({ props }) {
                     marginRight: "10px",
                   }}
                 >
-                  {/*{locations.map((element) => {*/}
-                  {/*  return (*/}
                   <Select.Option>data</Select.Option>
-                  {/*  );*/}
-                  {/*})}*/}
                 </Select>
               </div>
               <div className="w-full md:w-1/4 px-3">
@@ -383,11 +375,7 @@ function Retur({ props }) {
                     marginRight: "10px",
                   }}
                 >
-                  {/*{locations.map((element) => {*/}
-                  {/*  return (*/}
                   <Select.Option>data</Select.Option>
-                  {/*  );*/}
-                  {/*})}*/}
                 </Select>
               </div>
               <div className="w-full md:w-1/4 px-3">

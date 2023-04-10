@@ -204,7 +204,7 @@ export default function ReactDataTable({
           dataPayment.length > 1
             ? dataPayment.reduce(
                 (acc, curr) =>
-                  parseInt(acc) + parseInt(curr.attributes.payment),
+                  parseFloat(acc) + parseFloat(curr.attributes.payment),
                 0
               )
             : dataPayment.length === 1

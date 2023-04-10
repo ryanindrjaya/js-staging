@@ -130,7 +130,7 @@ const POSTPurchaseDetail = async (
     data: {
       total_order: String(qty),
       unit_order: unit,
-      unit_price: parseInt(unitPrice),
+      unit_price: parseFloat(unitPrice),
       unit_price_after_disc: parseFloat(unitPriceAfterDisc || 0).toFixed(2),
       sub_total: parseFloat(subTotal || 0).toFixed(2),
       products: { id: id },
@@ -143,7 +143,6 @@ const POSTPurchaseDetail = async (
 
   const endpoint = process.env.NEXT_PUBLIC_URL + url;
   const JSONdata = JSON.stringify(data);
-
 
   const options = {
     method: "POST",
