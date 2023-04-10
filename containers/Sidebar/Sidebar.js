@@ -239,13 +239,13 @@ export default function Sidebar(props) {
               title={
                 <span className="isoMenuHolder" style={submenuColor}>
                   <SidebarStockIcon size={18} />
-                  <span className="nav-text">Stok</span>
+                  <span className="nav-text">Inventory</span>
                 </span>
               }
             >
               <Menu.Item style={submenuStyle} key="stok">
                 <Link href="/dashboard/stok">
-                  <a>Riwayat Stok</a>
+                  <a>Riwayat Inventory</a>
                 </Link>
               </Menu.Item>
               <Menu.Item style={submenuStyle} key="permintaan_barang">
@@ -255,19 +255,19 @@ export default function Sidebar(props) {
               </Menu.Item>
               <Menu.Item style={submenuStyle} key="daftar_keluar_barang">
                 <Link href="/dashboard/stok/daftar-keluar-barang">
-                  <a>Daftar Barang Keluar</a>
+                  <a>Mutasi Barang Keluar</a>
                 </Link>
               </Menu.Item>
               <Menu.Item style={submenuStyle} key="daftar_masuk_barang">
                 <Link href="/dashboard/stok/daftar-masuk-barang">
-                  <a>Daftar Barang Masuk</a>
+                  <a>Mutasi Barang Masuk</a>
                 </Link>
               </Menu.Item>
-              {/* <Menu.Item style={submenuStyle} key="penyesuaian_stok">
+              <Menu.Item style={submenuStyle} key="penyesuaian_stok">
                 <Link href="/dashboard/stok/penyesuaian">
                   <a>Penyesuaian Stok</a>
                 </Link>
-              </Menu.Item> */}
+              </Menu.Item>
             </SubMenu>
 
             {/* PEMBELIAN  */}

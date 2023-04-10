@@ -21,10 +21,10 @@ import nookies from "nookies";
 import DateTimeComponent from "../../../../../components/DateTime/dateTime";
 import TitlePage from "../../../../../components/TitlePage/TitlePage";
 import Column from "antd/lib/table/Column";
-import { CreateStorePayment } from "../../utility/createStorePayment";
 import { useRouter } from "next/router";
 import PembayaranDrawer from "../../../../../components/Drawer/PembayaranDrawer";
-import { createInventoryFromPenjualan } from "../../utility/createInventory";
+import { CreateStorePayment } from "../../../../../library/functions/createStorePayment";
+import { createInventoryFromPenjualan } from "../../../../../library/functions/createInventory";
 
 PembayaranToko.getInitialProps = async (context) => {
   try {

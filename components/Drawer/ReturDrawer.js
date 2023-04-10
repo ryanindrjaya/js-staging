@@ -2,10 +2,9 @@ import { Button, Drawer, InputNumber, Popconfirm, Select } from "antd";
 import {
   CreateStorePaymenWithoutUpdate,
   updateReturTransaction,
-  updateTransaction,
-} from "../../pages/dashboard/penjualan/utility/createStorePayment";
+} from "../../library/functions/createStorePayment";
 import React, { useState } from "react";
-import { createInventoryFromReturPenjualan } from "../../pages/dashboard/penjualan/utility/createInventory";
+import { createInventoryFromReturPenjualan } from "../../library/functions/createInventory";
 
 function ReturDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
   const data = record?.attributes;

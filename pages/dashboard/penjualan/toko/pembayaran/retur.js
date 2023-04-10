@@ -21,10 +21,10 @@ import nookies from "nookies";
 import DateTimeComponent from "../../../../../components/DateTime/dateTime";
 import TitlePage from "../../../../../components/TitlePage/TitlePage";
 import Column from "antd/lib/table/Column";
-import { CreateStorePayment } from "../../utility/createStorePayment";
 import { useRouter } from "next/router";
 import ReturDrawer from "../../../../../components/Drawer/ReturDrawer";
-import { createInventoryFromReturPenjualan } from "../../utility/createInventory";
+import { CreateStorePayment } from "../../../../../library/functions/createStorePayment";
+import { createInventoryFromReturPenjualan } from "../../../../../library/functions/createInventory";
 
 PembayaranToko.getInitialProps = async (context) => {
   try {
@@ -155,6 +155,8 @@ function PembayaranToko({ props }) {
         );
 
         await createInventoryFromReturPenjualan(record);
+
+        reloadPage();
       } else {
         message.error("Pembayaran tidak mencukupi", 2);
       }
