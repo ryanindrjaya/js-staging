@@ -401,3 +401,16 @@ html[dir="rtl"] .dz-hidden-input {
   font-size: 28px;
   color: #999;
 }
+
+.custom-table .ant-table-thead {
+  height: 60px;
+}
+
+.custom-row {
+  height: 60px;
+}
+
+button:hover:active {
+  background-color: white !important;
+  color: #059669 !important;
+}
