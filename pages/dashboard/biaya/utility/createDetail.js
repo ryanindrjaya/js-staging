@@ -34,7 +34,7 @@ const createDetail = (
     //tempListId = [];
 
     if(biaya.info[id] != null){ 
-      if(biaya.info[id].pilihData == "pilih"){
+      if(biaya.info[id].pilihData == "pilih"){ console.log("biaya create detail", biaya);
         //default value
 
         //tempListId = [];
@@ -46,7 +46,7 @@ const createDetail = (
         var oth = biaya.info[id]?.oth ?? 0;
         var sisa_hutang = sisaHutang[id] ?? 0;
         var lpb = element;
-        var total_retur = data[id].subtotal; console.log("el", element);
+        var total_retur = data[id].subtotal;
         var customer = biaya.list[id]?.attributes?.customer?.data?.id;
 
         if(sisaHutang[id] == undefined || sisaHutang[id] < 0) sisa_hutang = 0 ;

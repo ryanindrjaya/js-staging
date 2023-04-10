@@ -97,6 +97,7 @@ function Hutang({ props }) {
 
     // Range Picker
     const { RangePicker } = DatePicker;
+    const [rangePicker, setRangePicker] = useState();
 
     const handleSetting = () => {
         router.push("/dashboard/biaya/hutang/setting");
@@ -113,6 +114,10 @@ function Hutang({ props }) {
             "Work In Progress",
             "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
         );
+    };
+
+    const handleEdit = (id) => {
+        router.push("/dashboard/biaya/hutang/edit/" + id);
     };
 
     const handleDelete = async (data) => {
@@ -205,7 +210,7 @@ function Hutang({ props }) {
             query += `filters[${key}\][id]=${searchParameters[key].id}&`;
           } else { query += ""; }
 
-          if (key === "no_hutang" || key === "status") {
+          if (key === "no_hutang" || key === "status_pembayaran") {
             if (searchParameters[key] !== undefined) {
               query += `filters[${key}]=${searchParameters[key]}&`;
             } else { query += ""; }
@@ -285,7 +290,7 @@ function Hutang({ props }) {
                                         marginRight: "10px",
                                     }}
                                     allowClear
-                                    onChange={(e) => setSearchParameters({ ...searchParameters, status: e })}
+                                    onChange={(e) => setSearchParameters({ ...searchParameters, status_pembayaran: e })}
                                     //onChange={value => onSearch(value, "pembayaran")}
                                 >
                                     <Select.Option value="Dibayar">
@@ -366,7 +371,7 @@ function Hutang({ props }) {
 
                         <DebtTable
                           data={hutang}
-                          onUpdate={handleUpdate}
+                          onUpdate={handleEdit}
                           onDelete={handleDelete}
                           //onPageChange={handlePageChange}
                           //onChangeStatus={onChangeStatus}

@@ -240,6 +240,7 @@ function Hutang({ props }) {
     values.supplier = supplier;
     values.document = document;
     values.tanggal_pembayaran = tanggal;
+    values.status_pembayaran = "Dibayar";
     await createData(sisaHutang, values, listId, form, router, "/debts/", "hutang", akunHutang);
   };
 
