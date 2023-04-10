@@ -25,6 +25,10 @@
   color: #036b82 !important;
 } */
 
+.ant-input-number-affix-wrapper {
+  align-items: center !important;
+}
+
 /*========= END CHANGE PLACEHOLDER COLOR ==============*/
 @media print {
   .ant-table-thead .ant-table-cell {
