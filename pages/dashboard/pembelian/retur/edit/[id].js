@@ -27,6 +27,7 @@ import createReturFunc from "../../utility/createRetur";
 import { useRouter } from "next/router";
 import LoadingAnimations from "@iso/components/Animations/Loading";
 import moment from "moment";
+import createInventoryRetur from "../../utility/createInventoryRetur";
 
 Retur.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -125,6 +126,8 @@ function Retur({ props }) {
   const user = props.user;
   const locations = props.location.data;
   const dataLPB = props.dataLPB.data;
+  const returMasterId = props.id;
+
   var products = useSelector((state) => state.Order);
   var selectedProduct = products?.productList;
   const dispatch = useDispatch();
@@ -248,45 +251,51 @@ function Retur({ props }) {
     }
   };
 
-  const checkReturQty = (values) => {
+  const checkReturQty = async (values) => {
     let popUpDialog = false;
     let cannotBeReturnedProducts = [];
-    console.log("ishowing dialog", popUpDialog);
-    // console.log("test for looping", values);
-    // console.log("test for looping", dataGudang);
-    // console.log("test for looping", products.productList);
-
-    for (const indextest in products.productList) {
-      console.log("test for looping", products.productList[indextest]);
-    }
 
     for (let index in dataGudang) {
       const qty = values?.jumlah_qty?.[index] ?? 1;
-      const unitIndex = values?.jumlah_option?.[index] ?? 1;
+      const unitIndex =
+        values?.jumlah_option?.[index] ??
+        products?.productInfo?.[index].unit ??
+        1;
+      const productId = products.productList[index]?.id;
       const productName = products.productList[index]?.attributes?.name;
+      const productUnit =
+        products.productList[index]?.attributes?.["unit_" + unitIndex];
+      const gudangLocatioId = dataGudang?.[index].location?.data?.id ?? 0;
 
-      const stokGudangUnit1 = dataGudang?.[index]?.stock_unit_1 ?? 0;
-      const stokGudangUnit2 = dataGudang?.[index]?.stock_unit_2 ?? 0;
-      const stokGudangUnit3 = dataGudang?.[index]?.stock_unit_3 ?? 0;
-      const stokGudangUnit4 = dataGudang?.[index]?.stock_unit_4 ?? 0;
-      const stokGudangUnit5 = dataGudang?.[index]?.stock_unit_5 ?? 0;
+      if (typeof unitIndex === "string") {
+        productUnit = unitIndex;
+      }
 
-      if (qty > eval(`stokGudangUnit${unitIndex}`)) {
-        let canBeReturned = false;
-        for (let i = unitIndex - 1; i >= 1; i--) {
-          if (eval(`stokGudangUnit${i}`) !== 0) {
-            canBeReturned = true;
-            break;
-          } else {
-            popUpDialog = true;
-            cannotBeReturnedProducts.push(productName);
-          }
-        }
+      const returData = {
+        location: gudangLocatioId,
+        product: productId,
+        unit: productUnit,
+        qty: qty,
+      };
 
-        if (!canBeReturned && productName !== undefined) {
-          popUpDialog = true;
-          cannotBeReturnedProducts.push(productName);
-        }
+      // fetch to api check
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/product/check";
+      const options = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+        body: JSON.stringify(returData),
+      };
+
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
+      console.log("json response", JSON.stringify(returData));
+      console.log("checking response", res);
+      if (!res?.available) {
+        popUpDialog = true;
+        cannotBeReturnedProducts.push(productName);
       }
     }
 
@@ -314,36 +323,33 @@ function Retur({ props }) {
 
   const onFinish = async (values) => {
     setLoading(true);
+
     console.log("values", values);
-    const isShowingPopup = checkReturQty(values);
+    console.log("products", products);
+
+    const isShowingPopup = await checkReturQty(values);
+    console.log("isShowingPopup", isShowingPopup);
     if (isShowingPopup) {
       setLoading(false);
       return;
     }
 
-    // const payment = getPaymentRemaining();
-    // console.log(payment);
-    // if (totalPrice > payment.returPaymentRemaining) {
-    //   notification["error"]({
-    //     message: "Overprice",
-    //     description: "Harga retur melebih dari Sisa pembayaran / Harga LPB",
-    //   });
-    //   setLoading(false);
-    //   return;
-    // }
-
+    const payment = getPaymentRemaining();
+    console.log(payment);
+    if (totalPrice > payment.returPaymentRemaining) {
+      notification["error"]({
+        message: "Overprice",
+        description: "Harga retur melebih dari Sisa pembayaran / Harga LPB",
+      });
+      setLoading(false);
+      return;
+    }
+    console.log("executed onfinish");
     setDataValues(values);
     setLoading(false);
   };
 
   const createDetailRetur = async () => {
-    console.log(
-      "info total",
-      productTotalPrice,
-      productSubTotal,
-      products,
-      dataValues
-    );
     updateRetur(
       products,
       productTotalPrice,
@@ -351,7 +357,9 @@ function Retur({ props }) {
       setListId,
       "/retur-details",
       dataValues,
-      props.returs
+      props.returs,
+      returMasterId,
+      createInventoryRetur
     );
   };
 
@@ -432,12 +440,6 @@ function Retur({ props }) {
     }
   }, [totalPrice]);
 
-  //useEffect(() => {
-  //  if (listId.length > 0) {
-  //    createRetur(dataValues);
-  //  }
-  //}, [listId]);
-
   useEffect(() => {
     if (dataValues) createDetailRetur();
   }, [dataValues]);
@@ -462,14 +464,22 @@ function Retur({ props }) {
     for (const index in returDetails) {
       const locationId = returDetails[index]?.attributes?.location?.data?.id;
       const product = returDetails[index]?.attributes?.products?.data?.[0];
-      console.log("product", product);
-      // const onSelectLocation = async (locationId, dataProduct, idx)
       onSelectLocation(locationId, product, index);
 
-      console.log("set location id ===> ", locationId);
+      const dateString = returDetails[index]?.attributes?.expired_date;
+      const dateFormat = "YYYY-MM-DD";
+      const momentDate = moment(dateString, dateFormat);
+      const batch = returDetails[index]?.attributes?.batch;
+
       form.setFieldsValue({
         product_location: {
           [index]: locationId,
+        },
+        expired_date: {
+          [index]: momentDate,
+        },
+        batch: {
+          [index]: batch,
         },
       });
     }
@@ -479,7 +489,9 @@ function Retur({ props }) {
     var dateString = new Date(returData.attributes.tanggal_retur);
     var momentObj = moment(dateString, "YYYY-MM-DD");
     var momentString = momentObj.format("MM-DD-YYYY");
+    console.log("retur data", returData);
     form.setFieldsValue({
+      no_retur: returData.attributes.no_retur,
       DPP_PPN_active: returData.attributes.DPP_PPN_active,
       catatan: returData.attributes.catatan,
       supplier_id: {
@@ -501,6 +513,15 @@ function Retur({ props }) {
     });
 
     returData.attributes.retur_details.data.forEach((element, index) => {
+      form.setFieldValue({
+        batch: {
+          [index]: element.attributes.batch,
+        },
+        expired_date: {
+          [index]: element.attributes.expired_date,
+        },
+      });
+
       var indexUnit = 1;
 
       var dateStringDetail = new Date(element.attributes.expired_date);
@@ -544,10 +565,10 @@ function Retur({ props }) {
         qty: element.attributes.qty,
         unit: element.attributes.unit,
         unitIndex: indexUnit,
-        priceUnit: parseInt(element.attributes.harga_satuan),
-        disc: parseInt(element.attributes.disc),
-        priceAfterDisc: parseInt(element.attributes.harga_satuan),
-        subTotal: parseInt(element.attributes.sub_total),
+        priceUnit: parseFloat(element.attributes.harga_satuan),
+        disc: parseFloat(element.attributes.disc),
+        priceAfterDisc: parseFloat(element.attributes.harga_satuan),
+        subTotal: parseFloat(element.attributes.sub_total),
         index,
       });
 
@@ -572,6 +593,10 @@ function Retur({ props }) {
         index,
       });
     });
+
+    // const detailsData = form.getFieldsValue(["expired_date", "batch"]);
+    // console.log("details data", detailsData);
+    console.log("form values", form.getFieldInstance());
 
     setTimeout(() => {
       setIsFetchingData(false);
@@ -598,18 +623,6 @@ function Retur({ props }) {
     };
 
     return paymentData;
-  };
-
-  const validateError = () => {
-    var listError = form.getFieldsError();
-    listError.forEach((element) => {
-      if (element.errors[0]) {
-        notification["error"]({
-          message: "Field Kosong",
-          description: element.errors[0],
-        });
-      }
-    });
   };
 
   const getDPP = () => {
@@ -653,7 +666,6 @@ function Retur({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="no_retur"
-                    initialValue={`Retur/ET/${totalReturs}/${mm}/${yyyy}`}
                     rules={[
                       {
                         required: true,
@@ -855,7 +867,6 @@ function Retur({ props }) {
                     </div>
                   ) : (
                     <Button
-                      onClick={validateError}
                       htmlType="submit"
                       className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
                     >

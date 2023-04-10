@@ -4,7 +4,17 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import { Form, Input, DatePicker, Button, message, Upload, Select, Spin, notification } from "antd";
+import {
+  Form,
+  Input,
+  DatePicker,
+  Button,
+  message,
+  Upload,
+  Select,
+  Spin,
+  notification,
+} from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import nookies from "nookies";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
@@ -21,7 +31,8 @@ ReturLPB.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings/" + id + "?populate=deep";
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL + "/purchasings/" + id + "?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -116,7 +127,9 @@ function ReturLPB({ props }) {
   const [expProduct, setExpProduct] = useState([]);
   const [batch, setBatch] = useState([]);
 
-  var totalReturs = String(props.dataLPBPage?.meta?.pagination.total + 1).padStart(3, "0");
+  var totalReturs = String(
+    props.dataLPBPage?.meta?.pagination.total + 1
+  ).padStart(3, "0");
   var today = new Date();
   var dd = String(today.getDate()).padStart(2, "0");
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
@@ -142,21 +155,38 @@ function ReturLPB({ props }) {
   };
 
   const createDetailRetur = async () => {
-
-    for(let index = 0; index < products.productList.length; index++){
-      if(dataValues.expired_date[index] == undefined) dataValues.expired_date[index] = expProduct[index];
-      if(dataValues.product_location[index] == undefined) dataValues.product_location[index] = locProduct[index].data.id;
-      if(dataValues.batch[index] == undefined) dataValues.batch[index] = batch[index];
+    for (let index = 0; index < products.productList.length; index++) {
+      if (dataValues.expired_date[index] == undefined)
+        dataValues.expired_date[index] = expProduct[index];
+      if (dataValues.product_location[index] == undefined)
+        dataValues.product_location[index] = locProduct[index].data.id;
+      if (dataValues.batch[index] == undefined)
+        dataValues.batch[index] = batch[index];
     }
 
-    createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-details", dataValues);
+    createDetailReturFunc(
+      products,
+      productTotalPrice,
+      productSubTotal,
+      setListId,
+      "/retur-details",
+      dataValues
+    );
   };
 
   const createRetur = async (values) => {
     values.supplier = data.attributes.supplier.data;
     values.location = data.attributes.location.data;
     values.status = "Draft";
-    createReturLPBFunc(grandTotal, totalPrice, values, listId, form, router, data);
+    createReturLPBFunc(
+      grandTotal,
+      totalPrice,
+      values,
+      listId,
+      form,
+      router,
+      data
+    );
   };
 
   const onChangeProduct = async () => {
@@ -178,7 +208,14 @@ function ReturLPB({ props }) {
   };
 
   const calculatePriceAfterDisc = (row, index) => {
-    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index);
+    const total = calculatePrice(
+      row,
+      products,
+      productTotalPrice,
+      productSubTotal,
+      setTotalPrice,
+      index
+    );
 
     return formatter.format(total);
   };
@@ -193,7 +230,8 @@ function ReturLPB({ props }) {
       data: data.data,
     });
 
-    purchase_details.forEach((element, index) => { console.log("el", element)
+    purchase_details.forEach((element, index) => {
+      console.log("el", element);
       var indexUnit = 1;
       var unitOrder = element.attributes.unit_order;
       var productUnit = element.attributes.product.data.attributes;
@@ -207,15 +245,15 @@ function ReturLPB({ props }) {
       batch.push(element.attributes.batch);
 
       form.setFieldsValue({
-          product_location: {
-            [element.attributes.product.data.id]: element.attributes.location,
-          },
-          expired_date: {
-            [element.attributes.product.data.id]: moment(momentStringDetail),
-          },
-          batch: {
-            [element.attributes.product.data.id]: element.attributes.batch,
-          },
+        product_location: {
+          [element.attributes.product.data.id]: element.attributes.location,
+        },
+        expired_date: {
+          [element.attributes.product.data.id]: moment(momentStringDetail),
+        },
+        batch: {
+          [element.attributes.product.data.id]: element.attributes.batch,
+        },
       });
 
       for (let index = 1; index < 6; index++) {
@@ -237,14 +275,14 @@ function ReturLPB({ props }) {
       }
 
       //SET INITIAL PRODUCT
-      dispatch({ 
+      dispatch({
         type: "SET_INITIAL_PRODUCT",
         product: element.attributes.product.data,
         qty: parseInt(element.attributes.total_order),
         unit: element.attributes.unit_order,
         unitIndex: indexUnit,
-        priceUnit: parseInt(element.attributes.unit_price),
-        disc: parseInt(disc),
+        priceUnit: parseFloat(element.attributes.unit_price),
+        disc: parseFloat(disc),
         priceAfterDisc: element.attributes.unit_price_after_disc,
         subTotal: element.attributes.sub_total,
         d1: element.attributes.dp1,
@@ -261,7 +299,6 @@ function ReturLPB({ props }) {
       //    },
       //  });
       //});
-
     });
     setTimeout(() => {
       setIsFetchingData(false);
@@ -358,35 +395,54 @@ function ReturLPB({ props }) {
                       },
                     ]}
                   >
-                    <DatePicker placeholder="Tanggal Retur" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
+                    <DatePicker
+                      placeholder="Tanggal Retur"
+                      size="large"
+                      format={"DD/MM/YYYY"}
+                      style={{ width: "100%" }}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-2/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="purchasing" initialValue={data.id}>
-                    <p className="font-bold m-0">No LPB : {data.attributes.no_purchasing}</p>
+                    <p className="font-bold m-0">
+                      No LPB : {data.attributes.no_purchasing}
+                    </p>
                   </Form.Item>
-                  <p className="font-bold m-0">No Nota Supplier : {data.attributes.no_nota_suppplier}</p>
-                  <p className="font-bold m-0">Tanggal Pembelian : {data.attributes.date_purchasing}</p>
+                  <p className="font-bold m-0">
+                    No Nota Supplier : {data.attributes.no_nota_suppplier}
+                  </p>
+                  <p className="font-bold m-0">
+                    Tanggal Pembelian : {data.attributes.date_purchasing}
+                  </p>
                 </div>
                 <div className="w-full md:w-3/4 px-3 mb-2 md:mb-0">
-                  <p className="font-bold m-0">Alamat Supplier : {data.attributes.supplier.data.attributes.address}</p>
+                  <p className="font-bold m-0">
+                    Alamat Supplier :{" "}
+                    {data.attributes.supplier.data.attributes.address}
+                  </p>
                 </div>
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                  <SearchBar form={form} tempList={tempList} onChange={onChangeProduct} selectedProduct={selectedProduct} />
+                  <SearchBar
+                    form={form}
+                    tempList={tempList}
+                    onChange={onChangeProduct}
+                    selectedProduct={selectedProduct}
+                  />
                 </div>
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-2 md:mb-0">
                   {isFetchinData ? (
-                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
-                    <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
-                      <LoadingAnimations />
+                    <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
+                      <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
+                        <LoadingAnimations />
+                      </div>
+                      <div className="text-sm align-middle text-center animate-pulse text-slate-400">
+                        Sedang Mengambil Data
+                      </div>
                     </div>
-                    <div className="text-sm align-middle text-center animate-pulse text-slate-400">
-                      Sedang Mengambil Data
-                    </div>
-                  </div>
-                ) : (
-                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                    <DataReturTable
+                  ) : (
+                    <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
+                      <DataReturTable
                         products={products}
                         productTotalPrice={productTotalPrice}
                         setTotalPrice={setTotalPrice}
@@ -399,9 +455,9 @@ function ReturLPB({ props }) {
                         locProduct={locProduct}
                         expProduct={expProduct}
                         batch={batch}
-                    />
-                  </div>
-                )}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="flex justify-start md:justify-between">
@@ -422,7 +478,10 @@ function ReturLPB({ props }) {
                         width: "100%",
                       }}
                     >
-                      <Select.Option value="Pajak Pembelian" key="Pajak Pembelian">
+                      <Select.Option
+                        value="Pajak Pembelian"
+                        key="Pajak Pembelian"
+                      >
                         Pajak Pembelian
                       </Select.Option>
                       <Select.Option value="Non Pajak" key="Non Pajak">
@@ -431,10 +490,14 @@ function ReturLPB({ props }) {
                     </Select>
                   </Form.Item>
                 </div>
-                <p className="font-bold">Total Item : {products.productList.length} </p>
+                <p className="font-bold">
+                  Total Item : {products.productList.length}{" "}
+                </p>
               </div>
               <div className="flex justify-end">
-                <p className="font-bold">Total Harga : {formatterTotal.format(totalPrice)} </p>
+                <p className="font-bold">
+                  Total Harga : {formatterTotal.format(totalPrice)}{" "}
+                </p>
               </div>
               <Form.Item name="catatan">
                 <TextArea rows={4} placeholder="Catatan Tambahan" />
@@ -445,7 +508,11 @@ function ReturLPB({ props }) {
                     <Spin />
                   </div>
                 ) : (
-                  <Button onClick={validateError} htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
+                  <Button
+                    onClick={validateError}
+                    htmlType="submit"
+                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
+                  >
                     Retur
                   </Button>
                 )}
