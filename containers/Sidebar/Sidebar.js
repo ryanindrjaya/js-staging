@@ -22,12 +22,12 @@ import { IoIosArrowRoundUp } from "react-icons/io";
 const SubMenu = Menu.SubMenu;
 const MenuItemGroup = Menu.ItemGroup;
 const { Sider } = Layout;
-const { toggleOpenDrawer, changeOpenKeys, changeCurrent, toggleCollapsed } = appActions;
+const { toggleOpenDrawer, changeOpenKeys, changeCurrent, toggleCollapsed } =
+  appActions;
 
 export default function Sidebar(props) {
-  const { view, openKeys, collapsed, openDrawer, height, current } = useSelector(
-    (state) => state.App
-  );
+  const { view, openKeys, collapsed, openDrawer, height, current } =
+    useSelector((state) => state.App);
   const { sidebarTheme } = useSelector((state) => state.ThemeSwitcher);
   const dispatch = useDispatch();
   function handleClick(e) {
@@ -40,8 +40,12 @@ export default function Sidebar(props) {
     }
   }
   function onOpenChange(newOpenKeys) {
-    const latestOpenKey = newOpenKeys.find((key) => !(openKeys.indexOf(key) > -1));
-    const latestCloseKey = openKeys.find((key) => !(newOpenKeys.indexOf(key) > -1));
+    const latestOpenKey = newOpenKeys.find(
+      (key) => !(openKeys.indexOf(key) > -1)
+    );
+    const latestCloseKey = openKeys.find(
+      (key) => !(newOpenKeys.indexOf(key) > -1)
+    );
     let nextOpenKeys = [];
     if (latestOpenKey) {
       nextOpenKeys = getAncestorKeys(latestOpenKey).concat(latestOpenKey);
@@ -259,11 +263,11 @@ export default function Sidebar(props) {
                   <a>Mutasi Barang Masuk</a>
                 </Link>
               </Menu.Item>
-              {/* <Menu.Item style={submenuStyle} key="penyesuaian_stok">
+              <Menu.Item style={submenuStyle} key="penyesuaian_stok">
                 <Link href="/dashboard/stok/penyesuaian">
                   <a>Penyesuaian Stok</a>
                 </Link>
-              </Menu.Item> */}
+              </Menu.Item>
             </SubMenu>
 
             {/* PEMBELIAN  */}

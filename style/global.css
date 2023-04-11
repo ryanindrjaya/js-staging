@@ -25,6 +25,10 @@
   color: #036b82 !important;
 } */
 
+.ant-input-number-affix-wrapper {
+  align-items: center !important;
+}
+
 /*========= END CHANGE PLACEHOLDER COLOR ==============*/
 @media print {
   .ant-table-thead .ant-table-cell {
@@ -400,4 +404,17 @@ html[dir="rtl"] .dz-hidden-input {
   vertical-align: middle;
   font-size: 28px;
   color: #999;
+}
+
+.custom-table .ant-table-thead {
+  height: 60px;
+}
+
+.custom-row {
+  height: 60px;
+}
+
+button:hover:active {
+  background-color: white !important;
+  color: #059669 !important;
 }

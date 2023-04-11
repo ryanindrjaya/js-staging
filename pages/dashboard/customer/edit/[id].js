@@ -377,7 +377,7 @@ const Tambah = ({ props }) => {
                 </div>
 
                 <div className="flex md:flex-row flex-col gap-x-10 w-full">
-                  <Form.Item initialValue={initial.area.data.id} className="w-full" name="area">
+                  <Form.Item initialValue={initial.area?.data?.id} className="w-full" name="area">
                     <Select showSearch placeholder="Area">
                       {area.map((item) => (
                         <Select.Option key={item.id} value={item.id}>
@@ -387,7 +387,7 @@ const Tambah = ({ props }) => {
                     </Select>
                   </Form.Item>
                   <Form.Item
-                    initialValue={initial.wilayah.data.id}
+                    initialValue={initial.wilayah?.data?.id}
                     className="w-full"
                     name="wilayah"
                   >

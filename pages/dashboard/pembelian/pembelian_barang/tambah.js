@@ -285,8 +285,7 @@ function Tambah({ props }) {
   };
 
   const createOrder = async (values, detailListId) => {
-    console.log("datavalues", dataValues);
-    console.log("values", values);
+    console.log("detailListId", detailListId);
     await createPurchasing(
       products,
       grandTotal,

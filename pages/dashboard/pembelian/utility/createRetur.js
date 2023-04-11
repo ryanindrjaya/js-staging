@@ -14,8 +14,10 @@ const CreateRetur = async (
   listId,
   form,
   router,
-  lpbId
+  lpbId,
+  createInventoryRetur
 ) => {
+  tempProductListId = [];
   // CLEANING DATA
 
   var supplierId = { id: parseInt(values.supplier_id) };
@@ -38,10 +40,10 @@ const CreateRetur = async (
     data: values,
   };
 
-  await createData(data, form, router, lpbId);
+  await createData(data, form, router, lpbId, createInventoryRetur);
 };
 
-const createData = async (data, form, router, lpbId) => {
+const createData = async (data, form, router, lpbId, createInventoryRetur) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/returs";
   const JSONdata = JSON.stringify(data);
   const options = {
@@ -66,6 +68,11 @@ const createData = async (data, form, router, lpbId) => {
       router,
       lpbId
     );
+
+    // * if status is Selesai, create inventory retur
+    if (data.data.status === "Selesai") {
+      await createInventoryRetur(res.data);
+    }
   } else {
     console.log("error here");
     openNotificationWithIcon("error");

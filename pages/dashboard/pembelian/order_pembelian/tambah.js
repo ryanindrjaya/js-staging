@@ -506,6 +506,7 @@ function Tambah({ props }) {
                     ]}
                   >
                     <Select
+                      placeholder="Pilih Lokasi"
                       size="large"
                       style={{
                         width: "100%",

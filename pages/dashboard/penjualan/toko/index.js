@@ -5,6 +5,7 @@ import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLay
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import router, { useRouter } from "next/router";
 import { Input, notification, Select, DatePicker } from "antd";
+import { BarcodeOutlined } from "@ant-design/icons";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
 import SellingTable from "../../../../components/ReactDataTable/Selling/SellingTable";
 import nookies from "nookies";
@@ -59,7 +60,9 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchStore = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales?populate=deep";
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL +
+    "/store-sales?sort[0]=createdAt:desc&populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -82,6 +85,10 @@ function Toko({ props }) {
 
   const handleAdd = () => {
     router.push("/dashboard/penjualan/toko/tambah");
+  };
+
+  const handleNavigateToPembayaran = () => {
+    router.push("/dashboard/penjualan/toko/pembayaran");
   };
 
   const handleUpdate = (id) => {
@@ -391,17 +398,34 @@ function Toko({ props }) {
               <span className="text-black text-md font-bold ml-1 mt-5">
                 Semua Penjualan
               </span>
-              <button
-                onClick={handleAdd}
-                type="button"
-                className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
-              >
-                <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    + Tambah
-                  </a>
-                </div>
-              </button>
+              <div className="mt-5">
+                <button
+                  onClick={handleAdd}
+                  type="button"
+                  className="bg-cyan-700 mx-2 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+                >
+                  <div className="text-white text-center text-sm font-bold">
+                    <a className="text-white no-underline text-xs sm:text-xs">
+                      + Tambah
+                    </a>
+                  </div>
+                </button>
+
+                <button
+                  onClick={handleNavigateToPembayaran}
+                  type="button"
+                  className="bg-orange-300 mx-2 rounded px-5 py-2 hover:bg-orange-500  shadow-sm flex float-right mb-5"
+                >
+                  <div className="text-white text-center text-sm font-bold">
+                    <a className="text-white no-underline text-xs sm:text-xs flex items-center">
+                      <span className="mr-2">
+                        <BarcodeOutlined />
+                      </span>
+                      Pembayaran
+                    </a>
+                  </div>
+                </button>
+              </div>
             </div>
 
             <div className="w-full flex justify-between">

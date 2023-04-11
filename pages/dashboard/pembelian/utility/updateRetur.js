@@ -5,6 +5,7 @@ import nookies from "nookies";
 import * as moment from "moment";
 import router from "next/router";
 import { notification } from "antd";
+import createInventoryRetur from "./createInventoryRetur";
 
 var tempListId = [];
 const cookies = nookies.get(null, "token");
@@ -30,18 +31,16 @@ const updateRetur = (
   setListId,
   url,
   value,
-  returData
+  returData,
+  returMasterId,
+  createInventoryRetur
 ) => {
-  console.log("value", value);
   products.productList.forEach((element) => {
     // value detail
     tempListId = [];
     const id = index;
     var qty = value.jumlah_qty?.[id] ?? products?.productInfo[id]?.qty ?? 1;
-    var unit =
-      value.jumlah_option?.[id] ??
-      products?.productInfo[id]?.unit ??
-      element.attributes.unit_1;
+    var unit = products?.productInfo[id]?.unit ?? element.attributes.unit_1;
 
     var unitPrice =
       value.harga_satuan?.[id] ?? products?.productInfo[id]?.priceUnit;
@@ -139,6 +138,7 @@ const updateRetur = (
   index = 0;
 
   PUTRetur(
+    returMasterId,
     idRetur,
     no_retur,
     catatan,
@@ -214,6 +214,7 @@ const PUTReturDetail = async (
 };
 
 const PUTRetur = async (
+  returMasterId,
   idRetur,
   no_retur,
   catatan,
@@ -246,7 +247,7 @@ const PUTRetur = async (
     },
   };
 
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs/" + idRetur;
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs/" + returMasterId;
   const JSONdata = JSON.stringify(data);
   const options = {
     method: "PUT",
@@ -259,9 +260,17 @@ const PUTRetur = async (
 
   const req = await fetch(endpoint, options);
   const res = await req.json();
+  console.log("put retur master ", JSON.stringify(data), endpoint);
+  console.log("put res mater", res);
 
   if (req.status === 200) {
     openNotificationWithIcon("success");
+
+    if (status === "Selesai") {
+      console.log("=========UPDATE INVENTORY RETUR=========");
+      await createInventoryRetur(res.data);
+    }
+
     router.replace("/dashboard/pembelian/retur");
   } else {
     openNotificationWithIcon("error");
