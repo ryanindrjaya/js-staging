@@ -85,6 +85,7 @@ function Kasir({ props }) {
     }
 
     const endpoint = process.env.NEXT_PUBLIC_URL + "/cashiers";
+    values.cash_in_hand = values.cash_in_hand ?? 0;
     const data = {
       data: {
         ...values,
@@ -92,6 +93,7 @@ function Kasir({ props }) {
         type: "CHECK IN",
       },
     };
+
     const options = {
       method: "POST",
       headers: {
