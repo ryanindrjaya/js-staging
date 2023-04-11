@@ -317,26 +317,31 @@ function Retur({ props }) {
     return popUpDialog;
   };
 
-  // ! COPY THIS INTO STORE RETUR
   const onFinish = async (values) => {
     setLoading(true);
 
     console.log("values", values);
+    console.log("products", products);
 
     const isShowingPopup = await checkReturQty(values);
+    console.log("isShowingPopup", isShowingPopup);
     if (isShowingPopup) {
       setLoading(false);
       return;
     }
 
     const payment = getPaymentRemaining();
-    if (totalPrice > payment.returPaymentRemaining) {
-      notification["error"]({
-        message: "Overprice",
-        description: "Harga retur melebih dari Sisa pembayaran / Harga LPB",
-      });
-      setLoading(false);
-      return;
+    console.log("PAYMENT ===> ", payment, "total price", totalPrice);
+    if (payment) {
+      if (totalPrice > payment.returPaymentRemaining) {
+        notification["error"]({
+          message: "Overprice",
+          description: "Harga retur melebih dari Sisa pembayaran / Harga LPB",
+        });
+        setLoading(false);
+        return;
+      }
+      console.log("executed onfinish");
     }
 
     setDataValues(values);
