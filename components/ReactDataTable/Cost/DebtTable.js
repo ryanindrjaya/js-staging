@@ -10,6 +10,7 @@ import { useRouter } from "next/router";
 
 export default function ReactDataTable({
     data,
+    onUpdate,
     onDelete,
     onPageChange,
     onChangeStatusPengiriman,
@@ -80,7 +81,7 @@ export default function ReactDataTable({
             {row?.attributes?.document == "Draft" ? (
               <div>
                 <button
-                    onClick={() => lihat(row)}
+                    onClick={() => onUpdate(row.id)}
                     className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
                 >
                     <EditOutlined className="mr-2 mt-0.5 float float-left" />
@@ -120,13 +121,13 @@ export default function ReactDataTable({
         {
           name: "No LPB",
           width: "150px",
-          selector: (row) => console.log(row),
+          //selector: (row) => console.log(row),
         },
         {
             name: "Nota Supplier",
             width: "150px",
             //selector: (row) => row.attributes?.customer?.data?.attributes?.name ?? "-",
-            selector: (row) => console.log("data row", row),
+            //selector: (row) => console.log("data row", row),
         },
         {
             name: "Supplier",
