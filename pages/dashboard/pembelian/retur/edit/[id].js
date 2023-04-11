@@ -335,16 +335,19 @@ function Retur({ props }) {
     }
 
     const payment = getPaymentRemaining();
-    console.log(payment);
-    if (totalPrice > payment.returPaymentRemaining) {
-      notification["error"]({
-        message: "Overprice",
-        description: "Harga retur melebih dari Sisa pembayaran / Harga LPB",
-      });
-      setLoading(false);
-      return;
+    console.log("PAYMENT ===> ", payment, "total price", totalPrice);
+    if (payment) {
+      if (totalPrice > payment.returPaymentRemaining) {
+        notification["error"]({
+          message: "Overprice",
+          description: "Harga retur melebih dari Sisa pembayaran / Harga LPB",
+        });
+        setLoading(false);
+        return;
+      }
+      console.log("executed onfinish");
     }
-    console.log("executed onfinish");
+
     setDataValues(values);
     setLoading(false);
   };
