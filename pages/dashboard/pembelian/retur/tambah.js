@@ -288,8 +288,7 @@ function Retur({ props }) {
 
       const req = await fetch(endpoint, options);
       const res = await req.json();
-      console.log("retur response", res);
-      console.log("json data", JSON.stringify(returData));
+      console.log(res);
       if (!res?.available) {
         popUpDialog = true;
         cannotBeReturnedProducts.push(productName);
