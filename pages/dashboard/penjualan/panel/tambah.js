@@ -5,10 +5,11 @@ import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { Row, Form, Input, InputNumber, Select, Button, Spin, notification } from "antd";
+import { Row, Form, Input, InputNumber, Select, Button, Spin, notification, Modal } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import StoreSaleTable from "../../../../components/ReactDataTable/Selling/StoreSaleTable";
+import ReportTodayTable from "../../../../components/ReactDataTable/Selling/ReportTodayTable";
 import createSaleFunc from "../utility/createSale";
 import createDetailSaleFunc from "../utility/createDetailSale";
 import calculatePrice from "../utility/calculatePrice";
@@ -115,14 +116,14 @@ const fetchCustomer = async (cookies) => {
 };
 
 function Toko({ props }) {
-  const products = useSelector((state) => state.Order); console.log("product",products);
+  const products = useSelector((state) => state.Order);
   const dispatch = useDispatch();
 
   var selectedProduct = products?.productList;
   const locations = props.locations.data;
   const user = props.user;
   const inven = props.inven.data;
-  const panel = props.panel;
+  const panel = props.panel; console.log("panel", panel);
   const customerData = props.customer.data[0];
 
   const [form] = Form.useForm();
@@ -152,6 +153,8 @@ function Toko({ props }) {
 
   const [location, setLocation] = useState();
   const [locationData, setLocationData] = useState();
+
+  const [open, setOpen] = useState(false);
 
   const router = useRouter();
   const { TextArea } = Input;
@@ -386,6 +389,22 @@ function Toko({ props }) {
     setTotalPrice(0);
   };
 
+  //modal laporan hari ini
+  const showModal = () => {
+    setOpen(true);
+  };
+
+  const handleOk = () => {
+    //setModalText('The modal will be closed after two seconds');
+    
+  };
+
+  const handleCancel = () => {
+    console.log('Clicked cancel button');
+    setOpen(false);
+  };
+  //end modal laporan hari ini
+
   useEffect(() => {
     // this one is used for checking the price if the old price is same with new one.
     // if both are same then we should not set new price for grand total.
@@ -491,7 +510,7 @@ function Toko({ props }) {
                 </div>
                 <div className="w-full flex justify-center md:w-1/3">
                   <button
-                    //onClick={() => setSelectedCategory("RESEP")}
+                    onClick={showModal}
                     className="bg-cyan-700 rounded-md m-1 text-sm"
                   >
                     <p className="px-4 py-2 m-0 text-white">Laporan Penjualan Hari Ini</p>
@@ -500,6 +519,20 @@ function Toko({ props }) {
                 <div className="w-full flex justify-end text-right md:w-1/3">
                   <p>{user.name}</p>
                 </div>
+
+              <Modal
+                title="Laporan Penjualan Hari Ini"
+                open={open}
+                width={1200}
+                //onOk={handleOk}
+                //confirmLoading={confirmLoading}
+                onCancel={handleCancel}
+                footer={<div></div>}
+              >
+                 <ReportTodayTable
+                   data={panel}     
+                 />
+              </Modal>
             </div>
 
             <Form
@@ -670,9 +703,29 @@ function Toko({ props }) {
                     />
                   </Form.Item>
                 </div>
+                <div className="w-full flex justify-end px-3 -mt-16">
+                  <Form.Item name="totalItem" className="font-bold text-lg">
+                    <span> Total Item : {products.productList.length}{" "} </span>
+                  </Form.Item>
+                </div>
+                <div className="w-full flex justify-end px-3 -mt-9">
+                  <Form.Item name="dpp" value={dpp} className="font-bold text-lg">
+                    <span> Total Harga : {formatter.format(totalPrice)}</span>
+                  </Form.Item>
+                </div>
+                <div className="w-full flex justify-end px-3 -mt-6">
+                  <Form.Item name="ppn" value={ppn} className="font-bold text-lg">
+                    <span> DPP : {formatter.format(dpp)}</span>
+                  </Form.Item>
+                </div>
+                <div className="w-full flex justify-end px-3 -mt-6">
+                  <Form.Item name="grandtotal" value={totalPrice} className="font-bold text-lg">
+                    <span> PPN : {formatter.format(ppn)}</span>
+                  </Form.Item>
+                </div>
               </div>
 
-              <div className="w-full flex flex-wrap -mx-3 mb-4">
+              <div className="w-full flex flex-wrap -mx-3 -mt-20 mb-4">
                 <div className="w-full md:w-1/3 px-3">
                   <Form.Item noStyle>
                     <Input
@@ -798,24 +851,24 @@ function Toko({ props }) {
               </div>
 
               <div className="w-full flex flex-wrap justify-end mb-3">
-                <Form.Item name="dpp" value={dpp} className="w-full h-2 md:w-1/2 mx-2">
-                  <span> DPP </span> <span>: {formatter.format(dpp)}</span>
-                </Form.Item>
-                <Form.Item name="ppn" value={ppn} className="w-full h-2 md:w-1/2 mx-2">
-                  <span> PPN </span> <span>: {formatter.format(ppn)}</span>
-                </Form.Item>
-                <Form.Item name="grandtotal" value={totalPrice} className="w-full h-2 md:w-1/2 mx-2">
-                  <span> Total </span> <span>: {formatter.format(totalPrice)}</span>
-                </Form.Item>
-                <Form.Item name="biayaPengiriman" value={biayaPengiriman} className="w-full h-2 md:w-1/2 mx-2">
-                  <span> Biaya Pengiriman </span> <span>: {formatter.format(biayaPengiriman)}</span>
-                </Form.Item>
-                <Form.Item name="biayaTambahan" value={biayaTambahan} className="w-full h-2 md:w-1/2 mx-2">
-                  <span> Biaya Tambahan </span> <span>: {formatter.format(biayaTambahan)}</span>
-                </Form.Item>
+                {/*<Form.Item name="dpp" value={dpp} className="w-full h-2 md:w-1/2 mx-2">*/}
+                {/*  <span> DPP </span> <span>: {formatter.format(dpp)}</span>*/}
+                {/*</Form.Item>*/}
+                {/*<Form.Item name="ppn" value={ppn} className="w-full h-2 md:w-1/2 mx-2">*/}
+                {/*  <span> PPN </span> <span>: {formatter.format(ppn)}</span>*/}
+                {/*</Form.Item>*/}
+                {/*<Form.Item name="grandtotal" value={totalPrice} className="w-full h-2 md:w-1/2 mx-2">*/}
+                {/*  <span> Total </span> <span>: {formatter.format(totalPrice)}</span>*/}
+                {/*</Form.Item>*/}
+                {/*<Form.Item name="biayaPengiriman" value={biayaPengiriman} className="w-full h-2 md:w-1/2 mx-2">*/}
+                {/*  <span> Biaya Pengiriman </span> <span>: {formatter.format(biayaPengiriman)}</span>*/}
+                {/*</Form.Item>*/}
+                {/*<Form.Item name="biayaTambahan" value={biayaTambahan} className="w-full h-2 md:w-1/2 mx-2">*/}
+                {/*  <span> Biaya Tambahan </span> <span>: {formatter.format(biayaTambahan)}</span>*/}
+                {/*</Form.Item>*/}
 
-                <Form.Item name="grandTotal" value={grandTotal} className="w-full h-2 md:w-1/2 mx-2 mt-3 text-lg">
-                  <span> Total </span>  <span>: {formatter.format(grandTotal)}</span>
+                <Form.Item name="grandTotal" value={grandTotal} className="w-full flex justify-end h-2 md:w-1/2 mx-2 mt-3">
+                  <span className="font-bold text-lg"> Total </span>  <span className="font-bold text-lg">: {formatter.format(grandTotal)}</span>
                 </Form.Item>
               </div>
 
