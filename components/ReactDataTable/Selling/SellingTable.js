@@ -21,6 +21,7 @@ export default function ReactDataTable({
   onChangeStatusPengiriman,
   onChangeStatus,
   returPage,
+  page
 }) {
   console.log("test table data ", data);
 
@@ -155,7 +156,10 @@ export default function ReactDataTable({
     {
       name: "Customer",
       width: "180px",
-      selector: (row) => row.attributes?.customer_name ?? "-",
+      selector: (row) => {
+        if(page == "panel") return row.attributes?.customer?.data?.attributes?.name ?? "-";
+        else return row.attributes?.customer_name ?? "-";
+      },
     },
     {
       name: "NO Faktur",

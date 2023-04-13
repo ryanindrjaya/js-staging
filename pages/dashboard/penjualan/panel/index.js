@@ -395,6 +395,7 @@ function NonPanelSale({ props }) {
               //onPageChange={handlePageChange}
               onChangeStatus={onChangeStatus}
               returPage={returPage}
+              page="panel"
             />
           </LayoutContent>
         </LayoutWrapper>

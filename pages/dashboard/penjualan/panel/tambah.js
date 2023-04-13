@@ -103,7 +103,8 @@ const fetchInven = async (cookies) => {
 
 const fetchCustomer = async (cookies) => {
     let name = "walk in customer"
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/customers?filters[name][$contains]=${name}`;
+    //const endpoint = process.env.NEXT_PUBLIC_URL + `/customers?filters[name][$contains]=${name}`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/customers?populate=deep";
     const options = {
         method: "GET",
         headers: {
@@ -123,8 +124,8 @@ function Toko({ props }) {
   const locations = props.locations.data;
   const user = props.user;
   const inven = props.inven.data;
-  const panel = props.panel; console.log("panel", panel);
-  const customerData = props.customer.data[0];
+  const panel = props.panel;
+  const customerData = props.customer; console.log("panel", panel, customerData);
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -145,6 +146,8 @@ function Toko({ props }) {
   const [discPrice, setDiscPrice] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
+  const [limitCredit, setLimitCredit] = useState(0);
+  var totalBelumDibayar = 0;
 
   const [dppActive, setDPPActive] = useState("Active");
   const [ppnActive, setPPNActive] = useState("Active");
@@ -274,7 +277,8 @@ function Toko({ props }) {
     maximumFractionDigits: 2,
   });
 
-  const onFinish = (values) => {
+  const onFinish = (values) => { console.log("values", values);
+    totalBelumDibayar = grandTotal;
     setLoading(true);
     values.status_data = simpanData;
     setInfo("sukses");
@@ -286,8 +290,36 @@ function Toko({ props }) {
                   "Data gagal ditambahkan, karena no penjualan sama",
           });
           setInfo("gagal");
-      } 
+      }
+
+      if(customer.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
     });
+
+    customerData.data.forEach((element) => {
+      if(customer.id == element.id && totalBelumDibayar > element.attributes.credit_limit){
+          notification["error"]({
+              message: "Gagal menambahkan data",
+              description:
+                  "Data gagal ditambahkan, karena melebihi limit kredit",
+          });
+          setInfo("gagal");
+      }
+    });
+      //if(customer.id == element.attributes.customer.data.id){ 
+      //  totalBelumDibayar += element.attributes.total;
+      //  if (totalBelumDibayar > element.attributes.customer.data.attributes.credit_limit){
+      //    notification["error"]({
+      //        message: "Gagal menambahkan data",
+      //        description:
+      //            "Data gagal ditambahkan, karena melebihi limit kredit",
+      //    });
+      //    setInfo("gagal");
+      //  }
+      //}
+
+    
+
+    console.log("totalBelumDibayar", totalBelumDibayar);
     setDataValues(values);
     setLoading(false);
   };
@@ -474,13 +506,29 @@ function Toko({ props }) {
   }, [discType]);
 
   useEffect(() => {
+    // set limit credit value
+    totalBelumDibayar = 0;
+    if(customer){
+      panel.data.forEach((element) => {
+        if(customer.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
+      });
+
+      setLimitCredit(customer?.attributes?.credit_limit - totalBelumDibayar);
+      form.setFieldsValue({
+        limitCredit: formatter.format(customer?.attributes?.credit_limit - totalBelumDibayar),
+      });
+    }
+    
+  }, [customer]);
+
+  useEffect(() => {
     // used to reset redux from value before
     clearData();
     setProductSubTotal({});
-    form.setFieldsValue({
-      customer: customerData?.attributes.name,
-    });
-    setCustomer(customerData);
+    //form.setFieldsValue({
+    //  customer: customerData?.attributes.name,
+    //});
+    //setCustomer(customerData);
   }, []);
 
   const validateError = () => {
@@ -588,6 +636,30 @@ function Toko({ props }) {
                     </Select>
                   </Form.Item>
                 </div>
+                <div className="w-full md:w-1/4 px-3 mb-2">
+                  <Form.Item name="limitCredit" noStyle>
+                    <Input
+                      size="large"
+                      style={{
+                        width: "100%",
+                      }}
+                      suffix="Limit Kredit"
+                      disabled
+                      defaultValue={formatter.format(limitCredit)}
+                    />
+                  </Form.Item>
+                </div>
+
+                <div className="w-full md:w-1/3 px-3 mb-2">
+                  <p className="m-0">Keterangan : {console.log("customer", customer)}</p>
+                  <p className="m-0"> {customer?.attributes?.address}</p>
+                  <p> {locationData?.city}</p>
+                </div>
+                <div className="w-full md:w-1/3 px-3 mb-2">
+                  <Form.Item name="no_inventory">
+                    <Input style={{ height: "40px" }} placeholder="No Inv" />
+                  </Form.Item>
+                </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="location"
@@ -620,17 +692,6 @@ function Toko({ props }) {
                         );
                       })}
                     </Select>
-                  </Form.Item>
-                </div>
-                
-                <div className="w-full md:w-1/3 px-3 mb-2">
-                  <p className="m-0">Keterangan : {console.log("customer", customer)}</p>
-                  <p className="m-0"> {customer?.attributes?.address}</p>
-                  <p> {locationData?.city}</p>
-                </div>
-                <div className="w-full md:w-1/3 px-3 mb-2">
-                  <Form.Item name="no_inventory">
-                    <Input style={{ height: "40px" }} placeholder="No Inv" />
                   </Form.Item>
                 </div>
               </div>
