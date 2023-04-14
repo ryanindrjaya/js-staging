@@ -84,23 +84,29 @@ function Retur({ props }) {
     const cookies = nookies.get(null, "token");
 
     const options = {
-      method: "DELETE",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: "Bearer " + cookies.token,
       },
+      body: JSON.stringify({
+        data: {
+          status: "Dibatalkan",
+        },
+      }),
     };
 
     const req = await fetch(endpoint, options);
     const res = await req.json();
     if (res) {
-      const res = await fetchData(cookies);
+      const newDataReq = await fetchData(cookies);
+      const newData = await newDataReq.json();
       openNotificationWithIcon(
         "success",
-        "Berhasil menghapus data",
-        "Order Pembelian yang dipilih telah berhasil dihapus. Silahkan cek kembali Order Pembelian"
+        "Retur dibatalakan",
+        "Retur pembelian berhasil dibatalkan"
       );
-      setRetur(res);
+      setRetur(newData);
     }
   };
 

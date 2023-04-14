@@ -317,7 +317,7 @@ export default function ReactDataTable({
                   marginRight: "10px",
                 }}
                 formatter={(value) =>
-                  value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "%"
+                  value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                 }
                 parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
               />
@@ -330,16 +330,18 @@ export default function ReactDataTable({
       name: "D1",
       width: "100px",
       selector: (row, idx) => {
-        defaultDp1 = row.attributes?.unit_1_dp1 || 0;
-        if (products.productInfo[idx]?.d1) {
-          defaultDp1 = products.productInfo[idx].d1;
-        }
+        defaultDp1 =
+          products?.productInfo?.[idx]?.disc || row.attributes?.disc_1_1 || 0;
 
-        if (products.productInfo[idx]) {
-          if (products.productInfo[idx].unit) {
-            defaultDp1 = products.productInfo[idx].d1;
-          }
-        }
+        // if (products.productInfo[idx]?.d1) {
+        //   defaultDp1 = products.productInfo[idx].d1;
+        // }
+
+        // if (products.productInfo[idx]) {
+        //   if (products.productInfo[idx].unit) {
+        //     defaultDp1 = products.productInfo[idx].d1;
+        //   }
+        // }
 
         return (
           <div className="disabled:bg-white">

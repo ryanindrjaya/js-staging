@@ -73,8 +73,8 @@ function CetakPenjualan({ props }) {
   const maker = data?.added_by;
   const totalPembelian = data?.total;
   const isDPPActive = data?.is_dpp_active;
-  const dpp = isDPPActive ? totalPembelian / 1.1 : 0;
-  const ppn = isDPPActive ? dpp * 0.11 : 0;
+  const dpp = data?.dpp;
+  const ppn = data?.ppn;
 
   const print = () => {
     window.print();
