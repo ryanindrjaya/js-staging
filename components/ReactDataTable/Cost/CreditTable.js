@@ -16,7 +16,7 @@ export default function ReactDataTable({
     onChangeStatus,
     user,
 }) {
-    const router = useRouter(); console.log("data table", data);
+    const router = useRouter();
     const { Option } = Select;
 
     const tagRed = process.env.TAG_RED;
@@ -115,18 +115,45 @@ export default function ReactDataTable({
         },
         {
           name: "Sales",
-          width: "150px",
-          selector: (row) => console.log(row),
+          width: "180px",
+          selector: (row) => {
+            var detail = row?.attributes?.credit_details?.data;
+            var salesName = "";
+
+              for (const key in detail) {
+                salesName += detail[key]?.attributes?.customer?.data?.attributes?.name +", ";
+              }
+
+            return salesName;
+          }
         },
         {
           name: "Area",
           width: "150px",
-          selector: (row) => row.attributes?.area?.data?.attributes?.name ?? "-",
+          selector: (row) => {
+            var detail = row?.attributes?.credit_details?.data;
+            var areaName = "";
+
+              for (const key in detail) {
+                areaName += detail[key]?.attributes?.customer?.data?.attributes?.area?.data?.attributes?.name +", ";
+              }
+
+            return areaName;
+          }
         },
         {
           name: "Wilayah",
           width: "150px",
-          selector: (row) => row.attributes?.wilayah?.data?.attributes?.name ?? "-",
+          selector: (row) => {
+            var detail = row?.attributes?.credit_details?.data;
+            var wilayahName = "";
+
+              for (const key in detail) {
+                wilayahName += detail[key]?.attributes?.customer?.data?.attributes?.wilayah?.data?.attributes?.name +", ";
+              }
+
+            return wilayahName;
+          }
         },
         {
           name: "Tanggal",
@@ -136,7 +163,7 @@ export default function ReactDataTable({
         {
           name: "Status Penagihan",
           width: "150px",
-          selector: (row) => row.attributes?.status ?? "-",
+          selector: (row) => row.attributes?.status_pembayaran ?? "-",
         },
         {
           name: "Total Penagihan",

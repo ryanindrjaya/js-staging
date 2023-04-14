@@ -4,7 +4,7 @@ import { Input, InputNumber, Select, Form, Row, DatePicker, Checkbox } from "ant
 import { useDispatch } from "react-redux";
 import { useState } from "react";
 
-export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal, form, supplier, statusPembayaran, rangePicker, search }) {
+export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal, form, supplier, statusPembayaran, rangePicker, search, dataEdit, dataEditId }) {
   const dispatch = useDispatch();
 
   var unit = 1;
@@ -63,25 +63,25 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     var pilihData = "tidak";
     if(value.target.checked == true) pilihData = "pilih";
     else pilihData = "tidak";
-
+    var indexTemp = index;
     index = cekData(data);
 
-    if (pilihData) { 
+    if (pilihData == "tidak") {
       form.setFieldsValue({
         AccTunai: {
-          [index]: 0,
+          [indexTemp]: 0,
         },
         AccBankTf: {
-          [index]: 0,
+          [indexTemp]: 0,
         },
         AccBankGiro: {
-          [index]: 0,
+          [indexTemp]: 0,
         },
         AccCN: {
-          [index]: 0,
+          [indexTemp]: 0,
         },
         AccOTH: {
-          [index]: 0,
+          [indexTemp]: 0,
         },
       });
     }
@@ -95,6 +95,8 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       onChangeCn(0, data, index);
       onChangeOth(0, data, index);
       onChangeId(data.id, data, index);
+
+      //if (dataEdit) onChangeId("create", data, index);
     //}
 
     //biaya.info[index].id = data.id;
@@ -168,19 +170,6 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                 >
                   Pilih
                 </Checkbox>
-            {/*{biaya.info[idx]?.pilihData == null || biaya.info[idx]?.pilihData == "tidak" ? (*/}
-            {/*  <button type="button" onClick={(value) => onChangePilih("tidak", row, idx, value)} className="bg-cyan-700 rounded-md m-1 text-sm">*/}
-            {/*    <p className="px-4 py-2 m-0 text-white">*/}
-            {/*    Pilih*/}
-            {/*    </p>*/}
-            {/*  </button>*/}
-            {/*) : (*/}
-            {/*  <button type="button" onClick={(value) => onChangePilih("pilih", row, idx, value)} className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm">*/}
-            {/*    <p className="px-4 py-2 m-0 text-black">*/}
-            {/*    Tidak*/}
-            {/*    </p>*/}
-            {/*  </button>*/}
-            {/*)}*/}
             </Form.Item>
           </Row>
         )
@@ -215,14 +204,18 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       name: "ACC Tunai",
       width: "150px",
       selector: (row, idx) => {
-        var defaultAccTunai = biaya.info[idx]?.tunai ?? 0;
+        var index = cekData(row);
+        var defaultAccTunai = biaya.info[index]?.tunai ?? 0;
 
         return (
           <Row align="bottom" justify="center">
             <Form.Item name={["AccTunai", `${idx}`]} noStyle>
               <InputNumber
                 defaultValue={defaultAccTunai}
-                //formatter={(value) => `${value}%`}
+                formatter={(value) =>
+                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                 min={0}
                 onChange={(e) => onChangeTunai(e, row, idx)}
                 style={{
@@ -239,14 +232,18 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       name: "ACC Bank Transfer",
       width: "150px",
       selector: (row, idx) => {
-        var defaultAccBankTf = biaya.info[idx]?.transfer ?? 0;
+        var index = cekData(row);
+        var defaultAccBankTf = biaya.info[index]?.transfer ?? 0;
 
         return (
           <Row align="bottom" justify="center">
             <Form.Item name={["AccBankTf", `${idx}`]} noStyle>
               <InputNumber
                 defaultValue={defaultAccBankTf}
-                //formatter={(value) => `${value}%`}
+                formatter={(value) =>
+                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                 min={0}
                 onChange={(e) => onChangeTransfer(e, row, idx)}
                 style={{
@@ -263,14 +260,18 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       name: "ACC Bank Giro",
       width: "150px",
       selector: (row, idx) => {
-        var defaultAccBankGiro = biaya.info[idx]?.giro ?? 0;
+        var index = cekData(row);
+        var defaultAccBankGiro = biaya.info[index]?.giro ?? 0;
 
         return (
           <Row align="bottom" justify="center">
             <Form.Item name={["AccBankGiro", `${idx}`]} noStyle>
               <InputNumber
                 defaultValue={defaultAccBankGiro}
-                //formatter={(value) => `${value}%`}
+                formatter={(value) =>
+                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                 min={0}
                 onChange={(e) => onChangeGiro(e, row, idx)}
                 style={{
@@ -287,14 +288,18 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       name: "ACC CN",
       width: "150px",
       selector: (row, idx) => {
-        var defaultAccCN = biaya.info[idx]?.cn ?? 0;
+        var index = cekData(row);
+        var defaultAccCN = biaya.info[index]?.cn ?? 0;
 
         return (
           <Row align="bottom" justify="center">
             <Form.Item name={["AccCN", `${idx}`]} noStyle>
               <InputNumber
                 defaultValue={defaultAccCN}
-                //formatter={(value) => `${value}%`}
+                formatter={(value) =>
+                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                 min={0}
                 onChange={(e) => onChangeCn(e, row, idx)}
                 style={{
@@ -311,14 +316,18 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       name: "ACC OTH",
       width: "150px",
       selector: (row, idx) => {
-        var defaultAccOTH = biaya.info[idx]?.oth ?? 0;
+        var index = cekData(row);
+        var defaultAccOTH = biaya.info[index]?.oth ?? 0;
 
         return (
           <Row align="bottom" justify="center">
             <Form.Item name={["AccOTH", `${idx}`]} noStyle>
               <InputNumber
                 defaultValue={defaultAccOTH}
-                //formatter={(value) => `${value}%`}
+                formatter={(value) =>
+                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                 min={0}
                 onChange={(e) => onChangeOth(e, row, idx)}
                 style={{

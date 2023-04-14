@@ -43,7 +43,7 @@ export default function OrderTable({
   };
 
   const onChangeUnit = (value, data, index) => {
-    console.log("data change unit", data);
+    console.log("data change unit", value, data, index);
     unit = value;
     if (value == 1) {
       priceUnit = data.attributes.buy_price_1;
@@ -112,12 +112,16 @@ export default function OrderTable({
     data.attributes.buy_price_4 = tempPriceUnit[3];
     data.attributes.buy_price_5 = tempPriceUnit[4];
 
+    console.log("editing purpose", products?.productInfo?.[indexRow]?.disc);
+
     formObj.setFieldsValue({
       harga_satuan: {
         [indexRow]: value,
       },
       disc_rp: {
-        [indexRow]: data.attributes[`purchase_discount_${index}`],
+        [indexRow]:
+          products?.productInfo?.[indexRow]?.disc ??
+          data.attributes[`purchase_discount_${index}`],
       },
     });
   };
@@ -205,17 +209,29 @@ export default function OrderTable({
                   onChange={(e) => {
                     const selectedUnitIndex =
                       formObj.getFieldValue("jumlah_option") ??
-                      products?.productInfo[idx]?.unitIndex ??
-                      "";
+                      products?.productInfo[idx]?.unitIndex;
 
-                    // console.log("test data onchange", e, row, unit, idx);
+                    console.log(products);
+
+                    console.log(
+                      "test data onchange",
+                      e,
+                      row,
+                      selectedUnitIndex,
+                      idx
+                    );
                     // console.log("selected unit", selectedUnitIndex);
                     // onChangePriceUnit(e, row, unit, selectedUnitIndex[idx])
 
                     // edit prupose
                     // console.log("edit ", products?.productInfo[idx]?.unitIndex);
 
-                    onChangePriceUnit(e, row, selectedUnitIndex[idx], idx);
+                    onChangePriceUnit(
+                      e,
+                      row,
+                      selectedUnitIndex?.[idx] ?? 1,
+                      idx
+                    );
                   }}
                   style={{
                     width: "150px",
@@ -341,7 +357,6 @@ export default function OrderTable({
         var defaultDisc = 0;
         console.log("test disc", products.productInfo[idx]?.disc);
 
-        
         if (products.productInfo[idx]?.disc) {
           defaultDisc = products?.productInfo[idx]?.disc;
         } else {

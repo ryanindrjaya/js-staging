@@ -65,6 +65,7 @@ export default function ReactDataTable({
         <div></div>
       ) : (
         <button
+          hidden={row.attributes.purchasing?.data ? true : false}
           onClick={() => onUpdate(row)}
           className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
         >
@@ -133,11 +134,12 @@ export default function ReactDataTable({
       name: <div className="ml-6">Status</div>,
       width: "180px",
       selector: (row) => {
+        console.log(row);
         return (
           <Select
             defaultValue={row.attributes.status}
             bordered={false}
-            disabled /*={row.attributes.status === "Diterima" || row.attributes.status === "Selesai"}*/
+            disabled={row.attributes.status === "Diterima" || row.attributes.status === "Selesai"}
             onChange={(e) => onChangeStatus(e, row)}
             style={{ width: 140 }}
           >

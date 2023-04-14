@@ -1,7 +1,14 @@
 import React from "react";
 
-export default function calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index) {
-  var priceUnit = row.attributes[`buy_price_1`];
+export default function calculatePrice(
+  row,
+  products,
+  productTotalPrice,
+  productSubTotal,
+  setTotalPrice,
+  index
+) {
+  var priceUnit = row.attributes[`sold_price_1`];
   var qty = 1;
   var disc = 0;
   var margin = 0;
@@ -11,20 +18,27 @@ export default function calculatePrice(row, products, productTotalPrice, product
 
   // check if Dp1, Dp2, Dp3 changed
   if (products.productInfo[index]?.d1) {
-    Dp1 = products.productInfo[index].d1 ?? 1;
-  } else if (products.productInfo[index]?.d1 === 0 || products.productInfo[index]?.d1 === null) {
+    Dp1 = products.productInfo[index].d1 ?? 0;
+  } else if (
+    products.productInfo[index]?.d1 === 0 ||
+    products.productInfo[index]?.d1 === null
+  ) {
     Dp1 = 0;
   }
 
   if (products.productInfo[index]?.d2) {
-    Dp2 = products.productInfo[index].d2 ?? 1;
-  } else if (products.productInfo[index]?.d2 === 0 || products.productInfo[index]?.d2 === null) {
+    Dp2 = products.productInfo[index].d2 ?? 0;
+  } else if (
+    products.productInfo[index]?.d2 === 0 ||
+    products.productInfo[index]?.d2 === null
+  ) {
     Dp2 = 0;
   }
 
   // check if price changed
   if (products.productInfo[index]?.priceUnit) {
-    priceUnit = products.productInfo[index].priceUnit ?? row.attributes[`buy_price_1`];
+    priceUnit =
+      products.productInfo[index].priceUnit ?? row.attributes[`sold_price_1`];
   }
 
   // check if qty changed
@@ -42,8 +56,11 @@ export default function calculatePrice(row, products, productTotalPrice, product
     margin = products.productInfo[index]?.margin ?? 0;
   }
 
-  priceUnit = priceUnit - disc;
-  priceUnit = priceUnit + (priceUnit*margin/100);
+  if (disc > 0) {
+    priceUnit = priceUnit - (priceUnit * disc) / 100;
+  }
+
+  priceUnit = priceUnit + (priceUnit * margin) / 100;
   var price1 = calculatePercentage(priceUnit, Dp1);
   var price2 = calculatePercentage(price1, Dp2);
 

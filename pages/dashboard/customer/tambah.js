@@ -159,7 +159,7 @@ const Tambah = ({ props }) => {
       const tokoIndex = form.getFieldValue("tipe_penjualan").indexOf("TOKO");
       console.log("tokoIndex", tokoIndex);
       if (tokoIndex > -1) {
-        const old = lue().tipe_penjualan;
+        const old = form.getFieldsValue().tipe_penjualan;
         const newValue = old.filter((item) => item !== "TOKO");
         console.log("newValue", newValue);
         form.setFieldsValue({

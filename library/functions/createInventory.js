@@ -13,9 +13,7 @@ const getStoreSale = async (id) => {
       Authorization: `Bearer ${cookies.token}`,
     },
   });
-
   const data = await response.json();
-
   return data;
 };
 
@@ -86,6 +84,7 @@ export async function createInventoryFromReturPenjualan(row) {
   const retur_store_sale_details = returStoreSale.data.attributes.retur_store_sale_details.data;
   const no_retur_store_sale = returStoreSale.data.attributes.no_retur_store_sale;
 
+
   retur_store_sale_details.forEach((element) => {
     console.log("element store detail (penjualan)", element);
     const unitOrder = element.attributes.unit;
@@ -129,6 +128,7 @@ async function addToGudang(body) {
     },
     body: JSON.stringify(body),
   });
+
 
   const data = await response.json();
   console.log("body", JSON.stringify(body));

@@ -1,4 +1,2 @@
-# Isomorphic-next
-# Sejati
-# Sejati
-# ERP-Sejati
+# PROJEK TERKUTUK
+fucek

@@ -143,6 +143,28 @@ const Tambah = ({ props }) => {
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
                   <Form.Item
+                    name="codename"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Kode Pengguna tidak boleh kosong!",
+                      },
+                    ]}
+                  >
+                    <Input
+                      style={{ height: "50px" }}
+                      prefix={
+                        <UserOutlined
+                          style={{ fontSize: "150%" }}
+                          className="site-form-item-icon mr-5"
+                        />
+                      }
+                      placeholder="Kode Pengguna"
+                    />
+                  </Form.Item>
+                </div>
+                <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
+                  <Form.Item
                     name="email"
                     rules={[
                       {

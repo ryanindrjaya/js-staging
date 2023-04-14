@@ -24,7 +24,7 @@ import {
   notification,
   Row,
 } from "antd";
-import createDetailPurchasing from "../utility/createDetail";
+import createDetailPurchasing from "../utility/createPurchasingDetail";
 import createPurchasing from "../utility/createPurchasing";
 import updateOrder from "../utility/updateOrder";
 import updateProduct from "../utility/updateProduct";
@@ -272,6 +272,7 @@ function Tambah({ props }) {
   };
 
   const createDetailOrder = async () => {
+    console.log("datavalues", dataValues);
     createDetailPurchasing(
       dataValues,
       products,
@@ -284,6 +285,7 @@ function Tambah({ props }) {
   };
 
   const createOrder = async (values, detailListId) => {
+    console.log("detailListId", detailListId);
     await createPurchasing(
       products,
       grandTotal,
@@ -322,44 +324,25 @@ function Tambah({ props }) {
     }
 
     const poData = row.attributes?.purchase?.data;
-    const resPO = await changeStatusPO(poData, trxStatus, LPBLocationId);
+
+    const resPO = await changeStatusPO(poData?.id, trxStatus);
+
     if (resPO.data) {
-      await changeStatusLPB(row, row.id);
+      await changeStatusLPB(id, trxStatus);
     }
   };
 
-  const changeStatusPO = async (poData, status, LPBLocationId) => {
+  const changeStatusPO = async (id, status) => {
     try {
-      // cleaning
-      delete poData.attributes?.document;
-      for (var key in poData.attributes) {
-        if (
-          poData.attributes[key] === null ||
-          poData.attributes[key] === undefined
-        ) {
-          delete poData.attributes[key];
-        }
-      }
-
-      poData.attributes.status = status;
-      poData.attributes.location = {
-        id: poData.attributes?.location?.data?.id ?? LPBLocationId,
-      };
-      poData.attributes.supplier = {
-        id: poData.attributes?.supplier?.data?.id,
-      };
-      poData.attributes.purchase_details =
-        poData.attributes?.purchase_details?.data;
-
-      const values = {
-        data: poData.attributes,
+      const updateStatus = {
+        data: {
+          status,
+        },
       };
 
-      console.log(values);
-
-      const JSONdata = JSON.stringify(values);
+      const JSONdata = JSON.stringify(updateStatus);
       const cookies = nookies.get(null, "token");
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/" + poData.id;
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/" + id;
       const options = {
         method: "PUT",
         headers: {
@@ -371,76 +354,23 @@ function Tambah({ props }) {
 
       const req = await fetch(endpoint, options);
       const res = await req.json();
-      if (req.status === 200) {
-        openNotificationWithIcon(
-          "success",
-          "Status PO berhasil dirubah",
-          "Status PO berhasil dirubah. Silahkan cek tabel PO"
-        );
-      } else {
-        openNotificationWithIcon(
-          "error",
-          "Status PO gagal dirubah 1",
-          "Status PO gagal dirubah. Silahkan cek log untuk error detail"
-        );
-      }
+      console.log("po update from lpb ", res);
 
       return res;
     } catch (error) {
       console.log(error);
-      openNotificationWithIcon(
-        "error",
-        "Status PO gagal dirubah 2",
-        "Status PO gagal dirubah. Silahkan cek log untuk error detail"
-      );
+      console.log("po update from lpb ", res);
 
       return null;
     }
   };
 
-  const changeStatusLPB = async (values, id) => {
+  const changeStatusLPB = async (id, status) => {
     try {
-      // // clean object
-      delete values.attributes.purchase;
-      for (var key in values.attributes) {
-        if (
-          values.attributes[key] === null ||
-          values.attributes[key] === undefined
-        ) {
-          delete values.attributes[key];
-        }
-      }
-
-      if (
-        values.attributes?.document?.data === null ||
-        values.attributes?.document?.data === undefined
-      ) {
-        delete values.attributes?.document;
-      }
-
-      var purchasing_details = [];
-      var purchasing_payments = [];
-      var returs = [];
-      values.attributes.purchasing_details.data.forEach((element) => {
-        purchasing_details.push({ id: element.id });
-      });
-      values.attributes.purchasing_payments.data.forEach((element) => {
-        purchasing_payments.push({ id: element.id });
-      });
-      values.attributes.returs.data.forEach((element) => {
-        returs.push({ id: element.id });
-      })
-
-      values.attributes.supplier = { id: values.attributes.supplier.data.id };
-      values.attributes.location = {
-        id: values?.attributes?.location?.data?.id ?? LPBLocationId,
-      };
-      values.attributes.purchasing_details = purchasing_details;
-      values.attributes.purchasing_payments = purchasing_payments;
-      values.attributes.returs = returs;
-
       const newValues = {
-        data: values.attributes,
+        data: {
+          status,
+        },
       };
 
       const JSONdata = JSON.stringify(newValues);
@@ -455,8 +385,6 @@ function Tambah({ props }) {
         },
         body: JSONdata,
       };
-
-      console.log("jsondata put update", JSONdata);
 
       const req = await fetch(endpoint, options);
       const res = await req.json();
@@ -579,7 +507,6 @@ function Tambah({ props }) {
 
     form.setFieldsValue({
       supplier_id: `${supplier.attributes.id_supplier} - ${supplier.attributes.name}`,
-      order_date: moment(momentString),
       location: dataPO.location.data.attributes.name,
       tempo_days: dataPO.tempo_days,
       tempo_time: dataPO.tempo_time,
@@ -763,9 +690,9 @@ function Tambah({ props }) {
   }, [additionalFee]);
 
   useEffect(() => {
-    if (listId.length > 0) {
-      // createOrder(dataValues);
-    }
+    // if (listId.length > 0) {
+    //   createOrder(dataValues, listId);
+    // }
   }, [listId]);
 
   useEffect(() => {
@@ -1258,3 +1185,5 @@ function Tambah({ props }) {
 }
 
 export default Tambah;
+
+

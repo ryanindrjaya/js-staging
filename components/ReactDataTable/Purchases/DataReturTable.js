@@ -2,7 +2,8 @@ import DataTable from "react-data-table-component";
 import AlertDialog from "../../Alert/Alert";
 import { Input, InputNumber, Select, Form, Row, DatePicker } from "antd";
 import { useDispatch } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import nookies from "nookies";
 
 export default function ReactDataTable({
   calculatePriceAfterDisc,
@@ -15,8 +16,12 @@ export default function ReactDataTable({
   locProduct,
   expProduct,
   batch,
+  onSelectLocation,
+  stokString,
 }) {
   const dispatch = useDispatch();
+
+  const cookies = nookies.get(null, "token");
 
   useEffect(() => {
     console.log("products", products);
@@ -504,13 +509,21 @@ export default function ReactDataTable({
       },
     },
     {
+      name: "Stok Gudang",
+      width: "300px",
+      selector: (row, idx) => {
+        return (
+          <div className="disabled:bg-white italic text-gray-500">
+            {stokString?.[idx] ?? "Pilih Gudang"}
+          </div>
+        );
+      },
+    },
+    {
       name: "Lokasi",
       width: "250px",
       sortable: true,
       selector: (row, idx) => {
-        var defaultLoc = null;
-        if (locProduct) defaultLoc = locProduct[idx]?.data.id;
-
         return (
           <>
             <Form.Item
@@ -525,13 +538,13 @@ export default function ReactDataTable({
               noStyle
             >
               <Select
+                onSelect={(e) => onSelectLocation(e, row, idx)}
                 placeholder="Pilih Lokasi Produk"
                 size="normal"
                 style={{
                   width: "200px",
                   marginRight: "10px",
                 }}
-                defaultValue={defaultLoc}
               >
                 {locations.map((element) => {
                   return (
@@ -554,9 +567,6 @@ export default function ReactDataTable({
       width: "150px",
       sortable: true,
       selector: (row, idx) => {
-        var defaultEXP = null;
-        if (expProduct) defaultEXP = expProduct[idx];
-
         return (
           <>
             <Form.Item
@@ -571,7 +581,6 @@ export default function ReactDataTable({
               noStyle
             >
               <DatePicker
-                defaultValue={defaultEXP}
                 placeholder="EXP. Date"
                 size="normal"
                 format={"DD/MM/YYYY"}
@@ -586,9 +595,6 @@ export default function ReactDataTable({
       width: "150px",
       sortable: true,
       selector: (row, idx) => {
-        var defaultBatch = null;
-        if (batch) defaultBatch = batch[idx];
-
         return (
           <>
             <Form.Item
@@ -602,7 +608,7 @@ export default function ReactDataTable({
               ]}
               noStyle
             >
-              <Input defaultValue={defaultBatch} size="normal" />
+              <Input size="normal" />
             </Form.Item>
           </>
         );

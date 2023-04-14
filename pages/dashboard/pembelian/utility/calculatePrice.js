@@ -46,10 +46,13 @@ export default function calculatePrice(
   }
 
   // check if price changed
-  console.log("test product redux ", products.productInfo[index]);
-  if (products.productInfo[index]?.priceUnit) {
+  if (
+    products.productInfo[index]?.unit_price ||
+    products.productInfo[index]?.priceUnit
+  ) {
     priceUnit =
-      products.productInfo[index].priceUnit ?? row.attributes[`buy_price_1`];
+      products.productInfo[index].unit_price ??
+      products.productInfo[index]?.priceUnit;
   }
 
   // check if qty changed
@@ -66,6 +69,7 @@ export default function calculatePrice(
   }
 
   priceUnit = priceUnit - disc;
+
   var price1 = calculatePercentage(priceUnit, Dp1);
   var price2 = calculatePercentage(price1, Dp2);
   var price3 = calculatePercentage(price2, Dp3);

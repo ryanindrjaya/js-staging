@@ -7,7 +7,7 @@ import { PrinterOutlined } from "@ant-design/icons";
 import router from "next/router";
 import Item from "antd/lib/list/Item";
 
-export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal, form, customer, statusPembayaran, rangePicker, sales }) {
+export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal, form, customer, statusPembayaran, rangePicker, sales, area, wilayah, tipePenjualan }) {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
@@ -54,20 +54,11 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     });
 
     element.subtotal = returSubtotal;
-    //element.hutangJatuhTempo = element.attributes.total_purchasing - element.subtotal;
-    //element.sisaHutang = element.hutangJatuhTempo;
-    //element.sisaHutangFix = element.hutangJatuhTempo;
     element.sisaPiutang = element.attributes?.total - element?.subtotal;
     sisaPiutang[index] = element.sisaPiutang;
 
     index++;
   });
-
-  //const onChangeSisaHutang = (value, data, index) => {
-  //  var sisa = data.sisaHutangFix;
-  //  sisa = sisa;
-  //  dispatch({ type: "CHANGE_DATA_SISAHUTANG", sisahutang: sisa, listData: data, index: index });
-  //};
 
   const cekData = (data) => {
     for (const key in biaya.list) {
@@ -78,6 +69,12 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   const calculate = (row, id) => {
     id = cekData(row);
     return calculatePriceTotal(row, id);
+  };
+
+  const calculateTotalPembayaran = (data, id) => {
+    if (biaya.info[id] != undefined) {
+      return (biaya.info[id]?.tunai + biaya.info[id]?.giro + biaya.info[id]?.cn + biaya.info[id]?.oth + biaya.info[id]?.transfer );
+    } else return 0;
   };
 
   const onChangePilih = async (value, data, index) => {
@@ -98,8 +95,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       onChangeOth(0, data, index);
       onChangeId(data.id, data, index);
     }
-    //onChangeTunai(0, data, index);
-    //console.log("pilih", data, biaya);
+    
   };
 
   const onChangeId = (value, data, index) => {
@@ -130,15 +126,6 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     index = cekData(data);
     dispatch({ type: "CHANGE_DATA_OTH", oth: value, listData: data, index: index });
   };
-
-  //const metodePembayaran = (value) => {
-  //  //router.push("/dashboard/biaya/piutang/metode_pembayaran/" + value.id + value.keterangan);
-  //  var totalPiutang = parseInt(value.attributes.total) - value.subtotal;
-  //  router.push({
-  //    pathname: '/dashboard/biaya/piutang/metode_pembayaran',
-  //    query: { id: value.id, ket: value.keterangan, total: totalPiutang },
-  //  });
-  //};
 
   const onChangeMetode = (value) => {
     setMetode(value);
@@ -341,6 +328,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                                       marginRight: "10px",
                                   }}
                                   onChange={(value) => onChangeBayar(value, metode, row, idx)}
+                                  formatter={(value) =>
+                                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                  }
+                                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                               />
                           </Form.Item>
                       </div>
@@ -385,6 +376,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                                       marginRight: "10px",
                                   }}
                                   onChange={(value) => onChangeBayar(value, metode, row, idx)}
+                                  formatter={(value) =>
+                                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                  }
+                                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                               />
                           </Form.Item>
                       </div>
@@ -429,6 +424,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                                       marginRight: "10px",
                                   }}
                                   onChange={(value) => onChangeBayar(value, metode, row)}
+                                  formatter={(value) =>
+                                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                  }
+                                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                               />
                           </Form.Item>
                       </div>
@@ -473,6 +472,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                                       marginRight: "10px",
                                   }}
                                   onChange={(value) => onChangeBayar(value, metode, row)}
+                                  formatter={(value) =>
+                                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                  }
+                                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                               />
                           </Form.Item>
                       </div>
@@ -517,6 +520,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                                       marginRight: "10px",
                                   }}
                                   onChange={(value) => onChangeBayar(value, metode, row)}
+                                  formatter={(value) =>
+                                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                  }
+                                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                               />
                           </Form.Item>
                       </div>
@@ -616,6 +623,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     {
       name: "Sales",
       width: "150px",
+      selector: (row) => row.attributes?.customer?.data?.attributes?.sales_name,
       //selector: (row) => console.log("row tabel",row),
     },
     {
@@ -631,7 +639,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     {
       name: "Total Pembayaran",
       width: "150px",
-      //selector: (row) => formatter.format( row.sisaHutang - row.sisaPiutang ),
+      selector: (row, idx) => formatter.format(calculateTotalPembayaran(row, idx)),
       //selector: (row, idx) => totalPembayaran(row, idx) ,
       //selector: (row, idx) => ((row.attributes?.total - row?.subtotal) - row?.sisaPiutang) ?? 0 ,
       //selector: (row) => console.log("row total pem", row),
@@ -649,138 +657,981 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       paginationRowsPerPageOptions={[5]}
       paginationTotalRows={[1]}
       columns={columns}
-      data={data.filter((item) => {
+      data={data.filter((item, id) => {
+        //filter
         let man = new Date(item.attributes.sale_date); //date from data
-        let customerNama = item.attributes.customer.data.attributes.name;
+        let customerNama = item.attributes.customer.data.id;
+        let areaFilter = item.attributes.customer.data.attributes.area.data.id;
+        let wilayahFilter = item.attributes.customer.data.attributes.wilayah.data.id;
+        let salesFilter = item.attributes.customer.data.attributes.sales_name;
 
-        if( statusPembayaran == item.status && customer?.attributes.name == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined
-        ) {
+        //show pilih data
+        if(biaya.info[id]?.pilihData == "pilih"){
           return item;
-        }
-        if( statusPembayaran == item.status && customer?.attributes.name == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == item.attributes.added_by
-        ) {
-            if (item.keterangan == "sales") return item;
-            else { };
-        }
-        if( statusPembayaran == item.status && customer?.attributes.name == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined
-        ) {
-          return item;
-        }
-        if( statusPembayaran == item.status && customer?.attributes.name == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == item.attributes.added_by
-        ) {
-            if (item.keterangan == "sales") return item;
-            else { };
-        }
-        if( statusPembayaran == undefined && customer?.attributes.name == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined
-        ) {
-          return item;
-        }
-        if( statusPembayaran == undefined && customer?.attributes.name == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == item.attributes.added_by
-        ) {
-            if (item.keterangan == "sales") return item;
-            else { };
-        }
-        if( statusPembayaran == undefined && customer?.attributes.name == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined
-        ) {
-          return item;
-        }
-        if( statusPembayaran == undefined && customer?.attributes.name == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == item.attributes.added_by
-        ) {
-            if (item.keterangan == "sales") return item;
-            else { };
-        }
+        } else {}
 
-        if( customer?.attributes.name == customerNama && statusPembayaran == undefined && min == null && max == null &&
-          sales == undefined
+        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
+            sales == undefined && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == undefined
         ){
           return item;
         }
-        if( customer?.attributes.name == customerNama && statusPembayaran == undefined && min == null && max == null &&
-          sales == item.attributes.added_by
+
+        if( statusPembayaran == item.status && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter
+            && tipePenjualan == item.keterangan
+        ) {
+          return item;
+        }
+        if( statusPembayaran == item.status && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter
+            && tipePenjualan == undefined
+        ) {
+          return item;
+        }
+        if( statusPembayaran == item.status && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == areaFilter && wilayah?.id == undefined
+            && tipePenjualan == item.keterangan
+        ) {
+          return item;
+        }
+        if( statusPembayaran == item.status && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == areaFilter && wilayah?.id == undefined
+            && tipePenjualan == undefined
+        ) {
+          return item;
+        }
+        if( statusPembayaran == item.status && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter
+            && tipePenjualan == item.keterangan
+        ) {
+          return item;
+        }
+        if( statusPembayaran == item.status && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter
+            && tipePenjualan == undefined
+        ) {
+          return item;
+        }
+        if( statusPembayaran == item.status && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == undefined && wilayah?.id == undefined
+            && tipePenjualan == item.keterangan
+        ) {
+          return item;
+        }
+        if( statusPembayaran == item.status && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == undefined && wilayah?.id == undefined
+            && tipePenjualan == undefined
+        ) {
+          return item;
+        }
+        if( statusPembayaran == item.status && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
+            && tipePenjualan == item.keterangan
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == item.status && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
+            && tipePenjualan == undefined
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == item.status && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
+            && tipePenjualan == item.keterangan
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == item.status && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
+            && tipePenjualan == undefined
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == item.status && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
+            && tipePenjualan == item.keterangan
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == item.status && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
+            && tipePenjualan == undefined
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == item.status && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
+            && tipePenjualan == item.keterangan
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == item.status && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
+            && tipePenjualan == undefined
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == item.status && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter
+            && tipePenjualan == item.keterangan
+        ) {
+          return item;
+        }
+        if( statusPembayaran == item.status && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter
+            && tipePenjualan == undefined
+        ) {
+          return item;
+        }
+        if( statusPembayaran == item.status && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == areaFilter && wilayah?.id == undefined
+            && tipePenjualan == item.keterangan
+        ) {
+          return item;
+        }
+        if( statusPembayaran == item.status && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == areaFilter && wilayah?.id == undefined
+            && tipePenjualan == item.keterangan
+        ) {
+          return item;
+        }
+        if( statusPembayaran == item.status && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter
+            && tipePenjualan == item.keterangan
+        ) {
+          return item;
+        }
+        if( statusPembayaran == item.status && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter
+            && tipePenjualan == undefined
+        ) {
+          return item;
+        }
+        if( statusPembayaran == item.status && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == undefined && wilayah?.id == undefined
+            && tipePenjualan == item.keterangan
+        ) {
+          return item;
+        }
+        if( statusPembayaran == item.status && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == undefined && wilayah?.id == undefined
+            && tipePenjualan == undefined
+        ) {
+          return item;
+        }
+        if( statusPembayaran == item.status && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
+            && tipePenjualan == item.keterangan
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == item.status && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
+            && tipePenjualan == undefined
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == item.status && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
+            && tipePenjualan == item.keterangan
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == item.status && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
+            && tipePenjualan == undefined
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == item.status && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
+            && tipePenjualan == item.keterangan
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == item.status && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
+            && tipePenjualan == undefined
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == item.status && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
+            && tipePenjualan == item.keterangan
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == item.status && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
+            && tipePenjualan == undefined
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == undefined && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter
+            && tipePenjualan == item.keterangan
+        ) {
+          return item;
+        }
+        if( statusPembayaran == undefined && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter
+            && tipePenjualan == undefined
+        ) {
+          return item;
+        }
+        if( statusPembayaran == undefined && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == areaFilter && wilayah?.id == undefined
+            && tipePenjualan == item.keterangan
+        ) {
+          return item;
+        }
+        if( statusPembayaran == undefined && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == areaFilter && wilayah?.id == undefined
+            && tipePenjualan == undefined
+        ) {
+          return item;
+        }
+        if( statusPembayaran == undefined && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter
+            && tipePenjualan == item.keterangan
+        ) {
+          return item;
+        }
+        if( statusPembayaran == undefined && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter
+            && tipePenjualan == undefined
+        ) {
+          return item;
+        }
+        if( statusPembayaran == undefined && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == undefined && wilayah?.id == undefined
+            && tipePenjualan == item.keterangan
+        ) {
+          return item;
+        }
+        if( statusPembayaran == undefined && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == undefined && wilayah?.id == undefined
+            && tipePenjualan == undefined
+        ) {
+          return item;
+        }
+        if( statusPembayaran == undefined && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
+            && tipePenjualan == item.keterangan
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == undefined && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
+            && tipePenjualan == undefined
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == undefined && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
+            && tipePenjualan == item.keterangan
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == undefined && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
+            && tipePenjualan == undefined
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == undefined && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
+            && tipePenjualan == item.keterangan
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == undefined && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
+            && tipePenjualan == undefined
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == undefined && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
+            && tipePenjualan == item.keterangan
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == undefined && customer?.id == customerNama &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
+            && tipePenjualan == undefined
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == undefined && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter
+            && tipePenjualan == item.keterangan
+        ) {
+          return item;
+        }
+        if( statusPembayaran == undefined && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter
+            && tipePenjualan == undefined
+        ) {
+          return item;
+        }
+        if( statusPembayaran == undefined && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == areaFilter && wilayah?.id == undefined
+            && tipePenjualan == item.keterangan
+        ) {
+          return item;
+        }
+        if( statusPembayaran == undefined && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == areaFilter && wilayah?.id == undefined
+            && tipePenjualan == undefined
+        ) {
+          return item;
+        }
+        if( statusPembayaran == undefined && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter
+            && tipePenjualan == item.keterangan
+        ) {
+          return item;
+        }
+        if( statusPembayaran == undefined && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter
+            && tipePenjualan == undefined
+        ) {
+          return item;
+        }
+        if( statusPembayaran == undefined && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == undefined && wilayah?.id == undefined
+            && tipePenjualan == item.keterangan
+        ) {
+          return item;
+        }
+        if( statusPembayaran == undefined && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == undefined && area?.id == undefined && wilayah?.id == undefined
+            && tipePenjualan == undefined
+        ) {
+          return item;
+        }
+        if( statusPembayaran == undefined && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
+            && tipePenjualan == item.keterangan
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == undefined && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
+            && tipePenjualan == undefined
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == undefined && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
+            && tipePenjualan == item.keterangan
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == undefined && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
+            && tipePenjualan == undefined
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == undefined && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
+            && tipePenjualan == item.keterangan
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == undefined && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
+            && tipePenjualan == undefined
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == undefined && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
+            && tipePenjualan == item.keterangan
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+        if( statusPembayaran == undefined && customer?.id == undefined &&
+            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
+            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
+            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
+            sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
+            && tipePenjualan == undefined
+        ) {
+            if (item.keterangan == "sales") return item;
+            else { };
+        }
+
+        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
+          sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
+        ){
+          return item;
+        }if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
+          sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == undefined
+        ){
+          return item;
+        }
+        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
+          sales == undefined && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == item.keterangan
+        ){
+          return item;
+        }
+        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
+          sales == undefined && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == undefined
+        ){
+          return item;
+        }
+        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
+          sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
+        ){
+          return item;
+        }
+        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
+          sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == undefined
+        ){
+          return item;
+        }
+        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
+          sales == undefined && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == item.keterangan
+        ){
+          return item;
+        }
+        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
+          sales == undefined && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == undefined
+        ){
+          return item;
+        }
+        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
+          sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
         ){
           if(item.keterangan == "sales") return item;
           else { };
         }
-        if( customer?.attributes.name == customerNama && statusPembayaran == item.status && min == null && max == null &&
-          sales == undefined
-        ){
-          return item;
-        }
-        if( customer?.attributes.name == customerNama && statusPembayaran == item.status && min == null && max == null &&
-          sales == item.attributes.added_by
+        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
+          sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == undefined
         ){
           if(item.keterangan == "sales") return item;
           else { };
         }
-        if( customer?.attributes.name == undefined && statusPembayaran == item.status && min == null && max == null ){
-          return item;
-        }
-
-        if( customer?.attributes.name == undefined && statusPembayaran == undefined && min == null && max == null &&
-          sales == item.attributes.added_by
+        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
+          sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == item.keterangan
         ){
           if(item.keterangan == "sales") return item;
           else { };
         }
-
-        if( customer?.attributes.name == undefined && statusPembayaran == undefined && min == null && max == null &&
-          sales == undefined
+        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
+          sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == undefined
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
+          sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
+          sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == undefined
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
+          sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == item.keterangan
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
+          sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == undefined
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
+          sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
+        ){
+          return item;
+        }
+        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
+          sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == undefined
+        ){
+          return item;
+        }
+        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
+          sales == undefined && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == item.keterangan
+        ){
+          return item;
+        }
+        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
+          sales == undefined && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == undefined
+        ){
+          return item;
+        }
+        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
+          sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
+        ){
+          return item;
+        }
+        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
+          sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == undefined
+        ){
+          return item;
+        }
+        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
+          sales == undefined && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == item.keterangan
+        ){
+          return item;
+        }
+        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
+          sales == undefined && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == undefined
+        ){
+          return item;
+        }
+        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
+          sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
+          sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == undefined
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
+          sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == item.keterangan
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
+          sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == undefined
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
+          sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
+          sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == undefined
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
+          sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == item.keterangan
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
+          sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == undefined
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
+          sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
+          sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == undefined
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
+          sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == item.keterangan
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
+          sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == undefined
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
+          sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
+          sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == undefined
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
+          sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == item.keterangan
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
+          sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == undefined
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
+          sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
+        ){
+          return item;
+        }
+        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
+          sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == undefined
+        ){
+          return item;
+        }
+        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
+          sales == undefined && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == item.keterangan
+        ){
+          return item;
+        }
+        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
+          sales == undefined && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == undefined
+        ){
+          return item;
+        }
+        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
+          sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
+        ){
+          return item;
+        }
+        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
+          sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == undefined
+        ){
+          return item;
+        }
+        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
+          sales == undefined && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == item.keterangan
+        ){
+          return item;
+        }
+        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
+          sales == undefined && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == undefined
+        ){
+          return item;
+        }
+        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
+          sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
+          sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == undefined
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
+          sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == item.keterangan
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
+          sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == undefined
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
+          sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
+          sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == undefined
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
+          sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == item.keterangan
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
+          sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == undefined
+        ){
+          if(item.keterangan == "sales") return item;
+          else { };
+        }
+        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
+          sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
+        ){
+          return item;
+        }
+        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
+          sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == undefined
+        ){
+          return item;
+        }
+        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
+          sales == undefined && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == item.keterangan
+        ){
+          return item;
+        }
+        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
+          sales == undefined && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == undefined
+        ){
+          return item;
+        }
+        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
+          sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
+        ){
+          return item;
+        }
+        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
+          sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == undefined
+        ){
+          return item;
+        }
+        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
+          sales == undefined && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == item.keterangan
         ){
           return item;
         }
 
-        console.log("item", customerNama, customer?.attributes.name, item);
-        //if(supplier?.id == item.attributes.supplier.data.id && statusPembayaran == undefined &&
-        //    min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-        //    min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-        //    min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-        //    (item.attributes.no_purchasing.toLowerCase().indexOf(search?.toLowerCase()) !== -1 || search == undefined)
-        //) {
-        //  return item;
-        //  }
-        //if (supplier?.id == item.attributes.supplier.data.id && statusPembayaran == item.attributes.status_pembayaran && min == null && 
-        //    (item.attributes.no_purchasing.toLowerCase().indexOf(search?.toLowerCase()) !== -1 || search == undefined)
-        //) {
-        //  return item;
-        //}
-        //if(supplier?.id == item.attributes.supplier.data.id && statusPembayaran == undefined && min == null && item.attributes.no_purchasing.toLowerCase().indexOf(search?.toLowerCase()) !== -1) {
-        //  return item;
-        //}
-        //if(supplier?.id == item.attributes.supplier.data.id && statusPembayaran == undefined && min == null && search == undefined) {
-        //  return item;
-        //}
       })}
       noDataComponent={`--Belum ada data penjualan--`}
     />

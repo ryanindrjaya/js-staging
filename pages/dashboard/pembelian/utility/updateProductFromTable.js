@@ -4,8 +4,9 @@ import { notification } from "antd";
 const updateProductFromTable = async (data) => {
   try {
     const purchasingDetails = data?.attributes?.purchasing_details?.data;
-    const promises = purchasingDetails.map((element) => {
-      updateAPI(element);
+    console.log("purchasingDetails", purchasingDetails);
+    const promises = purchasingDetails.map(async (element) => {
+      await updateAPI(element);
     });
 
     await Promise.all(promises);
@@ -16,6 +17,7 @@ const updateProductFromTable = async (data) => {
 };
 
 const updateAPI = async (element) => {
+  console.log("updating all api");
   try {
     const cookies = nookies.get(null, "token");
 
@@ -85,6 +87,7 @@ const updateAPI = async (element) => {
 
     const data = { data: productData };
     const JSONdata = JSON.stringify(data);
+    console.log("jsondata from update produk", JSONdata);
     const endpoint = process.env.NEXT_PUBLIC_URL + "/products/" + productId;
     const options = {
       method: "PUT",
@@ -114,27 +117,19 @@ const updateAPI = async (element) => {
 const updateAtProductUnit1 = (productData, unit, unitPrice, disc) => {
   console.log("UPDATE DISC & HARGA PEMBELIAN DI UNIT 1");
 
-  //unit 1
   productData.buy_price_1 = unitPrice;
-  productData.purchase_discount_1 = disc;
-
-  //unit 2
-  productData.buy_price_2 = productData.buy_price_1 / productData.qty_2;
-  productData.purchase_discount_2 =
-    productData.purchase_discount_1 / productData?.qty_1;
-
-  //unit 3
-  productData.buy_price_3 = productData.buy_price_2 / productData.qty_3;
-  productData.purchase_discount_3 =
-    productData.purchase_discount_2 / productData?.qty_2;
-
-  // unit 4
+  productData.buy_price_2 = productData.buy_price_1 / productData?.qty_2;
+  productData.buy_price_3 = productData.buy_price_2 / productData?.qty_3;
   productData.buy_price_4 = productData.buy_price_3 / productData?.qty_4;
+  productData.buy_price_5 = productData.buy_price_4 / productData?.qty_5;
+
+  productData.purchase_discount_1 = disc;
+  productData.purchase_discount_2 =
+    productData.purchase_discount_1 / productData?.qty_2;
+  productData.purchase_discount_3 =
+    productData.purchase_discount_2 / productData?.qty_3;
   productData.purchase_discount_4 =
     productData.purchase_discount_3 / productData?.qty_4;
-
-  // unit 5
-  productData.buy_price_5 = productData.buy_price_4 / productData?.qty_5;
   productData.purchase_discount_5 =
     productData.purchase_discount_4 / productData?.qty_5;
 };
@@ -144,27 +139,20 @@ const updateAtProductUnit2 = (productData, unit, unitPrice, disc) => {
 
   //unit 2
   productData.buy_price_2 = unitPrice;
-  productData.purchase_discount_2 = disc;
-
-  //unit 1
-  productData.buy_price_1 = productData.buy_price_2 * productData.qty_2;
-  productData.purchase_discount_1 =
-    productData.purchase_discount_2 * productData?.qty_2;
-
-  //unit 3
   productData.buy_price_3 = productData.buy_price_2 / productData.qty_3;
-  productData.purchase_discount_3 =
-    productData.purchase_discount_2 / productData?.qty_2;
-
-  // unit 4
   productData.buy_price_4 = productData.buy_price_3 / productData?.qty_4;
+  productData.buy_price_5 = productData.buy_price_4 / productData?.qty_5;
+  productData.buy_price_1 = productData.buy_price_2 * productData.qty_2;
+
+  productData.purchase_discount_2 = disc;
+  productData.purchase_discount_3 =
+    productData.purchase_discount_2 / productData?.qty_3;
   productData.purchase_discount_4 =
     productData.purchase_discount_3 / productData?.qty_4;
-
-  // unit 5
-  productData.buy_price_5 = productData.buy_price_4 / productData?.qty_5;
   productData.purchase_discount_5 =
     productData.purchase_discount_4 / productData?.qty_5;
+  productData.purchase_discount_1 =
+    productData.purchase_discount_2 * productData?.qty_2;
 };
 
 const updateAtProductUnit3 = (productData, unit, unitPrice, disc) => {
@@ -172,55 +160,41 @@ const updateAtProductUnit3 = (productData, unit, unitPrice, disc) => {
 
   //unit 3
   productData.buy_price_3 = unitPrice;
-  productData.purchase_discount_3 = disc;
+  productData.buy_price_4 = productData.buy_price_3 / productData?.qty_4;
+  productData.buy_price_5 = productData.buy_price_4 / productData?.qty_5;
+  productData.buy_price_2 = productData.buy_price_3 * productData.qty_3;
+  productData.buy_price_1 = productData.buy_price_2 * productData.qty_2;
 
   //unit 2
-  productData.buy_price_2 = productData.buy_price_3 * productData.qty_3;
-  productData.purchase_discount_2 =
-    productData.purchase_discount_3 * productData?.qty_3;
-
-  //unit 1
-  productData.buy_price_1 = productData.buy_price_2 * productData.qty_2;
-  productData.purchase_discount_1 =
-    productData.purchase_discount_2 * productData?.qty_2;
-
-  // unit 4
-  productData.buy_price_4 = productData.buy_price_3 / productData?.qty_4;
+  productData.purchase_discount_3 = disc;
   productData.purchase_discount_4 =
     productData.purchase_discount_3 / productData?.qty_4;
-
-  // unit 5
-  productData.buy_price_5 = productData.buy_price_4 / productData?.qty_5;
   productData.purchase_discount_5 =
     productData.purchase_discount_4 / productData?.qty_5;
+  productData.purchase_discount_2 =
+    productData.purchase_discount_3 * productData?.qty_3;
+  productData.purchase_discount_1 =
+    productData.purchase_discount_2 * productData?.qty_2;
 };
 
 const updateAtProductUnit4 = (productData, unit, unitPrice, disc) => {
   console.log("UPDATE DISC & HARGA PEMBELIAN DI UNIT 4");
 
-  //unit 4
   productData.buy_price_4 = unitPrice;
-  productData.purchase_discount_4 = disc;
-
-  // unit 3
-  productData.buy_price_3 = productData.buy_price_4 * productData?.qty_4;
-  productData.purchase_discount_3 =
-    productData.purchase_discount_4 * productData?.qty_4;
-
-  //unit 2
-  productData.buy_price_2 = productData.buy_price_3 * productData.qty_3;
-  productData.purchase_discount_2 =
-    productData.purchase_discount_3 * productData?.qty_3;
-
-  //unit 1
-  productData.buy_price_1 = productData.buy_price_2 * productData.qty_2;
-  productData.purchase_discount_1 =
-    productData.purchase_discount_2 * productData?.qty_2;
-
-  // unit 5
   productData.buy_price_5 = productData.buy_price_4 / productData?.qty_5;
+  productData.buy_price_3 = productData.buy_price_4 * productData?.qty_4;
+  productData.buy_price_2 = productData.buy_price_3 * productData.qty_3;
+  productData.buy_price_1 = productData.buy_price_2 * productData.qty_2;
+
+  productData.purchase_discount_4 = disc;
   productData.purchase_discount_5 =
     productData.purchase_discount_4 / productData?.qty_5;
+  productData.purchase_discount_3 =
+    productData.purchase_discount_4 * productData?.qty_4;
+  productData.purchase_discount_2 =
+    productData.purchase_discount_3 * productData?.qty_3;
+  productData.purchase_discount_1 =
+    productData.purchase_discount_2 * productData?.qty_2;
 };
 
 const updateAtProductUnit5 = (productData, unit, unitPrice, disc) => {
@@ -228,25 +202,18 @@ const updateAtProductUnit5 = (productData, unit, unitPrice, disc) => {
 
   //unit 5
   productData.buy_price_5 = unitPrice;
-  productData.purchase_discount_5 = disc;
-
-  // unit 4
   productData.buy_price_4 = productData.buy_price_5 * productData?.qty_5;
+  productData.buy_price_3 = productData.buy_price_4 * productData?.qty_4;
+  productData.buy_price_2 = productData.buy_price_3 * productData.qty_3;
+  productData.buy_price_1 = productData.buy_price_2 * productData.qty_2;
+
+  productData.purchase_discount_5 = disc;
   productData.purchase_discount_4 =
     productData.purchase_discount_5 * productData?.qty_5;
-
-  // unit 3
-  productData.buy_price_3 = productData.buy_price_4 * productData?.qty_4;
   productData.purchase_discount_3 =
     productData.purchase_discount_4 * productData?.qty_4;
-
-  //unit 2
-  productData.buy_price_2 = productData.buy_price_3 * productData.qty_3;
   productData.purchase_discount_2 =
     productData.purchase_discount_3 * productData?.qty_3;
-
-  //unit 1
-  productData.buy_price_1 = productData.buy_price_2 * productData.qty_2;
   productData.purchase_discount_1 =
     productData.purchase_discount_2 * productData?.qty_2;
 };

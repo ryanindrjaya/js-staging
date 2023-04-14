@@ -224,6 +224,7 @@ function Tambah({ props }) {
     );
 
     const formattedNumber = formatter.format(total);
+    console.log("product", products);
     console.log("harga setelah diskon", formattedNumber);
 
     return formattedNumber;
@@ -505,6 +506,7 @@ function Tambah({ props }) {
                     ]}
                   >
                     <Select
+                      placeholder="Pilih Lokasi"
                       size="large"
                       style={{
                         width: "100%",
