@@ -2,6 +2,7 @@ import DataTable from "react-data-table-component";
 import AlertDialog from "../../Alert/Alert";
 import { Input, InputNumber, Select, Form, Row, DatePicker } from "antd";
 import { useDispatch } from "react-redux";
+import { useState } from "react";
 
 export default function ReactDataTable({
   calculatePriceAfterDisc,
@@ -14,7 +15,6 @@ export default function ReactDataTable({
   stokString,
   formObj,
 }) {
-  console.log("data location stock", dataLocationStock);
   const dispatch = useDispatch();
   var defaultDp1 = 0;
   var defaultDp2 = 0;
@@ -299,9 +299,9 @@ export default function ReactDataTable({
       name: "Diskon",
       width: "150px",
       selector: (row, idx) => {
-        var defaultDisc = 0;
+        let defaultDisc = 0;
         if (products.productInfo[idx]?.disc) {
-          defaultDisc = products.productInfo[idx].disc;
+          defaultDisc = products.productInfo[idx]?.disc;
         }
 
         return (
@@ -310,13 +310,14 @@ export default function ReactDataTable({
               <InputNumber
                 defaultValue={defaultDisc}
                 min={0}
+                max={100}
                 onChange={(e) => onChangeDisc(e, row, idx)}
                 style={{
                   width: "100px",
                   marginRight: "10px",
                 }}
                 formatter={(value) =>
-                  value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "%"
                 }
                 parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
               />

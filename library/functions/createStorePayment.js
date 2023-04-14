@@ -161,7 +161,7 @@ export const updateReturTransaction = async (
     console.log(endpoint, JSON.stringify(data), result);
 
     // update master transaction
-    await updateMasterTransaction(storeTrxId);
+    // await updateMasterTransaction(storeTrxId);
 
     message.success("Transaksi Retur Lunas", 2);
     // if (reloadPage) {

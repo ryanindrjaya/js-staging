@@ -147,8 +147,8 @@ function ReturToko({ props }) {
   const [totalPrice, setTotalPrice] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
 
-  const [dppActive, setDPPActive] = useState("Active");
-  const [ppnActive, setPPNActive] = useState("Active");
+  const [dppActive, setDPPActive] = useState(true);
+  const [ppnActive, setPPNActive] = useState(true);
   const [simpanData, setSimpanData] = useState("Bayar");
   const [dataLocationStock, setDataLocationStock] = useState();
   const [dataGudang, setDataGudang] = useState();
@@ -371,11 +371,12 @@ function ReturToko({ props }) {
     // }
 
     const payment = store.data.attributes.total;
-    console.log("check payment", payment, grandTotal);
-    if (grandTotal > payment) {
+    console.log("check payment", payment.toFixed(2), grandTotal.toFixed(2));
+    if (payment.toFixed(2) > grandTotal.toFixed(2)) {
       notification["error"]({
         message: "Overprice",
-        description: "Harga retur melebih dari Sisa pembayaran / Harga LPB",
+        description:
+          "Harga retur melebih dari Sisa pembayaran / Harga Penjualan",
       });
       setLoading(false);
       return;
@@ -534,7 +535,7 @@ function ReturToko({ props }) {
 
   useEffect(() => {
     // set dpp
-    if (dppActive == "DPP") {
+    if (dppActive) {
       setDPP(grandTotal / 1.11);
     } else {
       setDPP(0);
@@ -543,7 +544,7 @@ function ReturToko({ props }) {
 
   useEffect(() => {
     // set ppn
-    if (ppnActive == "PPN") {
+    if (ppnActive) {
       setPPN(((grandTotal / 1.11) * 11) / 100);
     } else {
       setPPN(0);
@@ -899,14 +900,18 @@ function ReturToko({ props }) {
                   <Form.Item name="DPP_active">
                     <Select
                       placeholder="Pakai DPP"
+                      defaultValue={dppActive}
                       onChange={setDPPActive}
                       size="large"
                       style={{
                         width: "100%",
                       }}
                     >
-                      <Select.Option value="DPP" key={"DPP"}>
+                      <Select.Option value={true} key={"DPP"}>
                         DPP
+                      </Select.Option>
+                      <Select.Option value={false} key={"non-DPP"}>
+                        Tidak Ada
                       </Select.Option>
                     </Select>
                   </Form.Item>
@@ -915,14 +920,18 @@ function ReturToko({ props }) {
                   <Form.Item name="PPN_active">
                     <Select
                       placeholder="Pakai PPN"
+                      defaultValue={ppnActive}
                       onChange={setPPNActive}
                       size="large"
                       style={{
                         width: "100%",
                       }}
                     >
-                      <Select.Option value="PPN" key={"PPN"}>
-                        PPN
+                      <Select.Option value={true} key={"DPP"}>
+                        DPP
+                      </Select.Option>
+                      <Select.Option value={false} key={"Active"}>
+                        Tidak Ada
                       </Select.Option>
                     </Select>
                   </Form.Item>
