@@ -268,7 +268,7 @@ function PembayaranToko({ props }) {
                 >
                   <Column
                     title="No Faktur"
-                    dataIndex={["attributes", "faktur"]}
+                    dataIndex={["attributes", "no_retur_store_sale"]}
                     key="faktur"
                   />
                   <Column

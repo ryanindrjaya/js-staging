@@ -75,7 +75,7 @@ export default function ReactDataTable({
       )}
 
       <AlertDialog
-        hidden={row.attributes.purchasing.data ? true : false}
+        hidden={row?.attributes?.purchasing?.data ? true : false}
         onCancel={onCancel}
         onConfirm={onConfirm}
         title="Hapus Kategori"

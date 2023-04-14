@@ -24,8 +24,8 @@ const createDetailSale = (
     var disc = 0;
     var margin = 0;
     var unit = element.attributes.unit_1;
-    var unitPrice = element.attributes.buy_price_1;
-    var unitPriceAfterDisc = element.attributes.buy_price_1;
+    var unitPrice = element.attributes.sold_price_1;
+    var unitPriceAfterDisc = element.attributes.sold_price_1;
     var subTotal = 0;
     const productLoc = form.getFieldValue("product_location");
     tempListId = [];
@@ -41,7 +41,7 @@ const createDetailSale = (
     disc = products.productInfo[id]?.disc ?? 0;
     unit = products.productInfo[id]?.unit ?? element.attributes.unit_1;
     unitPrice =
-      products.productInfo[id]?.priceUnit ?? element.attributes.buy_price_1;
+      products.productInfo[id]?.priceUnit ?? element.attributes.sold_price_1;
     unitPriceAfterDisc = productTotalPrice?.[id];
     subTotal = productSubTotal?.[subtotalId];
     var d1 = products.productInfo[id]?.d1 ?? element.attributes.unit_1_dp1;
