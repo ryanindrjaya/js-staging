@@ -162,9 +162,9 @@ export default function ReactDataTable({
       },
     },
     {
-      name: "NO Faktur",
+      name: "No Faktur",
       width: "180px",
-      selector: (row) => row.attributes?.faktur ?? "-",
+      selector: (row) => row.attributes?.no_store_sale ?? "-",
     },
     {
       name: <div className="">Status</div>,
@@ -219,7 +219,7 @@ export default function ReactDataTable({
       },
     },
     {
-      name: "Sisa Pembayaran",
+      name: "Kembalian",
       width: "200px",
       selector: (row) => {
         const totalHarga = row.attributes?.total ?? 0;
@@ -234,6 +234,7 @@ export default function ReactDataTable({
             dataPaymentValue - totalHarga < 0
               ? 0
               : dataPaymentValue - totalHarga;
+
           return formatter.format(kembali);
         }
 

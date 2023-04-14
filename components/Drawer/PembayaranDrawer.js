@@ -27,7 +27,7 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
             data: { id },
           } = await CreateStorePaymenWithoutUpdate(
             total,
-            0,
+            totalCharge,
             nominal,
             option,
             "Pembayaran",
@@ -115,8 +115,9 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
   };
 
   const totalInputValue = values.reduce((acc, cur) => acc + cur.nominal, 0);
-  const totalAfterInput = data?.total - totalInputValue;
-
+  const totalAfterInput = data?.total - totalInputValue; // sisa pembayaran
+  const totalCharge =
+    totalAfterInput <= 0 ? (data?.total - totalInputValue) * -1 : 0;
   return (
     <Drawer
       title={`Pembayaran Lainnya`}
@@ -131,9 +132,12 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
 
       {Array.from({ length: 3 }, (_, i) => renderInput(i))}
 
-      <p className="mt-5 font-bold">
+      <p className="mt-5">
         Sisa Pembayaran :{" "}
         {formatter.format(totalAfterInput < 0 ? 0 : totalAfterInput)}
+      </p>
+      <p className="mt-2 font-medium text-red-400">
+        Pengembalian : {formatter.format(totalCharge)}
       </p>
 
       <Popconfirm
