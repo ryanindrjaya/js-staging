@@ -36,7 +36,7 @@ Retur.getInitialProps = async (context) => {
   const reqLocation = await fetchLocation(cookies);
   const location = await reqLocation.json();
 
-  const reqDataRetur = await fetchDataRetur(cookies);
+  const reqDataRetur = await fetchDataRetur(cookies, id);
   const returs = await reqDataRetur.json();
 
   const reqDataLPB = await fetchDataLPB(cookies);
@@ -80,8 +80,8 @@ const fetchLocation = async (cookies) => {
   return req;
 };
 
-const fetchDataRetur = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs?populate=deep";
+const fetchDataRetur = async (cookies, id) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + `/returs/${id}?populate=deep`;
   const options = {
     method: "GET",
     headers: {
@@ -127,6 +127,7 @@ function Retur({ props }) {
   const locations = props.location.data;
   const dataLPB = props.dataLPB.data;
   const returMasterId = props.id;
+  const returs = props.returs.data;
 
   var products = useSelector((state) => state.Order);
   var selectedProduct = products?.productList;
@@ -160,10 +161,6 @@ function Retur({ props }) {
   const [expProduct, setExpProduct] = useState([]);
   const [batch, setBatch] = useState([]);
 
-  var totalReturs = String(props.returs?.meta?.pagination.total + 1).padStart(
-    3,
-    "0"
-  );
   var today = new Date();
   var dd = String(today.getDate()).padStart(2, "0");
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
@@ -452,13 +449,13 @@ function Retur({ props }) {
     setIsFetchingData(true);
     setProductValue();
 
-    var returData = null;
+    var returData = props.returs.data;
 
-    props.returs.data.forEach((element) => {
-      if (props.id == element.id) {
-        returData = element;
-      }
-    });
+    // props.returs.data.forEach((element) => {
+    //   if (props.id == element.id) {
+    //     returData = element;
+    //   }
+    // });
 
     var labelSupplier = `${returData.attributes.supplier.data.attributes.id_supplier} - ${returData.attributes.supplier.data.attributes.name}`;
 
@@ -609,14 +606,20 @@ function Retur({ props }) {
   const getPaymentRemaining = () => {
     let returPayments = 0;
     let returPaymentRemaining = 0;
-    const totalLPBPayment = lpbData?.attributes?.total_purchasing ?? 0;
+    const lpbTrx = returs?.attributes?.purchasing?.data;
+    const docRetur = lpbTrx?.attributes?.returs?.data;
 
-    // for (const data in lpbData?.attributes?.returs?.data) {
-    //   console.log("retur payment ", data.);
-    // }
-    lpbData?.attributes?.returs?.data.forEach((element) => {
-      returPayments = returPayments + element.attributes.total_price;
+    docRetur.forEach((element) => {
+      if (element.attributes.status === "Selesai") {
+        returPayments += element.attributes.total_price;
+      }
     });
+
+    const totalLPBPayment = lpbTrx?.attributes?.total_purchasing;
+
+    console.log("total LPB", totalLPBPayment);
+    console.log("retur payment ", returPayments);
+    console.log("retur remaing", formatter.format(returPaymentRemaining));
 
     returPaymentRemaining = totalLPBPayment - returPayments;
     const paymentData = {
@@ -859,6 +862,28 @@ function Retur({ props }) {
                   Total Harga : {formatterTotal.format(totalPrice)}{" "}
                 </p>
               </div>
+
+              <div className="flex justify-end mt-5">
+                <p className="font-bold">
+                  Total LPB :{" "}
+                  {formatter.format(getPaymentRemaining().LPBPayment ?? 0)}{" "}
+                </p>
+              </div>
+              <div className="flex justify-end">
+                <p className="font-bold text-green-600">
+                  Pembayaran Selesai :{" "}
+                  {formatter.format(getPaymentRemaining().returPayment ?? 0)}{" "}
+                </p>
+              </div>
+              <div className="flex justify-end">
+                <p className="font-bold text-red-400">
+                  Sisa Pembayaran :{" "}
+                  {formatter.format(
+                    getPaymentRemaining().returPaymentRemaining ?? 0
+                  )}{" "}
+                </p>
+              </div>
+
               <Form.Item name="catatan">
                 <TextArea rows={4} placeholder="Catatan Tambahan" />
               </Form.Item>

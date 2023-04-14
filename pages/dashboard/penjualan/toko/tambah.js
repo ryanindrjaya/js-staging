@@ -352,7 +352,7 @@ function Toko({ props }) {
 
         const req = await fetch(endpoint, options);
         const res = await req.json();
-        console.log("repsonse", res);
+        console.log("repsonse", res, JSON.stringify(returData));
         if (!res?.available) {
           cannotBeReturnedProducts.push(product.attributes.name);
         }
@@ -431,8 +431,8 @@ function Toko({ props }) {
     values.sale_date = today;
     values.added_by = user.name;
     values.category = selectedCategory;
-    values.dpp = dpp;
-    values.ppn = ppn;
+    values.dpp = dppPrice;
+    values.ppn = ppnPrice;
     values.customer = customer;
     await createSaleFunc(
       grandTotal,
@@ -544,17 +544,9 @@ function Toko({ props }) {
         totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan)
       );
     }
-
-    if (isDPPActive) {
-      dppValue = totalPrice / 1.11;
-      ppnValue = (dppValue * 11) / 100;
-      setdppPrice(dppValue);
-      setppnPrice(ppnValue);
-    }
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
 
   useEffect(() => {
-    // TODO ::
     if (products.productList.length > 0) {
       const index = products.productList.length - 1;
       const formDiscValues = form.getFieldValue("disc_rp");
@@ -565,13 +557,6 @@ function Toko({ props }) {
             data.stock = element.attributes.total_stock;
           }
         });
-      });
-
-      form.setFieldsValue({
-        disc_rp: {
-          ...form.getFieldValue("disc_rp"),
-          [index]: products.productInfo[index].disc,
-        },
       });
     }
   }, [products.productList]);
@@ -592,21 +577,11 @@ function Toko({ props }) {
   }, [dataValues]);
 
   useEffect(() => {
-    if (dppActive) {
-      dppValue = totalPrice / 1.11;
-    } else {
-      dppValue = 0;
-    }
-
-    if (ppnActive) {
-      ppnValue = (dppValue * 11) / 100;
-    } else {
-      ppnValue = 0;
-    }
-
-    setdppPrice(dppValue);
-    setppnPrice(ppnValue);
-  }, [dppActive, ppnActive, grandTotal]);
+    dppValue = totalPrice / 1.11;
+    ppnValue = (dppValue * 11) / 100;
+    dppActive ? setdppPrice(dppValue) : setdppPrice(0);
+    ppnActive ? setppnPrice(ppnValue) : setppnPrice(0);
+  }, [dppActive, ppnActive, grandTotal, isDPPActive]);
 
   useEffect(() => {
     // set max value
@@ -983,7 +958,11 @@ function Toko({ props }) {
                     <Select
                       placeholder="Pakai DPP"
                       defaultValue={dppActive}
-                      onChange={setDPPActive}
+                      onChange={(e) => {
+                        // isDPPActive(e);
+                        setIsDPPActive(e);
+                        setDPPActive(e);
+                      }}
                       size="large"
                       style={{
                         width: "100%",
@@ -1002,7 +981,11 @@ function Toko({ props }) {
                   <Form.Item name="PPN_active">
                     <Select
                       placeholder="Pakai PPN"
-                      onChange={setPPNActive}
+                      onChange={(e) => {
+                        // isDPPActive(e);
+                        setIsDPPActive(e);
+                        setPPNActive(e);
+                      }}
                       defaultValue={ppnActive}
                       size="large"
                       style={{
