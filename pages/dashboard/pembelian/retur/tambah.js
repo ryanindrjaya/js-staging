@@ -401,7 +401,9 @@ function Retur({ props }) {
     //   console.log("retur payment ", data.);
     // }
     lpbData?.attributes?.returs?.data.forEach((element) => {
-      returPayments = returPayments + element.attributes.total_price;
+      if (element.attributes.status === "Selesai") {
+        returPayments = returPayments + element.attributes.total_price;
+      }
     });
 
     returPaymentRemaining = totalLPBPayment - returPayments;
@@ -742,7 +744,7 @@ function Retur({ props }) {
               </div>
               <div className="flex justify-end">
                 <p className="font-bold text-green-600">
-                  Pembayaran Sebelumnya :{" "}
+                  Pembayaran Selesai :{" "}
                   {formatter.format(getPaymentRemaining().returPayment ?? 0)}{" "}
                 </p>
               </div>

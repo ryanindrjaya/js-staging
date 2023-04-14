@@ -206,10 +206,11 @@ export default function ReactDataTable({
         </Modal>
       </div>
       <AlertDialog
+        buttonText="Batalkan"
         onCancel={onCancel}
         onConfirm={onConfirm}
-        title="Hapus Kategori"
-        message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
+        title="Batalkan Retur Pembelian"
+        message="Transaksi return akan dirubah menjadi status dibatalkan. Lanjutkan?"
         id={row.id}
       />
     </div>
@@ -251,7 +252,15 @@ export default function ReactDataTable({
       width: "150px",
       selector: (row) => {
         return (
-          <Tag color={row.attributes.status === "Selesai" ? "green" : "orange"}>
+          <Tag
+            color={
+              row.attributes.status === "Selesai"
+                ? "green"
+                : row.attributes.status === "Draft"
+                ? "orange"
+                : "red"
+            }
+          >
             {row.attributes.status}
           </Tag>
         );
