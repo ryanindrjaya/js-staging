@@ -3,7 +3,7 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import { useSelector, useDispatch } from "react-redux";
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Row, Form, Input, InputNumber, Select, Button, Spin, notification, Modal } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
@@ -15,6 +15,8 @@ import createDetailSaleFunc from "../utility/createDetailSale";
 import calculatePrice from "../utility/calculatePrice";
 import nookies from "nookies";
 import Customer from "@iso/components/Form/AddSale/CustomerForm";
+import ConfirmDialog from "@iso/components/Alert/ConfirmDialog";
+import createInventory from "../utility/createInventory";
 
 Toko.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -159,6 +161,7 @@ function Toko({ props }) {
 
   const [open, setOpen] = useState(false);
 
+  const submitBtn = useRef();
   const router = useRouter();
   const { TextArea } = Input;
   var today = new Date();
@@ -337,7 +340,39 @@ function Toko({ props }) {
     values.customer = customer;
     values.area = customer?.attributes?.area?.data;
     values.wilayah = customer?.attributes?.wilayah?.data;
-    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/panel-sales/", "panel sale");
+    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/panel-sales/", "panel sale", selectedLocationId, updateStock);
+  };
+
+  const updateStock = async (id, locations) => {
+    // fetching data to update
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/panel-sales/${id}?populate=deep`;
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+    const row = res.data; console.log("row stock", row);
+
+    const trxStatus = row.attributes?.status_data;
+    //const LPBLocationId = row.attributes.location?.data?.id;
+
+    if (trxStatus == "Publish") {
+      // invetory handle
+      createInventory(row, locations);
+      //await updateProductFromTable(row);
+    }
+
+    //const poData = row.attributes?.purchase?.data;
+
+    //const resPO = await changeStatusPO(poData?.id, trxStatus);
+
+    //if (resPO.data) {
+    //  await changeStatusLPB(id, trxStatus);
+    //}
   };
 
   const onChangeProduct = async () => {
@@ -962,11 +997,31 @@ function Toko({ props }) {
                         <Spin />
                       </div>
                     ) : (
-                      <button htmlType="submit" onClick={() => setSimpanData("Publish")} className="bg-cyan-700 rounded-md m-1 text-sm">
-                        <p className="px-4 py-2 m-0 text-white">
-                          SIMPAN DAN CETAK UNTUK PEMBAYARAN PIUTANG
-                        </p>
-                      </button>
+                    <>
+                      <ConfirmDialog
+                        onConfirm={() => submitBtn?.current?.click()}
+                        onCancel={() => {}}
+                        title="Tambah Panel"
+                        message="Silahkan cek kembali data yang telah dimasukkan, apakah anda yakin ingin menambahkan ?"
+                        component={
+                          <button
+                            type="button"
+                            className="bg-cyan-700 rounded-md m-1 text-sm"
+                            onClick={() => setSimpanData("Publish")}
+                          >
+                            <p className="px-4 py-2 m-0 text-white">
+                              SIMPAN DAN CETAK UNTUK PEMBAYARAN PIUTANG
+                            </p>
+                          </button>
+                        }
+                      />
+                      <Button htmlType="submit" ref={submitBtn}></Button>
+                    </>
+                      //<button htmlType="submit" onClick={() => setSimpanData("Publish")} className="bg-cyan-700 rounded-md m-1 text-sm">
+                      //  <p className="px-4 py-2 m-0 text-white">
+                      //    SIMPAN DAN CETAK UNTUK PEMBAYARAN PIUTANG
+                      //  </p>
+                      //</button>
                     )}
                   </Form.Item>
               </div>
