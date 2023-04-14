@@ -63,7 +63,7 @@ function CetakPenjualan({ props }) {
   const customerName = data.customer_name;
   const customerAddress = data.address;
   const customerPhone = data.phone;
-  const faktur = data.faktur;
+  const faktur = data.no_store_sale;
 
   // details
   const details = data?.store_sale_details?.data ?? [];

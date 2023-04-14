@@ -214,8 +214,8 @@ function Toko({ props }) {
   const [dppPrice, setdppPrice] = useState(0);
   const [ppnPrice, setppnPrice] = useState(0);
 
-  const [dppActive, setDPPActive] = useState(false);
-  const [ppnActive, setPPNActive] = useState(false);
+  const [dppActive, setDPPActive] = useState(true);
+  const [ppnActive, setPPNActive] = useState(true);
   const [isDPPActive, setIsDPPActive] = useState(true);
   const [discMax, setDiscMax] = useState();
 
@@ -391,7 +391,6 @@ function Toko({ props }) {
     }
   };
 
-  // ! add validation stock
   const onFinish = async (values) => {
     setLoading(true);
 
@@ -555,13 +554,24 @@ function Toko({ props }) {
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
 
   useEffect(() => {
+    // TODO ::
     if (products.productList.length > 0) {
+      const index = products.productList.length - 1;
+      const formDiscValues = form.getFieldValue("disc_rp");
+
       inven.forEach((element) => {
         products.productList.forEach((data) => {
           if (data.id == element.attributes.products?.data[0]?.id) {
             data.stock = element.attributes.total_stock;
           }
         });
+      });
+
+      form.setFieldsValue({
+        disc_rp: {
+          ...form.getFieldValue("disc_rp"),
+          [index]: products.productInfo[index].disc,
+        },
       });
     }
   }, [products.productList]);
@@ -972,6 +982,7 @@ function Toko({ props }) {
                   <Form.Item name="DPP_active">
                     <Select
                       placeholder="Pakai DPP"
+                      defaultValue={dppActive}
                       onChange={setDPPActive}
                       size="large"
                       style={{
@@ -992,6 +1003,7 @@ function Toko({ props }) {
                     <Select
                       placeholder="Pakai PPN"
                       onChange={setPPNActive}
+                      defaultValue={ppnActive}
                       size="large"
                       style={{
                         width: "100%",
