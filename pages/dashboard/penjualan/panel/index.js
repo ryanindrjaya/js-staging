@@ -7,13 +7,17 @@ import router, { useRouter } from "next/router";
 import { Input, notification, Select, DatePicker } from "antd";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
 import SellingTable from "../../../../components/ReactDataTable/Selling/SellingTable";
+import Customer from "@iso/components/Form/AddCost/CustomerForm";
 import nookies from "nookies";
 
-NonPanelSale.getInitialProps = async (context) => {
+PanelSale.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
 
   const req = await fetchData(cookies);
   const user = await req.json();
+
+  const reqDataUserSales = await fetchUserSales(cookies);
+  const dataUserSales = await reqDataUserSales.json();
 
   const reqLocation = await fetchLocation(cookies);
   const locations = await reqLocation.json();
@@ -24,6 +28,7 @@ NonPanelSale.getInitialProps = async (context) => {
   return {
     props: {
       user,
+      dataUserSales,
       locations,
       panel,
     },
@@ -42,6 +47,20 @@ const fetchData = async (cookies) => {
 
   const req = await fetch(endpoint, options);
   return req;
+};
+
+const fetchUserSales = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/users?populate=deep&filters[role][name][$eq]=Sales&?filters[role][type][$eq]=Sales";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
 };
 
 const fetchLocation = async (cookies) => {
@@ -72,13 +91,18 @@ const fetchPanelSales = async (cookies) => {
     return req;
 };
 
-function NonPanelSale({ props }) {
+function PanelSale({ props }) {
   const user = props.user;
   const locations = props.locations.data;
   const data = props.panel;
+  const dataUserSales = props.dataUserSales;
   const router = useRouter();
   const [sell, setSell] = useState(data);
   const [returPage, setReturPage] = useState("panel");
+  const [searchParameters, setSearchParameters] = useState({});
+
+  // Range Picker
+  const { RangePicker } = DatePicker;
 
   const handleAdd = () => {
     router.push("/dashboard/penjualan/panel/tambah");
@@ -231,7 +255,7 @@ function NonPanelSale({ props }) {
                 </Select>
               </div>
               <div className="w-full md:w-1/5 px-3">                
-                <DatePicker placeholder="Rentang Tanggal" size="large" style={{ width: "100%" }} />
+                <RangePicker size="large" onChange={(e) => setSearchParameters({ ...searchParameters, range: e })} />
               </div>
               <div className="w-full md:w-1/5 px-3"> 
                 <Select
@@ -256,60 +280,25 @@ function NonPanelSale({ props }) {
 
             <div className="w-full flex justify-start mt-3">
               <div className="w-full md:w-1/5 px-3"> 
-                <Select
-                  placeholder="Pelanggan"
-                  size="large"
-                  style={{
-                    width: "100%",
-                    marginRight: "10px",
-                  }}
-                >
-                {/*{locations.map((element) => {*/}
-                {/*  return (*/}
-                    <Select.Option>
-                      data
-                    </Select.Option>
-                {/*  );*/}
-                {/*})}*/}
-                </Select>
+                <Customer onChangeCustomer={(e) => setSearchParameters({ ...searchParameters, customer: e })} />
               </div>
               <div className="w-full md:w-1/5 px-3"> 
                 <Select
-                  placeholder="Sales"
-                  size="large"
-                  style={{
-                    width: "100%",
-                    marginRight: "10px",
-                  }}
+                    size="large"
+                    style={{
+                        width: "100%",
+                    }}
+                    placeholder="Sales"
+                    allowClear
+                    onChange={(e) => setSearchParameters({ ...searchParameters, sales: e })}
                 >
-                {/*{locations.map((element) => {*/}
-                {/*  return (*/}
-                    <Select.Option>
-                      data
-                    </Select.Option>
-                {/*  );*/}
-                {/*})}*/}
-                </Select>
-              </div>
-              <div className="w-full md:w-1/5 px-3"> 
-                <Select
-                  placeholder="Status Penyerahan"
-                  size="large"
-                  style={{
-                    width: "100%",
-                    marginRight: "10px",
-                  }}
-                >
-                {/*{locations.map((element) => {*/}
-                {/*  return (*/}
-                    <Select.Option>
-                      Diproses
-                    </Select.Option>
-                    <Select.Option>
-                      Diterima
-                    </Select.Option>
-                {/*  );*/}
-                {/*})}*/}
+                    {dataUserSales?.map((element) => {
+                        return (
+                            <Select.Option value={element.name} key={element.id}>
+                                {element.name}
+                            </Select.Option>
+                        );
+                    })}
                 </Select>
               </div>
               <div className="w-full md:w-1/5 px-3"> 
@@ -324,7 +313,13 @@ function NonPanelSale({ props }) {
                 {/*{locations.map((element) => {*/}
                 {/*  return (*/}
                     <Select.Option>
-                      data
+                      Tempo
+                    </Select.Option>
+                    <Select.Option>
+                      Menunggu
+                    </Select.Option>
+                    <Select.Option>
+                      Selesai
                     </Select.Option>
                 {/*  );*/}
                 {/*})}*/}
@@ -404,4 +399,4 @@ function NonPanelSale({ props }) {
   );
 }
 
-export default NonPanelSale;
+export default PanelSale;

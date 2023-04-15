@@ -92,37 +92,125 @@ export default function ReactDataTable({
     maximumFractionDigits: 2,
   });
 
-  const content = (row) => (
-    <div>
-      <div>
-        <button
-          onClick={() => print(row)}
-          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-        >
-          <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
-          Cetak
-        </button>
-      </div>
+  const content = (row) => {
+    if(page == "panel"){
 
-      <div>
-        <button
-          onClick={() => returPenjualan(row)}
-          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-        >
-          <UndoOutlined className="mr-2 mt-0.5 float float-left" />
-          Retur Penjualan
-        </button>
-      </div>
+      return (
+        <div>
+          <div>
+            <button
+                onClick={() => print(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+            >
+                <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
+                Cetak
+            </button>
+          </div>
 
-      <AlertDialog
-        onCancel={onCancel}
-        onConfirm={onConfirm}
-        title="Hapus Kategori"
-        message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
-        id={row.id}
-      />
-    </div>
-  );
+          {row.attributes.status_data != "Draft" ? (
+            <></>
+          ) : (
+            <div>
+              <button
+                onClick={() => lihat(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+              >
+                <EditOutlined className="mr-2 mt-0.5 float float-left" />
+                Edit
+              </button>
+            </div>
+          )}
+
+          {row.attributes.status_data != "Draft" ? (
+            <></>
+          ) : (
+            <div>
+              <button
+                onClick={() => lihat(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+              >
+                <CloseOutlined className="mr-2 mt-0.5 float float-left" />
+                Batal
+              </button>
+            </div>
+          )}
+
+          <div>
+            <button
+                onClick={() => lihat(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+            >
+                <CalculatorOutlined className="mr-2 mt-0.5 float float-left" />
+                Jadikan Piutang
+            </button>
+          </div>
+          <div>
+            <button
+                onClick={() => lihat(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+            >
+                <BankOutlined className="mr-2 mt-0.5 float float-left" />
+                Pembayaran
+            </button>
+          </div>
+          <div>
+            <button
+                onClick={() => lihat(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+            >
+                <UnorderedListOutlined className="mr-2 mt-0.5 float float-left" />
+                Melihat Pembayaran
+            </button>
+          </div>
+          <div>
+            <button
+                onClick={() => returPenjualan(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+            >
+                <UndoOutlined className="mr-2 mt-0.5 float float-left" />
+                Retur Penjualan
+            </button>
+          </div>
+        </div>
+      );
+
+    } else {
+
+      return (
+        <div>
+          <div>
+            <button
+                onClick={() => print(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+            >
+                <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
+                Cetak
+            </button>
+          </div>
+
+          <div>
+            <button
+                onClick={() => returPenjualan(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+            >
+                <UndoOutlined className="mr-2 mt-0.5 float float-left" />
+                Retur Penjualan
+            </button>
+          </div>
+
+        <AlertDialog
+            onCancel={onCancel}
+            onConfirm={onConfirm}
+            title="Hapus Kategori"
+            message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
+            id={row.id}
+        />
+        </div>
+      );
+
+    }
+
+  }
 
   const customStyles = {
     headerStyle: { textAlign: "center" },

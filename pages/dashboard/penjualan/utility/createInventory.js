@@ -26,9 +26,9 @@ async function createInventory(row, locations) {
     //const batch = element.attributes.batch ?? null;
 
     //if (unitOrder && totalOrder && product && location) {
-    if (unit && qty && product) {
+    if (unit && qty && product && location) {
       const item = {
-        location: location.id,
+        location: location,
         product: product.id,
         unit: unit,
         qty: qty,
@@ -48,7 +48,7 @@ async function createInventory(row, locations) {
       type: "Terjual",
     };
 
-    await addToGudang(body);
+    addToGudang(body);
   }
 }
 
