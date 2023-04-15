@@ -5,17 +5,7 @@ import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import {
-  Row,
-  Form,
-  Input,
-  InputNumber,
-  Select,
-  Button,
-  Spin,
-  notification,
-  Modal,
-} from "antd";
+import { Row, Form, Input, InputNumber, Select, Button, Spin, notification, Modal } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "../../../../components/Form/AddOrder/SearchBar";
 import StoreSaleTable from "../../../../components/ReactDataTable/Selling/StoreSaleTable";
@@ -143,8 +133,7 @@ const fetchInven = async (cookies) => {
 
 const fetchCustomer = async (cookies) => {
   let name = "walk in customer";
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + `/customers?filters[name][$contains]=${name}`;
+  const endpoint = process.env.NEXT_PUBLIC_URL + `/customers?filters[name][$contains]=${name}`;
   const options = {
     method: "GET",
     headers: {
@@ -225,8 +214,7 @@ function Toko({ props }) {
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
   var date = today.getDate() + "/" + mm + "/" + yyyy;
-  var time =
-    today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 
   let dppValue = 0;
   let ppnValue = 0;
@@ -247,9 +235,7 @@ function Toko({ props }) {
 
   // NO Store Sale
   const trxNumber = String(userLastDocNumber).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(
-    `${userCodeName}/${trxNumber}/${mm}/${yyyy}`
-  );
+  const [categorySale, setCategorySale] = useState(`${userCodeName}/${trxNumber}/${mm}/${yyyy}`);
 
   const getProductAtLocation = async () => {
     const locationId = form.getFieldValue("location");
@@ -279,7 +265,7 @@ function Toko({ props }) {
   };
 
   const getStockAtLocation = async (productId, locationId) => {
-    let stockString = "Stok Kosong";
+    let stockString = [];
     try {
       console.log("get stock", productId, locationId);
       const response = await getStock(productId, locationId);
@@ -289,19 +275,11 @@ function Toko({ props }) {
         const stock = response.data[0].attributes;
         const product = stock.product?.data?.attributes; // use optional chaining to check if product exists
 
-        const stockUnit1 = stock.stock_unit_1;
-        const stockUnit2 = stock.stock_unit_2;
-        const stockUnit3 = stock.stock_unit_3;
-        const stockUnit4 = stock.stock_unit_4;
-        const stockUnit5 = stock.stock_unit_5;
-
-        const satuanUnit1 = product.unit_1;
-        const satuanUnit2 = product.unit_2;
-        const satuanUnit3 = product.unit_3;
-        const satuanUnit4 = product.unit_4;
-        const satuanUnit5 = product.unit_5;
-
-        stockString = `${stockUnit1} ${satuanUnit1}, ${stockUnit2} ${satuanUnit2}, ${stockUnit3} ${satuanUnit3}, ${stockUnit4} ${satuanUnit4}, ${stockUnit5} ${satuanUnit5}`;
+        for (let i = 1; i <= 5; i++) {
+          if (product?.[`unit_${i}`]) {
+            stockString.push(`${stock?.[`stock_unit_${i}`] || 0} ${product[`unit_${i}`]}`);
+          }
+        }
       }
     } catch (error) {
       console.error("error", error);
@@ -310,7 +288,7 @@ function Toko({ props }) {
         [productId]: "Error fetching stock data",
       });
     }
-    return stockString;
+    return stockString.length > 0 ? stockString.join(", ") : "Stok kosong";
   };
 
   var formatter = new Intl.NumberFormat("id-ID", {
@@ -366,14 +344,11 @@ function Toko({ props }) {
           content: (
             <div>
               <p>
-                Item ini tidak bisa dilakukan retur. Silahkan cek kembali stok
-                gudang yang tersedia:
+                Item ini tidak bisa dilakukan retur. Silahkan cek kembali stok gudang yang tersedia:
               </p>
               <ul>
                 {cannotBeReturnedProducts.map((product) => (
-                  <li key={product}>
-                    {product === undefined ? "" : `- ${product}`}{" "}
-                  </li>
+                  <li key={product}>{product === undefined ? "" : `- ${product}`} </li>
                 ))}
               </ul>
             </div>
@@ -536,13 +511,9 @@ function Toko({ props }) {
     // if both are same then we should not set new price for grand total.
     // if they are not, then set new grand total
     if (discPrice !== totalPrice && discPrice !== 0) {
-      setGrandTotal(
-        discPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan)
-      );
+      setGrandTotal(discPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
     } else {
-      setGrandTotal(
-        totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan)
-      );
+      setGrandTotal(totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
     }
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
 
@@ -614,14 +585,12 @@ function Toko({ props }) {
   const buttonProps = {
     BEBAS: {
       className: "bg-cyan-700 rounded-md m-1 text-sm",
-      selectedClassName:
-        "bg-white rounded-md border border-cyan-700 m-1 text-sm",
+      selectedClassName: "bg-white rounded-md border border-cyan-700 m-1 text-sm",
       label: "BEBAS",
     },
     RESEP: {
       className: "bg-cyan-700 rounded-md m-1 text-sm",
-      selectedClassName:
-        "bg-white rounded-md border border-cyan-700 m-1 text-sm",
+      selectedClassName: "bg-white rounded-md border border-cyan-700 m-1 text-sm",
       label: "RESEP",
     },
   };
@@ -641,9 +610,7 @@ function Toko({ props }) {
           <LayoutContent>
             <Row justify="space-between">
               <button disabled className="bg-yellow-500 rounded-md">
-                <p className="px-3 py-2 m-0 font-bold text-white uppercase">
-                  {selectedCategory}
-                </p>
+                <p className="px-3 py-2 m-0 font-bold text-white uppercase">{selectedCategory}</p>
               </button>
               <div>
                 {Object.keys(buttonProps).map((category) => (
@@ -697,18 +664,12 @@ function Toko({ props }) {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "40px" }}
-                      placeholder="No. Penjualan"
-                    />
+                    <Input style={{ height: "40px" }} placeholder="No. Penjualan" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
                   <Form.Item name="customer_name">
-                    <Input
-                      style={{ height: "40px" }}
-                      placeholder="Nama Pelanggan"
-                    />
+                    <Input style={{ height: "40px" }} placeholder="Nama Pelanggan" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
@@ -775,10 +736,7 @@ function Toko({ props }) {
                     >
                       {locations.map((element) => {
                         return (
-                          <Select.Option
-                            value={element.id}
-                            key={element.attributes.name}
-                          >
+                          <Select.Option value={element.id} key={element.attributes.name}>
                             {element.attributes.name}
                           </Select.Option>
                         );
@@ -823,9 +781,7 @@ function Toko({ props }) {
                 </div>
               )}
               <div className="flex justify-end">
-                <p className="font-bold">
-                  Total Item : {products.productList.length}{" "}
-                </p>
+                <p className="font-bold">Total Item : {products.productList.length} </p>
               </div>
               <div className="flex justify-end transition-all">
                 <Row>
@@ -838,9 +794,7 @@ function Toko({ props }) {
                     </p>
                   )}
                   {discPrice === 0 ? (
-                    <p className="font-bold ml-2">
-                      {formatter.format(totalPrice || 0)}
-                    </p>
+                    <p className="font-bold ml-2">{formatter.format(totalPrice || 0)}</p>
                   ) : (
                     <p className="font-bold line-through ml-2 ">
                       {formatter.format(totalPrice || 0)}
@@ -855,9 +809,7 @@ function Toko({ props }) {
                     <p></p>
                   ) : (
                     <p className="font-bold text-red-500 ml-2">
-                      {isDPPActive
-                        ? formatter.format(dppPrice - discValue)
-                        : formatter.format(0)}
+                      {isDPPActive ? formatter.format(dppPrice - discValue) : formatter.format(0)}
                     </p>
                   )}
 
@@ -865,15 +817,11 @@ function Toko({ props }) {
 
                   {discPrice === 0 ? (
                     <p className="font-bold ml-2">
-                      {isDPPActive
-                        ? formatter.format(dppPrice)
-                        : formatter.format(0)}
+                      {isDPPActive ? formatter.format(dppPrice) : formatter.format(0)}
                     </p>
                   ) : (
                     <p className="font-bold line-through ml-2 ">
-                      {isDPPActive
-                        ? formatter.format(dppPrice)
-                        : formatter.format(0)}
+                      {isDPPActive ? formatter.format(dppPrice) : formatter.format(0)}
                     </p>
                   )}
                 </Row>
@@ -885,22 +833,16 @@ function Toko({ props }) {
                     <p></p>
                   ) : (
                     <p className="font-bold text-red-500 ml-2">
-                      {isDPPActive
-                        ? formatter.format(ppnPrice - discValue)
-                        : formatter.format(0)}
+                      {isDPPActive ? formatter.format(ppnPrice - discValue) : formatter.format(0)}
                     </p>
                   )}
                   {discPrice === 0 ? (
                     <p className="font-bold ml-2">
-                      {isDPPActive
-                        ? formatter.format(ppnPrice)
-                        : formatter.format(0)}
+                      {isDPPActive ? formatter.format(ppnPrice) : formatter.format(0)}
                     </p>
                   ) : (
                     <p className="font-bold line-through ml-2 ">
-                      {isDPPActive
-                        ? formatter.format(ppnPrice)
-                        : formatter.format(0)}
+                      {isDPPActive ? formatter.format(ppnPrice) : formatter.format(0)}
                     </p>
                   )}
                 </Row>
@@ -1003,9 +945,7 @@ function Toko({ props }) {
                 </div>
               </div>
               <div className="w-full flex md:w-3/4 justify-end mb-2">
-                <p className="mb-4 font-bold text-center">
-                  Biaya Tambahan Lain Lain
-                </p>
+                <p className="mb-4 font-bold text-center">Biaya Tambahan Lain Lain</p>
               </div>
               <div className="w-full flex flex-wrap justify-end mb-3">
                 <div className="w-full md:w-1/3 px-3 mb-2 text-center md:mb-0">
@@ -1062,9 +1002,7 @@ function Toko({ props }) {
                 </div>
               </div>
               <div className="flex justify-end">
-                <p className="font-bold text-lg">
-                  Total Penjualan: {formatter.format(grandTotal)}
-                </p>
+                <p className="font-bold text-lg">Total Penjualan: {formatter.format(grandTotal)}</p>
               </div>
               <div className="w-full flex justify-between">
                 <Form.Item name="sale_note" className="w-full md:w-1/2 mx-2">
@@ -1081,13 +1019,8 @@ function Toko({ props }) {
                       <Spin />
                     </div>
                   ) : (
-                    <button
-                      htmlType="submit"
-                      className="bg-cyan-700 rounded-md m-1 text-sm"
-                    >
-                      <p className="px-4 py-2 m-0 text-white">
-                        SIMPAN DAN CETAK UNTUK PEMBAYARAN
-                      </p>
+                    <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
+                      <p className="px-4 py-2 m-0 text-white">SIMPAN DAN CETAK UNTUK PEMBAYARAN</p>
                     </button>
                   )}
                 </Form.Item>
