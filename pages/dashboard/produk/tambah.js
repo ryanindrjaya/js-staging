@@ -339,8 +339,8 @@ const Tambah = ({ props }) => {
 
     product.data.forEach((element) => {
       if (
-        element.attributes.manufacture.data.id == selectedManufactures &&
-        element.attributes.group.data.id == selectedGroups &&
+        element.attributes.manufacture?.data?.id == selectedManufactures &&
+        element.attributes.group?.data?.id == selectedGroups &&
         element.attributes.category.data.id ==
           category[0]?.category?.category_id
       ) {
