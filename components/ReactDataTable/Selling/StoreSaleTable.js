@@ -2,15 +2,18 @@ import DataTable from "react-data-table-component";
 import AlertDialog from "../../Alert/Alert";
 import { Input, InputNumber, Select, Form, Row, DatePicker } from "antd";
 import { useDispatch } from "react-redux";
+import { useState } from "react";
 
 export default function ReactDataTable({
-    calculatePriceAfterDisc,
-    productSubTotal,
-    setProductSubTotal,
-    products,
-    locations,
-    setTotalPrice,
-    formObj,
+  calculatePriceAfterDisc,
+  productSubTotal,
+  setProductSubTotal,
+  products,
+  setTotalPrice,
+  dataLocationStock,
+  dataDetailTrx,
+  stokString,
+  formObj,
 }) {
   const dispatch = useDispatch();
   var defaultDp1 = 0;
@@ -32,7 +35,12 @@ export default function ReactDataTable({
   };
 
   const onChangeUnit = (data, value, index) => {
-    dispatch({ type: "CHANGE_PRODUCT_UNIT",  unit: data, product: value, index });
+    dispatch({
+      type: "CHANGE_PRODUCT_UNIT",
+      unit: data,
+      product: value,
+      index,
+    });
   };
 
   const onChangeQty = (value, data, index) => {
@@ -40,7 +48,7 @@ export default function ReactDataTable({
       type: "CHANGE_PRODUCT_QTY",
       qty: value,
       product: data,
-      index
+      index,
     });
   };
 
@@ -49,7 +57,7 @@ export default function ReactDataTable({
       type: "CHANGE_PRODUCT_DISC",
       disc: value,
       product: data,
-      index
+      index,
     });
   };
 
@@ -58,7 +66,7 @@ export default function ReactDataTable({
       type: "CHANGE_PRODUCT_MARGIN",
       margin: value,
       product: data,
-      index
+      index,
     });
   };
 
@@ -69,7 +77,7 @@ export default function ReactDataTable({
           type: "CHANGE_PRODUCT_D1",
           d1: value,
           product: data,
-          index
+          index,
         });
         break;
       case "d2":
@@ -77,7 +85,7 @@ export default function ReactDataTable({
           type: "CHANGE_PRODUCT_D2",
           d2: value,
           product: data,
-          index
+          index,
         });
         break;
       default:
@@ -88,12 +96,14 @@ export default function ReactDataTable({
   const sumProductSubTotal = (data) => {
     const newProductSubTotalProduct = [data];
 
-    const sum = newProductSubTotalProduct.reduce((prev, curr, index, array) => prev + curr, 0)
+    const sum = newProductSubTotalProduct.reduce(
+      (prev, curr, index, array) => prev + curr,
+      0
+    );
     setTotalPrice(sum);
   };
 
   const onConfirm = (id) => {
-
     var newSubTotalProduct = productSubTotal;
     var newProductInfo = products.productInfo;
 
@@ -104,11 +114,11 @@ export default function ReactDataTable({
     let subtotal = productSubTotal;
     onDeleteProduct(id);
 
-    subtotal[id+1] = 0;
+    subtotal[id + 1] = 0;
     setProductSubTotal(subtotal);
     sumProductSubTotal(productSubTotal);
 
-    if(products.productList.length == 0){
+    if (products.productList.length == 0) {
       setTotalPrice(0);
     }
   };
@@ -129,26 +139,32 @@ export default function ReactDataTable({
   const columns = [
     {
       name: "Nama Produk",
-      width: "250px",
+      width: "150px",
       selector: (row) => row.attributes?.name,
     },
     {
-      name: "Jumlah Stock",
-      width: "150px",
-      selector: (row) => row?.stock,
+      name: "Stok Gudang",
+      width: "300px",
+      selector: (row, idx) => {
+        return (
+          <div className="disabled:bg-white italic text-gray-500">
+            {dataLocationStock?.[row.id] ?? "Pilih Gudang"}
+          </div>
+        );
+      },
     },
     {
       name: "Harga Satuan",
       width: "150px",
       selector: (row, idx) => {
-        var priceUnit = row.attributes?.buy_price_1;
+        var priceUnit = row.attributes?.sold_price_1;
         if (products.productInfo[idx]) {
           if (products.productInfo[idx].priceUnit) {
             priceUnit = products.productInfo[idx].priceUnit;
           }
         }
 
-      return formatter.format(priceUnit);
+        return formatter.format(priceUnit);
       },
     },
     {
@@ -175,6 +191,7 @@ export default function ReactDataTable({
                   defaultValue={defaultQty}
                   onChange={(e) => onChangeQty(e, row, idx)}
                   min={1}
+                  max={dataDetailTrx?.data?.[idx]?.attributes?.qty} // added max qty for retur penjualan
                   rules={[
                     {
                       required: true,
@@ -199,35 +216,50 @@ export default function ReactDataTable({
                   {row.attributes?.unit_1 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_1 === null} value={1}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_1 === null}
+                      value={1}
+                    >
                       {row.attributes?.unit_1}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_2 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_2 === null} value={2}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_2 === null}
+                      value={2}
+                    >
                       {row.attributes?.unit_2}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_3 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_3 === null} value={3}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_3 === null}
+                      value={3}
+                    >
                       {row.attributes?.unit_3}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_4 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_4 === null} value={4}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_4 === null}
+                      value={4}
+                    >
                       {row.attributes?.unit_4}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_5 === null ? (
                     <></>
                   ) : (
-                    <Select.Option disabled={row.attributes?.unit_5 === null} value={5}>
+                    <Select.Option
+                      disabled={row.attributes?.unit_5 === null}
+                      value={5}
+                    >
                       {row.attributes?.unit_5}
                     </Select.Option>
                   )}
@@ -267,9 +299,9 @@ export default function ReactDataTable({
       name: "Diskon",
       width: "150px",
       selector: (row, idx) => {
-        var defaultDisc = 0;
+        let defaultDisc = 0;
         if (products.productInfo[idx]?.disc) {
-          defaultDisc = products.productInfo[idx].disc;
+          defaultDisc = products.productInfo[idx]?.disc;
         }
 
         return (
@@ -278,12 +310,15 @@ export default function ReactDataTable({
               <InputNumber
                 defaultValue={defaultDisc}
                 min={0}
+                max={100}
                 onChange={(e) => onChangeDisc(e, row, idx)}
                 style={{
                   width: "100px",
                   marginRight: "10px",
                 }}
-                formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                formatter={(value) =>
+                  value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
                 parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
               />
             </Form.Item>
@@ -295,20 +330,23 @@ export default function ReactDataTable({
       name: "D1",
       width: "100px",
       selector: (row, idx) => {
-        defaultDp1 = row.attributes?.unit_1_dp1 || 0;
-        if (products.productInfo[idx]?.d1) {
-          defaultDp1 = products.productInfo[idx].d1;
-        }
+        defaultDp1 =
+          products?.productInfo?.[idx]?.disc || row.attributes?.disc_1_1 || 0;
 
-        if (products.productInfo[idx]) {
-          if (products.productInfo[idx].unit) {
-            defaultDp1 = products.productInfo[idx].d1;
-          }
-        }
+        // if (products.productInfo[idx]?.d1) {
+        //   defaultDp1 = products.productInfo[idx].d1;
+        // }
+
+        // if (products.productInfo[idx]) {
+        //   if (products.productInfo[idx].unit) {
+        //     defaultDp1 = products.productInfo[idx].d1;
+        //   }
+        // }
 
         return (
           <div className="disabled:bg-white">
             <InputNumber
+              disabled
               controls={false}
               formatter={(value) => `${value}%`}
               max={100}
@@ -347,7 +385,6 @@ export default function ReactDataTable({
               max={100}
               min={0}
               name={["disc_rp2", `${idx}`]}
-              value={defaultDp2}
               onChange={(e) => onChangeD1D2D3(e, row, "d2", idx)}
               style={{
                 width: "60px",
@@ -375,7 +412,11 @@ export default function ReactDataTable({
               ]}
               noStyle
             >
-              <DatePicker placeholder="EXP. Date" size="normal" format={"DD/MM/YYYY"} />
+              <DatePicker
+                placeholder="EXP. Date"
+                size="normal"
+                format={"DD/MM/YYYY"}
+              />
             </Form.Item>
           </>
         );

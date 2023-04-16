@@ -4,7 +4,7 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import Head from "next/head";
-import { DatePicker, Empty, Select, Spin, Table } from "antd";
+import { DatePicker, Empty, Select, Spin, Table, Tag } from "antd";
 import { useRouter } from "next/dist/client/router";
 import nookies from "nookies";
 import useDebounce from "../../../hooks/useDebounce";
@@ -323,8 +323,8 @@ export default function Riwayat({ defaultOptions }) {
                       className="uppercase child text-center"
                       title={unit}
                       render={(_, record) => {
-                        return record.detail?.unit === unit && record.detail?.type === "Masuk"
-                          ? record.detail?.qty
+                        return record.detail?.type === "Masuk" && record.detail?.qty?.[unit] > 0
+                          ? record.detail?.qty?.[unit]
                           : "";
                       }}
                       dataIndex={unit}
@@ -338,8 +338,8 @@ export default function Riwayat({ defaultOptions }) {
                       className="uppercase child text-center"
                       title={unit}
                       render={(_, record) => {
-                        return record.detail?.unit === unit && record.detail?.type === "Keluar"
-                          ? record.detail?.qty
+                        return record.detail?.type === "Keluar" && record.detail?.qty?.[unit] > 0
+                          ? record.detail?.qty?.[unit]
                           : "";
                       }}
                       dataIndex={unit}
@@ -353,7 +353,9 @@ export default function Riwayat({ defaultOptions }) {
                       className="uppercase child text-center"
                       title={unit}
                       render={(_, record) => {
-                        return record.detail?.remaining_stock?.[unit];
+                        return record.detail?.remaining_stock?.[unit] > 0
+                          ? record.detail?.remaining_stock?.[unit]
+                          : "";
                       }}
                       dataIndex={unit}
                       key={unit}
@@ -376,11 +378,11 @@ export default function Riwayat({ defaultOptions }) {
       ) : (
         <>
           <Head>
-            <title>Riwayat Stok</title>
+            <title>Riwayat Inventory</title>
           </Head>
           <DashboardLayout>
             <LayoutWrapper>
-              <TitlePage titleText={"Riwayat Stok"} />
+              <TitlePage titleText={"Riwayat Inventory"} />
               <LayoutContent>
                 <div className="lg:w-3/4 w-full gap-3 grid grid-cols-3 mb-3">
                   <Select
@@ -434,52 +436,125 @@ export default function Riwayat({ defaultOptions }) {
                       <div className="w-full">
                         <p className="font-bold text-[#036b82] text-xl mb-1">PRODUK MASUK</p>
 
-                        <div className="w-full flex justify-between gap-2">
-                          <p className="text-sm mb-0">STOK AWAL</p>
-                          <p className="text-sm mb-0">{data.awal}</p>
+                        <div className="w-full flex flex-col gap-1 mb-3">
+                          <p className="text-sm font-bold mb-0">STOK AWAL</p>
+                          <div className="flex gap-y-1 flex-wrap">
+                            {data.awal?.split(", ").map((item) => {
+                              return (
+                                <Tag className="text-sm" color="blue" key={item}>
+                                  {item}
+                                </Tag>
+                              );
+                            })}
+                          </div>
                         </div>
-                        <div className="w-full flex justify-between gap-2">
-                          <p className="text-sm mb-0">STOK PEMBELIAN</p>
-                          <p className="text-sm mb-0">{data.pembelian}</p>
+                        <div className="w-full flex flex-col gap-1 mb-3">
+                          <p className="text-sm font-bold mb-0">STOK PEMBELIAN</p>
+                          <div className="flex gap-y-1 flex-wrap">
+                            {data.pembelian?.split(", ").map((item) => {
+                              return (
+                                <Tag className="text-sm" color="blue" key={item}>
+                                  {item}
+                                </Tag>
+                              );
+                            })}
+                          </div>
                         </div>
-                        <div className="w-full flex justify-between gap-2">
-                          <p className="text-sm mb-0">STOK RETUR PENJUALAN</p>
-                          <p className="text-sm mb-0">{data.retur_penjualan}</p>
+                        <div className="w-full flex flex-col gap-1 mb-3">
+                          <p className="text-sm font-bold mb-0">STOK RETUR PENJUALAN</p>
+                          <div className="flex gap-y-1 flex-wrap">
+                            {data.retur_penjualan?.split(", ").map((item) => {
+                              return (
+                                <Tag className="text-sm" color="blue" key={item}>
+                                  {item}
+                                </Tag>
+                              );
+                            })}
+                          </div>
                         </div>
-                        <div className="w-full flex justify-between gap-2">
-                          <p className="text-sm mb-0">STOK TRANSFER MASUK</p>
-                          <p className="text-sm mb-0">{data.transfer_masuk}</p>
+                        <div className="w-full flex flex-col gap-1 mb-3">
+                          <p className="text-sm font-bold mb-0">STOK TRANSFER MASUK</p>
+                          <div className="flex gap-y-1 flex-wrap">
+                            {data.transfer_masuk?.split(", ").map((item) => {
+                              return (
+                                <Tag className="text-sm" color="blue" key={item}>
+                                  {item}
+                                </Tag>
+                              );
+                            })}
+                          </div>
                         </div>
                       </div>
                       <div className="w-full">
                         <p className="font-bold text-[#036b82] text-xl mb-1">PRODUK KELUAR</p>
 
-                        <div className="w-full flex justify-between gap-2">
-                          <p className="text-sm mb-0">STOK TERJUAL</p>
-                          <p className="text-sm mb-0">{data.terjual}</p>
+                        <div className="w-full flex flex-col gap-1 mb-3">
+                          <p className="text-sm font-bold mb-0">STOK TERJUAL</p>
+                          <div className="flex gap-y-1 flex-wrap">
+                            {data.terjual?.split(", ").map((item) => {
+                              return (
+                                <Tag className="text-sm" color="blue" key={item}>
+                                  {item}
+                                </Tag>
+                              );
+                            })}
+                          </div>
                         </div>
-                        <div className="w-full flex justify-between gap-2">
-                          <p className="text-sm mb-0">STOK PENYESUAIAN STOK</p>
-                          <p className="text-sm mb-0">{data.penyesuaian_stok}</p>
+                        <div className="w-full flex flex-col gap-1 mb-3">
+                          <p className="text-sm font-bold mb-0">STOK PENYESUAIAN STOK</p>
+                          <div className="flex gap-y-1 flex-wrap">
+                            {data.penyesuaian_stok?.split(", ").map((item) => {
+                              return (
+                                <Tag className="text-sm" color="blue" key={item}>
+                                  {item}
+                                </Tag>
+                              );
+                            })}
+                          </div>
                         </div>
-                        <div className="w-full flex justify-between gap-2">
-                          <p className="text-sm mb-0">STOK RETUR PEMBELIAN</p>
-                          <p className="text-sm mb-0">{data.retur_pembelian}</p>
+                        <div className="w-full flex flex-col gap-1 mb-3">
+                          <p className="text-sm font-bold mb-0">STOK RETUR PEMBELIAN</p>
+                          <div className="flex gap-y-1 flex-wrap">
+                            {data.retur_pembelian?.split(", ").map((item) => {
+                              return (
+                                <Tag className="text-sm" color="blue" key={item}>
+                                  {item}
+                                </Tag>
+                              );
+                            })}
+                          </div>
                         </div>
-                        <div className="w-full flex justify-between gap-2">
-                          <p className="text-sm mb-0">STOK TRANSFER KELUAR</p>
-                          <p className="text-sm mb-0">{data.transfer_keluar}</p>
+                        <div className="w-full flex flex-col gap-1 mb-3">
+                          <p className="text-sm font-bold mb-0">STOK TRANSFER KELUAR</p>
+                          <div className="flex gap-y-1 flex-wrap">
+                            {data.transfer_keluar?.split(", ").map((item) => {
+                              return (
+                                <Tag className="text-sm" color="blue" key={item}>
+                                  {item}
+                                </Tag>
+                              );
+                            })}
+                          </div>
                         </div>
                       </div>
                       <div className="w-full">
                         <p className="font-bold text-[#036b82] text-xl mb-1">TOTAL STOK</p>
 
-                        <div className="w-full flex gap-2 justify-between">
-                          <p className="text-sm mb-0">STOK SAAT INI</p>
-                          <p className="text-sm mb-0">{data.current_stock}</p>
+                        <div className="w-full flex flex-col gap-1 mb-3">
+                          <p className="text-sm font-bold mb-0">STOK SAAT INI</p>
+                          <div className="flex gap-y-1 flex-wrap">
+                            {data.current_stock?.split(", ").map((item) => {
+                              return (
+                                <Tag className="text-sm" color="blue" key={item}>
+                                  {item}
+                                </Tag>
+                              );
+                            })}
+                          </div>
                         </div>
                       </div>
                     </div>
+                    <p className="m-0">Keterangan Unit : {data.conversion}</p>
                     {history?.units?.length > 0 ? (
                       <>
                         <Table
@@ -510,9 +585,9 @@ export default function Riwayat({ defaultOptions }) {
                                 className="uppercase child text-center"
                                 title={unit}
                                 render={(_, record) => {
-                                  return record.detail?.unit === unit &&
-                                    record.detail?.type === "Masuk"
-                                    ? record.detail?.qty
+                                  return record.detail?.type === "Masuk" &&
+                                    record.detail?.qty?.[unit] > 0
+                                    ? record.detail?.qty?.[unit]
                                     : "";
                                 }}
                                 dataIndex={unit}
@@ -526,9 +601,9 @@ export default function Riwayat({ defaultOptions }) {
                                 className="uppercase child text-center"
                                 title={unit}
                                 render={(_, record) => {
-                                  return record.detail?.unit === unit &&
-                                    record.detail?.type === "Keluar"
-                                    ? record.detail?.qty
+                                  return record.detail?.type === "Keluar" &&
+                                    record.detail?.qty?.[unit] > 0
+                                    ? record.detail?.qty?.[unit]
                                     : "";
                                 }}
                                 dataIndex={unit}
@@ -542,7 +617,9 @@ export default function Riwayat({ defaultOptions }) {
                                 className="uppercase child text-center"
                                 title={unit}
                                 render={(_, record) => {
-                                  return record.detail?.remaining_stock?.[unit];
+                                  return record.detail?.remaining_stock?.[unit] > 0
+                                    ? record.detail?.remaining_stock?.[unit]
+                                    : "";
                                 }}
                                 dataIndex={unit}
                                 key={unit}

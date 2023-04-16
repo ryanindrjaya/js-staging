@@ -1,5 +1,5 @@
 import Head from "next/head";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
@@ -93,6 +93,11 @@ function Hutang({ props }) {
     const [hutang, setHutang] = useState(data);
     const [supplier, setSupplier] = useState();
     const dispatch = useDispatch();
+    const [searchParameters, setSearchParameters] = useState({});
+
+    // Range Picker
+    const { RangePicker } = DatePicker;
+    const [rangePicker, setRangePicker] = useState();
 
     const handleSetting = () => {
         router.push("/dashboard/biaya/hutang/setting");
@@ -109,6 +114,10 @@ function Hutang({ props }) {
             "Work In Progress",
             "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
         );
+    };
+
+    const handleEdit = (id) => {
+        router.push("/dashboard/biaya/hutang/edit/" + id);
     };
 
     const handleDelete = async (data) => {
@@ -189,6 +198,54 @@ function Hutang({ props }) {
         dispatch(logout());
     };
 
+    useEffect(() => {
+      const searchQuery = async () => {
+        let query = "";
+        let startDate = "";
+        let endDate = "";
+
+        for (const key in searchParameters) {
+
+          if (key === "supplier" && searchParameters[key] !== null) {
+            query += `filters[${key}\][id]=${searchParameters[key].id}&`;
+          } else { query += ""; }
+
+          if (key === "no_hutang" || key === "status_pembayaran") {
+            if (searchParameters[key] !== undefined) {
+              query += `filters[${key}]=${searchParameters[key]}&`;
+            } else { query += ""; }
+          } else { query += ""; }
+
+          if(key == "range" && searchParameters[key] !== null ){
+            startDate = searchParameters?.range[0]?.format('YYYY-MM-DD');
+            endDate = searchParameters?.range[1]?.format('YYYY-MM-DD');
+
+            query += `filters[tanggal_pembayaran][$gte]=${startDate}&filters[tanggal_pembayaran][$lte]=${endDate}`;
+          } else { query += ""; }
+
+        }
+
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate=deep&" + query;
+
+        const cookies = nookies.get(null, "token");
+        const options = {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+        };
+
+        const req = await fetch(endpoint, options);
+        const res = await req.json();
+
+        setHutang(res);
+        console.log("endpoint", endpoint, res);
+      }
+
+      searchQuery();
+    }, [searchParameters]);
+
     return (
         <>
             <Head>
@@ -200,7 +257,9 @@ function Hutang({ props }) {
                     <LayoutContent>
                         <div className="w-full flex justify-start">
                             <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                                <Supplier onChangeSupplier={setSupplier} />
+                                <Supplier
+                                  onChangeSupplier={(e) => setSearchParameters({ ...searchParameters, supplier: e })}
+                                />
                             </div>
                             <div className="w-full md:w-1/4 px-3">
                                 <Select
@@ -210,14 +269,16 @@ function Hutang({ props }) {
                                         width: "100%",
                                         marginRight: "10px",
                                     }}
+                                    allowClear
+                                    onChange={(e) => setSearchParameters({ ...searchParameters, no_hutang: e })}
                                 >
-                                    {/*{locations.map((element) => {*/}
-                                    {/*  return (*/}
-                                    <Select.Option>
-                                        data
-                                    </Select.Option>
-                                    {/*  );*/}
-                                    {/*})}*/}
+                                    {data.data?.map((element) => {
+                                      return (
+                                        <Select.Option value={element.attributes.no_hutang} key={element.id}>
+                                          {element.attributes.no_hutang}
+                                        </Select.Option>
+                                      );
+                                    })}
                                 </Select>
                             </div>
                             <div className="w-full md:w-1/4 px-3">
@@ -228,18 +289,20 @@ function Hutang({ props }) {
                                         width: "100%",
                                         marginRight: "10px",
                                     }}
+                                    allowClear
+                                    onChange={(e) => setSearchParameters({ ...searchParameters, status_pembayaran: e })}
+                                    //onChange={value => onSearch(value, "pembayaran")}
                                 >
-                                    {/*{locations.map((element) => {*/}
-                                    {/*  return (*/}
-                                    <Select.Option>
-                                        data
+                                    <Select.Option value="Dibayar">
+                                        Dibayar
                                     </Select.Option>
-                                    {/*  );*/}
-                                    {/*})}*/}
+                                    <Select.Option value="Belum Dibayar">
+                                        Belum Dibayar
+                                    </Select.Option>
                                 </Select>
                             </div>
                             <div className="w-full md:w-1/4 px-3">
-                                <DatePicker placeholder="Rentang Tanggal" size="large" style={{ width: "100%" }} />
+                              <RangePicker size="large" onChange={(e) => setSearchParameters({ ...searchParameters, range: e })} />
                             </div>
                         </div>
 
@@ -308,7 +371,7 @@ function Hutang({ props }) {
 
                         <DebtTable
                           data={hutang}
-                          onUpdate={handleUpdate}
+                          onUpdate={handleEdit}
                           onDelete={handleDelete}
                           //onPageChange={handlePageChange}
                           //onChangeStatus={onChangeStatus}

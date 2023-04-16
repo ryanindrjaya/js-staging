@@ -6,7 +6,17 @@ import ConfirmDialog from "@iso/components/Alert/ConfirmDialog";
 import { useSelector, useDispatch } from "react-redux";
 import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { Row, Form, Input, InputNumber, Select, Button, Spin, notification, DatePicker } from "antd";
+import {
+  Row,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  Button,
+  Spin,
+  notification,
+  DatePicker,
+} from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import AddSellSalesTable from "@iso/components/ReactDataTable/Selling/AddSellSalesTable";
@@ -18,6 +28,7 @@ import Supplier from "@iso/components/Form/AddCost/SupplierForm";
 import nookies from "nookies";
 import LoadingAnimations from "@iso/components/Animations/Loading";
 import DataTable from "react-data-table-component";
+import * as moment from "moment";
 
 Hutang.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -63,86 +74,81 @@ const fetchData = async (cookies) => {
 };
 
 const fetchDataPurchasing = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=deep";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
 
-    const req = await fetch(endpoint, options);
-    return req;
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
 const fetchRetur = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-lpbs?populate=deep";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-lpbs?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
 
-    const req = await fetch(endpoint, options);
-    return req;
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
 const fetchHutang = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate=deep";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
 
-    const req = await fetch(endpoint, options);
-    return req;
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
 const fetchAkunHutang = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=deep";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
 
-    const req = await fetch(endpoint, options);
-    return req;
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
 function Hutang({ props }) {
   const biaya = useSelector((state) => state.Cost);
   const dispatch = useDispatch();
 
-  //var selectedProduct = products?.productList;
-  //const locations = props.locations.data;
   const user = props.user;
-  //const inven = props.inven.data;
   const lpb = props.LPB.data;
   const returLPB = props.returLPB.data;
   const akunHutang = props.akunHutang.data;
   const hutang = props.hutang;
   const [supplier, setSupplier] = useState();
-  const [dataTabel, setDataTabel] =  useState([]);
+  const [dataTabel, setDataTabel] = useState([]);
   const [dataRetur, setDataRetur] = useState([]);
   const [sisaHutang, setSisaHutang] = useState([]);
   const [sisaHutangTotal, setSisaHutangTotal] = useState({});
-  //const [dataShow, setDataShow] =  useState([]); console.log("data show", dataShow);
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  //const [additionalFee, setAdditionalFee] = useState();
   const [isFetchinData, setIsFetchingData] = useState(false);
   const [document, setDocument] = useState();
-  const [tanggal, setTanggal] = useState();
+  const [tanggal, setTanggal] = useState(moment());
 
   const [dataValues, setDataValues] = useState();
 
@@ -154,17 +160,37 @@ function Hutang({ props }) {
   var today = new Date();
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
-  var date = today.getDate()+'/'+mm+'/'+yyyy;
-  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  var date = today.getDate() + "/" + mm + "/" + yyyy;
+  var time =
+    today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 
   const cookies = nookies.get(null, "token");
   const tempList = [];
 
   const [info, setInfo] = useState();
 
+  //total item
+  const [totalItem, setTotalItem] = useState(0);
+
+  // status pembayaran
+  const [statusPembayaran, setStatusPembayaran] = useState();
+
+  // Range Picker
+  const { RangePicker } = DatePicker;
+  const [rangePicker, setRangePicker] = useState();
+
+  // Search No LPB
+  const { Search } = Input;
+  const [searchNoLpb, setSearchNoLpb] = useState();
+
   // NO Hutang
-  var noHutang = String(props.hutang?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`PH/ET/${user.id}/${noHutang}/${mm}/${yyyy}`);
+  var noHutang = String(props.hutang?.meta?.pagination.total + 1).padStart(
+    3,
+    "0"
+  );
+  const [categorySale, setCategorySale] = useState(
+    `PH/ET/${user.id}/${noHutang}/${mm}/${yyyy}`
+  );
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -190,27 +216,36 @@ function Hutang({ props }) {
       totalOth += biaya.info[key].oth;
     }
 
-    var totalBayar = values.bayar1 + values.bayar2 + values.bayar3 + values.bayar4 + values.bayar5;
-    var totalBayarProduk = totalTunai + totalTransfer + totalGiro + totalCn + totalOth;
-    if ((totalTunai != values.bayar1 || totalTransfer != values.bayar2 || totalGiro != values.bayar3 || totalCn != values.bayar4 || totalOth != values.bayar5)
-        && totalBayar != totalBayarProduk
+    var totalBayar =
+      values.bayar1 +
+      values.bayar2 +
+      values.bayar3 +
+      values.bayar4 +
+      values.bayar5;
+    var totalBayarProduk =
+      totalTunai + totalTransfer + totalGiro + totalCn + totalOth;
+    if (
+      (totalTunai != values.bayar1 ||
+        totalTransfer != values.bayar2 ||
+        totalGiro != values.bayar3 ||
+        totalCn != values.bayar4 ||
+        totalOth != values.bayar5) &&
+      totalBayar != totalBayarProduk
     ) {
       notification["error"]({
         message: "Gagal menambahkan data",
-        description:
-          "Total pembayaran dan yang dibayar tidak sesuai.",
+        description: "Total pembayaran dan yang dibayar tidak sesuai.",
       });
       setInfo("gagal");
     }
 
     hutang.data.forEach((element) => {
       if (values.no_hutang == element.attributes.no_hutang) {
-          notification["error"]({
-              message: "Gagal menambahkan data",
-              description:
-                  "Data gagal ditambahkan, karena no hutang sama",
-          });
-          setInfo("gagal");
+        notification["error"]({
+          message: "Gagal menambahkan data",
+          description: "Data gagal ditambahkan, karena no hutang sama",
+        });
+        setInfo("gagal");
       }
     });
     setDataValues(values);
@@ -219,7 +254,15 @@ function Hutang({ props }) {
 
   const createDetail = async () => {
     //await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/sales-sale-details");
-    await createDetails(dataValues, dataTabel, biaya, sisaHutang, setListId, "/debt-details", "hutang");
+    await createDetails(
+      dataValues,
+      dataTabel,
+      biaya,
+      sisaHutang,
+      setListId,
+      "/debt-details",
+      "hutang"
+    );
   };
 
   const createMaster = async (values) => {
@@ -229,7 +272,28 @@ function Hutang({ props }) {
     values.sisa_hutang_jatuh_tempo = sisaHutangJatuhTempo();
     values.supplier = supplier;
     values.document = document;
-    await createData(sisaHutang, values, listId, form, router, "/debts/", "hutang", akunHutang);
+    values.tanggal_pembayaran = tanggal;
+    await createData(
+      sisaHutang,
+      values,
+      listId,
+      form,
+      router,
+      "/debts/",
+      "hutang",
+      akunHutang
+    );
+    values.status_pembayaran = "Dibayar";
+    await createData(
+      sisaHutang,
+      values,
+      listId,
+      form,
+      router,
+      "/debts/",
+      "hutang",
+      akunHutang
+    );
   };
 
   const clearData = () => {
@@ -244,11 +308,11 @@ function Hutang({ props }) {
 
   const totalHutangJatuhTempo = () => {
     var total = 0;
-    if(biaya.info != null){
-
-      for(let row in biaya.info) {
-        if(biaya.info[row].pilihData == "pilih") total = total + biaya.info[row].totalHutangJatuhTempo;
-      };
+    if (biaya.info != null) {
+      for (let row in biaya.info) {
+        if (biaya.info[row].pilihData == "pilih")
+          total = total + biaya.info[row].totalHutangJatuhTempo;
+      }
     }
     return total;
   };
@@ -260,17 +324,18 @@ function Hutang({ props }) {
     var giro = 0;
     var cn = 0;
     var oth = 0;
-      for (let row in biaya.info) {
-        if (biaya.info[row].pilihData == "pilih") {
-          if(biaya.info[row].tunai != null) tunai = biaya.info[row].tunai;
-          if(biaya.info[row].transfer != null) transfer = biaya.info[row].transfer;
-          if(biaya.info[row].giro != null) giro = biaya.info[row].giro;
-          if(biaya.info[row].cn != null) cn = biaya.info[row].cn;
-          if(biaya.info[row].oth != null) oth = biaya.info[row].oth;
+    for (let row in biaya.info) {
+      if (biaya.info[row].pilihData == "pilih") {
+        if (biaya.info[row].tunai != null) tunai = biaya.info[row].tunai;
+        if (biaya.info[row].transfer != null)
+          transfer = biaya.info[row].transfer;
+        if (biaya.info[row].giro != null) giro = biaya.info[row].giro;
+        if (biaya.info[row].cn != null) cn = biaya.info[row].cn;
+        if (biaya.info[row].oth != null) oth = biaya.info[row].oth;
 
-          total = total + tunai + transfer + giro + cn + oth;
-        }
-      };
+        total = total + tunai + transfer + giro + cn + oth;
+      }
+    }
     return total;
   };
 
@@ -282,6 +347,12 @@ function Hutang({ props }) {
     return total;
   };
 
+  const filterBySearch = (event) => {
+    // Access input value
+    const query = event.target.value;
+    if (event != undefined) setSearchNoLpb(query);
+  };
+
   useEffect(() => {
     var totalTunai = 0;
     var totalTransfer = 0;
@@ -290,35 +361,33 @@ function Hutang({ props }) {
     var totalOth = 0;
     var lastKey = 0;
 
-    if(biaya.info){
-        for (const key in biaya.info) {
+    if (biaya.info) {
+      for (const key in biaya.info) {
+        totalTunai += biaya.info[key].tunai;
+        totalTransfer += biaya.info[key].transfer;
+        totalGiro += biaya.info[key].giro;
+        totalCn += biaya.info[key].cn;
+        totalOth += biaya.info[key].oth;
 
-            totalTunai += biaya.info[key].tunai;
-            totalTransfer += biaya.info[key].transfer;
-            totalGiro += biaya.info[key].giro;
-            totalCn += biaya.info[key].cn;
-            totalOth += biaya.info[key].oth;
-
-            if (biaya.info[key].pilihData == "pilih") {
-                form.setFieldsValue({
-                    metode_bayar1: "tunai",
-                    bayar1: totalTunai,
-                    metode_bayar2: "transfer",
-                    bayar2: totalTransfer,
-                    metode_bayar3: "giro",
-                    bayar3: totalGiro,
-                    metode_bayar4: "cn",
-                    bayar4: totalCn,
-                    metode_bayar5: "oth",
-                    bayar5: totalOth,
-                });
-            } 
-
+        if (biaya.info[key].pilihData == "pilih") {
+          form.setFieldsValue({
+            metode_bayar1: "tunai",
+            bayar1: totalTunai,
+            metode_bayar2: "transfer",
+            bayar2: totalTransfer,
+            metode_bayar3: "giro",
+            bayar3: totalGiro,
+            metode_bayar4: "cn",
+            bayar4: totalCn,
+            metode_bayar5: "oth",
+            bayar5: totalOth,
+          });
+          lastKey++;
         }
-        
+      }
+      setTotalItem(lastKey);
     }
   }, [biaya.info]);
-
 
   useEffect(() => {
     if (dataValues && info == "sukses") createDetail();
@@ -336,79 +405,84 @@ function Hutang({ props }) {
 
     var lpbId = 0;
     lpb.forEach((row) => {
-        var tempoDate = new Date(row.attributes?.date_purchasing);
-        var tempoTime = parseInt(row.attributes?.tempo_days ?? 0);
-        var today = new Date();
-        var isTempo = false;
-        var statusPembayaran = row.attributes?.status_pembayaran;
-        var purchasingHistory = row.attributes?.purchasing_payments.data;
-        var status = "Sebagian";
+      var tempoDate = new Date(row.attributes?.date_purchasing);
+      var tempoTime = parseInt(row.attributes?.tempo_days ?? 0);
+      var today = new Date();
+      var isTempo = false;
+      var statusPembayaran = row.attributes?.status_pembayaran;
+      var purchasingHistory = row.attributes?.purchasing_payments.data;
+      var status = "Sebagian";
 
-        if (row.attributes?.tempo_time === "Hari") {
-            tempoDate.setDate(tempoDate.getDate() + tempoTime);
+      if (row.attributes?.tempo_time === "Hari") {
+        tempoDate.setDate(tempoDate.getDate() + tempoTime);
+      } else {
+        tempoDate.setDate(tempoDate.getMonth() + tempoTime);
+      }
+
+      if (tempoDate < today) {
+        isTempo = true;
+      }
+
+      if (isTempo) {
+        if (statusPembayaran === "Belum Lunas") {
+          status = "Tempo";
+        } else if (statusPembayaran === "Dibayar Sebagian") {
+          status = "Sebagian";
+        } else if (statusPembayaran === "Lunas") {
+          status = "Selesai";
+        }
+      } else {
+        if (
+          statusPembayaran === "Belum Lunas" &&
+          purchasingHistory.length == 0
+        ) {
+          status = "Tempo";
+        } else if (
+          statusPembayaran === "Dibayar Sebagian" &&
+          purchasingHistory.length > 0
+        ) {
+          status = "Sebagian";
+        } else if (
+          statusPembayaran === "Lunas" &&
+          purchasingHistory.length > 0
+        ) {
+          status = "Selesai";
         } else {
-            tempoDate.setDate(tempoDate.getMonth() + tempoTime);
+          status = "Menunggu";
         }
+      }
 
-        if (tempoDate < today) {
-            isTempo = true;
-        }
-
-        if (isTempo) {
-            if (statusPembayaran === "Belum Lunas" || statusPembayaran === "Belum Dibayar") {
-                status = "Tempo";
-            } else if (statusPembayaran === "Dibayar Sebagian") {
-                status = "Sebagian";
-            } else if (statusPembayaran === "Lunas") {
-                status = "Selesai";
-            }
-        } else {
-            if (
-                statusPembayaran === "Belum Lunas" &&
-                purchasingHistory.length > 0
-            ) {
-                status = "Tempo";
-            } else if (
-                statusPembayaran === "Dibayar Sebagian" &&
-                purchasingHistory.length > 0
-            ) {
-                status = "Sebagian";
-            } else if (
-                statusPembayaran === "Lunas" &&
-                purchasingHistory.length > 0
-            ) {
-                status = "Selesai";
-            } else {
-                status = "Menunggu";
-            }
-        }
-
-        if (status == "Tempo" || statusPembayaran == "Dibayar Sebagian") {
-          row.hidden = false;
-          dataTabel[lpbId] = row; console.log("row", row);
-          //biaya.list.push(row);
-          dispatch({ type: "ADD_LIST", list: row });
-        }
-        lpbId++;
+      if (status == "Tempo" || statusPembayaran == "Dibayar Sebagian") {
+        row.hidden = false;
+        dataTabel[lpbId] = row;
+        //biaya.list.push(row);
+        dispatch({ type: "ADD_LIST", list: row });
+      }
+      console.log("statusPembayaran", statusPembayaran, status);
+      lpbId++;
     });
-
 
     //dataTabel.push(biaya.list);
     lpbId = 0;
 
-      returLPB.forEach((row) => {
-          row.subtotal = 0;
-          dataTabel.forEach((element) => {
-              if (element.attributes.no_purchasing == row.attributes.purchasing.data?.attributes.no_purchasing) {
-                  row.attributes.retur_lpb_details.data.forEach((detail) => {
-                      row.subtotal += parseInt(detail.attributes.sub_total);
-                  });
-                  dataRetur[lpbId] = { id: element.attributes.no_purchasing, subtotal: row.subtotal };
-              }
+    returLPB.forEach((row) => {
+      row.subtotal = 0;
+      dataTabel.forEach((element) => {
+        if (
+          element.attributes.no_purchasing ==
+          row.attributes.purchasing.data?.attributes.no_purchasing
+        ) {
+          row.attributes.retur_lpb_details.data.forEach((detail) => {
+            row.subtotal += parseInt(detail.attributes.sub_total);
           });
-          lpbId++;
+          dataRetur[lpbId] = {
+            id: element.attributes.no_purchasing,
+            subtotal: row.subtotal,
+          };
+        }
       });
-
+      lpbId++;
+    });
   }, []);
 
   const validateError = () => {
@@ -441,34 +515,40 @@ function Hutang({ props }) {
               onFinish={onFinish}
               onFinishFailed={validateError}
             >
-
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-4">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="no_hutang"
                     initialValue={categorySale}
                     rules={[
-                        {
-                            required: true,
-                            message: "Nomor Hutang tidak boleh kosong!",
-                        },
+                      {
+                        required: true,
+                        message: "Nomor Hutang tidak boleh kosong!",
+                      },
                     ]}
-                    >
-                    <Input style={{ height: "40px" }} placeholder="No. Hutang" />
+                  >
+                    <Input
+                      style={{ height: "40px" }}
+                      placeholder="No. Hutang"
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                    <Supplier onChangeSupplier={setSupplier} />
+                  <Supplier onChangeSupplier={setSupplier} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item name="status_pembayaran" //initialValue={"Hari"} 
-                  noStyle>
+                  <Form.Item
+                    name="status_pembayaran" //initialValue={"Hari"}
+                    noStyle
+                  >
                     <Select
                       size="large"
                       style={{
                         width: "100%",
                       }}
+                      allowClear
                       placeholder="Status Pembayaran"
+                      onChange={setStatusPembayaran}
                     >
                       <Select.Option value="Dibayar" key="Dibayar">
                         Dibayar
@@ -480,80 +560,108 @@ function Hutang({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="tanggal"
-                    //initialValue={categorySale}
-                    //rules={[
-                    //    {
-                    //        required: true,
-                    //        message: "Nomor Penjualan tidak boleh kosong!",
-                    //    },
-                    //]}
-                    >
-                    <DatePicker placeholder="Rentang Tanggal" size="large" style={{ width: "100%" }} onChange={(values) => setTanggal(values._d)} format="DD-MM-YY" />
+                  <Form.Item name="tanggal">
+                    <RangePicker
+                      size="large"
+                      onChange={(values) => setRangePicker(values)}
+                    />
                   </Form.Item>
                 </div>
               </div>
 
-              <div className="w-full flex md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
-                  {/*<SearchBar*/}
-                  {/*  form={form}*/}
-                  {/*  tempList={tempList}*/}
-                  {/*  onChange={onChangeProduct}*/}
-                  {/*  user={user}*/}
-                  {/*  selectedProduct={selectedProduct}*/}
-                  {/*  isBasedOnLocation={false}*/}
-                  {/*/>*/}
+              <div className="w-full md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
+                <Search
+                  size="large"
+                  id="searchBox"
+                  placeholder="Cari Nomor LPB"
+                  onChange={filterBySearch}
+                />
               </div>
 
               {isFetchinData ? (
-                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
-                    <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
-                      <LoadingAnimations />
-                    </div>
-                    <div className="text-sm align-middle text-center animate-pulse text-slate-400">
-                      Sedang Mengambil Data
-                    </div>
+                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
+                  <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
+                    <LoadingAnimations />
                   </div>
+                  <div className="text-sm align-middle text-center animate-pulse text-slate-400">
+                    Sedang Mengambil Data
+                  </div>
+                </div>
               ) : (
-              <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                <AddDebtTable
-                  data={dataTabel}
-                  retur={dataRetur}
-                  biaya={biaya}
-                  calculatePriceTotal={calculatePriceTotal}
-                  sisaHutang={sisaHutang}
-                  form={form}
-                  supplier={supplier}
-                />
-              </div>
+                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
+                  <AddDebtTable
+                    data={dataTabel}
+                    retur={dataRetur}
+                    biaya={biaya}
+                    calculatePriceTotal={calculatePriceTotal}
+                    sisaHutang={sisaHutang}
+                    form={form}
+                    supplier={supplier}
+                    statusPembayaran={statusPembayaran}
+                    rangePicker={rangePicker}
+                    search={searchNoLpb}
+                  />
+                </div>
               )}
 
               <div className="w-full flex flex-wrap mb-3">
-                <Form.Item name="total_item" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> TOTAL ITEM </span> <span> : {dataTabel?.length ?? 0}</span>
+                <Form.Item
+                  name="total_item"
+                  className="w-full h-2 mx-2 flex justify-end font-bold"
+                >
+                  <span> TOTAL ITEM </span> <span> : {totalItem}</span>
                 </Form.Item>
-                <Form.Item name="total_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> TOTAL HUTANG JATUH TEMPO </span> <span> : {formatter.format(totalHutangJatuhTempo())}</span>
+                <Form.Item
+                  name="total_hutang_jatuh_tempo"
+                  className="w-full h-2 mx-2 flex justify-end font-bold"
+                >
+                  <span> TOTAL HUTANG JATUH TEMPO </span>{" "}
+                  <span> : {formatter.format(totalHutangJatuhTempo())}</span>
                 </Form.Item>
-                <Form.Item name="total_pembayaran" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> TOTAL PEMBAYARAN </span> <span> : {formatter.format(totalPembayaran())}</span>
+                <Form.Item
+                  name="total_pembayaran"
+                  className="w-full h-2 mx-2 flex justify-end font-bold"
+                >
+                  <span> TOTAL PEMBAYARAN </span>{" "}
+                  <span> : {formatter.format(totalPembayaran())}</span>
                 </Form.Item>
-                <Form.Item name="sisa_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> SISA HUTANG JATUH TEMPO </span> <span> : {formatter.format(sisaHutangJatuhTempo())}</span>
+                <Form.Item
+                  name="sisa_hutang_jatuh_tempo"
+                  className="w-full h-2 mx-2 flex justify-end font-bold"
+                >
+                  <span> SISA HUTANG JATUH TEMPO </span>{" "}
+                  <span> : {formatter.format(sisaHutangJatuhTempo())}</span>
                 </Form.Item>
               </div>
 
               <div className="w-full md:w-1/4 px-3 -mx-3">
                 <Form.Item name="tanggal_pembayaran">
-                    <DatePicker placeholder="Tanggal Pembayaran" size="large" style={{ width: "100%" }} />
-                  </Form.Item>
+                  <DatePicker
+                    defaultValue={tanggal}
+                    placeholder="Tanggal Pembayaran"
+                    size="large"
+                    style={{ width: "100%" }}
+                    onChange={(value) => setTanggal(value)}
+                  />
+                </Form.Item>
               </div>
 
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 mt-8">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="bayar1">
-                    <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
+                    <InputNumber
+                      placeholder="Nominal Pembayaran"
+                      formatter={(value) =>
+                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      }
+                      parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                      min={0}
+                      style={{
+                        height: "40px",
+                        width: "100%",
+                        marginRight: "10px",
+                      }}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -583,13 +691,24 @@ function Hutang({ props }) {
                     </Select>
                   </Form.Item>
                 </div>
-
               </div>
 
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="bayar2">
-                    <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
+                    <InputNumber
+                      placeholder="Nominal Pembayaran"
+                      formatter={(value) =>
+                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      }
+                      parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                      min={0}
+                      style={{
+                        height: "40px",
+                        width: "100%",
+                        marginRight: "10px",
+                      }}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -624,7 +743,19 @@ function Hutang({ props }) {
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="bayar3">
-                    <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
+                    <InputNumber
+                      placeholder="Nominal Pembayaran"
+                      formatter={(value) =>
+                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      }
+                      parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                      min={0}
+                      style={{
+                        height: "40px",
+                        width: "100%",
+                        marginRight: "10px",
+                      }}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -659,7 +790,19 @@ function Hutang({ props }) {
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="bayar4">
-                    <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
+                    <InputNumber
+                      placeholder="Nominal Pembayaran"
+                      formatter={(value) =>
+                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      }
+                      parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                      min={0}
+                      style={{
+                        height: "40px",
+                        width: "100%",
+                        marginRight: "10px",
+                      }}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -694,7 +837,19 @@ function Hutang({ props }) {
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="bayar5">
-                    <Input style={{ height: "40px" }} placeholder="Bayar biaya" />
+                    <InputNumber
+                      placeholder="Nominal Pembayaran"
+                      formatter={(value) =>
+                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      }
+                      parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                      min={0}
+                      style={{
+                        height: "40px",
+                        width: "100%",
+                        marginRight: "10px",
+                      }}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -732,44 +887,52 @@ function Hutang({ props }) {
                 </Form.Item>
               </div>
 
-              <div  className="w-full flex justify-center">
-                  <Form.Item>
-                    {loading ? (
-                      <div className=" flex float-left ml-3 ">
-                        <Spin />
-                      </div>
-                    ) : (
-                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm" onClick={() => setDocument("Draft")}>
-                        <p className="px-4 py-2 m-0 text-white">
-                          SIMPAN DAN PERBARUI
-                        </p>
-                      </button>
-                    )}
-                  </Form.Item>
-                  <Form.Item>
-                    {loading ? (
-                      <div className=" flex float-left ml-3 ">
-                        <Spin />
-                      </div>
-                    ) : (
-                      <>
-                        <ConfirmDialog
-                          onConfirm={() => submitBtn?.current?.click()}
-                          onCancel={() => {}}
-                          title="Tambah Hutang"
-                          message="Silahkan cek kembali data yang telah dimasukkan, apakah anda yakin ingin menambahkan ?"
-                          component={
-                            <button type="button" className="bg-cyan-700 rounded-md m-1 text-sm" onClick={() => setDocument("Publish")}>
-                              <p className="px-4 py-2 m-0 text-white">
-                                SIMPAN DAN CETAK
-                              </p>
-                            </button>
-                          }
-                        />
-                        <Button htmlType="submit" ref={submitBtn}></Button>
-                      </>
-                    )}
-                  </Form.Item>
+              <div className="w-full flex justify-center">
+                <Form.Item>
+                  {loading ? (
+                    <div className=" flex float-left ml-3 ">
+                      <Spin />
+                    </div>
+                  ) : (
+                    <button
+                      htmlType="submit"
+                      className="bg-cyan-700 rounded-md m-1 text-sm"
+                      onClick={() => setDocument("Draft")}
+                    >
+                      <p className="px-4 py-2 m-0 text-white">
+                        SIMPAN DAN PERBARUI
+                      </p>
+                    </button>
+                  )}
+                </Form.Item>
+                <Form.Item>
+                  {loading ? (
+                    <div className=" flex float-left ml-3 ">
+                      <Spin />
+                    </div>
+                  ) : (
+                    <>
+                      <ConfirmDialog
+                        onConfirm={() => submitBtn?.current?.click()}
+                        onCancel={() => {}}
+                        title="Tambah Hutang"
+                        message="Silahkan cek kembali data yang telah dimasukkan, apakah anda yakin ingin menambahkan ?"
+                        component={
+                          <button
+                            type="button"
+                            className="bg-cyan-700 rounded-md m-1 text-sm"
+                            onClick={() => setDocument("Publish")}
+                          >
+                            <p className="px-4 py-2 m-0 text-white">
+                              SIMPAN DAN CETAK
+                            </p>
+                          </button>
+                        }
+                      />
+                      <Button htmlType="submit" ref={submitBtn}></Button>
+                    </>
+                  )}
+                </Form.Item>
               </div>
             </Form>
           </LayoutContent>

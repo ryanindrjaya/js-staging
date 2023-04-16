@@ -24,7 +24,7 @@ import {
   notification,
   Row,
 } from "antd";
-import createDetailPurchasing from "../../utility/createDetail";
+import createDetailPurchasing from "../../utility/createPurchasingDetail";
 import createPurchasing from "../../utility/createPurchasing";
 import updateOrder from "../../utility/updateOrder";
 import updateProduct from "../../utility/updateProduct";
@@ -64,13 +64,16 @@ EditLPB.getInitialProps = async (context) => {
   const req4 = await fetchUser(cookies);
   user = await req4.json();
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/purchasings/${id}?populate=deep`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  }).then((res) => res.json());
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_URL}/purchasings/${id}?populate=deep`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    }
+  ).then((res) => res.json());
 
   if (response.status === 401) {
     context.res.writeHead(302, {
@@ -172,7 +175,9 @@ function EditLPB({ props }) {
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [supplier, setSupplier] = useState(initialValues.attributes.supplier?.data);
+  const [supplier, setSupplier] = useState(
+    initialValues.attributes.supplier?.data
+  );
   const [isDPPActive, setIsDPPActive] = useState(true);
   const [dppPrice, setdppPrice] = useState(0);
   const [ppnPrice, setppnPrice] = useState(0);
@@ -214,7 +219,9 @@ function EditLPB({ props }) {
   const tempList = [];
 
   // NO PO
-  var totalPurchases = String(props.purchases?.meta?.pagination.total + 1).padStart(3, "0");
+  var totalPurchases = String(
+    props.purchases?.meta?.pagination.total + 1
+  ).padStart(3, "0");
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -223,7 +230,12 @@ function EditLPB({ props }) {
   });
 
   const cleanData = (data) => {
-    const unusedKeys = ["disc_rp", "harga_satuan", "jumlah_option", "jumlah_qty"];
+    const unusedKeys = [
+      "disc_rp",
+      "harga_satuan",
+      "jumlah_option",
+      "jumlah_qty",
+    ];
     for (let key in data) {
       if (data[key] === null || data[key] === undefined) {
         delete data[key];
@@ -289,41 +301,47 @@ function EditLPB({ props }) {
       // console.log("editedProduct", editedProduct);
       // console.log("products", products);
 
-      const detailsLPB = products.productList?.map(({ attributes, id }, idx) => {
-        console.log();
+      console.log("redux products", products);
+      const detailsLPB = products.productList?.map(
+        ({ attributes, id }, idx) => {
+          const qty = editedProduct?.[idx]?.qty || 1;
+          const unitPriceAfterDisc = parseFloat(
+            productTotalPrice?.[idx] || attributes?.buy_price_1
+          ).toFixed(2);
+          const subTotal = parseFloat(unitPriceAfterDisc * qty).toFixed(2);
+          const unitOrder = editedProduct?.[idx]?.unit || attributes?.unit_1;
+          const unitPrice =
+            editedProduct?.[idx]?.unit_price ||
+            editedProduct?.[idx]?.priceUnit ||
+            attributes?.buy_price_1;
 
-        const qty = editedProduct?.[idx]?.qty || 1;
-        const unitPriceAfterDisc = parseFloat(
-          productTotalPrice?.[idx] || attributes?.buy_price_1
-        ).toFixed(2);
-        const subTotal = parseFloat(unitPriceAfterDisc * qty).toFixed(2);
-        const unitOrder = editedProduct?.[idx]?.unit || attributes?.unit_1;
-        const unitPrice = editedProduct?.[idx]?.priceUnit || attributes?.buy_price_1;
+          const discRp = form.getFieldValue("disc_rp");
+          const unitDisc =
+            discRp?.[idx] ??
+            editedProduct?.[idx]?.disc ??
+            attributes?.purchase_discount_1;
 
-        const discRp = form.getFieldValue("disc_rp");
-        const unitDisc =
-          discRp?.[idx] ?? editedProduct?.[idx]?.disc ?? attributes?.purchase_discount_1;
+          const expiredDate = sanitizedValues?.expired_date?.[idx];
+          const batch = sanitizedValues?.batch?.[idx];
 
-        const expiredDate = sanitizedValues?.expired_date?.[idx];
-        const batch = sanitizedValues?.batch?.[idx];
-
-        return {
-          total_order: String(editedProduct?.[idx]?.qty || 1),
-          sub_total: subTotal,
-          unit_order: unitOrder,
-          disc: unitDisc,
-          unit_price: unitPrice,
-          unit_price_after_disc: unitPriceAfterDisc,
-          dp1: editedProduct?.[idx]?.d1 || attributes?.unit_1_dp1,
-          dp2: editedProduct?.[idx]?.d2 || attributes?.unit_1_dp2,
-          dp3: editedProduct?.[idx]?.d3 || attributes?.unit_1_dp3,
-          products: [id],
-          relation_id: editedProduct?.[idx]?.relation_id,
-          location: values?.product_location?.[idx],
-          expired_date: expiredDate,
-          batch: batch,
-        };
-      });
+          return {
+            total_order: String(editedProduct?.[idx]?.qty || 1),
+            sub_total: subTotal,
+            unit_order: unitOrder,
+            disc: unitDisc,
+            unit_price: unitPrice,
+            unit_price_after_disc: unitPriceAfterDisc,
+            dp1: editedProduct?.[idx]?.d1 || attributes?.unit_1_dp1,
+            dp2: editedProduct?.[idx]?.d2 || attributes?.unit_1_dp2,
+            dp3: editedProduct?.[idx]?.d3 || attributes?.unit_1_dp3,
+            products: [id],
+            relation_id: editedProduct?.[idx]?.relation_id,
+            location: values?.product_location?.[idx],
+            expired_date: expiredDate,
+            batch: batch,
+          };
+        }
+      );
 
       let detailsId = [];
       for (let item in detailsLPB) {
@@ -361,13 +379,15 @@ function EditLPB({ props }) {
       if (res?.data?.id) {
         notification.success({
           message: "Berhasil mengubah data",
-          description: "Data LPB berhasil diubah. Silahkan cek pada halaman LPB",
+          description:
+            "Data LPB berhasil diubah. Silahkan cek pada halaman LPB",
         });
         router.replace("/dashboard/pembelian/pembelian_barang");
       } else {
         notification.error({
           message: "Gagal mengubah data",
-          description: "Data LPB gagal diubah. Silahkan cek data anda dan coba lagi",
+          description:
+            "Data LPB gagal diubah. Silahkan cek data anda dan coba lagi",
         });
       }
     } catch (error) {
@@ -501,7 +521,8 @@ function EditLPB({ props }) {
     clearData();
     setIsFetchingData(true);
 
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/purchases/${id}?populate=deep`;
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL + `/purchases/${id}?populate=deep`;
     console.log(endpoint);
     const options = {
       method: "GET",
@@ -573,7 +594,8 @@ function EditLPB({ props }) {
       var unitOrder = element.attributes.unit_order;
       var productUnit = element.attributes.products.data[0].attributes;
 
-      priceAfterDisc = priceAfterDisc + element.attributes.unit_price_after_disc;
+      priceAfterDisc =
+        priceAfterDisc + element.attributes.unit_price_after_disc;
 
       for (let index = 1; index < 6; index++) {
         if (unitOrder === productUnit[`unit_${index}`]) {
@@ -595,7 +617,11 @@ function EditLPB({ props }) {
         },
       });
 
-      const test = form.getFieldsValue(["disc_rp", "jumlah_option", "jumlah_qty"]);
+      const test = form.getFieldsValue([
+        "disc_rp",
+        "jumlah_option",
+        "jumlah_qty",
+      ]);
 
       // SET INITIAL PRODUCT
       dispatch({
@@ -758,7 +784,10 @@ function EditLPB({ props }) {
 
         details.forEach((element, index) => {
           const product = element.attributes?.product?.data;
-          const unit = getUnitIndex(product?.attributes, element?.attributes?.unit_order);
+          const unit = getUnitIndex(
+            product?.attributes,
+            element?.attributes?.unit_order
+          );
 
           form.setFieldsValue({
             ...initialValues.attributes,
@@ -827,7 +856,11 @@ function EditLPB({ props }) {
             >
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Supplier disabled={true} supplier={supplier} onChangeSupplier={setSupplier} />
+                  <Supplier
+                    disabled={true}
+                    supplier={supplier}
+                    onChangeSupplier={setSupplier}
+                  />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
@@ -840,7 +873,11 @@ function EditLPB({ props }) {
                       },
                     ]}
                   >
-                    <Input disabled={true} style={{ height: "40px" }} placeholder="No.PO" />
+                    <Input
+                      disabled={true}
+                      style={{ height: "40px" }}
+                      placeholder="No.PO"
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -941,7 +978,11 @@ function EditLPB({ props }) {
                 </div>
 
                 <div className="w-full md:w-1/4 px-3 mb-2 mt-5 md:mb-0">
-                  <SearchPO disabled={true} supplier={supplier} handleSelect={fetchPOdata} />
+                  <SearchPO
+                    disabled={true}
+                    supplier={supplier}
+                    handleSelect={fetchPOdata}
+                  />
                 </div>
 
                 <div className="w-full md:w-1/4 px-3 mb-2 mt-5 md:mb-0">
@@ -986,7 +1027,9 @@ function EditLPB({ props }) {
                 )}
               </div>
               <div className="flex justify-end">
-                <p className="font-bold">Total Item : {products.productList.length} </p>
+                <p className="font-bold">
+                  Total Item : {products.productList.length}{" "}
+                </p>
               </div>
               <div className="flex justify-end transition-all">
                 <Row>
@@ -999,7 +1042,9 @@ function EditLPB({ props }) {
                     </p>
                   )}
                   {discPrice === 0 ? (
-                    <p className="font-bold ml-2">{formatter.format(totalPrice || 0)}</p>
+                    <p className="font-bold ml-2">
+                      {formatter.format(totalPrice || 0)}
+                    </p>
                   ) : (
                     <p className="font-bold line-through ml-2 ">
                       {formatter.format(totalPrice || 0)}
@@ -1014,7 +1059,9 @@ function EditLPB({ props }) {
                     <p></p>
                   ) : (
                     <p className="font-bold text-red-500 ml-2">
-                      {isDPPActive ? formatter.format(dppPrice - discValue) : formatter.format(0)}
+                      {isDPPActive
+                        ? formatter.format(dppPrice - discValue)
+                        : formatter.format(0)}
                     </p>
                   )}
 
@@ -1022,11 +1069,15 @@ function EditLPB({ props }) {
 
                   {discPrice === 0 ? (
                     <p className="font-bold ml-2">
-                      {isDPPActive ? formatter.format(dppPrice) : formatter.format(0)}
+                      {isDPPActive
+                        ? formatter.format(dppPrice)
+                        : formatter.format(0)}
                     </p>
                   ) : (
                     <p className="font-bold line-through ml-2 ">
-                      {isDPPActive ? formatter.format(dppPrice) : formatter.format(0)}
+                      {isDPPActive
+                        ? formatter.format(dppPrice)
+                        : formatter.format(0)}
                     </p>
                   )}
                 </Row>
@@ -1038,16 +1089,22 @@ function EditLPB({ props }) {
                     <p></p>
                   ) : (
                     <p className="font-bold text-red-500 ml-2">
-                      {isDPPActive ? formatter.format(ppnPrice - discValue) : formatter.format(0)}
+                      {isDPPActive
+                        ? formatter.format(ppnPrice - discValue)
+                        : formatter.format(0)}
                     </p>
                   )}
                   {discPrice === 0 ? (
                     <p className="font-bold ml-2">
-                      {isDPPActive ? formatter.format(ppnPrice) : formatter.format(0)}
+                      {isDPPActive
+                        ? formatter.format(ppnPrice)
+                        : formatter.format(0)}
                     </p>
                   ) : (
                     <p className="font-bold line-through ml-2 ">
-                      {isDPPActive ? formatter.format(ppnPrice) : formatter.format(0)}
+                      {isDPPActive
+                        ? formatter.format(ppnPrice)
+                        : formatter.format(0)}
                     </p>
                   )}
                 </Row>
@@ -1220,7 +1277,9 @@ function EditLPB({ props }) {
               <div>
                 <p className="font-bold flex justify-end">
                   Total Pembelian :{" "}
-                  {grandTotal === 0 ? formatter.format(totalPrice) : formatter.format(grandTotal)}
+                  {grandTotal === 0
+                    ? formatter.format(totalPrice)
+                    : formatter.format(grandTotal)}
                 </p>
               </div>
               <Form.Item name="additional_note">

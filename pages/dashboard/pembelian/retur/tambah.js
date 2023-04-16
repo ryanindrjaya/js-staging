@@ -1,20 +1,33 @@
 import Head from "next/head";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, createContext } from "react";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
-import { Form, Input, DatePicker, Button, message, Upload, Select, Spin, notification } from "antd";
+import {
+  Form,
+  Input,
+  DatePicker,
+  Button,
+  message,
+  Modal,
+  Select,
+  Spin,
+  notification,
+} from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import nookies from "nookies";
-import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
+import SearchBar from "../../../../components/Form/AddOrder/SearchBar";
 import { useSelector, useDispatch } from "react-redux";
 import calculatePrice from "../utility/calculatePrice";
-import DataReturTable from "@iso/components/ReactDataTable/Purchases/DataReturTable";
+import DataReturTable from "../../../../components/ReactDataTable/Purchases/DataReturTable";
 import createDetailReturFunc from "../utility/createReturDetail";
 import createReturFunc from "../utility/createRetur";
 import { useRouter } from "next/router";
+import SearchLPB from "../../../../components/Form/AddOrder/SearchLPB";
+import moment from "moment";
+import createInventoryRetur from "../utility/createInventoryRetur";
 
 Retur.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -46,7 +59,7 @@ Retur.getInitialProps = async (context) => {
       location,
       returs,
       dataLPB,
-      user
+      user,
     },
   };
 };
@@ -125,12 +138,23 @@ function Retur({ props }) {
   const [grandTotal, setGrandTotal] = useState(0);
   const [listId, setListId] = useState([]);
   const router = useRouter();
+  const [lpbData, setLpbData] = useState();
+  const [dataGudang, setDataGudang] = useState();
+  const [stokString, setStokString] = useState({});
+
+  const [modal, contextHolder] = Modal.useModal();
+  const [isTaxActive, setIsTaxActive] = useState(true);
+
+  const ReachableContext = createContext(null);
+  const UnreachableContext = createContext(null);
 
   //temp
   const tempList = [];
   const cookies = nookies.get(null, "token");
-
-  var totalReturs = String(props.returs?.meta?.pagination.total + 1).padStart(3, "0");
+  var totalReturs = String(props.returs?.meta?.pagination.total + 1).padStart(
+    3,
+    "0"
+  );
   var today = new Date();
   var dd = String(today.getDate()).padStart(2, "0");
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
@@ -149,20 +173,205 @@ function Retur({ props }) {
     maximumFractionDigits: 2,
   });
 
+  const onSelectLocation = async (locationId, dataProduct, idx) => {
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/inventories?populate=location&filters[location][id]=${locationId}&filters[product][id]=${dataProduct.id}`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    if (res.data.length > 0) {
+      const product = dataProduct.attributes;
+      const stok = res.data[0].attributes;
+      let stokGudang = "";
+      setDataGudang({
+        ...dataGudang,
+        [idx]: res.data[0].attributes,
+      });
+
+      const unit1 = product.unit_1
+        ? stok.stock_unit_1 + " " + product.unit_1
+        : "";
+      const unit2 = product.unit_2
+        ? stok.stock_unit_2 + " " + product.unit_2
+        : "";
+      const unit3 = product.unit_3
+        ? stok.stock_unit_3 + " " + product.unit_3
+        : "";
+      const unit4 = product.unit_4
+        ? stok.stock_unit_4 + " " + product.unit_4
+        : "";
+      const unit5 = product.unit_5
+        ? stok.stock_unit_5 + " " + product.unit_5
+        : "";
+
+      stokGudang =
+        unit1 + " " + unit2 + " " + unit3 + " " + unit4 + " " + unit5;
+
+      setStokString({
+        ...stokString,
+        [idx]: stokGudang,
+      });
+    } else {
+      const product = dataProduct.attributes;
+      let stokGudang = "";
+      setDataGudang({
+        ...dataGudang,
+        [idx]: {
+          location: {
+            data: {
+              id: locationId,
+            },
+          },
+        },
+      });
+
+      const unit1 = product.unit_1 ? "0" + " " + product.unit_1 : "";
+      const unit2 = product.unit_2 ? "0" + " " + product.unit_2 : "";
+      const unit3 = product.unit_3 ? "0" + " " + product.unit_3 : "";
+      const unit4 = product.unit_4 ? "0" + " " + product.unit_4 : "";
+      const unit5 = product.unit_5 ? "0" + " " + product.unit_5 : "";
+
+      stokGudang =
+        unit1 + " " + unit2 + " " + unit3 + " " + unit4 + " " + unit5;
+
+      setStokString({
+        ...stokString,
+        [idx]: stokGudang,
+      });
+    }
+  };
+
+  const checkReturQty = async (values) => {
+    let popUpDialog = false;
+    let cannotBeReturnedProducts = [];
+
+    for (let index in dataGudang) {
+      const qty = values?.jumlah_qty?.[index] ?? 1;
+      const unitIndex =
+        values?.jumlah_option?.[index] ??
+        products?.productInfo?.[index].unit ??
+        1;
+      const productId = products.productList[index]?.id;
+      const productName = products.productList[index]?.attributes?.name;
+      const productUnit =
+        products.productList[index]?.attributes?.["unit_" + unitIndex];
+      const gudangLocatioId = dataGudang?.[index].location?.data?.id ?? 0;
+
+      if (typeof unitIndex === "string") {
+        productUnit = unitIndex;
+      }
+
+      const returData = {
+        location: gudangLocatioId,
+        product: productId,
+        unit: productUnit,
+        qty: qty,
+      };
+
+      // fetch to api check
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/product/check";
+      const options = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+        body: JSON.stringify(returData),
+      };
+
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
+      console.log(res);
+      if (!res?.available) {
+        popUpDialog = true;
+        cannotBeReturnedProducts.push(productName);
+      }
+    }
+
+    if (popUpDialog) {
+      Modal.error({
+        title: "Retur Gagal",
+        content: (
+          <div>
+            <p>
+              Item ini tidak bisa dilakukan retur. Silahkan cek kembali stok
+              gudang yang tersedia:
+            </p>
+            <ul>
+              {cannotBeReturnedProducts.map((product) => (
+                <li>{product === undefined ? "" : `- ${product}`} </li>
+              ))}
+            </ul>
+          </div>
+        ),
+      });
+    }
+
+    return popUpDialog;
+  };
+
   const onFinish = async (values) => {
     setLoading(true);
+
+    console.log("values", values);
+    console.log("products", products);
+
+    const isShowingPopup = await checkReturQty(values);
+    console.log("isShowingPopup", isShowingPopup);
+    if (isShowingPopup) {
+      setLoading(false);
+      return;
+    }
+
+    const payment = getPaymentRemaining();
+    console.log("PAYMENT ===> ", payment, "total price", totalPrice);
+    if (payment) {
+      if (totalPrice > payment.returPaymentRemaining) {
+        notification["error"]({
+          message: "Overprice",
+          description: "Harga retur melebih dari Sisa pembayaran / Harga LPB",
+        });
+        setLoading(false);
+        return;
+      }
+      console.log("executed onfinish");
+    }
+
     setDataValues(values);
     setLoading(false);
   };
 
   const createDetailRetur = async () => {
-    console.log("info total", productTotalPrice, productSubTotal, products, dataValues);
-    createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-details", dataValues);
+    createDetailReturFunc(
+      products,
+      productTotalPrice,
+      productSubTotal,
+      setListId,
+      "/retur-details",
+      dataValues
+    );
   };
 
   const createRetur = async (values) => {
-    values.status = "Draft";
-    createReturFunc(grandTotal, totalPrice, values, listId, form, router);
+    await createReturFunc(
+      grandTotal,
+      totalPrice,
+      values,
+      listId,
+      form,
+      router,
+      lpbData?.id,
+      createInventoryRetur
+    );
+
+    // create retur inventory
   };
 
   const onChangeProduct = async () => {
@@ -183,41 +392,51 @@ function Retur({ props }) {
     }
   };
 
-  //const calculatePriceAfterDisc = (row, index) => {
-  //  var total = 0;
-  //  var qty = 1;
-  //  var priceUnit = row.attributes[`buy_price_1`];
+  const getPaymentRemaining = () => {
+    let returPayments = 0;
+    let returPaymentRemaining = 0;
+    const totalLPBPayment = lpbData?.attributes?.total_purchasing ?? 0;
 
-  //  // check if price changed
-  //  if (products.productInfo[index]?.priceUnit) {
-  //    priceUnit = products.productInfo[index].priceUnit ?? row.attributes[`buy_price_1`];
-  //  }
-  //  // check if qty changed
-  //  if (products.productInfo[index]?.qty) {
-  //    qty = products.productInfo[index]?.qty ?? 1;
-  //  }
+    // for (const data in lpbData?.attributes?.returs?.data) {
+    //   console.log("retur payment ", data.);
+    // }
+    lpbData?.attributes?.returs?.data.forEach((element) => {
+      if (element.attributes.status === "Selesai") {
+        returPayments = returPayments + element.attributes.total_price;
+      }
+    });
 
-  //  // set product price after disc & sub total
-  //  productTotalPrice[index] = priceUnit;
-  //  productSubTotal[index] = priceUnit * qty;
+    returPaymentRemaining = totalLPBPayment - returPayments;
+    const paymentData = {
+      LPBPayment: totalLPBPayment,
+      returPayment: returPayments,
+      returPaymentRemaining: returPaymentRemaining,
+    };
 
-  //  // set all product total
-  //  var total = 0;
-  //  for (var key in productSubTotal) {
-  //    total = total + productSubTotal[key];
-  //  }
-  //    setTotalPrice(total);
-  //  return formatter.format(productTotalPrice[index]);
-  //};
+    return paymentData;
+  };
+
+  useEffect(() => {
+    getPaymentRemaining();
+  }, [lpbData]);
 
   const calculatePriceAfterDisc = (row, index) => {
-    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index, setProductSubTotal);
+    const total = calculatePrice(
+      row,
+      products,
+      productTotalPrice,
+      productSubTotal,
+      setTotalPrice,
+      index,
+      setProductSubTotal
+    );
     return formatter.format(total);
   };
 
   const fetchReturdata = async (id) => {
     //clearData();
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=deep`;
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=deep`;
     const options = {
       method: "GET",
       headers: {
@@ -237,7 +456,8 @@ function Retur({ props }) {
     });
   };
 
-  const setProductValue = async () => { console.log("products",products)
+  const setProductValue = async () => {
+    console.log("products", products);
     if (products.productList.length != 0) {
       products.productList.forEach((element) => {
         console.log("masuk");
@@ -306,6 +526,23 @@ function Retur({ props }) {
     });
   };
 
+  const getDPP = () => {
+    const isDPPActive = form.getFieldValue("DPP_PPN_active");
+    var total = 0;
+
+    if (isDPPActive) total = totalPrice / 1.11;
+
+    return total;
+  };
+
+  const getPPN = () => {
+    var total = 0;
+    let dpp = getDPP();
+    total = dpp * 0.11;
+
+    return total;
+  };
+
   return (
     <>
       <Head>
@@ -344,6 +581,7 @@ function Retur({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="tanggal_retur"
+                    initialValue={moment()}
                     rules={[
                       {
                         required: true,
@@ -351,15 +589,13 @@ function Retur({ props }) {
                       },
                     ]}
                   >
-                    <DatePicker placeholder="Tanggal Retur" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
+                    <DatePicker
+                      placeholder="Tanggal Retur"
+                      size="large"
+                      format={"DD/MM/YYYY"}
+                      style={{ width: "100%" }}
+                    />
                   </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Upload {...data}>
-                    <Button size="large" icon={<UploadOutlined />}>
-                      Click to Upload
-                    </Button>
-                  </Upload>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
@@ -380,7 +616,10 @@ function Retur({ props }) {
                     >
                       {locations.map((element) => {
                         return (
-                          <Select.Option value={element.id} key={element.attributes.name}>
+                          <Select.Option
+                            value={element.id}
+                            key={element.attributes.name}
+                          >
                             {element.attributes.name}
                           </Select.Option>
                         );
@@ -389,22 +628,31 @@ function Retur({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="purchasing">
+                  <SearchLPB supplier={supplier} handleSelect={setLpbData} />
+                </div>
+                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
+                  <Form.Item
+                    name="status"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Status tidak boleh kosong!",
+                      },
+                    ]}
+                  >
                     <Select
-                      placeholder="Pilih Nomor LPB"
+                      placeholder="Pilih Status"
                       size="large"
-                      onChange={(e) => fetchReturdata(e)}
                       style={{
                         width: "100%",
                       }}
                     >
-                      {dataLPB.map((element) => {
-                        return (
-                          <Select.Option value={element.id} key={element.id}>
-                            {element.attributes.no_purchasing}
-                          </Select.Option>
-                        );
-                      })}
+                      <Select.Option value="Draft" key="Draft">
+                        Draft
+                      </Select.Option>
+                      <Select.Option value="Selesai" key="Selesai">
+                        Selesai
+                      </Select.Option>
                     </Select>
                   </Form.Item>
                 </div>
@@ -413,7 +661,14 @@ function Retur({ props }) {
                   <Form.Item name="tanggal_pembelian"></Form.Item>
                 </div>
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
-                  <SearchBar form={form} tempList={tempList} onChange={onChangeProduct} user={user}  selectedProduct={selectedProduct} isBasedOnLocation={false}/>
+                  <SearchBar
+                    form={form}
+                    tempList={tempList}
+                    onChange={onChangeProduct}
+                    user={user}
+                    selectedProduct={selectedProduct}
+                    isBasedOnLocation={false}
+                  />
                 </div>
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
                   <DataReturTable
@@ -426,13 +681,16 @@ function Retur({ props }) {
                     productSubTotal={productSubTotal}
                     locations={locations}
                     formObj={form}
+                    onSelectLocation={onSelectLocation}
+                    stokString={stokString}
                   />
                 </div>
               </div>
               <div className="flex justify-start md:justify-between">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    name="pajak"
+                    name="DPP_PPN_active"
+                    initialValue={isTaxActive}
                     rules={[
                       {
                         required: true,
@@ -443,38 +701,85 @@ function Retur({ props }) {
                     <Select
                       placeholder="Pajak Pembelian"
                       size="large"
+                      onChange={setIsTaxActive}
                       style={{
                         width: "100%",
                       }}
                     >
-                      <Select.Option value="Pajak Pembelian" key="Pajak Pembelian">
+                      <Select.Option value={true} key="Pajak Pembelian">
                         Pajak Pembelian
                       </Select.Option>
-                      <Select.Option value="Non Pajak" key="Non Pajak">
+                      <Select.Option value={false} key="Non Pajak">
                         Non Pajak
                       </Select.Option>
                     </Select>
                   </Form.Item>
                 </div>
-                <p className="font-bold">Total Item : {products.productList.length} </p>
+                <p className="font-bold">
+                  Total Item : {products.productList.length}{" "}
+                </p>
               </div>
               <div className="flex justify-end">
-                <p className="font-bold">Total Harga : {formatterTotal.format(totalPrice)} </p>
+                <p className="font-bold">
+                  DPP : {formatterTotal.format(getDPP())}
+                </p>
               </div>
+              <div className="flex justify-end">
+                <p className="font-bold">
+                  PPN : {formatterTotal.format(getPPN())}
+                </p>
+              </div>
+
+              <div className="flex justify-end">
+                <p className="font-bold">
+                  Total Harga : {formatterTotal.format(totalPrice)}{" "}
+                </p>
+              </div>
+
+              <div className="flex justify-end mt-5">
+                <p className="font-bold">
+                  Total LPB :{" "}
+                  {formatter.format(getPaymentRemaining().LPBPayment ?? 0)}{" "}
+                </p>
+              </div>
+              <div className="flex justify-end">
+                <p className="font-bold text-green-600">
+                  Pembayaran Selesai :{" "}
+                  {formatter.format(getPaymentRemaining().returPayment ?? 0)}{" "}
+                </p>
+              </div>
+              <div className="flex justify-end">
+                <p className="font-bold text-red-400">
+                  Sisa Pembayaran :{" "}
+                  {formatter.format(
+                    getPaymentRemaining().returPaymentRemaining ?? 0
+                  )}{" "}
+                </p>
+              </div>
+
               <Form.Item name="catatan">
                 <TextArea rows={4} placeholder="Catatan Tambahan" />
               </Form.Item>
-              <Form.Item className="mt-5">
-                {loading ? (
-                  <div className=" flex float-left ml-3 ">
-                    <Spin />
-                  </div>
-                ) : (
-                  <Button onClick={validateError} htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
-                    Tambah
-                  </Button>
-                )}
-              </Form.Item>
+              <ReachableContext.Provider value="Light">
+                <Form.Item className="mt-5">
+                  {loading ? (
+                    <div className=" flex float-left ml-3 ">
+                      <Spin />
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={validateError}
+                      htmlType="submit"
+                      className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
+                    >
+                      Tambah
+                    </Button>
+                  )}
+                </Form.Item>
+                {contextHolder}
+
+                <UnreachableContext.Provider value="Bamboo" />
+              </ReachableContext.Provider>
             </Form>
           </LayoutContent>
         </LayoutWrapper>

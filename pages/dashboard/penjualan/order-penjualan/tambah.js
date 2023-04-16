@@ -5,7 +5,16 @@ import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { Row, Form, Input, InputNumber, Select, Button, Spin, notification } from "antd";
+import {
+  Row,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  Button,
+  Spin,
+  notification,
+} from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import AddSellSalesTable from "../../../../components/ReactDataTable/Selling/AddSellSalesTable";
@@ -102,7 +111,8 @@ const fetchInven = async (cookies) => {
 
 const fetchCustomer = async (cookies) => {
   let name = "walk in customer";
-  const endpoint = process.env.NEXT_PUBLIC_URL + `/customers?filters[name][$contains]=${name}`;
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL + `/customers?filters[name][$contains]=${name}`;
   const options = {
     method: "GET",
     headers: {
@@ -151,7 +161,8 @@ function PesananSales({ props }) {
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
   var date = today.getDate() + "/" + mm + "/" + yyyy;
-  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  var time =
+    today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 
   // DPP & PPN
   //const dpp = 1.11;
@@ -171,7 +182,9 @@ function PesananSales({ props }) {
 
   // NO Sales Sale
   var noSale = String(props.sale?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`PPS/ET/${user.id}/${noSale}/${mm}/${yyyy}`);
+  const [categorySale, setCategorySale] = useState(
+    `PPS/ET/${user.id}/${noSale}/${mm}/${yyyy}`
+  );
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -195,7 +208,13 @@ function PesananSales({ props }) {
   };
 
   const createDetailSale = async () => {
-    await createDetailOrderSaleFunc(dataValues, products, setListId, "/sales-sell-details", true);
+    await createDetailOrderSaleFunc(
+      dataValues,
+      products,
+      setListId,
+      "/sales-sell-details",
+      true
+    );
   };
 
   const createSale = async (values) => {
@@ -227,7 +246,13 @@ function PesananSales({ props }) {
   };
 
   const calculatePriceAfterDisc = (row) => {
-    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
+    const total = calculatePrice(
+      row,
+      products,
+      productTotalPrice,
+      productSubTotal,
+      setTotalPrice
+    );
     return formatter.format(total);
   };
 
@@ -267,7 +292,10 @@ function PesananSales({ props }) {
           element?.attributes?.buy_price_1;
 
         const qty = products?.productInfo?.[idx]?.qty || 1;
-        const diskonJual = products?.productInfo?.[idx]?.d1 || element.attributes?.unit_1_dp1 || 0;
+        const diskonJual =
+          products?.productInfo?.[idx]?.d1 ||
+          element.attributes?.unit_1_dp1 ||
+          0;
 
         return unitPrice * qty - (unitPrice * qty * diskonJual) / 100;
       });
@@ -339,7 +367,12 @@ function PesananSales({ props }) {
               </div>
             </div>
 
-            <Form form={form} name="add" onFinish={onFinish} onFinishFailed={validateError}>
+            <Form
+              form={form}
+              name="add"
+              onFinish={onFinish}
+              onFinishFailed={validateError}
+            >
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-4">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
@@ -352,7 +385,10 @@ function PesananSales({ props }) {
                       },
                     ]}
                   >
-                    <Input style={{ height: "40px" }} placeholder="No. Penjualan" />
+                    <Input
+                      style={{ height: "40px" }}
+                      placeholder="No. Penjualan"
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -405,7 +441,10 @@ function PesananSales({ props }) {
                     >
                       {locations.map((element) => {
                         return (
-                          <Select.Option value={element.id} key={element.attributes.name}>
+                          <Select.Option
+                            value={element.id}
+                            key={element.attributes.name}
+                          >
                             {element.attributes.name}
                           </Select.Option>
                         );
@@ -452,12 +491,16 @@ function PesananSales({ props }) {
                     />
                   </div>
                   <div className="flex justify-end">
-                    <p className="font-bold">Total Item : {products.productList.length} </p>
+                    <p className="font-bold">
+                      Total Item : {products.productList.length}{" "}
+                    </p>
                   </div>
                   <div className="flex justify-end transition-all">
                     <Row>
                       <p className="font-bold">Total Order Penjualan :</p>
-                      <p className="font-bold ml-2 ">{formatter.format(totalPrice || 0)}</p>
+                      <p className="font-bold ml-2 ">
+                        {formatter.format(totalPrice || 0)}
+                      </p>
                     </Row>
                   </div>
                 </>
@@ -476,8 +519,13 @@ function PesananSales({ props }) {
                       <Spin />
                     </div>
                   ) : (
-                    <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
-                      <p className="px-4 py-2 m-0 text-white">SIMPAN UNTUK PEMESANAN PENJUALAN</p>
+                    <button
+                      htmlType="submit"
+                      className="bg-cyan-700 rounded-md m-1 text-sm"
+                    >
+                      <p className="px-4 py-2 m-0 text-white">
+                        SIMPAN UNTUK PEMESANAN PENJUALAN
+                      </p>
                     </button>
                   )}
                 </Form.Item>

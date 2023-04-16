@@ -16,7 +16,8 @@ export default function ReactDataTable({
   onChangeStatusPengiriman,
   onChangeStatus,
 }) {
-  const router = useRouter(); console.log("data index",data)
+  const router = useRouter();
+  console.log("data index", data);
   const { Option } = Select;
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
@@ -38,7 +39,11 @@ export default function ReactDataTable({
   };
 
   const print = (row) => {
-    openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
+    openNotificationWithIcon(
+      "info",
+      "Work In Progress",
+      "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
+    );
     //router.push("order_pembelian/print/" + row.id);
   };
 
@@ -80,17 +85,29 @@ export default function ReactDataTable({
     setOpen(true);
   };
   const handleOk = () => {
-    setModalText('The modal will be closed after two seconds');
+    setModalText("The modal will be closed after two seconds");
     setConfirmLoading(true);
     setTimeout(() => {
       setOpen(false);
       setConfirmLoading(false);
     }, 2000);
   };
+
   const handleCancel = () => {
-    console.log('Clicked cancel button');
+    console.log("Clicked cancel button");
     setOpen(false);
     //this.myFormRef.reset();
+  };
+
+  const openModal = (id) => {
+    router.replace(
+      {
+        pathname: "/dashboard/pembelian/retur",
+        query: { id: id },
+      },
+      undefined,
+      { shallow: true }
+    );
   };
 
   const content = (row) => (
@@ -114,88 +131,86 @@ export default function ReactDataTable({
         </button>
       </div>
 
-      {editStatus ? (
+      {row.attributes.status === "Selesai" ? (
         <div hidden></div>
       ) : (
         <div>
           <button
-              onClick={() => edit(row)}
-              className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+            onClick={() => edit(row)}
+            className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
           >
-              <EditOutlined className="mr-2 mt-0.5 float float-left" />
-              Edit
+            <EditOutlined className="mr-2 mt-0.5 float float-left" />
+            Edit
           </button>
         </div>
       )}
 
       <div>
-        <button
-            //onClick={() => metodePembayaran(row)}
-            onClick={showModal}
-            className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+        <Modal
+          title="Pembayaran Retur Pembelian"
+          open={open}
+          onOk={handleOk}
+          confirmLoading={confirmLoading}
+          onCancel={handleCancel}
+          footer={[
+            <button
+              className="border border-cyan-700 rounded-md m-1 text-sm px-6 py-2"
+              key="back"
+              onClick={handleCancel}
+            >
+              Cancel
+            </button>,
+            <button
+              className="bg-cyan-700 rounded-md m-1 text-sm px-4"
+              key="submit"
+              loading={loading}
+              onClick={handleOk}
+            >
+              <p className="px-4 py-2 m-0 text-white">SIMPAN</p>
+            </button>,
+          ]}
         >
-            <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
-            Metode Pembayaran
-        </button>
+          <div className="w-full flex justify-start">
+            <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-left">
+              <span className="font-bold">Supplier : </span>
+            </div>
+            <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-center">
+              <span className="font-bold">Nomer : </span>
+            </div>
+            <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-right">
+              <span className="font-bold">Jumlah Total : </span>
+            </div>
+          </div>
 
-          <Modal
-            title="Pembayaran Retur Pembelian"
-            open={open}
-            onOk={handleOk}
-            confirmLoading={confirmLoading}
-            onCancel={handleCancel}
-            //ref={(modal) => this.myFormRef = modal}
-            footer={[
-                <button className="border border-cyan-700 rounded-md m-1 text-sm px-6 py-2" key="back" onClick={handleCancel}>
-                Cancel
-                </button>,
-                <button className="bg-cyan-700 rounded-md m-1 text-sm px-4" key="submit" loading={loading} onClick={handleOk}>
-                <p className="px-4 py-2 m-0 text-white">
-                    SIMPAN
-                </p>
-                </button>
-            ]}
-          >
-                <div className="w-full flex justify-start">
-                    <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-left">
-                        <span className="font-bold">Supplier : </span>
-                    </div>
-                    <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-center">
-                        <span className="font-bold">Nomer : </span>
-                    </div>
-                    <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-right">
-                        <span className="font-bold">Jumlah Total : </span>
-                    </div>
-                </div>
+          <div className="w-full flex justify-start">
+            <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-left">
+              <span className="font-bold">alamat</span>
+            </div>
+            <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-center">
+              <div>
+                <span className="font-bold">Tanggal : </span>
+              </div>
+              <div>
+                <span className="font-bold">Lokasi Gudang : </span>
+              </div>
+            </div>
+            <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-right">
+              <span className="font-bold">Catatan : </span>
+              <span className="font-bold">Pembayaran : </span>
+            </div>
+          </div>
 
-                 <div className="w-full flex justify-start">
-                    <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-left">
-                        <span className="font-bold">alamat</span>
-                    </div>
-                    <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-center">
-                        <div>
-                          <span className="font-bold">Tanggal : </span>
-                        </div>
-                        <div>
-                          <span className="font-bold">Lokasi Gudang : </span>
-                        </div>
-                    </div>
-                    <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0 text-right">
-                        <span className="font-bold">Catatan : </span>
-                        <span className="font-bold">Pembayaran : </span>
-                    </div>
-                  </div>
-
-                  <div className="w-full flex justify-start">
-                      <TextArea rows={4} placeholder="Catatan Tambahan" />
-                  </div>
-          </Modal>
-        </div>
+          <div className="w-full flex justify-start">
+            <TextArea rows={4} placeholder="Catatan Tambahan" />
+          </div>
+        </Modal>
+      </div>
       <AlertDialog
+        buttonText="Batalkan"
         onCancel={onCancel}
         onConfirm={onConfirm}
-        title="Hapus Kategori"
-        message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
+        title="Batalkan Retur Pembelian"
+        message="Transaksi return akan dirubah menjadi status dibatalkan. Lanjutkan?"
         id={row.id}
       />
     </div>
@@ -213,24 +228,55 @@ export default function ReactDataTable({
 
   const columns = [
     {
+      name: "Tindakan",
+      width: "150px",
+      selector: (row) => {
+        return (
+          <>
+            <Popover content={content(row)} placement="bottom" trigger="click">
+              <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
+                Tindakan
+              </button>
+            </Popover>
+          </>
+        );
+      },
+    },
+    {
       name: "Tanggal",
       width: "150px",
       selector: (row) => formatMyDate(row.attributes?.tanggal_retur),
     },
-    //{
-    //  name: "NO PO",
-    //  width: "180px",
-    //  selector: (row) => row.attributes?.no_po ?? "-",
-    //},
     {
-      name: "NO Retur",
+      name: "Status",
+      width: "150px",
+      selector: (row) => {
+        return (
+          <Tag
+            color={
+              row.attributes.status === "Selesai"
+                ? "green"
+                : row.attributes.status === "Draft"
+                ? "orange"
+                : "red"
+            }
+          >
+            {row.attributes.status}
+          </Tag>
+        );
+      },
+    },
+
+    {
+      name: "No Retur",
       width: "180px",
       selector: (row) => row.attributes?.no_retur ?? "-",
     },
     {
       name: "NO LPB",
       width: "180px",
-      //selector: (row) => row.attributes.purchasing.data.attributes?.no_purchasing ?? "-",
+      selector: (row) =>
+        row.attributes.purchasing?.data?.attributes?.no_purchasing ?? "-",
     },
     {
       name: "Lokasi",
@@ -240,132 +286,26 @@ export default function ReactDataTable({
     {
       name: "Supplier",
       width: "180px",
-      selector: (row) => row.attributes?.supplier?.data?.attributes?.name ?? "-",
+      selector: (row) =>
+        row.attributes?.supplier?.data?.attributes?.name ?? "-",
     },
-    //{
-    //  name: "Status Pembayaran",
-    //  width: "150px",
-    //  selector: (row) => {
-    //    var tempoDate = new Date(row.attributes?.date_purchasing);
-    //    var tempoTime = parseInt(row.attributes?.tempo_days ?? 0);
-    //    var today = new Date();
-    //    var isTempo = false;
-    //    var statusPembayaran = row.attributes?.status_pembayaran;
-    //    var purchasingHistory = row.attributes?.purchasing_payments.data;
 
-    //    if (row.attributes?.tempo_time === "Hari") {
-    //      tempoDate.setDate(tempoDate.getDate() + tempoTime);
-    //    } else {
-    //      tempoDate.setDate(tempoDate.getMonth() + tempoTime);
-    //    }
-
-    //    if (tempoDate < today) {
-    //      isTempo = true;
-    //    }
-
-    //    if (isTempo) {
-    //      if (statusPembayaran === "Belum Lunas") {
-    //        return <Tag color="red">Tempo</Tag>;
-    //      } else if (statusPembayaran === "Lunas") {
-    //        return <Tag color="green">Lunas</Tag>;
-    //      }
-    //    } else {
-    //      if (
-    //        statusPembayaran === "Belum Lunas" &&
-    //        purchasingHistory.length > 0
-    //      ) {
-    //        return <Tag color={tagRed}>Tempo</Tag>;
-    //      } else if (
-    //        statusPembayaran === "Lunas" &&
-    //        purchasingHistory.length > 0
-    //      ) {
-    //        return <Tag color={tagGreen}>Lunas</Tag>;
-    //      } else {
-    //        return <Tag color={tagOrange}>Menunggu</Tag>;
-    //      }
-    //    }
-
-    //    return <Tag color={tagOrange}>Menunggu</Tag>;
-    //  },
-    //},
     {
       name: "Grand Total",
       width: "180px",
-      //selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
+      selector: (row) => {
+        const LPBTotal =
+          row.attributes?.purchasing?.data?.attributes?.total_purchasing;
+
+        return formatter.format(LPBTotal);
+      },
     },
     {
       name: "Pembayaran",
       width: "180px",
-      //selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
-    },
-    //{
-    //  name: <div className="ml-6">Status</div>,
-    //  width: "150px",
-    //  selector: (row) => {
-    //    return (
-    //      <Select
-    //        defaultValue={row.attributes.status}
-    //        bordered={false}
-    //        disabled={row.attributes.status === "Diterima"}
-    //        onChange={(e) => onChangeStatus(e, row)}
-    //      >
-    //        <Option value="Dipesan">
-             
-    //          <Tag color="default">Dipesan</Tag>
-    //        </Option>
-    //        <Option value="Diterima">
-    //        <Tag color="success">Diterima</Tag>
-    //        </Option>
-    //      </Select>
-    //    );
-    //  },
-    //},
-    //{
-    //  name: "Status Pengiriman",
-    //  width: "150px",
-    //  selector: (row) => {
-    //    return (
-    //      <>
-    //        <Select
-    //          defaultValue={row.attributes.delivery_status}
-    //          bordered={false}
-    //          disabled={row.attributes.delivery_status === "Terkirim"}
-    //          onChange={(e) => onChangeStatusPengiriman(e, row)}
-    //        >
-    //          <Option value="Loading">
-    //            <Tag color="default">Loading</Tag>
-    //          </Option>
-    //          <Option value="Pending">
-    //            <Tag color="warning">Pending</Tag>
-    //          </Option>
-    //          <Option value="Antrian">
-    //            <Tag color="processing">Antrian</Tag>
-    //          </Option>
-    //          <Option value="Terkirim">
-    //            <Tag color="success">Terkirim</Tag>
-    //          </Option>
-    //        </Select>
-    //      </>
-    //    );
-    //  },
-    //},
-    {
-      name: "Tindakan",
-      width: "250px",
       selector: (row) => {
-          
-        if(row.attributes.status == "Selesai") setEditStatus(true);
-        else setEditStatus(false);
-
-        return(
-          <>
-            <Popover content={content(row)} placement="bottom" trigger="click">
-              <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
-                Tindakan
-              </button>
-            </Popover>
-          </>
-        );
+        let returTotal = row.attributes?.total_price;
+        return formatter.format(returTotal);
       },
     },
   ];
@@ -380,6 +320,8 @@ export default function ReactDataTable({
       data={data.data}
       pagination
       noDataComponent={"Belum ada data Retur Pembelian"}
+      highlightOnHover
+      onRowClicked={(row) => openModal(row.id)}
     />
   );
 }

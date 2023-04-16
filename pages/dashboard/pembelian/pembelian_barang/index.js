@@ -164,12 +164,7 @@ function Pembelian({ props }) {
     row.attributes.status = status;
     // const dataStatus = row;
 
-    const LPBLocationId = row.attributes.location?.data?.id;
-
-    console.log("data row status", LPBLocationId);
-
     if (status === "Diterima") {
-      console.log("store to inventory && update product price");
       // invetory handle
       await createInventory(row);
 
@@ -177,38 +172,23 @@ function Pembelian({ props }) {
     }
 
     const poData = row?.attributes?.purchase?.data;
-    const req = await changeStatusPO(poData, status, LPBLocationId);
-    if (req.status === 200) {
-      await changeStatusLPB(row, row.id);
+    const res = await changeStatusPO(poData?.id, status);
+    if (res.data) {
+      await changeStatusLPB(status, row.id);
     }
   };
 
-  const changeStatusPO = async (poData, status, LPBLocationId) => {
+  const changeStatusPO = async (poId, status) => {
     try {
-      // cleaning
-      delete poData.attributes?.document;
-      for (var key in poData.attributes) {
-        if (poData.attributes[key] === null || poData.attributes[key] === undefined) {
-          delete poData.attributes[key];
-        }
-      }
-
-      poData.attributes.status = status;
-      poData.attributes.location = {
-        id: poData.attributes?.location?.data?.id ?? LPBLocationId,
-      };
-      poData.attributes.supplier = {
-        id: poData.attributes?.supplier?.data?.id,
-      };
-      poData.attributes.purchase_details = poData.attributes?.purchase_details?.data;
-
-      const values = {
-        data: poData.attributes,
+      const updateStatus = {
+        data: {
+          status,
+        },
       };
 
-      const JSONdata = JSON.stringify(values);
+      const JSONdata = JSON.stringify(updateStatus);
       const cookies = nookies.get(null, "token");
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/" + poData.id;
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/" + poId;
       const options = {
         method: "PUT",
         headers: {
@@ -219,7 +199,7 @@ function Pembelian({ props }) {
       };
 
       const req = await fetch(endpoint, options);
-
+      const res = await req.json();
       if (req.status === 200) {
         openNotificationWithIcon(
           "success",
@@ -234,7 +214,7 @@ function Pembelian({ props }) {
         );
       }
 
-      return req;
+      return res;
     } catch (error) {
       console.log(error);
       openNotificationWithIcon(
@@ -247,41 +227,12 @@ function Pembelian({ props }) {
     }
   };
 
-  const changeStatusLPB = async (values, id) => {
+  const changeStatusLPB = async (status, id) => {
     try {
-      // // clean object
-      delete values.attributes.purchase;
-      for (var key in values.attributes) {
-        if (values.attributes[key] === null || values.attributes[key] === undefined) {
-          delete values.attributes[key];
-        }
-      }
-
-      if (
-        values.attributes?.document?.data === null ||
-        values.attributes?.document?.data === undefined
-      ) {
-        delete values.attributes?.document;
-      }
-
-      var purchasing_details = [];
-      var purchasing_payments = [];
-      values.attributes.purchasing_details.data.forEach((element) => {
-        purchasing_details.push({ id: element.id });
-      });
-      values.attributes.purchasing_payments.data.forEach((element) => {
-        purchasing_payments.push({ id: element.id });
-      });
-
-      values.attributes.supplier = { id: values.attributes.supplier.data.id };
-      values.attributes.location = {
-        id: values?.attributes?.location?.data?.id ?? LPBLocationId,
-      };
-      values.attributes.purchasing_details = purchasing_details;
-      values.attributes.purchasing_payments = purchasing_payments;
-
       const newValues = {
-        data: values.attributes,
+        data: {
+          status,
+        },
       };
 
       const JSONdata = JSON.stringify(newValues);
@@ -296,8 +247,6 @@ function Pembelian({ props }) {
         },
         body: JSONdata,
       };
-
-      console.log("jsondata put update", JSONdata);
 
       const req = await fetch(endpoint, options);
       const res = await req.json();
@@ -317,6 +266,7 @@ function Pembelian({ props }) {
           "Status LPB berhasil dirubah. Silahkan cek LPB"
         );
       } else {
+        console.log("error", res);
         openNotificationWithIcon(
           "error",
           "Status LPB gagal dirubah",
@@ -324,7 +274,7 @@ function Pembelian({ props }) {
         );
       }
     } catch (error) {
-      console.log(error);
+      console.log("error", error);
       openNotificationWithIcon(
         "error",
         "Status LPB gagal dirubah",

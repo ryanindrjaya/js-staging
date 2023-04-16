@@ -14,12 +14,13 @@ const cookies = nookies.get(null, "token");
 async function createInventory(row) {
   const data = [];
   const purchasingDetails = row.attributes.purchasing_details.data;
+  const noLPB = row.attributes.no_purchasing;
 
   purchasingDetails.forEach((element) => {
     console.log("element purchasing detail", element);
 
     const unitOrder = element.attributes.unit_order;
-    const totalOrder = parseInt(element.attributes.total_order);
+    const totalOrder = parseFloat(element.attributes.total_order);
     const product = element.attributes.product.data;
     const location = element.attributes.location.data;
     const expDate = element.attributes.expired_date;
@@ -42,6 +43,7 @@ async function createInventory(row) {
   if (data.length > 0) {
     const body = {
       data,
+      no_referensi: noLPB,
       type: "Pembelian",
     };
 
@@ -50,14 +52,17 @@ async function createInventory(row) {
 }
 
 async function addToGudang(body) {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/inventories/add`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${cookies.token}`,
-    },
-    body: JSON.stringify(body),
-  });
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_URL}/inventories/add`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${cookies.token}`,
+      },
+      body: JSON.stringify(body),
+    }
+  );
 
   const data = await response.json();
 

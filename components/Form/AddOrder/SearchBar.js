@@ -42,6 +42,10 @@ export default function SearchBar({
     if (res) {
       dispatch({ type: "ADD_PRODUCT", product: res.data });
       form.setFieldsValue({ products: undefined });
+
+      if (getProductAtLocation) {
+        getProductAtLocation();
+      }
     }
   };
 
@@ -61,7 +65,10 @@ export default function SearchBar({
 
     res.locations.forEach((location) => {
       queryLocations =
-        queryLocations + "filters[locations][name][$contains]=" + location.name + "&";
+        queryLocations +
+        "filters[locations][name][$contains]=" +
+        location.name +
+        "&";
     });
     // console.log("querylocation " + queryLocations);
     return queryLocations;
@@ -75,7 +82,9 @@ export default function SearchBar({
     }
   };
 
-  const options = data.map((d) => <Select.Option key={d.value}>{d.label}</Select.Option>);
+  const options = data.map((d) => (
+    <Select.Option key={d.value}>{d.label}</Select.Option>
+  ));
 
   const fetchProduct = async (query, callback) => {
     if (!query) {
@@ -98,7 +107,6 @@ export default function SearchBar({
             Authorization: "Bearer " + cookies.token,
           },
         };
-        console.log(endpoint);
 
         const req = await fetch(endpoint, options);
         const res = await req.json();
@@ -112,7 +120,9 @@ export default function SearchBar({
           // product based on user location
           const filteredProductByLocation = res.data.filter((item) =>
             item.attributes.locations.data.some((location) =>
-              user.locations.some((userLocation) => userLocation.id === location.id)
+              user.locations.some(
+                (userLocation) => userLocation.id === location.id
+              )
             )
           );
 

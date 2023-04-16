@@ -37,13 +37,16 @@ const createReturDetail = (
     var unit = products?.productInfo[id]?.unit ?? element.attributes.unit_1;
     //var unitPrice = getUnitPrice(element, unit);
     var unitPrice = value?.harga_satuan[id];
-    if(value?.harga_satuan[id] == undefined){
-        unitPrice = element.attributes.buy_price_1;
+    if (value?.harga_satuan[id] == undefined) {
+      unitPrice = element.attributes.buy_price_1;
     }
     //var disc = products?.productInfo[id]?.disc ?? 0;
-    var d1 = products?.productInfo[id]?.d1 ?? element.attributes[`unit_1_dp1`] ?? 0;
-    var d2 = products?.productInfo[id]?.d2 ?? element.attributes[`unit_1_dp2`] ?? 0;
-    var d3 = products?.productInfo[id]?.d3 ?? element.attributes[`unit_1_dp3`] ?? 0;
+    var d1 =
+      products?.productInfo[id]?.d1 ?? element.attributes[`unit_1_dp1`] ?? 0;
+    var d2 =
+      products?.productInfo[id]?.d2 ?? element.attributes[`unit_1_dp2`] ?? 0;
+    var d3 =
+      products?.productInfo[id]?.d3 ?? element.attributes[`unit_1_dp3`] ?? 0;
 
     var unitPriceAfterDisc = productTotalPrice[id];
     var subTotal = productSubTotal?.[id];
@@ -78,22 +81,22 @@ const createReturDetail = (
 };
 
 const POSTReturDetail = async (
-    qty,
-    disc,
-    unit,
-    unitPrice,
-    unitPriceAfterDisc,
-    d1,
-    d2,
-    d3,
-    subTotal,
-    id,
-    setListId,
-    products,
-    batch,
-    expired_date,
-    location,
-    url
+  qty,
+  disc,
+  unit,
+  unitPrice,
+  unitPriceAfterDisc,
+  d1,
+  d2,
+  d3,
+  subTotal,
+  id,
+  setListId,
+  products,
+  batch,
+  expired_date,
+  location,
+  url
 ) => {
   var data = {
     data: {
@@ -105,7 +108,7 @@ const POSTReturDetail = async (
       disc: disc,
       //harga_satuan: parseInt(unitPrice),
       harga_satuan: unitPrice,
-      sub_total: parseInt(subTotal),
+      sub_total: parseFloat(subTotal),
       products: { id: id },
       batch: batch,
       expired_date: expired_date,
@@ -127,7 +130,7 @@ const POSTReturDetail = async (
   const req = await fetch(endpoint, options);
   const res = await req.json();
 
-  if (req.status === 200) { 
+  if (req.status === 200) {
     tempListId.push(res.data?.id);
     if (tempListId.length === products.productList.length) {
       setListId(tempListId);

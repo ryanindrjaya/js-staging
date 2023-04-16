@@ -29,7 +29,7 @@ function SearchPO({ supplier, handleSelect, disabled }) {
       try {
         const endpoint =
           process.env.NEXT_PUBLIC_URL +
-          `/purchases/?populate=deep&filters[status][$eq]=Sebagian Diterima&filters[status][$eq]=Diproses&filters[supplier][name][$eq]=${supplierName}`;
+          `/purchases/?populate=deep&filters[status][$eq]=Sebagian Diterima&filters[status][$eq]=Diproses&filters[supplier][name][$eq]=${supplierName}&filters[no_po][$contains]=${query}`;
         const options = {
           method: "GET",
           headers: {
@@ -40,6 +40,8 @@ function SearchPO({ supplier, handleSelect, disabled }) {
 
         const req = await fetch(endpoint, options);
         const res = await req.json();
+
+        console.log("result po", query, res);
 
         if (req.status == 200) {
           const po = res?.data?.map((po) => ({

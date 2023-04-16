@@ -18,6 +18,7 @@ const CreateSale = async (
   page,
   locations
 ) => {
+  tempProductListId = [];
   // CLEANING DATA
   listId.forEach((element) => {
     tempProductListId.push({ id: element });
@@ -25,12 +26,13 @@ const CreateSale = async (
 
   values.total = grandTotal;
 
-  values.status = "Diproses"
+  values.status = "Belum Dibayar";
   values.purchasing_payments = null;
 
-  if(page == "sales sale"){
+  if (page == "sales sale") {
     locations.forEach((element) => {
-      if(element.attributes.name == values.location) values.location = element.id;
+      if (element.attributes.name == values.location)
+        values.location = element.id;
     });
   }
 
@@ -38,11 +40,20 @@ const CreateSale = async (
     data: values,
   };
 
+  console.log("test data create sales", data);
+
   const req = await createData(data, url);
   const res = await req.json();
 
   if (req.status === 200) {
-    await putRelationSaleDetail(res.data.id, res.data.attributes, form, router, url, page);
+    await putRelationSaleDetail(
+      res.data.id,
+      res.data.attributes,
+      form,
+      router,
+      url,
+      page
+    );
   } else {
     openNotificationWithIcon("error");
   }
@@ -102,16 +113,16 @@ const putRelationSaleDetail = async (id, value, form, router, url, page) => {
     body: JSONdata,
   };
 
-
   const req = await fetch(endpoint, options);
   const res = await req.json();
 
   if (req.status === 200) {
     form.resetFields();
-    if(page == "store sale") router.replace("/dashboard/penjualan/toko");
-    if(page == "sales sale") router.replace("/dashboard/penjualan/sales");
-    if(page == "non panel sale") router.replace("/dashboard/penjualan/non_panel");
-    if(page == "panel sale") router.replace("/dashboard/penjualan/panel");
+    if (page == "store sale") router.replace("/dashboard/penjualan/toko");
+    if (page == "sales sale") router.replace("/dashboard/penjualan/sales");
+    if (page == "non panel sale")
+      router.replace("/dashboard/penjualan/non_panel");
+    if (page == "panel sale") router.replace("/dashboard/penjualan/panel");
     openNotificationWithIcon("success");
   } else {
     openNotificationWithIcon("error");

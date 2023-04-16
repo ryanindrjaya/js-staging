@@ -9,7 +9,7 @@ import nookies from "nookies";
 import { toast } from "react-toastify";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import Supplier from "../../../../components/Form/AddOrder/SupplierForm";
-import LPBTable from "@iso/components/ReactDataTable/Purchases/LPBTable";
+import LPBTable from "../../../../components/ReactDataTable/Purchases/LPBTable";
 import { useSelector, useDispatch } from "react-redux";
 import LoadingAnimations from "@iso/components/Animations/Loading";
 import moment from "moment";
@@ -24,12 +24,14 @@ import {
   notification,
   Row,
 } from "antd";
-import createDetailPurchasing from "../utility/createDetail";
+import createDetailPurchasing from "../utility/createPurchasingDetail";
 import createPurchasing from "../utility/createPurchasing";
 import updateOrder from "../utility/updateOrder";
 import updateProduct from "../utility/updateProduct";
 import calculatePrice from "../utility/calculatePrice";
 import SearchPO from "../../../../components/Form/AddOrder/SearchPO";
+import createInventory from "../utility/createInventory";
+import updateProductFromTable from "../utility/updateProductFromTable";
 
 Tambah.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -270,6 +272,7 @@ function Tambah({ props }) {
   };
 
   const createDetailOrder = async () => {
+    console.log("datavalues", dataValues);
     createDetailPurchasing(
       dataValues,
       products,
@@ -282,6 +285,7 @@ function Tambah({ props }) {
   };
 
   const createOrder = async (values, detailListId) => {
+    console.log("detailListId", detailListId);
     await createPurchasing(
       products,
       grandTotal,
@@ -295,11 +299,120 @@ function Tambah({ props }) {
     );
   };
 
-  const updateOrderData = async () => {
-    if (dataValues.status == "Diterima") {
-      await updateOrder(preorderData, "Diterima");
-      await updateProductHarga(products);
-    } else await updateOrder(preorderData, "Diproses");
+  const updateOrderData = async (id) => {
+    // fetching data to update
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=deep`;
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+    const row = res.data;
+
+    const trxStatus = row.attributes?.status;
+    const LPBLocationId = row.attributes.location?.data?.id;
+
+    if (trxStatus == "Diterima") {
+      // invetory handle
+      createInventory(row);
+      await updateProductFromTable(row);
+    }
+
+    const poData = row.attributes?.purchase?.data;
+
+    const resPO = await changeStatusPO(poData?.id, trxStatus);
+
+    if (resPO.data) {
+      await changeStatusLPB(id, trxStatus);
+    }
+  };
+
+  const changeStatusPO = async (id, status) => {
+    try {
+      const updateStatus = {
+        data: {
+          status,
+        },
+      };
+
+      const JSONdata = JSON.stringify(updateStatus);
+      const cookies = nookies.get(null, "token");
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/" + id;
+      const options = {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+        body: JSONdata,
+      };
+
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
+      console.log("po update from lpb ", res);
+
+      return res;
+    } catch (error) {
+      console.log(error);
+      console.log("po update from lpb ", res);
+
+      return null;
+    }
+  };
+
+  const changeStatusLPB = async (id, status) => {
+    try {
+      const newValues = {
+        data: {
+          status,
+        },
+      };
+
+      const JSONdata = JSON.stringify(newValues);
+      const cookies = nookies.get(null, "token");
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings/" + id;
+
+      const options = {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+        body: JSONdata,
+      };
+
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
+
+      if (req.status === 200) {
+        const response = await fetchData(cookies);
+
+        openNotificationWithIcon(
+          "success",
+          "Status LPB berhasil dirubah",
+          "Status LPB berhasil dirubah. Silahkan cek LPB"
+        );
+      } else {
+        console.log("error", res);
+        openNotificationWithIcon(
+          "error",
+          "Status LPB gagal dirubah ",
+          "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah"
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      openNotificationWithIcon(
+        "error",
+        "Status LPB gagal dirubah ",
+        "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah"
+      );
+    }
   };
 
   const updateProductHarga = async (values) => {
@@ -307,6 +420,13 @@ function Tambah({ props }) {
     values.productList.forEach((element) => {
       updateProduct(element, values.productInfo[index]);
       index++;
+    });
+  };
+
+  const openNotificationWithIcon = (type, title, message) => {
+    notification[type]({
+      message: title,
+      description: message,
     });
   };
 
@@ -387,7 +507,6 @@ function Tambah({ props }) {
 
     form.setFieldsValue({
       supplier_id: `${supplier.attributes.id_supplier} - ${supplier.attributes.name}`,
-      order_date: moment(momentString),
       location: dataPO.location.data.attributes.name,
       tempo_days: dataPO.tempo_days,
       tempo_time: dataPO.tempo_time,
@@ -571,9 +690,9 @@ function Tambah({ props }) {
   }, [additionalFee]);
 
   useEffect(() => {
-    if (listId.length > 0) {
-      // createOrder(dataValues);
-    }
+    // if (listId.length > 0) {
+    //   createOrder(dataValues, listId);
+    // }
   }, [listId]);
 
   useEffect(() => {
@@ -1066,3 +1185,5 @@ function Tambah({ props }) {
 }
 
 export default Tambah;
+
+

@@ -14,7 +14,8 @@ export default function AlertDialog({
   message,
   id,
   rowIndex,
-  label = "Hapus",
+  hidden = false,
+  buttonText = "Hapus",
 }) {
   const [open, setOpen] = React.useState(false);
 
@@ -41,13 +42,13 @@ export default function AlertDialog({
   };
 
   return (
-    <div>
+    <div hidden={hidden}>
       <button
         type="button"
         className="hover:bg-red-400 text-red-600 hover:text-white transition-colors  text-xs font-normal py-2 px-2 rounded-md"
         onClick={handleClickOpen}
       >
-        <CloseOutlined className="mr-2 mt-0.5 float float-left" /> {label}
+        <CloseOutlined className="mr-2 mt-0.5 float float-left" /> {buttonText}
       </button>
       <Dialog
         open={open}
@@ -60,7 +61,9 @@ export default function AlertDialog({
           {title}
         </DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">{message}</DialogContentText>
+          <DialogContentText id="alert-dialog-description">
+            {message}
+          </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancel}>Tidak</Button>
