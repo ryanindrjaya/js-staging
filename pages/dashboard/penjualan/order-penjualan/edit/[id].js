@@ -1,6 +1,6 @@
 import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
-import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLayout";
+import DashboardLayout from "../../../../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
@@ -8,15 +8,25 @@ import { useRouter } from "next/router";
 import { Row, Form, Input, InputNumber, Select, Button, Spin, notification } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
-import AddSellSalesTable from "../../../../components/ReactDataTable/Selling/AddSellSalesTable";
-import createOrderSaleFunc from "../utility/createOrderSale";
-import createDetailOrderSaleFunc from "../utility/createDetailOrderSale";
-import calculatePrice from "../utility/calculatePrice";
+import AddSellSalesTable from "../../../../../components/ReactDataTable/Selling/AddSellSalesTable";
+import createOrderSaleFunc from "../../utility/createOrderSale";
+import createDetailOrderSaleFunc from "../../utility/createDetailOrderSale";
+import calculatePrice from "../../utility/calculatePrice";
+import LoadingAnimations from "@iso/components/Animations/Loading";
 import Customer from "@iso/components/Form/AddSale/CustomerForm";
 import nookies from "nookies";
 
-PesananSales.getInitialProps = async (context) => {
+EditPesananSales.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
+  const { id } = context.query;
+
+  const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/sales-sells/${id}?populate=deep`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  }).then((res) => res.json());
 
   const req = await fetchData(cookies);
   const user = await req.json();
@@ -40,6 +50,7 @@ PesananSales.getInitialProps = async (context) => {
       inven,
       sale,
       customer,
+      data: response?.data || {},
     },
   };
 };
@@ -114,7 +125,7 @@ const fetchCustomer = async (cookies) => {
   return req;
 };
 
-function PesananSales({ props }) {
+function EditPesananSales({ props }) {
   const products = useSelector((state) => state.Order);
   const dispatch = useDispatch();
 
@@ -123,13 +134,20 @@ function PesananSales({ props }) {
   const user = props.user;
   const inven = props.inven.data;
   const sale = props.sale;
-  const customerData = props.customer.data[0];
+  const initialValues = {
+    ...props.data?.attributes,
+    location: props.data?.attributes?.location?.data.id,
+  };
+  const masterId = props.data?.id;
+  const customerData = initialValues?.customer.data;
+
+  console.log("initialvalues", initialValues);
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [productList, setProductList] = useState([]);
   //const [additionalFee, setAdditionalFee] = useState();
-  const [isFetchinData, setIsFetchingData] = useState(false);
+  const [isFetchinData, setIsFetchingData] = useState(true);
 
   const [dataValues, setDataValues] = useState();
   //const [selectedCategory, setSelectedCategory] = useState("BEBAS");
@@ -138,10 +156,8 @@ function PesananSales({ props }) {
   const [listId, setListId] = useState([]);
   const [productTotalPrice, setProductTotalPrice] = useState({});
   const [productSubTotal, setProductSubTotal] = useState({});
-  useState({});
   //const [discPrice, setDiscPrice] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
-  useState({});
   const [grandTotal, setGrandTotal] = useState(0);
   const [selectedLocation, setSelectedLocation] = useState();
 
@@ -167,7 +183,7 @@ function PesananSales({ props }) {
   const [info, setInfo] = useState();
 
   // customer
-  const [customer, setCustomer] = useState();
+  const [customer, setCustomer] = useState(customerData);
 
   // NO Sales Sale
   var noSale = String(props.sale?.meta?.pagination.total + 1).padStart(3, "0");
@@ -179,34 +195,117 @@ function PesananSales({ props }) {
     maximumFractionDigits: 2,
   });
 
-  const onFinish = (values) => {
+  const updateDetailData = async (data, id) => {
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/sales-sell-details/${id}`;
+    const options = {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+      body: JSON.stringify({ data }),
+    };
+
+    const res = await fetch(endpoint, options).then((res) => res.json());
+    return res;
+  };
+
+  const createDetailData = async (data) => {
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/sales-sell-details`;
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+      body: JSON.stringify({ data }),
+    };
+
+    const res = await fetch(endpoint, options).then((res) => res.json());
+    return res;
+  };
+
+  const updateMasterData = async (data, id) => {
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/sales-sells/${id}`;
+    const options = {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+      body: JSON.stringify({ data }),
+    };
+
+    const res = await fetch(endpoint, options).then((res) => res.json());
+    return res;
+  };
+
+  const onFinish = async (values) => {
     setLoading(true);
-    setInfo("sukses");
-    sale.data.forEach((element) => {
-      if (values.no_sales_sell == element.attributes.no_sales_sell) {
-        notification["error"]({
-          message: "Gagal menambahkan data",
-          description: "Data gagal ditambahkan, karena no penjualan sama",
-        });
-        setInfo("gagal");
-      }
-    });
-    setDataValues(values);
-  };
 
-  const createDetailSale = async () => {
-    await createDetailOrderSaleFunc(dataValues, products, setListId, "/sales-sell-details", true);
-  };
-
-  const createSale = async (values) => {
-    values.sale_date = today;
-    values.added_by = user.name;
-    values.customer = customer;
-    values.total_item = products?.productList?.length || 0;
+    values.customer = customer?.id;
     values.customer_name = customer?.attributes?.name;
-    values.sales = user.name;
-    values.status = values?.status ? values.status : "Diproses";
-    await createOrderSaleFunc(values, listId, form, router, setLoading);
+    values.total_item = products.productList?.length;
+
+    // master PO
+    const sanitizedValues = cleanData(values);
+
+    const editedProduct = products.productInfo;
+    const details = products.productList?.map(({ attributes, id }, idx) => {
+      return {
+        qty: editedProduct?.[idx]?.qty || 1,
+        unit: editedProduct?.[idx]?.unit || attributes?.unit_1,
+        unit_price: editedProduct?.[idx]?.priceUnit || attributes?.buy_sold_1,
+        disc1: editedProduct?.[idx]?.d1 || attributes?.unit_1_dp1,
+        disc2: editedProduct?.[idx]?.d2 || attributes?.unit_1_dp2,
+        product: id,
+        relation_id: editedProduct?.[idx]?.relation_id,
+      };
+    });
+
+    let detailsId = [];
+
+    for (let item in details) {
+      const detail = details[item];
+      const id = detail.relation_id;
+      const postDetail = cleanData(detail);
+      console.log("post detail", postDetail);
+
+      if (id) {
+        const res = await updateDetailData(postDetail, id);
+        console.log("response update detail ==>", res);
+        detailsId.push(res?.data?.id);
+      } else {
+        const res = await createDetailData(postDetail);
+        console.log("response create detail ==>", res);
+        detailsId.push(res?.data?.id);
+      }
+    }
+
+    // assign detail id to master PO and assign new totalPrice
+    sanitizedValues.sales_sell_details = detailsId;
+
+    console.log("sanitizedValues", sanitizedValues);
+
+    // update master PO
+    const res = await updateMasterData(sanitizedValues, masterId);
+    console.log("response update master ==>", res);
+
+    if (res?.data?.id) {
+      notification.success({
+        message: "Berhasil mengubah data",
+        description:
+          "Data Order Penjualan berhasil diubah. Silahkan cek pada halaman Order Penjualan",
+      });
+      router.replace("/dashboard/penjualan/order-penjualan");
+    } else {
+      notification.error({
+        message: "Gagal mengubah data",
+        description: "Data Order Penjualan gagal diubah. Silahkan cek data anda dan coba lagi",
+      });
+    }
+
+    setLoading(false);
   };
 
   const onChangeProduct = async () => {
@@ -227,14 +326,17 @@ function PesananSales({ props }) {
     }
   };
 
-  const calculatePriceAfterDisc = (row) => {
-    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
-    return formatter.format(total);
-  };
+  const cleanData = (data) => {
+    const unusedKeys = ["disc_rp", "harga_satuan", "jumlah_option", "jumlah_qty"];
+    for (let key in data) {
+      if (data[key] === null || data[key] === undefined) {
+        delete data[key];
+      } else if (unusedKeys.includes(key)) {
+        delete data[key];
+      }
+    }
 
-  const clearData = () => {
-    dispatch({ type: "CLEAR_DATA" });
-    setTotalPrice(0);
+    return data;
   };
 
   useEffect(() => {
@@ -279,23 +381,70 @@ function PesananSales({ props }) {
     }
   }, [products]);
 
-  useEffect(() => {
-    if (listId.length > 0) {
-      createSale(dataValues);
+  function getUnitIndex(data, selected) {
+    let unit = 0;
+
+    for (let key in data) {
+      if (key.includes("unit_") && data[key] === selected) {
+        unit = parseInt(key.replace("unit_", ""));
+      }
     }
-  }, [listId]);
+
+    return unit;
+  }
 
   useEffect(() => {
-    if (dataValues && info == "sukses") createDetailSale();
-  }, [dataValues]);
+    dispatch({ type: "CLEAR_DATA" });
 
-  useEffect(() => {
-    // used to reset redux from value before
-    clearData();
-    form.setFieldsValue({
-      customer: customerData?.attributes.name,
-    });
-    setCustomer(customerData);
+    if (initialValues) {
+      form.setFieldsValue({
+        customer: customerData?.attributes.name,
+        location: initialValues?.location,
+        no_sales_sell: initialValues?.no_sales_sell,
+        tempo_days: initialValues?.tempo_days,
+        tempo_time: initialValues?.tempo_time,
+        sale_date: initialValues?.sale_date,
+        sale_note: initialValues?.sale_note,
+      });
+      setCustomer(customerData);
+      if (initialValues.sales_sell_details?.data.length > 0) {
+        const details = initialValues.sales_sell_details.data;
+
+        console.log("details", details);
+
+        details.forEach((element, index) => {
+          const product = element.attributes?.product?.data;
+          const unit = getUnitIndex(product?.attributes, element?.attributes?.unit);
+          dispatch({
+            type: "SET_INITIAL_PRODUCT",
+            product,
+            index,
+            qty: parseInt(element.attributes?.qty || 0),
+            unit: element.attributes?.unit,
+            priceUnit: element.attributes?.unit_price || 0,
+            d1: element.attributes?.disc1,
+            d2: element.attributes?.disc2,
+            unitIndex: unit,
+            relation_id: element?.id,
+          });
+
+          if (index === details.length - 1) {
+            setIsFetchingData(false);
+          }
+        });
+      }
+    } else {
+      notification["error"]({
+        message: "Gagal mengambil data",
+        description: "Data tidak ditemukan. Silahkan cek kembali",
+      });
+      router.replace("/dashboard/pembelian/order-penjualan");
+    }
+
+    // reset redux state when component unmount / ondestroy
+    return () => {
+      dispatch({ type: "CLEAR_DATA" });
+    };
   }, []);
 
   const validateError = () => {
@@ -315,11 +464,11 @@ function PesananSales({ props }) {
   return (
     <>
       <Head>
-        <title>Tambah Order Penjualan</title>
+        <title>Edit Order Penjualan</title>
       </Head>
       <DashboardLayout>
         <LayoutWrapper style={{}}>
-          <TitlePage titleText={"Tambah Order Penjualan"} />
+          <TitlePage titleText={"Edit Order Penjualan"} />
           <LayoutContent>
             <div className="w-full flex justify-between mx-2 mt-1">
               <div className="w-full justify-start md:w-1/3">
@@ -345,7 +494,6 @@ function PesananSales({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="no_sales_sell"
-                    initialValue={categorySale}
                     rules={[
                       {
                         required: true,
@@ -357,10 +505,10 @@ function PesananSales({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Customer onChangeCustomer={setCustomer} />
+                  <Customer customer={customer} onChangeCustomer={setCustomer} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item name="tempo_days" initialValue={"0"} noStyle>
+                  <Form.Item name="tempo_days" noStyle>
                     <Input
                       size="large"
                       style={{
@@ -368,7 +516,7 @@ function PesananSales({ props }) {
                       }}
                     />
                   </Form.Item>
-                  <Form.Item name="tempo_time" initialValue={"Hari"} noStyle>
+                  <Form.Item name="tempo_time" noStyle>
                     <Select
                       size="large"
                       style={{
@@ -478,7 +626,7 @@ function PesananSales({ props }) {
                     </div>
                   ) : (
                     <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
-                      <p className="px-4 py-2 m-0 text-white">SIMPAN UNTUK PEMESANAN PENJUALAN</p>
+                      <p className="px-4 py-2 m-0 text-white">SIMPAN PERUBAHAN</p>
                     </button>
                   )}
                 </Form.Item>
@@ -491,4 +639,4 @@ function PesananSales({ props }) {
   );
 }
 
-export default PesananSales;
+export default EditPesananSales;

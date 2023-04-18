@@ -5,8 +5,18 @@ import { useSelector } from "react-redux";
 
 import nookies from "nookies";
 
-export default function Customer({ onChangeCustomer }) {
-  const [data, setData] = useState([]);
+export default function Customer({ onChangeCustomer, customer, disabled, fetching }) {
+  console.log("data customer", customer);
+  const [data, setData] = useState(
+    customer
+      ? [
+          {
+            label: customer.attributes.name,
+            value: customer.id,
+          },
+        ]
+      : []
+  );
   const cookies = nookies.get(null, "token");
   const order = useSelector((state) => state.Order);
 
@@ -72,29 +82,58 @@ export default function Customer({ onChangeCustomer }) {
   return (
     <>
       <div className="w-full md:w-full mb-2 md:mb-0">
-        <Form.Item
-          name="customer"
-          style={{ width: "100%" }}
-          rules={[
-            {
-              required: true,
-              message: "Customer tidak boleh kosong!",
-            },
-          ]}
-        >
-          <Select
-            size="large"
-            showSearch
-            placeholder="Pilih Customer"
-            onSearch={handleSearch}
-            onChange={handleChange}
-            filterOption={false}
-            defaultActiveFirstOption={false}
-            suffixIcon={<CaretDownOutlined />}
+        {customer && !fetching ? (
+          <Form.Item
+            initialValue={customer.id}
+            name="customer"
+            style={{ width: "100%" }}
+            rules={[
+              {
+                required: true,
+                message: "Customer tidak boleh kosong!",
+              },
+            ]}
           >
-            {options}
-          </Select>
-        </Form.Item>
+            <Select
+              disabled={disabled}
+              size="large"
+              showSearch
+              placeholder="Pilih Customer"
+              onSearch={handleSearch}
+              onChange={handleChange}
+              filterOption={false}
+              defaultActiveFirstOption={false}
+              suffixIcon={<CaretDownOutlined />}
+            >
+              {options}
+            </Select>
+          </Form.Item>
+        ) : (
+          <Form.Item
+            name="customer"
+            style={{ width: "100%" }}
+            rules={[
+              {
+                required: true,
+                message: "Customer tidak boleh kosong!",
+              },
+            ]}
+          >
+            <Select
+              disabled={disabled}
+              size="large"
+              showSearch
+              placeholder="Pilih Customer"
+              onSearch={handleSearch}
+              onChange={handleChange}
+              filterOption={false}
+              defaultActiveFirstOption={false}
+              suffixIcon={<CaretDownOutlined />}
+            >
+              {options}
+            </Select>
+          </Form.Item>
+        )}
       </div>
     </>
   );

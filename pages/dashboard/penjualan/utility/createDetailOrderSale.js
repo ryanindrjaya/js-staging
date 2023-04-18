@@ -8,7 +8,7 @@ const cookies = nookies.get(null, "token");
 var id = 0;
 
 const createDetailOrderSale = (values, products, setListId, url) => {
-  products.productList.forEach((element) => {
+  products.productList.forEach((element, idx) => {
     console.log("element", element, products);
     //default value
     var qty = 1;
@@ -17,26 +17,14 @@ const createDetailOrderSale = (values, products, setListId, url) => {
     var elementId = element.id;
     tempListId = [];
 
-    qty = products.productInfo[id]?.qty ?? 1;
-    unit = products.productInfo[id]?.unit ?? element.attributes.unit_1;
-    unitPrice =
-      products.productInfo?.[id]?.unit_price ?? element.attributes.sold_price_1;
+    qty = products.productInfo[idx]?.qty ?? 1;
+    unit = products.productInfo[idx]?.unit ?? element.attributes.unit_1;
+    unitPrice = products.productInfo?.[idx]?.unit_price ?? element.attributes.sold_price_1;
 
     var d1 = products.productInfo[idx]?.d1;
     var d2 = products.productInfo[idx]?.d2;
 
-    POSTSaleDetail(
-      qty,
-      unit,
-      unitPrice,
-      idx,
-      setListId,
-      products,
-      elementId,
-      d1,
-      d2,
-      url
-    );
+    POSTSaleDetail(qty, unit, unitPrice, idx, setListId, products, elementId, d1, d2, url);
   });
 };
 

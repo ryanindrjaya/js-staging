@@ -27,26 +27,31 @@ export default function ReactDataTable({
   };
 
   const lihat = (row) => {
-    openNotificationWithIcon(
-      "info",
-      "Work In Progress",
-      "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
+    const id = row.id;
+
+    router.replace(
+      {
+        pathname: router.pathname,
+        query: { id: id },
+      },
+      undefined,
+      { shallow: true }
     );
-    //router.push("order_pembelian/print/" + row.id);
   };
 
   const print = (row) => {
-    openNotificationWithIcon(
-      "info",
-      "Work In Progress",
-      "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
-    );
-    //router.push("order_pembelian/print/" + row.id);
+    router.push("/dashboard/penjualan/order-penjualan/print/" + row.id, undefined, {
+      shallow: true,
+    });
   };
 
   const onConfirm = (id) => {
     console.log(id);
     onDelete(id);
+  };
+
+  const edit = (row) => {
+    router.push("order-penjualan/edit/" + row.id);
   };
 
   const onCancel = () => {
@@ -99,6 +104,7 @@ export default function ReactDataTable({
         title="Batalkan pesanan?"
         id={row.id}
         label="Batal"
+        buttonText="Batalkan"
       />
     </div>
   );
@@ -115,6 +121,19 @@ export default function ReactDataTable({
 
   const columns = [
     {
+      name: "Tindakan",
+      width: "100px",
+      selector: (row) => (
+        <>
+          <Popover content={content(row)} placement="bottom" trigger="click">
+            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
+              Tindakan
+            </button>
+          </Popover>
+        </>
+      ),
+    },
+    {
       name: "Tanggal",
       width: "120px",
       selector: (row) => formatMyDate(row.attributes?.sale_date),
@@ -122,12 +141,45 @@ export default function ReactDataTable({
     {
       name: "Customer",
       width: "100px",
+      wrap: true,
       selector: (row) => row.attributes?.customer?.data?.attributes?.name ?? "-",
     },
     {
-      name: "NO Order Penjualan",
+      name: "No Order Penjualan",
       width: "200px",
       selector: (row) => row.attributes?.no_sales_sell ?? "-",
+    },
+    {
+      name: "Status",
+      width: "200px",
+      selector: (row) => {
+        return (
+          <>
+            <Select
+              defaultValue={row.attributes.status}
+              disabled={row.attributes.status === "Diterima"}
+              bordered={false}
+              onChange={(e) => onChangeStatus(e, row.id)}
+              style={{
+                width: "150px",
+              }}
+            >
+              <Option value="Diproses" key="Diproses" className="text-black">
+                <Tag color="default">Diproses</Tag>
+              </Option>
+              <Option value="Dibatalkan" key="Dibatalkan" className="text-black">
+                <Tag color="error">Dibatalkan</Tag>
+              </Option>
+              <Option value="Diretur" key="Diretur" className="text-black">
+                <Tag color="blue">Diretur</Tag>
+              </Option>
+              <Option value="Diterima" key="Diterima" className="text-black">
+                <Tag color="success">Diterima</Tag>
+              </Option>
+            </Select>
+          </>
+        );
+      },
     },
     {
       name: "Sales",
@@ -150,19 +202,6 @@ export default function ReactDataTable({
       width: "180px",
       selector: (row) => row.attributes?.added_by ?? "-",
     },
-    {
-      name: "Tindakan",
-      width: "250px",
-      selector: (row) => (
-        <>
-          <Popover content={content(row)} placement="bottom" trigger="click">
-            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
-              Tindakan
-            </button>
-          </Popover>
-        </>
-      ),
-    },
   ];
 
   return (
@@ -174,7 +213,10 @@ export default function ReactDataTable({
       columns={columns}
       data={data.data}
       pagination
-      noDataComponent={"Belum ada data Penjualan Sales"}
+      noDataComponent={"--Data Kosong--"}
+      pointerOnHover
+      highlightOnHover
+      onRowClicked={(row) => lihat(row)}
     />
   );
 }

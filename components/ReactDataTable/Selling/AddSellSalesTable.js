@@ -143,6 +143,7 @@ export default function ReactDataTable({
     },
     {
       name: "Jumlah Stock",
+      wrap: true,
       selector: (row) => {
         console.log("row stock", row.stock);
         let result = [];
