@@ -21,7 +21,8 @@ export default function ReactDataTable({
   onChangeStatusPengiriman,
   onChangeStatus,
   returPage,
-  page
+  page,
+  updateStock
 }) {
   console.log("test table data ", data);
 
@@ -47,6 +48,16 @@ export default function ReactDataTable({
       "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
     );
     //router.push("order_pembelian/print/" + row.id);
+  };
+
+  const handlePiutang = (row) => {
+    if (row.attributes.status_data == "Draft") updateStock(row.id, row?.attributes?.location?.data?.id);
+    else {
+      notification.error({
+        message: "Error",
+        description: "Data sudah fix, tidak dapat dilakukan perubahan.",
+      });
+    }
   };
 
   const print = (row) => {
@@ -137,7 +148,7 @@ export default function ReactDataTable({
 
           <div>
             <button
-                onClick={() => lihat(row)}
+                onClick={() => handlePiutang(row)}
                 className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
             >
                 <CalculatorOutlined className="mr-2 mt-0.5 float float-left" />

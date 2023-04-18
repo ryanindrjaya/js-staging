@@ -8,6 +8,8 @@ import { Input, notification, Select, DatePicker } from "antd";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
 import SellingTable from "../../../../components/ReactDataTable/Selling/SellingTable";
 import Customer from "@iso/components/Form/AddCost/CustomerForm";
+import createInventory from "../utility/createInventory";
+import LoadingAnimations from "@iso/components/Animations/Loading";
 import nookies from "nookies";
 
 PanelSale.getInitialProps = async (context) => {
@@ -100,9 +102,79 @@ function PanelSale({ props }) {
   const [sell, setSell] = useState(data);
   const [returPage, setReturPage] = useState("panel");
   const [searchParameters, setSearchParameters] = useState({});
+  const [isFetchinData, setIsFetchingData] = useState(false);
 
   // Range Picker
   const { RangePicker } = DatePicker;
+
+  const cookies = nookies.get(null, "token");
+
+  const updateStock = async (id, locations) => {
+    // fetching data to update
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/panel-sales/${id}?populate=deep`;
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+    const row = res.data;
+    //var dataSale = null;
+    row.attributes.status_data = "Publish";
+    row.attributes.area = row?.attributes?.area?.data?.id;
+    row.attributes.wilayah = row?.attributes?.wilayah?.data?.id;
+    row.attributes.customer = row?.attributes?.customer?.data?.id;
+    row.attributes.location = row?.attributes?.location?.data?.id;
+
+    var tempDetails = [];
+    for (var details in row.attributes.panel_sale_details.data){
+      tempDetails[details] = row.attributes.panel_sale_details.data[details].id;
+    }
+    row.attributes.panel_sale_details = tempDetails;
+
+    var tempPayments = [];
+    for (var payments in row.attributes.purchasing_payments.data){
+      tempPayments[payments] = row.attributes.purchasing_payments.data[payments].id;
+    }
+    row.attributes.purchasing_payments = tempPayments;
+
+    const dataUpdate = {
+      data: row.attributes,
+    };
+    //var temp = [];
+    //row.attributes.panel_sale_details.data.forEach((item) => {
+    //  temp
+    //});
+    //sell.forEach((item) => {
+      
+    //});
+
+    const JSONdata = JSON.stringify(dataUpdate);
+    const endpointPut = process.env.NEXT_PUBLIC_URL + "/panel-sales/" + id + "?populate=deep";
+    const optionsPut = {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+        body: JSONdata,
+    };
+    const reqPut = await fetch(endpointPut, optionsPut);
+    const resPut = await reqPut.json();
+    const rowPut = resPut.data;
+
+    const trxStatus = rowPut?.attributes?.status_data;
+
+    if (trxStatus == "Publish") { console.log("masuk");
+      // invetory handle
+      createInventory(rowPut, locations);
+    }
+    console.log("tidak masuk", id, rowPut, resPut, dataUpdate);
+    router.reload("/dashboard/penjualan/panel");
+  };
 
   const handleAdd = () => {
     router.push("/dashboard/penjualan/panel/tambah");
@@ -383,15 +455,30 @@ function PanelSale({ props }) {
                 </button>
             </div>
 
-            <SellingTable
-              data={sell}
-              onUpdate={handleUpdate}
-              //onDelete={handleDelete}
-              //onPageChange={handlePageChange}
-              onChangeStatus={onChangeStatus}
-              returPage={returPage}
-              page="panel"
-            />
+            {isFetchinData ? (
+              <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
+                <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
+                  <LoadingAnimations />
+                </div>
+                <div className="text-sm align-middle text-center animate-pulse text-slate-400">
+                  Sedang Mengambil Data
+                </div>
+              </div>
+            ) : (
+              <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
+                <SellingTable
+                  data={sell}
+                  onUpdate={handleUpdate}
+                  //onDelete={handleDelete}
+                  //onPageChange={handlePageChange}
+                  onChangeStatus={onChangeStatus}
+                  returPage={returPage}
+                  page="panel"
+                  updateStock={updateStock}
+                />
+              </div>
+            )}
+
           </LayoutContent>
         </LayoutWrapper>
       </DashboardLayout>
