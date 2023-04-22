@@ -14,6 +14,7 @@ import createDetailOrderSaleFunc from "../utility/createDetailOrderSale";
 import calculatePrice from "../utility/calculatePrice";
 import Customer from "@iso/components/Form/AddSale/CustomerForm";
 import nookies from "nookies";
+import moment from "moment";
 
 PesananSales.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -144,6 +145,7 @@ function PesananSales({ props }) {
   useState({});
   const [grandTotal, setGrandTotal] = useState(0);
   const [selectedLocation, setSelectedLocation] = useState();
+  const [time, setTime] = useState(moment().format("HH:mm:ss"));
 
   const router = useRouter();
   const { TextArea } = Input;
@@ -151,7 +153,10 @@ function PesananSales({ props }) {
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
   var date = today.getDate() + "/" + mm + "/" + yyyy;
-  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+
+  setInterval(() => {
+    setTime(moment().format("HH:mm:ss"));
+  }, 1000);
 
   // DPP & PPN
   //const dpp = 1.11;
@@ -416,7 +421,7 @@ function PesananSales({ props }) {
                 </div>
               </div>
 
-              <div className="w-full flex md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
+              <div className="w-full flex md:w-4/4 mb-2 mt-2 mx-0  md:mb-0">
                 <SearchBar
                   form={form}
                   tempList={tempList}

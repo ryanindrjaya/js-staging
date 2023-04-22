@@ -387,7 +387,7 @@ function Sales({ props }) {
       const queryString = filterData.join("&");
       fetchSellData(queryString);
     }
-  }, [filter, router.query]);
+  }, [filter]);
 
   return (
     <>
