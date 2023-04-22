@@ -17,6 +17,7 @@ export default function SearchBar({
   available = false,
   inventoryLocation,
   getProductAtLocation,
+  location,
 }) {
   const dispatch = useDispatch();
 
@@ -46,7 +47,7 @@ export default function SearchBar({
       form.setFieldsValue({ products: undefined });
 
       if (getProductAtLocation) {
-        getProductAtLocation();
+        getProductAtLocation(location);
       }
     }
   };

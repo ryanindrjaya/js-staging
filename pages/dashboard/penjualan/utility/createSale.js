@@ -7,18 +7,11 @@ var tempProductListId = [];
 var tempSupplierId = 0;
 var tempLocationId;
 
-const CreateSale = async (
-  grandTotal,
-  totalPrice,
-  values,
-  listId,
-  form,
-  router,
-  url,
-  page,
-  locations
-) => {
+const CreateSale = async (grandTotal, totalPrice, values, listId, form, router, url, page) => {
   tempProductListId = [];
+
+  console.log("CREATE SELL DATA");
+
   // CLEANING DATA
   listId.forEach((element) => {
     tempProductListId.push({ id: element });
@@ -28,13 +21,6 @@ const CreateSale = async (
 
   values.status = "Belum Dibayar";
   values.purchasing_payments = null;
-
-  if (page == "sales sale") {
-    locations.forEach((element) => {
-      if (element.attributes.name == values.location)
-        values.location = element.id;
-    });
-  }
 
   var data = {
     data: values,
@@ -46,14 +32,7 @@ const CreateSale = async (
   const res = await req.json();
 
   if (req.status === 200) {
-    await putRelationSaleDetail(
-      res.data.id,
-      res.data.attributes,
-      form,
-      router,
-      url,
-      page
-    );
+    await putRelationSaleDetail(res.data.id, res.data.attributes, form, router, url, page);
   } else {
     openNotificationWithIcon("error");
   }
@@ -120,8 +99,7 @@ const putRelationSaleDetail = async (id, value, form, router, url, page) => {
     form.resetFields();
     if (page == "store sale") router.replace("/dashboard/penjualan/toko");
     if (page == "sales sale") router.replace("/dashboard/penjualan/sales");
-    if (page == "non panel sale")
-      router.replace("/dashboard/penjualan/non_panel");
+    if (page == "non panel sale") router.replace("/dashboard/penjualan/non_panel");
     if (page == "panel sale") router.replace("/dashboard/penjualan/panel");
     openNotificationWithIcon("success");
   } else {
@@ -155,8 +133,7 @@ const openNotificationWithIcon = (type) => {
   } else if (type === "success") {
     notification[type]({
       message: "Berhasil menambahkan data",
-      description:
-        "Produk berhasil ditambahkan. Silahkan cek pada halaman Pembelian Barang",
+      description: "Produk berhasil ditambahkan. Silahkan cek pada halaman Pembelian Barang",
     });
   }
 };

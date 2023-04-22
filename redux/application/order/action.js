@@ -93,6 +93,7 @@ const actions = {
     priceAfterDisc,
     subTotal,
     index,
+    margin,
   }),
 
   setSaleInitialProduct: (product, index) => ({
