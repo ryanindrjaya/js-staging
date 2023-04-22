@@ -88,24 +88,30 @@ export default function ReactDataTable({
           Cetak
         </button>
       </div>
-      <div>
-        <button
-          onClick={() => edit(row)}
-          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-        >
-          <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
-          Edit
-        </button>
-      </div>
+      {row.attributes.status === "Diterima" || row.attributes.status === "Diretur" ? (
+        ""
+      ) : (
+        <>
+          <div>
+            <button
+              onClick={() => edit(row)}
+              className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+            >
+              <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
+              Edit
+            </button>
+          </div>
 
-      <AlertDialog
-        onCancel={onCancel}
-        onConfirm={onConfirm}
-        title="Batalkan pesanan?"
-        id={row.id}
-        label="Batal"
-        buttonText="Batalkan"
-      />
+          <AlertDialog
+            onCancel={onCancel}
+            onConfirm={onConfirm}
+            title="Batalkan pesanan?"
+            id={row.id}
+            label="Batal"
+            buttonText="Batalkan"
+          />
+        </>
+      )}
     </div>
   );
 
@@ -189,8 +195,7 @@ export default function ReactDataTable({
     {
       name: "Jumlah Item",
       width: "120px",
-      selector: (row) =>
-        row.attributes?.total_item || row.attributes?.sales_sell_details?.data?.length || "-",
+      selector: (row) => row.attributes?.total_item || row.attributes?.sales_sell_details?.data?.length || "-",
     },
     {
       name: "Catatan Penjualan",
