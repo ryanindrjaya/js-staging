@@ -21,7 +21,7 @@ export default function Customer({ onChangeCustomer, customer, disabled, fetchin
   const order = useSelector((state) => state.Order);
 
   const handleChange = async (id) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/customers/${id}`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/customers/${id}?populate=deep`;
     const options = {
       method: "GET",
       headers: {

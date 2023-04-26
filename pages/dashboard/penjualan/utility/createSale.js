@@ -7,7 +7,18 @@ var tempProductListId = [];
 var tempSupplierId = 0;
 var tempLocationId;
 
-const CreateSale = async (grandTotal, totalPrice, values, listId, form, router, url, page) => {
+const CreateSale = async (
+  grandTotal,
+  totalPrice,
+  values,
+  listId,
+  form,
+  router,
+  url,
+  page,
+  locations,
+  updateStock
+) => {
   tempProductListId = [];
 
   console.log("CREATE SELL DATA");
@@ -32,7 +43,16 @@ const CreateSale = async (grandTotal, totalPrice, values, listId, form, router, 
   const res = await req.json();
 
   if (req.status === 200) {
-    await putRelationSaleDetail(res.data.id, res.data.attributes, form, router, url, page);
+    await putRelationSaleDetail(
+      res.data.id,
+      res.data.attributes,
+      form,
+      router,
+      url,
+      page,
+      locations,
+      updateStock,
+    );
   } else {
     openNotificationWithIcon("error");
   }
@@ -56,7 +76,7 @@ const createData = async (data, url) => {
   return req;
 };
 
-const putRelationSaleDetail = async (id, value, form, router, url, page) => {
+const putRelationSaleDetail = async (id, value, form, router, url, page, locations, updateStock) => {
   const user = await getUserMe();
   const dataSale = {
     data: value,
@@ -102,6 +122,7 @@ const putRelationSaleDetail = async (id, value, form, router, url, page) => {
     if (page == "non panel sale") router.replace("/dashboard/penjualan/non_panel");
     if (page == "panel sale") router.replace("/dashboard/penjualan/panel");
     openNotificationWithIcon("success");
+    updateStock(res.data.id, locations);
   } else {
     openNotificationWithIcon("error");
   }

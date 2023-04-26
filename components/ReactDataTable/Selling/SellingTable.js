@@ -14,7 +14,17 @@ import {
 } from "@ant-design/icons";
 import { useRouter } from "next/router";
 
-export default function ReactDataTable({ data, onDelete, onPageChange, onChangeStatusPengiriman, onChangeStatus, returPage }) {
+
+export default function ReactDataTable({
+  data,
+  onDelete,
+  onPageChange,
+  onChangeStatusPengiriman,
+  onChangeStatus,
+  returPage,
+  page,
+  updateStock
+}) {
   console.log("test table data ", data);
 
   const router = useRouter();
@@ -35,6 +45,16 @@ export default function ReactDataTable({ data, onDelete, onPageChange, onChangeS
   const lihat = (row) => {
     openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
     //router.push("order_pembelian/print/" + row.id);
+  };
+
+  const handlePiutang = (row) => {
+    if (row.attributes.status_data == "Draft") updateStock(row.id, row?.attributes?.location?.data?.id);
+    else {
+      notification.error({
+        message: "Error",
+        description: "Data sudah fix, tidak dapat dilakukan perubahan.",
+      });
+    }
   };
 
   const print = (row) => {
@@ -80,34 +100,127 @@ export default function ReactDataTable({ data, onDelete, onPageChange, onChangeS
     maximumFractionDigits: 2,
   });
 
-  const content = (row) => (
-    <div>
-      <div>
-        <button onClick={() => print(row)} className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md ">
-          <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
-          Cetak
-        </button>
-      </div>
 
-      <div>
-        <button
-          onClick={() => returPenjualan(row)}
-          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-        >
-          <UndoOutlined className="mr-2 mt-0.5 float float-left" />
-          Retur Penjualan
-        </button>
-      </div>
+  const content = (row) => {
+    if(page == "panel"){
 
-      <AlertDialog
-        onCancel={onCancel}
-        onConfirm={onConfirm}
-        title="Hapus Kategori"
-        message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
-        id={row.id}
-      />
-    </div>
-  );
+      return (
+        <div>
+          <div>
+            <button
+                onClick={() => print(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+            >
+                <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
+                Cetak
+            </button>
+          </div>
+
+          {row.attributes.status_data != "Draft" ? (
+            <></>
+          ) : (
+            <div>
+              <button
+                onClick={() => lihat(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+              >
+                <EditOutlined className="mr-2 mt-0.5 float float-left" />
+                Edit
+              </button>
+            </div>
+          )}
+
+          {row.attributes.status_data != "Draft" ? (
+            <></>
+          ) : (
+            <div>
+              <button
+                onClick={() => lihat(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+              >
+                <CloseOutlined className="mr-2 mt-0.5 float float-left" />
+                Batal
+              </button>
+            </div>
+          )}
+
+          <div>
+            <button
+                onClick={() => handlePiutang(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+            >
+                <CalculatorOutlined className="mr-2 mt-0.5 float float-left" />
+                Jadikan Piutang
+            </button>
+          </div>
+          <div>
+            <button
+                onClick={() => lihat(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+            >
+                <BankOutlined className="mr-2 mt-0.5 float float-left" />
+                Pembayaran
+            </button>
+          </div>
+          <div>
+            <button
+                onClick={() => lihat(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+            >
+                <UnorderedListOutlined className="mr-2 mt-0.5 float float-left" />
+                Melihat Pembayaran
+            </button>
+          </div>
+          <div>
+            <button
+                onClick={() => returPenjualan(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+            >
+                <UndoOutlined className="mr-2 mt-0.5 float float-left" />
+                Retur Penjualan
+            </button>
+          </div>
+        </div>
+      );
+
+    } else {
+
+      return (
+        <div>
+          <div>
+            <button
+                onClick={() => print(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+            >
+                <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
+                Cetak
+            </button>
+          </div>
+
+          <div>
+            <button
+                onClick={() => returPenjualan(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+            >
+                <UndoOutlined className="mr-2 mt-0.5 float float-left" />
+                Retur Penjualan
+            </button>
+          </div>
+
+        <AlertDialog
+            onCancel={onCancel}
+            onConfirm={onConfirm}
+            title="Hapus Kategori"
+            message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
+            id={row.id}
+        />
+        </div>
+      );
+
+    }
+
+  }
+
 
   const customStyles = {
     headerStyle: { textAlign: "center" },
@@ -139,7 +252,10 @@ export default function ReactDataTable({ data, onDelete, onPageChange, onChangeS
     {
       name: "Customer",
       width: "180px",
-      selector: (row) => row.attributes?.customer_name ?? "-",
+      selector: (row) => {
+        if(page == "panel") return row.attributes?.customer?.data?.attributes?.name ?? "-";
+        else return row.attributes?.customer_name ?? "-";
+      },
     },
     {
       name: "No Faktur",
