@@ -16,9 +16,13 @@ const CreateSale = async (
   router,
   url,
   page,
-  locations
+  locations,
+  updateStock
 ) => {
   tempProductListId = [];
+
+  console.log("CREATE SELL DATA");
+
   // CLEANING DATA
   listId.forEach((element) => {
     tempProductListId.push({ id: element });
@@ -28,13 +32,6 @@ const CreateSale = async (
 
   values.status = "Belum Dibayar";
   values.purchasing_payments = null;
-
-  if (page == "sales sale") {
-    locations.forEach((element) => {
-      if (element.attributes.name == values.location)
-        values.location = element.id;
-    });
-  }
 
   var data = {
     data: values,
@@ -52,7 +49,9 @@ const CreateSale = async (
       form,
       router,
       url,
-      page
+      page,
+      locations,
+      updateStock,
     );
   } else {
     openNotificationWithIcon("error");
@@ -77,7 +76,7 @@ const createData = async (data, url) => {
   return req;
 };
 
-const putRelationSaleDetail = async (id, value, form, router, url, page) => {
+const putRelationSaleDetail = async (id, value, form, router, url, page, locations, updateStock) => {
   const user = await getUserMe();
   const dataSale = {
     data: value,
@@ -120,10 +119,10 @@ const putRelationSaleDetail = async (id, value, form, router, url, page) => {
     form.resetFields();
     if (page == "store sale") router.replace("/dashboard/penjualan/toko");
     if (page == "sales sale") router.replace("/dashboard/penjualan/sales");
-    if (page == "non panel sale")
-      router.replace("/dashboard/penjualan/non_panel");
+    if (page == "non panel sale") router.replace("/dashboard/penjualan/non_panel");
     if (page == "panel sale") router.replace("/dashboard/penjualan/panel");
     openNotificationWithIcon("success");
+    updateStock(res.data.id, locations);
   } else {
     openNotificationWithIcon("error");
   }
@@ -155,8 +154,7 @@ const openNotificationWithIcon = (type) => {
   } else if (type === "success") {
     notification[type]({
       message: "Berhasil menambahkan data",
-      description:
-        "Produk berhasil ditambahkan. Silahkan cek pada halaman Pembelian Barang",
+      description: "Produk berhasil ditambahkan. Silahkan cek pada halaman Pembelian Barang",
     });
   }
 };

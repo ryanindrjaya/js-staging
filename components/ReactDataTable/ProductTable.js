@@ -2,18 +2,21 @@ import DataTable from "react-data-table-component";
 import AlertDialog from "../Alert/Alert";
 import { Popover } from "antd";
 import { EditOutlined, BarsOutlined } from "@ant-design/icons";
+import { useRouter } from "next/router";
 
-export default function ReactDataTable({
-  data,
-  onDelete,
-  onUpdate,
-  onPageChange,
-  setIsVisible,
-  setViewModalProduct,
-}) {
-  const openModal = (row) => {
-    setIsVisible(true, row);
-    setViewModalProduct(row);
+export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange }) {
+  const router = useRouter();
+  const lihat = (row) => {
+    const id = row.id;
+
+    router.replace(
+      {
+        pathname: router.pathname,
+        query: { id: id },
+      },
+      undefined,
+      { shallow: true }
+    );
   };
 
   const onConfirm = (id) => {
@@ -29,15 +32,13 @@ export default function ReactDataTable({
     onUpdate(id);
   };
 
-  const reverseData = data.data.map(
-    (val, index, array) => array[array.length - 1 - index]
-  );
+  const reverseData = data.data.map((val, index, array) => array[array.length - 1 - index]);
 
   const content = (row) => (
     <div>
       <div>
         <button
-          onClick={() => openModal(row)}
+          onClick={() => lihat(row)}
           className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
         >
           <BarsOutlined className="mr-2 mt-0.5 float float-left" />
@@ -126,6 +127,9 @@ export default function ReactDataTable({
       data={reverseData}
       defaultSortAsc={false}
       pagination
+      pointerOnHover
+      highlightOnHover
+      onRowClicked={(row) => lihat(row)}
     />
   );
 }
