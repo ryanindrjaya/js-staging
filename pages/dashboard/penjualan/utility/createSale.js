@@ -20,6 +20,9 @@ const CreateSale = async (
   updateStock
 ) => {
   tempProductListId = [];
+
+  console.log("CREATE SELL DATA");
+
   // CLEANING DATA
   listId.forEach((element) => {
     tempProductListId.push({ id: element });
@@ -29,13 +32,6 @@ const CreateSale = async (
 
   values.status = "Belum Dibayar";
   values.purchasing_payments = null;
-
-  if (page == "sales sale") {
-    locations.forEach((element) => {
-      if (element.attributes.name == values.location)
-        values.location = element.id;
-    });
-  }
 
   var data = {
     data: values,
@@ -158,8 +154,7 @@ const openNotificationWithIcon = (type) => {
   } else if (type === "success") {
     notification[type]({
       message: "Berhasil menambahkan data",
-      description:
-        "Produk berhasil ditambahkan. Silahkan cek pada halaman Pembelian Barang",
+      description: "Produk berhasil ditambahkan. Silahkan cek pada halaman Pembelian Barang",
     });
   }
 };

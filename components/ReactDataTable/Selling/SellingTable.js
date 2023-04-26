@@ -14,6 +14,7 @@ import {
 } from "@ant-design/icons";
 import { useRouter } from "next/router";
 
+
 export default function ReactDataTable({
   data,
   onDelete,
@@ -42,11 +43,7 @@ export default function ReactDataTable({
   };
 
   const lihat = (row) => {
-    openNotificationWithIcon(
-      "info",
-      "Work In Progress",
-      "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
-    );
+    openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
     //router.push("order_pembelian/print/" + row.id);
   };
 
@@ -102,6 +99,7 @@ export default function ReactDataTable({
     currency: "IDR",
     maximumFractionDigits: 2,
   });
+
 
   const content = (row) => {
     if(page == "panel"){
@@ -223,6 +221,7 @@ export default function ReactDataTable({
 
   }
 
+
   const customStyles = {
     headerStyle: { textAlign: "center" },
     headCells: {
@@ -240,9 +239,7 @@ export default function ReactDataTable({
       selector: (row) => (
         <>
           <Popover content={content(row)} placement="bottom" trigger="click">
-            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
-              Tindakan
-            </button>
+            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">Tindakan</button>
           </Popover>
         </>
       ),
@@ -263,7 +260,7 @@ export default function ReactDataTable({
     {
       name: "No Faktur",
       width: "180px",
-      selector: (row) => row.attributes?.no_store_sale ?? "-",
+      selector: (row) => row.attributes?.no_store_sale || row.attributes?.no_sales_sale || "-",
     },
     {
       name: <div className="">Status</div>,
@@ -274,6 +271,8 @@ export default function ReactDataTable({
           return <Tag color="red">{row.attributes?.status}</Tag>;
         } else if (row.attributes?.status == "Diretur") {
           return <Tag color="orange">{row.attributes?.status}</Tag>;
+        } else if (row.attributes?.status == "Diproses") {
+          return <Tag>{row.attributes?.status}</Tag>;
         } else {
           return <Tag color="green">{row.attributes?.status}</Tag>;
         }
@@ -284,9 +283,7 @@ export default function ReactDataTable({
       width: "180px",
       selector: (row) => {
         const dataPaymentMethod =
-          row?.attributes?.store_payments?.data
-            ?.map((payment) => payment?.attributes?.payment_method)
-            .join(", ") ?? null;
+          row?.attributes?.store_payments?.data?.map((payment) => payment?.attributes?.payment_method).join(", ") ?? null;
 
         console.log(row.id, row?.attributes?.store_payments?.data);
         return dataPaymentMethod;
@@ -305,11 +302,7 @@ export default function ReactDataTable({
 
         const dataPaymentValue =
           dataPayment.length > 1
-            ? dataPayment.reduce(
-                (acc, curr) =>
-                  parseFloat(acc) + parseFloat(curr.attributes.payment),
-                0
-              )
+            ? dataPayment.reduce((acc, curr) => parseFloat(acc) + parseFloat(curr.attributes.payment), 0)
             : dataPayment.length === 1
             ? dataPayment[0].attributes.payment
             : 0;
@@ -325,14 +318,8 @@ export default function ReactDataTable({
         const dataPayment = row?.attributes?.store_payments?.data ?? [];
 
         if (row.attributes.status === "Dibayar") {
-          const dataPaymentValue = dataPayment.reduce(
-            (acc, curr) => parseInt(acc) + parseInt(curr.attributes.payment),
-            0
-          );
-          const kembali =
-            dataPaymentValue - totalHarga < 0
-              ? 0
-              : dataPaymentValue - totalHarga;
+          const dataPaymentValue = dataPayment.reduce((acc, curr) => parseInt(acc) + parseInt(curr.attributes.payment), 0);
+          const kembali = dataPaymentValue - totalHarga < 0 ? 0 : dataPaymentValue - totalHarga;
 
           return formatter.format(kembali);
         }

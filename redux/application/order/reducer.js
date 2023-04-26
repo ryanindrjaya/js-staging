@@ -222,6 +222,7 @@ export default function Reducer(state = initState, action) {
             d2: action.d2,
             d3: action.d3,
             relation_id: action?.relation_id,
+            margin: action.margin,
           },
         },
       };

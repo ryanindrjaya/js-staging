@@ -363,16 +363,9 @@ function ReturToko({ props }) {
     values.customer_name = customer;
     values.faktur = faktur;
 
-    // * no neccesarry to check retur qty
-    // const isShowingPopup = await checkReturQty(values);
-    // if (isShowingPopup) {
-    //   setLoading(false);
-    //   return;
-    // }
-
     const payment = store.data.attributes.total;
     console.log("check payment", payment.toFixed(2), grandTotal.toFixed(2));
-    if (payment.toFixed(2) > grandTotal.toFixed(2)) {
+    if (grandTotal.toFixed(2) > payment.toFixed(2)) {
       notification["error"]({
         message: "Overprice",
         description:
@@ -927,10 +920,10 @@ function ReturToko({ props }) {
                         width: "100%",
                       }}
                     >
-                      <Select.Option value={true} key={"DPP"}>
-                        DPP
+                      <Select.Option value={true} key={"PPN"}>
+                        PPN
                       </Select.Option>
-                      <Select.Option value={false} key={"Active"}>
+                      <Select.Option value={false} key={"non-PPN"}>
                         Tidak Ada
                       </Select.Option>
                     </Select>

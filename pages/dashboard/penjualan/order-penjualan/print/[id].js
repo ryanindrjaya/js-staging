@@ -2,12 +2,11 @@ import React from "react";
 import nookies from "nookies";
 import { PrinterOutlined } from "@ant-design/icons";
 
-CetakPenjualan.getInitialProps = async (context) => {
+CetakPesananSales.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/store-sales/" + id + "?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sells/" + id + "?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -41,11 +40,12 @@ const formatter = new Intl.NumberFormat("id-ID", {
   minimumFractionDigits: 2,
 });
 
-function CetakPenjualan({ props }) {
+function CetakPesananSales({ props }) {
   const { sales } = props;
 
   const name = process.env.STAKEHOLDER_NAME;
   const data = sales.data.attributes;
+  const customer = data.customer.data?.attributes;
 
   // header left
   const address =
@@ -60,21 +60,30 @@ function CetakPenjualan({ props }) {
   console.log(formattedDate); // "08/04/2023"
 
   // header right
-  const customerName = data.customer_name;
-  const customerAddress = data.address;
-  const customerPhone = data.phone;
-  const faktur = data.no_store_sale;
+  const customerName = customer.name;
+  const customerAddress = customer.address;
+  const customerPhone = customer.phone;
+  const faktur = data.no_sales_sell;
 
   // details
-  const details = data?.store_sale_details?.data ?? [];
+  const details = data?.sales_sell_details?.data ?? [];
   console.log("details", details);
 
   // footer
   const maker = data?.added_by;
-  const totalPembelian = data?.total;
-  const isDPPActive = data?.is_dpp_active;
-  const dpp = data?.dpp;
-  const ppn = data?.ppn;
+  const totalPemesanan = details?.reduce((acc, curr) => {
+    const attributes = curr.attributes;
+    const unitPrice = attributes?.unit_price || 0;
+    const qty = attributes?.qty || 0;
+    const disc1 = attributes?.disc1 || 0;
+    const disc2 = attributes?.disc2 || 0;
+
+    const total = unitPrice * qty;
+    const totalDisc1 = (total * disc1) / 100;
+    const totalDisc2 = (total * disc2) / 100;
+
+    return acc + total - totalDisc1 - totalDisc2;
+  }, 0);
 
   const print = () => {
     window.print();
@@ -96,7 +105,7 @@ function CetakPenjualan({ props }) {
       </div>
 
       <div id="printableArea" className="text-center">
-        <div className="font-bold text-2xl">FAKTUR PENJUALAN</div>
+        <div className="font-bold text-2xl">ORDER PENJUALAN</div>
       </div>
 
       <div id="printableArea" className="mt-5 flex justify-between">
@@ -111,7 +120,7 @@ function CetakPenjualan({ props }) {
           <div className="font-bold">{customerName}</div>
           <div className="">{customerAddress}</div>
           <div className="">HP : {customerPhone}</div>
-          <div className="font-bold mt-4">Nomor Faktur : {faktur}</div>
+          <div className="font-bold mt-4">Nomor Order Penjualan : {faktur}</div>
         </div>
       </div>
 
@@ -119,30 +128,39 @@ function CetakPenjualan({ props }) {
         <table className="w-full border mt-5">
           <thead>
             <tr className="bg-gray-200">
-              <th className="py-3 px-4 text-left font-bold border-r">
-                TOTAL UNIT
-              </th>
-              <th className="py-3 px-4 text-left font-bold border-r">
-                NAMA PRODUK
-              </th>
+              <th className="py-3 px-4 text-left font-bold border-r">TOTAL UNIT</th>
+              <th className="py-3 px-4 text-left font-bold border-r">NAMA PRODUK</th>
+              <th className="py-3 px-4 text-left font-bold border-r">D1</th>
+              <th className="py-3 px-4 text-left font-bold border-r">D2</th>
               <th className="py-3 px-4 text-left font-bold">TOTAL HARGA</th>
             </tr>
           </thead>
           <tbody>
             {details?.map((item, index) => {
               const attributes = item.attributes;
-              console.log("attributes", attributes);
+              const unitPrice = attributes?.unit_price || 0;
+              const qty = attributes?.qty || 0;
+              const disc1 = attributes?.disc1 || 0;
+              const disc2 = attributes?.disc2 || 0;
+
+              const total = unitPrice * qty;
+              const totalDisc1 = (total * disc1) / 100;
+              const totalDisc2 = (total * disc2) / 100;
+
+              const subTotal = total - totalDisc1 - totalDisc2;
               return (
                 <tr key={index} className="border">
-                  <td className="py-3 px-4 border-r">
-                    {attributes?.qty + " " + attributes?.unit}
-                  </td>
+                  <td className="py-3 px-4 border-r">{attributes?.qty + " " + attributes?.unit}</td>
                   <td className="py-3 px-4 border-r">
                     {attributes.product?.data?.attributes?.name}
                   </td>
-                  <td className="py-3 px-4">
-                    {formatter.format(attributes?.sub_total)}
+                  <td className="py-3 px-4 border-r">
+                    {attributes?.disc1 ? `${attributes?.disc1}%` : ""}
                   </td>
+                  <td className="py-3 px-4 border-r">
+                    {attributes?.disc2 ? `${attributes?.disc2}%` : ""}
+                  </td>
+                  <td className="py-3 px-4">{formatter.format(subTotal)}</td>
                 </tr>
               );
             })}
@@ -161,18 +179,10 @@ function CetakPenjualan({ props }) {
         </div>
         <div>
           <p className="font-bold text-sm m-1">
-            TOTAL PEMBELIAN : {formatter.format(totalPembelian)}
-          </p>
-          <p className="font-bold text-sm m-1">DPP : {formatter.format(dpp)}</p>
-          <p className="font-bold text-sm m-1">PPN : {formatter.format(ppn)}</p>
-          <p className="font-bold text-sm m-1">
-            BIAYA PENGIRIMAN : {formatter.format(0)}
+            TOTAL ORDER PENJUALAN : {formatter.format(totalPemesanan)}
           </p>
           <p className="font-bold text-sm m-1">
-            BIAYA TAMBAHAN : {formatter.format(0)}
-          </p>
-          <p className="font-bold text-sm m-1">
-            Total Bayar : {formatter.format(totalPembelian)}
+            Total Pesanan : {formatter.format(totalPemesanan)}
           </p>
         </div>
       </div>
@@ -180,4 +190,4 @@ function CetakPenjualan({ props }) {
   );
 }
 
-export default CetakPenjualan;
+export default CetakPesananSales;

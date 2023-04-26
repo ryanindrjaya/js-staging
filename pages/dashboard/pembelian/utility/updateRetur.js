@@ -10,7 +10,6 @@ import createInventoryRetur from "./createInventoryRetur";
 var tempListId = [];
 const cookies = nookies.get(null, "token");
 var index = 0;
-let detailTotalPrice = 0;
 
 const getUnitPrice = (data, unit) => {
   var unitIndex = 1;
@@ -35,6 +34,8 @@ const updateRetur = (
   returMasterId,
   createInventoryRetur
 ) => {
+  let detailTotalPrice = 0;
+
   products.productList.forEach((element) => {
     // value detail
     tempListId = [];
@@ -63,7 +64,7 @@ const updateRetur = (
       products?.productInfo[id]?.d3 ?? element.attributes.unit_1_dp3 ?? 0;
     //var location = null;
 
-    var idDetail = returData?.data[0]?.attributes.retur_details?.data[index].id;
+    var idDetail = returData?.data?.attributes.retur_details?.data[index].id;
     console.log("detail", element, returData, idDetail, value);
 
     PUTReturDetail(
@@ -89,27 +90,29 @@ const updateRetur = (
   });
   index = 0;
 
-  var idRetur = returData.data[0].id;
-  var dpp_ppn_active =
-    value.DPP_PPN_active ?? returData.data[0].attributes.DPP_PPN_active;
-  var no_retur = value?.no_retur ?? returData?.data[0]?.attributes?.no_retur;
-  var catatan = value?.catatan ?? returData?.data[0]?.attributes?.catatan;
-  var pajak = value?.pajak ?? returData?.data[0]?.attributes?.pajak;
-  var status = value?.status ?? returData?.data[0]?.attributes?.status;
-  //var status = "lol";
-  var tanggal_pembelian = returData?.data[0]?.attributes?.tanggal_pembelian;
-  var tanggal_retur =
-    value?.tanggal_retur ?? returData?.data[0]?.attributes?.tanggal_retur;
-  var no_nota_supplier = returData?.data[0]?.attributes?.no_nota_supplier;
+  console.log("update data retur ", returData.data);
 
-  //var location = value?.location ?? returData?.data[0]?.attributes?.location?.data?.attributes?.id;
+  var idRetur = returData.data.id;
+  var dpp_ppn_active =
+    value.DPP_PPN_active ?? returData.data.attributes.DPP_PPN_active;
+  var no_retur = value?.no_retur ?? returData?.data?.attributes?.no_retur;
+  var catatan = value?.catatan ?? returData?.data?.attributes?.catatan;
+  var pajak = value?.pajak ?? returData?.data?.attributes?.pajak;
+  var status = value?.status ?? returData?.data?.attributes?.status;
+  //var status = "lol";
+  var tanggal_pembelian = returData?.data?.attributes?.tanggal_pembelian;
+  var tanggal_retur =
+    value?.tanggal_retur ?? returData?.data?.attributes?.tanggal_retur;
+  var no_nota_supplier = returData?.data?.attributes?.no_nota_supplier;
+
+  //var location = value?.location ?? returData?.data?.attributes?.location?.data?.attributes?.id;
   var location = value?.location?.value;
   if (value.location.value != null) {
     location = value.location.value;
   } else if (value.location != null) {
     location = value.location;
   } else {
-    location = returData?.data[0]?.attributes?.location?.data?.id;
+    location = returData?.data?.attributes?.location?.data?.id;
   }
 
   var purchasing = value?.purchasing?.value;
@@ -118,7 +121,7 @@ const updateRetur = (
   } else if (value.purchasing != null) {
     purchasing = value.purchasing;
   } else {
-    purchasing = returData?.data[0]?.attributes?.purchasing?.data?.id;
+    purchasing = returData?.data?.attributes?.purchasing?.data?.id;
   }
 
   var supplier = value?.supplier_id?.value;
@@ -127,11 +130,11 @@ const updateRetur = (
   } else if (value.supplier_id != null) {
     supplier = value.supplier_id;
   } else {
-    supplier = returData?.data[0]?.attributes?.supplier?.data?.id;
+    supplier = returData?.data?.attributes?.supplier?.data?.id;
   }
 
   var retur_details = [];
-  returData?.data[0]?.attributes?.retur_details.data.forEach((element) => {
+  returData?.data?.attributes?.retur_details.data.forEach((element) => {
     retur_details[index] = element.id;
     index++;
   });
@@ -151,7 +154,8 @@ const updateRetur = (
     purchasing,
     supplier,
     retur_details,
-    dpp_ppn_active
+    dpp_ppn_active,
+    detailTotalPrice
   );
 };
 
@@ -227,8 +231,11 @@ const PUTRetur = async (
   purchasing,
   supplier,
   retur_details,
-  dpp_ppn_active
+  dpp_ppn_active,
+  detailTotalPrice
 ) => {
+  console.log("TOTAL DETAIL", detailTotalPrice);
+
   var data = {
     data: {
       no_retur: no_retur,
