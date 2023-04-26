@@ -7,7 +7,18 @@ import { useDispatch } from "react-redux";
 
 const { addProduct } = action;
 
-export default function SearchBar({ form, user, getProductAtLocation }) {
+export default function SearchBar({
+  form,
+  tempList,
+  onChange,
+  selectedProduct,
+  user,
+  isBasedOnLocation = true,
+  available = false,
+  inventoryLocation,
+  getProductAtLocation,
+  location,
+}) {
   const dispatch = useDispatch();
 
   const [product, setProduct] = useState();
@@ -29,12 +40,14 @@ export default function SearchBar({ form, user, getProductAtLocation }) {
     const req = await fetch(endpoint, options);
     const res = await req.json();
 
+    console.log("select product ==>", res);
+
     if (res) {
       dispatch({ type: "ADD_PRODUCT", product: res.data });
       form.setFieldsValue({ products: undefined });
 
       if (getProductAtLocation) {
-        getProductAtLocation();
+        getProductAtLocation(location);
       }
     }
   };
@@ -51,17 +64,11 @@ export default function SearchBar({ form, user, getProductAtLocation }) {
     const req = await fetch(endpoint, options);
     const res = await req.json();
 
-    var queryLocations = "";
-
-    res.locations.forEach((location) => {
-      queryLocations =
-        queryLocations +
-        "filters[locations][name][$contains]=" +
-        location.name +
-        "&";
+    const locationData = res.locations.map((location, idx) => {
+      return `filters[$or][${idx}][locations][id][$eq]=${location?.id}`;
     });
     // console.log("querylocation " + queryLocations);
-    return queryLocations;
+    return locationData.join("&");
   };
 
   const handleSearch = (newValue) => {
@@ -72,9 +79,7 @@ export default function SearchBar({ form, user, getProductAtLocation }) {
     }
   };
 
-  const options = data.map((d) => (
-    <Select.Option key={d.value}>{d.label}</Select.Option>
-  ));
+  const options = data.map((d) => <Select.Option key={d.value}>{d.label}</Select.Option>);
 
   const fetchProduct = async (query, callback) => {
     if (!query) {
@@ -85,7 +90,11 @@ export default function SearchBar({ form, user, getProductAtLocation }) {
 
         const endpoint =
           process.env.NEXT_PUBLIC_URL +
-          `/products?populate=locations&filters[name][$contains]=${query}&${queryLocations}`;
+          `/products?populate=*&filters[name][$contains]=${query}&${queryLocations}${
+            available && inventoryLocation
+              ? `&filters[locations][inventories][total_stock][$gt]=0&filters[locations][id][$eq]=${inventoryLocation}`
+              : ""
+          }`;
         const options = {
           method: "GET",
           headers: {
@@ -97,18 +106,20 @@ export default function SearchBar({ form, user, getProductAtLocation }) {
         const req = await fetch(endpoint, options);
         const res = await req.json();
 
+        console.log("endpoint", endpoint);
+
         if (req.status == 200) {
           // filter product that already added
           // const filteredProduct = res.data.filter((item) => {
           //   return !selectedProduct?.some((temp) => temp.id == item.id);
           // });
 
+          console.log("res search product", res);
+
           // product based on user location
           const filteredProductByLocation = res.data.filter((item) =>
             item.attributes.locations.data.some((location) =>
-              user.locations.some(
-                (userLocation) => userLocation.id === location.id
-              )
+              user.locations.some((userLocation) => userLocation.id === location.id)
             )
           );
 

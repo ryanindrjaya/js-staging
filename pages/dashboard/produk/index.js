@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import nookies from "nookies";
 import DashboardLayout from "../../../containers/DashboardLayout/DashboardLayout";
 import TitlePage from "../../../components/TitlePage/TitlePage";
-import { Input, Modal, Select } from "antd";
+import { Input, Modal, Select, message } from "antd";
 import ProductTable from "../../../components/ReactDataTable/ProductTable";
 import ProductModal from "../../../components/Modal/ProductModal";
 import UnitTableView from "../../../components/ReactDataTable/Product/UnitsTableView";
@@ -56,8 +56,7 @@ const Product = ({ props }) => {
   const fetchSearchOption = async (query, category) => {
     const cookies = nookies.get(null);
     try {
-      const endpoint =
-        process.env.NEXT_PUBLIC_URL + `/${category}?filters[name][$containsi]=${query}`;
+      const endpoint = process.env.NEXT_PUBLIC_URL + `/${category}?filters[name][$containsi]=${query}`;
       const options = {
         method: "GET",
         headers: {
@@ -113,8 +112,7 @@ const Product = ({ props }) => {
         locationQuery = "";
       }
 
-      const endpoint =
-        process.env.NEXT_PUBLIC_URL + "/products?populate=*&" + query + locationQuery;
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/products?populate=*&" + query + locationQuery;
 
       console.log("endpoint", endpoint);
 
@@ -216,8 +214,7 @@ const Product = ({ props }) => {
   const fetchInventory = async (data) => {
     setIsLoading(true);
     const cookies = nookies.get(null, "token");
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + `/inventories?filters[product][id][$eq]=${data.id}&populate=*`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/inventories?filters[product][id][$eq]=${data.id}&populate=*`;
     const options = {
       method: "GET",
       headers: {
@@ -231,9 +228,7 @@ const Product = ({ props }) => {
     // return req;
     console.log(res);
 
-    setInventory(res.data);
-
-    //
+    return res.data;
   };
 
   const openModal = async (e, data) => {
@@ -242,14 +237,44 @@ const Product = ({ props }) => {
     fetchInventory(data);
   };
 
-  const searchingFilters = () => {
-    console.log("searching filters");
-  };
-
   useEffect(() => {
     console.log("inventory", inventory);
     setIsLoading(false);
   }, [inventory]);
+
+  useEffect(() => {
+    async function fetchOne(id) {
+      setIsLoading(true);
+      message.loading({ content: "Mengambil data", duration: 8000, key: "fetch" });
+      const cookies = nookies.get();
+      const endpoint = process.env.NEXT_PUBLIC_URL + `/products/${id}?populate=deep`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+      };
+
+      const res = await fetch(endpoint, options)
+        .then((r) => r.json())
+        .catch((e) => console.log(e));
+
+      if (res.data) {
+        message.destroy("fetch");
+
+        const inventory = await fetchInventory(res.data);
+
+        setInventory(inventory);
+        setModalProduct(res.data);
+        setVisible(true);
+        setIsLoading(false);
+      }
+    }
+    if (router.query.id) {
+      fetchOne(router.query.id);
+    }
+  }, [router.query]);
 
   return (
     <>
@@ -337,9 +362,31 @@ const Product = ({ props }) => {
               head
               width={"90%"}
               centered
-              visible={visible}
-              onOk={() => setVisible(false)}
-              onCancel={() => setVisible(false)}
+              open={visible}
+              onOk={() => {
+                router.replace(
+                  {
+                    pathname: router.pathname,
+                  },
+                  undefined,
+                  { shallow: true }
+                );
+                setVisible(false);
+                setModalProduct();
+                setInventory();
+              }}
+              onCancel={() => {
+                router.replace(
+                  {
+                    pathname: router.pathname,
+                  },
+                  undefined,
+                  { shallow: true }
+                );
+                setVisible(false);
+                setModalProduct();
+                setInventory();
+              }}
               bodyStyle={{
                 borderRadius: "20px",
                 backgroundColor: "#E8F2F2",
@@ -358,8 +405,6 @@ const Product = ({ props }) => {
               onDelete={handleDelete}
               onUpdate={handleUpdate}
               onPageChange={handlePageChange}
-              setIsVisible={openModal}
-              setViewModalProduct={setModalProduct}
             />
           </LayoutContent>
         </LayoutWrapper>
