@@ -177,7 +177,7 @@ export default function ReactDataTable({
       columns={columns}
       //data={data.data}
       pagination
-      noDataComponent={"Belum ada data Penjualan Panel"}
+      noDataComponent={"Belum ada data Penjualan"}
       data={data.data.filter((item) => {
         let man = new Date(moment()); //date from data "2023-03-10"
         let itemDate = new Date(item?.attributes?.sale_date);

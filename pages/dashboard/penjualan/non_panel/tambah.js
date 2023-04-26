@@ -5,10 +5,11 @@ import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { Row, Form, Input, InputNumber, Select, Button, Spin, notification } from "antd";
+import { Row, Form, Input, InputNumber, Select, Button, Spin, notification, Modal } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import StoreSaleTable from "../../../../components/ReactDataTable/Selling/StoreSaleTable";
+import ReportTodayTable from "../../../../components/ReactDataTable/Selling/ReportTodayTable";
 import createSaleFunc from "../utility/createSale";
 import createDetailSaleFunc from "../utility/createDetailSale";
 import calculatePrice from "../utility/calculatePrice";
@@ -134,6 +135,8 @@ function Toko({ props }) {
   const [dataValues, setDataValues] = useState();
   const [selectedCategory, setSelectedCategory] = useState("BEBAS");
   const [deliveryFee, setDeliveryFee] = useState(0);
+  const [selectedLocationId, setSelectedLocationId] = useState();
+  const [dataLocationStock, setDataLocationStock] = useState();
 
   const [listId, setListId] = useState([]);
   const [productTotalPrice, setProductTotalPrice] = useState({});
@@ -159,6 +162,12 @@ function Toko({ props }) {
   var date = today.getDate()+'/'+mm+'/'+yyyy;
   var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 
+  const [open, setOpen] = useState(false);
+
+  // Limit Credit
+  const [limitCredit, setLimitCredit] = useState(0);
+  var totalBelumDibayar = 0;
+
   // DPP & PPN
   const [dpp, setDPP] = useState(0);
   const [ppn, setPPN] = useState(0);
@@ -181,6 +190,87 @@ function Toko({ props }) {
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);
   }; 
+
+  const getProductAtLocation = async () => {
+    const locationId = form.getFieldValue("location");
+    let tempData = {};
+
+    // create an array of promises by mapping over the productList
+    const promises = products.productList.map(async (product) => {
+      const stock = await getStockAtLocation(product.id, locationId);
+      console.log("stock ", product.id, stock);
+
+      tempData = {
+        ...tempData,
+        [product.id]: stock,
+      };
+
+      return stock; // return a promise from each iteration
+    });
+
+    try {
+      // use Promise.all() to execute all promises in parallel
+      await Promise.all(promises);
+      setDataLocationStock(tempData); // update state after all promises have resolved
+      console.log("done");
+    } catch (error) {
+      console.error(error); // handle errors that may occur
+    }
+  };
+
+  const getStockAtLocation = async (productId, locationId) => {
+    let stockString = "Stok Kosong";
+    try {
+      console.log("get stock", productId, locationId);
+      const response = await getStock(productId, locationId);
+      console.log("response", response);
+
+      if (response.data.length > 0) {
+        const stock = response.data[0].attributes;
+        const product = stock.product?.data?.attributes; // use optional chaining to check if product exists
+
+        const stockUnit1 = stock.stock_unit_1;
+        const stockUnit2 = stock.stock_unit_2;
+        const stockUnit3 = stock.stock_unit_3;
+        const stockUnit4 = stock.stock_unit_4;
+        const stockUnit5 = stock.stock_unit_5;
+
+        const satuanUnit1 = product.unit_1;
+        const satuanUnit2 = product.unit_2;
+        const satuanUnit3 = product.unit_3;
+        const satuanUnit4 = product.unit_4;
+        const satuanUnit5 = product.unit_5;
+
+        stockString = `${stockUnit1} ${satuanUnit1}, ${stockUnit2} ${satuanUnit2}, ${stockUnit3} ${satuanUnit3}, ${stockUnit4} ${satuanUnit4}, ${stockUnit5} ${satuanUnit5}`;
+      }
+    } catch (error) {
+      console.error("error", error);
+      setDataLocationStock({
+        ...dataLocationStock,
+        [productId]: "Error fetching stock data",
+      });
+    }
+    return stockString;
+  };
+
+  async function getStock(productId, locationId) {
+    const cookies = nookies.get(null, "token");
+    const endpoint =
+        process.env.NEXT_PUBLIC_URL +
+        `/inventories?filters[location][id][$eq]=${locationId}&filters[product][id][$eq]=${productId}&populate=*`;
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    return res;
+  }
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -217,7 +307,41 @@ function Toko({ props }) {
     values.dpp = dpp;
     values.ppn = ppn;
     values.customer = customer;
-    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/non-panel-sales/", "non panel sale");
+    values.area = customer?.attributes?.area?.data;
+    values.wilayah = customer?.attributes?.wilayah?.data;
+    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/non-panel-sales/", "non panel sale", selectedLocationId, updateStock);
+  };
+
+  const updateStock = async (id, locations) => {
+    // fetching data to update
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/panel-sales/${id}?populate=deep`;
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+    const row = res.data; console.log("row stock", row);
+
+    const trxStatus = row.attributes?.status_data;
+    //const LPBLocationId = row.attributes.location?.data?.id;
+
+    if (trxStatus == "Publish") {
+      // invetory handle
+      createInventory(row, locations);
+      //await updateProductFromTable(row);
+    }
+
+    //const poData = row.attributes?.purchase?.data;
+
+    //const resPO = await changeStatusPO(poData?.id, trxStatus);
+
+    //if (resPO.data) {
+    //  await changeStatusLPB(id, trxStatus);
+    //}
   };
 
   const onChangeProduct = async () => {
@@ -301,6 +425,22 @@ function Toko({ props }) {
     setTotalPrice(0);
   };
 
+  //modal laporan hari ini
+  const showModal = () => {
+    setOpen(true);
+  };
+
+  const handleOk = () => {
+    //setModalText('The modal will be closed after two seconds');
+    
+  };
+
+  const handleCancel = () => {
+    console.log('Clicked cancel button');
+    setOpen(false);
+  };
+  //end modal laporan hari ini
+
   useEffect(() => {
     // this one is used for checking the price if the old price is same with new one.
     // if both are same then we should not set new price for grand total.
@@ -370,6 +510,22 @@ function Toko({ props }) {
   }, [discType]);
 
   useEffect(() => {
+    // set limit credit value
+    totalBelumDibayar = 0;
+    if(customer){
+      nonPanel.data.forEach((element) => {
+        if(customer.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
+      });
+
+      setLimitCredit(customer?.attributes?.credit_limit - totalBelumDibayar);
+      form.setFieldsValue({
+        limitCredit: formatter.format(customer?.attributes?.credit_limit - totalBelumDibayar),
+      });
+    }
+    
+  }, [customer]);
+
+  useEffect(() => {
     // used to reset redux from value before
     clearData();
     setProductSubTotal({});
@@ -406,7 +562,7 @@ function Toko({ props }) {
                 </div>
                 <div className="w-full flex justify-center md:w-1/3">
                   <button
-                    //onClick={() => setSelectedCategory("RESEP")}
+                    onClick={showModal}
                     className="bg-cyan-700 rounded-md m-1 text-sm"
                   >
                     <p className="px-4 py-2 m-0 text-white">Laporan Penjualan Hari Ini</p>
@@ -415,6 +571,20 @@ function Toko({ props }) {
                 <div className="w-full flex justify-end text-right md:w-1/3">
                   <p>{user.name}</p>
                 </div>
+
+              <Modal
+                title="Laporan Penjualan Hari Ini"
+                open={open}
+                width={1200}
+                //onOk={handleOk}
+                //confirmLoading={confirmLoading}
+                onCancel={handleCancel}
+                footer={<div></div>}
+              >
+                 <ReportTodayTable
+                   data={nonPanel}     
+                 />
+              </Modal>
             </div>
 
             <Form
@@ -470,6 +640,30 @@ function Toko({ props }) {
                     </Select>
                   </Form.Item>
                 </div>
+                <div className="w-full md:w-1/4 px-3 mb-2">
+                  <Form.Item name="limitCredit" noStyle>
+                    <Input
+                      size="large"
+                      style={{
+                        width: "100%",
+                      }}
+                      suffix="Limit Kredit"
+                      disabled
+                      defaultValue={formatter.format(limitCredit)}
+                    />
+                  </Form.Item>
+                </div>
+                
+                <div className="w-full md:w-1/3 px-3 mb-2">
+                  <p className="m-0">Keterangan : {console.log("customer", customer)}</p>
+                  <p className="m-0"> {customer?.attributes?.address}</p>
+                  {/*<p> {locationData?.city}</p>*/}
+                </div>
+                <div className="w-full md:w-1/3 px-3 mb-2">
+                  <Form.Item name="no_inventory">
+                    <Input style={{ height: "40px" }} placeholder="No Inv" />
+                  </Form.Item>
+                </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="location"
@@ -481,7 +675,10 @@ function Toko({ props }) {
                     ]}
                   >
                     <Select
-                      onChange={setLocation}
+                      onChange={(e) => {
+                        setSelectedLocationId(e);
+                        getProductAtLocation(e);
+                      }}
                       placeholder="Pilih Lokasi"
                       size="large"
                       style={{
@@ -499,17 +696,6 @@ function Toko({ props }) {
                         );
                       })}
                     </Select>
-                  </Form.Item>
-                </div>
-                
-                <div className="w-full md:w-1/3 px-3 mb-2">
-                  <p className="m-0">Keterangan : {locationData?.name}</p>
-                  <p className="m-0"> {locationData?.street}</p>
-                  <p> {locationData?.city}</p>
-                </div>
-                <div className="w-full md:w-1/3 px-3 mb-2">
-                  <Form.Item name="no_inventory">
-                    <Input style={{ height: "40px" }} placeholder="No Inv" />
                   </Form.Item>
                 </div>
               </div>
@@ -542,7 +728,7 @@ function Toko({ props }) {
                       calculatePriceAfterDisc={calculatePriceAfterDisc}
                       productSubTotal={productSubTotal}
                       setProductSubTotal={setProductSubTotal}
-                      locations={locations}
+                      dataLocationStock={dataLocationStock}
                       formObj={form}
                     />
                   </div>
@@ -582,9 +768,30 @@ function Toko({ props }) {
                     />
                   </Form.Item>
                 </div>
+
+                <div className="w-full flex justify-end px-3 -mt-16">
+                  <Form.Item name="totalItem" className="font-bold text-lg">
+                    <span> Total Item : {products.productList.length}{" "} </span>
+                  </Form.Item>
+                </div>
+                <div className="w-full flex justify-end px-3 -mt-9">
+                  <Form.Item name="dpp" value={dpp} className="font-bold text-lg">
+                    <span> Total Harga : {formatter.format(totalPrice)}</span>
+                  </Form.Item>
+                </div>
+                <div className="w-full flex justify-end px-3 -mt-6">
+                  <Form.Item name="ppn" value={ppn} className="font-bold text-lg">
+                    <span> DPP : {formatter.format(dpp)}</span>
+                  </Form.Item>
+                </div>
+                <div className="w-full flex justify-end px-3 -mt-6">
+                  <Form.Item name="grandtotal" value={totalPrice} className="font-bold text-lg">
+                    <span> PPN : {formatter.format(ppn)}</span>
+                  </Form.Item>
+                </div>
               </div>
 
-              <div className="w-full flex flex-wrap -mx-3 mb-4">
+              <div className="w-full flex flex-wrap -mx-3 -mt-20 mb-4">
                 <div className="w-full md:w-1/3 px-3">
                   <Form.Item noStyle>
                     <Input
@@ -710,24 +917,24 @@ function Toko({ props }) {
               </div>
 
               <div className="w-full flex flex-wrap justify-end mb-3">
-                <Form.Item name="dpp" value={dpp} className="w-full h-2 md:w-1/2 mx-2">
-                  <span> DPP </span> <span>: {formatter.format(dpp)}</span>
-                </Form.Item>
-                <Form.Item name="ppn" value={ppn} className="w-full h-2 md:w-1/2 mx-2">
-                  <span> PPN </span> <span>: {formatter.format(ppn)}</span>
-                </Form.Item>
-                <Form.Item name="grandtotal" value={totalPrice} className="w-full h-2 md:w-1/2 mx-2">
-                  <span> Total </span> <span>: {formatter.format(totalPrice)}</span>
-                </Form.Item>
-                <Form.Item name="biayaPengiriman" value={biayaPengiriman} className="w-full h-2 md:w-1/2 mx-2">
-                  <span> Biaya Pengiriman </span> <span>: {formatter.format(biayaPengiriman)}</span>
-                </Form.Item>
-                <Form.Item name="biayaTambahan" value={biayaTambahan} className="w-full h-2 md:w-1/2 mx-2">
-                  <span> Biaya Tambahan </span> <span>: {formatter.format(biayaTambahan)}</span>
-                </Form.Item>
+                {/*<Form.Item name="dpp" value={dpp} className="w-full h-2 md:w-1/2 mx-2">*/}
+                {/*  <span> DPP </span> <span>: {formatter.format(dpp)}</span>*/}
+                {/*</Form.Item>*/}
+                {/*<Form.Item name="ppn" value={ppn} className="w-full h-2 md:w-1/2 mx-2">*/}
+                {/*  <span> PPN </span> <span>: {formatter.format(ppn)}</span>*/}
+                {/*</Form.Item>*/}
+                {/*<Form.Item name="grandtotal" value={totalPrice} className="w-full h-2 md:w-1/2 mx-2">*/}
+                {/*  <span> Total </span> <span>: {formatter.format(totalPrice)}</span>*/}
+                {/*</Form.Item>*/}
+                {/*<Form.Item name="biayaPengiriman" value={biayaPengiriman} className="w-full h-2 md:w-1/2 mx-2">*/}
+                {/*  <span> Biaya Pengiriman </span> <span>: {formatter.format(biayaPengiriman)}</span>*/}
+                {/*</Form.Item>*/}
+                {/*<Form.Item name="biayaTambahan" value={biayaTambahan} className="w-full h-2 md:w-1/2 mx-2">*/}
+                {/*  <span> Biaya Tambahan </span> <span>: {formatter.format(biayaTambahan)}</span>*/}
+                {/*</Form.Item>*/}
 
-                <Form.Item name="grandTotal" value={grandTotal} className="w-full h-2 md:w-1/2 mx-2 mt-3 text-lg">
-                  <span> Total </span>  <span>: {formatter.format(grandTotal)}</span>
+                <Form.Item name="grandTotal" value={grandTotal} className="w-full flex justify-end h-2 md:w-1/2 mx-2 mt-3">
+                  <span className="font-bold text-lg"> Total </span>  <span className="font-bold text-lg">: {formatter.format(grandTotal)}</span>
                 </Form.Item>
               </div>
 
