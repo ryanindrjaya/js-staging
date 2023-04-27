@@ -613,7 +613,8 @@ function Toko({ props }) {
                 footer={<div></div>}
               >
                  <ReportTodayTable
-                   data={panel}     
+                   data={panel}
+                   page="panel"
                  />
               </Modal>
             </div>

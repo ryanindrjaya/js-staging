@@ -17,12 +17,13 @@ import * as moment from "moment";
 
 export default function ReactDataTable({
   data,
-  onPageChange
+  onPageChange,
+  page
 }) {
   console.log("test table data ", data);
 
   const router = useRouter();
-  console.log("data :", data);
+  console.log("data :", data, page);
   const { Option } = Select;
 
   const tagRed = process.env.TAG_RED;
@@ -58,9 +59,9 @@ export default function ReactDataTable({
 
     const columns = [
     {
-      name: "No Penjualan Panel",
+      name: "No Penjualan",
       width: "170px",
-      selector: (row) => row.attributes?.no_panel_sale,
+      selector: (row) => row.attributes?.no_panel_sale ?? row.attributes?.no_non_panel_sale
     },
     {
       name: "Customer",

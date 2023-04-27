@@ -297,7 +297,7 @@ function Toko({ props }) {
   };
 
   const createDetailSale = async () => {
-    await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/non-panel-sale-details");
+    await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/non-panel-sale-details", form);
   };
 
   const createSale = async (values) => {
@@ -582,7 +582,8 @@ function Toko({ props }) {
                 footer={<div></div>}
               >
                  <ReportTodayTable
-                   data={nonPanel}     
+                   data={nonPanel}
+                   page="non panel"
                  />
               </Modal>
             </div>

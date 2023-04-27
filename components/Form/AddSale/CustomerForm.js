@@ -50,7 +50,7 @@ export default function Customer({ onChangeCustomer, customer, disabled, fetchin
       callback([]);
     } else {
       try {
-        const endpoint = process.env.NEXT_PUBLIC_URL + `/customers/type?query=${query}&type=sales`;
+        const endpoint = process.env.NEXT_PUBLIC_URL + `/customers?filters[$or][0][name][$contains]=${query}`;
         const options = {
           method: "GET",
           headers: {
@@ -67,7 +67,7 @@ export default function Customer({ onChangeCustomer, customer, disabled, fetchin
         if (req.status == 200) {
           const customerResult =
             res.data?.map((customer) => ({
-              label: `${customer.name}`,
+              label: `${customer.attributes.name}`,
               value: customer.id,
             })) || [];
 
