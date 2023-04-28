@@ -3,7 +3,7 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import { useSelector, useDispatch } from "react-redux";
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Row, Form, Input, InputNumber, Select, Button, Spin, notification, Modal } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
@@ -15,6 +15,8 @@ import createDetailSaleFunc from "../utility/createDetailSale";
 import calculatePrice from "../utility/calculatePrice";
 import nookies from "nookies";
 import Customer from "@iso/components/Form/AddSale/CustomerForm";
+import ConfirmDialog from "@iso/components/Alert/ConfirmDialog";
+import createInventory from "../utility/createInventory";
 
 Toko.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -102,8 +104,7 @@ const fetchInven = async (cookies) => {
 };
 
 const fetchCustomer = async (cookies) => {
-    let name = "walk in customer"
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/customers?filters[name][$contains]=${name}`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/customers?populate=deep";
     const options = {
         method: "GET",
         headers: {
@@ -124,7 +125,7 @@ function Toko({ props }) {
   const user = props.user;
   const inven = props.inven.data;
   const nonPanel = props.nonPanel;
-  const customerData = props.customer.data[0];
+  const customerData = props.customer;
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -154,6 +155,7 @@ function Toko({ props }) {
   const [location, setLocation] = useState();
   const [locationData, setLocationData] = useState();
 
+  const submitBtn = useRef();
   const router = useRouter();
   const { TextArea } = Input;
   var today = new Date();
@@ -279,6 +281,9 @@ function Toko({ props }) {
   });
 
   const onFinish = (values) => {
+    console.log("finish", customerData, customer.id, totalBelumDibayar);
+
+    totalBelumDibayar = grandTotal;
     setLoading(true);
     values.status_data = simpanData;
     setInfo("sukses");
@@ -290,8 +295,23 @@ function Toko({ props }) {
                   "Data gagal ditambahkan, karena no penjualan sama",
           });
           setInfo("gagal");
-      } 
+      }
+
+      if(customer.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
     });
+
+    customerData.data.forEach((element) => {
+      console.log("limit", element.attributes.credit_limit);
+      if(customer.id == element.id && totalBelumDibayar > element.attributes.credit_limit){
+          notification["error"]({
+              message: "Gagal menambahkan data",
+              description:
+                  "Data gagal ditambahkan, karena melebihi limit kredit",
+          });
+          setInfo("gagal");
+      }
+    });
+
     setDataValues(values);
     setLoading(false);
   };
@@ -321,7 +341,7 @@ function Toko({ props }) {
         Authorization: "Bearer " + cookies.token,
       },
     };
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/panel-sales/${id}?populate=deep`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/non-panel-sales/${id}?populate=deep`;
     const req = await fetch(endpoint, options);
     const res = await req.json();
     const row = res.data; console.log("row stock", row);
@@ -331,6 +351,7 @@ function Toko({ props }) {
 
     if (trxStatus == "Publish") {
       // invetory handle
+      console.log("inventory", row, locations);
       createInventory(row, locations);
       //await updateProductFromTable(row);
     }
@@ -522,17 +543,17 @@ function Toko({ props }) {
         limitCredit: formatter.format(customer?.attributes?.credit_limit - totalBelumDibayar),
       });
     }
-    
+    console.log("cust", limitCredit - totalBelumDibayar);
   }, [customer]);
 
   useEffect(() => {
     // used to reset redux from value before
     clearData();
     setProductSubTotal({});
-    form.setFieldsValue({
-      customer: customerData?.attributes.name,
-    });
-    setCustomer(customerData);
+    //form.setFieldsValue({
+    //  customer: customerData?.attributes.name,
+    //});
+    //setCustomer(customerData);
   }, []);
 
   const validateError = () => {
@@ -968,11 +989,31 @@ function Toko({ props }) {
                         <Spin />
                       </div>
                     ) : (
-                      <button htmlType="submit" onClick={() => setSimpanData("Publish")} className="bg-cyan-700 rounded-md m-1 text-sm">
-                        <p className="px-4 py-2 m-0 text-white">
-                          SIMPAN DAN CETAK UNTUK PEMBAYARAN PIUTANG
-                        </p>
-                      </button>
+                    <>
+                      <ConfirmDialog
+                        onConfirm={() => submitBtn?.current?.click()}
+                        onCancel={() => {}}
+                        title="Tambah Panel"
+                        message="Silahkan cek kembali data yang telah dimasukkan, apakah anda yakin ingin menambahkan ?"
+                        component={
+                          <button
+                            type="button"
+                            className="bg-cyan-700 rounded-md m-1 text-sm"
+                            onClick={() => setSimpanData("Publish")}
+                          >
+                            <p className="px-4 py-2 m-0 text-white">
+                              SIMPAN DAN CETAK UNTUK PEMBAYARAN PIUTANG
+                            </p>
+                          </button>
+                        }
+                      />
+                      <Button htmlType="submit" ref={submitBtn}></Button>
+                    </>
+                      //<button htmlType="submit" onClick={() => setSimpanData("Publish")} className="bg-cyan-700 rounded-md m-1 text-sm">
+                      //  <p className="px-4 py-2 m-0 text-white">
+                      //    SIMPAN DAN CETAK UNTUK PEMBAYARAN PIUTANG
+                      //  </p>
+                      //</button>
                     )}
                   </Form.Item>
               </div>

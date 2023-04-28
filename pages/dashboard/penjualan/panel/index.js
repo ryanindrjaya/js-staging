@@ -100,7 +100,6 @@ function PanelSale({ props }) {
   const dataUserSales = props.dataUserSales;
   const router = useRouter();
   const [sell, setSell] = useState(data);
-  const [returPage, setReturPage] = useState("panel");
   const [searchParameters, setSearchParameters] = useState({});
   const [isFetchinData, setIsFetchingData] = useState(false);
 
@@ -122,7 +121,7 @@ function PanelSale({ props }) {
     const req = await fetch(endpoint, options);
     const res = await req.json();
     const row = res.data;
-    //var dataSale = null;
+
     row.attributes.status_data = "Publish";
     row.attributes.area = row?.attributes?.area?.data?.id;
     row.attributes.wilayah = row?.attributes?.wilayah?.data?.id;
@@ -144,13 +143,6 @@ function PanelSale({ props }) {
     const dataUpdate = {
       data: row.attributes,
     };
-    //var temp = [];
-    //row.attributes.panel_sale_details.data.forEach((item) => {
-    //  temp
-    //});
-    //sell.forEach((item) => {
-      
-    //});
 
     const JSONdata = JSON.stringify(dataUpdate);
     const endpointPut = process.env.NEXT_PUBLIC_URL + "/panel-sales/" + id + "?populate=deep";
@@ -472,7 +464,7 @@ function PanelSale({ props }) {
                   //onDelete={handleDelete}
                   //onPageChange={handlePageChange}
                   onChangeStatus={onChangeStatus}
-                  returPage={returPage}
+                  returPage="panel"
                   page="panel"
                   updateStock={updateStock}
                 />

@@ -58,7 +58,10 @@ export default function ReactDataTable({
   };
 
   const print = (row) => {
-    router.push("/dashboard/penjualan/toko/print/" + row.id);
+    if (page == "panel" || page == "nonpanel") openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
+    else {
+      router.push("/dashboard/penjualan/toko/print/" + row.id);
+    }
   };
 
   const returPenjualan = (row) => {
@@ -102,7 +105,7 @@ export default function ReactDataTable({
 
 
   const content = (row) => {
-    if(page == "panel"){
+    if(page == "panel" || page == "nonpanel"){
 
       return (
         <div>
@@ -253,7 +256,7 @@ export default function ReactDataTable({
       name: "Customer",
       width: "180px",
       selector: (row) => {
-        if(page == "panel") return row.attributes?.customer?.data?.attributes?.name ?? "-";
+        if(page == "panel" || page == "nonpanel") return row.attributes?.customer?.data?.attributes?.name ?? "-";
         else return row.attributes?.customer_name ?? "-";
       },
     },
@@ -360,7 +363,7 @@ export default function ReactDataTable({
       columns={columns}
       data={data.data}
       pagination
-      noDataComponent={"Belum ada data Penjualan Toko"}
+      noDataComponent={"Belum ada data Penjualan"}
     />
   );
 }

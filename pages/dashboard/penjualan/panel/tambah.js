@@ -104,8 +104,6 @@ const fetchInven = async (cookies) => {
 };
 
 const fetchCustomer = async (cookies) => {
-    let name = "walk in customer"
-    //const endpoint = process.env.NEXT_PUBLIC_URL + `/customers?filters[name][$contains]=${name}`;
     const endpoint = process.env.NEXT_PUBLIC_URL + "/customers?populate=deep";
     const options = {
         method: "GET",

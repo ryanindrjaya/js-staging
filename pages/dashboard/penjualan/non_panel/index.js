@@ -78,7 +78,6 @@ function NonPanelSale({ props }) {
   const data = props.nonpanelsales;
   const router = useRouter();
   const [sell, setSell] = useState(data);
-  const [returPage, setReturPage] = useState("nonpanel");
 
   const handleAdd = () => {
     router.push("/dashboard/penjualan/non_panel/tambah");
@@ -394,7 +393,8 @@ function NonPanelSale({ props }) {
               //onDelete={handleDelete}
               //onPageChange={handlePageChange}
               onChangeStatus={onChangeStatus}
-              returPage={returPage}
+              returPage="nonpanel"
+              page="nonpanel"
             />
           </LayoutContent>
         </LayoutWrapper>
