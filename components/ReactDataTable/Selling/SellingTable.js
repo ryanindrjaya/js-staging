@@ -47,6 +47,10 @@ export default function ReactDataTable({
     //router.push("order_pembelian/print/" + row.id);
   };
 
+  const handleEdit = (row) => {
+    if (page == "nonpanel") router.push("non_panel/edit/" + row.id);
+  };
+
   const handlePiutang = (row) => {
     if (row.attributes.status_data == "Draft") updateStock(row.id, row?.attributes?.location?.data?.id);
     else {
@@ -124,7 +128,7 @@ export default function ReactDataTable({
           ) : (
             <div>
               <button
-                onClick={() => lihat(row)}
+                onClick={() => handleEdit(row)}
                 className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
               >
                 <EditOutlined className="mr-2 mt-0.5 float float-left" />

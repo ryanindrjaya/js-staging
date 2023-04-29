@@ -804,17 +804,17 @@ function Toko({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full flex justify-end px-3 -mt-9">
-                  <Form.Item name="dpp" value={dpp} className="font-bold text-lg">
+                  <Form.Item name="grandtotal" value={totalPrice} className="font-bold text-lg">
                     <span> Total Harga : {formatter.format(totalPrice)}</span>
                   </Form.Item>
                 </div>
                 <div className="w-full flex justify-end px-3 -mt-6">
-                  <Form.Item name="ppn" value={ppn} className="font-bold text-lg">
+                  <Form.Item name="dpp" value={dpp} className="font-bold text-lg">
                     <span> DPP : {formatter.format(dpp)}</span>
                   </Form.Item>
                 </div>
                 <div className="w-full flex justify-end px-3 -mt-6">
-                  <Form.Item name="grandtotal" value={totalPrice} className="font-bold text-lg">
+                  <Form.Item name="ppn" value={ppn} className="font-bold text-lg">
                     <span> PPN : {formatter.format(ppn)}</span>
                   </Form.Item>
                 </div>

@@ -122,6 +122,7 @@ const putRelationSaleDetail = async (id, value, form, router, url, page, locatio
     if (page == "non panel sale") router.replace("/dashboard/penjualan/non_panel");
     if (page == "panel sale") router.replace("/dashboard/penjualan/panel");
     openNotificationWithIcon("success");
+    console.log("update stock",res.data.id, locations);
     updateStock(res.data.id, locations);
   } else {
     openNotificationWithIcon("error");
