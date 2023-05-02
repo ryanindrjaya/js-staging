@@ -312,9 +312,9 @@ export default function Sidebar(props) {
                   <a>Penjualan Toko</a>
                 </Link>
               </Menu.Item>
-              <Menu.Item style={submenuStyle} key="penjualan_pesanan_sales">
-                <Link href="/dashboard/penjualan/pesanansales">
-                  <a>Penjualan Pesanan Sales</a>
+              <Menu.Item style={submenuStyle} key="order_penjualan">
+                <Link href="/dashboard/penjualan/order-penjualan">
+                  <a>Order Penjualan</a>
                 </Link>
               </Menu.Item>
               <Menu.Item style={submenuStyle} key="penjualan_sales">
