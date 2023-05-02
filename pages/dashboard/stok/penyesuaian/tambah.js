@@ -335,63 +335,75 @@ export default function tambahPenyesuaian() {
             console.log(err);
           });
 
-        detailIds.push(res?.id);
+        console.log("res detail", res);
+        if (res?.id) {
+          detailIds.push(res?.id);
+        }
       }
 
-      // create inventory adjustment
-      const endpoint = `${process.env.NEXT_PUBLIC_URL}/inventory-adjustments`;
-      const data = {
-        data: {
-          ...values,
-          details: detailIds,
-        },
-      };
-
-      const headers = {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(data),
-      };
-
-      const response = await fetch(endpoint, headers)
-        .then((res) => {
-          return res.json();
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-
-      console.log("response create master", response);
-
-      if (response?.data?.id) {
-        notification["success"]({
-          message: "Berhasil",
-          description:
-            "Berhasil membuat penyesuaian stok, harap cek halaman penyesuaian stok untuk melihat detail",
-        });
-
-        form.resetFields();
-        setProducts([]);
-        setLoading({ ...loading, submit: false });
-        setOptions({
-          ...options,
-          products: [],
-        });
-        setSelectedLocation(null);
-        await fetchLatestNoReferensi();
-
-        router.replace(
-          {
-            pathname: "/dashboard/stok/penyesuaian",
+      if (detailIds.length > 0) {
+        console.log("detail ids", detailIds);
+        const endpoint = `${process.env.NEXT_PUBLIC_URL}/inventory-adjustments`;
+        const data = {
+          data: {
+            ...values,
+            details: detailIds,
           },
-          undefined,
-          { shallow: true }
-        );
+        };
+
+        const headers = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(data),
+        };
+
+        const response = await fetch(endpoint, headers)
+          .then((res) => {
+            return res.json();
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+
+        console.log("response create master", response);
+
+        if (response?.data?.id) {
+          notification["success"]({
+            message: "Berhasil",
+            description:
+              "Berhasil membuat penyesuaian stok, harap cek halaman penyesuaian stok untuk melihat detail",
+          });
+
+          form.resetFields();
+          setProducts([]);
+          setLoading({ ...loading, submit: false });
+          setOptions({
+            ...options,
+            products: [],
+          });
+          setSelectedLocation(null);
+          await fetchLatestNoReferensi();
+
+          router.replace(
+            {
+              pathname: "/dashboard/stok/penyesuaian",
+            },
+            undefined,
+            { shallow: true }
+          );
+        } else {
+          console.log("response", response);
+          setLoading({ ...loading, submit: false });
+
+          notification["error"]({
+            message: "Gagal",
+            description: "Gagal membuat permintaan produk, silahkan coba lagi",
+          });
+        }
       } else {
-        console.log("response", response);
         setLoading({ ...loading, submit: false });
 
         notification["error"]({

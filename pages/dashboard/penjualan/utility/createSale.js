@@ -51,7 +51,7 @@ const CreateSale = async (
       url,
       page,
       locations,
-      updateStock
+      updateStock,
     );
   } else {
     openNotificationWithIcon("error");
@@ -76,16 +76,7 @@ const createData = async (data, url) => {
   return req;
 };
 
-const putRelationSaleDetail = async (
-  id,
-  value,
-  form,
-  router,
-  url,
-  page,
-  locations,
-  updateStock
-) => {
+const putRelationSaleDetail = async (id, value, form, router, url, page, locations, updateStock) => {
   const user = await getUserMe();
   const dataSale = {
     data: value,
@@ -128,8 +119,7 @@ const putRelationSaleDetail = async (
     form.resetFields();
     if (page == "store sale") router.replace("/dashboard/penjualan/toko");
     if (page == "sales sale") router.replace("/dashboard/penjualan/sales");
-    if (page == "non panel sale")
-      router.replace("/dashboard/penjualan/non_panel");
+    if (page == "non panel sale") router.replace("/dashboard/penjualan/non_panel");
     if (page == "panel sale") router.replace("/dashboard/penjualan/panel");
     openNotificationWithIcon("success");
     updateStock(res.data.id, locations);
@@ -164,8 +154,7 @@ const openNotificationWithIcon = (type) => {
   } else if (type === "success") {
     notification[type]({
       message: "Berhasil menambahkan data",
-      description:
-        "Produk berhasil ditambahkan. Silahkan cek pada halaman Pembelian Barang",
+      description: "Produk berhasil ditambahkan. Silahkan cek pada halaman Pembelian Barang",
     });
   }
 };

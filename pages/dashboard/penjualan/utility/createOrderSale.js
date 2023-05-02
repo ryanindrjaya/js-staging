@@ -7,18 +7,13 @@ var tempProductListId = [];
 var tempSupplierId = 0;
 var tempLocationId;
 
-const CreateOrderSale = async (
-  values,
-  listId,
-  form,
-  router
-) => {
+const CreateOrderSale = async (values, listId, form, router, setLoading) => {
   // CLEANING DATA
   listId.forEach((element) => {
     tempProductListId.push({ id: element });
   });
 
-  values.status = "Diproses"
+  values.status = "Diproses";
   values.purchasing_payments = null;
 
   var data = {
@@ -28,8 +23,8 @@ const CreateOrderSale = async (
   const req = await createData(data);
   const res = await req.json();
 
-  if (req.status === 200) { 
-    await putRelationSaleDetail(res.data.id, res.data.attributes, form, router);
+  if (req.status === 200) {
+    await putRelationSaleDetail(res.data.id, res.data.attributes, form, router, setLoading);
   } else {
     openNotificationWithIcon("error");
   }
@@ -53,7 +48,7 @@ const createData = async (data) => {
   return req;
 };
 
-const putRelationSaleDetail = async (id, value, form, router) => {
+const putRelationSaleDetail = async (id, value, form, router, setLoading) => {
   const user = await getUserMe();
   const dataSale = {
     data: value,
@@ -79,13 +74,13 @@ const putRelationSaleDetail = async (id, value, form, router) => {
     body: JSONdata,
   };
 
-
   const req = await fetch(endpoint, options);
   const res = await req.json();
 
   if (req.status === 200) {
+    setLoading(false);
     form.resetFields();
-    router.replace("/dashboard/penjualan/pesanansales");
+    router.replace("/dashboard/penjualan/order-penjualan");
     openNotificationWithIcon("success");
   } else {
     openNotificationWithIcon("error");
@@ -118,8 +113,7 @@ const openNotificationWithIcon = (type) => {
   } else if (type === "success") {
     notification[type]({
       message: "Berhasil menambahkan data",
-      description:
-        "Data berhasil ditambahkan. Silahkan cek pada halaman Pesanan Penjualan Sales",
+      description: "Data berhasil ditambahkan. Silahkan cek pada halaman Pesanan Penjualan Sales",
     });
   }
 };
