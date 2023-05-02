@@ -147,8 +147,8 @@ function ReturToko({ props }) {
   const [totalPrice, setTotalPrice] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
 
-  const [dppActive, setDPPActive] = useState(true);
-  const [ppnActive, setPPNActive] = useState(true);
+  const [dppActive, setDPPActive] = useState(false);
+  const [ppnActive, setPPNActive] = useState(false);
   const [simpanData, setSimpanData] = useState("Bayar");
   const [dataLocationStock, setDataLocationStock] = useState();
   const [dataGudang, setDataGudang] = useState();
@@ -364,8 +364,12 @@ function ReturToko({ props }) {
     values.faktur = faktur;
 
     const payment = store.data.attributes.total;
-    console.log("check payment", payment.toFixed(2), grandTotal.toFixed(2));
-    if (grandTotal.toFixed(2) > payment.toFixed(2)) {
+    const grandTotalFloat = parseFloat(grandTotal.toFixed(2));
+    const paymentFloat = parseFloat(payment.toFixed(2));
+
+    console.log(grandTotalFloat, paymentFloat);
+    console.log("overprice? ", grandTotalFloat > paymentFloat);
+    if (grandTotalFloat > paymentFloat) {
       notification["error"]({
         message: "Overprice",
         description:
@@ -528,7 +532,10 @@ function ReturToko({ props }) {
 
   useEffect(() => {
     // set dpp
+
+    console.log("test dpp active");
     if (dppActive) {
+      console.log("grand Total is ", grandTotal);
       setDPP(grandTotal / 1.11);
     } else {
       setDPP(0);
@@ -608,6 +615,8 @@ function ReturToko({ props }) {
         expired_date: {
           [productId]: moment(momentString),
         },
+        DPP_active: true,
+        PPN_active: true,
       });
 
       //SET INITIAL PRODUCT
@@ -634,6 +643,8 @@ function ReturToko({ props }) {
 
     setTimeout(() => {
       setIsFetchingData(false);
+      setDPPActive(true);
+      setPPNActive(true);
     }, 3000);
   }, []);
 
