@@ -147,8 +147,8 @@ function Toko({ props }) {
   const [totalPrice, setTotalPrice] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
 
-  const [dppActive, setDPPActive] = useState("Active");
-  const [ppnActive, setPPNActive] = useState("Active");
+  const [dppActive, setDPPActive] = useState("DPP");
+  const [ppnActive, setPPNActive] = useState("PPN");
   const [simpanData, setSimpanData] = useState("Publish");
   const [discMax, setDiscMax] = useState();
 
@@ -841,6 +841,7 @@ function Toko({ props }) {
                 <div className="w-full md:w-1/3 px-3">
                   <Form.Item name="DPP_active">
                     <Select
+                      defaultValue={dppActive}
                       placeholder="Pakai DPP"
                       //onChange={setDPPActive}
                       onChange={setDPPActive}
@@ -861,6 +862,7 @@ function Toko({ props }) {
                 <div className="w-full md:w-1/3 px-3">
                   <Form.Item name="PPN_active">
                     <Select
+                      defaultValue={ppnActive}
                       placeholder="Pakai PPN"
                       //onChange={setDPPActive}
                       onChange={setPPNActive}

@@ -172,14 +172,14 @@ export default function ReactDataTable({
         var defaultOption = row.attributes?.unit_1;
         var defaultIndex = 1;
 
-        if (products.productInfo[idx]?.qty) {
+        if (products.productInfo[idx]?.qty != undefined || products.productInfo[idx]?.qty > 0) {
           defaultQty = products.productInfo[idx].qty;
         }
 
-        if (products.productInfo[idx]?.unitIndex) {
+        if (products.productInfo[idx]?.unitIndex != undefined || products.productInfo[idx]?.unitIndex > 0) {
           defaultIndex = products.productInfo[idx].unitIndex;
         }
-
+        console.log("default qty", defaultQty, defaultIndex);
         return (
           <>
             <Row>
