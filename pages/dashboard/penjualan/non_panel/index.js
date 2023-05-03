@@ -342,7 +342,7 @@ function NonPanelSale({ props }) {
 
             <div className="w-full flex justify-start mt-3">
               <div className="w-full md:w-1/5 px-3"> 
-                <Customer onChangeCustomer={(e) => setSearchParameters({ ...searchParameters, customer: e })} />
+                <Customer onChangeCustomer={(e) => setSearchParameters({ ...searchParameters, customer: e })} page={"NON PANEL"} />
               </div>
               <div className="w-full md:w-1/5 px-3"> 
                 <Select

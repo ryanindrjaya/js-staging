@@ -14,9 +14,11 @@ import createSaleFunc from "../../utility/createSale";
 import createDetailSaleFunc from "../../utility/createDetailSale";
 import calculatePrice from "../../utility/calculatePrice";
 import nookies from "nookies";
+import LoadingAnimations from "@iso/components/Animations/Loading";
 import Customer from "@iso/components/Form/AddSale/CustomerForm";
 import ConfirmDialog from "@iso/components/Alert/ConfirmDialog";
 import createInventory from "../../utility/createInventory";
+import moment from "moment";
 
 Edit.getInitialProps = async (context) => {
   const cookies = nookies.get(context); console.log("cookies", cookies, context.query.id);
@@ -564,6 +566,7 @@ function Edit({ props }) {
 
   useEffect(() => {
     // used to reset redux from value before
+    setIsFetchingData(true);
     clearData();
     setProductSubTotal({});
 
@@ -614,14 +617,53 @@ function Edit({ props }) {
         additional_fee_3_sub: editData.attributes?.additional_fee_3_sub,
     })
 
+    var id = 0;
     detailsData.forEach((items) => {
-      console.log("details data", items);
+      var indexUnit = 1;
+      var unitOrder = items.attributes.unit;
+      var productUnit = items.attributes.product.data.attributes;
+
+      for (let index = 1; index < 6; index++) {
+        if (unitOrder === productUnit[`unit_${index}`]) {
+          indexUnit = index;
+        }
+      }
+
+      //var dateString = items.attributes.expired_date;
+      var dateString = new Date();
+      var momentObj = moment(dateString, "MM-DD-YYYY");
+      var momentString = momentObj.format("MM-DD-YYYY");
+      //const productId = items.attributes.product.data.id;
+      console.log("details data", items, dateString, momentObj, momentString);
+
+      form.setFieldsValue({
+        jumlah_option: {
+            [id]: items.attributes.unit,
+        },
+        jumlah_qty: {
+            [id]: items.attributes.qty,
+        },
+        margin: {
+            [id]: items.attributes.margin,
+        },
+        disc_rp1: {
+            [id]: items.attributes.disc1,
+        },
+        disc_rp2: {
+            [id]: items.attributes.disc2,
+        },
+        expired_date: {
+            [id]: moment(items.attributes.expired_date),
+        },
+      });
+
+      //SET INITIAL PRODUCT
         dispatch({
             type: "SET_SALE_INITIAL_PRODUCT",
             product: items?.attributes?.product?.data,
             qty: items?.attributes?.qty,
             unit: items?.attributes?.unit,
-            //unitIndex,
+            unitIndex: indexUnit,
             priceUnit: items?.attributes?.unit_price,
             disc: items?.attributes?.disc,
             margin: items?.attributes?.margin,
@@ -629,17 +671,15 @@ function Edit({ props }) {
             //subTotal,
             d1: items?.attributes?.disc1 ?? 0,
             d2: items?.attributes?.disc2 ?? 0,
-            index: 0,
+            index: id,
         });
 
-            //dispatch({
-            //    type: "CHANGE_PRODUCT_UNIT",
-            //    unit: data,
-            //    product: value,
-            //    index,
-            //});
+        id++;
     });
 
+    setTimeout(() => {
+      setIsFetchingData(false);
+    }, 3000);
   }, []);
 
   const validateError = () => {
@@ -721,7 +761,7 @@ function Edit({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Customer onChangeCustomer={setCustomer} />
+                  <Customer onChangeCustomer={setCustomer} page={"NON PANEL"} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
                   <Form.Item name="tempo_days" initialValue={"0"} noStyle>
