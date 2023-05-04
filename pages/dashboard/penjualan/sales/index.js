@@ -470,8 +470,6 @@ function SalesSale({ props }) {
       }
     });
 
-    console.log("query useeffect", query);
-
     if (query?.filters) {
       const qs = require("qs");
       const stringified = qs.stringify(query);
