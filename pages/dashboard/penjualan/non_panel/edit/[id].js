@@ -298,56 +298,205 @@ function Edit({ props }) {
     maximumFractionDigits: 2,
   });
 
-  const onFinish = (values) => {
+  const cleanData = (data) => {
+    const unusedKeys = [
+      "disc_rp",
+      "harga_satuan",
+      "jumlah_option",
+      "jumlah_qty",
+    ];
+    for (let key in data) {
+      if (data[key] === null || data[key] === undefined) {
+        delete data[key];
+      } else if (unusedKeys.includes(key)) {
+        delete data[key];
+      }
+    }
+
+    return data;
+  };
+
+  const updateDetailData = async (data, id) => {
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/non-panel-sale-details/${id}`;
+    const options = {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+      body: JSON.stringify({ data }),
+    };
+
+    const res = await fetch(endpoint, options).then((res) => res.json());
+    return res;
+  };
+
+  const createDetailData = async (data) => {
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/non-panel-sale-details`;
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+      body: JSON.stringify({ data }),
+    };
+
+    const res = await fetch(endpoint, options).then((res) => res.json());
+    return res;
+  };
+
+  const updateMasterData = async (data, id) => {
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/non-panel-sales/${id}`;
+    const options = {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+      body: JSON.stringify({ data }),
+    };
+
+    const res = await fetch(endpoint, options).then((res) => res.json());
+    return res;
+  };
+
+  const onFinish = async (values) => {
     console.log("finish", customerData, customer.id, totalBelumDibayar);
 
-    //totalBelumDibayar = grandTotal;
-    //setLoading(true);
-    //values.status_data = simpanData;
-    //setInfo("sukses");
-    //nonPanel.data.forEach((element) => {
-    //  if (values.no_non_panel_sale == element.attributes.no_non_panel_sale) {
-    //      notification["error"]({
-    //          message: "Gagal menambahkan data",
-    //          description:
-    //              "Data gagal ditambahkan, karena no penjualan sama",
-    //      });
-    //      setInfo("gagal");
-    //  }
+    totalBelumDibayar = grandTotal;
+    setLoading(true);
+    values.status_data = simpanData;
+    setInfo("sukses");
+    nonPanel.data.forEach((element) => {
+      //if (values.no_non_panel_sale == element.attributes.no_non_panel_sale) {
+      //    notification["error"]({
+      //        message: "Gagal menambahkan data",
+      //        description:
+      //            "Data gagal ditambahkan, karena no penjualan sama",
+      //    });
+      //    setInfo("gagal");
+      //}
 
-    //  if(customer.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
-    //});
+      if(customer.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
+    });
 
-    //customerData.data.forEach((element) => {
-    //  console.log("limit", element.attributes.credit_limit);
-    //  if(customer.id == element.id && totalBelumDibayar > element.attributes.credit_limit){
-    //      notification["error"]({
-    //          message: "Gagal menambahkan data",
-    //          description:
-    //              "Data gagal ditambahkan, karena melebihi limit kredit",
-    //      });
-    //      setInfo("gagal");
-    //  }
-    //});
+    customerData.data.forEach((element) => {
+      console.log("limit", element.attributes.credit_limit);
+      if(customer.id == element.id && totalBelumDibayar > element.attributes.credit_limit){
+          notification["error"]({
+              message: "Gagal menambahkan data",
+              description:
+                  "Data gagal ditambahkan, karena melebihi limit kredit",
+          });
+          setInfo("gagal");
+      }
+    });
+
+    try {
+      /* 
+      TODO:
+      * 1. Update Detail Penjualan Sales
+      * 2. Update Penjualan Sales
+      */
+
+      console.log("data values", values);
+
+      // master Penjualan Sales
+      values.customer = customer.id;
+      values.customer_name = customer.attributes?.name;
+      values.location = selectedLocationId;
+      values.dpp = dpp;
+      values.ppn = ppn;
+      values.total = grandTotal;
+      values.area = customer?.attributes?.area?.data;
+      values.wilayah = customer?.attributes?.wilayah?.data;
+
+      const sanitizedValues = cleanData(values);
+
+      const editedProduct = products.productInfo;
+      const details = products.productList?.map(({ attributes, id }, idx) => ({
+        qty: editedProduct?.[idx]?.qty || 1,
+        unit: editedProduct?.[idx]?.unit || attributes?.unit_1,
+        unit_price: editedProduct?.[idx]?.priceUnit || attributes?.sold_price_1,
+        disc: editedProduct?.[idx]?.disc || 0,
+        disc1: editedProduct?.[idx]?.d1 || attributes?.unit_1_dp1,
+        disc2: editedProduct?.[idx]?.d2 || attributes?.unit_1_dp2,
+        expired_date: values?.expired_date?.[idx]?.format("YYYY-MM-DD") || null,
+        product: id,
+        relation_id: editedProduct?.[idx]?.relation_id,
+        margin: editedProduct?.[idx]?.margin || 0,
+        sub_total: productSubTotal?.[idx],
+      }));
+
+      console.log("details", details);
+
+      let detailsId = [];
+
+      for (let item in details) {
+        var detail = details[item];
+        var id = detail.relation_id;
+        var postDetail = cleanData(detail);
+        console.log("post detail", postDetail, id);
+        if (id) {
+          const res = await updateDetailData(postDetail, id);
+          console.log("response update detail ==>", res);
+          detailsId.push(res?.data?.id);
+        } else {
+          const res = await createDetailData(postDetail);
+          console.log("response create detail ==>", res);
+          detailsId.push(res?.data?.id);
+        }
+      }
+
+      sanitizedValues.non_panel_sale_details = detailsId;
+
+      // update master Data
+      const res = await updateMasterData(sanitizedValues, editData.id);
+      console.log("response create master ==>", res);
+
+      if (res?.data?.id) {
+        notification.success({
+          message: "Berhasil mengubah data",
+          description: "Data Penjualan Non Panel berhasil diubah. Silahkan cek pada halaman Penjualan Non Panel",
+        });
+        router.replace("/dashboard/penjualan/non_panel");
+        updateStock(res.data.id, selectedLocationId);
+      } else {
+        notification.error({
+          message: "Gagal mengubah data",
+          description: "Data Penjualan Non Panel gagal diubah. Silahkan cek data anda dan coba lagi",
+        });
+      }
+
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+      notification.error({
+        message: "Gagal menambahkan data",
+        description: "Data Penjualan Non Panel gagal dibuat. Silahkan cek data anda dan coba lagi",
+      });
+      setLoading(false);
+    }
 
     //setDataValues(values);
-    //setLoading(false);
+    setLoading(false);
   };
 
   const createDetailSale = async () => {
-    await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/non-panel-sale-details", form);
+    //await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/non-panel-sale-details", form);
   };
 
   const createSale = async (values) => {
-    values.sale_date = today;
-    values.added_by = user.name;
-    //values.category = selectedCategory;
-    values.dpp = dpp;
-    values.ppn = ppn;
-    values.customer = customer;
-    values.area = customer?.attributes?.area?.data;
-    values.wilayah = customer?.attributes?.wilayah?.data;
-    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/non-panel-sales/", "non panel sale", selectedLocationId, updateStock);
+    //values.sale_date = today;
+    //values.added_by = user.name;
+    ////values.category = selectedCategory;
+    //values.dpp = dpp;
+    //values.ppn = ppn;
+    //values.customer = customer;
+    //values.area = customer?.attributes?.area?.data;
+    //values.wilayah = customer?.attributes?.wilayah?.data;
+    //await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/non-panel-sales/", "non panel sale", selectedLocationId, updateStock);
   };
 
   const updateStock = async (id, locations) => {
@@ -659,7 +808,7 @@ function Edit({ props }) {
 
       //SET INITIAL PRODUCT
         dispatch({
-            type: "SET_SALE_INITIAL_PRODUCT",
+            type: "SET_INITIAL_PRODUCT",
             product: items?.attributes?.product?.data,
             qty: items?.attributes?.qty,
             unit: items?.attributes?.unit,
@@ -667,6 +816,7 @@ function Edit({ props }) {
             priceUnit: items?.attributes?.unit_price,
             disc: items?.attributes?.disc,
             margin: items?.attributes?.margin,
+            relation_id: items?.id,
             //priceAfterDisc,
             //subTotal,
             d1: items?.attributes?.disc1 ?? 0,
