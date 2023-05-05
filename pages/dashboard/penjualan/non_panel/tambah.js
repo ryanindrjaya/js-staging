@@ -280,6 +280,70 @@ function Toko({ props }) {
     maximumFractionDigits: 2,
   });
 
+  const cekLimit = async () => {
+      totalBelumDibayar = grandTotal;
+
+      nonPanel.data.forEach((element) => {
+          if (customer?.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
+      });
+
+      customerData.data.forEach((element) => {
+          if (customer?.id == element.id && totalBelumDibayar > element.attributes.credit_limit) {
+              notification["error"]({
+                  message: "Gagal menambahkan data",
+                  description:
+                      "Data gagal ditambahkan, karena melebihi limit kredit",
+              });
+              setInfo("gagal");
+          }
+      });
+  };
+
+  const calculateDifference = (date1, date2) => {
+    const d1 = new Date(date1);
+    const d2 = new Date(date2);
+    var difference = null;
+
+    if (isNaN(d1) || isNaN(d2)) {
+      difference = "Invalid";
+    } else {
+      const timeDiff = Math.abs(d2.getTime() - d1.getTime());
+      const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+      difference = diffDays;
+    }
+
+    return difference;
+  };
+
+  const cekTermin = async () => {
+      let data = null;
+
+      nonPanel.data.some((element) => {
+          console.log("non element", element, customer);
+          if (customer.id == element.attributes.customer.data.id && element.attributes.status == "Belum Dibayar") {
+            //if (element.attributes.sale_date )
+            data = element;
+            return true;
+          }
+      });
+
+      var difference = calculateDifference(data.attributes.sale_date, today);
+      console.log("break diff", difference);
+
+      var type = customer.attributes.credit_limit_duration_type;
+      var duration = customer.attributes.credit_limit_duration;
+      if (type == "Hari" && difference > duration) console.log("termin hari aman");
+      else if (type == "Bulan" && difference > (duration * 30)) console.log("termin bulan aman");
+      else {
+          notification["info"]({
+              message: "Ada penjualan yang belum dibayar",
+              description:
+                  "Dengan no : " + data.attributes.no_non_panel_sale,
+          });
+      }
+      
+  };
+
   const onFinish = (values) => {
     console.log("finish", customerData, customer.id, totalBelumDibayar);
 
@@ -300,17 +364,20 @@ function Toko({ props }) {
       if(customer.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
     });
 
-    customerData.data.forEach((element) => {
-      console.log("limit", element.attributes.credit_limit);
-      if(customer.id == element.id && totalBelumDibayar > element.attributes.credit_limit){
-          notification["error"]({
-              message: "Gagal menambahkan data",
-              description:
-                  "Data gagal ditambahkan, karena melebihi limit kredit",
-          });
-          setInfo("gagal");
-      }
-    });
+    cekLimit();
+    cekTermin();
+
+    //customerData.data.forEach((element) => {
+    //  console.log("limit", element.attributes.credit_limit);
+    //  if(customer.id == element.id && totalBelumDibayar > element.attributes.credit_limit){
+    //      notification["error"]({
+    //          message: "Gagal menambahkan data",
+    //          description:
+    //              "Data gagal ditambahkan, karena melebihi limit kredit",
+    //      });
+    //      setInfo("gagal");
+    //  }
+    //});
 
     setDataValues(values);
     setLoading(false);
@@ -517,6 +584,10 @@ function Toko({ props }) {
       setPPN(0);
     }
   }, [ppnActive, grandTotal]);
+
+  useEffect(() => {
+    cekLimit();
+  }, [grandTotal]);
 
   useEffect(() => {
     locations.forEach((element) => {

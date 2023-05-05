@@ -21,7 +21,7 @@ import createInventory from "../../utility/createInventory";
 import moment from "moment";
 
 Edit.getInitialProps = async (context) => {
-  const cookies = nookies.get(context); console.log("cookies", cookies, context.query.id);
+  const cookies = nookies.get(context);
   const idEdit = context.query.id;
 
   const endpoint = process.env.NEXT_PUBLIC_URL + "/non-panel-sales/" + idEdit + "?populate=deep";
@@ -165,8 +165,8 @@ function Edit({ props }) {
   const [totalPrice, setTotalPrice] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
 
-  const [dppActive, setDPPActive] = useState("Active");
-  const [ppnActive, setPPNActive] = useState("Active");
+  const [dppActive, setDPPActive] = useState("DPP");
+  const [ppnActive, setPPNActive] = useState("PPN");
   const [simpanData, setSimpanData] = useState("Publish");
   const [discMax, setDiscMax] = useState();
 
@@ -201,14 +201,14 @@ function Edit({ props }) {
   const [info, setInfo] = useState();
 
   // customer
-  const [customer, setCustomer] = useState(); console.log("customer", customer);
+  const [customer, setCustomer] = useState();
 
   // NO Non Panel Sale
   var noNonPanelSale = String(nonPanel?.meta?.pagination.total + 1).padStart(3, "0");
   const [categorySale, setCategorySale] = useState(`PNP/ET/${user.id}/${noNonPanelSale}/${mm}/${yyyy}`);
 
   const handleBiayaPengiriman = (values) => {
-    setBiayaPengiriman(values.target.value);
+    setBiayaPengiriman(values);
   }; 
 
   const getProductAtLocation = async () => {
@@ -361,142 +361,171 @@ function Edit({ props }) {
     return res;
   };
 
+  const cekLimit = async () => {
+      totalBelumDibayar = grandTotal;
+
+      nonPanel.data.forEach((element) => {
+          if (customer?.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
+      });
+
+      customerData.data.forEach((element) => {
+          if (customer?.id == element.id && totalBelumDibayar > element.attributes.credit_limit) {
+              notification["error"]({
+                  message: "Gagal menambahkan data",
+                  description:
+                      "Data gagal ditambahkan, karena melebihi limit kredit",
+              });
+              setInfo("gagal");
+          }
+      });
+  };
+
+  const calculateDifference = (date1, date2) => {
+    const d1 = new Date(date1);
+    const d2 = new Date(date2);
+    var difference = null;
+
+    if (isNaN(d1) || isNaN(d2)) {
+      difference = "Invalid";
+    } else {
+      const timeDiff = Math.abs(d2.getTime() - d1.getTime());
+      const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+      difference = diffDays;
+    }
+
+    return difference;
+  };
+
+  const cekTermin = async () => {
+      let data = null;
+
+      nonPanel.data.some((element) => {
+          console.log("non element", element, customer);
+          if (customer.id == element.attributes.customer.data.id && element.attributes.status == "Belum Dibayar") {
+            //if (element.attributes.sale_date )
+            data = element;
+            return true;
+          }
+      });
+      
+      var difference = calculateDifference(data.attributes.sale_date, editData.attributes.sale_date);
+      console.log("break diff", difference);
+
+      var type = customer.attributes.credit_limit_duration_type;
+      var duration = customer.attributes.credit_limit_duration;
+      if (type == "Hari" && difference > duration) console.log("termin hari aman");
+      else if (type == "Bulan" && difference > (duration * 30)) console.log("termin bulan aman");
+      else {
+          notification["info"]({
+              message: "Ada penjualan yang belum dibayar",
+              description:
+                  "Dengan no : " + data.attributes.no_non_panel_sale,
+          });
+      }
+      
+  };
+
   const onFinish = async (values) => {
     console.log("finish", customerData, customer.id, totalBelumDibayar);
 
-    totalBelumDibayar = grandTotal;
+    //totalBelumDibayar = grandTotal;
     setLoading(true);
     values.status_data = simpanData;
     setInfo("sukses");
-    nonPanel.data.forEach((element) => {
-      //if (values.no_non_panel_sale == element.attributes.no_non_panel_sale) {
-      //    notification["error"]({
-      //        message: "Gagal menambahkan data",
-      //        description:
-      //            "Data gagal ditambahkan, karena no penjualan sama",
-      //    });
-      //    setInfo("gagal");
-      //}
 
-      if(customer.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
-    });
+    cekLimit();
+    cekTermin();
 
-    customerData.data.forEach((element) => {
-      console.log("limit", element.attributes.credit_limit);
-      if(customer.id == element.id && totalBelumDibayar > element.attributes.credit_limit){
-          notification["error"]({
-              message: "Gagal menambahkan data",
-              description:
-                  "Data gagal ditambahkan, karena melebihi limit kredit",
-          });
-          setInfo("gagal");
+      if (info == "sukses") {
+          try {
+              /* 
+              TODO:
+              * 1. Update Detail Penjualan Sales
+              * 2. Update Penjualan Sales
+              */
+
+              console.log("data values", values);
+
+              // master Penjualan Sales
+              values.customer = customer.id;
+              values.customer_name = customer.attributes?.name;
+              values.location = selectedLocationId;
+              values.dpp = dpp;
+              values.ppn = ppn;
+              values.total = grandTotal;
+              values.area = customer?.attributes?.area?.data;
+              values.wilayah = customer?.attributes?.wilayah?.data;
+
+              const sanitizedValues = cleanData(values);
+
+              const editedProduct = products.productInfo;
+              const details = products.productList?.map(({ attributes, id }, idx) => ({
+                  qty: editedProduct?.[idx]?.qty || 1,
+                  unit: editedProduct?.[idx]?.unit || attributes?.unit_1,
+                  unit_price: editedProduct?.[idx]?.priceUnit || attributes?.sold_price_1,
+                  disc: editedProduct?.[idx]?.disc || 0,
+                  disc1: editedProduct?.[idx]?.d1 || attributes?.unit_1_dp1,
+                  disc2: editedProduct?.[idx]?.d2 || attributes?.unit_1_dp2,
+                  expired_date: values?.expired_date?.[idx]?.format("YYYY-MM-DD") || null,
+                  product: id,
+                  relation_id: editedProduct?.[idx]?.relation_id,
+                  margin: editedProduct?.[idx]?.margin || 0,
+                  sub_total: productSubTotal?.[idx],
+              }));
+
+              console.log("details", details);
+
+              let detailsId = [];
+
+              for (let item in details) {
+                  var detail = details[item];
+                  var id = detail.relation_id;
+                  var postDetail = cleanData(detail);
+                  console.log("post detail", postDetail, id);
+                  if (id) {
+                      const res = await updateDetailData(postDetail, id);
+                      console.log("response update detail ==>", res);
+                      detailsId.push(res?.data?.id);
+                  } else {
+                      const res = await createDetailData(postDetail);
+                      console.log("response create detail ==>", res);
+                      detailsId.push(res?.data?.id);
+                  }
+              }
+
+              sanitizedValues.non_panel_sale_details = detailsId;
+
+              // update master Data
+              const res = await updateMasterData(sanitizedValues, editData.id);
+              console.log("response create master ==>", res);
+
+              if (res?.data?.id) {
+                  notification.success({
+                      message: "Berhasil mengubah data",
+                      description: "Data Penjualan Non Panel berhasil diubah. Silahkan cek pada halaman Penjualan Non Panel",
+                  });
+                  router.replace("/dashboard/penjualan/non_panel");
+                  updateStock(res.data.id, selectedLocationId);
+              } else {
+                  notification.error({
+                      message: "Gagal mengubah data",
+                      description: "Data Penjualan Non Panel gagal diubah. Silahkan cek data anda dan coba lagi",
+                  });
+              }
+
+              setLoading(false);
+          } catch (error) {
+              console.log(error);
+              notification.error({
+                  message: "Gagal menambahkan data",
+                  description: "Data Penjualan Non Panel gagal dibuat. Silahkan cek data anda dan coba lagi",
+              });
+              setLoading(false);
+          }
       }
-    });
-
-    try {
-      /* 
-      TODO:
-      * 1. Update Detail Penjualan Sales
-      * 2. Update Penjualan Sales
-      */
-
-      console.log("data values", values);
-
-      // master Penjualan Sales
-      values.customer = customer.id;
-      values.customer_name = customer.attributes?.name;
-      values.location = selectedLocationId;
-      values.dpp = dpp;
-      values.ppn = ppn;
-      values.total = grandTotal;
-      values.area = customer?.attributes?.area?.data;
-      values.wilayah = customer?.attributes?.wilayah?.data;
-
-      const sanitizedValues = cleanData(values);
-
-      const editedProduct = products.productInfo;
-      const details = products.productList?.map(({ attributes, id }, idx) => ({
-        qty: editedProduct?.[idx]?.qty || 1,
-        unit: editedProduct?.[idx]?.unit || attributes?.unit_1,
-        unit_price: editedProduct?.[idx]?.priceUnit || attributes?.sold_price_1,
-        disc: editedProduct?.[idx]?.disc || 0,
-        disc1: editedProduct?.[idx]?.d1 || attributes?.unit_1_dp1,
-        disc2: editedProduct?.[idx]?.d2 || attributes?.unit_1_dp2,
-        expired_date: values?.expired_date?.[idx]?.format("YYYY-MM-DD") || null,
-        product: id,
-        relation_id: editedProduct?.[idx]?.relation_id,
-        margin: editedProduct?.[idx]?.margin || 0,
-        sub_total: productSubTotal?.[idx],
-      }));
-
-      console.log("details", details);
-
-      let detailsId = [];
-
-      for (let item in details) {
-        var detail = details[item];
-        var id = detail.relation_id;
-        var postDetail = cleanData(detail);
-        console.log("post detail", postDetail, id);
-        if (id) {
-          const res = await updateDetailData(postDetail, id);
-          console.log("response update detail ==>", res);
-          detailsId.push(res?.data?.id);
-        } else {
-          const res = await createDetailData(postDetail);
-          console.log("response create detail ==>", res);
-          detailsId.push(res?.data?.id);
-        }
-      }
-
-      sanitizedValues.non_panel_sale_details = detailsId;
-
-      // update master Data
-      const res = await updateMasterData(sanitizedValues, editData.id);
-      console.log("response create master ==>", res);
-
-      if (res?.data?.id) {
-        notification.success({
-          message: "Berhasil mengubah data",
-          description: "Data Penjualan Non Panel berhasil diubah. Silahkan cek pada halaman Penjualan Non Panel",
-        });
-        router.replace("/dashboard/penjualan/non_panel");
-        updateStock(res.data.id, selectedLocationId);
-      } else {
-        notification.error({
-          message: "Gagal mengubah data",
-          description: "Data Penjualan Non Panel gagal diubah. Silahkan cek data anda dan coba lagi",
-        });
-      }
-
-      setLoading(false);
-    } catch (error) {
-      console.log(error);
-      notification.error({
-        message: "Gagal menambahkan data",
-        description: "Data Penjualan Non Panel gagal dibuat. Silahkan cek data anda dan coba lagi",
-      });
-      setLoading(false);
-    }
 
     //setDataValues(values);
     setLoading(false);
-  };
-
-  const createDetailSale = async () => {
-    //await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/non-panel-sale-details", form);
-  };
-
-  const createSale = async (values) => {
-    //values.sale_date = today;
-    //values.added_by = user.name;
-    ////values.category = selectedCategory;
-    //values.dpp = dpp;
-    //values.ppn = ppn;
-    //values.customer = customer;
-    //values.area = customer?.attributes?.area?.data;
-    //values.wilayah = customer?.attributes?.wilayah?.data;
-    //await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/non-panel-sales/", "non panel sale", selectedLocationId, updateStock);
   };
 
   const updateStock = async (id, locations) => {
@@ -511,7 +540,7 @@ function Edit({ props }) {
     const endpoint = process.env.NEXT_PUBLIC_URL + `/non-panel-sales/${id}?populate=deep`;
     const req = await fetch(endpoint, options);
     const res = await req.json();
-    const row = res.data; console.log("row stock", row);
+    const row = res.data;
 
     const trxStatus = row.attributes?.status_data;
     //const LPBLocationId = row.attributes.location?.data?.id;
@@ -618,11 +647,6 @@ function Edit({ props }) {
     setOpen(true);
   };
 
-  const handleOk = () => {
-    //setModalText('The modal will be closed after two seconds');
-    
-  };
-
   const handleCancel = () => {
     console.log('Clicked cancel button');
     setOpen(false);
@@ -638,6 +662,8 @@ function Edit({ props }) {
     } else {
       setGrandTotal(totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
     }
+
+    if (totalPrice) setTotalWithDisc();
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
 
   useEffect(() => {
@@ -658,23 +684,13 @@ function Edit({ props }) {
   }, [additionalFee]);
 
   useEffect(() => {
-    if (listId.length > 0) {
-      createSale(dataValues);
-    }
-  }, [listId]);
-
-  useEffect(() => {
-    if (dataValues && info == "sukses") createDetailSale();
-  }, [dataValues]);
-
-  useEffect(() => {
     // set dpp
     if(dppActive == "DPP"){
       setDPP(grandTotal / 1.11);
     } else {
       setDPP(0);
     }
-  }, [dppActive, grandTotal]);
+  }, [dppActive, grandTotal, totalPrice]);
 
   useEffect(() => {
     // set ppn
@@ -683,7 +699,11 @@ function Edit({ props }) {
     } else {
       setPPN(0);
     }
-  }, [ppnActive, grandTotal]);
+  }, [ppnActive, grandTotal, totalPrice]);
+
+  useEffect(() => {
+    cekLimit();
+  }, [grandTotal]);
 
   useEffect(() => {
     locations.forEach((element) => {
@@ -693,8 +713,10 @@ function Edit({ props }) {
 
   useEffect(() => {
     // set max value
-    if(discType == "Tetap") setDiscMax(totalPrice);
-    if(discType == "Persentase") setDiscMax(100);
+    if(isFetchinData == false){
+      if(discType == "Tetap") setDiscMax(totalPrice);
+      if(discType == "Persentase") setDiscMax(100);
+    }
   }, [discType]);
 
   useEffect(() => {
@@ -738,6 +760,9 @@ function Edit({ props }) {
       },
       location: editData.attributes?.location?.data.id,
 
+      disc_type: editData.attributes?.disc_type,
+      disc_value: editData.attributes?.disc_value,
+      delivery_fee: editData.attributes?.delivery_fee,
       DPP_active: dpp,
       PPN_active: ppn,
 
@@ -755,6 +780,9 @@ function Edit({ props }) {
     setCustomer(editData.attributes?.customer?.data);
     setSelectedLocationId(editData.attributes?.location?.data.id);
     getProductAtLocation(editData.attributes?.location?.data.id);
+    setDiscType(editData.attributes?.disc_type);
+    handleBiayaPengiriman(editData.attributes?.delivery_fee);
+    //setTotalWithDisc(editData.attributes?.disc_value);
     setDPP(editData.attributes?.dpp);
     setDPPActive(dpp);
     setPPN(editData.attributes?.ppn);
@@ -953,7 +981,7 @@ function Edit({ props }) {
                 </div>
                 
                 <div className="w-full md:w-1/3 px-3 mb-2">
-                  <p className="m-0">Keterangan : {console.log("customer", customer)}</p>
+                  <p className="m-0">Keterangan : </p>
                   <p className="m-0"> {customer?.attributes?.address}</p>
                   {/*<p> {locationData?.city}</p>*/}
                 </div>
@@ -1108,7 +1136,7 @@ function Edit({ props }) {
                       style={{
                         width: "40%",
                       }}
-                      onChange={handleBiayaPengiriman}
+                      onChange={(values) => handleBiayaPengiriman(values.target.value)}
                     />
                   </Form.Item>
                 </div>
