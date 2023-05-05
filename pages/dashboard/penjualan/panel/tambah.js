@@ -104,8 +104,6 @@ const fetchInven = async (cookies) => {
 };
 
 const fetchCustomer = async (cookies) => {
-    let name = "walk in customer"
-    //const endpoint = process.env.NEXT_PUBLIC_URL + `/customers?filters[name][$contains]=${name}`;
     const endpoint = process.env.NEXT_PUBLIC_URL + "/customers?populate=deep";
     const options = {
         method: "GET",
@@ -151,8 +149,8 @@ function Toko({ props }) {
   const [limitCredit, setLimitCredit] = useState(0);
   var totalBelumDibayar = 0;
 
-  const [dppActive, setDPPActive] = useState("Active");
-  const [ppnActive, setPPNActive] = useState("Active");
+  const [dppActive, setDPPActive] = useState("DPP");
+  const [ppnActive, setPPNActive] = useState("PPN");
   const [simpanData, setSimpanData] = useState("Publish");
   const [discMax, setDiscMax] = useState();
 
@@ -613,7 +611,8 @@ function Toko({ props }) {
                 footer={<div></div>}
               >
                  <ReportTodayTable
-                   data={panel}     
+                   data={panel}
+                   page="panel"
                  />
               </Modal>
             </div>
@@ -644,7 +643,7 @@ function Toko({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Customer onChangeCustomer={setCustomer} />
+                  <Customer onChangeCustomer={setCustomer} page={"PANEL"} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
                   <Form.Item name="tempo_days" initialValue={"0"} noStyle>
@@ -805,17 +804,17 @@ function Toko({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full flex justify-end px-3 -mt-9">
-                  <Form.Item name="dpp" value={dpp} className="font-bold text-lg">
+                  <Form.Item name="grandtotal" value={totalPrice} className="font-bold text-lg">
                     <span> Total Harga : {formatter.format(totalPrice)}</span>
                   </Form.Item>
                 </div>
                 <div className="w-full flex justify-end px-3 -mt-6">
-                  <Form.Item name="ppn" value={ppn} className="font-bold text-lg">
+                  <Form.Item name="dpp" value={dpp} className="font-bold text-lg">
                     <span> DPP : {formatter.format(dpp)}</span>
                   </Form.Item>
                 </div>
                 <div className="w-full flex justify-end px-3 -mt-6">
-                  <Form.Item name="grandtotal" value={totalPrice} className="font-bold text-lg">
+                  <Form.Item name="ppn" value={ppn} className="font-bold text-lg">
                     <span> PPN : {formatter.format(ppn)}</span>
                   </Form.Item>
                 </div>
@@ -849,6 +848,7 @@ function Toko({ props }) {
                 <div className="w-full md:w-1/3 px-3">
                   <Form.Item name="DPP_active">
                     <Select
+                      defaultValue={dppActive}
                       placeholder="Pakai DPP"
                       //onChange={setDPPActive}
                       onChange={setDPPActive}
@@ -869,6 +869,7 @@ function Toko({ props }) {
                 <div className="w-full md:w-1/3 px-3">
                   <Form.Item name="PPN_active">
                     <Select
+                      defaultValue={ppnActive}
                       placeholder="Pakai PPN"
                       //onChange={setDPPActive}
                       onChange={setPPNActive}

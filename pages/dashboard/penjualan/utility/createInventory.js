@@ -13,9 +13,8 @@ const cookies = nookies.get(null, "token");
 
 async function createInventory(row, locations) {
   const data = [];
-  const saleDetails = row.attributes.panel_sale_details.data;
-  const noSale = row.attributes.no_panel_sale;
-
+  const saleDetails = row.attributes.panel_sale_details?.data ?? row.attributes.non_panel_sale_details?.data;
+  const noSale = row.attributes.no_panel_sale ?? row.attributes.no_non_panel_sale;
   saleDetails.forEach((element) => {
 
     const unit = element.attributes.unit;
@@ -23,9 +22,7 @@ async function createInventory(row, locations) {
     const product = element.attributes.product.data;
     const location = locations;
     const expDate = element.attributes.expired_date;
-    //const batch = element.attributes.batch ?? null;
-
-    //if (unitOrder && totalOrder && product && location) {
+    
     if (unit && qty && product && location) {
       const item = {
         location: location,
@@ -35,7 +32,7 @@ async function createInventory(row, locations) {
         exp_date: expDate,
         //batch,
       };
-
+      console.log("item", item);
       data.push(item);
       console.log("element detail", element, item, data);
     }

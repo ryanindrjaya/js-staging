@@ -47,6 +47,10 @@ export default function ReactDataTable({
     //router.push("order_pembelian/print/" + row.id);
   };
 
+  const handleEdit = (row) => {
+    if (page == "nonpanel") router.push("non_panel/edit/" + row.id);
+  };
+
   const handlePiutang = (row) => {
     if (row.attributes.status_data == "Draft") updateStock(row.id, row?.attributes?.location?.data?.id);
     else {
@@ -58,7 +62,10 @@ export default function ReactDataTable({
   };
 
   const print = (row) => {
-    router.push("/dashboard/penjualan/toko/print/" + row.id);
+    if (page == "panel" || page == "nonpanel") openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
+    else {
+      router.push("/dashboard/penjualan/toko/print/" + row.id);
+    }
   };
 
   const returPenjualan = (row) => {
@@ -102,7 +109,7 @@ export default function ReactDataTable({
 
 
   const content = (row) => {
-    if(page == "panel"){
+    if(page == "panel" || page == "nonpanel"){
 
       return (
         <div>
@@ -121,7 +128,7 @@ export default function ReactDataTable({
           ) : (
             <div>
               <button
-                onClick={() => lihat(row)}
+                onClick={() => handleEdit(row)}
                 className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
               >
                 <EditOutlined className="mr-2 mt-0.5 float float-left" />
@@ -253,7 +260,7 @@ export default function ReactDataTable({
       name: "Customer",
       width: "180px",
       selector: (row) => {
-        if(page == "panel") return row.attributes?.customer?.data?.attributes?.name ?? "-";
+        if(page == "panel" || page == "nonpanel") return row.attributes?.customer?.data?.attributes?.name ?? "-";
         else return row.attributes?.customer_name ?? "-";
       },
     },
@@ -360,7 +367,7 @@ export default function ReactDataTable({
       columns={columns}
       data={data.data}
       pagination
-      noDataComponent={"Belum ada data Penjualan Toko"}
+      noDataComponent={"Belum ada data Penjualan"}
     />
   );
 }

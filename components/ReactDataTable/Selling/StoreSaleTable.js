@@ -177,7 +177,7 @@ export default function ReactDataTable({
         if (products.productInfo[idx]?.unitIndex) {
           defaultIndex = products.productInfo[idx].unitIndex;
         }
-
+        console.log("default qty", defaultQty, defaultIndex);
         return (
           <>
             <Row>
@@ -321,19 +321,21 @@ export default function ReactDataTable({
 
         return (
           <div className="disabled:bg-white">
-            <InputNumber
-              disabled
-              controls={false}
-              formatter={(value) => `${value}%`}
-              max={100}
-              min={0}
-              value={defaultDp1}
-              name={["disc_rp1", `${idx}`]}
-              onChange={(e) => onChangeD1D2D3(e, row, "d1", idx)}
-              style={{
-                width: "60px",
-              }}
-            />
+            <Form.Item name={["disc_rp1", `${idx}`]} noStyle>
+                <InputNumber
+                  disabled
+                  controls={false}
+                  formatter={(value) => `${value}%`}
+                  max={100}
+                  min={0}
+                  value={defaultDp1}
+                  //name={["disc_rp1", `${idx}`]}
+                  onChange={(e) => onChangeD1D2D3(e, row, "d1", idx)}
+                  style={{
+                    width: "60px",
+                  }}
+                />
+            </Form.Item>
           </div>
         );
       },
@@ -355,17 +357,19 @@ export default function ReactDataTable({
 
         return (
           <div className="disabled:bg-white">
-            <InputNumber
-              controls={false}
-              formatter={(value) => `${value}%`}
-              max={100}
-              min={0}
-              name={["disc_rp2", `${idx}`]}
-              onChange={(e) => onChangeD1D2D3(e, row, "d2", idx)}
-              style={{
-                width: "60px",
-              }}
-            />
+            <Form.Item name={["disc_rp2", `${idx}`]} noStyle>
+                <InputNumber
+                  controls={false}
+                  formatter={(value) => `${value}%`}
+                  max={100}
+                  min={0}
+                  //name={["disc_rp2", `${idx}`]}
+                  onChange={(e) => onChangeD1D2D3(e, row, "d2", idx)}
+                  style={{
+                    width: "60px",
+                  }}
+                />
+            </Form.Item>
           </div>
         );
       },
