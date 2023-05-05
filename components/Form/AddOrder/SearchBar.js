@@ -18,6 +18,7 @@ export default function SearchBar({
   inventoryLocation,
   getProductAtLocation,
   location,
+  disabled = false,
 }) {
   const dispatch = useDispatch();
 
@@ -143,11 +144,12 @@ export default function SearchBar({
       <div className="w-full md:w-full mb-2 md:mb-0">
         <Form.Item name="products">
           <Select
+            disabled={disabled}
             allowClear
             size="large"
             showSearch
             value={product}
-            placeholder="Ketikan Nama Produk / SKU"
+            placeholder={disabled ? "Pilih lokasi gudang terlebih dahulu" : "Ketikan Nama Produk / SKU"}
             onSearch={handleSearch}
             onChange={handleChange}
             onSelect={handleSelect}
