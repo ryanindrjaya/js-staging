@@ -75,6 +75,9 @@ function Pembayaran({ props }) {
 
   // HISTORY
   var purchasingHistory = props.purchases.data.attributes.purchasing_payments?.data;
+
+  console.log(purchasingHistory);
+
   var lastIndex = purchasingHistory.length - 1;
   var paymentRemaining = purchasingHistory[lastIndex]?.attributes.payment_remaining;
 
@@ -402,7 +405,10 @@ function Pembayaran({ props }) {
                     <p className="text-sm m-0 pt-1 right-16">Tanggal Pembelian : {purchasingDate}</p>
                     <p className="text-sm m-0 pt-1">Status Pembelian : {statusPembelian}</p>
                     <p className="text-sm m-0 pt-1">Lokasi Gudang : {lokasi}</p>
-                    <button type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex mb-4 mt-4">
+                    <button
+                      type="button"
+                      className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex mb-4 mt-4"
+                    >
                       <div className="text-white text-center text-sm font-bold">
                         <a className="text-white no-underline text-xs sm:text-xs">Lihat Dokumen</a>
                       </div>
@@ -449,13 +455,22 @@ function Pembayaran({ props }) {
                           },
                         ]}
                       >
-                        <DatePicker placeholder="Tanggal Pembayaran" size="large" format={"DD/MM/YYYY"} style={{ width: "200%" }} />
+                        <DatePicker
+                          placeholder="Tanggal Pembayaran"
+                          size="large"
+                          format={"DD/MM/YYYY"}
+                          style={{ width: "200%" }}
+                        />
                       </Form.Item>
                     </div>
 
                     <div>
-                      <p className="text-sm m-0 pt-1  text-start">Saldo Di muka : {formatter.format(getFirstPayment())}</p>
-                      <p className="text-sm m-0 pt-1  text-start">Jumlah Pembayaran : {formatter.format(totalPayment)}</p>
+                      <p className="text-sm m-0 pt-1  text-start">
+                        Saldo Di muka : {formatter.format(getFirstPayment())}
+                      </p>
+                      <p className="text-sm m-0 pt-1  text-start">
+                        Jumlah Pembayaran : {formatter.format(totalPayment)}
+                      </p>
                     </div>
 
                     <div className="pt-3">
@@ -551,9 +566,15 @@ function Pembayaran({ props }) {
                     <p className="text-sm m-0 pt-1  text-start">PPN : {formatter.format(getPPN())}</p>
                     <p className="text-lg m-0 pt-4 font-bold text-start">TOTAL PEMBAYARAN INC PAJAK :</p>
                     <p className="text-lg m-0 pt-1 font-bold text-start">{formatter.format(getPriceInclTax())}</p>
-                    <p className="text-sm m-0 pt-5 font-bold text-start">PEMBAYARAN TEMPO : {formatter.format(tempoPayment)}</p>
-                    <p className="text-sm m-0 pt-1 font-bold text-start">Total Pembayaran : {formatter.format(getPriceInclTax())}</p>
-                    <p className="text-sm m-0 pt-1 font-bold text-start">Total Kembali : {formatter.format(changePrice)}</p>
+                    <p className="text-sm m-0 pt-5 font-bold text-start">
+                      PEMBAYARAN TEMPO : {formatter.format(tempoPayment)}
+                    </p>
+                    <p className="text-sm m-0 pt-1 font-bold text-start">
+                      Total Pembayaran : {formatter.format(getPriceInclTax())}
+                    </p>
+                    <p className="text-sm m-0 pt-1 font-bold text-start">
+                      Total Kembali : {formatter.format(changePrice)}
+                    </p>
                   </div>
                 </Row>
               </div>
@@ -566,22 +587,34 @@ function Pembayaran({ props }) {
 
               <div className="my-5">
                 <p className="font-bold">Riwayat Pembayaran</p>
-                {purchasingHistory.map((element) => {
+                {purchasingHistory.map((element, idx) => {
                   var date = new Date(element.attributes.payment_date).toLocaleDateString();
                   return (
                     <Collapse accordion>
-                      <Panel header={date} key={date}>
-                        <p>{`Pembayaran 1 : ${formatter.format(element.attributes.payment_value_1)} (${element.attributes.payment_method_1})`}</p>
+                      <Panel header={date} key={idx}>
+                        <p>{`Pembayaran 1 : ${formatter.format(element.attributes.payment_value_1)} (${
+                          element.attributes.payment_method_1
+                        })`}</p>
                         <p>
-                          {`Pembayaran 2 : ${formatter.format(element.attributes.payment_value_2)} (${element.attributes.payment_method_2 ?? "-"})`}
+                          {`Pembayaran 2 : ${formatter.format(element.attributes.payment_value_2)} (${
+                            element.attributes.payment_method_2 ?? "-"
+                          })`}
                         </p>
                         <p>
-                          {`Pembayaran 3 : ${formatter.format(element.attributes.payment_value_3)} (${element.attributes.payment_method_3 ?? "-"})`}
+                          {`Pembayaran 3 : ${formatter.format(element.attributes.payment_value_3)} (${
+                            element.attributes.payment_method_3 ?? "-"
+                          })`}
                         </p>
 
-                        <p className="font-bold pt-5">{`Pembayaran : ${formatter.format(element.attributes.payment)}`}</p>
-                        <p className="font-bold">{`Total Pembayaran : ${formatter.format(element.attributes.total_payment)}`}</p>
-                        <p className="font-bold">{`Sisa Pembayaran : ${formatter.format(element.attributes.payment_remaining)}`}</p>
+                        <p className="font-bold pt-5">{`Pembayaran : ${formatter.format(
+                          element.attributes.payment
+                        )}`}</p>
+                        <p className="font-bold">{`Total Pembayaran : ${formatter.format(
+                          element.attributes.total_payment
+                        )}`}</p>
+                        <p className="font-bold">{`Sisa Pembayaran : ${formatter.format(
+                          element.attributes.payment_remaining
+                        )}`}</p>
                         <p className="font-bold">{`Kembalian : ${formatter.format(element.attributes.change)}`}</p>
                         <p className="pt-5 italic">{`Catatan : ${element.attributes.additional_note ?? "-"}`}</p>
                       </Panel>
