@@ -24,7 +24,7 @@ Edit.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const idEdit = context.query.id;
 
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/non-panel-sales/" + idEdit + "?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/panel-sales/" + idEdit + "?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -45,8 +45,8 @@ Edit.getInitialProps = async (context) => {
   const reqInven = await fetchInven(cookies);
   const inven = await reqInven.json();
 
-  const reqNonPanel = await fetchNonPanel(cookies);
-  const nonPanel = await reqNonPanel.json();
+  const reqPanel = await fetchPanel(cookies);
+  const panel = await reqPanel.json();
 
   const reqCustomer = await fetchCustomer(cookies);
   const customer = await reqCustomer.json();
@@ -56,7 +56,7 @@ Edit.getInitialProps = async (context) => {
       user,
       locations,
       inven,
-      nonPanel,
+      panel,
       customer,
       editData
     },
@@ -77,8 +77,8 @@ const fetchData = async (cookies) => {
   return req;
 };
 
-const fetchNonPanel = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/non-panel-sales?populate=deep";
+const fetchPanel = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/panel-sales?populate=deep";
     const options = {
         method: "GET",
         headers: {
@@ -140,7 +140,7 @@ function Edit({ props }) {
   const locations = props.locations.data;
   const user = props.user;
   const inven = props.inven.data;
-  const nonPanel = props.nonPanel;
+  const panel = props.panel;
   const customerData = props.customer;
   const editData = props.editData.data;
 
@@ -202,9 +202,9 @@ function Edit({ props }) {
   // customer
   const [customer, setCustomer] = useState();
 
-  // NO Non Panel Sale
-  var noNonPanelSale = String(nonPanel?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`PNP/ET/${user.id}/${noNonPanelSale}/${mm}/${yyyy}`);
+  // NO Panel Sale
+  var noPanelSale = String(panel?.meta?.pagination.total + 1).padStart(3, "0");
+  const [categorySale, setCategorySale] = useState(`PNP/ET/${user.id}/${noPanelSale}/${mm}/${yyyy}`);
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values);
@@ -316,7 +316,7 @@ function Edit({ props }) {
   };
 
   const updateDetailData = async (data, id) => {
-    const endpoint = `${process.env.NEXT_PUBLIC_URL}/non-panel-sale-details/${id}`;
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/panel-sale-details/${id}`;
     const options = {
       method: "PUT",
       headers: {
@@ -331,7 +331,7 @@ function Edit({ props }) {
   };
 
   const createDetailData = async (data) => {
-    const endpoint = `${process.env.NEXT_PUBLIC_URL}/non-panel-sale-details`;
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/panel-sale-details`;
     const options = {
       method: "POST",
       headers: {
@@ -346,7 +346,7 @@ function Edit({ props }) {
   };
 
   const updateMasterData = async (data, id) => {
-    const endpoint = `${process.env.NEXT_PUBLIC_URL}/non-panel-sales/${id}`;
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/panel-sales/${id}`;
     const options = {
       method: "PUT",
       headers: {
@@ -363,7 +363,7 @@ function Edit({ props }) {
   const cekLimit = async () => {
       totalBelumDibayar = grandTotal;
 
-      nonPanel.data.forEach((element) => {
+      panel.data.forEach((element) => {
           if (customer?.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
       });
 
@@ -398,7 +398,7 @@ function Edit({ props }) {
   const cekTermin = async () => {
       let data = null;
 
-      nonPanel.data.some((element) => {
+      panel.data.some((element) => {
           
           if (customer.id == element.attributes.customer.data.id && element.attributes.status == "Belum Dibayar") {
             //if (element.attributes.sale_date )
@@ -417,13 +417,15 @@ function Edit({ props }) {
           notification["info"]({
               message: "Ada penjualan yang belum dibayar",
               description:
-                  "Dengan no : " + data.attributes.no_non_panel_sale,
+                  "Dengan no : " + data.attributes.no_panel_sale,
+              duration: 10,
           });
       }
-      
+
   };
 
   const onFinish = async (values) => {
+
     setLoading(true);
     values.status_data = simpanData;
 
@@ -494,14 +496,14 @@ function Edit({ props }) {
               if (res?.data?.id) {
                   notification.success({
                       message: "Berhasil mengubah data",
-                      description: "Data Penjualan Non Panel berhasil diubah. Silahkan cek pada halaman Penjualan Non Panel",
+                      description: "Data Penjualan Panel berhasil diubah. Silahkan cek pada halaman Penjualan Panel",
                   });
-                  router.replace("/dashboard/penjualan/non_panel");
+                  router.replace("/dashboard/penjualan/panel");
                   updateStock(res.data.id, selectedLocationId);
               } else {
                   notification.error({
                       message: "Gagal mengubah data",
-                      description: "Data Penjualan Non Panel gagal diubah. Silahkan cek data anda dan coba lagi",
+                      description: "Data Penjualan Panel gagal diubah. Silahkan cek data anda dan coba lagi",
                   });
               }
 
@@ -510,7 +512,7 @@ function Edit({ props }) {
               console.log(error);
               notification.error({
                   message: "Gagal menambahkan data",
-                  description: "Data Penjualan Non Panel gagal dibuat. Silahkan cek data anda dan coba lagi",
+                  description: "Data Penjualan Panel gagal dibuat. Silahkan cek data anda dan coba lagi",
               });
               setLoading(false);
           }
@@ -529,7 +531,7 @@ function Edit({ props }) {
         Authorization: "Bearer " + cookies.token,
       },
     };
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/non-panel-sales/${id}?populate=deep`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/panel-sales/${id}?populate=deep`;
     const req = await fetch(endpoint, options);
     const res = await req.json();
     const row = res.data;
@@ -715,7 +717,7 @@ function Edit({ props }) {
     // set limit credit value
     totalBelumDibayar = 0;
     if(customer){
-      nonPanel.data.forEach((element) => {
+      panel.data.forEach((element) => {
         if(customer.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
       });
 
@@ -733,7 +735,7 @@ function Edit({ props }) {
     clearData();
     setProductSubTotal({});
 
-    var detailsData = editData.attributes?.non_panel_sale_details?.data;
+    var detailsData = editData.attributes?.panel_sale_details?.data;
     var dpp = "Active";
     var ppn = "Active";
 
@@ -742,7 +744,7 @@ function Edit({ props }) {
 
     form.setFieldsValue({
       //customer: customerData?.attributes.name,
-      no_non_panel_sale: editData.attributes?.no_non_panel_sale,
+      no_panel_sale: editData.attributes?.no_panel_sale,
       no_inventory: editData.attributes?.no_inventory,
       tempo_days: editData.attributes?.tempo_days,
       tempo_time: editData.attributes?.tempo_time,
@@ -871,7 +873,7 @@ function Edit({ props }) {
       </Head>
       <DashboardLayout>
         <LayoutWrapper style={{}}>
-          <TitlePage titleText={"Edit Penjualan Non Panel"} />
+          <TitlePage titleText={"Edit Penjualan Panel"} />
           <LayoutContent>
             <div className="w-full flex justify-between mx-2 mt-1">
                 <div className="w-full justify-start md:w-1/3">
@@ -899,8 +901,8 @@ function Edit({ props }) {
                 footer={<div></div>}
               >
                  <ReportTodayTable
-                   data={nonPanel}
-                   page="non panel"
+                   data={panel}
+                   page="panel"
                  />
               </Modal>
             </div>
@@ -918,7 +920,7 @@ function Edit({ props }) {
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-5">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
-                    name="no_non_panel_sale"
+                    name="no_panel_sale"
                     initialValue={categorySale}
                     rules={[
                         {
@@ -927,7 +929,7 @@ function Edit({ props }) {
                         },
                     ]}
                     >
-                    <Input style={{ height: "40px" }} placeholder="No. Penjualan" />
+                    <Input style={{ height: "40px" }} placeholder="No. Penjualan" disabled />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">

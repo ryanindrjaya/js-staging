@@ -14,6 +14,7 @@ import createSaleFunc from "../utility/createSale";
 import createDetailSaleFunc from "../utility/createDetailSale";
 import calculatePrice from "../utility/calculatePrice";
 import nookies from "nookies";
+import LoadingAnimations from "@iso/components/Animations/Loading";
 import Customer from "@iso/components/Form/AddSale/CustomerForm";
 import ConfirmDialog from "@iso/components/Alert/ConfirmDialog";
 import createInventory from "../utility/createInventory";
@@ -278,7 +279,73 @@ function Toko({ props }) {
     maximumFractionDigits: 2,
   });
 
-  const onFinish = (values) => { console.log("values", values);
+  const cekLimit = async () => {
+      totalBelumDibayar = grandTotal;
+
+      panel.data.forEach((element) => {
+          if (customer?.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
+      });
+
+      customerData.data.forEach((element) => {
+          if (customer?.id == element.id && totalBelumDibayar > element.attributes.credit_limit) {
+              notification["error"]({
+                  message: "Gagal menambahkan data",
+                  description:
+                      "Data gagal ditambahkan, karena melebihi limit kredit",
+              });
+              setInfo("gagal");
+          }
+      });
+  };
+
+  const calculateDifference = (date1, date2) => {
+    const d1 = new Date(date1);
+    const d2 = new Date(date2);
+    var difference = null;
+
+    if (isNaN(d1) || isNaN(d2)) {
+      difference = "Invalid";
+    } else {
+      const timeDiff = Math.abs(d2.getTime() - d1.getTime());
+      const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+      difference = diffDays;
+    }
+
+    return difference;
+  };
+
+  const cekTermin = async () => {
+      let data = null;
+
+      panel.data.some((element) => {
+          
+          if (customer.id == element.attributes.customer.data.id && element.attributes.status == "Belum Dibayar") {
+            //if (element.attributes.sale_date )
+            data = element;
+            return true;
+          }
+      });
+
+      if (data != null) {
+          var difference = calculateDifference(data.attributes.sale_date, today);
+          console.log("break diff", difference);
+
+          var type = customer.attributes.credit_limit_duration_type;
+          var duration = customer.attributes.credit_limit_duration;
+          if (type == "Hari" && difference > duration) console.log("termin hari aman");
+          else if (type == "Bulan" && difference > (duration * 30)) console.log("termin bulan aman");
+          else {
+              notification["info"]({
+                  message: "Ada penjualan yang belum dibayar",
+                  description:
+                      "Dengan no : " + data.attributes.no_panel_sale,
+              });
+          }
+      }
+
+  };
+
+  const onFinish = (values) => {
     totalBelumDibayar = grandTotal;
     setLoading(true);
     values.status_data = simpanData;
@@ -296,31 +363,9 @@ function Toko({ props }) {
       if(customer.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
     });
 
-    customerData.data.forEach((element) => {
-      if(customer.id == element.id && totalBelumDibayar > element.attributes.credit_limit){
-          notification["error"]({
-              message: "Gagal menambahkan data",
-              description:
-                  "Data gagal ditambahkan, karena melebihi limit kredit",
-          });
-          setInfo("gagal");
-      }
-    });
-      //if(customer.id == element.attributes.customer.data.id){ 
-      //  totalBelumDibayar += element.attributes.total;
-      //  if (totalBelumDibayar > element.attributes.customer.data.attributes.credit_limit){
-      //    notification["error"]({
-      //        message: "Gagal menambahkan data",
-      //        description:
-      //            "Data gagal ditambahkan, karena melebihi limit kredit",
-      //    });
-      //    setInfo("gagal");
-      //  }
-      //}
+    cekLimit();
+    cekTermin();
 
-    
-
-    console.log("totalBelumDibayar", totalBelumDibayar);
     setDataValues(values);
     setLoading(false);
   };

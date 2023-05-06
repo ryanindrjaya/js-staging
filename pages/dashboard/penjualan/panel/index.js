@@ -181,6 +181,61 @@ function PanelSale({ props }) {
     );
   };
 
+  const handleDelete = async (data) => {
+    handleDeleteRelation(data);
+
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/panel-sales/" + data.id;
+    const cookies = nookies.get(null, "token");
+
+    const options = {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+    if (res) {
+        const res = await fetchData(cookies);
+        openNotificationWithIcon(
+            "success",
+            "Berhasil menghapus data",
+            "Penjualan yang dipilih telah berhasil dihapus. Silahkan cek kembali penjualan non panel"
+        );
+        setSell(res);
+    }
+
+    setIsFetchingData(false);
+  };
+
+  const handleDeleteRelation = async (data) => {
+    setIsFetchingData(true);
+
+    var id = 0;
+    data.attributes.panel_sale_details.data.forEach((element) => {
+        id = element.id;
+
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/panel-sale-details/" + id;
+        const cookies = nookies.get(null, "token");
+
+        const options = {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+        };
+
+        const req = fetch(endpoint, options);
+        //const res = req.json();
+        if (req) {
+        console.log("relation deleted");
+        }
+    });
+  };
+
   const onChangeStatus = (status, row) => {
     row.attributes.status = status;
     handleChangeStatus(row, row.id);
@@ -461,7 +516,7 @@ function PanelSale({ props }) {
                 <SellingTable
                   data={sell}
                   onUpdate={handleUpdate}
-                  //onDelete={handleDelete}
+                  onDelete={handleDelete}
                   //onPageChange={handlePageChange}
                   onChangeStatus={onChangeStatus}
                   returPage="panel"

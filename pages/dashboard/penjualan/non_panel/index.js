@@ -10,6 +10,7 @@ import SellingTable from "../../../../components/ReactDataTable/Selling/SellingT
 import Customer from "@iso/components/Form/AddCost/CustomerForm";
 import createInventory from "../utility/createInventory";
 import nookies from "nookies";
+import LoadingAnimations from "@iso/components/Animations/Loading";
 
 NonPanelSale.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -100,6 +101,7 @@ function NonPanelSale({ props }) {
   const router = useRouter();
   const [sell, setSell] = useState(data);
   const [searchParameters, setSearchParameters] = useState({});
+  const [isFetchinData, setIsFetchingData] = useState(false);
 
   // Range Picker
   const { RangePicker } = DatePicker;
@@ -177,6 +179,61 @@ function NonPanelSale({ props }) {
       "Work In Progress",
       "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
     );
+  };
+
+  const handleDelete = async (data) => {
+    handleDeleteRelation(data);
+
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/non-panel-sales/" + data.id;
+    const cookies = nookies.get(null, "token");
+
+    const options = {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+    if (res) {
+        const res = await fetchData(cookies);
+        openNotificationWithIcon(
+            "success",
+            "Berhasil menghapus data",
+            "Penjualan yang dipilih telah berhasil dihapus. Silahkan cek kembali penjualan non panel"
+        );
+        setSell(res);
+    }
+
+    setIsFetchingData(false);
+  };
+
+  const handleDeleteRelation = async (data) => {
+    setIsFetchingData(true);
+
+    var id = 0;
+    data.attributes.non_panel_sale_details.data.forEach((element) => {
+        id = element.id;
+
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/non-panel-sale-details/" + id;
+        const cookies = nookies.get(null, "token");
+
+        const options = {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+        };
+
+        const req = fetch(endpoint, options);
+        //const res = req.json();
+        if (req) {
+        console.log("relation deleted");
+        }
+    });
   };
 
   const onChangeStatus = (status, row) => {
@@ -441,16 +498,28 @@ function NonPanelSale({ props }) {
                 </button>
             </div>
 
-            <SellingTable
-              data={sell}
-              onUpdate={handleUpdate}
-              //onDelete={handleDelete}
-              //onPageChange={handlePageChange}
-              onChangeStatus={onChangeStatus}
-              returPage="nonpanel"
-              page="nonpanel"
-              updateStock={updateStock}
-            />
+            {isFetchinData ? (
+                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
+                <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
+                    <LoadingAnimations />
+                </div>
+                <div className="text-sm align-middle text-center animate-pulse text-slate-400">Sedang Mengambil Data</div>
+                </div>
+            ) : (
+                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
+                    <SellingTable
+                      data={sell}
+                      onUpdate={handleUpdate}
+                      onDelete={handleDelete}
+                      //onPageChange={handlePageChange}
+                      onChangeStatus={onChangeStatus}
+                      returPage="nonpanel"
+                      page="nonpanel"
+                      updateStock={updateStock}
+                    />
+                </div>
+            )}
+
           </LayoutContent>
         </LayoutWrapper>
       </DashboardLayout>

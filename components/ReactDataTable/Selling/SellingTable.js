@@ -25,10 +25,8 @@ export default function ReactDataTable({
   page,
   updateStock
 }) {
-  console.log("test table data ", data);
 
   const router = useRouter();
-  console.log("data :", data);
   const { Option } = Select;
 
   const tagRed = process.env.TAG_RED;
@@ -49,6 +47,7 @@ export default function ReactDataTable({
 
   const handleEdit = (row) => {
     if (page == "nonpanel") router.push("non_panel/edit/" + row.id);
+    if (page == "panel") router.push("panel/edit/" + row.id);
   };
 
   const handlePiutang = (row) => {
@@ -62,7 +61,8 @@ export default function ReactDataTable({
   };
 
   const print = (row) => {
-    if (page == "panel" || page == "nonpanel") openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
+    if (page == "panel") router.push("/dashboard/penjualan/panel/print/" + row.id);
+    else if (page == "nonpanel") router.push("/dashboard/penjualan/non_panel/print/" + row.id);
     else {
       router.push("/dashboard/penjualan/toko/print/" + row.id);
     }
@@ -137,20 +137,6 @@ export default function ReactDataTable({
             </div>
           )}
 
-          {row.attributes.status_data != "Draft" ? (
-            <></>
-          ) : (
-            <div>
-              <button
-                onClick={() => lihat(row)}
-                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-              >
-                <CloseOutlined className="mr-2 mt-0.5 float float-left" />
-                Batal
-              </button>
-            </div>
-          )}
-
           <div>
             <button
                 onClick={() => handlePiutang(row)}
@@ -187,6 +173,27 @@ export default function ReactDataTable({
                 Retur Penjualan
             </button>
           </div>
+
+          {row.attributes.status_data != "Draft" ? (
+            <></>
+          ) : (
+            //<div>
+            //  <button
+            //    onClick={() => lihat(row)}
+            //    className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+            //  >
+            //    <CloseOutlined className="mr-2 mt-0.5 float float-left" />
+            //    Batal
+            //  </button>
+            //</div>
+            <AlertDialog
+              onCancel={onCancel}
+              onConfirm={onConfirm}
+              title="Hapus Kategori"
+              message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
+              id={row}
+            />
+          )}
         </div>
       );
 
