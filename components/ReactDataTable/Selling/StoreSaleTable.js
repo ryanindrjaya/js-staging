@@ -147,7 +147,9 @@ export default function ReactDataTable({
       width: "300px",
       selector: (row, idx) => {
         return (
-          <div className="disabled:bg-white italic text-gray-500">{dataLocationStock?.[row.id] ?? "Pilih Gudang"}</div>
+          <div className="disabled:bg-white italic text-gray-500">
+            {dataLocationStock?.[row.id] ?? "Pilih Gudang"}
+          </div>
         );
       },
     },
@@ -327,12 +329,8 @@ export default function ReactDataTable({
       name: "D1",
       width: "100px",
       selector: (row, idx) => {
-<<<<<<< Updated upstream
-        defaultDp1 = products?.productInfo?.[idx]?.disc || row.attributes?.disc_1_1 || 0;
-=======
         defaultDp1 =
-          products?.productInfo?.[idx]?.d1 || row.attributes?.disc_1_1 || 0;
->>>>>>> Stashed changes
+          products?.productInfo?.[idx]?.disc || row.attributes?.disc_1_1 || 0;
 
         // if (products.productInfo[idx]?.d1) {
         //   defaultDp1 = products.productInfo[idx].d1;
