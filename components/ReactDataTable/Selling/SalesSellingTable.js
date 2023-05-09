@@ -115,6 +115,10 @@ export default function SalesSellingTable({
     }
   };
 
+  const pembayaran = (row) => {
+    router.push("sales/pembayaran/" + row.id);
+  };
+
   const content = (row) => (
     <div>
       <div>
@@ -136,7 +140,9 @@ export default function SalesSellingTable({
         </button>
       </div>
 
-      {row.attributes.status !== "Diterima" && (
+      {row.attributes.status === "Diterima" || row.attributes.status === "Diretur" ? (
+        ""
+      ) : (
         <div>
           <button
             onClick={() => edit(row)}
@@ -148,16 +154,21 @@ export default function SalesSellingTable({
         </div>
       )}
 
-      <div>
-        <button
-          onClick={() => returPenjualan(row)}
-          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-        >
-          <UndoOutlined className="mr-2 mt-0.5 float float-left" />
-          Retur Penjualan
-        </button>
-      </div>
-      {row.attributes.status !== "Diterima" && (
+      {row.attributes.status !== "Diretur" && (
+        <div>
+          <button
+            onClick={() => returPenjualan(row)}
+            className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+          >
+            <UndoOutlined className="mr-2 mt-0.5 float float-left" />
+            Retur Penjualan
+          </button>
+        </div>
+      )}
+
+      {row.attributes.status === "Diterima" || row.attributes.status === "Diretur" ? (
+        ""
+      ) : (
         <AlertDialog
           onCancel={onCancel}
           onConfirm={onConfirm}
@@ -166,6 +177,16 @@ export default function SalesSellingTable({
           id={row.id}
         />
       )}
+
+      <div>
+        <button
+          onClick={() => pembayaran(row)}
+          className=" hover:text-cyan-700 transition-colors mt-3 text-xs font-normal py-2 px-2 rounded-md "
+        >
+          <CalculatorOutlined className="mr-2 mt-0.5 float float-left" />
+          Pembayaran
+        </button>
+      </div>
     </div>
   );
 
@@ -250,14 +271,36 @@ export default function SalesSellingTable({
       ),
     },
     {
+      name: "Status Pembayaran",
+      width: "150px",
+      selector: (row) => {
+        const lastIndex = row.attributes.purchasing_payments?.data?.length;
+        const lastPayment = row.attributes.purchasing_payments?.data[lastIndex - 1];
+
+        if (lastPayment?.attributes.payment_remaining === lastPayment?.attributes.total_payment) {
+          return <Tag color={tagRed}>Belum Lunas</Tag>;
+        } else if (
+          lastPayment?.attributes.payment_remaining > 0 &&
+          lastPayment?.attributes.payment_remaining < lastPayment?.attributes.total_payment
+        ) {
+          return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
+        } else if (lastPayment?.attributes.payment_remaining <= 0) {
+          return <Tag color={tagGreen}>Lunas</Tag>;
+        } else {
+          return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
+        }
+      },
+    },
+    {
       name: "Metode Pembayaran",
       width: "180px",
       selector: (row) => {
         const dataPaymentMethod =
-          row?.attributes?.store_payments?.data?.map((payment) => payment?.attributes?.payment_method).join(", ") ??
-          null;
+          row?.attributes?.purchasing_payments?.data
+            ?.map((payment, idx) => payment?.attributes?.[`payment_method_${idx + 1}`])
+            .join(", ") ?? null;
 
-        console.log(row.id, row?.attributes?.store_payments?.data);
+        console.log(row.id, row?.attributes?.purchasing_payments?.data);
         return dataPaymentMethod;
       },
     },
@@ -270,7 +313,7 @@ export default function SalesSellingTable({
       name: "Total Dibayar",
       width: "180px",
       selector: (row) => {
-        const dataPayment = row?.attributes?.store_payments?.data ?? [];
+        const dataPayment = row?.attributes?.purchasing_payments?.data ?? [];
 
         const dataPaymentValue =
           dataPayment.length > 1
@@ -287,7 +330,7 @@ export default function SalesSellingTable({
       width: "200px",
       selector: (row) => {
         const totalHarga = row.attributes?.total ?? 0;
-        const dataPayment = row?.attributes?.store_payments?.data ?? [];
+        const dataPayment = row?.attributes?.purchasing_payments?.data ?? [];
 
         if (row.attributes.status === "Dibayar") {
           const dataPaymentValue = dataPayment.reduce(
@@ -300,27 +343,6 @@ export default function SalesSellingTable({
         }
 
         return formatter.format(0);
-      },
-    },
-    {
-      name: "Status Pembayaran",
-      width: "150px",
-      selector: (row) => {
-        const lastIndex = row.attributes.purchasing_payments?.data?.length;
-        const lastPayment = row.attributes.purchasing_payments?.data[lastIndex - 1];
-
-        if (lastPayment?.attributes.payment_remaining === lastPayment?.attributes.total_payment) {
-          return <Tag color={tagRed}>Belum Dibayar</Tag>;
-        } else if (
-          lastPayment?.attributes.payment_remaining > 0 &&
-          lastPayment?.attributes.payment_remaining < lastPayment?.attributes.total_payment
-        ) {
-          return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
-        } else if (lastPayment?.attributes.payment_remaining <= 0) {
-          return <Tag color={tagGreen}>Selesai</Tag>;
-        } else {
-          return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
-        }
       },
     },
     {

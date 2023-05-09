@@ -594,6 +594,7 @@ function Toko({ props }) {
     // used to reset redux from value before
     clearData();
     setProductSubTotal({});
+    setDPPActive("DPP");
   }, []);
 
   const validateError = () => {
