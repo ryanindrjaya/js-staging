@@ -26,8 +26,6 @@ export default function SalesTable({
   var tempIndex = 0;
   var stock = 0;
 
-  console.log("data loocation stock", dataLocationStock);
-
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
@@ -219,8 +217,6 @@ export default function SalesTable({
               }
             });
 
-            console.log("orderUnitIndex", orderUnitIndex);
-
             for (let i = orderUnitIndex; i <= 5; i++) {
               if (row?.attributes[`unit_${i}`]) {
                 const unit = row?.attributes[`unit_${i}`];
@@ -235,9 +231,6 @@ export default function SalesTable({
             }
 
             const stockBasedOnOrder = productConversion[defaultUnit] * dataLocationStock?.[row.id]?.order_details?.qty;
-
-            console.log("productConversion", productConversion);
-            console.log("stockBasedOnOrder", stockBasedOnOrder);
 
             max = stockBasedOnOrder > 0 ? stockBasedOnOrder : 0;
           }

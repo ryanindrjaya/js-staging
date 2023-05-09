@@ -356,7 +356,10 @@ function SalesSale({ props }) {
 
     if (req.status === 200) {
       const response = await fetchSales(cookies);
-      setSell(response);
+      const data = await response.json();
+
+      setSell(data);
+
       openNotificationWithIcon(
         "success",
         "Status berhasil dirubah",
@@ -398,8 +401,8 @@ function SalesSale({ props }) {
         return "GREEN";
       case "Dibatalkan":
         return "red";
-      case "Sebagian Diterima":
-        return "orange";
+      case "Diretur":
+        return "blue";
       case "Diproses":
         return "default";
       default:
@@ -682,21 +685,22 @@ function SalesSale({ props }) {
               <div className="w-full md:w-1/5">
                 <Select
                   placeholder="Status Pembayaran"
-                  disabled
                   size="large"
                   allowClear
                   style={{
                     width: "100%",
                     marginRight: "10px",
                   }}
+                  onChange={(value) => {
+                    setFilter({
+                      ...filter,
+                      status_pembayaran: value,
+                    });
+                  }}
                 >
-                  {/*{locations.map((element) => {*/}
-                  {/*  return (*/}
-                  <Select.Option>Belum Dibayar</Select.Option>
-                  <Select.Option>Dibayar Sebagian</Select.Option>
-                  <Select.Option>Selesai</Select.Option>
-                  {/*  );*/}
-                  {/*})}*/}
+                  <Select.Option key="Belum Lunas">Belum Lunas</Select.Option>
+                  <Select.Option key="Dibayar Sebagian">Dibayar Sebagian</Select.Option>
+                  <Select.Option key="Lunas">Lunas</Select.Option>
                 </Select>
               </div>
               <div className="w-full md:w-1/5">

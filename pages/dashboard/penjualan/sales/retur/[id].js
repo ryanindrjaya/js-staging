@@ -17,6 +17,7 @@ import { useRouter } from "next/router";
 import moment from "moment";
 import LoadingAnimations from "@iso/components/Animations/Loading";
 import SalesTable from "../../../../../components/ReactDataTable/Selling/SalesTable";
+import ConfirmDialog from "../../../../../components/Alert/ConfirmDialog";
 
 ReturSales.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -202,7 +203,6 @@ function ReturSales({ props }) {
       }
     });
     setDataValues(values);
-    setLoading(false);
   };
 
   const createDetailSale = async () => {
@@ -212,7 +212,8 @@ function ReturSales({ props }) {
       productTotalPrice,
       productSubTotal,
       setListId,
-      "/retur-sales-sale-details"
+      "/retur-sales-sale-details",
+      form
     );
   };
 
@@ -226,6 +227,57 @@ function ReturSales({ props }) {
     values.additional_fee_2_desc = addFee2Desc;
     values.additional_fee_3_desc = addFee3Desc;
     values.sales_sale = sales.data.id;
+
+    // update status to "Diretur"
+    const data = {
+      data: {
+        status: "Diretur",
+      },
+    };
+
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/sales-sales/${sales.data.id}`;
+    const options = {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${cookies.token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    };
+
+    await fetch(endpoint, options);
+
+    const formValues = form.getFieldsValue();
+    const updatedProduct = products.productInfo;
+
+    // update stock
+    const items = products.productList?.map((item, idx) => ({
+      product: item.id,
+      location: formValues.product_location[idx],
+      qty: updatedProduct[idx]?.qty || 1,
+      unit: updatedProduct[idx]?.unit || item.unit_1,
+      exp_date: formValues.expired_date[idx],
+    }));
+
+    const dataStock = {
+      data: items,
+      type: "Retur Penjualan",
+      keterangan: `Retur Penjualan ${sales.data.attributes.no_sales_sale}`,
+      no_referensi: formValues.no_retur_sales_sale,
+    };
+
+    const endpointStock = `${process.env.NEXT_PUBLIC_URL}/inventories/add`;
+    const optionsStock = {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${cookies.token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(dataStock),
+    };
+
+    await fetch(endpointStock, optionsStock);
+
     await createSaleFunc(
       grandTotal,
       totalPrice,
@@ -237,6 +289,7 @@ function ReturSales({ props }) {
       "sales sale",
       locations
     );
+    setLoading(false);
   };
 
   const calculatePriceAfterDisc = (row, index) => {
@@ -404,7 +457,6 @@ function ReturSales({ props }) {
 
   const getStockAtLocation = async (productId, locationId) => {
     try {
-      console.log("get stock", productId, locationId);
       const response = await getStock(productId, locationId);
       console.log("response", response);
 
@@ -447,8 +499,6 @@ function ReturSales({ props }) {
       const initialOrder = sales.data?.attributes.sales_sale_details?.data?.find(
         (item) => item?.attributes?.product?.data?.id === product.id
       );
-      console.log("sales", sales);
-      console.log("initialOrder", initialOrder);
 
       tempData = {
         ...tempData,
@@ -464,7 +514,6 @@ function ReturSales({ props }) {
     try {
       // use Promise.all() to execute all promises in parallel
       await Promise.all(promises);
-      console.log("tempdata", tempData);
 
       setDataLocationStock(tempData); // update state after all promises have resolved
 
@@ -475,6 +524,8 @@ function ReturSales({ props }) {
       setIsFetchingData(false);
     }
   };
+
+  console.log("redux ==>", products);
 
   return (
     <>
@@ -864,13 +915,20 @@ function ReturSales({ props }) {
                       <Spin />
                     </div>
                   ) : (
-                    <button
-                      onClick={() => setSimpanData("Bayar")}
-                      htmlType="submit"
-                      className="bg-cyan-700 rounded-md m-1 text-sm"
-                    >
-                      <p className="px-8 py-2 m-0 text-white">SIMPAN DAN CETAK</p>
-                    </button>
+                    <ConfirmDialog
+                      title="Simpan Retur Penjualan"
+                      message="Dokuman akan berubah status menjadi 'Diretur' dan item produk akan masuk gudang tujuan. Lanjutkan?"
+                      onCancel={() => {}}
+                      onConfirm={() => {
+                        setSimpanData("Bayar");
+                        form.submit();
+                      }}
+                      component={
+                        <button htmlType="button" className="bg-cyan-700 rounded-md m-1 text-sm">
+                          <p className="px-8 py-2 m-0 text-white">SIMPAN DAN CETAK</p>
+                        </button>
+                      }
+                    />
                   )}
                 </Form.Item>
               </div>
