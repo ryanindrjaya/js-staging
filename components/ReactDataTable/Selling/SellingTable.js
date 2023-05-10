@@ -69,7 +69,7 @@ export default function ReactDataTable({
   };
 
   const returPenjualan = (row) => {
-    if (row.attributes.status === "Dibayar") {
+    if (row.attributes.status == "Dibayar" || row.attributes.status == "Dibayar Sebagian") {
       if (returPage == "toko") router.push("toko/retur/" + row.id);
       if (returPage == "sales") router.push("sales/retur/" + row.id);
       if (returPage == "nonpanel") router.push("non_panel/retur/" + row.id);
@@ -85,7 +85,6 @@ export default function ReactDataTable({
       openNotificationWithIcon("error", "Maaf tidak bisa diretur", message);
     }
 
-    //router.push("toko/retur/" + row.id);
   };
 
   const onConfirm = (id) => {
@@ -285,7 +284,7 @@ export default function ReactDataTable({
           return <Tag color="red">{row.attributes?.status}</Tag>;
         } else if (row.attributes?.status == "Diretur") {
           return <Tag color="orange">{row.attributes?.status}</Tag>;
-        } else if (row.attributes?.status == "Diproses") {
+        } else if (row.attributes?.status == "Dibayar Sebagian") {
           return <Tag>{row.attributes?.status}</Tag>;
         } else {
           return <Tag color="green">{row.attributes?.status}</Tag>;

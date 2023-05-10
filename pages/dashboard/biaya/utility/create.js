@@ -15,7 +15,8 @@ const Create = async (
   router,
   url,
   page,
-  akun
+  akun,
+  setCreateId
   //locations
 ) => {
   // CLEANING DATA
@@ -99,8 +100,8 @@ const Create = async (
           }
       });
     }
-
-    await putRelationDetail(res.data.id, res.data.attributes, form, router, url, page);
+    
+    await putRelationDetail(res.data.id, res.data.attributes, form, router, url, page, setCreateId);
   } else {
     openNotificationWithIcon("error");
   }
@@ -169,7 +170,7 @@ const putAkun = async (id, value, form, total, page) => {
     }
 };
 
-const putRelationDetail = async (id, value, form, router, url, page) => {
+const putRelationDetail = async (id, value, form, router, url, page, setCreateId) => {
   const user = await getUserMe();
   const data = {
     data: value,
@@ -205,6 +206,8 @@ const putRelationDetail = async (id, value, form, router, url, page) => {
     if(page == "hutang") router.replace("/dashboard/biaya/hutang");
     if(page == "piutang") router.replace("/dashboard/biaya/piutang");
     openNotificationWithIcon("success");
+
+    setCreateId(res.data);
   } else {
     openNotificationWithIcon("error");
   }
