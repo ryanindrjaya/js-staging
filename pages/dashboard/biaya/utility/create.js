@@ -234,13 +234,13 @@ const openNotificationWithIcon = (type) => {
     notification[type]({
       message: "Gagal menambahkan data",
       description:
-        "Data lpb yg dipilih gagal ditambahkan. Silahkan cek NO hutang atau kelengkapan data lainnya",
+        "Data penjualan yg dipilih gagal ditambahkan. Silahkan cek NO atau kelengkapan data lainnya",
     });
   } else if (type === "success") {
     notification[type]({
       message: "Berhasil menambahkan data",
       description:
-        "Data lpb yg dipilih berhasil ditambahkan. Silahkan cek pada halaman Hutang",
+        "Data penjualan yg dipilih berhasil ditambahkan.",
     });
   }
 };

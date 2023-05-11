@@ -407,145 +407,104 @@ function Piutang({ props }) {
     //var data = null;
     //var total = null;
 
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/credits/"+ value.id + "?populate=deep";
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL + "/credits/" + value.id + "?populate=deep";
     const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
     };
 
     const req = await fetch(endpoint, options);
     const res = await req.json();
 
-    //update status pembayaran di penjualan
-    res.data.attributes.credit_details.data.forEach((item)=> {
-      var url = null;
-      var data = null;
-      var total = null;
-      var pembayaran = null;
-      var detailId = [];
-      var returId = [];
+    // TODO :::: ENHANCEMENT CODE
+    res.data.attributes.credit_details.data.forEach((item) => {
+      const saleTypes = ["non_panel_sale", "panel_sale", "sales_sale"];
+      for (const saleType of saleTypes) {
+        const sale = item.attributes[saleType].data;
+        if (sale != null) {
+          let url = `/${saleType}s/${sale.id}`;
+          url = url.replaceAll("_", "-");
+          const data = sale;
+          console.log("link url", url);
+          const pembayaran =
+            item.attributes.cn +
+            item.attributes.giro +
+            item.attributes.oth +
+            item.attributes.transfer +
+            item.attributes.tunai;
+          const total =
+            pembayaran +
+            item.attributes.total_retur +
+            item.attributes.sisa_piutang;
+          const floatTotal = parseFloat(total.toFixed(2));
+          const floatDataTotal = parseFloat(data.attributes.total.toFixed(2));
 
-      if(item.attributes.non_panel_sale.data != null){
-        url = "/non-panel-sales/" + item.attributes.non_panel_sale.data.id;
-        data = item.attributes.non_panel_sale.data;
+          if (
+            floatTotal == floatDataTotal &&
+            item.attributes.sisa_piutang == 0
+          ) {
+            data.attributes.status = "Dibayar";
+          } else if (
+            floatTotal == floatDataTotal &&
+            item.attributes.sisa_piutang > 0
+          ) {
+            data.attributes.status = "Dibayar Sebagian";
+          } else {
+            console.log("error update status pembayaran di penjualan");
+          }
 
-        pembayaran = item.attributes.cn + item.attributes.giro + item.attributes.oth + item.attributes.transfer + item.attributes.tunai ;
-        total = pembayaran + item.attributes.total_retur + item.attributes.sisa_piutang;
+          data.attributes[`${saleType}_details`] = data.attributes[
+            `${saleType}_details`
+          ].data.map((detail) => detail.id);
+          data.attributes[`retur_${saleType}s`] = data.attributes[
+            `retur_${saleType}s`
+          ].data.map((retur) => retur.id);
 
-        if(total == data.attributes.total && item.attributes.sisa_piutang == 0) data.attributes.status = "Dibayar";
-        else if(total == data.attributes.total && item.attributes.sisa_piutang > 0) data.attributes.status = "Dibayar Sebagian";
-        else {
-          console.log("error update status pembayaran di penjualan");
+          data.attributes.area = data.attributes.area.data.id;
+          data.attributes.customer = data.attributes.customer.data.id;
+          data.attributes.location = data.attributes.location.data.id;
+          data.attributes.wilayah = data.attributes.wilayah.data.id;
+
+          if (data && url) editPenjualanDB(data.attributes, url);
         }
-
-        //cleaning data
-        data.attributes.non_panel_sale_details.data.forEach((detail) => {
-          detailId.push(detail.id);
-        });
-        data.attributes.retur_non_panel_sales.data.forEach((retur) => {
-          returId.push(retur.id);
-        });
-
-        data.attributes.non_panel_sale_details = detailId;
-        data.attributes.retur_non_panel_sales = returId;
       }
-
-      if(item.attributes.panel_sale.data != null) {
-        url = "/panel-sales/"+ item.attributes.panel_sale.data.id;
-        data = item.attributes.panel_sale.data;
-
-        pembayaran = item.attributes.cn + item.attributes.giro + item.attributes.oth + item.attributes.transfer + item.attributes.tunai ;
-        total = pembayaran + item.attributes.total_retur + item.attributes.sisa_piutang;
-
-        if(total == data.attributes.total && item.attributes.sisa_piutang == 0) data.attributes.status = "Dibayar";
-        else if(total == data.attributes.total && item.attributes.sisa_piutang > 0) data.attributes.status = "Dibayar Sebagian";
-        else {
-          console.log("error update status pembayaran di penjualan");
-        }
-
-        //cleaning data
-        data.attributes.panel_sale_details.data.forEach((detail) => {
-          detailId.push(detail.id);
-        });
-        data.attributes.retur_panel_sales.data.forEach((retur) => {
-          returId.push(retur.id);
-        });
-
-        data.attributes.panel_sale_details = detailId;
-        data.attributes.retur_panel_sales = returId;
-      }
-
-      if(item.attributes.sales_sale.data != null) {
-        url = "/sales-sales/"+ item.attributes.sales_sale.data.id;
-        data = item.attributes.sales_sale.data;
-
-        pembayaran = item.attributes.cn + item.attributes.giro + item.attributes.oth + item.attributes.transfer + item.attributes.tunai ;
-        total = pembayaran + item.attributes.total_retur + item.attributes.sisa_piutang;
-
-        if(total == data.attributes.total && item.attributes.sisa_piutang == 0) data.attributes.status = "Dibayar";
-        else if(total == data.attributes.total && item.attributes.sisa_piutang > 0) data.attributes.status = "Dibayar Sebagian";
-        else {
-          console.log("error update status pembayaran di penjualan");
-        }
-
-        //cleaning data
-        data.attributes.sales_sale_details.data.forEach((detail) => {
-          detailId.push(detail.id);
-        });
-        data.attributes.retur_sales_sales.data.forEach((retur) => {
-          returId.push(retur.id);
-        });
-
-        data.attributes.sales_sale_details = detailId;
-        data.attributes.retur_sales_sales = returId;
-      }
-
-      //cleaning data
-      data.attributes.area = data.attributes.area.data.id;
-      data.attributes.customer = data.attributes.customer.data.id;
-      data.attributes.location = data.attributes.location.data.id;
-      data.attributes.wilayah = data.attributes.wilayah.data.id;
-
-      if(data && url) editPenjualanDB(data.attributes, url);
-      
     });
-
   };
 
   const editPenjualanDB = async (value, url) => {
+    try {
       const data = {
-          data: value,
+        data: {
+          status: value.status,
+        },
       };
-
-      // clean object
-      for (var key in data) {
-          if (data[key] === null || data[key] === undefined) {
-              delete data[key];
-          }
-      }
 
       const JSONdata = JSON.stringify(data);
       const endpoint = process.env.NEXT_PUBLIC_URL + url;
       const options = {
-          method: "PUT",
-          headers: {
-              "Content-Type": "application/json",
-              Authorization: "Bearer " + cookies.token,
-          },
-          body: JSONdata,
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+        body: JSONdata,
       };
 
       const req = await fetch(endpoint, options);
       const res = await req.json();
 
       if (req.status === 200) {
-          console.log("status di penjualan sukses diupdate");
+        console.log("status di penjualan sukses diupdate");
       } else {
-          console.log("status di penjualan error atau tidak ada");
+        console.log("status di penjualan error atau tidak ada");
       }
+    } catch (error) {
+      console.log("errorr", error);
+    }
   };
 
   const clearData = () => {
@@ -561,15 +520,16 @@ function Piutang({ props }) {
 
   const totalPiutangJatuhTempo = () => {
     var total = 0;
-    if(biaya.info != null){ total = 0;
+    if(biaya.info != null){ //total = 0;
 
       for(let row in biaya.info) {
 
         console.log("biaya info tes", biaya.info[row], biaya.list[row]);
         if (biaya.info[row].pilihData == "pilih") {
-          total = total + biaya.list[row].sisaPiutang;
+          //total = total + biaya.list[row].sisaPiutang;
           //total = total + biaya.info[row].totalHutangJatuhTempo;
-        } //else if (biaya.info[row].pilihData == "tidak") total = 0;
+          total = total + (biaya.list[row].attributes.total - biaya.list[row].subtotal);
+        }
         if(biaya.info[row].totalHutangJatuhTempo == undefined) total = 0;
       };
     }
@@ -586,8 +546,7 @@ function Piutang({ props }) {
     for (let row in biaya.info) {
       if (biaya.info[row].pilihData == "pilih") {
         if (biaya.info[row].tunai != null) tunai = biaya.info[row].tunai;
-        if (biaya.info[row].transfer != null)
-          transfer = biaya.info[row].transfer;
+        if (biaya.info[row].transfer != null) transfer = biaya.info[row].transfer;
         if (biaya.info[row].giro != null) giro = biaya.info[row].giro;
         if (biaya.info[row].cn != null) cn = biaya.info[row].cn;
         if (biaya.info[row].oth != null) oth = biaya.info[row].oth;
@@ -857,11 +816,11 @@ function Piutang({ props }) {
   return (
     <>
       <Head>
-        <title>Penagihan Penjualan Sales</title>
+        <title>Penagihan Penjualan</title>
       </Head>
       <DashboardLayout>
         <LayoutWrapper style={{}}>
-          <TitlePage titleText={"Penagihan Penjualan Sales"} />
+          <TitlePage titleText={"Penagihan Penjualan"} />
           <LayoutContent>
             <Form
               form={form}
