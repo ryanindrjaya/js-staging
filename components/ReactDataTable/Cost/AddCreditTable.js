@@ -1,6 +1,6 @@
 import DataTable from "react-data-table-component";
 import AlertDialog from "../../Alert/Alert";
-import { Form, Select, InputNumber, Checkbox, Popover, Modal } from "antd";
+import { Form, Select, InputNumber, Checkbox, Popover, Modal, notification } from "antd";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
 import { PrinterOutlined } from "@ant-design/icons";
@@ -151,26 +151,23 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   var tempGiro = 0;
   var tempCn = 0;
   var tempOth = 0;
-  var tempIndex = 0;
+  var tempIndex = null;
   const onChangeBayar = (value, metode, row, idx) => {
-    //if(open == false){
-    //  tempTunai = 0;
-    //  tempTransfer = 0;
-    //  tempGiro = 0;
-    //  tempCn = 0;
-    //  tempOth = 0;
+
+    //setBiayaData(value);
+    //if(idx != tempIndex){
+        if (metode == "tunai") { setTunai(value); tempTunai = value; }
+        if (metode == "transfer") { setTransfer(value); tempTransfer = value; }
+        if (metode == "giro") { setGiro(value); tempGiro = value; }
+        if (metode == "cn") { setCn(value); tempCn = value; }
+        if (metode == "oth") { setOth(value); tempOth = value; }
+
+        // cek pembayaran
+        if ((row.attributes.total - row.subtotal) >= (tempTunai + tempTransfer + tempGiro + tempCn + tempOth)) setModalSisa(tunai + transfer + giro + cn + oth);
+        else handleCek("info");
     //}
-    //setModalSisa(0);
-    setBiayaData(value);
 
-    if (metode == "tunai") { setTunai(value); }
-    if (metode == "transfer") { setTransfer(value); }
-    if (metode == "giro") { setGiro(value); }
-    if (metode == "cn") { setCn(value); }
-    if (metode == "oth") { setOth(value); }
-
-    //setModalSisa(tempTunai + tempTransfer + tempGiro + tempCn + tempOth);
-    setModalSisa(tunai + transfer + giro + cn + oth);
+    tempIndex = idx;
   };
 
   const showModal = () => {
@@ -186,6 +183,16 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     onChangeGiro(giro, row, idx);
     onChangeCn(cn, row, idx);
     onChangeOth(oth, row, idx);
+
+    if ((row.attributes.total - row.subtotal) >= (tunai + transfer + giro + cn + oth)) setModalSisa(tunai + transfer + giro + cn + oth);
+    else {
+      handleCek("error");
+      onChangeTunai(0, row, idx);
+      onChangeTransfer(0, row, idx);
+      onChangeGiro(0, row, idx);
+      onChangeCn(0, row, idx);
+      onChangeOth(0, row, idx);
+    }
 
     setTimeout(() => {
       setOpen(false);
@@ -235,6 +242,13 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     setCn(0);
     setOth(0);
     //this.myFormRef.reset();
+  };
+
+  const handleCek = (value) => {
+    notification[value]({
+      message: "Pembayaran berlebih",
+      description: "Tidak dapat melakukan pembayaran, melebihi total piutang",
+    });
   };
 
   const content = (row, idx) => {
