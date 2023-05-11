@@ -8,15 +8,11 @@ import {
   Form,
   Input,
   DatePicker,
-  Button,
-  message,
-  Upload,
   Select,
   Spin,
   notification,
   InputNumber,
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
 import nookies from "nookies";
 import SearchBar from "../../.../../../../../components/Form/AddOrder/SearchBar";
 import { useSelector, useDispatch } from "react-redux";
@@ -25,9 +21,7 @@ import StoreSaleTable from "../../../../../components/ReactDataTable/Selling/Sto
 import createDetailSaleFunc from "../../utility/createDetailSale";
 import createSaleFunc from "../../utility/createSale";
 import { useRouter } from "next/router";
-import moment from "moment";
 import LoadingAnimations from "@iso/components/Animations/Loading";
-import createInventory from "../../utility/createInventory";
 import createReturInventory from "../../utility/createReturInventory";
 
 ReturPanel.getInitialProps = async (context) => {
@@ -52,6 +46,9 @@ ReturPanel.getInitialProps = async (context) => {
   const returPanel = await fetchData(cookies);
   const dataReturPanel = await returPanel.json();
 
+  const piutang = await fetchPiutang(cookies, id);
+  const dataPiutang = await piutang.json();
+
   const paymentRetur = await fetchPaymentRetur(cookies, id);
   const dataPaymentRetur = await paymentRetur.json();
 
@@ -72,11 +69,29 @@ ReturPanel.getInitialProps = async (context) => {
     props: {
       data,
       locations,
+      dataPiutang,
       dataReturPanel,
       dataPaymentRetur,
       user,
     },
   };
+};
+
+const fetchPiutang = async (cookies, id) => {
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL +
+    "/credit-details?populate=*&filters[panel_sale][id][$eq]=" +
+    id;
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
 const fetchDataLocation = async (cookies) => {
@@ -151,6 +166,7 @@ function ReturPanel({ props }) {
   const panel = props.data;
   const returPanel = props.dataReturPanel;
   const dataPaymentRetur = props.dataPaymentRetur;
+  const dataPiutang = props.dataPiutang;
   const totalTrx = panel.data.attributes.total;
 
   const [form] = Form.useForm();
@@ -344,13 +360,22 @@ function ReturPanel({ props }) {
     setLoading(true);
     setInfo("sukses");
 
+    let totalPiutang = 0;
+    dataPiutang?.data?.forEach((element) => {
+      const totalPembayaran =
+        element?.attributes?.credit?.data?.attributes?.total_pembayaran;
+      totalPiutang = totalPiutang + totalPembayaran;
+    });
+
     const payment = panel.data.attributes.total;
     const grandTotalFloat = parseFloat(grandTotal.toFixed(2));
     const paymentFloat = parseFloat(payment.toFixed(2));
+    const paidCredit = parseFloat(totalPiutang.toFixed(2));
+    const remainingPayment = parseFloat((paymentFloat - paidCredit).toFixed(2));
 
-    console.log(grandTotalFloat, paymentFloat);
-    console.log("overprice? ", grandTotalFloat > paymentFloat);
-    if (grandTotalFloat > paymentFloat) {
+    console.log(grandTotalFloat, remainingPayment);
+    console.log("overprice? ", grandTotalFloat > remainingPayment);
+    if (grandTotalFloat > remainingPayment) {
       notification["error"]({
         message: "Overprice",
         description:
