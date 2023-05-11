@@ -15,7 +15,8 @@ const Create = async (
   router,
   url,
   page,
-  akun
+  akun,
+  setCreateId
   //locations
 ) => {
   // CLEANING DATA
@@ -99,8 +100,8 @@ const Create = async (
           }
       });
     }
-
-    await putRelationDetail(res.data.id, res.data.attributes, form, router, url, page);
+    
+    await putRelationDetail(res.data.id, res.data.attributes, form, router, url, page, setCreateId);
   } else {
     openNotificationWithIcon("error");
   }
@@ -169,7 +170,7 @@ const putAkun = async (id, value, form, total, page) => {
     }
 };
 
-const putRelationDetail = async (id, value, form, router, url, page) => {
+const putRelationDetail = async (id, value, form, router, url, page, setCreateId) => {
   const user = await getUserMe();
   const data = {
     data: value,
@@ -205,6 +206,8 @@ const putRelationDetail = async (id, value, form, router, url, page) => {
     if(page == "hutang") router.replace("/dashboard/biaya/hutang");
     if(page == "piutang") router.replace("/dashboard/biaya/piutang");
     openNotificationWithIcon("success");
+
+    setCreateId(res.data);
   } else {
     openNotificationWithIcon("error");
   }
@@ -231,13 +234,13 @@ const openNotificationWithIcon = (type) => {
     notification[type]({
       message: "Gagal menambahkan data",
       description:
-        "Data lpb yg dipilih gagal ditambahkan. Silahkan cek NO hutang atau kelengkapan data lainnya",
+        "Data penjualan yg dipilih gagal ditambahkan. Silahkan cek NO atau kelengkapan data lainnya",
     });
   } else if (type === "success") {
     notification[type]({
       message: "Berhasil menambahkan data",
       description:
-        "Data lpb yg dipilih berhasil ditambahkan. Silahkan cek pada halaman Hutang",
+        "Data penjualan yg dipilih berhasil ditambahkan.",
     });
   }
 };

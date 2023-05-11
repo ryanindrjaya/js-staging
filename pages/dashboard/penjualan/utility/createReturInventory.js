@@ -11,16 +11,16 @@ import { notification } from "antd";
 
 const cookies = nookies.get(null, "token");
 
-async function createInventory(row, locations) {
+async function createReturInventory(row, locations, productInfo) {
   const data = [];
   const saleDetails =
     row.attributes.panel_sale_details?.data ??
     row.attributes.non_panel_sale_details?.data;
   const noSale =
     row.attributes.no_panel_sale ?? row.attributes.no_non_panel_sale;
-  saleDetails.forEach((element) => {
+  saleDetails.forEach((element, index) => {
     const unit = element.attributes.unit;
-    const qty = parseFloat(element.attributes.qty);
+    const qty = productInfo?.[index]?.qty ?? parseInt(element.attributes.qty);
     const product = element.attributes.product.data;
     const location = locations;
     const expDate = element.attributes.expired_date;
@@ -44,7 +44,7 @@ async function createInventory(row, locations) {
     const body = {
       data,
       no_referensi: noSale,
-      type: "Terjual",
+      type: "Retur Penjualan",
     };
 
     addToGudang(body);
@@ -81,4 +81,4 @@ async function addToGudang(body) {
   }
 }
 
-export default createInventory;
+export default createReturInventory;

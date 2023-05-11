@@ -10,7 +10,7 @@ export default function calculatePrice(
     //setTotalPrice,
     index) {
 
-    var sisaHutang = 0;
+    var sisaHutang = row.attributes.total;
     var tunai = 0;
     var transfer = 0;
     var giro = 0;
