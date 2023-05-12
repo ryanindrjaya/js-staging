@@ -97,7 +97,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchDataUser = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/users?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -113,7 +113,7 @@ const fetchDataUser = async (cookies) => {
 const fetchUserSales = async (cookies) => {
   const endpoint =
     process.env.NEXT_PUBLIC_URL +
-    "/users?populate=deep&filters[role][name][$eq]=Sales&?filters[role][type][$eq]=Sales";
+    "/users?populate=*&filters[role][name][$eq]=Sales&?filters[role][type][$eq]=Sales";
   const options = {
     method: "GET",
     headers: {
@@ -397,7 +397,17 @@ function Piutang({ props }) {
     values.wilayah = wilayah;
     values.document = document;
     values.status_pembayaran = "Dibayar";
-    await createData(sisaHutang, values, listId, form, router, "/credits/", "piutang", akunPiutang, setCreateId);
+    await createData(
+      sisaHutang,
+      values,
+      listId,
+      form,
+      router,
+      "/credits/",
+      "piutang",
+      akunPiutang,
+      setCreateId
+    );
     //console.log("Create master data", createId);
     //editPenjualan(createId);
   };
@@ -520,18 +530,20 @@ function Piutang({ props }) {
 
   const totalPiutangJatuhTempo = () => {
     var total = 0;
-    if(biaya.info != null){ //total = 0;
+    if (biaya.info != null) {
+      //total = 0;
 
-      for(let row in biaya.info) {
-
+      for (let row in biaya.info) {
         console.log("biaya info tes", biaya.info[row], biaya.list[row]);
         if (biaya.info[row].pilihData == "pilih") {
           //total = total + biaya.list[row].sisaPiutang;
           //total = total + biaya.info[row].totalHutangJatuhTempo;
-          total = total + (biaya.list[row].attributes.total - biaya.list[row].subtotal);
+          total =
+            total +
+            (biaya.list[row].attributes.total - biaya.list[row].subtotal);
         }
-        if(biaya.info[row].totalHutangJatuhTempo == undefined) total = 0;
-      };
+        if (biaya.info[row].totalHutangJatuhTempo == undefined) total = 0;
+      }
     }
     return total;
   };
@@ -546,7 +558,8 @@ function Piutang({ props }) {
     for (let row in biaya.info) {
       if (biaya.info[row].pilihData == "pilih") {
         if (biaya.info[row].tunai != null) tunai = biaya.info[row].tunai;
-        if (biaya.info[row].transfer != null) transfer = biaya.info[row].transfer;
+        if (biaya.info[row].transfer != null)
+          transfer = biaya.info[row].transfer;
         if (biaya.info[row].giro != null) giro = biaya.info[row].giro;
         if (biaya.info[row].cn != null) cn = biaya.info[row].cn;
         if (biaya.info[row].oth != null) oth = biaya.info[row].oth;
@@ -708,9 +721,9 @@ function Piutang({ props }) {
     });
 
     dataTabel.forEach((element) => {
-    element.subtotal = 0;
-    element.sisaHutang = 0;
-    element.dibayar = 0;
+      element.subtotal = 0;
+      element.sisaHutang = 0;
+      element.dibayar = 0;
 
       returSales.forEach((row) => {
         row.subtotal = 0;
