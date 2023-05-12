@@ -16,6 +16,8 @@ import createSaleFunc from "../../utility/createSale";
 import { useRouter } from "next/router";
 import moment from "moment";
 import LoadingAnimations from "@iso/components/Animations/Loading";
+import SalesTable from "../../../../../components/ReactDataTable/Selling/SalesTable";
+import ConfirmDialog from "../../../../../components/Alert/ConfirmDialog";
 
 ReturSales.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -164,6 +166,8 @@ function ReturSales({ props }) {
   const [addFee1Desc, setaddFee1Desc] = useState(sales.data.attributes.additional_fee_1_desc);
   const [addFee2Desc, setaddFee2Desc] = useState(sales.data.attributes.additional_fee_2_desc);
   const [addFee3Desc, setaddFee3Desc] = useState(sales.data.attributes.additional_fee_3_desc);
+  const [dataLocationStock, setDataLocationStock] = useState();
+  const [selectedLocationId, setSelectedLocationId] = useState();
 
   // Button Include
   const [btnDisc, setBtnDisc] = useState("Uninclude");
@@ -199,7 +203,6 @@ function ReturSales({ props }) {
       }
     });
     setDataValues(values);
-    setLoading(false);
   };
 
   const createDetailSale = async () => {
@@ -209,7 +212,8 @@ function ReturSales({ props }) {
       productTotalPrice,
       productSubTotal,
       setListId,
-      "/retur-sales-sale-details"
+      "/retur-sales-sale-details",
+      form
     );
   };
 
@@ -223,6 +227,57 @@ function ReturSales({ props }) {
     values.additional_fee_2_desc = addFee2Desc;
     values.additional_fee_3_desc = addFee3Desc;
     values.sales_sale = sales.data.id;
+
+    // update status to "Diretur"
+    const data = {
+      data: {
+        status: "Diretur",
+      },
+    };
+
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/sales-sales/${sales.data.id}`;
+    const options = {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${cookies.token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    };
+
+    await fetch(endpoint, options);
+
+    const formValues = form.getFieldsValue();
+    const updatedProduct = products.productInfo;
+
+    // update stock
+    const items = products.productList?.map((item, idx) => ({
+      product: item.id,
+      location: formValues.product_location[idx],
+      qty: updatedProduct[idx]?.qty || 1,
+      unit: updatedProduct[idx]?.unit || item.unit_1,
+      exp_date: formValues.expired_date[idx],
+    }));
+
+    const dataStock = {
+      data: items,
+      type: "Retur Penjualan",
+      keterangan: `Retur Penjualan ${sales.data.attributes.no_sales_sale}`,
+      no_referensi: formValues.no_retur_sales_sale,
+    };
+
+    const endpointStock = `${process.env.NEXT_PUBLIC_URL}/inventories/add`;
+    const optionsStock = {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${cookies.token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(dataStock),
+    };
+
+    await fetch(endpointStock, optionsStock);
+
     await createSaleFunc(
       grandTotal,
       totalPrice,
@@ -234,6 +289,7 @@ function ReturSales({ props }) {
       "sales sale",
       locations
     );
+    setLoading(false);
   };
 
   const calculatePriceAfterDisc = (row, index) => {
@@ -345,7 +401,6 @@ function ReturSales({ props }) {
   useEffect(() => {
     // used to reset redux from value before
     clearData();
-    setIsFetchingData(true);
 
     form.setFieldsValue({
       no_sales_sale: sales.data.attributes.no_sales_sale,
@@ -355,82 +410,20 @@ function ReturSales({ props }) {
       additional_fee_1_sub: sales.data.attributes?.additional_fee_1_sub,
       additional_fee_2_sub: sales.data.attributes?.additional_fee_2_sub,
       additional_fee_3_sub: sales.data.attributes?.additional_fee_3_sub,
+      retur_date: moment(),
     });
-
-    const retur_details = sales.data.attributes.sales_sale_details.data;
 
     dispatch({
       type: "SET_PREORDER_DATA",
       data: sales,
     });
-
-    var productId = 0;
-
-    retur_details.forEach((element) => {
-      var indexUnit = 1;
-      var unitOrder = element.attributes.unit_order;
-      var productUnit = element.attributes.product.data.attributes;
-
-      for (let index = 1; index < 6; index++) {
-        if (unitOrder === productUnit[`unit_${index}`]) {
-          indexUnit = index;
-        }
-      }
-
-      var dateString = element.attributes.expired_date;
-      var momentObj = moment(dateString, "YYYY-MM-DD");
-      var momentString = momentObj.format("MM-DD-YYYY");
-
-      form.setFieldsValue({
-        jumlah_qty: {
-          [productId]: element.attributes.qty,
-        },
-        jumlah_option: {
-          [productId]: element.attributes.unit,
-        },
-        disc_rp: {
-          [productId]: element.attributes.disc,
-        },
-        disc_rp1: {
-          [productId]: element.attributes.disc1,
-        },
-        disc_rp2: {
-          [productId]: element.attributes.disc2,
-        },
-        margin: {
-          [productId]: element.attributes.margin,
-        },
-        expired_date: {
-          [productId]: moment(momentString),
-        },
-      });
-
-      //SET INITIAL PRODUCT
-      dispatch({
-        type: "SET_SALE_INITIAL_PRODUCT",
-        product: element.attributes.product.data,
-        qty: element.attributes.qty,
-        unit: element.attributes.unit,
-        unitIndex: indexUnit,
-        disc: element.attributes.disc,
-        margin: element.attributes.margin,
-        d1: element.attributes.disc1,
-        d2: element.attributes.disc2,
-        expired_date: element.attributes.expired_date,
-        //priceAfterDisc,
-        //subTotal,
-        //unit: element.attributes.unit_order,
-        //unitIndex,
-        priceUnit: element.attributes.unit_price,
-        index: productId,
-      });
-      productId++;
-    });
-
-    setTimeout(() => {
-      setIsFetchingData(false);
-    }, 3000);
   }, []);
+
+  useEffect(() => {
+    if (products.productList.length > 0) {
+      getProductAtLocation();
+    }
+  }, [products.productList]);
 
   const validateError = () => {
     var listError = form.getFieldsError();
@@ -443,6 +436,96 @@ function ReturSales({ props }) {
       }
     });
   };
+
+  const onChangeProduct = async () => {
+    var isDuplicatedData = false;
+
+    tempList.find((item) => {
+      productList.forEach((element) => {
+        if (element.id === item.id) isDuplicatedData = true;
+      });
+    });
+
+    if (!isDuplicatedData) {
+      setProductList((productList) => [...productList, tempList[0]]);
+      toast.success("Produk berhasil ditambahkan!", {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 1000,
+      });
+    }
+  };
+
+  const getStockAtLocation = async (productId, locationId) => {
+    try {
+      const response = await getStock(productId, locationId);
+      console.log("response", response);
+
+      return response;
+    } catch (error) {
+      console.error("error", error);
+      setDataLocationStock({
+        ...dataLocationStock,
+        [productId]: "Error fetching stock data",
+      });
+    }
+  };
+
+  async function getStock(productId, locationId) {
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL + `/inventories/stock?location=${locationId}&product=${productId}&populate=*`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    return res;
+  }
+
+  const getProductAtLocation = async (locationId) => {
+    let tempData = {};
+    const location = locationId || selectedLocationId;
+    setIsFetchingData(true);
+
+    // create an array of promises by mapping over the productList
+    const promises = products.productList.map(async (product) => {
+      const res = await getStockAtLocation(product.id, location);
+      const stock = res?.data?.[0];
+      const initialOrder = sales.data?.attributes.sales_sale_details?.data?.find(
+        (item) => item?.attributes?.product?.data?.id === product.id
+      );
+
+      tempData = {
+        ...tempData,
+        [product.id]: {
+          ...stock,
+          order_details: initialOrder?.attributes,
+        },
+      };
+
+      return stock; // return a promise from each iteration
+    });
+
+    try {
+      // use Promise.all() to execute all promises in parallel
+      await Promise.all(promises);
+
+      setDataLocationStock(tempData); // update state after all promises have resolved
+
+      setIsFetchingData(false);
+      console.log("done");
+    } catch (error) {
+      console.error(error); // handle errors that may occur
+      setIsFetchingData(false);
+    }
+  };
+
+  console.log("redux ==>", products);
 
   return (
     <>
@@ -480,13 +563,13 @@ function ReturSales({ props }) {
                 </div>
               </div>
 
-              <div className="w-full flex flex-wrap justify-start -mx-3 mb-3 mt-2">
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
+              <div className="w-full flex justify-start -mx-3 gap-3 mb-3 mt-2">
+                <div className="w-full md:w-1/3 mb-2 md:mb-0">
                   <Form.Item name="no_sales_sale">
-                    <Input style={{ height: "40px" }} disabled />
+                    <Input style={{ height: "40px" }} readOnly />
                   </Form.Item>
                 </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
+                <div className="w-full md:w-1/3 mb-2 md:mb-0">
                   <Form.Item
                     name="no_retur_sales_sale"
                     initialValue={categorySale}
@@ -500,34 +583,7 @@ function ReturSales({ props }) {
                     <Input style={{ height: "40px" }} placeholder="No. Penjualan" />
                   </Form.Item>
                 </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="location"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Lokasi tidak boleh kosong!",
-                      },
-                    ]}
-                  >
-                    <Select
-                      placeholder="Lokasi Gudang Penerima"
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                    >
-                      {locations.map((element) => {
-                        return (
-                          <Select.Option value={element.id} key={element.attributes.name}>
-                            {element.attributes.name}
-                          </Select.Option>
-                        );
-                      })}
-                    </Select>
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
+                <div className="w-full md:w-1/3 mb-2 md:mb-0">
                   <Form.Item
                     name="retur_date"
                     rules={[
@@ -547,6 +603,19 @@ function ReturSales({ props }) {
                 </div>
               </div>
 
+              <div className="w-full flex md:w-4/4  mb-2 mt-2 mx-0  md:mb-0">
+                <SearchBar
+                  // disabled={!selectedLocationId}
+                  form={form}
+                  tempList={tempList}
+                  onChange={onChangeProduct}
+                  user={user}
+                  selectedProduct={selectedProduct}
+                  isBasedOnLocation={false}
+                  getProductAtLocation={getProductAtLocation}
+                />
+              </div>
+
               {isFetchinData ? (
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
                   <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
@@ -558,7 +627,8 @@ function ReturSales({ props }) {
                 </div>
               ) : (
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                  <StoreSaleTable
+                  <SalesTable
+                    retur={true}
                     products={products}
                     productTotalPrice={productTotalPrice}
                     setTotalPrice={setTotalPrice}
@@ -566,6 +636,7 @@ function ReturSales({ props }) {
                     calculatePriceAfterDisc={calculatePriceAfterDisc}
                     productSubTotal={productSubTotal}
                     setProductSubTotal={setProductSubTotal}
+                    dataLocationStock={dataLocationStock}
                     locations={locations}
                     formObj={form}
                   />
@@ -844,13 +915,20 @@ function ReturSales({ props }) {
                       <Spin />
                     </div>
                   ) : (
-                    <button
-                      onClick={() => setSimpanData("Bayar")}
-                      htmlType="submit"
-                      className="bg-cyan-700 rounded-md m-1 text-sm"
-                    >
-                      <p className="px-8 py-2 m-0 text-white">SIMPAN DAN CETAK</p>
-                    </button>
+                    <ConfirmDialog
+                      title="Simpan Retur Penjualan"
+                      message="Dokuman akan berubah status menjadi 'Diretur' dan item produk akan masuk gudang tujuan. Lanjutkan?"
+                      onCancel={() => {}}
+                      onConfirm={() => {
+                        setSimpanData("Bayar");
+                        form.submit();
+                      }}
+                      component={
+                        <button htmlType="button" className="bg-cyan-700 rounded-md m-1 text-sm">
+                          <p className="px-8 py-2 m-0 text-white">SIMPAN DAN CETAK</p>
+                        </button>
+                      }
+                    />
                   )}
                 </Form.Item>
               </div>

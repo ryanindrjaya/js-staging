@@ -7,13 +7,19 @@ import router, { useRouter } from "next/router";
 import { Input, notification, Select, DatePicker } from "antd";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
 import SellingTable from "../../../../components/ReactDataTable/Selling/SellingTable";
+import Customer from "@iso/components/Form/AddCost/CustomerForm";
+import createInventory from "../utility/createInventory";
 import nookies from "nookies";
+import LoadingAnimations from "@iso/components/Animations/Loading";
 
 NonPanelSale.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
 
   const req = await fetchData(cookies);
   const user = await req.json();
+
+  const reqDataUserSales = await fetchUserSales(cookies);
+  const dataUserSales = await reqDataUserSales.json();
 
   const reqLocation = await fetchLocation(cookies);
   const locations = await reqLocation.json();
@@ -26,6 +32,7 @@ NonPanelSale.getInitialProps = async (context) => {
       user,
       locations,
       nonpanelsales,
+      dataUserSales,
     },
   };
 };
@@ -42,6 +49,20 @@ const fetchData = async (cookies) => {
 
   const req = await fetch(endpoint, options);
   return req;
+};
+
+const fetchUserSales = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/users?populate=deep&filters[role][name][$eq]=Sales&?filters[role][type][$eq]=Sales";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
 };
 
 const fetchLocation = async (cookies) => {
@@ -76,9 +97,76 @@ function NonPanelSale({ props }) {
   const user = props.user;
   const locations = props.locations.data;
   const data = props.nonpanelsales;
+  const dataUserSales = props.dataUserSales;
   const router = useRouter();
   const [sell, setSell] = useState(data);
-  const [returPage, setReturPage] = useState("nonpanel");
+  const [searchParameters, setSearchParameters] = useState({});
+  const [isFetchinData, setIsFetchingData] = useState(false);
+
+  // Range Picker
+  const { RangePicker } = DatePicker;
+
+  const cookies = nookies.get(null, "token");
+
+  const updateStock = async (id, locations) => {
+    // fetching data to update
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/non-panel-sales/${id}?populate=deep`;
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+    const row = res.data;
+
+    row.attributes.status_data = "Publish";
+    row.attributes.area = row?.attributes?.area?.data?.id;
+    row.attributes.wilayah = row?.attributes?.wilayah?.data?.id;
+    row.attributes.customer = row?.attributes?.customer?.data?.id;
+    row.attributes.location = row?.attributes?.location?.data?.id;
+
+    var tempDetails = [];
+    for (var details in row.attributes.non_panel_sale_details.data){
+      tempDetails[details] = row.attributes.non_panel_sale_details.data[details].id;
+    }
+    row.attributes.non_panel_sale_details = tempDetails;
+
+    var tempPayments = [];
+    for (var payments in row.attributes.purchasing_payments.data){
+      tempPayments[payments] = row.attributes.purchasing_payments.data[payments].id;
+    }
+    row.attributes.purchasing_payments = tempPayments;
+
+    const dataUpdate = {
+      data: row.attributes,
+    };
+
+    const JSONdata = JSON.stringify(dataUpdate);
+    const endpointPut = process.env.NEXT_PUBLIC_URL + "/non-panel-sales/" + id + "?populate=deep";
+    const optionsPut = {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+        body: JSONdata,
+    };
+    const reqPut = await fetch(endpointPut, optionsPut);
+    const resPut = await reqPut.json();
+    const rowPut = resPut.data;
+
+    const trxStatus = rowPut?.attributes?.status_data;
+
+    if (trxStatus == "Publish") { console.log("masuk");
+      // invetory handle
+      createInventory(rowPut, locations);
+    }
+    console.log("tidak masuk", id, rowPut, resPut, dataUpdate);
+    router.reload("/dashboard/penjualan/non_panel");
+  };
 
   const handleAdd = () => {
     router.push("/dashboard/penjualan/non_panel/tambah");
@@ -91,6 +179,61 @@ function NonPanelSale({ props }) {
       "Work In Progress",
       "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
     );
+  };
+
+  const handleDelete = async (data) => {
+    handleDeleteRelation(data);
+
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/non-panel-sales/" + data.id;
+    const cookies = nookies.get(null, "token");
+
+    const options = {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+    if (res) {
+        const res = await fetchData(cookies);
+        openNotificationWithIcon(
+            "success",
+            "Berhasil menghapus data",
+            "Penjualan yang dipilih telah berhasil dihapus. Silahkan cek kembali penjualan non panel"
+        );
+        setSell(res);
+    }
+
+    setIsFetchingData(false);
+  };
+
+  const handleDeleteRelation = async (data) => {
+    setIsFetchingData(true);
+
+    var id = 0;
+    data.attributes.non_panel_sale_details.data.forEach((element) => {
+        id = element.id;
+
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/non-panel-sale-details/" + id;
+        const cookies = nookies.get(null, "token");
+
+        const options = {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+        };
+
+        const req = fetch(endpoint, options);
+        //const res = req.json();
+        if (req) {
+        console.log("relation deleted");
+        }
+    });
   };
 
   const onChangeStatus = (status, row) => {
@@ -231,7 +374,7 @@ function NonPanelSale({ props }) {
                 </Select>
               </div>
               <div className="w-full md:w-1/5 px-3">                
-                <DatePicker placeholder="Rentang Tanggal" size="large" style={{ width: "100%" }} />
+                <RangePicker size="large" onChange={(e) => setSearchParameters({ ...searchParameters, range: e })} />
               </div>
               <div className="w-full md:w-1/5 px-3"> 
                 <Select
@@ -256,79 +399,46 @@ function NonPanelSale({ props }) {
 
             <div className="w-full flex justify-start mt-3">
               <div className="w-full md:w-1/5 px-3"> 
-                <Select
-                  placeholder="Pelanggan"
-                  size="large"
-                  style={{
-                    width: "100%",
-                    marginRight: "10px",
-                  }}
-                >
-                {/*{locations.map((element) => {*/}
-                {/*  return (*/}
-                    <Select.Option>
-                      data
-                    </Select.Option>
-                {/*  );*/}
-                {/*})}*/}
-                </Select>
+                <Customer onChangeCustomer={(e) => setSearchParameters({ ...searchParameters, customer: e })} page={"NON PANEL"} />
               </div>
               <div className="w-full md:w-1/5 px-3"> 
                 <Select
-                  placeholder="Sales"
-                  size="large"
-                  style={{
-                    width: "100%",
-                    marginRight: "10px",
-                  }}
+                    size="large"
+                    style={{
+                        width: "100%",
+                    }}
+                    placeholder="Sales"
+                    allowClear
+                    onChange={(e) => setSearchParameters({ ...searchParameters, sales: e })}
                 >
-                {/*{locations.map((element) => {*/}
-                {/*  return (*/}
-                    <Select.Option>
-                      data
-                    </Select.Option>
-                {/*  );*/}
-                {/*})}*/}
+                    {dataUserSales?.map((element) => {
+                        return (
+                            <Select.Option value={element.name} key={element.id}>
+                                {element.name}
+                            </Select.Option>
+                        );
+                    })}
                 </Select>
               </div>
               <div className="w-full md:w-1/5 px-3"> 
-                <Select
-                  placeholder="Status Penyerahan"
-                  size="large"
-                  style={{
-                    width: "100%",
-                    marginRight: "10px",
-                  }}
-                >
-                {/*{locations.map((element) => {*/}
-                {/*  return (*/}
-                    <Select.Option>
-                      Diproses
-                    </Select.Option>
-                    <Select.Option>
-                      Diterima
-                    </Select.Option>
-                {/*  );*/}
-                {/*})}*/}
-                </Select>
-              </div>
-              <div className="w-full md:w-1/5 px-3"> 
-                <Select
+               <Select
                   placeholder="Jatuh Tempo"
                   size="large"
                   style={{
                     width: "100%",
                     marginRight: "10px",
                   }}
-                >
-                {/*{locations.map((element) => {*/}
-                {/*  return (*/}
-                    <Select.Option>
-                      data
-                    </Select.Option>
-                {/*  );*/}
-                {/*})}*/}
-                </Select>
+               >
+                <Select.Option>
+                    Tempo
+                </Select.Option>
+                <Select.Option>
+                    Menunggu
+                </Select.Option>
+                <Select.Option>
+                    Selesai
+                </Select.Option>
+               </Select>
               </div>
             </div>
 
@@ -388,14 +498,28 @@ function NonPanelSale({ props }) {
                 </button>
             </div>
 
-            <SellingTable
-              data={sell}
-              onUpdate={handleUpdate}
-              //onDelete={handleDelete}
-              //onPageChange={handlePageChange}
-              onChangeStatus={onChangeStatus}
-              returPage={returPage}
-            />
+            {isFetchinData ? (
+                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
+                <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
+                    <LoadingAnimations />
+                </div>
+                <div className="text-sm align-middle text-center animate-pulse text-slate-400">Sedang Mengambil Data</div>
+                </div>
+            ) : (
+                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
+                    <SellingTable
+                      data={sell}
+                      onUpdate={handleUpdate}
+                      onDelete={handleDelete}
+                      //onPageChange={handlePageChange}
+                      onChangeStatus={onChangeStatus}
+                      returPage="nonpanel"
+                      page="nonpanel"
+                      updateStock={updateStock}
+                    />
+                </div>
+            )}
+
           </LayoutContent>
         </LayoutWrapper>
       </DashboardLayout>

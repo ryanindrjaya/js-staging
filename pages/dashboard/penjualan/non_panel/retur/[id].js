@@ -4,24 +4,32 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import { Form, Input, DatePicker, Button, message, Upload, Select, Spin, notification, InputNumber } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import {
+  Form,
+  Input,
+  DatePicker,
+  Select,
+  Spin,
+  notification,
+  InputNumber,
+} from "antd";
 import nookies from "nookies";
-import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
+import SearchBar from "../../../../../components/Form/AddOrder/SearchBar";
 import { useSelector, useDispatch } from "react-redux";
 import calculatePrice from "../../utility/calculatePrice";
 import StoreSaleTable from "@iso/components/ReactDataTable/Selling/StoreSaleTable";
 import createDetailSaleFunc from "../../utility/createDetailSale";
 import createSaleFunc from "../../utility/createSale";
 import { useRouter } from "next/router";
-import moment from "moment";
 import LoadingAnimations from "@iso/components/Animations/Loading";
+import createReturInventory from "../../utility/createReturInventory";
 
 ReturNonPanel.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/non-panel-sales/" + id + "?populate=deep";
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL + "/non-panel-sales/" + id + "?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -37,6 +45,12 @@ ReturNonPanel.getInitialProps = async (context) => {
 
   const returNonPanel = await fetchData(cookies);
   const dataReturNonPanel = await returNonPanel.json();
+
+  const piutang = await fetchPiutang(cookies, id);
+  const dataPiutang = await piutang.json();
+
+  const paymentRetur = await fetchPaymentRetur(cookies, id);
+  const dataPaymentRetur = await paymentRetur.json();
 
   const dataUser = await fetchUser(cookies);
   const user = await dataUser.json();
@@ -56,9 +70,27 @@ ReturNonPanel.getInitialProps = async (context) => {
       data,
       locations,
       dataReturNonPanel,
-      user
+      dataPaymentRetur,
+      user,
     },
   };
+};
+
+const fetchPiutang = async (cookies, id) => {
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL +
+    "/credit-details?populate=*&filters[non_panel_sale][id][$eq]=" +
+    id;
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
 const fetchDataLocation = async (cookies) => {
@@ -76,7 +108,26 @@ const fetchDataLocation = async (cookies) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-non-panel-sales?populate=deep";
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL + "/retur-non-panel-sales?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+
+  return req;
+};
+
+const fetchPaymentRetur = async (cookies, id) => {
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL +
+    "/retur-non-panel-sales?populate=*&filters[non_panel_sale][id][$eq]=" +
+    id;
   const options = {
     method: "GET",
     headers: {
@@ -91,21 +142,21 @@ const fetchData = async (cookies) => {
 };
 
 const fetchUser = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=*";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=*";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
 
-    const req = await fetch(endpoint, options);
-    return req;
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
 function ReturNonPanel({ props }) {
-const products = useSelector((state) => state.Order);
+  const products = useSelector((state) => state.Sales);
   const dispatch = useDispatch();
 
   var selectedProduct = products?.productList;
@@ -113,6 +164,9 @@ const products = useSelector((state) => state.Order);
   const user = props.user;
   const nonPanel = props.data;
   const returNonPanel = props.dataReturNonPanel;
+  const dataPaymentRetur = props.dataPaymentRetur;
+  const dataPiutang = props.dataPiutang;
+  const totalTrx = nonPanel.data.attributes.total;
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -123,6 +177,8 @@ const products = useSelector((state) => state.Order);
   const [dataValues, setDataValues] = useState();
   const [selectedCategory, setSelectedCategory] = useState("BEBAS");
   const [deliveryFee, setDeliveryFee] = useState(0);
+  const [selectedLocationId, setSelectedLocationId] = useState();
+  const [dataLocationStock, setDataLocationStock] = useState();
 
   const [listId, setListId] = useState([]);
   const [productTotalPrice, setProductTotalPrice] = useState({});
@@ -132,8 +188,11 @@ const products = useSelector((state) => state.Order);
   const [totalPrice, setTotalPrice] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
 
-  const [dppActive, setDPPActive] = useState("Active");
-  const [ppnActive, setPPNActive] = useState("Active");
+  const [returPayment, setReturPayment] = useState(0);
+  const [returPaymentRemains, setReturPaymentRemains] = useState(0);
+
+  const [dppActive, setDPPActive] = useState(false);
+  const [ppnActive, setPPNActive] = useState(false);
   const [simpanData, setSimpanData] = useState("Bayar");
 
   const router = useRouter();
@@ -141,8 +200,9 @@ const products = useSelector((state) => state.Order);
   var today = new Date();
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
-  var date = today.getDate()+'/'+mm+'/'+yyyy;
-  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  var date = today.getDate() + "/" + mm + "/" + yyyy;
+  var time =
+    today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 
   // DPP & PPN
   const [dpp, setDPP] = useState(0);
@@ -158,12 +218,22 @@ const products = useSelector((state) => state.Order);
 
   //set data retur
   const [faktur, setFaktur] = useState(nonPanel.data.attributes.faktur);
-  const [customer, setCustomer] = useState(nonPanel.data.attributes.customer?.data?.attributes.name);
+  const [customer, setCustomer] = useState(
+    nonPanel.data.attributes.customer?.data?.attributes.name
+  );
   const [saleDate, setSaleDate] = useState(nonPanel.data.attributes.sale_date);
-  const [locationStore, setLocationStore] = useState(nonPanel.data.attributes.location.data.attributes.name);
-  const [addFee1Desc, setaddFee1Desc] = useState(nonPanel.data.attributes.additional_fee_1_desc);
-  const [addFee2Desc, setaddFee2Desc] = useState(nonPanel.data.attributes.additional_fee_2_desc);
-  const [addFee3Desc, setaddFee3Desc] = useState(nonPanel.data.attributes.additional_fee_3_desc);
+  const [locationStore, setLocationStore] = useState(
+    nonPanel.data.attributes.location.data.attributes.name
+  );
+  const [addFee1Desc, setaddFee1Desc] = useState(
+    nonPanel.data.attributes.additional_fee_1_desc
+  );
+  const [addFee2Desc, setaddFee2Desc] = useState(
+    nonPanel.data.attributes.additional_fee_2_desc
+  );
+  const [addFee3Desc, setaddFee3Desc] = useState(
+    nonPanel.data.attributes.additional_fee_3_desc
+  );
 
   // Button Include
   const [btnDisc, setBtnDisc] = useState("Uninclude");
@@ -172,12 +242,110 @@ const products = useSelector((state) => state.Order);
   const [btnAddFee3, setBtnAddFee3] = useState("Uninclude");
 
   // NO non panel
-    var noNonPanel = String(returNonPanel?.meta?.pagination.total + 1).padStart(3, "0");
-    const [categorySale, setCategorySale] = useState(`RNP/ET/${user.id}/${noNonPanel}/${mm}/${yyyy}`);
+  var noNonPanel = String(returNonPanel?.meta?.pagination.total + 1).padStart(
+    3,
+    "0"
+  );
+  const [categorySale, setCategorySale] = useState(
+    `RNP/ET/${user.id}/${noNonPanel}/${mm}/${yyyy}`
+  );
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);
-  }; 
+  };
+
+  const onChangeProduct = async () => {
+    var isDuplicatedData = false;
+
+    tempList.find((item) => {
+      productList.forEach((element) => {
+        if (element.id === item.id) isDuplicatedData = true;
+      });
+    });
+
+    console.log("templist", tempList);
+  };
+
+  const getProductAtLocation = async () => {
+    const locationId = form.getFieldValue("location");
+    let tempData = {};
+
+    // create an array of promises by mapping over the productList
+    const promises = products.productList.map(async (product) => {
+      const stock = await getStockAtLocation(product.id, locationId);
+      console.log("stock ", product.id, stock);
+
+      tempData = {
+        ...tempData,
+        [product.id]: stock,
+      };
+
+      return stock; // return a promise from each iteration
+    });
+
+    try {
+      // use Promise.all() to execute all promises in parallel
+      await Promise.all(promises);
+      setDataLocationStock(tempData); // update state after all promises have resolved
+      console.log("done");
+    } catch (error) {
+      console.error(error); // handle errors that may occur
+    }
+  };
+
+  const getStockAtLocation = async (productId, locationId) => {
+    let stockString = "Stok Kosong";
+    try {
+      console.log("get stock", productId, locationId);
+      const response = await getStock(productId, locationId);
+      console.log("response", response);
+
+      if (response.data.length > 0) {
+        const stock = response.data[0].attributes;
+        const product = stock.product?.data?.attributes; // use optional chaining to check if product exists
+
+        const stockUnit1 = stock.stock_unit_1;
+        const stockUnit2 = stock.stock_unit_2;
+        const stockUnit3 = stock.stock_unit_3;
+        const stockUnit4 = stock.stock_unit_4;
+        const stockUnit5 = stock.stock_unit_5;
+
+        const satuanUnit1 = product.unit_1;
+        const satuanUnit2 = product.unit_2;
+        const satuanUnit3 = product.unit_3;
+        const satuanUnit4 = product.unit_4;
+        const satuanUnit5 = product.unit_5;
+
+        stockString = `${stockUnit1} ${satuanUnit1}, ${stockUnit2} ${satuanUnit2}, ${stockUnit3} ${satuanUnit3}, ${stockUnit4} ${satuanUnit4}, ${stockUnit5} ${satuanUnit5}`;
+      }
+    } catch (error) {
+      console.error("error", error);
+      setDataLocationStock({
+        ...dataLocationStock,
+        [productId]: "Error fetching stock data",
+      });
+    }
+    return stockString;
+  };
+
+  async function getStock(productId, locationId) {
+    const cookies = nookies.get(null, "token");
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL +
+      `/inventories?filters[location][id][$eq]=${locationId}&filters[product][id][$eq]=${productId}&populate=*`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    return res;
+  }
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -188,23 +356,59 @@ const products = useSelector((state) => state.Order);
   const onFinish = (values) => {
     setLoading(true);
     setInfo("sukses");
+
+    let totalPiutang = 0;
+    dataPiutang?.data?.forEach((element) => {
+      const totalPembayaran =
+        element?.attributes?.credit?.data?.attributes?.total_pembayaran;
+      totalPiutang = totalPiutang + totalPembayaran;
+    });
+
+    const payment = panel.data.attributes.total;
+    const grandTotalFloat = parseFloat(grandTotal.toFixed(2));
+    const paymentFloat = parseFloat(payment.toFixed(2));
+    const paidCredit = parseFloat(totalPiutang.toFixed(2));
+    const remainingPayment = parseFloat((paymentFloat - paidCredit).toFixed(2));
+
+    console.log(grandTotalFloat, remainingPayment);
+    console.log("overprice? ", grandTotalFloat > remainingPayment);
+    if (grandTotalFloat > remainingPayment) {
+      notification["error"]({
+        message: "Overprice",
+        description:
+          "Harga retur melebih dari Sisa pembayaran / Harga Penjualan",
+      });
+      setLoading(false);
+      return;
+    }
+
     //values.status_pembayaran = simpanData;
     returNonPanel.data.forEach((element) => {
-        if (values.no_retur_non_panel_sale == element.attributes.no_retur_non_panel_sale) {
-          notification["error"]({
-              message: "Gagal menambahkan data",
-              description:
-                  "Data gagal ditambahkan, karena no penjualan sama",
-          });
-          setInfo("gagal");
-      } 
+      if (
+        values.no_retur_non_panel_sale ==
+        element.attributes.no_retur_non_panel_sale
+      ) {
+        notification["error"]({
+          message: "Gagal menambahkan data",
+          description: "Data gagal ditambahkan, karena no penjualan sama",
+        });
+        setInfo("gagal");
+      }
     });
     setDataValues(values);
     setLoading(false);
   };
 
   const createDetailSale = async () => {
-    await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/retur-non-panel-sale-details");
+    await createDetailSaleFunc(
+      dataValues,
+      products,
+      productTotalPrice,
+      productSubTotal,
+      setListId,
+      "/retur-non-panel-sale-details",
+      form
+    );
   };
 
   const createSale = async (values) => {
@@ -217,13 +421,59 @@ const products = useSelector((state) => state.Order);
     values.additional_fee_2_desc = addFee2Desc;
     values.additional_fee_3_desc = addFee3Desc;
     values.non_panel_sale = nonPanel.data.id;
-    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/retur-non-panel-sales/", "non panel sale", locations);
+    await createSaleFunc(
+      grandTotal,
+      totalPrice,
+      values,
+      listId,
+      form,
+      router,
+      "/retur-non-panel-sales/",
+      "non panel sale",
+      locations,
+      updateStock
+    );
   };
 
   const calculatePriceAfterDisc = (row, index) => {
-      const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index, setProductSubTotal);
+    const total = calculatePrice(
+      row,
+      products,
+      productTotalPrice,
+      productSubTotal,
+      setTotalPrice,
+      index,
+      setProductSubTotal
+    );
 
-      return formatter.format(total);
+    return formatter.format(total);
+  };
+
+  const updateStock = async (id, locations) => {
+    const panelId = panel.data.id;
+
+    // fetching data to update
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL + `/panel-sales/${panelId}?populate=deep`;
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+    const row = res.data;
+    console.log("endpoint", endpoint);
+    console.log("row stock", row);
+
+    const trxStatus = row.attributes?.status_data;
+
+    if (trxStatus == "Publish") {
+      const productInfo = products?.productInfo;
+      createReturInventory(row, selectedLocationId, productInfo);
+    }
   };
 
   const sumAdditionalPrice = () => {
@@ -270,7 +520,6 @@ const products = useSelector((state) => state.Order);
     }
   };
 
-
   const clearData = () => {
     dispatch({ type: "CLEAR_DATA" });
     setTotalPrice(0);
@@ -281,9 +530,44 @@ const products = useSelector((state) => state.Order);
     // if both are same then we should not set new price for grand total.
     // if they are not, then set new grand total
     if (discPrice !== totalPrice && discPrice !== 0) {
-      setGrandTotal(discPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
+      setGrandTotal(
+        discPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan)
+      );
     } else {
-      setGrandTotal(totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
+      setGrandTotal(
+        totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan)
+      );
+    }
+  }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
+
+  useEffect(() => {
+    if (dppActive) {
+      setDPP(grandTotal / 1.11);
+    } else {
+      setDPP(0);
+    }
+
+    if (ppnActive) {
+      setPPN(((grandTotal / 1.11) * 11) / 100);
+    } else {
+      setPPN(0);
+    }
+
+    setReturPaymentRemains(totalTrx - returPayment);
+  }, [grandTotal]);
+
+  useEffect(() => {
+    // this one is used for checking the price if the old price is same with new one.
+    // if both are same then we should not set new price for grand total.
+    // if they are not, then set new grand total
+    if (discPrice !== totalPrice && discPrice !== 0) {
+      setGrandTotal(
+        discPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan)
+      );
+    } else {
+      setGrandTotal(
+        totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan)
+      );
     }
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
 
@@ -303,7 +587,7 @@ const products = useSelector((state) => state.Order);
 
   useEffect(() => {
     // set dpp
-    if(dppActive == "DPP"){
+    if (dppActive) {
       setDPP(grandTotal / 1.11);
     } else {
       setDPP(0);
@@ -312,8 +596,8 @@ const products = useSelector((state) => state.Order);
 
   useEffect(() => {
     // set ppn
-    if(ppnActive == "PPN"){
-      setPPN((grandTotal / 1.11) * 11 / 100);
+    if (ppnActive) {
+      setPPN(((grandTotal / 1.11) * 11) / 100);
     } else {
       setPPN(0);
     }
@@ -322,7 +606,6 @@ const products = useSelector((state) => state.Order);
   useEffect(() => {
     // used to reset redux from value before
     clearData();
-    setIsFetchingData(true);
 
     form.setFieldsValue({
       no_non_panel_sale: nonPanel.data.attributes.no_non_panel_sale,
@@ -334,92 +617,27 @@ const products = useSelector((state) => state.Order);
       additional_fee_3_sub: nonPanel.data.attributes?.additional_fee_3_sub,
     });
 
-    const retur_details = nonPanel.data.attributes.non_panel_sale_details.data;
-
-    dispatch({
-      type: "SET_PREORDER_DATA",
-      data: nonPanel,
-    });
-
-    var productId = 0;
-
-    retur_details.forEach((element) => {
-        var indexUnit = 1;
-        var unitOrder = element.attributes.unit_order;
-        var productUnit = element.attributes.product.data.attributes;
-
-        for (let index = 1; index < 6; index++) {
-            if (unitOrder === productUnit[`unit_${index}`]) {
-                indexUnit = index;
-            }
-        }
-
-        var dateString = element.attributes.expired_date;
-        var momentObj = moment(dateString, "YYYY-MM-DD");
-        var momentString = momentObj.format("MM-DD-YYYY");
-
-        form.setFieldsValue({
-            jumlah_qty: {
-                [productId]: element.attributes.qty,
-            },
-            jumlah_option: {
-                [productId]: element.attributes.unit,
-            },
-            disc_rp: {
-                [productId]: element.attributes.disc,
-            },
-            disc_rp1: {
-                [productId]: element.attributes.disc1,
-            },
-            disc_rp2: {
-                [productId]: element.attributes.disc2,
-            },
-            margin: {
-                [productId]: element.attributes.margin,
-            },
-            expired_date: {
-                [productId]: moment(momentString),
-            },
-        });
-
-        //SET INITIAL PRODUCT
-        dispatch({
-            type: "SET_SALE_INITIAL_PRODUCT",
-            product: element.attributes.product.data,
-            qty: element.attributes.qty,
-            unit: element.attributes.unit,
-            unitIndex: indexUnit,
-            disc: element.attributes.disc,
-            margin: element.attributes.margin,
-            d1: element.attributes.disc1,
-            d2: element.attributes.disc2,
-            expired_date: element.attributes.expired_date,
-            //priceAfterDisc,
-            //subTotal,
-            //unit: element.attributes.unit_order,
-            //unitIndex,
-            priceUnit: element.attributes.unit_price,
-            index: productId,
-        });
-        productId++;
-    });
-
-    setTimeout(() => {
-      setIsFetchingData(false);
-    }, 3000);
+    setDPPActive(true);
+    setPPNActive(true);
+    calculatePaymentRemaining();
   }, []);
 
-  const validateError = () => {
-    var listError = form.getFieldsError();
-    listError.forEach((element) => {
-      if (element.errors[0]) {
-        notification["error"]({
-          message: "Field Kosong",
-          description: element.errors[0],
-        });
-      }
+  const calculatePaymentRemaining = () => {
+    let totalRemaining = 0;
+    dataPaymentRetur?.data?.forEach((element) => {
+      const totalTrx = element.attributes.total;
+      totalRemaining = totalRemaining + totalTrx;
     });
+
+    console.log("data payment retur", dataPaymentRetur);
+    setReturPayment(totalRemaining);
   };
+
+  useEffect(() => {
+    if (grandTotal != 0) {
+      setReturPaymentRemains(totalTrx - returPayment);
+    }
+  }, [returPayment]);
 
   return (
     <>
@@ -430,7 +648,6 @@ const products = useSelector((state) => state.Order);
         <LayoutWrapper style={{}}>
           <TitlePage titleText={"Retur Penjualan Non Panel"} />
           <LayoutContent>
-
             <Form
               form={form}
               name="add"
@@ -439,7 +656,6 @@ const products = useSelector((state) => state.Order);
               }}
               onFinish={onFinish}
             >
-
               <div className="w-full flex flex-wrap justify-start -mx-3 mt-1">
                 <div className="w-full md:w-1/3 px-3 mt-2 md:mb-0">
                   {/*<p className="text-sm text-start ml-9">No Faktur : {faktur}</p>*/}
@@ -451,7 +667,9 @@ const products = useSelector((state) => state.Order);
 
               <div className="w-full flex flex-wrap justify-start -mx-3">
                 <div className="w-full md:w-1/3 px-3 md:mb-0">
-                  <p className="text-sm text-start ml-9">Tanggal : {saleDate}</p>
+                  <p className="text-sm text-start ml-9">
+                    Tanggal : {saleDate}
+                  </p>
                 </div>
                 <div className="w-full md:w-1/3 px-3 md:mb-0">
                   <p className="text-sm text-start">Lokasi : {locationStore}</p>
@@ -460,9 +678,7 @@ const products = useSelector((state) => state.Order);
 
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-3 mt-2">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="no_non_panel_sale"
-                    >
+                  <Form.Item name="no_non_panel_sale">
                     <Input style={{ height: "40px" }} disabled />
                   </Form.Item>
                 </div>
@@ -471,13 +687,16 @@ const products = useSelector((state) => state.Order);
                     name="no_retur_non_panel_sale"
                     initialValue={categorySale}
                     rules={[
-                        {
-                            required: true,
-                            message: "Nomor Penjualan tidak boleh kosong!",
-                        },
+                      {
+                        required: true,
+                        message: "Nomor Penjualan tidak boleh kosong!",
+                      },
                     ]}
-                    >
-                    <Input style={{ height: "40px" }} placeholder="No. Penjualan" />
+                  >
+                    <Input
+                      style={{ height: "40px" }}
+                      placeholder="No. Penjualan"
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -491,6 +710,10 @@ const products = useSelector((state) => state.Order);
                     ]}
                   >
                     <Select
+                      onChange={(e) => {
+                        setSelectedLocationId(e);
+                        getProductAtLocation(e);
+                      }}
                       placeholder="Lokasi Gudang Penerima"
                       size="large"
                       style={{
@@ -499,7 +722,10 @@ const products = useSelector((state) => state.Order);
                     >
                       {locations.map((element) => {
                         return (
-                          <Select.Option value={element.id} key={element.attributes.name}>
+                          <Select.Option
+                            value={element.id}
+                            key={element.attributes.name}
+                          >
                             {element.attributes.name}
                           </Select.Option>
                         );
@@ -517,32 +743,52 @@ const products = useSelector((state) => state.Order);
                       },
                     ]}
                   >
-                    <DatePicker placeholder="Tanggal Retur" size="large" format={"DD/MM/YYYY"} style={{ width: "100%" }} />
+                    <DatePicker
+                      placeholder="Tanggal Retur"
+                      size="large"
+                      format={"DD/MM/YYYY"}
+                      style={{ width: "100%" }}
+                    />
                   </Form.Item>
                 </div>
               </div>
 
+              <div className="w-full flex md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
+                <SearchBar
+                  form={form}
+                  tempList={tempList}
+                  onChange={onChangeProduct}
+                  user={user}
+                  selectedProduct={selectedProduct}
+                  isBasedOnLocation={false}
+                  getProductAtLocation={getProductAtLocation}
+                />
+              </div>
+
               {isFetchinData ? (
-                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
-                    <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
-                      <LoadingAnimations />
-                    </div>
-                    <div className="text-sm align-middle text-center animate-pulse text-slate-400">Sedang Mengambil Data</div>
+                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
+                  <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
+                    <LoadingAnimations />
                   </div>
-                ) : (
-                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                    <StoreSaleTable
-                      products={products}
-                      productTotalPrice={productTotalPrice}
-                      setTotalPrice={setTotalPrice}
-                      setProductTotalPrice={setProductTotalPrice}
-                      calculatePriceAfterDisc={calculatePriceAfterDisc}
-                      productSubTotal={productSubTotal}
-                      setProductSubTotal={setProductSubTotal}
-                      locations={locations}
-                      formObj={form}
-                    />
+                  <div className="text-sm align-middle text-center animate-pulse text-slate-400">
+                    Sedang Mengambil Data
                   </div>
+                </div>
+              ) : (
+                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
+                  <StoreSaleTable
+                    products={products}
+                    productTotalPrice={productTotalPrice}
+                    setTotalPrice={setTotalPrice}
+                    setProductTotalPrice={setProductTotalPrice}
+                    calculatePriceAfterDisc={calculatePriceAfterDisc}
+                    productSubTotal={productSubTotal}
+                    setProductSubTotal={setProductSubTotal}
+                    locations={locations}
+                    dataLocationStock={dataLocationStock}
+                    formObj={form}
+                  />
+                </div>
               )}
 
               <div className="w-full flex flex-wrap -mx-3 mb-1">
@@ -577,17 +823,28 @@ const products = useSelector((state) => state.Order);
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/6 px-3 mt-5 ">
-                 {btnDisc === "Uninclude" ? (
-                    <button type="button" onClick={() => { setTotalWithDisc(); setBtnDisc("Include") } } className="bg-cyan-700 rounded-md m-1 text-sm">
-                      <p className="px-4 py-2 m-0 text-white">
-                        INC. RETUR
-                      </p>
+                  {btnDisc === "Uninclude" ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTotalWithDisc();
+                        setBtnDisc("Include");
+                      }}
+                      className="bg-cyan-700 rounded-md m-1 text-sm"
+                    >
+                      <p className="px-4 py-2 m-0 text-white">INC. RETUR</p>
                     </button>
                   ) : (
-                    <button type="button" onClick={() => { setTotalWithDisc(); setBtnDisc("Uninclude"); Uninclude(); } } className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm">
-                      <p className="px-4 py-2 m-0 text-cyan">
-                        INC. RETUR
-                      </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTotalWithDisc();
+                        setBtnDisc("Uninclude");
+                        Uninclude();
+                      }}
+                      className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm"
+                    >
+                      <p className="px-4 py-2 m-0 text-cyan">INC. RETUR</p>
                     </button>
                   )}
                 </div>
@@ -604,8 +861,11 @@ const products = useSelector((state) => state.Order);
                         width: "100%",
                       }}
                     >
-                      <Select.Option value="DPP" key={"DPP"}>
+                      <Select.Option value={true} key={"DPP"}>
                         DPP
+                      </Select.Option>
+                      <Select.Option value={false} key={"non-DPP"}>
+                        Non-DPP
                       </Select.Option>
                     </Select>
                   </Form.Item>
@@ -620,34 +880,76 @@ const products = useSelector((state) => state.Order);
                         width: "100%",
                       }}
                     >
-                      <Select.Option value="PPN" key={"PPN"}>
+                      <Select.Option value={true} key={"PPN"}>
                         PPN
+                      </Select.Option>
+                      <Select.Option value={false} key={"non-PPN"}>
+                        Non-PPN
                       </Select.Option>
                     </Select>
                   </Form.Item>
                 </div>
                 <div className="w-full flex flex-wrap md:w-1/3 justify-start -mt-14 mb-3">
-                    <Form.Item name="dpp" value={dpp} className="w-full h-2 md:w-1/2 mx-2">
-                        <span> DPP </span> <span>: {formatter.format(dpp)}</span>
-                    </Form.Item>
-                    <Form.Item name="ppn" value={ppn} className="w-full h-2 md:w-1/2 mx-2">
-                        <span> PPN </span> <span>: {formatter.format(ppn)}</span>
-                    </Form.Item>
-                    <Form.Item name="grandtotal" value={totalPrice} className="w-full h-2 md:w-1/2 mx-2">
-                        <span> Total </span> <span>: {formatter.format(totalPrice)}</span>
-                    </Form.Item>
-                    <Form.Item name="biayaTambahan" value={biayaTambahan} className="w-full h-2 md:w-1/2 mx-2">
-                        <span> Biaya Tambahan </span> <span>: {formatter.format(biayaTambahan)}</span>
-                    </Form.Item>
+                  <Form.Item
+                    name="dpp"
+                    value={dpp}
+                    className="w-full h-2 md:w-1/2 mx-2"
+                  >
+                    <span> DPP </span> <span>: {formatter.format(dpp)}</span>
+                  </Form.Item>
+                  <Form.Item
+                    name="ppn"
+                    value={ppn}
+                    className="w-full h-2 md:w-1/2 mx-2"
+                  >
+                    <span> PPN </span> <span>: {formatter.format(ppn)}</span>
+                  </Form.Item>
+                  <Form.Item
+                    name="grandtotal"
+                    value={totalPrice}
+                    className="w-full h-2 md:w-1/2 mx-2"
+                  >
+                    <span> Total </span>{" "}
+                    <span>: {formatter.format(totalPrice)}</span>
+                  </Form.Item>
+                  <Form.Item
+                    name="biayaTambahan"
+                    value={biayaTambahan}
+                    className="w-full h-2 md:w-1/2 mx-2"
+                  >
+                    <span> Biaya Tambahan </span>{" "}
+                    <span>: {formatter.format(biayaTambahan)}</span>
+                  </Form.Item>
 
-                    <Form.Item name="grandTotal" value={grandTotal} className="w-full h-2 md:w-1/2 mx-2 mt-3 text-lg">
-                        <span> Total </span>  <span>: {formatter.format(grandTotal)}</span>
-                    </Form.Item>
+                  <Form.Item
+                    name="grandTotal"
+                    value={grandTotal}
+                    className="w-full h-2 md:w-1/2 mx-2 mt-3 text-lg"
+                  >
+                    <span> Total </span>{" "}
+                    <span>: {formatter.format(grandTotal)}</span>
+                  </Form.Item>
+                  {/* <Form.Item
+                    name="test1"
+                    className="w-full h-2 md:w-1/2 mx-2 mt-10 text-lg"
+                  >
+                    <span> Total Pembayaran Trx </span>{" "}
+                    <span>: {formatter.format(grandTotal)}</span>
+                  </Form.Item>
+                  <Form.Item
+                    name="test1"
+                    className="w-full h-2 md:w-1/2 mx-2 mt-3 text-lg"
+                  >
+                    <span> Sisa </span>{" "}
+                    <span>: {formatter.format(returPaymentRemains)}</span>
+                  </Form.Item> */}
                 </div>
               </div>
 
               <div className="w-full flex md:w-3/4 justify-end mb-2">
-                <p className="mb-4 font-bold text-center">Biaya Tambahan Lain Lain</p>
+                <p className="mb-4 font-bold text-center">
+                  Biaya Tambahan Lain Lain
+                </p>
               </div>
               <div className="w-full flex flex-wrap justify-end mb-3">
                 <div className="w-full md:w-1/3 px-3 mb-2 text-end md:mb-0 mt-2">
@@ -703,117 +1005,122 @@ const products = useSelector((state) => state.Order);
                 </div>
                 <div className="w-full md:w-1/6 px-1 mb-2 text-center md:mb-0 mt-10">
                   <Form.Item>
-                  {btnAddFee1 === "Uninclude" ? (
-                    <button type="button" 
-                      onClick={() => { 
-                        setBtnAddFee1("Include");
-                        setAdditionalFee({
-                          ...additionalFee,
-                          additional_fee_1_sub: nonPanel.data.attributes?.additional_fee_1_sub,
-                        })
-                      }}
-                    className="bg-cyan-700 rounded-md m-1 text-sm">
-                      <p className="px-4 py-2 m-0 text-white">
-                        INC. RETUR
-                      </p>
-                    </button>
-                  ) : (
-                    <button type="button"
-                      onClick={() => {
-                        setBtnAddFee1("Uninclude");
-                        setAdditionalFee({
-                          ...additionalFee,
-                          additional_fee_1_sub: 0,
-                        })
-                      }}
-                    className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm">
-                      <p className="px-4 py-2 m-0 text-cyan">
-                        INC. RETUR
-                      </p>
-                    </button>
-                  )}
+                    {btnAddFee1 === "Uninclude" ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setBtnAddFee1("Include");
+                          setAdditionalFee({
+                            ...additionalFee,
+                            additional_fee_1_sub:
+                              nonPanel.data.attributes?.additional_fee_1_sub,
+                          });
+                        }}
+                        className="bg-cyan-700 rounded-md m-1 text-sm"
+                      >
+                        <p className="px-4 py-2 m-0 text-white">INC. RETUR</p>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setBtnAddFee1("Uninclude");
+                          setAdditionalFee({
+                            ...additionalFee,
+                            additional_fee_1_sub: 0,
+                          });
+                        }}
+                        className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm"
+                      >
+                        <p className="px-4 py-2 m-0 text-cyan">INC. RETUR</p>
+                      </button>
+                    )}
                   </Form.Item>
                   <Form.Item>
-                  {btnAddFee2 === "Uninclude" ? (
-                    <button type="button" 
-                      onClick={() => { 
-                        setBtnAddFee2("Include");
-                        setAdditionalFee({
-                          ...additionalFee,
-                          additional_fee_2_sub: nonPanel.data.attributes?.additional_fee_2_sub,
-                        })
-                      }}
-                    className="bg-cyan-700 rounded-md m-1 text-sm">
-                      <p className="px-4 py-2 m-0 text-white">
-                        INC. RETUR
-                      </p>
-                    </button>
-                  ) : (
-                    <button type="button"
-                      onClick={() => {
-                        setBtnAddFee2("Uninclude");
-                        setAdditionalFee({
-                          ...additionalFee,
-                          additional_fee_2_sub: 0,
-                        })
-                      }}
-                    className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm">
-                      <p className="px-4 py-2 m-0 text-cyan">
-                        INC. RETUR
-                      </p>
-                    </button>
-                  )}
+                    {btnAddFee2 === "Uninclude" ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setBtnAddFee2("Include");
+                          setAdditionalFee({
+                            ...additionalFee,
+                            additional_fee_2_sub:
+                              nonPanel.data.attributes?.additional_fee_2_sub,
+                          });
+                        }}
+                        className="bg-cyan-700 rounded-md m-1 text-sm"
+                      >
+                        <p className="px-4 py-2 m-0 text-white">INC. RETUR</p>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setBtnAddFee2("Uninclude");
+                          setAdditionalFee({
+                            ...additionalFee,
+                            additional_fee_2_sub: 0,
+                          });
+                        }}
+                        className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm"
+                      >
+                        <p className="px-4 py-2 m-0 text-cyan">INC. RETUR</p>
+                      </button>
+                    )}
                   </Form.Item>
                   <Form.Item>
-                  {btnAddFee3 === "Uninclude" ? (
-                    <button type="button" 
-                      onClick={() => { 
-                        setBtnAddFee3("Include");
-                        setAdditionalFee({
-                          ...additionalFee,
-                          additional_fee_3_sub: nonPanel.data.attributes?.additional_fee_3_sub,
-                        })
-                      }}
-                    className="bg-cyan-700 rounded-md m-1 text-sm">
-                      <p className="px-4 py-2 m-0 text-white">
-                        INC. RETUR
-                      </p>
-                    </button>
-                  ) : (
-                    <button type="button"
-                      onClick={() => {
-                        setBtnAddFee3("Uninclude");
-                        setAdditionalFee({
-                          ...additionalFee,
-                          additional_fee_3_sub: 0,
-                        })
-                      }}
-                    className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm">
-                      <p className="px-4 py-2 m-0 text-cyan">
-                        INC. RETUR
-                      </p>
-                    </button>
-                  )}
+                    {btnAddFee3 === "Uninclude" ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setBtnAddFee3("Include");
+                          setAdditionalFee({
+                            ...additionalFee,
+                            additional_fee_3_sub:
+                              nonPanel.data.attributes?.additional_fee_3_sub,
+                          });
+                        }}
+                        className="bg-cyan-700 rounded-md m-1 text-sm"
+                      >
+                        <p className="px-4 py-2 m-0 text-white">INC. RETUR</p>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setBtnAddFee3("Uninclude");
+                          setAdditionalFee({
+                            ...additionalFee,
+                            additional_fee_3_sub: 0,
+                          });
+                        }}
+                        className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm"
+                      >
+                        <p className="px-4 py-2 m-0 text-cyan">INC. RETUR</p>
+                      </button>
+                    )}
                   </Form.Item>
                 </div>
               </div>
 
-
-
-              <div  className="w-full flex justify-center">
-                  <Form.Item>
-                    {loading ? (
-                      <div className=" flex float-left ml-3 ">
-                        <Spin />
-                      </div>
-                    ) : (
-                      <button onClick={validateError} onClick={() => setSimpanData("Bayar")} htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
-                        <p className="px-8 py-2 m-0 text-white">
-                          SIMPAN DAN CETAK
-                        </p>
-                      </button>
-                    )}
-                  </Form.Item>
+              <div className="w-full flex justify-center">
+                <Form.Item>
+                  {loading ? (
+                    <div className=" flex float-left ml-3 ">
+                      <Spin />
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setSimpanData("Bayar")}
+                      htmlType="submit"
+                      className="bg-cyan-700 rounded-md m-1 text-sm"
+                    >
+                      <p className="px-8 py-2 m-0 text-white">
+                        SIMPAN DAN CETAK
+                      </p>
+                    </button>
+                  )}
+                </Form.Item>
               </div>
             </Form>
           </LayoutContent>

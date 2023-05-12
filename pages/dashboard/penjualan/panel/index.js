@@ -100,7 +100,6 @@ function PanelSale({ props }) {
   const dataUserSales = props.dataUserSales;
   const router = useRouter();
   const [sell, setSell] = useState(data);
-  const [returPage, setReturPage] = useState("panel");
   const [searchParameters, setSearchParameters] = useState({});
   const [isFetchinData, setIsFetchingData] = useState(false);
 
@@ -122,7 +121,7 @@ function PanelSale({ props }) {
     const req = await fetch(endpoint, options);
     const res = await req.json();
     const row = res.data;
-    //var dataSale = null;
+
     row.attributes.status_data = "Publish";
     row.attributes.area = row?.attributes?.area?.data?.id;
     row.attributes.wilayah = row?.attributes?.wilayah?.data?.id;
@@ -144,13 +143,6 @@ function PanelSale({ props }) {
     const dataUpdate = {
       data: row.attributes,
     };
-    //var temp = [];
-    //row.attributes.panel_sale_details.data.forEach((item) => {
-    //  temp
-    //});
-    //sell.forEach((item) => {
-      
-    //});
 
     const JSONdata = JSON.stringify(dataUpdate);
     const endpointPut = process.env.NEXT_PUBLIC_URL + "/panel-sales/" + id + "?populate=deep";
@@ -187,6 +179,61 @@ function PanelSale({ props }) {
       "Work In Progress",
       "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
     );
+  };
+
+  const handleDelete = async (data) => {
+    handleDeleteRelation(data);
+
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/panel-sales/" + data.id;
+    const cookies = nookies.get(null, "token");
+
+    const options = {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+    if (res) {
+        const res = await fetchData(cookies);
+        openNotificationWithIcon(
+            "success",
+            "Berhasil menghapus data",
+            "Penjualan yang dipilih telah berhasil dihapus. Silahkan cek kembali penjualan non panel"
+        );
+        setSell(res);
+    }
+
+    setIsFetchingData(false);
+  };
+
+  const handleDeleteRelation = async (data) => {
+    setIsFetchingData(true);
+
+    var id = 0;
+    data.attributes.panel_sale_details.data.forEach((element) => {
+        id = element.id;
+
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/panel-sale-details/" + id;
+        const cookies = nookies.get(null, "token");
+
+        const options = {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+        };
+
+        const req = fetch(endpoint, options);
+        //const res = req.json();
+        if (req) {
+        console.log("relation deleted");
+        }
+    });
   };
 
   const onChangeStatus = (status, row) => {
@@ -352,7 +399,7 @@ function PanelSale({ props }) {
 
             <div className="w-full flex justify-start mt-3">
               <div className="w-full md:w-1/5 px-3"> 
-                <Customer onChangeCustomer={(e) => setSearchParameters({ ...searchParameters, customer: e })} />
+                <Customer onChangeCustomer={(e) => setSearchParameters({ ...searchParameters, customer: e })} page={"PANEL"}/>
               </div>
               <div className="w-full md:w-1/5 px-3"> 
                 <Select
@@ -469,10 +516,10 @@ function PanelSale({ props }) {
                 <SellingTable
                   data={sell}
                   onUpdate={handleUpdate}
-                  //onDelete={handleDelete}
+                  onDelete={handleDelete}
                   //onPageChange={handlePageChange}
                   onChangeStatus={onChangeStatus}
-                  returPage={returPage}
+                  returPage="panel"
                   page="panel"
                   updateStock={updateStock}
                 />

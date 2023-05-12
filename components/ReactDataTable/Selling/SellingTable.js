@@ -25,10 +25,8 @@ export default function ReactDataTable({
   page,
   updateStock
 }) {
-  console.log("test table data ", data);
 
   const router = useRouter();
-  console.log("data :", data);
   const { Option } = Select;
 
   const tagRed = process.env.TAG_RED;
@@ -47,6 +45,11 @@ export default function ReactDataTable({
     //router.push("order_pembelian/print/" + row.id);
   };
 
+  const handleEdit = (row) => {
+    if (page == "nonpanel") router.push("non_panel/edit/" + row.id);
+    if (page == "panel") router.push("panel/edit/" + row.id);
+  };
+
   const handlePiutang = (row) => {
     if (row.attributes.status_data == "Draft") updateStock(row.id, row?.attributes?.location?.data?.id);
     else {
@@ -58,11 +61,15 @@ export default function ReactDataTable({
   };
 
   const print = (row) => {
-    router.push("/dashboard/penjualan/toko/print/" + row.id);
+    if (page == "panel") router.push("/dashboard/penjualan/panel/print/" + row.id);
+    else if (page == "nonpanel") router.push("/dashboard/penjualan/non_panel/print/" + row.id);
+    else {
+      router.push("/dashboard/penjualan/toko/print/" + row.id);
+    }
   };
 
   const returPenjualan = (row) => {
-    if (row.attributes.status === "Dibayar") {
+    if (row.attributes.status == "Dibayar" || row.attributes.status == "Dibayar Sebagian") {
       if (returPage == "toko") router.push("toko/retur/" + row.id);
       if (returPage == "sales") router.push("sales/retur/" + row.id);
       if (returPage == "nonpanel") router.push("non_panel/retur/" + row.id);
@@ -78,7 +85,6 @@ export default function ReactDataTable({
       openNotificationWithIcon("error", "Maaf tidak bisa diretur", message);
     }
 
-    //router.push("toko/retur/" + row.id);
   };
 
   const onConfirm = (id) => {
@@ -102,7 +108,7 @@ export default function ReactDataTable({
 
 
   const content = (row) => {
-    if(page == "panel"){
+    if(page == "panel" || page == "nonpanel"){
 
       return (
         <div>
@@ -121,25 +127,11 @@ export default function ReactDataTable({
           ) : (
             <div>
               <button
-                onClick={() => lihat(row)}
+                onClick={() => handleEdit(row)}
                 className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
               >
                 <EditOutlined className="mr-2 mt-0.5 float float-left" />
                 Edit
-              </button>
-            </div>
-          )}
-
-          {row.attributes.status_data != "Draft" ? (
-            <></>
-          ) : (
-            <div>
-              <button
-                onClick={() => lihat(row)}
-                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-              >
-                <CloseOutlined className="mr-2 mt-0.5 float float-left" />
-                Batal
               </button>
             </div>
           )}
@@ -180,6 +172,27 @@ export default function ReactDataTable({
                 Retur Penjualan
             </button>
           </div>
+
+          {row.attributes.status_data != "Draft" ? (
+            <></>
+          ) : (
+            //<div>
+            //  <button
+            //    onClick={() => lihat(row)}
+            //    className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+            //  >
+            //    <CloseOutlined className="mr-2 mt-0.5 float float-left" />
+            //    Batal
+            //  </button>
+            //</div>
+            <AlertDialog
+              onCancel={onCancel}
+              onConfirm={onConfirm}
+              title="Hapus Kategori"
+              message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
+              id={row}
+            />
+          )}
         </div>
       );
 
@@ -253,7 +266,7 @@ export default function ReactDataTable({
       name: "Customer",
       width: "180px",
       selector: (row) => {
-        if(page == "panel") return row.attributes?.customer?.data?.attributes?.name ?? "-";
+        if(page == "panel" || page == "nonpanel") return row.attributes?.customer?.data?.attributes?.name ?? "-";
         else return row.attributes?.customer_name ?? "-";
       },
     },
@@ -271,7 +284,7 @@ export default function ReactDataTable({
           return <Tag color="red">{row.attributes?.status}</Tag>;
         } else if (row.attributes?.status == "Diretur") {
           return <Tag color="orange">{row.attributes?.status}</Tag>;
-        } else if (row.attributes?.status == "Diproses") {
+        } else if (row.attributes?.status == "Dibayar Sebagian") {
           return <Tag>{row.attributes?.status}</Tag>;
         } else {
           return <Tag color="green">{row.attributes?.status}</Tag>;
@@ -360,7 +373,7 @@ export default function ReactDataTable({
       columns={columns}
       data={data.data}
       pagination
-      noDataComponent={"Belum ada data Penjualan Toko"}
+      noDataComponent={"Belum ada data Penjualan"}
     />
   );
 }

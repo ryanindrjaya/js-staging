@@ -17,14 +17,14 @@ export default function calculatePrice(row, products, productTotalPrice, product
   }
 
 
-  //if (products.productInfo[index]?.d2) {
-  //  Dp2 = products.productInfo[index].d2 ?? 0;
-  //} else if (
-  //  products.productInfo[index]?.d2 === 0 ||
-  //  products.productInfo[index]?.d2 === null
-  //) {
-  Dp2 = 0;
-  //}
+  if (products.productInfo[index]?.d2) {
+    Dp2 = products.productInfo[index].d2 ?? 0;
+  } else if (
+    products.productInfo[index]?.d2 === 0 ||
+    products.productInfo[index]?.d2 === null
+  ) {
+    Dp2 = 0;
+  }
 
 
   // check if price changed

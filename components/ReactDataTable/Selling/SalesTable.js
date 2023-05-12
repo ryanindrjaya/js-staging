@@ -14,6 +14,8 @@ export default function SalesTable({
   dataDetailTrx,
   stokString,
   formObj,
+  retur = false,
+  locations = [],
 }) {
   const dispatch = useDispatch();
   var defaultDp1 = 0;
@@ -142,6 +144,7 @@ export default function SalesTable({
     {
       name: "Stok Gudang",
       width: "300px",
+      omit: retur,
       wrap: true,
       selector: (row, idx) => {
         if (dataLocationStock?.[row.id]) {
@@ -176,7 +179,7 @@ export default function SalesTable({
       },
     },
     {
-      name: "Jumlah Penjualan",
+      name: retur ? "Jumlah Retur" : "Jumlah Penjualan",
       width: "220px",
       selector: (row, idx) => {
         var defaultQty = 1;
@@ -200,6 +203,37 @@ export default function SalesTable({
 
         if (stock) {
           max = stock[defaultUnit].qty;
+        } else if (retur) {
+          if (defaultUnit === dataLocationStock?.[row.id]?.order_details?.unit) {
+            max = dataLocationStock?.[row.id]?.order_details?.qty;
+          } else {
+            // set max based on product conversion
+            let productConversion = {};
+            let orderUnitIndex;
+
+            [1, 2, 3, 4, 5].forEach((i) => {
+              if (row?.attributes[`unit_${i}`] === dataLocationStock?.[row.id]?.order_details?.unit) {
+                orderUnitIndex = i;
+              }
+            });
+
+            for (let i = orderUnitIndex; i <= 5; i++) {
+              if (row?.attributes[`unit_${i}`]) {
+                const unit = row?.attributes[`unit_${i}`];
+                const conversion = row?.attributes[`qty_${i}`];
+                const previousConversion = productConversion[row?.attributes[`unit_${i - 1}`]] || 1;
+                if (i !== orderUnitIndex) {
+                  productConversion[unit] = conversion * previousConversion;
+                } else {
+                  productConversion[unit] = conversion;
+                }
+              }
+            }
+
+            const stockBasedOnOrder = productConversion[defaultUnit] * dataLocationStock?.[row.id]?.order_details?.qty;
+
+            max = stockBasedOnOrder > 0 ? stockBasedOnOrder : 0;
+          }
         }
 
         return (
@@ -277,6 +311,7 @@ export default function SalesTable({
     {
       name: "Margin",
       width: "150px",
+      omit: retur,
       selector: (row, idx) => {
         var defaultMargin = 0;
 
@@ -418,6 +453,46 @@ export default function SalesTable({
               noStyle
             >
               <DatePicker placeholder="EXP. Date" size="normal" format={"DD/MM/YYYY"} />
+            </Form.Item>
+          </>
+        );
+      },
+    },
+    {
+      name: "Lokasi Retur",
+      width: "250px",
+      omit: !retur,
+      sortable: true,
+      selector: (row, idx) => {
+        return (
+          <>
+            <Form.Item
+              label={"product_location"}
+              name={["product_location", `${idx}`]}
+              rules={[
+                {
+                  required: true,
+                  message: "Lokasi Produk tidak boleh kosong!",
+                },
+              ]}
+              noStyle
+            >
+              <Select
+                placeholder="Pilih Lokasi Produk"
+                size="normal"
+                style={{
+                  width: "200px",
+                  marginRight: "10px",
+                }}
+              >
+                {locations.map((element) => {
+                  return (
+                    <Select.Option value={element.id} key={element.attributes.name}>
+                      {element.attributes.name}
+                    </Select.Option>
+                  );
+                })}
+              </Select>
             </Form.Item>
           </>
         );

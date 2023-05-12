@@ -18,6 +18,7 @@ export default function SearchBar({
   inventoryLocation,
   getProductAtLocation,
   location,
+  disabled = false,
 }) {
   const dispatch = useDispatch();
 
@@ -46,6 +47,7 @@ export default function SearchBar({
       dispatch({ type: "ADD_PRODUCT", product: res.data });
       form.setFieldsValue({ products: undefined });
 
+      console.log("======= exce =======", getProductAtLocation);
       if (getProductAtLocation) {
         getProductAtLocation(location);
       }
@@ -79,7 +81,9 @@ export default function SearchBar({
     }
   };
 
-  const options = data.map((d) => <Select.Option key={d.value}>{d.label}</Select.Option>);
+  const options = data.map((d) => (
+    <Select.Option key={d.value}>{d.label}</Select.Option>
+  ));
 
   const fetchProduct = async (query, callback) => {
     if (!query) {
@@ -109,21 +113,13 @@ export default function SearchBar({
         console.log("endpoint", endpoint);
 
         if (req.status == 200) {
-          // filter product that already added
-          // const filteredProduct = res.data.filter((item) => {
-          //   return !selectedProduct?.some((temp) => temp.id == item.id);
-          // });
-
-          console.log("res search product", res);
-
-          // product based on user location
           const filteredProductByLocation = res.data.filter((item) =>
             item.attributes.locations.data.some((location) =>
-              user.locations.some((userLocation) => userLocation.id === location.id)
+              user.locations.some(
+                (userLocation) => userLocation.id === location.id
+              )
             )
           );
-
-          console.log(filteredProductByLocation);
 
           const products = filteredProductByLocation.map((product) => ({
             label: `${product.attributes.name}`,
@@ -143,11 +139,12 @@ export default function SearchBar({
       <div className="w-full md:w-full mb-2 md:mb-0">
         <Form.Item name="products">
           <Select
+            disabled={disabled}
             allowClear
             size="large"
             showSearch
             value={product}
-            placeholder="Ketikan Nama Produk / SKU"
+            placeholder={disabled ? "Pilih lokasi gudang terlebih dahulu" : "Ketikan Nama Produk / SKU"}
             onSearch={handleSearch}
             onChange={handleChange}
             onSelect={handleSelect}
