@@ -35,35 +35,57 @@ Piutang.getInitialProps = async (context) => {
   const req = await fetchData(cookies);
   const user = await req.json();
 
+  console.log("step 1 done ✅");
+
   const reqDataUserSales = await fetchUserSales(cookies);
   const dataUserSales = await reqDataUserSales.json();
+
+  console.log("step 2 done ✅");
 
   const reqDataUser = await fetchDataUser(cookies);
   const dataUser = await reqDataUser.json();
 
+  console.log("step 3 done ✅");
+
   const reqPiutang = await fetchPiutang(cookies);
   const piutang = await reqPiutang.json();
+
+  console.log("step 4 done ✅");
 
   const reqSales = await fetchSales(cookies);
   const sales = await reqSales.json();
 
+  console.log("step 5 done ✅");
+
   const reqReturSales = await fetchReturSales(cookies);
   const returSales = await reqReturSales.json();
+
+  console.log("step 6 done ✅");
 
   const reqPanel = await fetchPanel(cookies);
   const panel = await reqPanel.json();
 
+  console.log("step 7 done ✅");
+
   const reqReturPanel = await fetchReturPanel(cookies);
   const returPanel = await reqReturPanel.json();
+
+  console.log("step 8 done ✅");
 
   const reqNonPanel = await fetchNonPanel(cookies);
   const nonPanel = await reqNonPanel.json();
 
+  console.log("step 9 done ✅");
+
   const reqReturNonPanel = await fetchReturNonPanel(cookies);
   const returNonPanel = await reqReturNonPanel.json();
 
+  console.log("step 10 done ✅");
+
   const reqAkunPiutang = await fetchAkunPiutang(cookies);
   const akunPiutang = await reqAkunPiutang.json();
+
+  console.log("step 11 done ✅");
 
   return {
     props: {
@@ -97,7 +119,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchDataUser = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/users?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -105,6 +127,8 @@ const fetchDataUser = async (cookies) => {
       Authorization: "Bearer " + cookies.token,
     },
   };
+
+  console.log("trying fetch data user", endpoint, options);
 
   const req = await fetch(endpoint, options);
   return req;
@@ -397,7 +421,17 @@ function Piutang({ props }) {
     values.wilayah = wilayah;
     values.document = document;
     values.status_pembayaran = "Dibayar";
-    await createData(sisaHutang, values, listId, form, router, "/credits/", "piutang", akunPiutang, setCreateId);
+    await createData(
+      sisaHutang,
+      values,
+      listId,
+      form,
+      router,
+      "/credits/",
+      "piutang",
+      akunPiutang,
+      setCreateId
+    );
     //console.log("Create master data", createId);
     //editPenjualan(createId);
   };
@@ -520,18 +554,20 @@ function Piutang({ props }) {
 
   const totalPiutangJatuhTempo = () => {
     var total = 0;
-    if(biaya.info != null){ //total = 0;
+    if (biaya.info != null) {
+      //total = 0;
 
-      for(let row in biaya.info) {
-
+      for (let row in biaya.info) {
         console.log("biaya info tes", biaya.info[row], biaya.list[row]);
         if (biaya.info[row].pilihData == "pilih") {
           //total = total + biaya.list[row].sisaPiutang;
           //total = total + biaya.info[row].totalHutangJatuhTempo;
-          total = total + (biaya.list[row].attributes.total - biaya.list[row].subtotal);
+          total =
+            total +
+            (biaya.list[row].attributes.total - biaya.list[row].subtotal);
         }
-        if(biaya.info[row].totalHutangJatuhTempo == undefined) total = 0;
-      };
+        if (biaya.info[row].totalHutangJatuhTempo == undefined) total = 0;
+      }
     }
     return total;
   };
@@ -546,7 +582,8 @@ function Piutang({ props }) {
     for (let row in biaya.info) {
       if (biaya.info[row].pilihData == "pilih") {
         if (biaya.info[row].tunai != null) tunai = biaya.info[row].tunai;
-        if (biaya.info[row].transfer != null) transfer = biaya.info[row].transfer;
+        if (biaya.info[row].transfer != null)
+          transfer = biaya.info[row].transfer;
         if (biaya.info[row].giro != null) giro = biaya.info[row].giro;
         if (biaya.info[row].cn != null) cn = biaya.info[row].cn;
         if (biaya.info[row].oth != null) oth = biaya.info[row].oth;
@@ -708,9 +745,9 @@ function Piutang({ props }) {
     });
 
     dataTabel.forEach((element) => {
-    element.subtotal = 0;
-    element.sisaHutang = 0;
-    element.dibayar = 0;
+      element.subtotal = 0;
+      element.sisaHutang = 0;
+      element.dibayar = 0;
 
       returSales.forEach((row) => {
         row.subtotal = 0;
