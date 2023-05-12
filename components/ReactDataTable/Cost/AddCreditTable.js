@@ -553,7 +553,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                       <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0 text-center">
                           <span className="font-bold">
                               {formatter.format(
-                                (row.attributes?.total - row.subtotal) - (tunai + transfer + giro + cn + oth)
+                                row.attributes?.total - (tunai + transfer + giro + cn + oth + row.subtotal)
                               )}
                           </span>
                       </div>
