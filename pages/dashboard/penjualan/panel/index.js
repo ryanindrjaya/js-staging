@@ -52,17 +52,19 @@ const fetchData = async (cookies) => {
 };
 
 const fetchUserSales = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/users?populate=deep&filters[role][name][$eq]=Sales&?filters[role][type][$eq]=Sales";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL +
+    "/users?populate=*&filters[role][name][$eq]=Sales&?filters[role][type][$eq]=Sales";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
 
-    const req = await fetch(endpoint, options);
-    return req;
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
 const fetchLocation = async (cookies) => {
@@ -80,17 +82,17 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchPanelSales = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/panel-sales?populate=deep";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/panel-sales?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
 
-    const req = await fetch(endpoint, options);
-    return req;
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
 function PanelSale({ props }) {
@@ -117,7 +119,8 @@ function PanelSale({ props }) {
         Authorization: "Bearer " + cookies.token,
       },
     };
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/panel-sales/${id}?populate=deep`;
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL + `/panel-sales/${id}?populate=deep`;
     const req = await fetch(endpoint, options);
     const res = await req.json();
     const row = res.data;
@@ -129,14 +132,15 @@ function PanelSale({ props }) {
     row.attributes.location = row?.attributes?.location?.data?.id;
 
     var tempDetails = [];
-    for (var details in row.attributes.panel_sale_details.data){
+    for (var details in row.attributes.panel_sale_details.data) {
       tempDetails[details] = row.attributes.panel_sale_details.data[details].id;
     }
     row.attributes.panel_sale_details = tempDetails;
 
     var tempPayments = [];
-    for (var payments in row.attributes.purchasing_payments.data){
-      tempPayments[payments] = row.attributes.purchasing_payments.data[payments].id;
+    for (var payments in row.attributes.purchasing_payments.data) {
+      tempPayments[payments] =
+        row.attributes.purchasing_payments.data[payments].id;
     }
     row.attributes.purchasing_payments = tempPayments;
 
@@ -145,14 +149,15 @@ function PanelSale({ props }) {
     };
 
     const JSONdata = JSON.stringify(dataUpdate);
-    const endpointPut = process.env.NEXT_PUBLIC_URL + "/panel-sales/" + id + "?populate=deep";
+    const endpointPut =
+      process.env.NEXT_PUBLIC_URL + "/panel-sales/" + id + "?populate=deep";
     const optionsPut = {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-        body: JSONdata,
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+      body: JSONdata,
     };
     const reqPut = await fetch(endpointPut, optionsPut);
     const resPut = await reqPut.json();
@@ -160,7 +165,8 @@ function PanelSale({ props }) {
 
     const trxStatus = rowPut?.attributes?.status_data;
 
-    if (trxStatus == "Publish") { console.log("masuk");
+    if (trxStatus == "Publish") {
+      console.log("masuk");
       // invetory handle
       createInventory(rowPut, locations);
     }
@@ -188,23 +194,23 @@ function PanelSale({ props }) {
     const cookies = nookies.get(null, "token");
 
     const options = {
-        method: "DELETE",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
     };
 
     const req = await fetch(endpoint, options);
     const res = await req.json();
     if (res) {
-        const res = await fetchData(cookies);
-        openNotificationWithIcon(
-            "success",
-            "Berhasil menghapus data",
-            "Penjualan yang dipilih telah berhasil dihapus. Silahkan cek kembali penjualan non panel"
-        );
-        setSell(res);
+      const res = await fetchData(cookies);
+      openNotificationWithIcon(
+        "success",
+        "Berhasil menghapus data",
+        "Penjualan yang dipilih telah berhasil dihapus. Silahkan cek kembali penjualan non panel"
+      );
+      setSell(res);
     }
 
     setIsFetchingData(false);
@@ -215,24 +221,25 @@ function PanelSale({ props }) {
 
     var id = 0;
     data.attributes.panel_sale_details.data.forEach((element) => {
-        id = element.id;
+      id = element.id;
 
-        const endpoint = process.env.NEXT_PUBLIC_URL + "/panel-sale-details/" + id;
-        const cookies = nookies.get(null, "token");
+      const endpoint =
+        process.env.NEXT_PUBLIC_URL + "/panel-sale-details/" + id;
+      const cookies = nookies.get(null, "token");
 
-        const options = {
+      const options = {
         method: "DELETE",
         headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
         },
-        };
+      };
 
-        const req = fetch(endpoint, options);
-        //const res = req.json();
-        if (req) {
+      const req = fetch(endpoint, options);
+      //const res = req.json();
+      if (req) {
         console.log("relation deleted");
-        }
+      }
     });
   };
 
@@ -244,12 +251,18 @@ function PanelSale({ props }) {
   const handleChangeStatus = async (values, id) => {
     // clean object
     for (var key in values.attributes) {
-      if (values.attributes[key] === null || values.attributes[key] === undefined) {
+      if (
+        values.attributes[key] === null ||
+        values.attributes[key] === undefined
+      ) {
         delete values.attributes[key];
       }
     }
 
-    if (values.attributes?.document?.data === null || values.attributes?.document?.data === undefined) {
+    if (
+      values.attributes?.document?.data === null ||
+      values.attributes?.document?.data === undefined
+    ) {
       delete values.attributes?.document;
     }
 
@@ -290,9 +303,17 @@ function PanelSale({ props }) {
     if (req.status === 200) {
       const response = await fetchSales(cookies);
       setSell(response);
-      openNotificationWithIcon("success", "Status berhasil dirubah", "Status berhasil dirubah. Silahkan cek penjualan sales");
+      openNotificationWithIcon(
+        "success",
+        "Status berhasil dirubah",
+        "Status berhasil dirubah. Silahkan cek penjualan sales"
+      );
     } else {
-      openNotificationWithIcon("error", "Status gagal dirubah", "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah");
+      openNotificationWithIcon(
+        "error",
+        "Status gagal dirubah",
+        "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah"
+      );
     }
   };
 
@@ -313,7 +334,7 @@ function PanelSale({ props }) {
           <TitlePage titleText={"Daftar Penjualan Panel"} />
           <LayoutContent>
             <div className="w-full flex justify-start">
-              <div className="w-full md:w-1/5 px-3"> 
+              <div className="w-full md:w-1/5 px-3">
                 <Select
                   placeholder="Lokasi Gudang"
                   size="large"
@@ -322,16 +343,16 @@ function PanelSale({ props }) {
                     marginRight: "10px",
                   }}
                 >
-                {locations.map((element) => {
-                  return (
-                    <Select.Option value={element.id}>
-                      {element.attributes.name}
-                    </Select.Option>
-                  );
-                })}
+                  {locations.map((element) => {
+                    return (
+                      <Select.Option value={element.id}>
+                        {element.attributes.name}
+                      </Select.Option>
+                    );
+                  })}
                 </Select>
               </div>
-              <div className="w-full md:w-1/5 px-3"> 
+              <div className="w-full md:w-1/5 px-3">
                 <Select
                   placeholder="Lokasi Penjualan"
                   size="large"
@@ -340,16 +361,16 @@ function PanelSale({ props }) {
                     marginRight: "10px",
                   }}
                 >
-                {locations.map((element) => {
-                  return (
-                    <Select.Option value={element.id}>
-                      {element.attributes.name}
-                    </Select.Option>
-                  );
-                })}
+                  {locations.map((element) => {
+                    return (
+                      <Select.Option value={element.id}>
+                        {element.attributes.name}
+                      </Select.Option>
+                    );
+                  })}
                 </Select>
               </div>
-              <div className="w-full md:w-1/5 px-3"> 
+              <div className="w-full md:w-1/5 px-3">
                 <Select
                   placeholder="Status Pembayaran"
                   size="large"
@@ -358,25 +379,24 @@ function PanelSale({ props }) {
                     marginRight: "10px",
                   }}
                 >
-                {/*{locations.map((element) => {*/}
-                {/*  return (*/}
-                    <Select.Option>
-                      Belum Dibayar
-                    </Select.Option>
-                    <Select.Option>
-                      Dibayar Sebagian
-                    </Select.Option>
-                    <Select.Option>
-                      Selesai
-                    </Select.Option>
-                {/*  );*/}
-                {/*})}*/}
+                  {/*{locations.map((element) => {*/}
+                  {/*  return (*/}
+                  <Select.Option>Belum Dibayar</Select.Option>
+                  <Select.Option>Dibayar Sebagian</Select.Option>
+                  <Select.Option>Selesai</Select.Option>
+                  {/*  );*/}
+                  {/*})}*/}
                 </Select>
               </div>
-              <div className="w-full md:w-1/5 px-3">                
-                <RangePicker size="large" onChange={(e) => setSearchParameters({ ...searchParameters, range: e })} />
+              <div className="w-full md:w-1/5 px-3">
+                <RangePicker
+                  size="large"
+                  onChange={(e) =>
+                    setSearchParameters({ ...searchParameters, range: e })
+                  }
+                />
               </div>
-              <div className="w-full md:w-1/5 px-3"> 
+              <div className="w-full md:w-1/5 px-3">
                 <Select
                   placeholder="Admin Penjualan"
                   size="large"
@@ -385,42 +405,48 @@ function PanelSale({ props }) {
                     marginRight: "10px",
                   }}
                 >
-                {user.map((element) => {
-                  return (
-                    <Select.Option value={element.id}>
-                      {element.name}
-                    </Select.Option>
-                  );
-                }
-                )}
+                  {user.map((element) => {
+                    return (
+                      <Select.Option value={element.id}>
+                        {element.name}
+                      </Select.Option>
+                    );
+                  })}
                 </Select>
               </div>
             </div>
 
             <div className="w-full flex justify-start mt-3">
-              <div className="w-full md:w-1/5 px-3"> 
-                <Customer onChangeCustomer={(e) => setSearchParameters({ ...searchParameters, customer: e })} page={"PANEL"}/>
+              <div className="w-full md:w-1/5 px-3">
+                <Customer
+                  onChangeCustomer={(e) =>
+                    setSearchParameters({ ...searchParameters, customer: e })
+                  }
+                  page={"PANEL"}
+                />
               </div>
-              <div className="w-full md:w-1/5 px-3"> 
+              <div className="w-full md:w-1/5 px-3">
                 <Select
-                    size="large"
-                    style={{
-                        width: "100%",
-                    }}
-                    placeholder="Sales"
-                    allowClear
-                    onChange={(e) => setSearchParameters({ ...searchParameters, sales: e })}
+                  size="large"
+                  style={{
+                    width: "100%",
+                  }}
+                  placeholder="Sales"
+                  allowClear
+                  onChange={(e) =>
+                    setSearchParameters({ ...searchParameters, sales: e })
+                  }
                 >
-                    {dataUserSales?.map((element) => {
-                        return (
-                            <Select.Option value={element.name} key={element.id}>
-                                {element.name}
-                            </Select.Option>
-                        );
-                    })}
+                  {dataUserSales?.map((element) => {
+                    return (
+                      <Select.Option value={element.name} key={element.id}>
+                        {element.name}
+                      </Select.Option>
+                    );
+                  })}
                 </Select>
               </div>
-              <div className="w-full md:w-1/5 px-3"> 
+              <div className="w-full md:w-1/5 px-3">
                 <Select
                   placeholder="Jatuh Tempo"
                   size="large"
@@ -429,77 +455,79 @@ function PanelSale({ props }) {
                     marginRight: "10px",
                   }}
                 >
-                {/*{locations.map((element) => {*/}
-                {/*  return (*/}
-                    <Select.Option>
-                      Tempo
-                    </Select.Option>
-                    <Select.Option>
-                      Menunggu
-                    </Select.Option>
-                    <Select.Option>
-                      Selesai
-                    </Select.Option>
-                {/*  );*/}
-                {/*})}*/}
+                  {/*{locations.map((element) => {*/}
+                  {/*  return (*/}
+                  <Select.Option>Tempo</Select.Option>
+                  <Select.Option>Menunggu</Select.Option>
+                  <Select.Option>Selesai</Select.Option>
+                  {/*  );*/}
+                  {/*})}*/}
                 </Select>
               </div>
             </div>
 
             <div className="w-full flex justify-between mt-0 mb-2">
-              <span className="text-black text-md font-bold ml-1 mt-5">Semua Penjualan</span>
-              <button onClick={handleAdd} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5">
-                    <div className="text-white text-center text-sm font-bold">
-                        <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
-                    </div>
+              <span className="text-black text-md font-bold ml-1 mt-5">
+                Semua Penjualan
+              </span>
+              <button
+                onClick={handleAdd}
+                type="button"
+                className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+              >
+                <div className="text-white text-center text-sm font-bold">
+                  <a className="text-white no-underline text-xs sm:text-xs">
+                    + Tambah
+                  </a>
+                </div>
               </button>
             </div>
 
             <div className="w-full flex justify-between">
-                <button
-                    onClick={handleUpdate}
-                    type="button"
-                    className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
-                >
-                    <div className="text-white text-center text-sm font-bold">
-                      <a className="text-white no-underline text-xs sm:text-xs">
-                        Print PDF
-                      </a>
-                    </div>
-                </button>
-                <button
-                    onClick={handleUpdate}
-                    type="button"
-                    className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
-                >
-                    <div className="text-white text-center text-sm font-bold">
-                      <a className="text-white no-underline text-xs sm:text-xs">
-                        Print CSV
-                      </a>
-                    </div>
-                </button>
-                <button
-                    onClick={handleUpdate}
-                    type="button"
-                    className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
-                >
-                    <div className="text-white text-center text-sm font-bold">
-                      <a className="text-white no-underline text-xs sm:text-xs">
-                        Print XLS
-                      </a>
-                    </div>
-                </button>
-                <button
-                    onClick={handleUpdate}
-                    type="button"
-                    className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
-                >
-                    <div className="text-white text-center text-sm font-bold">
-                      <a className="text-white no-underline text-xs sm:text-xs">
-                        Kolom Tampak
-                      </a>
-                    </div>
-                </button>
+              <button
+                onClick={handleUpdate}
+                type="button"
+                className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
+              >
+                <div className="text-white text-center text-sm font-bold">
+                  <a className="text-white no-underline text-xs sm:text-xs">
+                    Print PDF
+                  </a>
+                </div>
+              </button>
+              <button
+                onClick={handleUpdate}
+                type="button"
+                className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
+              >
+                <div className="text-white text-center text-sm font-bold">
+                  <a className="text-white no-underline text-xs sm:text-xs">
+                    Print CSV
+                  </a>
+                </div>
+              </button>
+              <button
+                onClick={handleUpdate}
+                type="button"
+                className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
+              >
+                <div className="text-white text-center text-sm font-bold">
+                  <a className="text-white no-underline text-xs sm:text-xs">
+                    Print XLS
+                  </a>
+                </div>
+              </button>
+              <button
+                onClick={handleUpdate}
+                type="button"
+                className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
+              >
+                <div className="text-white text-center text-sm font-bold">
+                  <a className="text-white no-underline text-xs sm:text-xs">
+                    Kolom Tampak
+                  </a>
+                </div>
+              </button>
             </div>
 
             {isFetchinData ? (
@@ -525,7 +553,6 @@ function PanelSale({ props }) {
                 />
               </div>
             )}
-
           </LayoutContent>
         </LayoutWrapper>
       </DashboardLayout>
