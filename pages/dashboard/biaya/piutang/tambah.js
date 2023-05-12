@@ -35,57 +35,35 @@ Piutang.getInitialProps = async (context) => {
   const req = await fetchData(cookies);
   const user = await req.json();
 
-  console.log("step 1 done ✅");
-
   const reqDataUserSales = await fetchUserSales(cookies);
   const dataUserSales = await reqDataUserSales.json();
-
-  console.log("step 2 done ✅");
 
   const reqDataUser = await fetchDataUser(cookies);
   const dataUser = await reqDataUser.json();
 
-  console.log("step 3 done ✅");
-
   const reqPiutang = await fetchPiutang(cookies);
   const piutang = await reqPiutang.json();
-
-  console.log("step 4 done ✅");
 
   const reqSales = await fetchSales(cookies);
   const sales = await reqSales.json();
 
-  console.log("step 5 done ✅");
-
   const reqReturSales = await fetchReturSales(cookies);
   const returSales = await reqReturSales.json();
-
-  console.log("step 6 done ✅");
 
   const reqPanel = await fetchPanel(cookies);
   const panel = await reqPanel.json();
 
-  console.log("step 7 done ✅");
-
   const reqReturPanel = await fetchReturPanel(cookies);
   const returPanel = await reqReturPanel.json();
-
-  console.log("step 8 done ✅");
 
   const reqNonPanel = await fetchNonPanel(cookies);
   const nonPanel = await reqNonPanel.json();
 
-  console.log("step 9 done ✅");
-
   const reqReturNonPanel = await fetchReturNonPanel(cookies);
   const returNonPanel = await reqReturNonPanel.json();
 
-  console.log("step 10 done ✅");
-
   const reqAkunPiutang = await fetchAkunPiutang(cookies);
   const akunPiutang = await reqAkunPiutang.json();
-
-  console.log("step 11 done ✅");
 
   return {
     props: {
@@ -128,8 +106,6 @@ const fetchDataUser = async (cookies) => {
     },
   };
 
-  console.log("trying fetch data user", endpoint, options);
-
   const req = await fetch(endpoint, options);
   return req;
 };
@@ -137,7 +113,7 @@ const fetchDataUser = async (cookies) => {
 const fetchUserSales = async (cookies) => {
   const endpoint =
     process.env.NEXT_PUBLIC_URL +
-    "/users?populate=deep&filters[role][name][$eq]=Sales&?filters[role][type][$eq]=Sales";
+    "/users?populate=*&filters[role][name][$eq]=Sales&?filters[role][type][$eq]=Sales";
   const options = {
     method: "GET",
     headers: {
