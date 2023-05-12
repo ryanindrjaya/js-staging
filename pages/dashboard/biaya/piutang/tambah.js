@@ -524,7 +524,6 @@ function Piutang({ props }) {
 
       for(let row in biaya.info) {
 
-        console.log("biaya info tes", biaya.info[row], biaya.list[row]);
         if (biaya.info[row].pilihData == "pilih") {
           //total = total + biaya.list[row].sisaPiutang;
           //total = total + biaya.info[row].totalHutangJatuhTempo;
@@ -720,10 +719,11 @@ function Piutang({ props }) {
           row.attributes?.sales_sale?.data?.attributes.no_sales_sale
         ) {
           row.attributes.retur_sales_sale_details.data.forEach((detail) => {
-            row.subtotal += parseInt(detail.attributes.sub_total);
+            if (detail.attributes.sub_total != null || detail.attributes.sub_total != undefined) row.subtotal += parseInt(detail.attributes.sub_total);
+            else row.subtotal += 0;
           });
 
-          element.subtotal = row.subtotal;
+          element.subtotal += row.subtotal;
 
           if (dataRetur.length > 0)
             dataRetur[dataRetur.length] = {
@@ -736,8 +736,7 @@ function Piutang({ props }) {
               subtotal: row.subtotal,
             };
 
-          element.sisaHutang =
-            parseInt(element.attributes.total) - element.subtotal;
+          element.sisaHutang = parseInt(element.attributes.total) - parseInt(element.subtotal);
         }
       });
 
@@ -749,10 +748,11 @@ function Piutang({ props }) {
           row.attributes?.panel_sale?.data?.attributes.no_panel_sale
         ) {
           row.attributes.retur_panel_sale_details.data.forEach((detail) => {
-            row.subtotal += parseInt(detail.attributes.sub_total);
+            if (detail.attributes.sub_total != null || detail.attributes.sub_total != undefined) row.subtotal += parseInt(detail.attributes.sub_total);
+            else row.subtotal += 0;
           });
 
-          element.subtotal = row.subtotal;
+          element.subtotal += row.subtotal;
 
           if (dataRetur.length > 0)
             dataRetur[dataRetur.length] = {
@@ -765,8 +765,7 @@ function Piutang({ props }) {
               subtotal: row.subtotal,
             };
 
-          element.sisaHutang =
-            parseInt(element.attributes.total) - element.subtotal;
+          element.sisaHutang = parseInt(element.attributes.total) - parseInt(element.subtotal);
         }
       });
 
@@ -778,10 +777,11 @@ function Piutang({ props }) {
           row.attributes?.non_panel_sale?.data?.attributes.no_non_panel_sale
         ) {
           row.attributes.retur_non_panel_sale_details.data.forEach((detail) => {
-            row.subtotal += parseInt(detail.attributes.sub_total);
+            if (detail.attributes.sub_total != null || detail.attributes.sub_total != undefined) row.subtotal += parseInt(detail.attributes.sub_total);
+            else row.subtotal += 0;
           });
 
-          element.subtotal = row.subtotal;
+          element.subtotal += row.subtotal;
 
           if (dataRetur.length > 0)
             dataRetur[dataRetur.length] = {
@@ -794,8 +794,7 @@ function Piutang({ props }) {
               subtotal: row.subtotal,
             };
 
-          element.sisaHutang =
-            parseInt(element.attributes.total) - element.subtotal;
+          element.sisaHutang = parseInt(element.attributes.total) - parseInt(element.subtotal);
         }
       });
     });
