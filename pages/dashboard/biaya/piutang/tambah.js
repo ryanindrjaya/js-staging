@@ -97,7 +97,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchDataUser = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/users?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users?populate";
   const options = {
     method: "GET",
     headers: {
@@ -127,7 +127,7 @@ const fetchUserSales = async (cookies) => {
 };
 
 const fetchPiutang = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/credits?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/credits?populate";
   const options = {
     method: "GET",
     headers: {
@@ -230,7 +230,7 @@ const fetchNonPanel = async (cookies) => {
 
 const fetchAkunPiutang = async (cookies) => {
   const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/credit-accounts?populate=deep";
+    process.env.NEXT_PUBLIC_URL + "/credit-accounts?populate";
   const options = {
     method: "GET",
     headers: {
