@@ -5,7 +5,17 @@ import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { Row, Form, Input, InputNumber, Select, Button, Spin, notification, DatePicker } from "antd";
+import {
+  Row,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  Button,
+  Spin,
+  notification,
+  DatePicker,
+} from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import AddSellSalesTable from "../../../../components/ReactDataTable/Selling/AddSellSalesTable";
@@ -43,7 +53,7 @@ PesananSales.getInitialProps = async (context) => {
       locations,
       inven,
       sale,
-      customer
+      customer,
     },
   };
 };
@@ -63,31 +73,31 @@ const fetchData = async (cookies) => {
 };
 
 const fetchUser = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/users?populate=deep";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users?populate=*";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
 
-    const req = await fetch(endpoint, options);
-    return req;
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
 const fetchSale = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sells?populate=deep";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sells?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
 
-    const req = await fetch(endpoint, options);
-    return req;
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
 const fetchLocation = async (cookies) => {
@@ -105,33 +115,33 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchInven = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/inventories?populate=deep";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/inventories?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
 
-    const req = await fetch(endpoint, options);
-    return req;
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
 const fetchCustomer = async (cookies) => {
-    let name = "walk in customer"
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/customers?filters[name][$contains]=${name}`;
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
-    const req = await fetch(endpoint, options);
-    return req;
+  let name = "walk in customer";
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL + `/customers?filters[name][$contains]=${name}`;
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+  const req = await fetch(endpoint, options);
+  return req;
 };
-
 
 function PesananSales({ props }) {
   const products = useSelector((state) => state.Order);
@@ -157,9 +167,11 @@ function PesananSales({ props }) {
 
   const [listId, setListId] = useState([]);
   const [productTotalPrice, setProductTotalPrice] = useState({});
-  const [productSubTotal, setProductSubTotal] = useState({}); useState({});
+  const [productSubTotal, setProductSubTotal] = useState({});
+  useState({});
   //const [discPrice, setDiscPrice] = useState(0);
-  const [totalPrice, setTotalPrice] = useState(0); useState({});
+  const [totalPrice, setTotalPrice] = useState(0);
+  useState({});
   const [grandTotal, setGrandTotal] = useState(0);
 
   const router = useRouter();
@@ -167,8 +179,9 @@ function PesananSales({ props }) {
   var today = new Date();
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
-  var date = today.getDate()+'/'+mm+'/'+yyyy;
-  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  var date = today.getDate() + "/" + mm + "/" + yyyy;
+  var time =
+    today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 
   // DPP & PPN
   //const dpp = 1.11;
@@ -188,7 +201,9 @@ function PesananSales({ props }) {
 
   // NO Sales Sale
   var noSale = String(props.sale?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`JM/ET/${user.id}/${noSale}/${mm}/${yyyy}`);
+  const [categorySale, setCategorySale] = useState(
+    `JM/ET/${user.id}/${noSale}/${mm}/${yyyy}`
+  );
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -201,12 +216,11 @@ function PesananSales({ props }) {
     setInfo("sukses");
     sale.data.forEach((element) => {
       if (values.no_sales_sell == element.attributes.no_sales_sell) {
-          notification["error"]({
-              message: "Gagal menambahkan data",
-              description:
-                  "Data gagal ditambahkan, karena no penjualan sama",
-          });
-          setInfo("gagal");
+        notification["error"]({
+          message: "Gagal menambahkan data",
+          description: "Data gagal ditambahkan, karena no penjualan sama",
+        });
+        setInfo("gagal");
       }
     });
     setDataValues(values);
@@ -214,7 +228,12 @@ function PesananSales({ props }) {
   };
 
   const createDetailSale = async () => {
-    await createDetailOrderSaleFunc(dataValues, products, setListId, "/sales-sell-details");
+    await createDetailOrderSaleFunc(
+      dataValues,
+      products,
+      setListId,
+      "/sales-sell-details"
+    );
   };
 
   const createSale = async (values) => {
@@ -243,7 +262,13 @@ function PesananSales({ props }) {
   };
 
   const calculatePriceAfterDisc = (row) => {
-    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice);
+    const total = calculatePrice(
+      row,
+      products,
+      productTotalPrice,
+      productSubTotal,
+      setTotalPrice
+    );
     return formatter.format(total);
   };
 
@@ -253,15 +278,14 @@ function PesananSales({ props }) {
   };
 
   useEffect(() => {
-    if(products.productList.length > 0){ 
-        inven.forEach((element) => {
-            products.productList.forEach((data) => {
-              if (data.id == element.attributes.products.data[0].id) {
-                data.stock = element.attributes.total_stock;
-              }  
-            });
+    if (products.productList.length > 0) {
+      inven.forEach((element) => {
+        products.productList.forEach((data) => {
+          if (data.id == element.attributes.products.data[0].id) {
+            data.stock = element.attributes.total_stock;
           }
-        );
+        });
+      });
     }
   }, [products.productList]);
 
@@ -305,7 +329,6 @@ function PesananSales({ props }) {
         <LayoutWrapper style={{}}>
           <TitlePage titleText={"Jurnal Memo"} />
           <LayoutContent>
-
             <Form
               form={form}
               name="add"
@@ -315,39 +338,43 @@ function PesananSales({ props }) {
               onFinish={onFinish}
               onFinishFailed={validateError}
             >
-
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-4">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="no_jurnal"
                     initialValue={categorySale}
                     rules={[
-                        {
-                            required: true,
-                            message: "Nomor Jurnal tidak boleh kosong!",
-                        },
+                      {
+                        required: true,
+                        message: "Nomor Jurnal tidak boleh kosong!",
+                      },
                     ]}
-                    >
-                    <Input style={{ height: "40px" }} placeholder="No. Jurnal" />
+                  >
+                    <Input
+                      style={{ height: "40px" }}
+                      placeholder="No. Jurnal"
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item name="users" //initialValue={"Hari"} 
-                    noStyle>
+                  <Form.Item
+                    name="users" //initialValue={"Hari"}
+                    noStyle
+                  >
                     <Select
-                        size="large"
-                        style={{
+                      size="large"
+                      style={{
                         width: "100%",
-                        }}
-                        placeholder="User"
+                      }}
+                      placeholder="User"
                     >
-                    {dataUser.map((element) => {
+                      {dataUser.map((element) => {
                         return (
-                            <Select.Option value={element.id} key={element.name}>
+                          <Select.Option value={element.id} key={element.name}>
                             {element.name}
-                            </Select.Option>
+                          </Select.Option>
                         );
-                    })}
+                      })}
                     </Select>
                   </Form.Item>
                 </div>
@@ -361,8 +388,12 @@ function PesananSales({ props }) {
                     //        message: "Nomor Penjualan tidak boleh kosong!",
                     //    },
                     //]}
-                    >
-                    <DatePicker placeholder="Tanggal Jurnal" size="large" style={{ width: "100%" }} />
+                  >
+                    <DatePicker
+                      placeholder="Tanggal Jurnal"
+                      size="large"
+                      style={{ width: "100%" }}
+                    />
                   </Form.Item>
                 </div>
                 {/*<div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">*/}
@@ -426,36 +457,38 @@ function PesananSales({ props }) {
               </div>
 
               <div className="w-full flex md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
-                  <SearchBar
-                    form={form}
-                    tempList={tempList}
-                    onChange={onChangeProduct}
-                    user={user}
-                    selectedProduct={selectedProduct}
-                    isBasedOnLocation={false}
-                  />
+                <SearchBar
+                  form={form}
+                  tempList={tempList}
+                  onChange={onChangeProduct}
+                  user={user}
+                  selectedProduct={selectedProduct}
+                  isBasedOnLocation={false}
+                />
               </div>
 
               {isFetchinData ? (
-                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
-                    <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
-                      <LoadingAnimations />
-                    </div>
-                    <div className="text-sm align-middle text-center animate-pulse text-slate-400">Sedang Mengambil Data</div>
+                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
+                  <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
+                    <LoadingAnimations />
                   </div>
-                ) : (
-                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                    <AddSellSalesTable
-                      products={products}
-                      productTotalPrice={productTotalPrice}
-                      setTotalPrice={setTotalPrice}
-                      setProductTotalPrice={setProductTotalPrice}
-                      //calculatePriceAfterDisc={calculatePriceAfterDisc}
-                      productSubTotal={productSubTotal}
-                      locations={locations}
-                      formObj={form}
-                    />
+                  <div className="text-sm align-middle text-center animate-pulse text-slate-400">
+                    Sedang Mengambil Data
                   </div>
+                </div>
+              ) : (
+                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
+                  <AddSellSalesTable
+                    products={products}
+                    productTotalPrice={productTotalPrice}
+                    setTotalPrice={setTotalPrice}
+                    setProductTotalPrice={setProductTotalPrice}
+                    //calculatePriceAfterDisc={calculatePriceAfterDisc}
+                    productSubTotal={productSubTotal}
+                    locations={locations}
+                    formObj={form}
+                  />
+                </div>
               )}
 
               {/*<div className="w-full mt-8 flex justify-between">*/}
@@ -464,20 +497,21 @@ function PesananSales({ props }) {
               {/*  </Form.Item>*/}
               {/*</div>*/}
 
-              <div  className="w-full flex justify-left">
-                  <Form.Item>
-                    {loading ? (
-                      <div className=" flex float-left ml-3 ">
-                        <Spin />
-                      </div>
-                    ) : (
-                      <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
-                        <p className="px-4 py-2 m-0 text-white">
-                          SIMPAN
-                        </p>
-                      </button>
-                    )}
-                  </Form.Item>
+              <div className="w-full flex justify-left">
+                <Form.Item>
+                  {loading ? (
+                    <div className=" flex float-left ml-3 ">
+                      <Spin />
+                    </div>
+                  ) : (
+                    <button
+                      htmlType="submit"
+                      className="bg-cyan-700 rounded-md m-1 text-sm"
+                    >
+                      <p className="px-4 py-2 m-0 text-white">SIMPAN</p>
+                    </button>
+                  )}
+                </Form.Item>
               </div>
             </Form>
           </LayoutContent>

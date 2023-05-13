@@ -97,7 +97,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchDataUser = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/users?populate";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -113,7 +113,7 @@ const fetchDataUser = async (cookies) => {
 const fetchUserSales = async (cookies) => {
   const endpoint =
     process.env.NEXT_PUBLIC_URL +
-    "/users?populate=deep&filters[role][name][$eq]=Sales&?filters[role][type][$eq]=Sales";
+    "/users?populate=*&filters[role][name][$eq]=Sales&?filters[role][type][$eq]=Sales";
   const options = {
     method: "GET",
     headers: {
@@ -397,7 +397,17 @@ function Piutang({ props }) {
     values.wilayah = wilayah;
     values.document = document;
     values.status_pembayaran = "Dibayar";
-    await createData(sisaHutang, values, listId, form, router, "/credits/", "piutang", akunPiutang, setCreateId);
+    await createData(
+      sisaHutang,
+      values,
+      listId,
+      form,
+      router,
+      "/credits/",
+      "piutang",
+      akunPiutang,
+      setCreateId
+    );
     //console.log("Create master data", createId);
     //editPenjualan(createId);
   };
@@ -707,9 +717,9 @@ function Piutang({ props }) {
     });
 
     dataTabel.forEach((element) => {
-    element.subtotal = 0;
-    element.sisaHutang = 0;
-    element.dibayar = 0;
+      element.subtotal = 0;
+      element.sisaHutang = 0;
+      element.dibayar = 0;
 
       returSales.forEach((row) => {
         row.subtotal = 0;
