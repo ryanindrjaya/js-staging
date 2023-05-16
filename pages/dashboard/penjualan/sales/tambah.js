@@ -751,7 +751,7 @@ function Toko({ props }) {
                       },
                     ]}
                   >
-                    <Customer onChangeCustomer={setCustomer} />
+                    <Customer onChangeCustomer={setCustomer} page={"SALES"} />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2">
