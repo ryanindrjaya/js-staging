@@ -151,6 +151,7 @@ function Hutang({ props }) {
   const [tanggal, setTanggal] = useState(moment());
 
   const [dataValues, setDataValues] = useState();
+  const [createId, setCreateId] = useState();
 
   const [listId, setListId] = useState([]);
 
@@ -273,16 +274,6 @@ function Hutang({ props }) {
     values.supplier = supplier;
     values.document = document;
     values.tanggal_pembayaran = tanggal;
-    await createData(
-      sisaHutang,
-      values,
-      listId,
-      form,
-      router,
-      "/debts/",
-      "hutang",
-      akunHutang
-    );
     values.status_pembayaran = "Dibayar";
     await createData(
       sisaHutang,
@@ -292,8 +283,71 @@ function Hutang({ props }) {
       router,
       "/debts/",
       "hutang",
-      akunHutang
+      akunHutang,
+      setCreateId
     );
+
+  };
+
+  const editPenjualan = async (value) => {
+    //var url = null;
+    //var data = null;
+    //var total = null;
+
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL + "/debts/" + value.id + "?populate=deep";
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    // TODO :::: ENHANCEMENT CODE
+      res.data.attributes.debt_details.data.forEach((item) => {
+
+          const sisa_hutang = item.attributes.sisa_hutang;
+          console.log("detail", item);
+          if (sisa_hutang == 0) editPenjualanDB("Lunas", item.attributes.purchasing.data.id);
+          else editPenjualanDB("Dibayar Sebagian", item.attributes.purchasing.data.id);
+      });
+
+  };
+
+  const editPenjualanDB = async (value, id) => {
+    try {
+      const data = {
+        data: {
+          status_pembayaran: value,
+        },
+      };
+
+      const JSONdata = JSON.stringify(data);
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings/" + id;
+      const options = {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+        body: JSONdata,
+      };
+
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
+      console.log("res",res);
+      if (req.status === 200) {
+        console.log("status di penjualan sukses diupdate");
+      } else {
+        console.log("status di penjualan error atau tidak ada");
+      }
+    } catch (error) {
+      console.log("errorr", error);
+    }
   };
 
   const clearData = () => {
@@ -354,6 +408,10 @@ function Hutang({ props }) {
   };
 
   useEffect(() => {
+    if (createId != undefined || createId != null) editPenjualan(createId);
+  }, [createId]);
+
+  useEffect(() => {
     var totalTunai = 0;
     var totalTransfer = 0;
     var totalGiro = 0;
@@ -404,6 +462,7 @@ function Hutang({ props }) {
     clearData();
 
     var lpbId = 0;
+    var infoId = 0;
     lpb.forEach((row) => {
       var tempoDate = new Date(row.attributes?.date_purchasing);
       var tempoTime = parseInt(row.attributes?.tempo_days ?? 0);
@@ -457,8 +516,11 @@ function Hutang({ props }) {
         dataTabel[lpbId] = row;
         //biaya.list.push(row);
         dispatch({ type: "ADD_LIST", list: row });
+        //dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: row, index: infoId });
+        //dispatch({ type: "CHANGE_ID", id: row.id, listData: row, index: infoId });
+        infoId++;
       }
-      console.log("statusPembayaran", statusPembayaran, status);
+      
       lpbId++;
     });
 
@@ -783,6 +845,18 @@ function Hutang({ props }) {
                         OTH
                       </Select.Option>
                     </Select>
+                  </Form.Item>
+                </div>
+                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
+                  <Form.Item name="no_giro">
+                    <Input
+                      placeholder="No Giro"
+                      style={{
+                        height: "40px",
+                        width: "100%",
+                        marginRight: "10px",
+                      }}
+                    />
                   </Form.Item>
                 </div>
               </div>

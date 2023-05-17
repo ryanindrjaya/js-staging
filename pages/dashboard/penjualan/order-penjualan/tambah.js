@@ -295,6 +295,16 @@ function PesananSales({ props }) {
   }, [dataValues]);
 
   useEffect(() => {
+    if (customer){
+      var tempoDays = customer?.attributes?.credit_limit_duration;
+      form.setFieldsValue({
+        tempo_days: tempoDays.toString(),
+        tempo_time: customer?.attributes?.credit_limit_duration,
+      });
+    }
+  }, [customer]);
+
+  useEffect(() => {
     // used to reset redux from value before
     clearData();
     form.setFieldsValue({

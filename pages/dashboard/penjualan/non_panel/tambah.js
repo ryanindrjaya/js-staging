@@ -601,6 +601,12 @@ function Toko({ props }) {
       form.setFieldsValue({
         limitCredit: formatter.format(customer?.attributes?.credit_limit - totalBelumDibayar),
       });
+
+      var tempoDays = customer?.attributes?.credit_limit_duration;
+      form.setFieldsValue({
+        tempo_days: tempoDays.toString(),
+        tempo_time: customer?.attributes?.credit_limit_duration_type,
+      });
     }
     console.log("cust", limitCredit - totalBelumDibayar);
   }, [customer]);

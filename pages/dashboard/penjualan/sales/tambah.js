@@ -591,6 +591,16 @@ function Toko({ props }) {
   }, [discType]);
 
   useEffect(() => {
+    if (customer){
+      var tempoDays = customer?.attributes?.credit_limit_duration;
+      form.setFieldsValue({
+        tempo_days: tempoDays.toString(),
+        tempo_time: customer?.attributes?.credit_limit_duration_type,
+      });
+    }
+  }, [customer]);
+
+  useEffect(() => {
     // used to reset redux from value before
     clearData();
     setProductSubTotal({});
