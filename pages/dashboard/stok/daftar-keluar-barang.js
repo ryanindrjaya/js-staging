@@ -4,28 +4,12 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import Head from "next/head";
-import {
-  DatePicker,
-  Empty,
-  Input,
-  InputNumber,
-  Modal,
-  notification,
-  Popconfirm,
-  Select,
-  Tag,
-  Tooltip,
-} from "antd";
+import { DatePicker, Empty, Input, InputNumber, Modal, notification, Popconfirm, Select, Tag, Tooltip } from "antd";
 import moment from "moment";
 import nookies from "nookies";
 import { useRouter } from "next/router";
 import DataTable from "react-data-table-component";
-import {
-  CloseCircleFilled,
-  CheckCircleFilled,
-  PrinterOutlined,
-  ArrowLeftOutlined,
-} from "@ant-design/icons";
+import { CloseCircleFilled, CheckCircleFilled, PrinterOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import Link from "next/link";
 
 export default function daftarKeluarBarang({ companyOptions }) {
@@ -359,9 +343,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
 
         const sameData = data.filter(
           (item, productIdx) =>
-            item.product.id === row.product.id &&
-            item.send_unit === row.send_unit &&
-            productIdx !== index
+            item.product.id === row.product.id && item.send_unit === row.send_unit && productIdx !== index
         );
 
         if (sameData.length > 0) {
@@ -392,8 +374,8 @@ export default function daftarKeluarBarang({ companyOptions }) {
 
                 setData(newData);
               }}
-              defaultValue={row.status === "Selesai" ? row.sended : 1}
-              min={maxQty > 0 ? 1 : 0}
+              defaultValue={row.status === "Selesai" ? row.sended : 0}
+              min={0}
               max={maxQty > 0 ? maxQty : 0}
               className="w-[30%]"
             />
@@ -464,10 +446,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
             </Popconfirm>
           </div>
         ) : (
-          <PrinterOutlined
-            className="mr-1 text-lg cursor-pointer hover:text-blue-700 duration-150"
-            title="Cetak"
-          />
+          <PrinterOutlined className="mr-1 text-lg cursor-pointer hover:text-blue-700 duration-150" title="Cetak" />
         ),
     },
     {
@@ -555,10 +534,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
                 setPrintState(false);
               }}
             />
-            <button
-              onClick={handlePrint}
-              class="print:hidden rounded-full bg-sky-400 px-4 py-2 font-bold text-white"
-            >
+            <button onClick={handlePrint} class="print:hidden rounded-full bg-sky-400 px-4 py-2 font-bold text-white">
               <span>
                 <PrinterOutlined className="mr-1 text-lg" />
               </span>{" "}
@@ -580,9 +556,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
                 <p className="text-sm mb-0 font-bold uppercase">{moment().format("DD/MM/YYYY")}</p>
 
                 <p className="text-sm mb-0 font-bold uppercase">{master?.location_sender?.name}</p>
-                <p className="text-sm mb-0 font-bold uppercase">
-                  {master?.location_recipient?.name}
-                </p>
+                <p className="text-sm mb-0 font-bold uppercase">{master?.location_recipient?.name}</p>
               </div>
             </div>
           </div>
@@ -642,13 +616,10 @@ export default function daftarKeluarBarang({ companyOptions }) {
                         onCancel={() => {}}
                       >
                         <p>
-                          Apakah anda yakin akan membatalkan permintaan ini? Harap isi alasan
-                          pembatalan dibawah ini:
+                          Apakah anda yakin akan membatalkan permintaan ini? Harap isi alasan pembatalan dibawah ini:
                         </p>
                         <Input.TextArea
-                          onInput={(e) =>
-                            setCancelModal({ ...cancelModal, reason: e.target.value })
-                          }
+                          onInput={(e) => setCancelModal({ ...cancelModal, reason: e.target.value })}
                           value={cancelModal.reason}
                           placeholder="Alasan Pembatalan"
                           className="mt-2"
@@ -702,9 +673,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
                       />
                     </div>
 
-                    <p className="uppercase text-[#036B82] font-bold text-xl mb-1">
-                      Produk Transfer
-                    </p>
+                    <p className="uppercase text-[#036B82] font-bold text-xl mb-1">Produk Transfer</p>
                     <div className="w-full lg:w-4/5 grid grid-cols-1 items-end md:grid-cols-4 gap-3 mb-3">
                       <Input.Search
                         onChange={handleFilterProducts}
@@ -713,9 +682,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
                         className="w-full"
                       />
                       <button
-                        title={
-                          !printable ? "Harap selesaikan semua permintaan terlebih dahulu" : ""
-                        }
+                        title={!printable ? "Harap selesaikan semua permintaan terlebih dahulu" : ""}
                         onClick={printPdf}
                         disabled={!printable}
                         className={printable ? activeBtn : inactiveBtn}
@@ -732,10 +699,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
                     />
                   </>
                 ) : (
-                  <Empty
-                    description="Pilih Gudang Terlebih Dahulu"
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                  />
+                  <Empty description="Pilih Gudang Terlebih Dahulu" image={Empty.PRESENTED_IMAGE_SIMPLE} />
                 )}
               </LayoutContent>
             </LayoutWrapper>

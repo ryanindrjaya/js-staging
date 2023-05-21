@@ -362,7 +362,7 @@ function PesananSales({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Customer onChangeCustomer={setCustomer} />
+                  <Customer onChangeCustomer={setCustomer} page="sales" />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
                   <Form.Item name="tempo_days" initialValue={"0"} noStyle>

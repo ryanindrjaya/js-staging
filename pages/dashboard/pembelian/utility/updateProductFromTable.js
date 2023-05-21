@@ -33,25 +33,13 @@ const updateAPI = async (element) => {
     const dp2 = element?.attributes?.dp2;
     const dp3 = element?.attributes?.dp3;
 
-    productData.unit_1_dp1 = dp1;
-    productData.unit_1_dp2 = dp2;
-    productData.unit_1_dp3 = dp3;
-
-    productData.unit_2_dp1 = dp1;
-    productData.unit_2_dp2 = dp2;
-    productData.unit_2_dp3 = dp3;
-
-    productData.unit_3_dp1 = dp1;
-    productData.unit_3_dp2 = dp2;
-    productData.unit_3_dp3 = dp3;
-
-    productData.unit_4_dp1 = dp1;
-    productData.unit_4_dp2 = dp2;
-    productData.unit_4_dp3 = dp3;
-
-    productData.unit_5_dp1 = dp1;
-    productData.unit_5_dp2 = dp2;
-    productData.unit_5_dp3 = dp3;
+    for (let i = 1; i <= 5; i++) {
+      if (productData?.[`unit_${i}`]) {
+        productData[`unit_${i}_dp1`] = dp1;
+        productData[`unit_${i}_dp2`] = dp2;
+        productData[`unit_${i}_dp3`] = dp3;
+      }
+    }
 
     console.log("element coy", element);
 
@@ -124,14 +112,10 @@ const updateAtProductUnit1 = (productData, unit, unitPrice, disc) => {
   productData.buy_price_5 = productData.buy_price_4 / productData?.qty_5;
 
   productData.purchase_discount_1 = disc;
-  productData.purchase_discount_2 =
-    productData.purchase_discount_1 / productData?.qty_2;
-  productData.purchase_discount_3 =
-    productData.purchase_discount_2 / productData?.qty_3;
-  productData.purchase_discount_4 =
-    productData.purchase_discount_3 / productData?.qty_4;
-  productData.purchase_discount_5 =
-    productData.purchase_discount_4 / productData?.qty_5;
+  productData.purchase_discount_2 = productData.purchase_discount_1 / productData?.qty_2;
+  productData.purchase_discount_3 = productData.purchase_discount_2 / productData?.qty_3;
+  productData.purchase_discount_4 = productData.purchase_discount_3 / productData?.qty_4;
+  productData.purchase_discount_5 = productData.purchase_discount_4 / productData?.qty_5;
 };
 
 const updateAtProductUnit2 = (productData, unit, unitPrice, disc) => {
@@ -145,14 +129,10 @@ const updateAtProductUnit2 = (productData, unit, unitPrice, disc) => {
   productData.buy_price_1 = productData.buy_price_2 * productData.qty_2;
 
   productData.purchase_discount_2 = disc;
-  productData.purchase_discount_3 =
-    productData.purchase_discount_2 / productData?.qty_3;
-  productData.purchase_discount_4 =
-    productData.purchase_discount_3 / productData?.qty_4;
-  productData.purchase_discount_5 =
-    productData.purchase_discount_4 / productData?.qty_5;
-  productData.purchase_discount_1 =
-    productData.purchase_discount_2 * productData?.qty_2;
+  productData.purchase_discount_3 = productData.purchase_discount_2 / productData?.qty_3;
+  productData.purchase_discount_4 = productData.purchase_discount_3 / productData?.qty_4;
+  productData.purchase_discount_5 = productData.purchase_discount_4 / productData?.qty_5;
+  productData.purchase_discount_1 = productData.purchase_discount_2 * productData?.qty_2;
 };
 
 const updateAtProductUnit3 = (productData, unit, unitPrice, disc) => {
@@ -167,14 +147,10 @@ const updateAtProductUnit3 = (productData, unit, unitPrice, disc) => {
 
   //unit 2
   productData.purchase_discount_3 = disc;
-  productData.purchase_discount_4 =
-    productData.purchase_discount_3 / productData?.qty_4;
-  productData.purchase_discount_5 =
-    productData.purchase_discount_4 / productData?.qty_5;
-  productData.purchase_discount_2 =
-    productData.purchase_discount_3 * productData?.qty_3;
-  productData.purchase_discount_1 =
-    productData.purchase_discount_2 * productData?.qty_2;
+  productData.purchase_discount_4 = productData.purchase_discount_3 / productData?.qty_4;
+  productData.purchase_discount_5 = productData.purchase_discount_4 / productData?.qty_5;
+  productData.purchase_discount_2 = productData.purchase_discount_3 * productData?.qty_3;
+  productData.purchase_discount_1 = productData.purchase_discount_2 * productData?.qty_2;
 };
 
 const updateAtProductUnit4 = (productData, unit, unitPrice, disc) => {
@@ -187,14 +163,10 @@ const updateAtProductUnit4 = (productData, unit, unitPrice, disc) => {
   productData.buy_price_1 = productData.buy_price_2 * productData.qty_2;
 
   productData.purchase_discount_4 = disc;
-  productData.purchase_discount_5 =
-    productData.purchase_discount_4 / productData?.qty_5;
-  productData.purchase_discount_3 =
-    productData.purchase_discount_4 * productData?.qty_4;
-  productData.purchase_discount_2 =
-    productData.purchase_discount_3 * productData?.qty_3;
-  productData.purchase_discount_1 =
-    productData.purchase_discount_2 * productData?.qty_2;
+  productData.purchase_discount_5 = productData.purchase_discount_4 / productData?.qty_5;
+  productData.purchase_discount_3 = productData.purchase_discount_4 * productData?.qty_4;
+  productData.purchase_discount_2 = productData.purchase_discount_3 * productData?.qty_3;
+  productData.purchase_discount_1 = productData.purchase_discount_2 * productData?.qty_2;
 };
 
 const updateAtProductUnit5 = (productData, unit, unitPrice, disc) => {
@@ -208,28 +180,22 @@ const updateAtProductUnit5 = (productData, unit, unitPrice, disc) => {
   productData.buy_price_1 = productData.buy_price_2 * productData.qty_2;
 
   productData.purchase_discount_5 = disc;
-  productData.purchase_discount_4 =
-    productData.purchase_discount_5 * productData?.qty_5;
-  productData.purchase_discount_3 =
-    productData.purchase_discount_4 * productData?.qty_4;
-  productData.purchase_discount_2 =
-    productData.purchase_discount_3 * productData?.qty_3;
-  productData.purchase_discount_1 =
-    productData.purchase_discount_2 * productData?.qty_2;
+  productData.purchase_discount_4 = productData.purchase_discount_5 * productData?.qty_5;
+  productData.purchase_discount_3 = productData.purchase_discount_4 * productData?.qty_4;
+  productData.purchase_discount_2 = productData.purchase_discount_3 * productData?.qty_3;
+  productData.purchase_discount_1 = productData.purchase_discount_2 * productData?.qty_2;
 };
 
 const openNotificationWithIcon = (type) => {
   if (type === "error") {
     notification[type]({
       message: "Gagal Memperbarui Katalog",
-      description:
-        "Katalog produk gagal diperbarui. Silahkan cek log untuk detail lebih lanjut",
+      description: "Katalog produk gagal diperbarui. Silahkan cek log untuk detail lebih lanjut",
     });
   } else if (type === "success") {
     notification[type]({
       message: "Katalog Produk diperbarui!",
-      description:
-        "Katalog berhasil diperbarui. Silahkan cek pada halaman Produk",
+      description: "Katalog berhasil diperbarui. Silahkan cek pada halaman Produk",
     });
   }
 };
