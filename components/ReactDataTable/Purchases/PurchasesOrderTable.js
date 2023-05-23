@@ -152,6 +152,9 @@ export default function ReactDataTable({
             <Option value="Diterima">
               <Tag color="success">Diterima</Tag>
             </Option>
+            <Option value="Dibatalkan">
+              <Tag color="red">Dibatalkan</Tag>
+            </Option>
           </Select>
         );
       },

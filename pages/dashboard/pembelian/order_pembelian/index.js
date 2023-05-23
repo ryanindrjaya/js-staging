@@ -5,15 +5,7 @@ import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLay
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import PurchasesOrderTable from "../../../../components/ReactDataTable/Purchases/PurchasesOrderTable";
 import { useRouter } from "next/router";
-import {
-  Button,
-  Descriptions,
-  Input,
-  Modal,
-  notification,
-  Spin,
-  Tag,
-} from "antd";
+import { Button, Descriptions, Input, Modal, notification, Spin, Tag } from "antd";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
 import { PrinterOutlined } from "@ant-design/icons";
 import nookies from "nookies";
@@ -112,8 +104,7 @@ function Pembelian({ props }) {
 
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/purchases?pagination[page]=" + page;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases?pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -194,38 +185,14 @@ function Pembelian({ props }) {
   };
 
   const onChangeStatusPengiriman = (status, row) => {
-    row.attributes.delivery_status = status;
-    handleChangeStatus(row, row.id);
+    handleChangeStatus(status, row.id);
   };
 
-  const handleChangeStatus = async (values, id) => {
-    // clean object
-    for (var key in values.attributes) {
-      if (
-        values.attributes[key] === null ||
-        values.attributes[key] === undefined
-      ) {
-        delete values.attributes[key];
-      }
-    }
-
-    if (
-      values.attributes?.document?.data === null ||
-      values.attributes?.document?.data === undefined
-    ) {
-      delete values.attributes?.document;
-    }
-
-    var purchase_details = [];
-    values.attributes.purchase_details.data.forEach((element) => {
-      purchase_details.push({ id: element.id });
-    });
-    values.attributes.supplier = { id: values.attributes.supplier.data.id };
-    values.attributes.location = { id: values.attributes.location.data.id };
-    values.attributes.purchase_details = purchase_details;
-
+  const handleChangeStatus = async (status, id) => {
     const newValues = {
-      data: values.attributes,
+      data: {
+        status,
+      },
     };
 
     const JSONdata = JSON.stringify(newValues);
@@ -288,8 +255,7 @@ function Pembelian({ props }) {
   // search query
   useEffect(() => {
     async function getPOById(id) {
-      const endpoint =
-        process.env.NEXT_PUBLIC_URL + `/purchases/${id}?populate=*`;
+      const endpoint = process.env.NEXT_PUBLIC_URL + `/purchases/${id}?populate=*`;
       const options = {
         method: "GET",
         headers: {
@@ -389,13 +355,8 @@ function Pembelian({ props }) {
                 <>
                   <Descriptions
                     extra={
-                      <Button
-                        onClick={print}
-                        className="bg-cyan-700 hover:bg-cyan-800 mr-7 border-none"
-                        type="primary"
-                      >
-                        <PrinterOutlined className="mr-2 mt-0.5 float float-left" />{" "}
-                        Cetak
+                      <Button onClick={print} className="bg-cyan-700 hover:bg-cyan-800 mr-7 border-none" type="primary">
+                        <PrinterOutlined className="mr-2 mt-0.5 float float-left" /> Cetak
                       </Button>
                     }
                     size="middle"
@@ -415,33 +376,21 @@ function Pembelian({ props }) {
                       {selectedPO?.attributes?.supplier?.data?.attributes?.name}
                     </Descriptions.Item>
                     <Descriptions.Item label="Status Pengiriman" span={2}>
-                      <Tag
-                        color={getTagColor(
-                          selectedPO?.attributes?.delivery_status
-                        )}
-                      >
+                      <Tag color={getTagColor(selectedPO?.attributes?.delivery_status)}>
                         {selectedPO?.attributes?.delivery_status}
                       </Tag>
                     </Descriptions.Item>
                     <Descriptions.Item label="Status" span={2}>
-                      <Tag color={getTagColor(selectedPO?.attributes?.status)}>
-                        {selectedPO?.attributes?.status}
-                      </Tag>
+                      <Tag color={getTagColor(selectedPO?.attributes?.status)}>{selectedPO?.attributes?.status}</Tag>
                     </Descriptions.Item>
                     <Descriptions.Item label="Lokasi" span={2}>
                       {selectedPO?.attributes?.location?.data?.attributes?.name}
                     </Descriptions.Item>
                   </Descriptions>
 
-                  <Descriptions
-                    className="my-3"
-                    size="middle"
-                    title="PEMBAYARAN"
-                    bordered
-                  >
+                  <Descriptions className="my-3" size="middle" title="PEMBAYARAN" bordered>
                     <Descriptions.Item label="Termin Pembayaran" span={2}>
-                      {selectedPO?.attributes?.tempo_days}{" "}
-                      {selectedPO?.attributes?.tempo_time}
+                      {selectedPO?.attributes?.tempo_days} {selectedPO?.attributes?.tempo_time}
                     </Descriptions.Item>
                     <Descriptions.Item label="Total" className="font-bold">
                       {formatter.format(selectedPO?.attributes?.delivery_total)}
@@ -467,9 +416,7 @@ function Pembelian({ props }) {
                 className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
               >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    + Tambah
-                  </a>
+                  <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
                 </div>
               </button>
             </div>

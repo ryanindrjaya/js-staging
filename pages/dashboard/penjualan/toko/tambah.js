@@ -207,6 +207,7 @@ function Toko({ props }) {
   const [ppnActive, setPPNActive] = useState(true);
   const [isDPPActive, setIsDPPActive] = useState(true);
   const [discMax, setDiscMax] = useState();
+  const [discValue, setDiscValue] = useState(0);
 
   const router = useRouter();
   const { TextArea } = Input;
@@ -343,9 +344,7 @@ function Toko({ props }) {
           title: "Retur Gagal",
           content: (
             <div>
-              <p>
-                Item ini tidak bisa dilakukan retur. Silahkan cek kembali stok gudang yang tersedia:
-              </p>
+              <p>Item ini tidak bisa dilakukan retur. Silahkan cek kembali stok gudang yang tersedia:</p>
               <ul>
                 {cannotBeReturnedProducts.map((product) => (
                   <li key={product}>{product === undefined ? "" : `- ${product}`} </li>
@@ -409,16 +408,8 @@ function Toko({ props }) {
     values.dpp = dppPrice;
     values.ppn = ppnPrice;
     values.customer = customer;
-    await createSaleFunc(
-      grandTotal,
-      totalPrice,
-      values,
-      listId,
-      form,
-      router,
-      "/store-sales/",
-      "store sale"
-    );
+    values.delivery_fee = biayaPengiriman;
+    await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/store-sales/", "store sale");
   };
 
   const onChangeProduct = async () => {
@@ -440,14 +431,7 @@ function Toko({ props }) {
   };
 
   const calculatePriceAfterDisc = (row, index) => {
-    const total = calculatePrice(
-      row,
-      products,
-      productTotalPrice,
-      productSubTotal,
-      setTotalPrice,
-      index
-    );
+    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index);
     return formatter.format(total);
   };
 
@@ -484,6 +468,7 @@ function Toko({ props }) {
       });
     }
     setDiscPrice(newTotal);
+    setDiscValue(disc.disc_value);
   };
 
   const setTotalPriceWithPercentDisc = (disc) => {
@@ -499,6 +484,7 @@ function Toko({ props }) {
       });
     }
     setDiscPrice(newTotal);
+    setDiscValue((totalPrice * disc.disc_value) / 100);
   };
 
   const clearData = () => {
@@ -623,11 +609,7 @@ function Toko({ props }) {
                         : buttonProps[category].className
                     }
                   >
-                    <p
-                      className={`px-4 py-2 m-0 text-${
-                        selectedCategory === category ? "cyan-700" : "white"
-                      }`}
-                    >
+                    <p className={`px-4 py-2 m-0 text-${selectedCategory === category ? "cyan-700" : "white"}`}>
                       {buttonProps[category].label}
                     </p>
                   </button>
@@ -789,16 +771,12 @@ function Toko({ props }) {
                   {discPrice === 0 ? (
                     <p></p>
                   ) : (
-                    <p className="font-bold text-red-500 ml-2">
-                      {formatter.format(discPrice || 0)}
-                    </p>
+                    <p className="font-bold text-red-500 ml-2">{formatter.format(discPrice || 0)}</p>
                   )}
                   {discPrice === 0 ? (
                     <p className="font-bold ml-2">{formatter.format(totalPrice || 0)}</p>
                   ) : (
-                    <p className="font-bold line-through ml-2 ">
-                      {formatter.format(totalPrice || 0)}
-                    </p>
+                    <p className="font-bold line-through ml-2 ">{formatter.format(totalPrice || 0)}</p>
                   )}
                 </Row>
               </div>{" "}
@@ -816,9 +794,7 @@ function Toko({ props }) {
                   {""}
 
                   {discPrice === 0 ? (
-                    <p className="font-bold ml-2">
-                      {isDPPActive ? formatter.format(dppPrice) : formatter.format(0)}
-                    </p>
+                    <p className="font-bold ml-2">{isDPPActive ? formatter.format(dppPrice) : formatter.format(0)}</p>
                   ) : (
                     <p className="font-bold line-through ml-2 ">
                       {isDPPActive ? formatter.format(dppPrice) : formatter.format(0)}
@@ -837,9 +813,7 @@ function Toko({ props }) {
                     </p>
                   )}
                   {discPrice === 0 ? (
-                    <p className="font-bold ml-2">
-                      {isDPPActive ? formatter.format(ppnPrice) : formatter.format(0)}
-                    </p>
+                    <p className="font-bold ml-2">{isDPPActive ? formatter.format(ppnPrice) : formatter.format(0)}</p>
                   ) : (
                     <p className="font-bold line-through ml-2 ">
                       {isDPPActive ? formatter.format(ppnPrice) : formatter.format(0)}
