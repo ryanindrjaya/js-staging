@@ -2,10 +2,27 @@ const initState = {
   list: [],
   info: {},
   preData: {},
+  akun: [],
 };
 
 export default function Reducer(state = initState, action) {
   switch (action.type) {
+    case "ADD_AKUN_COA":
+      state.akun.push(action.akun);
+      return {
+        ...state,
+        akun: [...state.akun],
+      };
+
+    case "REMOVE_AKUN":
+      state.akun.splice(action.index, 1);
+      let infoData = state.akun;
+      delete infoData[action.index];
+      return {
+        ...state,
+        akun: [...state.akun],
+      };
+
     case "ADD_LIST":
       state.list.push(action.list);
       return {
@@ -176,7 +193,7 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CLEAR_DATA":
-      state = { list: [], info: {}, preData: {} };
+      state = { akun: [], list: [], info: {}, preData: {} };
       return state;
 
     default:

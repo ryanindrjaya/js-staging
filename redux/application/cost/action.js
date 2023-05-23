@@ -2,6 +2,16 @@ const actions = {
   ADD_PRODUCT: "ADD_LIST",
   REMOVE_PRODUCT: "REMOVE_LIST",
 
+  addAkunCOA: (akun) => ({
+    type: "ADD_AKUN_COA",
+    akun,
+  }),
+
+  removeList: (index) => ({
+    type: "REMOVE_AKUN",
+    index,
+  }),
+
   addList: (list) => ({
     type: "ADD_LIST",
     list,

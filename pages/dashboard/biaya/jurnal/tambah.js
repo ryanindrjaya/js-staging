@@ -17,15 +17,15 @@ import {
   DatePicker,
 } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
-import AddSellSalesTable from "../../../../components/ReactDataTable/Selling/AddSellSalesTable";
+import SearchBar from "@iso/components/Form/AddCost/SearchCOA";
+import AddJurnalTable from "@iso/components/ReactDataTable/Cost/AddJurnalTable";
 //import createOrderSaleFunc from "../utility/createOrderSale";
 //import createDetailOrderSaleFunc from "../utility/createDetailOrderSale";
 import calculatePrice from "../utility/calculatePrice";
 import Customer from "@iso/components/Form/AddSale/CustomerForm";
 import nookies from "nookies";
 
-PesananSales.getInitialProps = async (context) => {
+AkunCOA.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
 
   const req = await fetchData(cookies);
@@ -143,11 +143,11 @@ const fetchCustomer = async (cookies) => {
   return req;
 };
 
-function PesananSales({ props }) {
-  const products = useSelector((state) => state.Order);
+function AkunCOA({ props }) {
+  const akuns = useSelector((state) => state.Cost); console.log("products", akuns);
   const dispatch = useDispatch();
 
-  var selectedProduct = products?.productList;
+  var selectedAkun = akuns?.akun;
   const locations = props.locations.data;
   const user = props.user;
   const inven = props.inven.data;
@@ -157,7 +157,7 @@ function PesananSales({ props }) {
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [productList, setProductList] = useState([]);
+  const [akunList, setAkunList] = useState([]);
   //const [additionalFee, setAdditionalFee] = useState();
   const [isFetchinData, setIsFetchingData] = useState(false);
 
@@ -227,67 +227,69 @@ function PesananSales({ props }) {
     setLoading(false);
   };
 
-  const createDetailSale = async () => {
-    await createDetailOrderSaleFunc(
-      dataValues,
-      products,
-      setListId,
-      "/sales-sell-details"
-    );
-  };
+  //const createDetailSale = async () => {
+  //  await createDetailOrderSaleFunc(
+  //    dataValues,
+  //    akuns,
+  //    setListId,
+  //    "/sales-sell-details"
+  //  );
+  //};
 
-  const createSale = async (values) => {
-    values.sale_date = today;
-    values.added_by = user.name;
-    values.customer = customer;
-    await createOrderSaleFunc(values, listId, form, router);
-  };
+  //const createSale = async (values) => {
+  //  values.sale_date = today;
+  //  values.added_by = user.name;
+  //  values.customer = customer;
+  //  await createOrderSaleFunc(values, listId, form, router);
+  //};
 
-  const onChangeProduct = async () => {
+  const onChangeAkun = async () => {
     var isDuplicatedData = false;
 
     tempList.find((item) => {
-      productList.forEach((element) => {
+      akunList.forEach((element) => {
         if (element.id === item.id) isDuplicatedData = true;
       });
     });
 
     if (!isDuplicatedData) {
-      setProductList((productList) => [...productList, tempList[0]]);
-      toast.success("Produk berhasil ditambahkan!", {
-        position: toast.POSITION.TOP_RIGHT,
-        autoClose: 1000,
-      });
+      setAkunList((list) => [...list, tempList[0]]);
+      //toast.success("Akun berhasil ditambahkan!", {
+      //  position: toast.POSITION.TOP_RIGHT,
+      //  autoClose: 1000,
+      //});
+      console.log("duplicated");
     }
+    console.log("duplicated", tempList, akunList, !isDuplicatedData);
   };
 
-  const calculatePriceAfterDisc = (row) => {
-    const total = calculatePrice(
-      row,
-      products,
-      productTotalPrice,
-      productSubTotal,
-      setTotalPrice
-    );
-    return formatter.format(total);
-  };
+  //const calculatePriceAfterDisc = (row) => {
+  //  const total = calculatePrice(
+  //    row,
+  //    products,
+  //    productTotalPrice,
+  //    productSubTotal,
+  //    setTotalPrice
+  //  );
+  //  return formatter.format(total);
+  //};
 
   const clearData = () => {
     dispatch({ type: "CLEAR_DATA" });
     setTotalPrice(0);
   };
 
-  useEffect(() => {
-    if (products.productList.length > 0) {
-      inven.forEach((element) => {
-        products.productList.forEach((data) => {
-          if (data.id == element.attributes.products.data[0].id) {
-            data.stock = element.attributes.total_stock;
-          }
-        });
-      });
-    }
-  }, [products.productList]);
+  //useEffect(() => {
+  //  if (products.productList.length > 0) {
+  //    inven.forEach((element) => {
+  //      products.productList.forEach((data) => {
+  //        if (data.id == element.attributes.products.data[0].id) {
+  //          data.stock = element.attributes.total_stock;
+  //        }
+  //      });
+  //    });
+  //  }
+  //}, [products.productList]);
 
   useEffect(() => {
     if (listId.length > 0) {
@@ -460,9 +462,9 @@ function PesananSales({ props }) {
                 <SearchBar
                   form={form}
                   tempList={tempList}
-                  onChange={onChangeProduct}
+                  onChange={onChangeAkun}
                   user={user}
-                  selectedProduct={selectedProduct}
+                  selectedAkun={selectedAkun}
                   isBasedOnLocation={false}
                 />
               </div>
@@ -478,14 +480,8 @@ function PesananSales({ props }) {
                 </div>
               ) : (
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                  <AddSellSalesTable
-                    products={products}
-                    productTotalPrice={productTotalPrice}
-                    setTotalPrice={setTotalPrice}
-                    setProductTotalPrice={setProductTotalPrice}
-                    //calculatePriceAfterDisc={calculatePriceAfterDisc}
-                    productSubTotal={productSubTotal}
-                    locations={locations}
+                  <AddJurnalTable
+                    data={akuns}
                     formObj={form}
                   />
                 </div>
@@ -521,4 +517,4 @@ function PesananSales({ props }) {
   );
 }
 
-export default PesananSales;
+export default AkunCOA;
