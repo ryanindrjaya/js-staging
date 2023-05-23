@@ -295,6 +295,16 @@ function PesananSales({ props }) {
   }, [dataValues]);
 
   useEffect(() => {
+    if (customer){
+      var tempoDays = customer?.attributes?.credit_limit_duration;
+      form.setFieldsValue({
+        tempo_days: tempoDays.toString(),
+        tempo_time: customer?.attributes?.credit_limit_duration,
+      });
+    }
+  }, [customer]);
+
+  useEffect(() => {
     // used to reset redux from value before
     clearData();
     form.setFieldsValue({
@@ -362,7 +372,7 @@ function PesananSales({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Customer onChangeCustomer={setCustomer} page="sales" />
+                  <Customer onChangeCustomer={setCustomer} page={"SALES"} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
                   <Form.Item name="tempo_days" initialValue={"0"} noStyle>

@@ -309,7 +309,7 @@ export default function ReactDataTable({
           lastPayment?.attributes.payment_remaining ===
           lastPayment?.attributes.total_payment
         ) {
-          return <Tag color={tagRed}>Belum Dibayar</Tag>;
+          return <Tag color={tagRed}>Belum Lunas</Tag>;
         } else if (
           lastPayment?.attributes.payment_remaining > 0 &&
           lastPayment?.attributes.payment_remaining <
@@ -317,10 +317,11 @@ export default function ReactDataTable({
         ) {
           return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
         } else if (lastPayment?.attributes.payment_remaining <= 0) {
-          return <Tag color={tagGreen}>Selesai</Tag>;
+          return <Tag color={tagGreen}>Lunas</Tag>;
         } else {
           return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
         }
+        //return row.attributes.status_pembayaran;
       },
     },
     {

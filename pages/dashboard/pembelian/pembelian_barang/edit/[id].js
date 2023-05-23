@@ -777,6 +777,7 @@ function EditLPB({ props }) {
           label: initialValues.attributes?.location?.data?.attributes?.name,
           value: initialValues.attributes?.location?.data?.id,
         },
+        additional_note: initialValues.attributes?.additional_note,
       });
 
       if (initialValues.attributes.purchasing_details?.data.length > 0) {
