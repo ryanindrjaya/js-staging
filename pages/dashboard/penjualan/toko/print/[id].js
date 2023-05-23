@@ -76,6 +76,10 @@ function CetakPenjualan({ props }) {
   const dpp = data?.dpp;
   const ppn = data?.ppn;
 
+  // additional cost
+  const addFee = (data?.additional_fee_1_sub + data?.additional_fee_2_sub + data?.additional_fee_3_sub) ?? 0;
+  const deliveryFee = data?.delivery_fee ?? 0;
+
   const print = () => {
     window.print();
     return false;
@@ -166,10 +170,10 @@ function CetakPenjualan({ props }) {
           <p className="font-bold text-sm m-1">DPP : {formatter.format(dpp)}</p>
           <p className="font-bold text-sm m-1">PPN : {formatter.format(ppn)}</p>
           <p className="font-bold text-sm m-1">
-            BIAYA PENGIRIMAN : {formatter.format(0)}
+            BIAYA PENGIRIMAN : {formatter.format(deliveryFee)}
           </p>
           <p className="font-bold text-sm m-1">
-            BIAYA TAMBAHAN : {formatter.format(0)}
+            BIAYA TAMBAHAN : {formatter.format(addFee)}
           </p>
           <p className="font-bold text-sm m-1">
             Total Bayar : {formatter.format(totalPembelian)}

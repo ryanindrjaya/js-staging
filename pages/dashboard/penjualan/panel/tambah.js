@@ -640,6 +640,12 @@ function Toko({ props }) {
           customer?.attributes?.credit_limit - totalBelumDibayar
         ),
       });
+
+      var tempoDays = customer?.attributes?.credit_limit_duration;
+      form.setFieldsValue({
+        tempo_days: tempoDays.toString(),
+        tempo_time: customer?.attributes?.credit_limit_duration_type,
+      });
     }
   }, [customer]);
 
