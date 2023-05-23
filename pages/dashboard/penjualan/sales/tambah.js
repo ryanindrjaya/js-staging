@@ -591,6 +591,16 @@ function Toko({ props }) {
   }, [discType]);
 
   useEffect(() => {
+    if (customer){
+      var tempoDays = customer?.attributes?.credit_limit_duration;
+      form.setFieldsValue({
+        tempo_days: tempoDays.toString(),
+        tempo_time: customer?.attributes?.credit_limit_duration_type,
+      });
+    }
+  }, [customer]);
+
+  useEffect(() => {
     // used to reset redux from value before
     clearData();
     setProductSubTotal({});
@@ -751,7 +761,7 @@ function Toko({ props }) {
                       },
                     ]}
                   >
-                    <Customer onChangeCustomer={setCustomer} />
+                    <Customer onChangeCustomer={setCustomer} page={"SALES"} />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2">

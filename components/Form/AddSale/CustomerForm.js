@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import nookies from "nookies";
 
 export default function Customer({ onChangeCustomer, customer, disabled, fetching, page }) {
-  console.log("data customer", customer);
+
   const [data, setData] = useState(
     customer
       ? [
@@ -50,7 +50,9 @@ export default function Customer({ onChangeCustomer, customer, disabled, fetchin
       callback([]);
     } else {
       try {
-        const endpoint = process.env.NEXT_PUBLIC_URL + `/customers?filters[$or][0][name][$contains]=${query}&filters[$and][1][tipe_penjualan_query][$contains]=${page}`;
+        const endpoint =
+          process.env.NEXT_PUBLIC_URL +
+          `/customers?filters[$or][0][name][$contains]=${query}&filters[$and][1][tipe_penjualan_query][$contains]=${page}`;
         const options = {
           method: "GET",
           headers: {
