@@ -25,7 +25,7 @@ import calculatePrice from "../utility/calculatePrice";
 import Customer from "@iso/components/Form/AddSale/CustomerForm";
 import nookies from "nookies";
 
-AkunCOA.getInitialProps = async (context) => {
+Jurnal.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
 
   const req = await fetchData(cookies);
@@ -143,7 +143,7 @@ const fetchCustomer = async (cookies) => {
   return req;
 };
 
-function AkunCOA({ props }) {
+function Jurnal({ props }) {
   const akuns = useSelector((state) => state.Cost); console.log("products", akuns);
   const dispatch = useDispatch();
 
@@ -199,10 +199,10 @@ function AkunCOA({ props }) {
   // customer
   const [customer, setCustomer] = useState();
 
-  // NO Sales Sale
+  // NO Jurnal
   var noSale = String(props.sale?.meta?.pagination.total + 1).padStart(3, "0");
   const [categorySale, setCategorySale] = useState(
-    `JM/ET/${user.id}/${noSale}/${mm}/${yyyy}`
+    `JM/${user.id}/${noSale}/${mm}/${yyyy}`
   );
 
   var formatter = new Intl.NumberFormat("id-ID", {
@@ -214,34 +214,35 @@ function AkunCOA({ props }) {
   const onFinish = (values) => {
     setLoading(true);
     setInfo("sukses");
-    sale.data.forEach((element) => {
-      if (values.no_sales_sell == element.attributes.no_sales_sell) {
-        notification["error"]({
-          message: "Gagal menambahkan data",
-          description: "Data gagal ditambahkan, karena no penjualan sama",
-        });
-        setInfo("gagal");
-      }
-    });
+    // sale.data.forEach((element) => {
+    //   if (values.no_sales_sell == element.attributes.no_sales_sell) {
+    //     notification["error"]({
+    //       message: "Gagal menambahkan data",
+    //       description: "Data gagal ditambahkan, karena no penjualan sama",
+    //     });
+    //     setInfo("gagal");
+    //   }
+    // });
+    console.log("finish value", values);
     setDataValues(values);
     setLoading(false);
   };
 
-  //const createDetailSale = async () => {
+  const createDetailSale = async () => {
   //  await createDetailOrderSaleFunc(
   //    dataValues,
   //    akuns,
   //    setListId,
   //    "/sales-sell-details"
   //  );
-  //};
+  };
 
-  //const createSale = async (values) => {
+  const createSale = async (values) => {
   //  values.sale_date = today;
   //  values.added_by = user.name;
   //  values.customer = customer;
   //  await createOrderSaleFunc(values, listId, form, router);
-  //};
+  };
 
   const onChangeAkun = async () => {
     var isDuplicatedData = false;
@@ -517,4 +518,4 @@ function AkunCOA({ props }) {
   );
 }
 
-export default AkunCOA;
+export default Jurnal;

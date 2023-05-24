@@ -11,7 +11,7 @@ export default function ReactDataTable({
   setTotalPrice,
   formObj,
 }) {
-  const dispatch = useDispatch(); console.log("data", data);
+  const dispatch = useDispatch();
 
   var unit = 1;
   var priceUnit = 1;
@@ -28,6 +28,18 @@ export default function ReactDataTable({
     dispatch({ type: "REMOVE_AKUN", index: value });
   };
 
+  const onChangeCatatan = (value, row, index) => {
+    dispatch({ type: "CHANGE_CATATAN", catatan: value, data: row, index: index });
+  };
+
+  const onChangeKredit = (value, row, index) => {
+    dispatch({ type: "CHANGE_KREDIT", kredit: value, data: row, index: index });
+  };
+
+  const onChangeDebit = (value, row, index) => {
+    dispatch({ type: "CHANGE_DEBIT", debit: value, data: row, index: index });
+  };
+
   const onConfirm = (id) => {
     //const subtotal = productSubTotal[id];
     //setTotalPrice((prev) => prev - subtotal);
@@ -36,7 +48,8 @@ export default function ReactDataTable({
       const element = data.akun[index];
       if (element.id === id) {
         onDeleteAkun(index);
-      } console.log("id delete", id);
+        console.log("index", id, element, data);
+      }
     }
   };
 
@@ -77,8 +90,8 @@ export default function ReactDataTable({
             <Row>
               <Form.Item name={["catatan", `${idx}`]} noStyle>
                 <Input
-                  //defaultValue={defaultQty}
-                  //onChange={(e) => onChangeQty(e, row, idx)}
+                  //defaultValue={default}
+                  onChange={(e) => onChangeCatatan(e.target.value, row, idx)}
                   rules={[
                     {
                       required: true,
@@ -88,7 +101,6 @@ export default function ReactDataTable({
                   style={{
                     width: "300px",
                   }}
-                  //max={row.stock?.[defaultOption]?.stock || 0}
                 />
               </Form.Item>
             </Row>
@@ -105,8 +117,8 @@ export default function ReactDataTable({
             <Row>
               <Form.Item name={["debit", `${idx}`]} noStyle>
                 <InputNumber
-                  //defaultValue={defaultQty}
-                  //onChange={(e) => onChangeQty(e, row, idx)}
+                  //defaultValue={default}
+                  onChange={(e) => onChangeDebit(e, row, idx)}
                   rules={[
                     {
                       required: true,
@@ -133,8 +145,8 @@ export default function ReactDataTable({
             <Row>
               <Form.Item name={["kredit", `${idx}`]} noStyle>
                 <InputNumber
-                  //defaultValue={defaultQty}
-                  //onChange={(e) => onChangeQty(e, row, idx)}
+                  //defaultValue={default}
+                  onChange={(e) => onChangeKredit(e, row, idx)}
                   rules={[
                     {
                       required: true,

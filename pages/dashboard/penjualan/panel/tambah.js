@@ -128,10 +128,8 @@ const fetchCustomer = async (cookies) => {
 };
 
 function Toko({ props }) {
-  const products = useSelector((state) => state.Sales);
+  const products = useSelector((state) => state.Sales); console.log("done", products);
   const dispatch = useDispatch();
-
-  console.log("props", props);
 
   var selectedProduct = products?.productList;
   const locations = props.locations.data;
@@ -784,7 +782,7 @@ function Toko({ props }) {
 
                 <div className="w-full md:w-1/3 px-3 mb-2">
                   <p className="m-0">
-                    Keterangan : {console.log("customer", customer)}
+                    Keterangan : {}
                   </p>
                   <p className="m-0"> {customer?.attributes?.address}</p>
                   <p> {locationData?.city}</p>

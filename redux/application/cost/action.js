@@ -22,6 +22,27 @@ const actions = {
     index,
   }),
 
+  changeCatatan: (catatan, data, index) => ({
+    type: "CHANGE_CATATAN",
+    catatan,
+    data,
+    index,
+  }),
+
+  changeKredit: (kredit, data, index) => ({
+    type: "CHANGE_KREDIT",
+    kredit,
+    data,
+    index,
+  }),
+
+  changeDebit: (debit, data, index) => ({
+    type: "CHANGE_DEBIT",
+    debit,
+    data,
+    index,
+  }),
+
   changeId: (id, listData, index) => ({
     type: "CHANGE_ID",
     id,
