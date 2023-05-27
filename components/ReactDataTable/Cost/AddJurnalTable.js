@@ -18,11 +18,11 @@ export default function ReactDataTable({
   var tempIndex = 0;
   var stock = 0;
 
-  var formatter = new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 2,
-  });
+  // var formatter = new Intl.NumberFormat("id-ID", {
+  //   style: "currency",
+  //   currency: "IDR",
+  //   maximumFractionDigits: 2,
+  // });
 
   const onDeleteAkun = (value) => {
     dispatch({ type: "REMOVE_AKUN", index: value });
@@ -88,7 +88,7 @@ export default function ReactDataTable({
         return (
           <>
             <Row>
-              <Form.Item name={["catatan", `${idx}`]} noStyle>
+              <Form.Item name={["catatanData", `${idx}`]} noStyle>
                 <Input
                   //defaultValue={default}
                   onChange={(e) => onChangeCatatan(e.target.value, row, idx)}
@@ -115,9 +115,13 @@ export default function ReactDataTable({
        return (
           <>
             <Row>
-              <Form.Item name={["debit", `${idx}`]} noStyle>
+              <Form.Item name={["debitData", `${idx}`]} noStyle>
                 <InputNumber
-                  //defaultValue={default}
+                  defaultValue={0}
+                  formatter={(value) =>
+                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                   onChange={(e) => onChangeDebit(e, row, idx)}
                   rules={[
                     {
@@ -143,9 +147,13 @@ export default function ReactDataTable({
        return (
           <>
             <Row>
-              <Form.Item name={["kredit", `${idx}`]} noStyle>
+              <Form.Item name={["kreditData", `${idx}`]} noStyle>
                 <InputNumber
-                  //defaultValue={default}
+                  defaultValue={0}
+                  formatter={(value) =>
+                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                   onChange={(e) => onChangeKredit(e, row, idx)}
                   rules={[
                     {

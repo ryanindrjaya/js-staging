@@ -236,7 +236,7 @@ function Setting({ props }) {
     };
 
     const fetchData = async (cookies) => {
-        const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?sort[0]=setting%3Adesc&sort[0]=type%3Aasc";
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?populate";
         const options = {
             method: "GET",
             headers: {

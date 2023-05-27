@@ -24,6 +24,7 @@ import AddJurnalTable from "@iso/components/ReactDataTable/Cost/AddJurnalTable";
 import calculatePrice from "../utility/calculatePrice";
 import Customer from "@iso/components/Form/AddSale/CustomerForm";
 import nookies from "nookies";
+import moment from "moment";
 
 Jurnal.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -40,8 +41,8 @@ Jurnal.getInitialProps = async (context) => {
   const reqInven = await fetchInven(cookies);
   const inven = await reqInven.json();
 
-  const reqSale = await fetchSale(cookies);
-  const sale = await reqSale.json();
+  const reqJurnal = await fetchJurnal(cookies);
+  const jurnal = await reqJurnal.json();
 
   const reqCustomer = await fetchCustomer(cookies);
   const customer = await reqCustomer.json();
@@ -52,7 +53,7 @@ Jurnal.getInitialProps = async (context) => {
       dataUser,
       locations,
       inven,
-      sale,
+      jurnal,
       customer,
     },
   };
@@ -86,8 +87,8 @@ const fetchUser = async (cookies) => {
   return req;
 };
 
-const fetchSale = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sells?populate=deep";
+const fetchJurnal = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -144,15 +145,15 @@ const fetchCustomer = async (cookies) => {
 };
 
 function Jurnal({ props }) {
-  const akuns = useSelector((state) => state.Cost); console.log("products", akuns);
+  const akuns = useSelector((state) => state.Cost);
   const dispatch = useDispatch();
 
   var selectedAkun = akuns?.akun;
   const locations = props.locations.data;
   const user = props.user;
   const inven = props.inven.data;
-  const sale = props.sale;
-  const customerData = props.customer.data[0];
+  const jurnal = props.jurnal;
+  const customerData = props.customer.data[0]; //console.log("user", user);
   const dataUser = props.dataUser;
 
   const [form] = Form.useForm();
@@ -200,9 +201,9 @@ function Jurnal({ props }) {
   const [customer, setCustomer] = useState();
 
   // NO Jurnal
-  var noSale = String(props.sale?.meta?.pagination.total + 1).padStart(3, "0");
+  var noJurnal = String(props.jurnal?.meta?.pagination.total + 1).padStart(3, "0");
   const [categorySale, setCategorySale] = useState(
-    `JM/${user.id}/${noSale}/${mm}/${yyyy}`
+    `JM/${user.id}/${noJurnal}/${mm}/${yyyy}`
   );
 
   var formatter = new Intl.NumberFormat("id-ID", {
@@ -214,34 +215,101 @@ function Jurnal({ props }) {
   const onFinish = (values) => {
     setLoading(true);
     setInfo("sukses");
-    // sale.data.forEach((element) => {
-    //   if (values.no_sales_sell == element.attributes.no_sales_sell) {
-    //     notification["error"]({
-    //       message: "Gagal menambahkan data",
-    //       description: "Data gagal ditambahkan, karena no penjualan sama",
-    //     });
-    //     setInfo("gagal");
-    //   }
-    // });
-    console.log("finish value", values);
-    setDataValues(values);
+    var totalDebit = 0;
+    var totalKredit = 0;
+    for(var index = 0; index < akuns.akun.length; index++){
+      if (values.debitData[index] == undefined) values.debitData[index] = 0;
+      if (values.kreditData[index] == undefined) values.kreditData[index] = 0;
+      totalDebit += values.debitData[index];
+      totalKredit += values.kreditData[index];
+    };
+
+    if (totalDebit != totalKredit) {
+      notification["error"]({
+        message: "Gagal menambahkan data",
+        description: "Data gagal ditambahkan, karena total kredit dan debit harus sama.",
+      });
+      setInfo("gagal");
+    } else console.log("Debit dan kredit sudah sesuai.");
+
+    var checkData = 1;
+    jurnal.data.forEach((element) => {
+      if (values.no_jurnal == element.attributes.no_jurnal && checkData == 1) {
+        notification["error"]({
+          message: "Gagal menambahkan data",
+          description: "Data gagal ditambahkan, karena no jurnal sama",
+        });
+        setInfo("gagal");
+        checkData++;
+      }
+    });
+    //setDataValues(values);
     setLoading(false);
   };
 
-  const createDetailSale = async () => {
-  //  await createDetailOrderSaleFunc(
-  //    dataValues,
-  //    akuns,
-  //    setListId,
-  //    "/sales-sell-details"
-  //  );
-  };
+  const create = async (values) => {
+  values.added_by = user.name;
 
-  const createSale = async (values) => {
-  //  values.sale_date = today;
-  //  values.added_by = user.name;
-  //  values.customer = customer;
-  //  await createOrderSaleFunc(values, listId, form, router);
+    console.log("data values", values, akuns);
+
+    akuns.akun.forEach((item, index) => {
+      values.catatan = values.catatanData[index];
+      values.debit = values.debitData[index];
+      values.kredit = values.kreditData[index];
+      values.chart_of_account = item.id;
+      
+      const req = createData(values);
+      
+    });
+    
+  };
+  
+  const createData = async (values) => {
+    
+    var data = {
+      data: values,
+    };
+    
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals";
+    const JSONdata = JSON.stringify(data);
+    
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+      body: JSONdata,
+    };
+    
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+    console.log("req create", req, res);
+
+    if (req.status === 200) {
+      console.log("suksess");
+      openNotificationWithIcon("success");
+      router.replace("/dashboard/biaya/jurnal");
+    } else {
+      openNotificationWithIcon("error", req);
+    }
+
+  };
+  
+  const openNotificationWithIcon = (type, req) => {
+    if (type === "error") {
+      notification[type]({
+        message: "Gagal menambahkan data",
+        description:
+        "Jurnal gagal ditambahkan." + req.statusText,
+      });
+    } else if (type === "success") {
+      notification[type]({
+        message: "Berhasil menambahkan data",
+        description:
+        "Jurnal berhasil ditambahkan.",
+      });
+    }
   };
 
   const onChangeAkun = async () => {
@@ -255,51 +323,18 @@ function Jurnal({ props }) {
 
     if (!isDuplicatedData) {
       setAkunList((list) => [...list, tempList[0]]);
-      //toast.success("Akun berhasil ditambahkan!", {
-      //  position: toast.POSITION.TOP_RIGHT,
-      //  autoClose: 1000,
-      //});
-      console.log("duplicated");
     }
-    console.log("duplicated", tempList, akunList, !isDuplicatedData);
+    
   };
-
-  //const calculatePriceAfterDisc = (row) => {
-  //  const total = calculatePrice(
-  //    row,
-  //    products,
-  //    productTotalPrice,
-  //    productSubTotal,
-  //    setTotalPrice
-  //  );
-  //  return formatter.format(total);
-  //};
 
   const clearData = () => {
     dispatch({ type: "CLEAR_DATA" });
     setTotalPrice(0);
   };
 
-  //useEffect(() => {
-  //  if (products.productList.length > 0) {
-  //    inven.forEach((element) => {
-  //      products.productList.forEach((data) => {
-  //        if (data.id == element.attributes.products.data[0].id) {
-  //          data.stock = element.attributes.total_stock;
-  //        }
-  //      });
-  //    });
-  //  }
-  //}, [products.productList]);
-
   useEffect(() => {
-    if (listId.length > 0) {
-      createSale(dataValues);
-    }
-  }, [listId]);
-
-  useEffect(() => {
-    if (dataValues && info == "sukses") createDetailSale();
+    //if (dataValues && info == "sukses") createDetailSale();]
+    if (dataValues && info == "sukses") create(dataValues);
   }, [dataValues]);
 
   useEffect(() => {
@@ -307,6 +342,7 @@ function Jurnal({ props }) {
     clearData();
     form.setFieldsValue({
       customer: customerData?.attributes.name,
+      tanggal: moment(),
     });
     setCustomer(customerData);
   }, []);
@@ -396,67 +432,10 @@ function Jurnal({ props }) {
                       placeholder="Tanggal Jurnal"
                       size="large"
                       style={{ width: "100%" }}
+                      format={"DD/MM/YYYY"}
                     />
                   </Form.Item>
                 </div>
-                {/*<div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">*/}
-                {/*  <Customer onChangeCustomer={setCustomer} />*/}
-                {/*</div>*/}
-                {/*<div className="w-full md:w-1/4 px-3 mb-2">*/}
-                {/*  <Form.Item name="tempo_days" initialValue={"0"} noStyle>*/}
-                {/*    <Input*/}
-                {/*      size="large"*/}
-                {/*      style={{*/}
-                {/*        width: "50%",*/}
-                {/*      }}*/}
-                {/*    />*/}
-                {/*  </Form.Item>*/}
-                {/*  <Form.Item name="tempo_time" initialValue={"Hari"} noStyle>*/}
-                {/*    <Select*/}
-                {/*      size="large"*/}
-                {/*      style={{*/}
-                {/*        width: "50%",*/}
-                {/*      }}*/}
-                {/*    >*/}
-                {/*      <Select.Option value="Hari" key="Hari">*/}
-                {/*        Hari*/}
-                {/*      </Select.Option>*/}
-                {/*      <Select.Option value="Bulan" key="Bulan">*/}
-                {/*        Bulan*/}
-                {/*      </Select.Option>*/}
-                {/*    </Select>*/}
-                {/*  </Form.Item>*/}
-                {/*</div>*/}
-                {/*<div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">*/}
-                {/*  <Form.Item*/}
-                {/*    name="location"*/}
-                {/*    rules={[*/}
-                {/*      {*/}
-                {/*        required: true,*/}
-                {/*        message: "Lokasi tidak boleh kosong!",*/}
-                {/*      },*/}
-                {/*    ]}*/}
-                {/*  >*/}
-                {/*    <Select*/}
-                {/*      placeholder="Pilih Lokasi"*/}
-                {/*      size="large"*/}
-                {/*      style={{*/}
-                {/*        width: "100%",*/}
-                {/*      }}*/}
-                {/*    >*/}
-                {/*      {locations.map((element) => {*/}
-                {/*        return (*/}
-                {/*          <Select.Option*/}
-                {/*            value={element.id}*/}
-                {/*            key={element.attributes.name}*/}
-                {/*          >*/}
-                {/*            {element.attributes.name}*/}
-                {/*          </Select.Option>*/}
-                {/*        );*/}
-                {/*      })}*/}
-                {/*    </Select>*/}
-                {/*  </Form.Item>*/}
-                {/*</div>*/}
               </div>
 
               <div className="w-full flex md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">

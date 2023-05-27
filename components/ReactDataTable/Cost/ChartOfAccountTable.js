@@ -98,58 +98,29 @@ export default function ReactDataTable({
     const columns = [
         {
           name: "Kode akun",
-          width: "200px",
+          width: "180px",
           selector: (row) => row.attributes?.kode ?? "-",
         },
         {
           name: "Nama",
-          width: "350px",
+          width: "250px",
           selector: (row) => row.attributes?.nama ?? "-",
         },
         {
+          name: "Jenis Akun",
+          width: "150px",
+          selector: (row) => row.attributes?.jenis_akun ?? "-",
+        },
+        {
+          name: "Jenis Sub Akun",
+          width: "150px",
+          selector: (row) => row.attributes?.jenis_sub_akun ?? "-",
+        },
+        {
           name: "Saldo",
-          width: "450px",
+          width: "300px",
           selector: (row) => formatter.format( row.attributes?.saldo) ?? "-",
         },
-        //{
-        //  name: "Tipe",
-        //  width: "90px",
-        //  selector: (row) => row.attributes?.type ?? "-",
-        //},
-        //{
-        //  name: "Deskripsi",
-        //  width: "230px",
-        //  selector: (row) => row.attributes?.deskripsi ?? "-",
-        //},
-        //{
-        //  name: "Setting",
-        //  width: "160px",
-        //  selector: (row) => {
-        //    var setting = "-";
-
-        //    if (row.attributes?.setting == false) setting = "Tidak Aktif";
-        //    else if (row.attributes?.setting == true) setting = "Aktif";
-        //    else setting = "-";
-
-        //    return (
-        //      <>
-        //        <Select
-        //          defaultValue={setting}
-        //          bordered={false}
-        //          //disabled={row.attributes.delivery_status === "Terkirim"}
-        //          onChange={(e) => onChangeSetting(e, row)}
-        //        >
-        //          <Option value="Tidak Aktif">
-        //            <Tag color="error">Tidak Aktif</Tag>
-        //          </Option>
-        //          <Option value="Aktif">
-        //            <Tag color="success">Aktif</Tag>
-        //          </Option>
-        //        </Select>
-        //      </>
-        //    );
-        //  }
-        //},
         {
             name: "Tindakan",
             width: "150px",
