@@ -66,9 +66,7 @@ const fetchData = async (cookies) => {
 };
 
 const fethcPaymentSales = async (cookies) => {
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL +
-    "/store-sales?sort[0]=createdAt:desc&populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales?sort[0]=createdAt:desc&populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -82,11 +80,7 @@ const fethcPaymentSales = async (cookies) => {
 };
 
 const getCheckInUser = async (cookies, user) => {
-  const today = new Date()
-    .toLocaleDateString("en-GB")
-    .split("/")
-    .reverse()
-    .join("-");
+  const today = new Date().toLocaleDateString("en-GB").split("/").reverse().join("-");
   const tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000)
     .toLocaleDateString("en-GB")
     .split("/")
@@ -235,11 +229,7 @@ function PembayaranToko({ props }) {
                   </div>
                   <div className="w-full md:w-1/5 mb-2 md:mb-0">
                     <Button
-                      onClick={() =>
-                        router.push(
-                          "/dashboard/penjualan/toko/pembayaran/retur"
-                        )
-                      }
+                      onClick={() => router.push("/dashboard/penjualan/toko/pembayaran/retur")}
                       size="large"
                       className="ml-2 border rounded-md"
                       style={{
@@ -261,21 +251,9 @@ function PembayaranToko({ props }) {
                 />
 
                 {/* TABEL COMPONENT */}
-                <Table
-                  dataSource={dataSales}
-                  className="custom-table"
-                  rowClassName="custom-row"
-                >
-                  <Column
-                    title="No Faktur"
-                    dataIndex={["attributes", "no_store_sale"]}
-                    key="faktur"
-                  />
-                  <Column
-                    title="Nama Customer"
-                    dataIndex={["attributes", "customer_name"]}
-                    key="customer_name"
-                  />
+                <Table dataSource={dataSales} className="custom-table" rowClassName="custom-row">
+                  <Column title="No Faktur" dataIndex={["attributes", "no_store_sale"]} key="faktur" />
+                  <Column title="Nama Customer" dataIndex={["attributes", "customer_name"]} key="customer_name" />
                   <Column
                     title="Status"
                     dataIndex={["attributes", "status"]}
@@ -298,16 +276,11 @@ function PembayaranToko({ props }) {
                     render={(record) => {
                       const dataPaymentMethod =
                         record?.attributes?.store_payments?.data
-                          ?.map(
-                            (payment) => payment?.attributes?.payment_method
-                          )
+                          ?.map((payment) => payment?.attributes?.payment_method)
                           .join(", ") ?? null;
                       return (
                         <Select
-                          disabled={
-                            record.attributes.status === "Dibayar" ||
-                            record.attributes.status === "Diretur"
-                          }
+                          disabled={record.attributes.status === "Dibayar" || record.attributes.status === "Diretur"}
                           placeholder="Pilih Metode Pembayaran"
                           defaultValue={dataPaymentMethod}
                           style={{ width: 120 }}
@@ -319,15 +292,9 @@ function PembayaranToko({ props }) {
                           }}
                         >
                           <Select.Option value="TUNAI">TUNAI</Select.Option>
-                          <Select.Option value="TRANSFER">
-                            TRANSFER
-                          </Select.Option>
-                          <Select.Option value="BANK BCA">
-                            BANK BCA
-                          </Select.Option>
-                          <Select.Option value="DEBIT BCA">
-                            DEBIT BCA
-                          </Select.Option>
+                          <Select.Option value="TRANSFER">TRANSFER</Select.Option>
+                          <Select.Option value="BANK BCA">BANK BCA</Select.Option>
+                          <Select.Option value="DEBIT BCA">DEBIT BCA</Select.Option>
                           <Select.Option value="LAINNYA">LAINNYA</Select.Option>
                         </Select>
                       );
@@ -336,42 +303,29 @@ function PembayaranToko({ props }) {
                   <Column
                     title="Total Harga"
                     key="total_harga"
-                    render={(record) => (
-                      <>{formatter.format(record.attributes?.total ?? 0)}</>
-                    )}
+                    render={(record) => <>{formatter.format(record.attributes?.total ?? 0)}</>}
                   />
                   <Column
                     title="Dibayar"
                     key="dibayar"
                     render={(record) => {
-                      const dataPayment =
-                        record?.attributes?.store_payments?.data ?? [];
+                      const dataPayment = record?.attributes?.store_payments?.data ?? [];
 
                       const dataPaymentValue =
                         dataPayment.length > 1
-                          ? dataPayment.reduce(
-                              (acc, curr) =>
-                                parseFloat(acc) +
-                                parseFloat(curr.attributes.payment),
-                              0
-                            )
+                          ? dataPayment.reduce((acc, curr) => parseFloat(acc) + parseFloat(curr.attributes.payment), 0)
                           : dataPayment.length === 1
                           ? dataPayment[0].attributes.payment
                           : 0;
 
                       return (
                         <InputNumber
-                          disabled={
-                            record.attributes.status === "Dibayar" ||
-                            record.attributes.status === "Diretur"
-                          }
+                          disabled={record.attributes.status === "Dibayar" || record.attributes.status === "Diretur"}
                           onChange={setPaymentValue}
                           placeholder="Masukan Nominal"
                           min={0}
                           defaultValue={dataPaymentValue}
-                          formatter={(value) =>
-                            `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                          }
+                          formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                           parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
                           style={{ width: 150 }}
                         />
@@ -384,23 +338,14 @@ function PembayaranToko({ props }) {
                     key="kembali"
                     render={(record) => {
                       const totalHarga = record.attributes?.total ?? 0;
-                      const dataPayment =
-                        record?.attributes?.store_payments?.data ?? [];
+                      const dataPayment = record?.attributes?.store_payments?.data ?? [];
 
-                      if (
-                        record.attributes.status === "Dibayar" ||
-                        record.attributes.status === "Diretur"
-                      ) {
+                      if (record.attributes.status === "Dibayar" || record.attributes.status === "Diretur") {
                         const dataPaymentValue = dataPayment.reduce(
-                          (acc, curr) =>
-                            parseFloat(acc) +
-                            parseFloat(curr.attributes.payment),
+                          (acc, curr) => parseFloat(acc) + parseFloat(curr.attributes.payment),
                           0
                         );
-                        const kembali =
-                          dataPaymentValue - totalHarga < 0
-                            ? 0
-                            : dataPaymentValue - totalHarga;
+                        const kembali = dataPaymentValue - totalHarga < 0 ? 0 : dataPaymentValue - totalHarga;
                         return formatter.format(kembali);
                       }
 
@@ -412,10 +357,7 @@ function PembayaranToko({ props }) {
                     title="Action"
                     key="action"
                     render={(_, record) => {
-                      if (
-                        record.attributes.status === "Dibayar" ||
-                        record.attributes.status === "Diretur"
-                      ) {
+                      if (record.attributes.status === "Dibayar" || record.attributes.status === "Diretur") {
                         return <></>;
                       }
 
@@ -423,14 +365,10 @@ function PembayaranToko({ props }) {
                         <div>
                           <Popconfirm
                             title={
-                              "Pembayaran akan dilakukan sebesar " +
-                              formatter.format(paymentValue) +
-                              ". Lanjutkan?"
+                              "Pembayaran akan dilakukan sebesar " + formatter.format(paymentValue) + ". Lanjutkan?"
                             }
                             description={
-                              "Pembayaran akan dilakukan sebesar " +
-                              formatter.format(paymentValue) +
-                              ". Lanjutkan?"
+                              "Pembayaran akan dilakukan sebesar " + formatter.format(paymentValue) + ". Lanjutkan?"
                             }
                             onConfirm={() => confirm(record)}
                             onCancel={cancel}
@@ -445,10 +383,7 @@ function PembayaranToko({ props }) {
                             </Button>
                           </Popconfirm>
 
-                          <Button
-                            onClick={() => onOpenDrawer(record)}
-                            className="rounded-md"
-                          >
+                          <Button onClick={() => onOpenDrawer(record)} className="rounded-md">
                             Pemb. Lain
                           </Button>
                         </div>
