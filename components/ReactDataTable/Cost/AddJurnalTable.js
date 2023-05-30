@@ -4,12 +4,14 @@ import { Input, InputNumber, Select, Form, Row, DatePicker } from "antd";
 import { useDispatch } from "react-redux";
 
 export default function ReactDataTable({
-  calculatePriceAfterDisc,
-  productSubTotal,
   data,
-  locations,
-  setTotalPrice,
   formObj,
+  setDebitValue,
+  setKreditValue,
+  setTotalDebitValue,
+  setTotalKreditValue,
+  totalDebitValue,
+  totalKreditValue,
 }) {
   const dispatch = useDispatch();
 
@@ -34,23 +36,26 @@ export default function ReactDataTable({
 
   const onChangeKredit = (value, row, index) => {
     dispatch({ type: "CHANGE_KREDIT", kredit: value, data: row, index: index });
+    setKreditValue(value);
   };
 
   const onChangeDebit = (value, row, index) => {
     dispatch({ type: "CHANGE_DEBIT", debit: value, data: row, index: index });
+    setDebitValue(value);
   };
 
-  const onConfirm = (id) => {
-    //const subtotal = productSubTotal[id];
-    //setTotalPrice((prev) => prev - subtotal);
+  const onConfirm = (id) => { console.log("id nih", id);
+    // var newAkunInfo = data.akunInfo;
 
-    for (let index = 0; index < data.akun.length; index++) {
-      const element = data.akun[index];
-      if (element.id === id) {
-        onDeleteAkun(index);
-        console.log("index", id, element, data);
-      }
-    }
+    // delete newAkunInfo[id];
+    onDeleteAkun(id);
+    // setTotalDebitValue(totalDebitValue - (data.akunInfo[id]?.debit ?? 0))
+    // setTotalKreditValue(totalKreditValue - (data.akunInfo[id]?.kredit ?? 0))
+    // formObj.setFieldsValue({
+    //   catatanData: undefined,
+    //   debitData: 0,
+    //   kreditData: 0,
+    // });
   };
 
   const onCancel = () => {
@@ -174,13 +179,13 @@ export default function ReactDataTable({
     },
     {
       name: "Hapus",
-      selector: (row) => (
+      selector: (row, idx) => (
         <AlertDialog
           onCancel={onCancel}
           onConfirm={onConfirm}
           title="Hapus Akun"
           message="Akun akan dihapus dari daftar ini. Lanjutkan?"
-          id={row.id}
+          id={idx}
         />
       ),
     },
