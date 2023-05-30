@@ -5,7 +5,7 @@ import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import DebtTable from "../../../../components/ReactDataTable/Cost/DebtAccountTable";
-import { UserOutlined, ShopOutlined, BankOutlined } from "@ant-design/icons";
+import { UserOutlined, ShopOutlined, BankOutlined, UnorderedListOutlined } from "@ant-design/icons";
 import { Button, Select, Form, Input, InputNumber, notification } from "antd";
 import nookies from "nookies";
 import { toast } from "react-toastify";
@@ -25,8 +25,8 @@ const Tambah = ({ props }) => {
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
   // NO Akun
-  var noAkun = String(props.akun?.meta?.pagination.total + 1).padStart(3, "0");
-  const [kodeAkun, setKodeAkun] = useState(`AC/ET/${user.id}/${noAkun}/${mm}/${yyyy}`);
+  // var noAkun = String(props.akun?.meta?.pagination.total + 1).padStart(3, "0");
+  // const [kodeAkun, setKodeAkun] = useState(`AC/ET/${user.id}/${noAkun}/${mm}/${yyyy}`);
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -125,7 +125,7 @@ const Tambah = ({ props }) => {
                         message: "Kode akun tidak boleh kosong!",
                       },
                     ]}
-                    initialValue={kodeAkun}
+                    //initialValue={kodeAkun}
                   >
                     <Input
                       style={{ height: "50px" }}
@@ -186,6 +186,88 @@ const Tambah = ({ props }) => {
                     />
                   </Form.Item>
                 </div>
+
+                <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
+                  <Form.Item 
+                    name="jenis_akun"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Jenis akun tidak boleh kosong!",
+                      },
+                    ]}
+                  >
+                    <Select 
+                      size="large"
+                      placeholder="Jenis Akun"
+                    >
+                      <Select.Option value="ASET LANCAR" key="ASET LANCAR">
+                        ASET LANCAR
+                      </Select.Option>
+                      <Select.Option value="KAS & BANK" key="KAS & BANK">
+                        KAS & BANK
+                      </Select.Option>
+                      <Select.Option value="ASET TAK BERWUJUD" key="ASET TAK BERWUJUD">
+                        ASET TAK BERWUJUD
+                      </Select.Option>
+                      <Select.Option value="PIUTANG" key="PIUTANG">
+                        PIUTANG
+                      </Select.Option>
+                      <Select.Option value="PERSEDIAAN" key="PERSEDIAAN">
+                        PERSEDIAAN
+                      </Select.Option>
+                      <Select.Option value="AKTIVA LANCAR LAINNYA" key="AKTIVA LANCAR LAINNYA">
+                        AKTIVA LANCAR LAINNYA
+                      </Select.Option>
+                      <Select.Option value="AKTIVA TETAP" key="AKTIVA TETAP">
+                        AKTIVA TETAP
+                      </Select.Option>
+                      <Select.Option value="KEWAJIBAN" key="KEWAJIBAN">
+                        KEWAJIBAN
+                      </Select.Option>
+                      <Select.Option value="MODAL" key="MODAL">
+                        MODAL
+                      </Select.Option>
+                      <Select.Option value="PENDAPATAN" key="PENDAPATAN">
+                        PENDAPATAN
+                      </Select.Option>
+                      <Select.Option value="HARGA POKOK PENJUALAN" key="HARGA POKOK PENJUALAN">
+                        HARGA POKOK PENJUALAN
+                      </Select.Option>
+                      <Select.Option value="BIAYA OPERASONAL" key="BIAYA OPERASONAL">
+                        BIAYA OPERASONAL
+                      </Select.Option>
+                      <Select.Option value="PENDAPATAN BEBAN LAINNYA" key="PENDAPATAN BEBAN LAINNYA">
+                        PENDAPATAN (BEBAN) LAINNYA
+                      </Select.Option>
+                    </Select>
+                  </Form.Item>
+                </div>
+
+                <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
+                  <Form.Item 
+                    name="jenis_sub_akun"
+                  >
+                    <Select 
+                      size="large"
+                      placeholder="Jenis Sub Akun"
+                    >
+                      <Select.Option value="BANK" key="BANK">
+                        BANK
+                      </Select.Option>
+                      <Select.Option value="KEWAJIBAN LANCAR" key="KEWAJIBAN LANCAR">
+                        KEWAJIBAN LANCAR
+                      </Select.Option>
+                      <Select.Option value="PENDAPATAN LAINNYA" key="PENDAPATAN LAINNYA">
+                        PENDAPATAN LAINNYA
+                      </Select.Option>
+                      <Select.Option value="BEBAN LAINNYA" key="BEBAN LAINNYA">
+                        BEBAN LAINNYA
+                      </Select.Option>
+                    </Select>
+                  </Form.Item>
+                </div>
+
               </div>
 
               <Form.Item>

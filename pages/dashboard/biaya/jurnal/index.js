@@ -7,12 +7,12 @@ import router, { useRouter } from "next/router";
 import { useSelector, useDispatch } from "react-redux";
 import { Input, notification, Select, DatePicker } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import DebtTable from "@iso/components/ReactDataTable/Cost/JurnalTable";
+import JurnalTable from "@iso/components/ReactDataTable/Cost/JurnalTable";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
 import nookies from "nookies";
 import tokenVerify from "../../../../authentication/tokenVerify";
 
-Hutang.getInitialProps = async (context) => {
+Jurnal.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
 
   const req = await fetchData(cookies);
@@ -24,8 +24,8 @@ Hutang.getInitialProps = async (context) => {
   const reqLocation = await fetchLocation(cookies);
   const locations = await reqLocation.json();
 
-  const reqHutang = await fetchHutang(cookies);
-  const hutang = await reqHutang.json();
+  const reqJurnal = await fetchJurnal(cookies);
+  const jurnal = await reqJurnal.json();
 
   //if (req.status !== 200) {
   //    context.res.writeHead(302, {
@@ -41,7 +41,7 @@ Hutang.getInitialProps = async (context) => {
     props: {
       user,
       locations,
-      hutang,
+      jurnal,
       dataUser,
     },
   };
@@ -89,8 +89,8 @@ const fetchLocation = async (cookies) => {
   return req;
 };
 
-const fetchHutang = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate=deep";
+const fetchJurnal = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -103,13 +103,13 @@ const fetchHutang = async (cookies) => {
   return req;
 };
 
-function Hutang({ props }) {
+function Jurnal({ props }) {
   const user = props.user;
   const locations = props.locations.data;
-  const data = props.hutang;
+  const data = props.jurnal;
   const dataUser = props.dataUser;
   const router = useRouter();
-  const [hutang, setHutang] = useState(data);
+  const [jurnal, setJurnal] = useState(data);
   const dispatch = useDispatch();
 
   const handleAdd = () => {
@@ -130,9 +130,9 @@ function Hutang({ props }) {
   };
 
   const handleDelete = async (data) => {
-    handleDeleteRelation(data);
+    //handleDeleteRelation(data);
 
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/debts/" + data.id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals/" + data.id;
     const cookies = nookies.get(null, "token");
 
     const options = {
@@ -150,35 +150,35 @@ function Hutang({ props }) {
       openNotificationWithIcon(
         "success",
         "Berhasil menghapus data",
-        "Hutang yang dipilih telah berhasil dihapus. Silahkan cek kembali hutang"
+        "Jurnal yang dipilih telah berhasil dihapus. Silahkan cek kembali jurnal"
       );
-      setHutang(res);
+      setJurnal(res);
     }
   };
 
-  const handleDeleteRelation = async (data) => {
-    var id = 0;
-    data.attributes.debt_details.data.forEach((element) => {
-      id = element.id;
+  // const handleDeleteRelation = async (data) => {
+  //   var id = 0;
+  //   data.attributes.debt_details.data.forEach((element) => {
+  //     id = element.id;
 
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-details/" + id;
-      const cookies = nookies.get(null, "token");
+  //     const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-details/" + id;
+  //     const cookies = nookies.get(null, "token");
 
-      const options = {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + cookies.token,
-        },
-      };
+  //     const options = {
+  //       method: "DELETE",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: "Bearer " + cookies.token,
+  //       },
+  //     };
 
-      const req = fetch(endpoint, options);
-      //const res = req.json();
-      if (req) {
-        console.log("relation deleted");
-      }
-    });
-  };
+  //     const req = fetch(endpoint, options);
+  //     //const res = req.json();
+  //     if (req) {
+  //       console.log("relation deleted");
+  //     }
+  //   });
+  // };
 
   const openNotificationWithIcon = (type, title, message) => {
     notification[type]({
@@ -188,7 +188,7 @@ function Hutang({ props }) {
   };
 
   const fetchData = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate=deep";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=deep";
     const options = {
       method: "GET",
       headers: {
@@ -352,8 +352,8 @@ function Hutang({ props }) {
               </button>
             </div>
 
-            <DebtTable
-              data={hutang}
+            <JurnalTable
+              data={jurnal}
               onUpdate={handleUpdate}
               onDelete={handleDelete}
               //onPageChange={handlePageChange}
@@ -369,4 +369,4 @@ function Hutang({ props }) {
   );
 }
 
-export default Hutang;
+export default Jurnal;

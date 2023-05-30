@@ -598,7 +598,7 @@ function Hutang({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Supplier onChangeSupplier={setSupplier} />
                 </div>
-                <div className="w-full md:w-1/4 px-3 mb-2">
+                {/* <div className="w-full md:w-1/4 px-3 mb-2">
                   <Form.Item
                     name="status_pembayaran" //initialValue={"Hari"}
                     noStyle
@@ -620,7 +620,7 @@ function Hutang({ props }) {
                       </Select.Option>
                     </Select>
                   </Form.Item>
-                </div>
+                </div> */}
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="tanggal">
                     <RangePicker

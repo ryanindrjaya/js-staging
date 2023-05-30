@@ -155,38 +155,38 @@ export default function ReactDataTable({
       width: "200px",
       selector: (row) => row.attributes?.no_sales_sell ?? "-",
     },
-    {
-      name: "Status",
-      width: "200px",
-      selector: (row) => {
-        return (
-          <>
-            <Select
-              defaultValue={row.attributes.status}
-              disabled={row.attributes.status === "Diterima"}
-              bordered={false}
-              onChange={(e) => onChangeStatus(e, row.id)}
-              style={{
-                width: "150px",
-              }}
-            >
-              <Option value="Diproses" key="Diproses" className="text-black">
-                <Tag color="default">Diproses</Tag>
-              </Option>
-              <Option value="Dibatalkan" key="Dibatalkan" className="text-black">
-                <Tag color="error">Dibatalkan</Tag>
-              </Option>
-              <Option value="Diretur" key="Diretur" className="text-black">
-                <Tag color="blue">Diretur</Tag>
-              </Option>
-              <Option value="Diterima" key="Diterima" className="text-black">
-                <Tag color="success">Diterima</Tag>
-              </Option>
-            </Select>
-          </>
-        );
-      },
-    },
+    // {
+    //   name: "Status",
+    //   width: "200px",
+    //   selector: (row) => {
+    //     return (
+    //       <>
+    //         <Select
+    //           defaultValue={row.attributes.status}
+    //           disabled={row.attributes.status === "Diterima"}
+    //           bordered={false}
+    //           onChange={(e) => onChangeStatus(e, row.id)}
+    //           style={{
+    //             width: "150px",
+    //           }}
+    //         >
+    //           <Option value="Diproses" key="Diproses" className="text-black">
+    //             <Tag color="default">Diproses</Tag>
+    //           </Option>
+    //           <Option value="Dibatalkan" key="Dibatalkan" className="text-black">
+    //             <Tag color="error">Dibatalkan</Tag>
+    //           </Option>
+    //           <Option value="Diretur" key="Diretur" className="text-black">
+    //             <Tag color="blue">Diretur</Tag>
+    //           </Option>
+    //           <Option value="Diterima" key="Diterima" className="text-black">
+    //             <Tag color="success">Diterima</Tag>
+    //           </Option>
+    //         </Select>
+    //       </>
+    //     );
+    //   },
+    // },
     {
       name: "Sales",
       width: "150px",

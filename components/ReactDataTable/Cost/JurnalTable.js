@@ -115,43 +115,42 @@ export default function ReactDataTable({
         {
           name: "No Jurnal Memo",
           width: "180px",
-          selector: (row) => row.attributes?.no_hutang ?? "-",
+          selector: (row) => row.attributes?.no_jurnal ?? "-",
         },
         {
           name: "User",
           width: "120px",
-          selector: (row) => console.log(row),
+          selector: (row) => row.attributes?.added_by ?? "-",
         },
         {
           name: "Tanggal Jurnal Memo",
           width: "150px",
-          //selector: (row) => row.attributes?.customer?.data?.attributes?.name ?? "-",
-          selector: (row) => console.log("data row", row),
+          selector: (row) => formatMyDate(row.attributes?.tanggal ?? "-"),
         },
         {
           name: "Akun",
           width: "180px",
-          selector: (row) => row.attributes?.supplier?.data?.attributes?.name ?? "-",
+          selector: (row) => row.attributes?.chart_of_account?.data?.attributes?.kode ?? "-",
         },
         {
           name: "Akun Deskripsi",
           width: "150px",
-          selector: (row) => formatMyDate(row.attributes?.tanggal_pembayaran ?? "-"),
+          selector: (row) => row.attributes?.chart_of_account?.data?.attributes?.nama ?? "-",
         },
         {
           name: "Catatan",
           width: "250px",
-          selector: (row) => row.attributes?.status ?? "-",
+          selector: (row) => row.attributes?.catatan ?? "-",
         },
         {
           name: "Debit",
           width: "150px",
-          selector: (row) => formatter.format(row.attributes?.total_pembayaran ?? "-"),
+          selector: (row) => formatter.format(row.attributes?.debit?? "-"),
         },
         {
           name: "Kredit",
           width: "150px",
-          selector: (row) => formatter.format(row.attributes?.total_pembayaran ?? "-"),
+          selector: (row) => formatter.format(row.attributes?.kredit ?? "-"),
         },
         //{
         //    name: "Tindakan",

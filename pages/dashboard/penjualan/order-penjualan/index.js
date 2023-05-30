@@ -201,22 +201,22 @@ function Sales({ props }) {
     );
   };
 
-  const getTagColor = (type) => {
-    switch (type) {
-      case "Terkirim":
-        return "green";
-      case "Diterima":
-        return "GREEN";
-      case "Dibatalkan":
-        return "red";
-      case "Sebagian Diterima":
-        return "orange";
-      case "Diproses":
-        return "default";
-      default:
-        return "default";
-    }
-  };
+  // const getTagColor = (type) => {
+  //   switch (type) {
+  //     case "Terkirim":
+  //       return "green";
+  //     case "Diterima":
+  //       return "GREEN";
+  //     case "Dibatalkan":
+  //       return "red";
+  //     case "Sebagian Diterima":
+  //       return "orange";
+  //     case "Diproses":
+  //       return "default";
+  //     default:
+  //       return "default";
+  //   }
+  // };
 
   const customStyles = {
     headerStyle: { textAlign: "center" },
@@ -451,11 +451,11 @@ function Sales({ props }) {
                     <Descriptions.Item label="Customer">
                       {selectedData?.attributes?.customer?.data?.attributes?.name}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Status" span={2}>
+                    {/* <Descriptions.Item label="Status" span={2}>
                       <Tag color={getTagColor(selectedData?.attributes?.status || "Diproses")}>
                         {selectedData?.attributes?.status || "Diproses"}
                       </Tag>
-                    </Descriptions.Item>
+                    </Descriptions.Item> */}
                     <Descriptions.Item label="Lokasi" span={2}>
                       {selectedData?.attributes?.location?.data?.attributes?.name}
                     </Descriptions.Item>

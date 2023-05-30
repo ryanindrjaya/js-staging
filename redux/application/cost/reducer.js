@@ -2,10 +2,29 @@ const initState = {
   list: [],
   info: {},
   preData: {},
+  akun: [],
+  akunInfo: {},
 };
 
 export default function Reducer(state = initState, action) {
   switch (action.type) {
+    case "ADD_AKUN_COA":
+      state.akun.push(action.akun);
+      return {
+        ...state,
+        akun: [...state.akun],
+      };
+
+    case "REMOVE_AKUN":
+      state.akun.splice(action.index, 1);
+      let infoData = state.akunInfo;
+      delete infoData[action.index];
+      return {
+        ...state,
+        akun: [...state.akun],
+        akunInfo: infoData,
+      };
+
     case "ADD_LIST":
       state.list.push(action.list);
       return {
@@ -21,6 +40,51 @@ export default function Reducer(state = initState, action) {
         ...state,
         list: [...state.list],
         info: infoCopy,
+      };
+
+    case "CHANGE_CATATAN":
+    var catatan = action.catatan;
+    var id = action.index;
+
+      return {
+        ...state,
+        akunInfo: {
+          ...state.akunInfo,
+          [id]: {
+            ...state.akunInfo[id],
+            catatan: catatan,
+          },
+        },
+      };
+
+    case "CHANGE_KREDIT":
+    var kredit = action.kredit;
+    var id = action.index;
+
+      return {
+        ...state,
+        akunInfo: {
+          ...state.akunInfo,
+          [id]: {
+            ...state.akunInfo[id],
+            kredit: kredit,
+          },
+        },
+      };
+
+    case "CHANGE_DEBIT":
+    var debit = action.debit;
+    var id = action.index;
+
+      return {
+        ...state,
+        akunInfo: {
+          ...state.akunInfo,
+          [id]: {
+            ...state.akunInfo[id],
+            debit: debit,
+          },
+        },
       };
 
     case "CHANGE_ID":
@@ -176,7 +240,7 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CLEAR_DATA":
-      state = { list: [], info: {}, preData: {} };
+      state = { akun: [], akunInfo: {}, list: [], info: {}, preData: {} };
       return state;
 
     default:

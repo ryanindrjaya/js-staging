@@ -2,6 +2,16 @@ const actions = {
   ADD_PRODUCT: "ADD_LIST",
   REMOVE_PRODUCT: "REMOVE_LIST",
 
+  addAkunCOA: (akun) => ({
+    type: "ADD_AKUN_COA",
+    akun,
+  }),
+
+  removeList: (index) => ({
+    type: "REMOVE_AKUN",
+    index,
+  }),
+
   addList: (list) => ({
     type: "ADD_LIST",
     list,
@@ -9,6 +19,27 @@ const actions = {
 
   removeList: (index) => ({
     type: "REMOVE_LIST",
+    index,
+  }),
+
+  changeCatatan: (catatan, data, index) => ({
+    type: "CHANGE_CATATAN",
+    catatan,
+    data,
+    index,
+  }),
+
+  changeKredit: (kredit, data, index) => ({
+    type: "CHANGE_KREDIT",
+    kredit,
+    data,
+    index,
+  }),
+
+  changeDebit: (debit, data, index) => ({
+    type: "CHANGE_DEBIT",
+    debit,
+    data,
     index,
   }),
 
