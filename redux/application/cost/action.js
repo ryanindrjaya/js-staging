@@ -7,7 +7,7 @@ const actions = {
     akun,
   }),
 
-  removeList: (index) => ({
+  removeAkun: (index) => ({
     type: "REMOVE_AKUN",
     index,
   }),

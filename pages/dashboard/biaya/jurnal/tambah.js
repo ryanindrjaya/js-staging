@@ -145,7 +145,7 @@ const fetchCustomer = async (cookies) => {
 };
 
 function Jurnal({ props }) {
-  const akuns = useSelector((state) => state.Cost);
+  const akuns = useSelector((state) => state.Cost); console.log("Akuns.", akuns);
   const dispatch = useDispatch();
 
   var selectedAkun = akuns?.akun;
@@ -153,27 +153,14 @@ function Jurnal({ props }) {
   const user = props.user;
   const inven = props.inven.data;
   const jurnal = props.jurnal;
-  const customerData = props.customer.data[0]; //console.log("user", user);
+  const customerData = props.customer.data[0];
   const dataUser = props.dataUser;
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [akunList, setAkunList] = useState([]);
-  //const [additionalFee, setAdditionalFee] = useState();
   const [isFetchinData, setIsFetchingData] = useState(false);
-
   const [dataValues, setDataValues] = useState();
-  //const [selectedCategory, setSelectedCategory] = useState("BEBAS");
-  //const [deliveryFee, setDeliveryFee] = useState(0);
-
-  const [listId, setListId] = useState([]);
-  const [productTotalPrice, setProductTotalPrice] = useState({});
-  const [productSubTotal, setProductSubTotal] = useState({});
-  useState({});
-  //const [discPrice, setDiscPrice] = useState(0);
-  const [totalPrice, setTotalPrice] = useState(0);
-  useState({});
-  const [grandTotal, setGrandTotal] = useState(0);
 
   const router = useRouter();
   const { TextArea } = Input;
@@ -181,8 +168,14 @@ function Jurnal({ props }) {
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
   var date = today.getDate() + "/" + mm + "/" + yyyy;
-  var time =
-    today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+
+  // debit dan kredit
+  const [debitValue, setDebitValue] = useState(0);
+  const [kreditValue, setKreditValue] = useState(0);
+  const [totalDebitValue, setTotalDebitValue] = useState(0);
+  const [totalKreditValue, setTotalKreditValue] = useState(0);
+  const [deleteAkun, setDeleteAkun] = useState(0);
 
   // DPP & PPN
   //const dpp = 1.11;
@@ -329,8 +322,29 @@ function Jurnal({ props }) {
 
   const clearData = () => {
     dispatch({ type: "CLEAR_DATA" });
-    setTotalPrice(0);
   };
+
+  useEffect(() => {
+    var totalDebit = 0;
+    var totalKredit = 0;
+
+    for(var index = 0; index < akuns.akun.length; index++){
+      totalDebit += akuns.akunInfo[index]?.debit ?? 0;
+      totalKredit += akuns.akunInfo[index]?.kredit ?? 0;
+    };
+
+    setTotalDebitValue(totalDebit);
+    setTotalKreditValue(totalKredit);
+
+    totalDebit = 0;
+    totalKredit = 0;
+    setDebitValue(0);
+    setKreditValue(0);
+  }, [debitValue, kreditValue]);
+    
+  useEffect(() => {
+    
+  }, [deleteAkun]);
 
   useEffect(() => {
     //if (dataValues && info == "sukses") createDetailSale();]
@@ -463,15 +477,26 @@ function Jurnal({ props }) {
                   <AddJurnalTable
                     data={akuns}
                     formObj={form}
+                    setDebitValue={setDebitValue}
+                    setKreditValue={setKreditValue}
+                    // setTotalDebitValue={setTotalDebitValue}
+                    // setTotalKreditValue={setTotalKreditValue}
+                    // totalDebitValue={totalDebitValue}
+                    // totalKreditValue={totalKreditValue}
                   />
                 </div>
               )}
 
-              {/*<div className="w-full mt-8 flex justify-between">*/}
-              {/*  <Form.Item name="sale_note" className="w-full mx-2">*/}
-              {/*    <TextArea rows={4} placeholder="Catatan" />*/}
-              {/*  </Form.Item>*/}
-              {/*</div>*/}
+              <div className="w-full flex justify-end px-3 mt-5">
+                <Form.Item name="totalDebit" className="font-bold text-lg">
+                  <span> Total Debit : {totalDebitValue} </span>
+                </Form.Item>
+              </div>
+              <div className="w-full flex justify-end px-3 -mt-5">
+                <Form.Item name="totalKredit" className="font-bold text-lg">
+                  <span> Total Kredit : {totalKreditValue} </span>
+                </Form.Item>
+              </div>
 
               <div className="w-full flex justify-left">
                 <Form.Item>

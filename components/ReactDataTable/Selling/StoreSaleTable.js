@@ -329,17 +329,17 @@ export default function ReactDataTable({
       name: "D1",
       width: "100px",
       selector: (row, idx) => {
-        //defaultDp1 = products?.productInfo?.[idx]?.disc || row.attributes?.disc_1_1 || 0;
-          defaultDp1 = 0;
-          // if (products.productInfo[idx]?.d1) {
-          //   defaultDp1 = products.productInfo[idx].d1;
-          // }
+          defaultDp1 = products?.productInfo?.[idx]?.disc || row.attributes?.disc_1_1 || 0;
+          
+          if (products.productInfo[idx]?.d1) {
+            defaultDp1 = products.productInfo[idx].d1;
+          }
   
-          // if (products.productInfo[idx]) {
-          //   if (products.productInfo[idx].unit) {
-          //     defaultDp1 = products.productInfo[idx].d1;
-          //   }
-          // }
+          if (products.productInfo[idx]) {
+            if (products.productInfo[idx].unit) {
+              defaultDp1 = products.productInfo[idx].d1;
+            }
+          }
 
         return (
           <div className="disabled:bg-white">
@@ -382,6 +382,7 @@ export default function ReactDataTable({
               formatter={(value) => `${value}%`}
               max={100}
               min={0}
+              defaultValue={defaultDp2}
               name={["disc_rp2", `${idx}`]}
               onChange={(e) => onChangeD1D2D3(e, row, "d2", idx)}
               style={{
