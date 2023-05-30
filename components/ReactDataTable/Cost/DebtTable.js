@@ -23,6 +23,8 @@ export default function ReactDataTable({
     const tagRed = process.env.TAG_RED;
     const tagGreen = process.env.TAG_GREEN;
     const tagOrange = process.env.TAG_ORANGE;
+    var noLPB;
+    var noSupp;
 
     const openNotificationWithIcon = (type, title, message) => {
         notification[type]({
@@ -121,18 +123,33 @@ export default function ReactDataTable({
         {
           name: "No LPB",
           width: "150px",
-          //selector: (row) => console.log(row),
+          selector: (row) => {
+            noLPB = undefined;
+            row.attributes?.debt_details?.data.forEach((item) => {
+              if(noLPB == undefined) noLPB = item?.attributes?.purchasing?.data?.attributes?.no_purchasing ;
+              else noLPB += ", " + item?.attributes?.purchasing?.data?.attributes?.no_purchasing;
+            });
+
+            return noLPB;
+          },
         },
         {
-            name: "Nota Supplier",
-            width: "150px",
-            //selector: (row) => row.attributes?.customer?.data?.attributes?.name ?? "-",
-            //selector: (row) => console.log("data row", row),
+          name: "Nota Supplier",
+          width: "150px",
+          selector: (row) => {
+            noSupp = undefined;
+            row.attributes?.debt_details?.data.forEach((item) => {
+              if(noSupp == undefined) noSupp = item?.attributes?.purchasing?.data?.attributes?.no_nota_suppplier ;
+              else noSupp += ", " + item?.attributes?.purchasing?.data?.attributes?.no_nota_suppplier;
+            });
+
+            return noSupp;
+          },
         },
         {
-            name: "Supplier",
-            width: "180px",
-            selector: (row) => row.attributes?.supplier?.data?.attributes?.name ?? "-",
+          name: "Supplier",
+          width: "180px",
+          selector: (row) => row.attributes?.supplier?.data?.attributes?.name ?? "-",
         },
         {
           name: "Tanggal",

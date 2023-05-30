@@ -84,6 +84,10 @@ function CetakPenjualan({ props }) {
     }
   }, 0);
 
+  // additional cost
+  const addFee = (data?.additional_fee_1_sub + data?.additional_fee_2_sub + data?.additional_fee_3_sub) ?? 0;
+  const deliveryFee = data?.delivery_fee ?? 0;
+
   const print = () => {
     window.print();
     return false;

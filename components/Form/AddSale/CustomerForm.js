@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import nookies from "nookies";
 
 export default function Customer({ onChangeCustomer, customer, disabled, fetching, page }) {
-  console.log("data customer", customer);
+
   const [data, setData] = useState(
     customer
       ? [
