@@ -11,7 +11,7 @@ const nextConfig = {
   env: {
     BASE_URL: process.env.BASE_URL,
     NEXT_PUBLIC_URL: "https://strapi-js.keelola.web.id/api",
-    IMAGE_URL : "https://strapi-js.keelola.web.id/",
+    IMAGE_URL: "https://strapi-js.keelola.web.id/",
     // NEXT_PUBLIC_URL: "https://js-strapi.keelola.net/api",
     // NEXT_PUBLIC_URL: "http://localhost:1337/api",
     BACKEND_URL: "https://strapi-js.keelola.web.id/api",
@@ -46,9 +46,7 @@ module.exports = withPlugins(
       withBundleAnalyzer,
       {
         analyzeServer: ["server", "both"].includes(process.env.BUNDLE_ANALYZE),
-        analyzeBrowser: ["browser", "both"].includes(
-          process.env.BUNDLE_ANALYZE
-        ),
+        analyzeBrowser: ["browser", "both"].includes(process.env.BUNDLE_ANALYZE),
         bundleAnalyzerConfig: {
           server: {
             analyzerMode: "static",

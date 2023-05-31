@@ -263,27 +263,25 @@ export default function daftarKeluarBarang({ companyOptions }) {
   const columns = [
     {
       name: "Nama Produk",
+      wrap: true,
       selector: (row) => row.product.name,
     },
     {
       name: "Permintaan Transfer",
       align: "center",
-      width: "180px",
+      width: "260px",
       selector: (row) => (
         <Input.Group compact className="w-full">
           <InputNumber value={row.qty} readOnly className="w-[30%]" />
-          <Input value={row.unit} className="w-[60%] border-r" />
+          <Input value={row.unit} className="w-auto border-r" />
         </Input.Group>
       ),
     },
     {
       name: "Transfer Ke",
+      wrap: true,
       center: true,
-      selector: (row) => (
-        <Tooltip title={row.location_recipient.name} className="w-min">
-          {row.location_recipient.name}
-        </Tooltip>
-      ),
+      selector: (row) => row.location_recipient.name,
     },
     {
       name: "Status",

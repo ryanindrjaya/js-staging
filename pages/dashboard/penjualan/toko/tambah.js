@@ -146,11 +146,9 @@ const fetchCustomer = async (cookies) => {
   return req;
 };
 
-async function getStock(productId, locationId) {
+async function getStock(productId, unit) {
   const cookies = nookies.get(null, "token");
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL +
-    `/inventories?filters[location][id][$eq]=${locationId}&filters[product][id][$eq]=${productId}&populate=*`;
+  const endpoint = process.env.NEXT_PUBLIC_URL + `/inventories/user/location?product=${productId}&unit=${unit}`;
   const options = {
     method: "GET",
     headers: {
@@ -238,13 +236,13 @@ function Toko({ props }) {
   const trxNumber = String(userLastDocNumber).padStart(3, "0");
   const [categorySale, setCategorySale] = useState(`${userCodeName}/${trxNumber}/${mm}/${yyyy}`);
 
-  const getProductAtLocation = async () => {
+  const getProductAtLocation = async (unit = 1) => {
     const locationId = form.getFieldValue("location");
     let tempData = {};
 
     // create an array of promises by mapping over the productList
     const promises = products.productList.map(async (product) => {
-      const stock = await getStockAtLocation(product.id, locationId);
+      const stock = await getStockAtLocation(product.id, locationId, unit);
       console.log("stock ", product.id, stock);
 
       tempData = {
@@ -265,23 +263,19 @@ function Toko({ props }) {
     }
   };
 
-  const getStockAtLocation = async (productId, locationId) => {
-    let stockString = [];
+  const getStockAtLocation = async (productId, locationId, unit) => {
     try {
-      console.log("get stock", productId, locationId);
-      const response = await getStock(productId, locationId);
-      console.log("response", response);
+      const response = await getStock(productId, locationId, unit);
 
-      if (response.data.length > 0) {
-        const stock = response.data[0].attributes;
-        const product = stock.product?.data?.attributes; // use optional chaining to check if product exists
+      console.log(`response ${unit}`, response?.stock?.[unit]);
 
-        for (let i = 1; i <= 5; i++) {
-          if (product?.[`unit_${i}`]) {
-            stockString.push(`${stock?.[`stock_unit_${i}`] || 0} ${product[`unit_${i}`]}`);
-          }
-        }
+      const stringArr = [];
+
+      for (const [key, value] of Object.entries(response?.stock)) {
+        stringArr.push(`${value}${key}`);
       }
+
+      return response.available ? stringArr.join(", ") : "Stok kosong";
     } catch (error) {
       console.error("error", error);
       setDataLocationStock({
@@ -289,7 +283,6 @@ function Toko({ props }) {
         [productId]: "Error fetching stock data",
       });
     }
-    return stockString.length > 0 ? stockString.join(", ") : "Stok kosong";
   };
 
   var formatter = new Intl.NumberFormat("id-ID", {
@@ -709,7 +702,7 @@ function Toko({ props }) {
                       placeholder="Pilih Lokasi"
                       onChange={(e) => {
                         setSelectedLocationId(e);
-                        getProductAtLocation(e);
+                        // getProductAtLocation(e);
                       }}
                       size="large"
                       style={{

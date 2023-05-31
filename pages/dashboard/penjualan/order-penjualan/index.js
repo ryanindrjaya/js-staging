@@ -4,18 +4,7 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import router, { useRouter } from "next/router";
-import {
-  Input,
-  notification,
-  Select,
-  DatePicker,
-  Modal,
-  Descriptions,
-  Button,
-  Tag,
-  message,
-  Spin,
-} from "antd";
+import { Input, notification, Select, DatePicker, Modal, Descriptions, Button, Tag, message, Spin } from "antd";
 import { PrinterOutlined } from "@ant-design/icons";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
 import SellSalesTable from "../../../../components/ReactDataTable/Selling/SellSalesTable";
@@ -201,22 +190,22 @@ function Sales({ props }) {
     );
   };
 
-  // const getTagColor = (type) => {
-  //   switch (type) {
-  //     case "Terkirim":
-  //       return "green";
-  //     case "Diterima":
-  //       return "GREEN";
-  //     case "Dibatalkan":
-  //       return "red";
-  //     case "Sebagian Diterima":
-  //       return "orange";
-  //     case "Diproses":
-  //       return "default";
-  //     default:
-  //       return "default";
-  //   }
-  // };
+  const getTagColor = (type) => {
+    switch (type) {
+      case "Terkirim":
+        return "green";
+      case "Diterima":
+        return "GREEN";
+      case "Dibatalkan":
+        return "red";
+      case "Sebagian Diterima":
+        return "orange";
+      case "Diproses":
+        return "default";
+      default:
+        return "default";
+    }
+  };
 
   const customStyles = {
     headerStyle: { textAlign: "center" },
@@ -430,11 +419,7 @@ function Sales({ props }) {
                 <>
                   <Descriptions
                     extra={
-                      <Button
-                        onClick={print}
-                        className="bg-cyan-700 hover:bg-cyan-800 mr-7 border-none"
-                        type="primary"
-                      >
+                      <Button onClick={print} className="bg-cyan-700 hover:bg-cyan-800 mr-7 border-none" type="primary">
                         <PrinterOutlined className="mr-2 mt-0.5 float float-left" /> Cetak
                       </Button>
                     }
@@ -451,11 +436,11 @@ function Sales({ props }) {
                     <Descriptions.Item label="Customer">
                       {selectedData?.attributes?.customer?.data?.attributes?.name}
                     </Descriptions.Item>
-                    {/* <Descriptions.Item label="Status" span={2}>
+                    <Descriptions.Item label="Status" span={2}>
                       <Tag color={getTagColor(selectedData?.attributes?.status || "Diproses")}>
                         {selectedData?.attributes?.status || "Diproses"}
                       </Tag>
-                    </Descriptions.Item> */}
+                    </Descriptions.Item>
                     <Descriptions.Item label="Lokasi" span={2}>
                       {selectedData?.attributes?.location?.data?.attributes?.name}
                     </Descriptions.Item>

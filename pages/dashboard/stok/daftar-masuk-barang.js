@@ -4,18 +4,7 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import Head from "next/head";
-import {
-  DatePicker,
-  Empty,
-  Input,
-  InputNumber,
-  Modal,
-  notification,
-  Popconfirm,
-  Select,
-  Tag,
-  Tooltip,
-} from "antd";
+import { DatePicker, Empty, Input, InputNumber, Modal, notification, Popconfirm, Select, Tag, Tooltip } from "antd";
 import moment from "moment";
 import nookies from "nookies";
 import { useRouter } from "next/router";
@@ -92,6 +81,8 @@ export default function daftarKeluarBarang({ companyOptions }) {
 
       const noRefs = await response.json();
 
+      console.log("fetch no ref recipient", noRefs);
+
       if (noRefs?.data?.length > 0) {
         const options = noRefs.data.map((item) => ({
           label: item,
@@ -132,6 +123,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
       fetchBarangKeluar();
     }
   }, [selectedNoReferensi, statusFilter, refetch]);
+
   const customStyles = {
     headCells: {
       style: {
@@ -230,7 +222,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
         unit: row?.send_unit || row?.sended_unit || row?.unit,
         type: "Transfer Masuk",
         accepted: row?.accepted || 0,
-        no_referensi: row.no_referensi,
+        no_referensi: row?.no_referensi_recipient ?? row?.no_referensi,
       };
 
       const endpoint = `${process.env.NEXT_PUBLIC_URL}/product-request/transfer`;
@@ -248,8 +240,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
       if (response?.data) {
         notification.success({
           message: "Berhasil menerima ke stok",
-          description:
-            "Stok berhasil diterima, silahkan ganti status untuk melihat data yang sudah diterima",
+          description: "Stok berhasil diterima, silahkan ganti status untuk melihat data yang sudah diterima",
         });
         setRefetch(!refetch);
       } else {
@@ -266,6 +257,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
   const columns = [
     {
       name: "Nama Produk",
+      wrap: true,
       selector: (row) => row.product.name,
     },
     {
@@ -432,10 +424,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
             </Popconfirm>
           </div>
         ) : (
-          <PrinterOutlined
-            className="mr-1 text-lg cursor-pointer hover:text-blue-700 duration-150"
-            title="Cetak"
-          />
+          <PrinterOutlined className="mr-1 text-lg cursor-pointer hover:text-blue-700 duration-150" title="Cetak" />
         ),
     },
     {
@@ -496,10 +485,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
                     onOk={() => handleCancelData(cancelModal.id)}
                     onCancel={() => {}}
                   >
-                    <p>
-                      Apakah anda yakin akan membatalkan permintaan ini? Harap isi alasan pembatalan
-                      dibawah ini:
-                    </p>
+                    <p>Apakah anda yakin akan membatalkan permintaan ini? Harap isi alasan pembatalan dibawah ini:</p>
                     <Input.TextArea
                       onInput={(e) => setCancelModal({ ...cancelModal, reason: e.target.value })}
                       value={cancelModal.reason}
@@ -581,10 +567,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
                 />
               </>
             ) : (
-              <Empty
-                description="Pilih Gudang Terlebih Dahulu"
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-              />
+              <Empty description="Pilih Gudang Terlebih Dahulu" image={Empty.PRESENTED_IMAGE_SIMPLE} />
             )}
           </LayoutContent>
         </LayoutWrapper>
