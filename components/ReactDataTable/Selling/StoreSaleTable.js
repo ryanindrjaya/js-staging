@@ -315,15 +315,15 @@ export default function ReactDataTable({
       selector: (row, idx) => {
         defaultDp1 = products?.productInfo?.[idx]?.disc || row.attributes?.disc_1_1 || 0;
 
-        // if (products.productInfo[idx]?.d1) {
-        //   defaultDp1 = products.productInfo[idx].d1;
-        // }
+        if (products.productInfo[idx]?.d1) {
+          defaultDp1 = products.productInfo[idx].d1;
+        }
 
-        // if (products.productInfo[idx]) {
-        //   if (products.productInfo[idx].unit) {
-        //     defaultDp1 = products.productInfo[idx].d1;
-        //   }
-        // }
+        if (products.productInfo[idx]) {
+          if (products.productInfo[idx].unit) {
+            defaultDp1 = products.productInfo[idx].d1;
+          }
+        }
 
         return (
           <div className="disabled:bg-white">
@@ -348,16 +348,17 @@ export default function ReactDataTable({
       name: "D2",
       width: "100px",
       selector: (row, idx) => {
-        defaultDp2 = row.attributes?.unit_1_dp2 || 0;
-        if (products.productInfo[idx]?.d2) {
-          defaultDp2 = products.productInfo[idx].d2;
-        }
+        //defaultDp2 = row.attributes?.unit_1_dp2 || 0;
+        defaultDp2 = 0;
+        // if (products.productInfo[idx]?.d2) {
+        //   defaultDp2 = products.productInfo[idx].d2;
+        // }
 
-        if (products.productInfo[idx]) {
-          if (products.productInfo[idx].unit) {
-            defaultDp2 = products.productInfo[idx].d2;
-          }
-        }
+        // if (products.productInfo[idx]) {
+        //   if (products.productInfo[idx].unit) {
+        //     defaultDp2 = products.productInfo[idx].d2;
+        //   }
+        // }
 
         return (
           <div className="disabled:bg-white">
@@ -366,6 +367,7 @@ export default function ReactDataTable({
               formatter={(value) => `${value}%`}
               max={100}
               min={0}
+              defaultValue={defaultDp2}
               name={["disc_rp2", `${idx}`]}
               onChange={(e) => onChangeD1D2D3(e, row, "d2", idx)}
               style={{
@@ -376,30 +378,30 @@ export default function ReactDataTable({
         );
       },
     },
-    {
-      name: "EXPDate",
-      width: "150px",
-      sortable: true,
-      selector: (row, idx) => {
-        return (
-          <>
-            <Form.Item
-              label={"exp date"}
-              name={["expired_date", `${idx}`]}
-              rules={[
-                {
-                  required: true,
-                  message: "Tanggal EXP produk tidak boleh kosong!",
-                },
-              ]}
-              noStyle
-            >
-              <DatePicker placeholder="EXP. Date" size="normal" format={"DD/MM/YYYY"} />
-            </Form.Item>
-          </>
-        );
-      },
-    },
+    // {
+    //   name: "EXPDate",
+    //   width: "150px",
+    //   sortable: true,
+    //   selector: (row, idx) => {
+    //     return (
+    //       <>
+    //         <Form.Item
+    //           label={"exp date"}
+    //           name={["expired_date", `${idx}`]}
+    //           rules={[
+    //             {
+    //               required: true,
+    //               message: "Tanggal EXP produk tidak boleh kosong!",
+    //             },
+    //           ]}
+    //           noStyle
+    //         >
+    //           <DatePicker placeholder="EXP. Date" size="normal" format={"DD/MM/YYYY"} />
+    //         </Form.Item>
+    //       </>
+    //     );
+    //   },
+    // },
     {
       name: "Subtotal Setelah Diskon",
       width: "200px",

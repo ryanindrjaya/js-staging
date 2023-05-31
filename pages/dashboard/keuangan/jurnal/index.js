@@ -208,8 +208,9 @@ function Jurnal({ props }) {
       let endDate = "";
 
       for (const key in searchParameters) {
-        // if (key === "customer" && searchParameters[key] !== null) {
-        //   query += `filters[credit_details][customer][id]=${searchParameters[key].id}&`;
+        // if (key === "user" && searchParameters[key] !== null) {
+        //   console.log("search", searchParameters);
+        //   //query += `filters[credit_details][customer][id]=${searchParameters[key].id}&`;
         // } else {
         //   query += "";
         // }
@@ -233,11 +234,12 @@ function Jurnal({ props }) {
           query += "";
         }
 
-        // if (key === "sales" && searchParameters[key] !== undefined) {
-        //   query += `filters[credit_details][customer][sales_name]=${searchParameters[key]}&`;
-        // } else {
-        //   query += "";
-        // }
+        if (key === "akun" && searchParameters[key] !== undefined) {
+          console.log("search", searchParameters, data);
+          query += `filters[chart_of_account][id]=${searchParameters[key]}&`;
+        } else {
+          query += "";
+        }
 
         // if (key === "area" || key === "wilayah") {
         //   if (searchParameters[key] !== null) {
@@ -289,6 +291,9 @@ function Jurnal({ props }) {
                     width: "100%",
                   }}
                   allowClear
+                  onChange={(e) =>
+                    setSearchParameters({ ...searchParameters, user: e })
+                  }
                 >
                   {dataUser.map((element) => {
                     return (
@@ -308,6 +313,9 @@ function Jurnal({ props }) {
                     marginRight: "10px",
                   }}
                   allowClear
+                  onChange={(e) =>
+                    setSearchParameters({ ...searchParameters, akun: e })
+                  }
                 >
                   {coa.data.map((element) => {
                     return (
@@ -327,6 +335,9 @@ function Jurnal({ props }) {
                     marginRight: "10px",
                   }}
                   allowClear
+                  onChange={(e) =>
+                    setSearchParameters({ ...searchParameters, tipeTransaksi: e })
+                  }
                 >
                   <Select.Option value="Debit">Debit</Select.Option>
                   <Select.Option value="Kredit">Kredit</Select.Option>
