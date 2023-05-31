@@ -109,9 +109,7 @@ export default function permintaanBarang() {
           }),
         }));
         console.log("selectedLocation1", selectedLocation1);
-        const filtered = location2.filter(
-          (item) => JSON.parse(item?.value)?.id !== selectedLocation1?.id
-        );
+        const filtered = location2.filter((item) => JSON.parse(item?.value)?.id !== selectedLocation1?.id);
         setLoading({ ...loading, location2: false });
         setOptions({
           ...options,
@@ -216,8 +214,7 @@ export default function permintaanBarang() {
         }));
 
         const sameData = products.filter(
-          (product, productIdx) =>
-            product.id === row.id && product.unit === row.unit && productIdx !== index
+          (product, productIdx) => product.id === row.id && product.unit === row.unit && productIdx !== index
         );
 
         if (sameData.length > 0) {
@@ -349,7 +346,11 @@ export default function permintaanBarang() {
       });
       return;
     }
-    values.no_referensi = await fetchLatestNoReferensi();
+
+    const [no_referensi, no_referensi_recipient] = await fetchLatestNoReferensi();
+
+    values.no_referensi = no_referensi;
+    values.no_referensi_recipient = no_referensi_recipient;
     values.date = values?.date?.format("YYYY-MM-DD") || moment().format("YYYY-MM-DD");
     values.location_sender = selectedLocation1?.id;
     values.location_recipient = selectedLocation2?.id;
@@ -458,14 +459,13 @@ export default function permintaanBarang() {
     if (response) {
       const latestDaata = response.data?.[0];
       const no = parseInt(latestDaata?.attributes?.no_referensi?.split("/")?.[1] || 0) + 1;
-      console.log("no", no);
-      const latestNoReferensi = `MT/${String(no).padStart(3, "0")}/${moment().format(
-        "DD/MM/YYYY"
-      )}`;
+      const noRecipient = parseInt(latestDaata?.attributes?.no_referensi?.split("/")?.[1] || 0) + 2;
+      const latestNoReferensi = `MT/${String(no).padStart(3, "0")}/${moment().format("DD/MM/YYYY")}`;
+      const latestNoReferensiRecipient = `MT/${String(noRecipient).padStart(3, "0")}/${moment().format("DD/MM/YYYY")}`;
       form.setFieldsValue({
         no_referensi: latestNoReferensi,
       });
-      return latestNoReferensi;
+      return [latestNoReferensi, latestNoReferensiRecipient];
     }
 
     console.log("response from fetchLatestNoReferensi", response);
@@ -496,10 +496,7 @@ export default function permintaanBarang() {
                   setLoading({ ...loading, print: false });
                 }}
               />
-              <button
-                onClick={handlePrint}
-                class="print:hidden rounded-full bg-sky-400 px-4 py-2 font-bold text-white"
-              >
+              <button onClick={handlePrint} class="print:hidden rounded-full bg-sky-400 px-4 py-2 font-bold text-white">
                 <span>
                   <PrinterOutlined className="mr-1 text-lg" />
                 </span>{" "}
@@ -521,24 +518,16 @@ export default function permintaanBarang() {
                   <p className="text-sm mb-0 uppercase">Deskripsi</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm mb-0 font-bold uppercase">
-                    {form.getFieldValue("date")?.format("DD/MM/YYYY")}
-                  </p>
+                  <p className="text-sm mb-0 font-bold uppercase">{form.getFieldValue("date")?.format("DD/MM/YYYY")}</p>
 
-                  <p className="text-sm mb-0 font-bold uppercase">
-                    {form.getFieldValue("no_referensi")}
-                  </p>
+                  <p className="text-sm mb-0 font-bold uppercase">{form.getFieldValue("no_referensi")}</p>
                   <p className="text-sm mb-0 font-bold uppercase">{selectedLocation1?.name}</p>
                   <p className="text-sm mb-0 font-bold uppercase">{selectedLocation2?.name}</p>
-                  <p className="text-sm mb-0 font-bold uppercase">
-                    {form.getFieldValue("description")}
-                  </p>
+                  <p className="text-sm mb-0 font-bold uppercase">{form.getFieldValue("description")}</p>
                 </div>
               </div>
 
-              <p className="uppercase text-sm">
-                Cetakan Tanggal : {moment().format("DD/MM/YYYY HH:mm:ss")}
-              </p>
+              <p className="uppercase text-sm">Cetakan Tanggal : {moment().format("DD/MM/YYYY HH:mm:ss")}</p>
             </div>
 
             <DataTable
@@ -560,12 +549,7 @@ export default function permintaanBarang() {
             <LayoutWrapper>
               <TitlePage titleText={"Permintaan Barang"} />
               <LayoutContent>
-                <Form
-                  layout="vertical"
-                  form={form}
-                  onFinish={onFinish}
-                  onFinishFailed={onFinishFailed}
-                >
+                <Form layout="vertical" form={form} onFinish={onFinish} onFinishFailed={onFinishFailed}>
                   <div className="lg:w-4/5 w-full mx-auto mb-4">
                     <div className="w-full grid grid-cols-3 mb-3 gap-3">
                       <Form.Item
@@ -579,11 +563,7 @@ export default function permintaanBarang() {
                         name="date"
                         className="m-0"
                       >
-                        <DatePicker
-                          size="large"
-                          placeholder="Tanggal"
-                          className="w-full lg:col-span-1 col-span-3"
-                        />
+                        <DatePicker size="large" placeholder="Tanggal" className="w-full lg:col-span-1 col-span-3" />
                       </Form.Item>
                       <Form.Item
                         rules={[
@@ -595,11 +575,7 @@ export default function permintaanBarang() {
                         name="no_referensi"
                         className="m-0"
                       >
-                        <Input
-                          size="large"
-                          placeholder="No Refrensi"
-                          className="w-full lg:col-span-1 col-span-3"
-                        />
+                        <Input size="large" placeholder="No Refrensi" className="w-full lg:col-span-1 col-span-3" />
                       </Form.Item>
                       <Form.Item
                         rules={[
@@ -684,13 +660,10 @@ export default function permintaanBarang() {
                     </div>
                   </div>
 
-                  <span className="uppercase text-[#036B82] font-bold text-xl mb-1">
-                    Produk Transfer
-                  </span>
+                  <span className="uppercase text-[#036B82] font-bold text-xl mb-1">Produk Transfer</span>
                   {products.length > 0 && (
                     <span className="text-xs text-gray-400 ml-3">
-                      *Jika terdapat unit yang tidak muncul, kemungkinan unit produk kosong di
-                      gudang pengirim
+                      *Jika terdapat unit yang tidak muncul, kemungkinan unit produk kosong di gudang pengirim
                     </span>
                   )}
                   <Select
@@ -714,9 +687,7 @@ export default function permintaanBarang() {
                     }}
                     value={null}
                     size="large"
-                    placeholder={
-                      !selectedLocation1 ? "Pilih lokasi gudang pengirim" : "Pilih produk"
-                    }
+                    placeholder={!selectedLocation1 ? "Pilih lokasi gudang pengirim" : "Pilih produk"}
                     filterOption={false}
                     showSearch
                     className={`w-full mb-3 border-[3px] rounded-lg ${

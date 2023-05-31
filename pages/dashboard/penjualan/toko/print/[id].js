@@ -6,8 +6,7 @@ CetakPenjualan.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/store-sales/" + id + "?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales/" + id + "?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -77,10 +76,7 @@ function CetakPenjualan({ props }) {
   const ppn = data?.ppn;
   const biayaTambahan = [1, 2, 3].reduce((acc, curr) => {
     if (data?.[`additional_fee_${curr}_sub`]) {
-      console.log(
-        `additional fee ${curr}`,
-        data?.[`additional_fee_${curr}_sub`]
-      );
+      console.log(`additional fee ${curr}`, data?.[`additional_fee_${curr}_sub`]);
       return acc + data[`additional_fee_${curr}_sub`];
     } else {
       return acc;
@@ -88,10 +84,7 @@ function CetakPenjualan({ props }) {
   }, 0);
 
   // additional cost
-  const addFee =
-    data?.additional_fee_1_sub +
-      data?.additional_fee_2_sub +
-      data?.additional_fee_3_sub ?? 0;
+  const addFee = data?.additional_fee_1_sub + data?.additional_fee_2_sub + data?.additional_fee_3_sub ?? 0;
   const deliveryFee = data?.delivery_fee ?? 0;
 
   const print = () => {
@@ -102,10 +95,7 @@ function CetakPenjualan({ props }) {
   return (
     <div className="mx-20 my-3">
       <div className="flex justify-end mb-5">
-        <button
-          onClick={print}
-          class="print:hidden rounded-full bg-sky-400 px-4 py-2 font-bold text-white"
-        >
+        <button onClick={print} class="print:hidden rounded-full bg-sky-400 px-4 py-2 font-bold text-white">
           <span>
             <PrinterOutlined className="mr-1 text-lg" />
           </span>{" "}
@@ -137,12 +127,8 @@ function CetakPenjualan({ props }) {
         <table className="w-full border mt-5">
           <thead>
             <tr className="bg-gray-200">
-              <th className="py-3 px-4 text-left font-bold border-r">
-                TOTAL UNIT
-              </th>
-              <th className="py-3 px-4 text-left font-bold border-r">
-                NAMA PRODUK
-              </th>
+              <th className="py-3 px-4 text-left font-bold border-r">TOTAL UNIT</th>
+              <th className="py-3 px-4 text-left font-bold border-r">NAMA PRODUK</th>
               <th className="py-3 px-4 text-left font-bold">TOTAL HARGA</th>
             </tr>
           </thead>
@@ -152,15 +138,9 @@ function CetakPenjualan({ props }) {
               console.log("attributes", attributes);
               return (
                 <tr key={index} className="border">
-                  <td className="py-3 px-4 border-r">
-                    {attributes?.qty + " " + attributes?.unit}
-                  </td>
-                  <td className="py-3 px-4 border-r">
-                    {attributes.product?.data?.attributes?.name}
-                  </td>
-                  <td className="py-3 px-4">
-                    {formatter.format(attributes?.sub_total)}
-                  </td>
+                  <td className="py-3 px-4 border-r">{attributes?.qty + " " + attributes?.unit}</td>
+                  <td className="py-3 px-4 border-r">{attributes.product?.data?.attributes?.name}</td>
+                  <td className="py-3 px-4">{formatter.format(attributes?.sub_total)}</td>
                 </tr>
               );
             })}
@@ -178,20 +158,12 @@ function CetakPenjualan({ props }) {
           <p>DIBUAT OLEH {maker}</p>
         </div>
         <div>
-          <p className="font-bold text-sm m-1">
-            TOTAL PEMBELIAN : {formatter.format(totalPembelian)}
-          </p>
+          <p className="font-bold text-sm m-1">TOTAL PEMBELIAN : {formatter.format(totalPembelian)}</p>
           <p className="font-bold text-sm m-1">DPP : {formatter.format(dpp)}</p>
           <p className="font-bold text-sm m-1">PPN : {formatter.format(ppn)}</p>
-          <p className="font-bold text-sm m-1">
-            BIAYA PENGIRIMAN : {formatter.format(deliveryFee)}
-          </p>
-          <p className="font-bold text-sm m-1">
-            BIAYA TAMBAHAN : {formatter.format(biayaTambahan)}
-          </p>
-          <p className="font-bold text-sm m-1">
-            Total Bayar : {formatter.format(totalPembelian)}
-          </p>
+          <p className="font-bold text-sm m-1">BIAYA PENGIRIMAN : {formatter.format(deliveryFee)}</p>
+          <p className="font-bold text-sm m-1">BIAYA TAMBAHAN : {formatter.format(biayaTambahan)}</p>
+          <p className="font-bold text-sm m-1">Total Bayar : {formatter.format(totalPembelian)}</p>
         </div>
       </div>
     </div>

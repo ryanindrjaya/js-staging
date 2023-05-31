@@ -96,10 +96,7 @@ export default function ReactDataTable({
   const sumProductSubTotal = (data) => {
     const newProductSubTotalProduct = [data];
 
-    const sum = newProductSubTotalProduct.reduce(
-      (prev, curr, index, array) => prev + curr,
-      0
-    );
+    const sum = newProductSubTotalProduct.reduce((prev, curr, index, array) => prev + curr, 0);
     setTotalPrice(sum);
   };
 
@@ -147,7 +144,11 @@ export default function ReactDataTable({
       width: "300px",
       selector: (row, idx) => {
         return (
-          <div className="disabled:bg-white italic text-gray-500">
+          <div
+            className={`disabled:bg-white italic ${
+              dataLocationStock?.[row.id]?.includes("Kosong") ? "text-red-500" : "text-green-500"
+            }`}
+          >
             {dataLocationStock?.[row.id] ?? "Pilih Gudang"}
           </div>
         );
@@ -216,50 +217,35 @@ export default function ReactDataTable({
                   {row.attributes?.unit_1 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_1 === null}
-                      value={1}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_1 === null} value={1}>
                       {row.attributes?.unit_1}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_2 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_2 === null}
-                      value={2}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_2 === null} value={2}>
                       {row.attributes?.unit_2}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_3 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_3 === null}
-                      value={3}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_3 === null} value={3}>
                       {row.attributes?.unit_3}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_4 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_4 === null}
-                      value={4}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_4 === null} value={4}>
                       {row.attributes?.unit_4}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_5 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_5 === null}
-                      value={5}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_5 === null} value={5}>
                       {row.attributes?.unit_5}
                     </Select.Option>
                   )}
@@ -315,9 +301,7 @@ export default function ReactDataTable({
                   width: "100px",
                   marginRight: "10px",
                 }}
-                formatter={(value) =>
-                  value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                }
+                formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                 parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
               />
             </Form.Item>
@@ -329,17 +313,17 @@ export default function ReactDataTable({
       name: "D1",
       width: "100px",
       selector: (row, idx) => {
-          defaultDp1 = products?.productInfo?.[idx]?.disc || row.attributes?.disc_1_1 || 0;
-          
-          if (products.productInfo[idx]?.d1) {
-            defaultDp1 = products.productInfo[idx].d1;
-          }
-  
-          if (products.productInfo[idx]) {
-            if (products.productInfo[idx].unit) {
-              defaultDp1 = products.productInfo[idx].d1;
-            }
-          }
+        defaultDp1 = products?.productInfo?.[idx]?.disc || row.attributes?.disc_1_1 || 0;
+
+        // if (products.productInfo[idx]?.d1) {
+        //   defaultDp1 = products.productInfo[idx].d1;
+        // }
+
+        // if (products.productInfo[idx]) {
+        //   if (products.productInfo[idx].unit) {
+        //     defaultDp1 = products.productInfo[idx].d1;
+        //   }
+        // }
 
         return (
           <div className="disabled:bg-white">
@@ -364,16 +348,16 @@ export default function ReactDataTable({
       name: "D2",
       width: "100px",
       selector: (row, idx) => {
-        defaultDp2 = 0;
-        // if (products.productInfo[idx]?.d2) {
-        //   defaultDp2 = products.productInfo[idx].d2;
-        // }
+        defaultDp2 = row.attributes?.unit_1_dp2 || 0;
+        if (products.productInfo[idx]?.d2) {
+          defaultDp2 = products.productInfo[idx].d2;
+        }
 
-        // if (products.productInfo[idx]) {
-        //   if (products.productInfo[idx].unit) {
-        //     defaultDp2 = products.productInfo[idx].d2;
-        //   }
-        // }
+        if (products.productInfo[idx]) {
+          if (products.productInfo[idx].unit) {
+            defaultDp2 = products.productInfo[idx].d2;
+          }
+        }
 
         return (
           <div className="disabled:bg-white">
@@ -382,7 +366,6 @@ export default function ReactDataTable({
               formatter={(value) => `${value}%`}
               max={100}
               min={0}
-              defaultValue={defaultDp2}
               name={["disc_rp2", `${idx}`]}
               onChange={(e) => onChangeD1D2D3(e, row, "d2", idx)}
               style={{
@@ -393,34 +376,30 @@ export default function ReactDataTable({
         );
       },
     },
-    // {
-    //   name: "EXPDate",
-    //   width: "150px",
-    //   sortable: true,
-    //   selector: (row, idx) => {
-    //     return (
-    //       <>
-    //         <Form.Item
-    //           label={"exp date"}
-    //           name={["expired_date", `${idx}`]}
-    //           rules={[
-    //             {
-    //               required: true,
-    //               message: "Tanggal EXP produk tidak boleh kosong!",
-    //             },
-    //           ]}
-    //           noStyle
-    //         >
-    //           <DatePicker
-    //             placeholder="EXP. Date"
-    //             size="normal"
-    //             format={"DD/MM/YYYY"}
-    //           />
-    //         </Form.Item>
-    //       </>
-    //     );
-    //   },
-    // },
+    {
+      name: "EXPDate",
+      width: "150px",
+      sortable: true,
+      selector: (row, idx) => {
+        return (
+          <>
+            <Form.Item
+              label={"exp date"}
+              name={["expired_date", `${idx}`]}
+              rules={[
+                {
+                  required: true,
+                  message: "Tanggal EXP produk tidak boleh kosong!",
+                },
+              ]}
+              noStyle
+            >
+              <DatePicker placeholder="EXP. Date" size="normal" format={"DD/MM/YYYY"} />
+            </Form.Item>
+          </>
+        );
+      },
+    },
     {
       name: "Subtotal Setelah Diskon",
       width: "200px",

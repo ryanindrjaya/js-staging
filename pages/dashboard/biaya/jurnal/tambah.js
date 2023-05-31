@@ -5,17 +5,7 @@ import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import {
-  Row,
-  Form,
-  Input,
-  InputNumber,
-  Select,
-  Button,
-  Spin,
-  notification,
-  DatePicker,
-} from "antd";
+import { Row, Form, Input, InputNumber, Select, Button, Spin, notification, DatePicker } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "@iso/components/Form/AddCost/SearchCOA";
 import AddJurnalTable from "@iso/components/ReactDataTable/Cost/AddJurnalTable";
@@ -131,8 +121,7 @@ const fetchInven = async (cookies) => {
 
 const fetchCustomer = async (cookies) => {
   let name = "walk in customer";
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + `/customers?filters[name][$contains]=${name}`;
+  const endpoint = process.env.NEXT_PUBLIC_URL + `/customers?filters[name][$contains]=${name}`;
   const options = {
     method: "GET",
     headers: {
@@ -145,7 +134,8 @@ const fetchCustomer = async (cookies) => {
 };
 
 function Jurnal({ props }) {
-  const akuns = useSelector((state) => state.Cost); console.log("Akuns.", akuns);
+  const akuns = useSelector((state) => state.Cost);
+  console.log("Akuns.", akuns);
   const dispatch = useDispatch();
 
   var selectedAkun = akuns?.akun;
@@ -195,9 +185,7 @@ function Jurnal({ props }) {
 
   // NO Jurnal
   var noJurnal = String(props.jurnal?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(
-    `JM/${user.id}/${noJurnal}/${mm}/${yyyy}`
-  );
+  const [categorySale, setCategorySale] = useState(`JM/${user.id}/${noJurnal}/${mm}/${yyyy}`);
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -210,12 +198,12 @@ function Jurnal({ props }) {
     setInfo("sukses");
     var totalDebit = 0;
     var totalKredit = 0;
-    for(var index = 0; index < akuns.akun.length; index++){
+    for (var index = 0; index < akuns.akun.length; index++) {
       if (values.debitData[index] == undefined) values.debitData[index] = 0;
       if (values.kreditData[index] == undefined) values.kreditData[index] = 0;
       totalDebit += values.debitData[index];
       totalKredit += values.kreditData[index];
-    };
+    }
 
     if (totalDebit != totalKredit) {
       notification["error"]({
@@ -242,7 +230,7 @@ function Jurnal({ props }) {
   };
 
   const create = async (values) => {
-  values.added_by = user.name;
+    values.added_by = user.name;
 
     console.log("data values", values, akuns);
 
@@ -251,22 +239,19 @@ function Jurnal({ props }) {
       values.debit = values.debitData[index];
       values.kredit = values.kreditData[index];
       values.chart_of_account = item.id;
-      
+
       const req = createData(values);
-      
     });
-    
   };
-  
+
   const createData = async (values) => {
-    
     var data = {
       data: values,
     };
-    
+
     const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals";
     const JSONdata = JSON.stringify(data);
-    
+
     const options = {
       method: "POST",
       headers: {
@@ -275,7 +260,7 @@ function Jurnal({ props }) {
       },
       body: JSONdata,
     };
-    
+
     const req = await fetch(endpoint, options);
     const res = await req.json();
     console.log("req create", req, res);
@@ -287,21 +272,18 @@ function Jurnal({ props }) {
     } else {
       openNotificationWithIcon("error", req);
     }
-
   };
-  
+
   const openNotificationWithIcon = (type, req) => {
     if (type === "error") {
       notification[type]({
         message: "Gagal menambahkan data",
-        description:
-        "Jurnal gagal ditambahkan." + req.statusText,
+        description: "Jurnal gagal ditambahkan." + req.statusText,
       });
     } else if (type === "success") {
       notification[type]({
         message: "Berhasil menambahkan data",
-        description:
-        "Jurnal berhasil ditambahkan.",
+        description: "Jurnal berhasil ditambahkan.",
       });
     }
   };
@@ -318,7 +300,6 @@ function Jurnal({ props }) {
     if (!isDuplicatedData) {
       setAkunList((list) => [...list, tempList[0]]);
     }
-    
   };
 
   const clearData = () => {
@@ -329,10 +310,10 @@ function Jurnal({ props }) {
     var totalDebit = 0;
     var totalKredit = 0;
 
-    for(var index = 0; index < akuns.akun.length; index++){
+    for (var index = 0; index < akuns.akun.length; index++) {
       totalDebit += akuns.akunInfo[index]?.debit ?? 0;
       totalKredit += akuns.akunInfo[index]?.kredit ?? 0;
-    };
+    }
 
     setTotalDebitValue(totalDebit);
     setTotalKreditValue(totalKredit);
@@ -342,10 +323,8 @@ function Jurnal({ props }) {
     setDebitValue(0);
     setKreditValue(0);
   }, [debitValue, kreditValue]);
-    
-  useEffect(() => {
-    
-  }, [deleteAkun]);
+
+  useEffect(() => {}, [deleteAkun]);
 
   useEffect(() => {
     //if (dataValues && info == "sukses") createDetailSale();]
@@ -404,10 +383,7 @@ function Jurnal({ props }) {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "40px" }}
-                      placeholder="No. Jurnal"
-                    />
+                    <Input style={{ height: "40px" }} placeholder="No. Jurnal" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
@@ -506,10 +482,7 @@ function Jurnal({ props }) {
                       <Spin />
                     </div>
                   ) : (
-                    <button
-                      htmlType="submit"
-                      className="bg-cyan-700 rounded-md m-1 text-sm"
-                    >
+                    <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
                       <p className="px-4 py-2 m-0 text-white">SIMPAN</p>
                     </button>
                   )}

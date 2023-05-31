@@ -43,8 +43,8 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CHANGE_CATATAN":
-    var catatan = action.catatan;
-    var id = action.index;
+      var catatan = action.catatan;
+      var id = action.index;
 
       return {
         ...state,
@@ -58,8 +58,8 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CHANGE_KREDIT":
-    var kredit = action.kredit;
-    var id = action.index;
+      var kredit = action.kredit;
+      var id = action.index;
 
       return {
         ...state,
@@ -73,8 +73,8 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CHANGE_DEBIT":
-    var debit = action.debit;
-    var id = action.index;
+      var debit = action.debit;
+      var id = action.index;
 
       return {
         ...state,
@@ -88,9 +88,9 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CHANGE_ID":
-    var dataId = action.id;
-    var id = action.index;
-    //var data = action.listData.attributes;
+      var dataId = action.id;
+      var id = action.index;
+      //var data = action.listData.attributes;
 
       return {
         ...state,
@@ -104,9 +104,9 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CHANGE_TOTAL_HUTANG_JATUH_TEMPO":
-    var totalHutangJatuhTempo = action.totalHutangJatuhTempo;
-    var id = action.index;
-    //var data = action.listData.attributes;
+      var totalHutangJatuhTempo = action.totalHutangJatuhTempo;
+      var id = action.index;
+      //var data = action.listData.attributes;
 
       return {
         ...state,
@@ -120,9 +120,9 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CHANGE_DATA_SISAHUTANG":
-    var sisahutang = action.sisahutang;
-    var id = action.index;
-    //var data = action.listData.attributes;
+      var sisahutang = action.sisahutang;
+      var id = action.index;
+      //var data = action.listData.attributes;
 
       return {
         ...state,
@@ -136,9 +136,9 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CHANGE_PILIH_DATA":
-    var pilihdata = action.pilihData;
-    var id = action.index;
-    //var data = action.listData.attributes;
+      var pilihdata = action.pilihData;
+      var id = action.index;
+      //var data = action.listData.attributes;
 
       return {
         ...state,
@@ -152,9 +152,9 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CHANGE_DATA_TUNAI":
-    var tunai = action.tunai;
-    var id = action.index;
-    //var data = action.listData.attributes;
+      var tunai = action.tunai;
+      var id = action.index;
+      //var data = action.listData.attributes;
 
       return {
         ...state,
@@ -168,9 +168,9 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CHANGE_DATA_TRANSFER":
-    var transfer = action.transfer;
-    var id = action.index;
-    //var data = action.listData.attributes;
+      var transfer = action.transfer;
+      var id = action.index;
+      //var data = action.listData.attributes;
 
       return {
         ...state,
@@ -184,9 +184,9 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CHANGE_DATA_GIRO":
-    var giro = action.giro;
-    var id = action.index;
-    //var data = action.listData.attributes;
+      var giro = action.giro;
+      var id = action.index;
+      //var data = action.listData.attributes;
 
       return {
         ...state,
@@ -200,9 +200,9 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CHANGE_DATA_CN":
-    var cn = action.cn;
-    var id = action.index;
-    //var data = action.listData.attributes;
+      var cn = action.cn;
+      var id = action.index;
+      //var data = action.listData.attributes;
 
       return {
         ...state,
@@ -216,9 +216,9 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CHANGE_DATA_OTH":
-    var oth = action.oth;
-    var id = action.index;
-    //var data = action.listData.attributes;
+      var oth = action.oth;
+      var id = action.index;
+      //var data = action.listData.attributes;
 
       return {
         ...state,
