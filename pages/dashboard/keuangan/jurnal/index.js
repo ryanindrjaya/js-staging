@@ -8,7 +8,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { Input, notification, Select, DatePicker } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import JurnalTable from "@iso/components/ReactDataTable/Cost/JurnalTable";
-import Supplier from "@iso/components/Form/AddCost/SupplierForm";
 import nookies from "nookies";
 import tokenVerify from "../../../../authentication/tokenVerify";
 
@@ -29,15 +28,6 @@ Jurnal.getInitialProps = async (context) => {
 
   const reqCOA = await fetchCOA(cookies);
   const coa = await reqCOA.json();
-  //if (req.status !== 200) {
-  //    context.res.writeHead(302, {
-  //        Location: "/signin?session=false",
-  //        "Content-Type": "text/html; charset=utf-8",
-  //    });
-  //    context?.res?.end();
-
-  //    return {};
-  //}
 
   return {
     props: {
@@ -121,11 +111,10 @@ const fetchCOA = async (cookies) => {
 };
 
 function Jurnal({ props }) {
-  const user = props.user;
-  const locations = props.locations.data;
-  const data = props.jurnal;
-  const dataUser = props.dataUser;
-  const coa = props.coa;
+  const user = props?.user;
+  const data = props?.jurnal;
+  const dataUser = props?.dataUser;
+  const coa = props?.coa;
   const router = useRouter();
   const [jurnal, setJurnal] = useState(data);
   const [searchParameters, setSearchParameters] = useState({});
