@@ -11,6 +11,7 @@ import SidebarMenu from "./SidebarMenu";
 import SIDEBAR_MENU_OPTIONS from "./sidebar.navigations";
 import { SidebarPersonIcon } from "@iso/config/icon.config";
 import {
+  SidebarInvoiceIcon,
   SidebarContactIcon,
   SidebarEcommerceIcon,
   SidebarPurchasesIcon,
@@ -354,8 +355,25 @@ export default function Sidebar(props) {
                   <a>Piutang</a>
                 </Link>
               </Menu.Item>
+            </SubMenu>
+
+            {/* Keuangan */}
+            <SubMenu
+              key="keuangan"
+              title={
+                <span className="isoMenuHolder" style={submenuColor}>
+                  <SidebarInvoiceIcon size={18} />
+                  <span className="nav-text">Keuangan</span>
+                </span>
+              }
+            >
+              <Menu.Item style={submenuStyle} key="coa">
+                <Link href="/dashboard/keuangan/coa">
+                  <a>Chart Of Account (COA)</a>
+                </Link>
+              </Menu.Item>
               <Menu.Item style={submenuStyle} key="jurnal">
-                <Link href="/dashboard/biaya/jurnal">
+                <Link href="/dashboard/keuangan/jurnal">
                   <a>Jurnal</a>
                 </Link>
               </Menu.Item>

@@ -1,5 +1,5 @@
 import Head from "next/head";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
@@ -27,6 +27,8 @@ Jurnal.getInitialProps = async (context) => {
   const reqJurnal = await fetchJurnal(cookies);
   const jurnal = await reqJurnal.json();
 
+  const reqCOA = await fetchCOA(cookies);
+  const coa = await reqCOA.json();
   //if (req.status !== 200) {
   //    context.res.writeHead(302, {
   //        Location: "/signin?session=false",
@@ -43,6 +45,7 @@ Jurnal.getInitialProps = async (context) => {
       locations,
       jurnal,
       dataUser,
+      coa,
     },
   };
 };
@@ -103,21 +106,36 @@ const fetchJurnal = async (cookies) => {
   return req;
 };
 
+const fetchCOA = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?populate";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
 function Jurnal({ props }) {
   const user = props.user;
   const locations = props.locations.data;
   const data = props.jurnal;
   const dataUser = props.dataUser;
+  const coa = props.coa;
   const router = useRouter();
   const [jurnal, setJurnal] = useState(data);
+  const [searchParameters, setSearchParameters] = useState({});
   const dispatch = useDispatch();
 
-  const handleAdd = () => {
-    router.push("/dashboard/biaya/jurnal/tambah");
-  };
+  // Range Picker
+  const { RangePicker } = DatePicker;
 
-  const handleCOA = () => {
-    router.push("/dashboard/biaya/jurnal/setting");
+  const handleAdd = () => {
+    router.push("/dashboard/keuangan/jurnal/tambah");
   };
 
   const handleUpdate = (id) => {
@@ -156,30 +174,6 @@ function Jurnal({ props }) {
     }
   };
 
-  // const handleDeleteRelation = async (data) => {
-  //   var id = 0;
-  //   data.attributes.debt_details.data.forEach((element) => {
-  //     id = element.id;
-
-  //     const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-details/" + id;
-  //     const cookies = nookies.get(null, "token");
-
-  //     const options = {
-  //       method: "DELETE",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: "Bearer " + cookies.token,
-  //       },
-  //     };
-
-  //     const req = fetch(endpoint, options);
-  //     //const res = req.json();
-  //     if (req) {
-  //       console.log("relation deleted");
-  //     }
-  //   });
-  // };
-
   const openNotificationWithIcon = (type, title, message) => {
     notification[type]({
       message: title,
@@ -207,6 +201,78 @@ function Jurnal({ props }) {
     dispatch(logout());
   };
 
+  useEffect(() => {
+    const searchQuery = async () => {
+      let query = "";
+      let startDate = "";
+      let endDate = "";
+
+      for (const key in searchParameters) {
+        // if (key === "user" && searchParameters[key] !== null) {
+        //   console.log("search", searchParameters);
+        //   //query += `filters[credit_details][customer][id]=${searchParameters[key].id}&`;
+        // } else {
+        //   query += "";
+        // }
+
+        // if (key === "status_pembayaran") {
+        //   if (searchParameters[key] !== undefined) {
+        //     query += `filters[${key}]=${searchParameters[key]}&`;
+        //   } else {
+        //     query += "";
+        //   }
+        // } else {
+        //   query += "";
+        // }
+
+        if (key == "range" && searchParameters[key] !== null) {
+          startDate = searchParameters?.range[0]?.format("YYYY-MM-DD");
+          endDate = searchParameters?.range[1]?.format("YYYY-MM-DD");
+
+          query += `filters[tanggal][$gte]=${startDate}&filters[tanggal][$lte]=${endDate}`;
+        } else {
+          query += "";
+        }
+
+        if (key === "akun" && searchParameters[key] !== undefined) {
+          console.log("search", searchParameters, data);
+          query += `filters[chart_of_account][id]=${searchParameters[key]}&`;
+        } else {
+          query += "";
+        }
+
+        // if (key === "area" || key === "wilayah") {
+        //   if (searchParameters[key] !== null) {
+        //     query += `filters[credit_details][customer][${key}][id]=${searchParameters[key].id}&`;
+        //   } else {
+        //     query += "";
+        //   }
+        // } else {
+        //   query += "";
+        // }
+      }
+
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=deep&" + query;
+
+      const cookies = nookies.get(null, "token");
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+      };
+
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
+
+      setJurnal(res);
+      //console.log("endpoint", endpoint, res);
+    };
+
+    searchQuery();
+  }, [searchParameters]);
+
   return (
     <>
       <Head>
@@ -219,11 +285,15 @@ function Jurnal({ props }) {
             <div className="w-full flex justify-start">
               <div className="w-full md:w-1/4 px-3 mb-2">
                 <Select
+                  placeholder="User"
                   size="large"
                   style={{
                     width: "100%",
                   }}
-                  placeholder="User"
+                  allowClear
+                  onChange={(e) =>
+                    setSearchParameters({ ...searchParameters, user: e })
+                  }
                 >
                   {dataUser.map((element) => {
                     return (
@@ -242,12 +312,18 @@ function Jurnal({ props }) {
                     width: "100%",
                     marginRight: "10px",
                   }}
+                  allowClear
+                  onChange={(e) =>
+                    setSearchParameters({ ...searchParameters, akun: e })
+                  }
                 >
-                  {/*{locations.map((element) => {*/}
-                  {/*  return (*/}
-                  <Select.Option>data</Select.Option>
-                  {/*  );*/}
-                  {/*})}*/}
+                  {coa.data.map((element) => {
+                    return (
+                      <Select.Option value={element.id} key={element.attributes.nama}>
+                        {element.attributes.nama}
+                      </Select.Option>
+                    );
+                  })}
                 </Select>
               </div>
               <div className="w-full md:w-1/4 px-3">
@@ -258,31 +334,28 @@ function Jurnal({ props }) {
                     width: "100%",
                     marginRight: "10px",
                   }}
+                  allowClear
+                  onChange={(e) =>
+                    setSearchParameters({ ...searchParameters, tipeTransaksi: e })
+                  }
                 >
-                  {/*{locations.map((element) => {*/}
-                  {/*  return (*/}
-                  <Select.Option>data</Select.Option>
-                  {/*  );*/}
-                  {/*})}*/}
+                  <Select.Option value="Debit">Debit</Select.Option>
+                  <Select.Option value="Kredit">Kredit</Select.Option>
                 </Select>
               </div>
               <div className="w-full md:w-1/4 px-3">
-                <DatePicker placeholder="Rentang Tanggal" size="large" style={{ width: "100%" }} />
+                <RangePicker
+                  size="large"
+                  onChange={(e) =>
+                    setSearchParameters({ ...searchParameters, range: e })
+                  }
+                />
               </div>
             </div>
 
             <div className="w-full flex justify-between mt-2 mb-2">
               <span className="text-black text-md font-bold ml-1 mt-5">Semua Jurnal</span>
               <div className="float-right">
-                <button
-                  onClick={handleCOA}
-                  type="button"
-                  className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm mb-5 mx-2"
-                >
-                  <div className="text-white text-center text-sm font-bold">
-                    <a className="text-white no-underline text-xs sm:text-xs">Chart Of Account</a>
-                  </div>
-                </button>
                 <button
                   onClick={handleAdd}
                   type="button"

@@ -55,7 +55,7 @@ const Tambah = ({ props }) => {
         "Berhasil menambah data",
         "Akun COA telah berhasil ditambahkan. Silahkan cek kembali akun coa"
       );
-      router.replace("/dashboard/biaya/jurnal/setting");
+      router.replace("/dashboard/keuangan/coa");
     } else {
       //res.error?.details.errors.map((error) => {
       //  const ErrorMsg = error.path[0];
@@ -181,7 +181,11 @@ const Tambah = ({ props }) => {
                       },
                     ]}
                   >
-                    <Select size="large" placeholder="Jenis Akun">
+                    <Select 
+                      size="large"
+                      placeholder="Jenis Akun"
+                      allowClear
+                    >
                       <Select.Option value="ASET LANCAR" key="ASET LANCAR">
                         ASET LANCAR
                       </Select.Option>
@@ -226,8 +230,14 @@ const Tambah = ({ props }) => {
                 </div>
 
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
-                  <Form.Item name="jenis_sub_akun">
-                    <Select size="large" placeholder="Jenis Sub Akun">
+                  <Form.Item 
+                    name="jenis_sub_akun"
+                  >
+                    <Select 
+                      size="large"
+                      placeholder="Jenis Sub Akun"
+                      allowClear
+                    >
                       <Select.Option value="BANK" key="BANK">
                         BANK
                       </Select.Option>
