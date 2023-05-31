@@ -43,7 +43,6 @@ const fetchData = async (cookies) => {
 };
 
 const fetchAkun = async (cookies) => {
-  //const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?sort[0]=setting%3Adesc&sort[0]=type%3Aasc";
   const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts";
   const options = {
     method: "GET",
@@ -59,34 +58,13 @@ const fetchAkun = async (cookies) => {
 
 function Setting({ props }) {
   const user = props.user;
-  //const locations = props.locations.data;
-  //const data = props.hutang;
   const akunData = props.akun;
   const router = useRouter();
-  //const [hutang, setHutang] = useState(data);
-  //const [supplier, setSupplier] = useState();
   const [akun, setAkun] = useState(akunData);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState();
   const [tunaiData, setTunaiData] = useState();
   const [transferData, setTransferData] = useState();
-
-  //const handleSetting = () => {
-  //    router.push("/dashboard/biaya/hutang/setting");
-  //};
-
-  //const handleAdd = () => {
-  //    router.push("/dashboard/biaya/hutang/tambah");
-  //};
-
-  //const handleUpdate = (id) => {
-  //    // router.push("/dashboard/pembelian/order_pembelian/edit/" + id);
-  //    openNotificationWithIcon(
-  //        "info",
-  //        "Work In Progress",
-  //        "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
-  //    );
-  //};
 
   const handleDelete = async (id) => {
     const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts/" + id;
@@ -124,13 +102,10 @@ function Setting({ props }) {
         Authorization: "Bearer " + cookies.token,
       },
     };
-
-  const handleTambahAkun = () => {
-    router.push("/dashboard/keuangan/coa/tambahCOA");
   };
 
   const handleTambahAkun = () => {
-    router.push("/dashboard/biaya/jurnal/tambahCOA");
+    router.push("/dashboard/keuangan/coa/tambahCOA");
   };
 
   const onFinish = (values) => {
@@ -138,71 +113,6 @@ function Setting({ props }) {
     //setDataValues(values);
     setLoading(false);
   };
-
-  //const onChangeSetting = (setting, row) => {
-  //    var aktifLength = 0;
-  //    //var length = 0;
-  //    akun.data.forEach((element) => {
-  //      if(element.attributes.type == row.attributes.type){
-  //        if(element.attributes.setting == true) aktifLength++;
-  //      }
-
-  //      //length++;
-  //    });
-
-  //    //const cookies = nookies.get(length, "token");
-
-  //    if (aktifLength < 1 || setting == "Tidak Aktif") {
-  //      if (setting == "Tidak Aktif") row.attributes.setting = false;
-  //      if (setting == "Aktif") row.attributes.setting = true;
-  //        handleChangeSetting(row, row.id);
-  //    } else {
-  //      openNotificationWithIcon("error", "Setting gagal dirubah", "Karena tipe transaksi "+row.attributes.type+" memiliki lebih dari 1 akun aktif");
-  //      router.push("/dashboard/biaya/jurnal/setting");
-  //    }
-  //};
-
-  //const handleChangeSetting = async (values, id) => {
-  //    // clean object
-  //    for (var key in values.attributes) {
-  //        if (values.attributes[key] === null || values.attributes[key] === undefined) {
-  //            delete values.attributes[key];
-  //        }
-  //    }
-
-  //    if (values.attributes?.document?.data === null || values.attributes?.document?.data === undefined) {
-  //        delete values.attributes?.document;
-  //    }
-
-  //    const newValues = {
-  //        data: values.attributes,
-  //    };
-
-  //    const JSONdata = JSON.stringify(newValues);
-  //    const cookies = nookies.get(null, "token");
-  //    const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts/" + id;
-
-  //    const options = {
-  //        method: "PUT",
-  //        headers: {
-  //            "Content-Type": "application/json",
-  //            Authorization: "Bearer " + cookies.token,
-  //        },
-  //        body: JSONdata,
-  //    };
-
-  //    const req = await fetch(endpoint, options);
-  //    const res = await req.json();
-
-  //    if (req.status === 200) {
-  //        const response = await fetchData(cookies);
-  //        setAkun(response);
-
-  //        openNotificationWithIcon("success", "Setting berhasil dirubah", "Setting berhasil dirubah. Silahkan cek setting COA");
-  //    } else {
-  //        openNotificationWithIcon("error", "Setting gagal dirubah", "Tedapat kesalahan yang menyebabkan setting tidak dapat dirubah");
-  //    }
-  //};
 
   const openNotificationWithIcon = (type, title, message) => {
     notification[type]({
