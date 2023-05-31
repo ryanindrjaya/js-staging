@@ -137,7 +137,6 @@ function Jurnal({ props }) {
   };
 
   const handleDelete = async (data) => {
-    //handleDeleteRelation(data);
 
     const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals/" + data.id;
     const cookies = nookies.get(null, "token");
