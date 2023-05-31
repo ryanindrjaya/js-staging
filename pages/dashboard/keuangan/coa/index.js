@@ -142,7 +142,7 @@ function Setting({ props }) {
     };
 
     const handleTambahAkun = () => {
-        router.push("/dashboard/biaya/jurnal/tambahCOA");
+        router.push("/dashboard/keuangan/coa/tambahCOA");
     };
 
     const onFinish = (values) => {

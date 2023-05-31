@@ -21,7 +21,7 @@ import SearchBar from "@iso/components/Form/AddCost/SearchCOA";
 import AddJurnalTable from "@iso/components/ReactDataTable/Cost/AddJurnalTable";
 //import createOrderSaleFunc from "../utility/createOrderSale";
 //import createDetailOrderSaleFunc from "../utility/createDetailOrderSale";
-import calculatePrice from "../utility/calculatePrice";
+//import calculatePrice from "../utility/calculatePrice";
 import Customer from "@iso/components/Form/AddSale/CustomerForm";
 import nookies from "nookies";
 import moment from "moment";
@@ -283,7 +283,7 @@ function Jurnal({ props }) {
     if (req.status === 200) {
       console.log("suksess");
       openNotificationWithIcon("success");
-      router.replace("/dashboard/biaya/jurnal");
+      router.replace("/dashboard/keuangan/jurnal");
     } else {
       openNotificationWithIcon("error", req);
     }
@@ -490,12 +490,12 @@ function Jurnal({ props }) {
 
               <div className="w-full flex justify-end px-3 mt-5">
                 <Form.Item name="totalDebit" className="font-bold text-lg">
-                  <span> Total Debit : {totalDebitValue} </span>
+                  <span> Total Debit : {formatter.format(totalDebitValue)} </span>
                 </Form.Item>
               </div>
               <div className="w-full flex justify-end px-3 -mt-5">
                 <Form.Item name="totalKredit" className="font-bold text-lg">
-                  <span> Total Kredit : {totalKreditValue} </span>
+                  <span> Total Kredit : {formatter.format(totalKreditValue)} </span>
                 </Form.Item>
               </div>
 

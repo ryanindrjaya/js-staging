@@ -47,10 +47,14 @@ export default function ReactDataTable({
   const onConfirm = (id) => { console.log("id nih", id);
     // var newAkunInfo = data.akunInfo;
 
-    // delete newAkunInfo[id];
+    // delete newAkunInfo[id];]
+    console.log("total debit", totalDebitValue, data.akunInfo[id]?.debit);
+    console.log("total kredit", totalKreditValue, data.akunInfo[id]?.kredit);
+
+    setTotalDebitValue(totalDebitValue - (data.akunInfo[id]?.debit ?? 0));
+    setTotalKreditValue(totalKreditValue - (data.akunInfo[id]?.kredit ?? 0));
+
     onDeleteAkun(id);
-    // setTotalDebitValue(totalDebitValue - (data.akunInfo[id]?.debit ?? 0))
-    // setTotalKreditValue(totalKreditValue - (data.akunInfo[id]?.kredit ?? 0))
     // formObj.setFieldsValue({
     //   catatanData: undefined,
     //   debitData: 0,
