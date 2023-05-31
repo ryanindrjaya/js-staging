@@ -5,27 +5,18 @@ import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import {
-  Row,
-  Form,
-  Input,
-  InputNumber,
-  Select,
-  Button,
-  Spin,
-  notification,
-  DatePicker,
-} from "antd";
+import { Row, Form, Input, InputNumber, Select, Button, Spin, notification, DatePicker } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
-import AddSellSalesTable from "../../../../components/ReactDataTable/Selling/AddSellSalesTable";
+import SearchBar from "@iso/components/Form/AddCost/SearchCOA";
+import AddJurnalTable from "@iso/components/ReactDataTable/Cost/AddJurnalTable";
 //import createOrderSaleFunc from "../utility/createOrderSale";
 //import createDetailOrderSaleFunc from "../utility/createDetailOrderSale";
 import calculatePrice from "../utility/calculatePrice";
 import Customer from "@iso/components/Form/AddSale/CustomerForm";
 import nookies from "nookies";
+import moment from "moment";
 
-PesananSales.getInitialProps = async (context) => {
+Jurnal.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
 
   const req = await fetchData(cookies);
@@ -40,8 +31,8 @@ PesananSales.getInitialProps = async (context) => {
   const reqInven = await fetchInven(cookies);
   const inven = await reqInven.json();
 
-  const reqSale = await fetchSale(cookies);
-  const sale = await reqSale.json();
+  const reqJurnal = await fetchJurnal(cookies);
+  const jurnal = await reqJurnal.json();
 
   const reqCustomer = await fetchCustomer(cookies);
   const customer = await reqCustomer.json();
@@ -52,7 +43,7 @@ PesananSales.getInitialProps = async (context) => {
       dataUser,
       locations,
       inven,
-      sale,
+      jurnal,
       customer,
     },
   };
@@ -86,8 +77,8 @@ const fetchUser = async (cookies) => {
   return req;
 };
 
-const fetchSale = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sells?populate=deep";
+const fetchJurnal = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -130,8 +121,7 @@ const fetchInven = async (cookies) => {
 
 const fetchCustomer = async (cookies) => {
   let name = "walk in customer";
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + `/customers?filters[name][$contains]=${name}`;
+  const endpoint = process.env.NEXT_PUBLIC_URL + `/customers?filters[name][$contains]=${name}`;
   const options = {
     method: "GET",
     headers: {
@@ -143,36 +133,24 @@ const fetchCustomer = async (cookies) => {
   return req;
 };
 
-function PesananSales({ props }) {
-  const products = useSelector((state) => state.Order);
+function Jurnal({ props }) {
+  const akuns = useSelector((state) => state.Cost);
+  console.log("Akuns.", akuns);
   const dispatch = useDispatch();
 
-  var selectedProduct = products?.productList;
+  var selectedAkun = akuns?.akun;
   const locations = props.locations.data;
   const user = props.user;
   const inven = props.inven.data;
-  const sale = props.sale;
+  const jurnal = props.jurnal;
   const customerData = props.customer.data[0];
   const dataUser = props.dataUser;
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [productList, setProductList] = useState([]);
-  //const [additionalFee, setAdditionalFee] = useState();
+  const [akunList, setAkunList] = useState([]);
   const [isFetchinData, setIsFetchingData] = useState(false);
-
   const [dataValues, setDataValues] = useState();
-  //const [selectedCategory, setSelectedCategory] = useState("BEBAS");
-  //const [deliveryFee, setDeliveryFee] = useState(0);
-
-  const [listId, setListId] = useState([]);
-  const [productTotalPrice, setProductTotalPrice] = useState({});
-  const [productSubTotal, setProductSubTotal] = useState({});
-  useState({});
-  //const [discPrice, setDiscPrice] = useState(0);
-  const [totalPrice, setTotalPrice] = useState(0);
-  useState({});
-  const [grandTotal, setGrandTotal] = useState(0);
 
   const router = useRouter();
   const { TextArea } = Input;
@@ -180,8 +158,14 @@ function PesananSales({ props }) {
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
   var date = today.getDate() + "/" + mm + "/" + yyyy;
-  var time =
-    today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+
+  // debit dan kredit
+  const [debitValue, setDebitValue] = useState(0);
+  const [kreditValue, setKreditValue] = useState(0);
+  const [totalDebitValue, setTotalDebitValue] = useState(0);
+  const [totalKreditValue, setTotalKreditValue] = useState(0);
+  const [deleteAkun, setDeleteAkun] = useState(0);
 
   // DPP & PPN
   //const dpp = 1.11;
@@ -199,11 +183,9 @@ function PesananSales({ props }) {
   // customer
   const [customer, setCustomer] = useState();
 
-  // NO Sales Sale
-  var noSale = String(props.sale?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(
-    `JM/ET/${user.id}/${noSale}/${mm}/${yyyy}`
-  );
+  // NO Jurnal
+  var noJurnal = String(props.jurnal?.meta?.pagination.total + 1).padStart(3, "0");
+  const [categorySale, setCategorySale] = useState(`JM/${user.id}/${noJurnal}/${mm}/${yyyy}`);
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -214,89 +196,139 @@ function PesananSales({ props }) {
   const onFinish = (values) => {
     setLoading(true);
     setInfo("sukses");
-    sale.data.forEach((element) => {
-      if (values.no_sales_sell == element.attributes.no_sales_sell) {
+    var totalDebit = 0;
+    var totalKredit = 0;
+    for (var index = 0; index < akuns.akun.length; index++) {
+      if (values.debitData[index] == undefined) values.debitData[index] = 0;
+      if (values.kreditData[index] == undefined) values.kreditData[index] = 0;
+      totalDebit += values.debitData[index];
+      totalKredit += values.kreditData[index];
+    }
+
+    if (totalDebit != totalKredit) {
+      notification["error"]({
+        message: "Gagal menambahkan data",
+        description: "Data gagal ditambahkan, karena total kredit dan debit harus sama.",
+      });
+      setInfo("gagal");
+    } else console.log("Debit dan kredit sudah sesuai.");
+
+    var checkData = 1;
+    jurnal.data.forEach((element) => {
+      if (values.no_jurnal == element.attributes.no_jurnal && checkData == 1) {
         notification["error"]({
           message: "Gagal menambahkan data",
-          description: "Data gagal ditambahkan, karena no penjualan sama",
+          description: "Data gagal ditambahkan, karena no jurnal sama",
         });
         setInfo("gagal");
+        checkData++;
       }
     });
+
     setDataValues(values);
     setLoading(false);
   };
 
-  const createDetailSale = async () => {
-    await createDetailOrderSaleFunc(
-      dataValues,
-      products,
-      setListId,
-      "/sales-sell-details"
-    );
-  };
-
-  const createSale = async (values) => {
-    values.sale_date = today;
+  const create = async (values) => {
     values.added_by = user.name;
-    values.customer = customer;
-    await createOrderSaleFunc(values, listId, form, router);
+
+    console.log("data values", values, akuns);
+
+    akuns.akun.forEach((item, index) => {
+      values.catatan = values.catatanData[index];
+      values.debit = values.debitData[index];
+      values.kredit = values.kreditData[index];
+      values.chart_of_account = item.id;
+
+      const req = createData(values);
+    });
   };
 
-  const onChangeProduct = async () => {
+  const createData = async (values) => {
+    var data = {
+      data: values,
+    };
+
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals";
+    const JSONdata = JSON.stringify(data);
+
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+      body: JSONdata,
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+    console.log("req create", req, res);
+
+    if (req.status === 200) {
+      console.log("suksess");
+      openNotificationWithIcon("success");
+      router.replace("/dashboard/biaya/jurnal");
+    } else {
+      openNotificationWithIcon("error", req);
+    }
+  };
+
+  const openNotificationWithIcon = (type, req) => {
+    if (type === "error") {
+      notification[type]({
+        message: "Gagal menambahkan data",
+        description: "Jurnal gagal ditambahkan." + req.statusText,
+      });
+    } else if (type === "success") {
+      notification[type]({
+        message: "Berhasil menambahkan data",
+        description: "Jurnal berhasil ditambahkan.",
+      });
+    }
+  };
+
+  const onChangeAkun = async () => {
     var isDuplicatedData = false;
 
     tempList.find((item) => {
-      productList.forEach((element) => {
+      akunList.forEach((element) => {
         if (element.id === item.id) isDuplicatedData = true;
       });
     });
 
     if (!isDuplicatedData) {
-      setProductList((productList) => [...productList, tempList[0]]);
-      toast.success("Produk berhasil ditambahkan!", {
-        position: toast.POSITION.TOP_RIGHT,
-        autoClose: 1000,
-      });
+      setAkunList((list) => [...list, tempList[0]]);
     }
-  };
-
-  const calculatePriceAfterDisc = (row) => {
-    const total = calculatePrice(
-      row,
-      products,
-      productTotalPrice,
-      productSubTotal,
-      setTotalPrice
-    );
-    return formatter.format(total);
   };
 
   const clearData = () => {
     dispatch({ type: "CLEAR_DATA" });
-    setTotalPrice(0);
   };
 
   useEffect(() => {
-    if (products.productList.length > 0) {
-      inven.forEach((element) => {
-        products.productList.forEach((data) => {
-          if (data.id == element.attributes.products.data[0].id) {
-            data.stock = element.attributes.total_stock;
-          }
-        });
-      });
+    var totalDebit = 0;
+    var totalKredit = 0;
+
+    for (var index = 0; index < akuns.akun.length; index++) {
+      totalDebit += akuns.akunInfo[index]?.debit ?? 0;
+      totalKredit += akuns.akunInfo[index]?.kredit ?? 0;
     }
-  }, [products.productList]);
+
+    setTotalDebitValue(totalDebit);
+    setTotalKreditValue(totalKredit);
+
+    totalDebit = 0;
+    totalKredit = 0;
+    setDebitValue(0);
+    setKreditValue(0);
+  }, [debitValue, kreditValue]);
+
+  useEffect(() => {}, [deleteAkun]);
 
   useEffect(() => {
-    if (listId.length > 0) {
-      createSale(dataValues);
-    }
-  }, [listId]);
-
-  useEffect(() => {
-    if (dataValues && info == "sukses") createDetailSale();
+    //if (dataValues && info == "sukses") createDetailSale();]
+    if (dataValues && info == "sukses") create(dataValues);
   }, [dataValues]);
 
   useEffect(() => {
@@ -304,6 +336,7 @@ function PesananSales({ props }) {
     clearData();
     form.setFieldsValue({
       customer: customerData?.attributes.name,
+      tanggal: moment(),
     });
     setCustomer(customerData);
   }, []);
@@ -350,10 +383,7 @@ function PesananSales({ props }) {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "40px" }}
-                      placeholder="No. Jurnal"
-                    />
+                    <Input style={{ height: "40px" }} placeholder="No. Jurnal" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
@@ -393,76 +423,19 @@ function PesananSales({ props }) {
                       placeholder="Tanggal Jurnal"
                       size="large"
                       style={{ width: "100%" }}
+                      format={"DD/MM/YYYY"}
                     />
                   </Form.Item>
                 </div>
-                {/*<div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">*/}
-                {/*  <Customer onChangeCustomer={setCustomer} />*/}
-                {/*</div>*/}
-                {/*<div className="w-full md:w-1/4 px-3 mb-2">*/}
-                {/*  <Form.Item name="tempo_days" initialValue={"0"} noStyle>*/}
-                {/*    <Input*/}
-                {/*      size="large"*/}
-                {/*      style={{*/}
-                {/*        width: "50%",*/}
-                {/*      }}*/}
-                {/*    />*/}
-                {/*  </Form.Item>*/}
-                {/*  <Form.Item name="tempo_time" initialValue={"Hari"} noStyle>*/}
-                {/*    <Select*/}
-                {/*      size="large"*/}
-                {/*      style={{*/}
-                {/*        width: "50%",*/}
-                {/*      }}*/}
-                {/*    >*/}
-                {/*      <Select.Option value="Hari" key="Hari">*/}
-                {/*        Hari*/}
-                {/*      </Select.Option>*/}
-                {/*      <Select.Option value="Bulan" key="Bulan">*/}
-                {/*        Bulan*/}
-                {/*      </Select.Option>*/}
-                {/*    </Select>*/}
-                {/*  </Form.Item>*/}
-                {/*</div>*/}
-                {/*<div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">*/}
-                {/*  <Form.Item*/}
-                {/*    name="location"*/}
-                {/*    rules={[*/}
-                {/*      {*/}
-                {/*        required: true,*/}
-                {/*        message: "Lokasi tidak boleh kosong!",*/}
-                {/*      },*/}
-                {/*    ]}*/}
-                {/*  >*/}
-                {/*    <Select*/}
-                {/*      placeholder="Pilih Lokasi"*/}
-                {/*      size="large"*/}
-                {/*      style={{*/}
-                {/*        width: "100%",*/}
-                {/*      }}*/}
-                {/*    >*/}
-                {/*      {locations.map((element) => {*/}
-                {/*        return (*/}
-                {/*          <Select.Option*/}
-                {/*            value={element.id}*/}
-                {/*            key={element.attributes.name}*/}
-                {/*          >*/}
-                {/*            {element.attributes.name}*/}
-                {/*          </Select.Option>*/}
-                {/*        );*/}
-                {/*      })}*/}
-                {/*    </Select>*/}
-                {/*  </Form.Item>*/}
-                {/*</div>*/}
               </div>
 
               <div className="w-full flex md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
                 <SearchBar
                   form={form}
                   tempList={tempList}
-                  onChange={onChangeProduct}
+                  onChange={onChangeAkun}
                   user={user}
-                  selectedProduct={selectedProduct}
+                  selectedAkun={selectedAkun}
                   isBasedOnLocation={false}
                 />
               </div>
@@ -478,24 +451,29 @@ function PesananSales({ props }) {
                 </div>
               ) : (
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                  <AddSellSalesTable
-                    products={products}
-                    productTotalPrice={productTotalPrice}
-                    setTotalPrice={setTotalPrice}
-                    setProductTotalPrice={setProductTotalPrice}
-                    //calculatePriceAfterDisc={calculatePriceAfterDisc}
-                    productSubTotal={productSubTotal}
-                    locations={locations}
+                  <AddJurnalTable
+                    data={akuns}
                     formObj={form}
+                    setDebitValue={setDebitValue}
+                    setKreditValue={setKreditValue}
+                    setTotalDebitValue={setTotalDebitValue}
+                    setTotalKreditValue={setTotalKreditValue}
+                    totalDebitValue={totalDebitValue}
+                    totalKreditValue={totalKreditValue}
                   />
                 </div>
               )}
 
-              {/*<div className="w-full mt-8 flex justify-between">*/}
-              {/*  <Form.Item name="sale_note" className="w-full mx-2">*/}
-              {/*    <TextArea rows={4} placeholder="Catatan" />*/}
-              {/*  </Form.Item>*/}
-              {/*</div>*/}
+              <div className="w-full flex justify-end px-3 mt-5">
+                <Form.Item name="totalDebit" className="font-bold text-lg">
+                  <span> Total Debit : {totalDebitValue} </span>
+                </Form.Item>
+              </div>
+              <div className="w-full flex justify-end px-3 -mt-5">
+                <Form.Item name="totalKredit" className="font-bold text-lg">
+                  <span> Total Kredit : {totalKreditValue} </span>
+                </Form.Item>
+              </div>
 
               <div className="w-full flex justify-left">
                 <Form.Item>
@@ -504,10 +482,7 @@ function PesananSales({ props }) {
                       <Spin />
                     </div>
                   ) : (
-                    <button
-                      htmlType="submit"
-                      className="bg-cyan-700 rounded-md m-1 text-sm"
-                    >
+                    <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm">
                       <p className="px-4 py-2 m-0 text-white">SIMPAN</p>
                     </button>
                   )}
@@ -521,4 +496,4 @@ function PesananSales({ props }) {
   );
 }
 
-export default PesananSales;
+export default Jurnal;

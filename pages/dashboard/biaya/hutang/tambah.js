@@ -6,17 +6,7 @@ import ConfirmDialog from "@iso/components/Alert/ConfirmDialog";
 import { useSelector, useDispatch } from "react-redux";
 import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import {
-  Row,
-  Form,
-  Input,
-  InputNumber,
-  Select,
-  Button,
-  Spin,
-  notification,
-  DatePicker,
-} from "antd";
+import { Row, Form, Input, InputNumber, Select, Button, Spin, notification, DatePicker } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import AddSellSalesTable from "@iso/components/ReactDataTable/Selling/AddSellSalesTable";
@@ -162,8 +152,7 @@ function Hutang({ props }) {
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
   var date = today.getDate() + "/" + mm + "/" + yyyy;
-  var time =
-    today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 
   const cookies = nookies.get(null, "token");
   const tempList = [];
@@ -185,13 +174,8 @@ function Hutang({ props }) {
   const [searchNoLpb, setSearchNoLpb] = useState();
 
   // NO Hutang
-  var noHutang = String(props.hutang?.meta?.pagination.total + 1).padStart(
-    3,
-    "0"
-  );
-  const [categorySale, setCategorySale] = useState(
-    `PH/ET/${user.id}/${noHutang}/${mm}/${yyyy}`
-  );
+  var noHutang = String(props.hutang?.meta?.pagination.total + 1).padStart(3, "0");
+  const [categorySale, setCategorySale] = useState(`PH/ET/${user.id}/${noHutang}/${mm}/${yyyy}`);
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -217,14 +201,8 @@ function Hutang({ props }) {
       totalOth += biaya.info[key].oth;
     }
 
-    var totalBayar =
-      values.bayar1 +
-      values.bayar2 +
-      values.bayar3 +
-      values.bayar4 +
-      values.bayar5;
-    var totalBayarProduk =
-      totalTunai + totalTransfer + totalGiro + totalCn + totalOth;
+    var totalBayar = values.bayar1 + values.bayar2 + values.bayar3 + values.bayar4 + values.bayar5;
+    var totalBayarProduk = totalTunai + totalTransfer + totalGiro + totalCn + totalOth;
     if (
       (totalTunai != values.bayar1 ||
         totalTransfer != values.bayar2 ||
@@ -255,15 +233,7 @@ function Hutang({ props }) {
 
   const createDetail = async () => {
     //await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/sales-sale-details");
-    await createDetails(
-      dataValues,
-      dataTabel,
-      biaya,
-      sisaHutang,
-      setListId,
-      "/debt-details",
-      "hutang"
-    );
+    await createDetails(dataValues, dataTabel, biaya, sisaHutang, setListId, "/debt-details", "hutang");
   };
 
   const createMaster = async (values) => {
@@ -275,18 +245,7 @@ function Hutang({ props }) {
     values.document = document;
     values.tanggal_pembayaran = tanggal;
     values.status_pembayaran = "Dibayar";
-    await createData(
-      sisaHutang,
-      values,
-      listId,
-      form,
-      router,
-      "/debts/",
-      "hutang",
-      akunHutang,
-      setCreateId
-    );
-
+    await createData(sisaHutang, values, listId, form, router, "/debts/", "hutang", akunHutang, setCreateId);
   };
 
   const editPenjualan = async (value) => {
@@ -294,8 +253,7 @@ function Hutang({ props }) {
     //var data = null;
     //var total = null;
 
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/debts/" + value.id + "?populate=deep";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/debts/" + value.id + "?populate=deep";
     const options = {
       method: "GET",
       headers: {
@@ -308,14 +266,12 @@ function Hutang({ props }) {
     const res = await req.json();
 
     // TODO :::: ENHANCEMENT CODE
-      res.data.attributes.debt_details.data.forEach((item) => {
-
-          const sisa_hutang = item.attributes.sisa_hutang;
-          console.log("detail", item);
-          if (sisa_hutang == 0) editPenjualanDB("Lunas", item.attributes.purchasing.data.id);
-          else editPenjualanDB("Dibayar Sebagian", item.attributes.purchasing.data.id);
-      });
-
+    res.data.attributes.debt_details.data.forEach((item) => {
+      const sisa_hutang = item.attributes.sisa_hutang;
+      console.log("detail", item);
+      if (sisa_hutang == 0) editPenjualanDB("Lunas", item.attributes.purchasing.data.id);
+      else editPenjualanDB("Dibayar Sebagian", item.attributes.purchasing.data.id);
+    });
   };
 
   const editPenjualanDB = async (value, id) => {
@@ -339,7 +295,7 @@ function Hutang({ props }) {
 
       const req = await fetch(endpoint, options);
       const res = await req.json();
-      console.log("res",res);
+      console.log("res", res);
       if (req.status === 200) {
         console.log("status di penjualan sukses diupdate");
       } else {
@@ -364,8 +320,7 @@ function Hutang({ props }) {
     var total = 0;
     if (biaya.info != null) {
       for (let row in biaya.info) {
-        if (biaya.info[row].pilihData == "pilih")
-          total = total + biaya.info[row].totalHutangJatuhTempo;
+        if (biaya.info[row].pilihData == "pilih") total = total + biaya.info[row].totalHutangJatuhTempo;
       }
     }
     return total;
@@ -381,8 +336,7 @@ function Hutang({ props }) {
     for (let row in biaya.info) {
       if (biaya.info[row].pilihData == "pilih") {
         if (biaya.info[row].tunai != null) tunai = biaya.info[row].tunai;
-        if (biaya.info[row].transfer != null)
-          transfer = biaya.info[row].transfer;
+        if (biaya.info[row].transfer != null) transfer = biaya.info[row].transfer;
         if (biaya.info[row].giro != null) giro = biaya.info[row].giro;
         if (biaya.info[row].cn != null) cn = biaya.info[row].cn;
         if (biaya.info[row].oth != null) oth = biaya.info[row].oth;
@@ -491,20 +445,11 @@ function Hutang({ props }) {
           status = "Selesai";
         }
       } else {
-        if (
-          statusPembayaran === "Belum Lunas" &&
-          purchasingHistory.length == 0
-        ) {
+        if (statusPembayaran === "Belum Lunas" && purchasingHistory.length == 0) {
           status = "Tempo";
-        } else if (
-          statusPembayaran === "Dibayar Sebagian" &&
-          purchasingHistory.length > 0
-        ) {
+        } else if (statusPembayaran === "Dibayar Sebagian" && purchasingHistory.length > 0) {
           status = "Sebagian";
-        } else if (
-          statusPembayaran === "Lunas" &&
-          purchasingHistory.length > 0
-        ) {
+        } else if (statusPembayaran === "Lunas" && purchasingHistory.length > 0) {
           status = "Selesai";
         } else {
           status = "Menunggu";
@@ -520,7 +465,7 @@ function Hutang({ props }) {
         //dispatch({ type: "CHANGE_ID", id: row.id, listData: row, index: infoId });
         infoId++;
       }
-      
+
       lpbId++;
     });
 
@@ -530,10 +475,7 @@ function Hutang({ props }) {
     returLPB.forEach((row) => {
       row.subtotal = 0;
       dataTabel.forEach((element) => {
-        if (
-          element.attributes.no_purchasing ==
-          row.attributes.purchasing.data?.attributes.no_purchasing
-        ) {
+        if (element.attributes.no_purchasing == row.attributes.purchasing.data?.attributes.no_purchasing) {
           row.attributes.retur_lpb_details.data.forEach((detail) => {
             row.subtotal += parseInt(detail.attributes.sub_total);
           });
@@ -589,16 +531,13 @@ function Hutang({ props }) {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "40px" }}
-                      placeholder="No. Hutang"
-                    />
+                    <Input style={{ height: "40px" }} placeholder="No. Hutang" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Supplier onChangeSupplier={setSupplier} />
                 </div>
-                <div className="w-full md:w-1/4 px-3 mb-2">
+                {/* <div className="w-full md:w-1/4 px-3 mb-2">
                   <Form.Item
                     name="status_pembayaran" //initialValue={"Hari"}
                     noStyle
@@ -620,24 +559,16 @@ function Hutang({ props }) {
                       </Select.Option>
                     </Select>
                   </Form.Item>
-                </div>
+                </div> */}
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="tanggal">
-                    <RangePicker
-                      size="large"
-                      onChange={(values) => setRangePicker(values)}
-                    />
+                    <RangePicker size="large" onChange={(values) => setRangePicker(values)} />
                   </Form.Item>
                 </div>
               </div>
 
               <div className="w-full md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
-                <Search
-                  size="large"
-                  id="searchBox"
-                  placeholder="Cari Nomor LPB"
-                  onChange={filterBySearch}
-                />
+                <Search size="large" id="searchBox" placeholder="Cari Nomor LPB" onChange={filterBySearch} />
               </div>
 
               {isFetchinData ? (
@@ -667,32 +598,17 @@ function Hutang({ props }) {
               )}
 
               <div className="w-full flex flex-wrap mb-3">
-                <Form.Item
-                  name="total_item"
-                  className="w-full h-2 mx-2 flex justify-end font-bold"
-                >
+                <Form.Item name="total_item" className="w-full h-2 mx-2 flex justify-end font-bold">
                   <span> TOTAL ITEM </span> <span> : {totalItem}</span>
                 </Form.Item>
-                <Form.Item
-                  name="total_hutang_jatuh_tempo"
-                  className="w-full h-2 mx-2 flex justify-end font-bold"
-                >
-                  <span> TOTAL HUTANG JATUH TEMPO </span>{" "}
-                  <span> : {formatter.format(totalHutangJatuhTempo())}</span>
+                <Form.Item name="total_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
+                  <span> TOTAL HUTANG JATUH TEMPO </span> <span> : {formatter.format(totalHutangJatuhTempo())}</span>
                 </Form.Item>
-                <Form.Item
-                  name="total_pembayaran"
-                  className="w-full h-2 mx-2 flex justify-end font-bold"
-                >
-                  <span> TOTAL PEMBAYARAN </span>{" "}
-                  <span> : {formatter.format(totalPembayaran())}</span>
+                <Form.Item name="total_pembayaran" className="w-full h-2 mx-2 flex justify-end font-bold">
+                  <span> TOTAL PEMBAYARAN </span> <span> : {formatter.format(totalPembayaran())}</span>
                 </Form.Item>
-                <Form.Item
-                  name="sisa_hutang_jatuh_tempo"
-                  className="w-full h-2 mx-2 flex justify-end font-bold"
-                >
-                  <span> SISA HUTANG JATUH TEMPO </span>{" "}
-                  <span> : {formatter.format(sisaHutangJatuhTempo())}</span>
+                <Form.Item name="sisa_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
+                  <span> SISA HUTANG JATUH TEMPO </span> <span> : {formatter.format(sisaHutangJatuhTempo())}</span>
                 </Form.Item>
               </div>
 
@@ -713,9 +629,7 @@ function Hutang({ props }) {
                   <Form.Item name="bayar1">
                     <InputNumber
                       placeholder="Nominal Pembayaran"
-                      formatter={(value) =>
-                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                      }
+                      formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                       parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                       min={0}
                       style={{
@@ -760,9 +674,7 @@ function Hutang({ props }) {
                   <Form.Item name="bayar2">
                     <InputNumber
                       placeholder="Nominal Pembayaran"
-                      formatter={(value) =>
-                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                      }
+                      formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                       parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                       min={0}
                       style={{
@@ -807,9 +719,7 @@ function Hutang({ props }) {
                   <Form.Item name="bayar3">
                     <InputNumber
                       placeholder="Nominal Pembayaran"
-                      formatter={(value) =>
-                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                      }
+                      formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                       parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                       min={0}
                       style={{
@@ -866,9 +776,7 @@ function Hutang({ props }) {
                   <Form.Item name="bayar4">
                     <InputNumber
                       placeholder="Nominal Pembayaran"
-                      formatter={(value) =>
-                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                      }
+                      formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                       parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                       min={0}
                       style={{
@@ -913,9 +821,7 @@ function Hutang({ props }) {
                   <Form.Item name="bayar5">
                     <InputNumber
                       placeholder="Nominal Pembayaran"
-                      formatter={(value) =>
-                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                      }
+                      formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                       parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                       min={0}
                       style={{
@@ -973,9 +879,7 @@ function Hutang({ props }) {
                       className="bg-cyan-700 rounded-md m-1 text-sm"
                       onClick={() => setDocument("Draft")}
                     >
-                      <p className="px-4 py-2 m-0 text-white">
-                        SIMPAN DAN PERBARUI
-                      </p>
+                      <p className="px-4 py-2 m-0 text-white">SIMPAN DAN PERBARUI</p>
                     </button>
                   )}
                 </Form.Item>
@@ -997,9 +901,7 @@ function Hutang({ props }) {
                             className="bg-cyan-700 rounded-md m-1 text-sm"
                             onClick={() => setDocument("Publish")}
                           >
-                            <p className="px-4 py-2 m-0 text-white">
-                              SIMPAN DAN CETAK
-                            </p>
+                            <p className="px-4 py-2 m-0 text-white">SIMPAN DAN CETAK</p>
                           </button>
                         }
                       />

@@ -4,18 +4,7 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import router, { useRouter } from "next/router";
-import {
-  Input,
-  notification,
-  Select,
-  DatePicker,
-  Modal,
-  Descriptions,
-  Button,
-  Tag,
-  message,
-  Spin,
-} from "antd";
+import { Input, notification, Select, DatePicker, Modal, Descriptions, Button, Tag, message, Spin } from "antd";
 import { PrinterOutlined } from "@ant-design/icons";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
 import SellSalesTable from "../../../../components/ReactDataTable/Selling/SellSalesTable";
@@ -430,11 +419,7 @@ function Sales({ props }) {
                 <>
                   <Descriptions
                     extra={
-                      <Button
-                        onClick={print}
-                        className="bg-cyan-700 hover:bg-cyan-800 mr-7 border-none"
-                        type="primary"
-                      >
+                      <Button onClick={print} className="bg-cyan-700 hover:bg-cyan-800 mr-7 border-none" type="primary">
                         <PrinterOutlined className="mr-2 mt-0.5 float float-left" /> Cetak
                       </Button>
                     }

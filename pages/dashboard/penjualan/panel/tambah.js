@@ -5,17 +5,7 @@ import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import { useSelector, useDispatch } from "react-redux";
 import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import {
-  Row,
-  Form,
-  Input,
-  InputNumber,
-  Select,
-  Button,
-  Spin,
-  notification,
-  Modal,
-} from "antd";
+import { Row, Form, Input, InputNumber, Select, Button, Spin, notification, Modal } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "../../../../components/Form/AddOrder/SearchBar";
 import StoreSaleTable from "../../../../components/ReactDataTable/Selling/StoreSaleTable";
@@ -131,8 +121,6 @@ function Toko({ props }) {
   const products = useSelector((state) => state.Sales);
   const dispatch = useDispatch();
 
-  console.log("props", props);
-
   var selectedProduct = products?.productList;
   const locations = props.locations.data;
   const user = props.user;
@@ -179,8 +167,7 @@ function Toko({ props }) {
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
   var date = today.getDate() + "/" + mm + "/" + yyyy;
-  var time =
-    today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 
   // DPP & PPN
   const [dpp, setDPP] = useState(0);
@@ -199,9 +186,7 @@ function Toko({ props }) {
 
   // NO Panel Sale
   var noPanelSale = String(panel?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(
-    `PN/ET/${user.id}/${noPanelSale}/${mm}/${yyyy}`
-  );
+  const [categorySale, setCategorySale] = useState(`PN/ET/${user.id}/${noPanelSale}/${mm}/${yyyy}`);
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);
@@ -295,22 +280,21 @@ function Toko({ props }) {
   });
 
   const cekLimit = async () => {
-      totalBelumDibayar = grandTotal;
+    totalBelumDibayar = grandTotal;
 
-      panel.data.forEach((element) => {
-          if (customer?.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
-      });
+    panel.data.forEach((element) => {
+      if (customer?.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
+    });
 
-      customerData.data.forEach((element) => {
-          if (customer?.id == element.id && totalBelumDibayar > element.attributes.credit_limit) {
-              notification["error"]({
-                  message: "Gagal menambahkan data",
-                  description:
-                      "Data gagal ditambahkan, karena melebihi limit kredit",
-              });
-              setInfo("gagal");
-          }
-      });
+    customerData.data.forEach((element) => {
+      if (customer?.id == element.id && totalBelumDibayar > element.attributes.credit_limit) {
+        notification["error"]({
+          message: "Gagal menambahkan data",
+          description: "Data gagal ditambahkan, karena melebihi limit kredit",
+        });
+        setInfo("gagal");
+      }
+    });
   };
 
   const calculateDifference = (date1, date2) => {
@@ -330,34 +314,31 @@ function Toko({ props }) {
   };
 
   const cekTermin = async () => {
-      let data = null;
+    let data = null;
 
-      panel.data.some((element) => {
-          
-          if (customer.id == element.attributes.customer.data.id && element.attributes.status == "Belum Dibayar") {
-            //if (element.attributes.sale_date )
-            data = element;
-            return true;
-          }
-      });
-
-      if (data != null) {
-          var difference = calculateDifference(data.attributes.sale_date, today);
-          console.log("break diff", difference);
-
-          var type = customer.attributes.credit_limit_duration_type;
-          var duration = customer.attributes.credit_limit_duration;
-          if (type == "Hari" && difference > duration) console.log("termin hari aman");
-          else if (type == "Bulan" && difference > (duration * 30)) console.log("termin bulan aman");
-          else {
-              notification["info"]({
-                  message: "Ada penjualan yang belum dibayar",
-                  description:
-                      "Dengan no : " + data.attributes.no_panel_sale,
-              });
-          }
+    panel.data.some((element) => {
+      if (customer.id == element.attributes.customer.data.id && element.attributes.status == "Belum Dibayar") {
+        //if (element.attributes.sale_date )
+        data = element;
+        return true;
       }
+    });
 
+    if (data != null) {
+      var difference = calculateDifference(data.attributes.sale_date, today);
+      console.log("break diff", difference);
+
+      var type = customer.attributes.credit_limit_duration_type;
+      var duration = customer.attributes.credit_limit_duration;
+      if (type == "Hari" && difference > duration) console.log("termin hari aman");
+      else if (type == "Bulan" && difference > duration * 30) console.log("termin bulan aman");
+      else {
+        notification["info"]({
+          message: "Ada penjualan yang belum dibayar",
+          description: "Dengan no : " + data.attributes.no_panel_sale,
+        });
+      }
+    }
   };
 
   const onFinish = (values) => {
@@ -374,8 +355,7 @@ function Toko({ props }) {
         setInfo("gagal");
       }
 
-      if (customer.id == element.attributes.customer.data.id)
-        totalBelumDibayar += element.attributes.total;
+      if (customer.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
     });
 
     cekLimit();
@@ -429,8 +409,7 @@ function Toko({ props }) {
         Authorization: "Bearer " + cookies.token,
       },
     };
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + `/panel-sales/${id}?populate=deep`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/panel-sales/${id}?populate=deep`;
     const req = await fetch(endpoint, options);
     const res = await req.json();
     const row = res.data;
@@ -473,14 +452,7 @@ function Toko({ props }) {
   };
 
   const calculatePriceAfterDisc = (row, index) => {
-    const total = calculatePrice(
-      row,
-      products,
-      productTotalPrice,
-      productSubTotal,
-      setTotalPrice,
-      index
-    );
+    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index);
     return formatter.format(total);
   };
 
@@ -559,13 +531,9 @@ function Toko({ props }) {
     // if both are same then we should not set new price for grand total.
     // if they are not, then set new grand total
     if (discPrice !== totalPrice && discPrice !== 0) {
-      setGrandTotal(
-        discPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan)
-      );
+      setGrandTotal(discPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
     } else {
-      setGrandTotal(
-        totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan)
-      );
+      setGrandTotal(totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
     }
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
 
@@ -630,15 +598,12 @@ function Toko({ props }) {
     totalBelumDibayar = 0;
     if (customer) {
       panel.data.forEach((element) => {
-        if (customer.id == element.attributes.customer.data.id)
-          totalBelumDibayar += element.attributes.total;
+        if (customer.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
       });
 
       setLimitCredit(customer?.attributes?.credit_limit - totalBelumDibayar);
       form.setFieldsValue({
-        limitCredit: formatter.format(
-          customer?.attributes?.credit_limit - totalBelumDibayar
-        ),
+        limitCredit: formatter.format(customer?.attributes?.credit_limit - totalBelumDibayar),
       });
 
       var tempoDays = customer?.attributes?.credit_limit_duration;
@@ -687,13 +652,8 @@ function Toko({ props }) {
                 </p>
               </div>
               <div className="w-full flex justify-center md:w-1/3">
-                <button
-                  onClick={showModal}
-                  className="bg-cyan-700 rounded-md m-1 text-sm"
-                >
-                  <p className="px-4 py-2 m-0 text-white">
-                    Laporan Penjualan Hari Ini
-                  </p>
+                <button onClick={showModal} className="bg-cyan-700 rounded-md m-1 text-sm">
+                  <p className="px-4 py-2 m-0 text-white">Laporan Penjualan Hari Ini</p>
                 </button>
               </div>
               <div className="w-full flex justify-end text-right md:w-1/3">
@@ -734,10 +694,7 @@ function Toko({ props }) {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "40px" }}
-                      placeholder="No. Penjualan"
-                    />
+                    <Input style={{ height: "40px" }} placeholder="No. Penjualan" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -783,9 +740,7 @@ function Toko({ props }) {
                 </div>
 
                 <div className="w-full md:w-1/3 px-3 mb-2">
-                  <p className="m-0">
-                    Keterangan : {console.log("customer", customer)}
-                  </p>
+                  <p className="m-0">Keterangan : {}</p>
                   <p className="m-0"> {customer?.attributes?.address}</p>
                   <p> {locationData?.city}</p>
                 </div>
@@ -817,10 +772,7 @@ function Toko({ props }) {
                     >
                       {locations.map((element) => {
                         return (
-                          <Select.Option
-                            value={element.id}
-                            key={element.attributes.name}
-                          >
+                          <Select.Option value={element.id} key={element.attributes.name}>
                             {element.attributes.name}
                           </Select.Option>
                         );
@@ -906,29 +858,17 @@ function Toko({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full flex justify-end px-3 -mt-9">
-                  <Form.Item
-                    name="grandtotal"
-                    value={totalPrice}
-                    className="font-bold text-lg"
-                  >
+                  <Form.Item name="grandtotal" value={totalPrice} className="font-bold text-lg">
                     <span> Total Harga : {formatter.format(totalPrice)}</span>
                   </Form.Item>
                 </div>
                 <div className="w-full flex justify-end px-3 -mt-6">
-                  <Form.Item
-                    name="dpp"
-                    value={dpp}
-                    className="font-bold text-lg"
-                  >
+                  <Form.Item name="dpp" value={dpp} className="font-bold text-lg">
                     <span> DPP : {formatter.format(dpp)}</span>
                   </Form.Item>
                 </div>
                 <div className="w-full flex justify-end px-3 -mt-6">
-                  <Form.Item
-                    name="ppn"
-                    value={ppn}
-                    className="font-bold text-lg"
-                  >
+                  <Form.Item name="ppn" value={ppn} className="font-bold text-lg">
                     <span> PPN : {formatter.format(ppn)}</span>
                   </Form.Item>
                 </div>
@@ -1004,9 +944,7 @@ function Toko({ props }) {
               </div>
 
               <div className="w-full flex md:w-3/4 justify-end mb-2">
-                <p className="mb-4 font-bold text-center">
-                  Biaya Tambahan Lain Lain
-                </p>
+                <p className="mb-4 font-bold text-center">Biaya Tambahan Lain Lain</p>
               </div>
               <div className="w-full flex flex-wrap justify-end mb-3">
                 <div className="w-full md:w-1/3 px-3 mb-2 text-center md:mb-0">
@@ -1086,9 +1024,7 @@ function Toko({ props }) {
                   className="w-full flex justify-end h-2 md:w-1/2 mx-2 mt-3"
                 >
                   <span className="font-bold text-lg"> Total </span>{" "}
-                  <span className="font-bold text-lg">
-                    : {formatter.format(grandTotal)}
-                  </span>
+                  <span className="font-bold text-lg">: {formatter.format(grandTotal)}</span>
                 </Form.Item>
               </div>
 
@@ -1135,9 +1071,7 @@ function Toko({ props }) {
                             className="bg-cyan-700 rounded-md m-1 text-sm"
                             onClick={() => setSimpanData("Publish")}
                           >
-                            <p className="px-4 py-2 m-0 text-white">
-                              SIMPAN DAN CETAK UNTUK PEMBAYARAN PIUTANG
-                            </p>
+                            <p className="px-4 py-2 m-0 text-white">SIMPAN DAN CETAK UNTUK PEMBAYARAN PIUTANG</p>
                           </button>
                         }
                       />

@@ -16,20 +16,16 @@ export default function calculatePrice(row, products, productTotalPrice, product
     Dp1 = 0;
   }
 
-
   if (products.productInfo[index]?.d2) {
     Dp2 = products.productInfo[index].d2 ?? 0;
-  } else if (
-    products.productInfo[index]?.d2 === 0 ||
-    products.productInfo[index]?.d2 === null
-  ) {
+  } else if (products.productInfo[index]?.d2 === 0 || products.productInfo[index]?.d2 === null) {
     Dp2 = 0;
   }
 
-
   // check if price changed
   if (products.productInfo[index]?.priceUnit) {
-    priceUnit = products.productInfo[index].priceUnit ?? row.attributes[`sold_price_1`];
+    //priceUnit = products.productInfo[index].priceUnit ?? row.attributes[`sold_price_1`];
+    priceUnit = products.productInfo[index].priceUnit;
   }
 
   // check if qty changed
@@ -54,6 +50,7 @@ export default function calculatePrice(row, products, productTotalPrice, product
   priceUnit = priceUnit + (priceUnit * margin) / 100;
   var price1 = calculatePercentage(priceUnit, Dp1);
   var price2 = calculatePercentage(price1, Dp2);
+  //var price2 = price1;
 
   // set product price after disc & sub total
   productTotalPrice[index] = price2;

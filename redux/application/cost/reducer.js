@@ -2,10 +2,29 @@ const initState = {
   list: [],
   info: {},
   preData: {},
+  akun: [],
+  akunInfo: {},
 };
 
 export default function Reducer(state = initState, action) {
   switch (action.type) {
+    case "ADD_AKUN_COA":
+      state.akun.push(action.akun);
+      return {
+        ...state,
+        akun: [...state.akun],
+      };
+
+    case "REMOVE_AKUN":
+      state.akun.splice(action.index, 1);
+      let infoData = state.akunInfo;
+      delete infoData[action.index];
+      return {
+        ...state,
+        akun: [...state.akun],
+        akunInfo: infoData,
+      };
+
     case "ADD_LIST":
       state.list.push(action.list);
       return {
@@ -23,10 +42,55 @@ export default function Reducer(state = initState, action) {
         info: infoCopy,
       };
 
+    case "CHANGE_CATATAN":
+      var catatan = action.catatan;
+      var id = action.index;
+
+      return {
+        ...state,
+        akunInfo: {
+          ...state.akunInfo,
+          [id]: {
+            ...state.akunInfo[id],
+            catatan: catatan,
+          },
+        },
+      };
+
+    case "CHANGE_KREDIT":
+      var kredit = action.kredit;
+      var id = action.index;
+
+      return {
+        ...state,
+        akunInfo: {
+          ...state.akunInfo,
+          [id]: {
+            ...state.akunInfo[id],
+            kredit: kredit,
+          },
+        },
+      };
+
+    case "CHANGE_DEBIT":
+      var debit = action.debit;
+      var id = action.index;
+
+      return {
+        ...state,
+        akunInfo: {
+          ...state.akunInfo,
+          [id]: {
+            ...state.akunInfo[id],
+            debit: debit,
+          },
+        },
+      };
+
     case "CHANGE_ID":
-    var dataId = action.id;
-    var id = action.index;
-    //var data = action.listData.attributes;
+      var dataId = action.id;
+      var id = action.index;
+      //var data = action.listData.attributes;
 
       return {
         ...state,
@@ -40,9 +104,9 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CHANGE_TOTAL_HUTANG_JATUH_TEMPO":
-    var totalHutangJatuhTempo = action.totalHutangJatuhTempo;
-    var id = action.index;
-    //var data = action.listData.attributes;
+      var totalHutangJatuhTempo = action.totalHutangJatuhTempo;
+      var id = action.index;
+      //var data = action.listData.attributes;
 
       return {
         ...state,
@@ -56,9 +120,9 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CHANGE_DATA_SISAHUTANG":
-    var sisahutang = action.sisahutang;
-    var id = action.index;
-    //var data = action.listData.attributes;
+      var sisahutang = action.sisahutang;
+      var id = action.index;
+      //var data = action.listData.attributes;
 
       return {
         ...state,
@@ -72,9 +136,9 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CHANGE_PILIH_DATA":
-    var pilihdata = action.pilihData;
-    var id = action.index;
-    //var data = action.listData.attributes;
+      var pilihdata = action.pilihData;
+      var id = action.index;
+      //var data = action.listData.attributes;
 
       return {
         ...state,
@@ -88,9 +152,9 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CHANGE_DATA_TUNAI":
-    var tunai = action.tunai;
-    var id = action.index;
-    //var data = action.listData.attributes;
+      var tunai = action.tunai;
+      var id = action.index;
+      //var data = action.listData.attributes;
 
       return {
         ...state,
@@ -104,9 +168,9 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CHANGE_DATA_TRANSFER":
-    var transfer = action.transfer;
-    var id = action.index;
-    //var data = action.listData.attributes;
+      var transfer = action.transfer;
+      var id = action.index;
+      //var data = action.listData.attributes;
 
       return {
         ...state,
@@ -120,9 +184,9 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CHANGE_DATA_GIRO":
-    var giro = action.giro;
-    var id = action.index;
-    //var data = action.listData.attributes;
+      var giro = action.giro;
+      var id = action.index;
+      //var data = action.listData.attributes;
 
       return {
         ...state,
@@ -136,9 +200,9 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CHANGE_DATA_CN":
-    var cn = action.cn;
-    var id = action.index;
-    //var data = action.listData.attributes;
+      var cn = action.cn;
+      var id = action.index;
+      //var data = action.listData.attributes;
 
       return {
         ...state,
@@ -152,9 +216,9 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CHANGE_DATA_OTH":
-    var oth = action.oth;
-    var id = action.index;
-    //var data = action.listData.attributes;
+      var oth = action.oth;
+      var id = action.index;
+      //var data = action.listData.attributes;
 
       return {
         ...state,
@@ -176,7 +240,7 @@ export default function Reducer(state = initState, action) {
       };
 
     case "CLEAR_DATA":
-      state = { list: [], info: {}, preData: {} };
+      state = { akun: [], akunInfo: {}, list: [], info: {}, preData: {} };
       return state;
 
     default:

@@ -74,7 +74,6 @@ function CetakPenjualan({ props }) {
   const isDPPActive = data?.is_dpp_active;
   const dpp = data?.dpp;
   const ppn = data?.ppn;
-  const deliveryFee = data?.delivery_fee || 0;
   const biayaTambahan = [1, 2, 3].reduce((acc, curr) => {
     if (data?.[`additional_fee_${curr}_sub`]) {
       console.log(`additional fee ${curr}`, data?.[`additional_fee_${curr}_sub`]);
@@ -85,7 +84,7 @@ function CetakPenjualan({ props }) {
   }, 0);
 
   // additional cost
-  const addFee = (data?.additional_fee_1_sub + data?.additional_fee_2_sub + data?.additional_fee_3_sub) ?? 0;
+  const addFee = data?.additional_fee_1_sub + data?.additional_fee_2_sub + data?.additional_fee_3_sub ?? 0;
   const deliveryFee = data?.delivery_fee ?? 0;
 
   const print = () => {

@@ -10,10 +10,12 @@ const nextConfig = {
   reactStrictMode: true,
   env: {
     BASE_URL: process.env.BASE_URL,
-    NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL,
-    IMAGE_URL: process.env.BASE_URL,
-    BACKEND_URL: "https://localhost:8080",
-    STAKEHOLDER_NAME: process.env.REACT_APP_STAKEHOLDER_NAME,
+    NEXT_PUBLIC_URL: "https://strapi-js.keelola.web.id/api",
+    IMAGE_URL: "https://strapi-js.keelola.web.id/",
+    // NEXT_PUBLIC_URL: "https://js-strapi.keelola.net/api",
+    // NEXT_PUBLIC_URL: "http://localhost:1337/api",
+    BACKEND_URL: "https://strapi-js.keelola.web.id/api",
+    STAKEHOLDER_NAME: "APOTEK JAYA SEHAT",
     MAIN_COLOR: "#056A81",
     TAG_RED: "#F50",
     TAG_ORANGE: "#F4B042",
@@ -44,9 +46,7 @@ module.exports = withPlugins(
       withBundleAnalyzer,
       {
         analyzeServer: ["server", "both"].includes(process.env.BUNDLE_ANALYZE),
-        analyzeBrowser: ["browser", "both"].includes(
-          process.env.BUNDLE_ANALYZE
-        ),
+        analyzeBrowser: ["browser", "both"].includes(process.env.BUNDLE_ANALYZE),
         bundleAnalyzerConfig: {
           server: {
             analyzerMode: "static",
@@ -62,4 +62,3 @@ module.exports = withPlugins(
   ],
   nextConfig
 );
-
