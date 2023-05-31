@@ -236,7 +236,8 @@ function Jurnal({ props }) {
         checkData++;
       }
     });
-    //setDataValues(values);
+
+    setDataValues(values);
     setLoading(false);
   };
 
@@ -479,10 +480,10 @@ function Jurnal({ props }) {
                     formObj={form}
                     setDebitValue={setDebitValue}
                     setKreditValue={setKreditValue}
-                    // setTotalDebitValue={setTotalDebitValue}
-                    // setTotalKreditValue={setTotalKreditValue}
-                    // totalDebitValue={totalDebitValue}
-                    // totalKreditValue={totalKreditValue}
+                    setTotalDebitValue={setTotalDebitValue}
+                    setTotalKreditValue={setTotalKreditValue}
+                    totalDebitValue={totalDebitValue}
+                    totalKreditValue={totalKreditValue}
                   />
                 </div>
               )}

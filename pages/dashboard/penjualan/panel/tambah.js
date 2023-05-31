@@ -128,7 +128,7 @@ const fetchCustomer = async (cookies) => {
 };
 
 function Toko({ props }) {
-  const products = useSelector((state) => state.Sales); console.log("product", products);
+  const products = useSelector((state) => state.Sales);
   const dispatch = useDispatch();
 
   var selectedProduct = products?.productList;
