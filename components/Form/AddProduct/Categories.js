@@ -42,28 +42,28 @@ export default function Categories({
 
   const handleChangeCategory = async (newValue) => {
     setSelectedSubCategory(0);
-    fetchSubCategoriesById(newValue);
+    // fetchSubCategoriesById(newValue);
 
-    let list = [];
-    let filteredArr = data.find((item) => {
-      // console.log("items", item.value);
-      // console.log(item.category.category_id, newValue);
-      // console.log("new value", item.value, newValue, item.value === newValue);
-      // if (item.value === newValue) {
-      //   console.log("new value", item.value, newValue);
-      //   return item.category.category_id;
-      // }
+    // let list = [];
+    // let filteredArr = data.find((item) => {
+    //   // console.log("items", item.value);
+    //   // console.log(item.category.category_id, newValue);
+    //   // console.log("new value", item.value, newValue, item.value === newValue);
+    //   // if (item.value === newValue) {
+    //   //   console.log("new value", item.value, newValue);
+    //   //   return item.category.category_id;
+    //   // }
 
-      return item.category.category_id === newValue;
-    });
+    //   return item.category.category_id === newValue;
+    // });
 
-    list.push(filteredArr);
+    // list.push(filteredArr);
 
-    console.log("selected category", filteredArr, list);
     // console.log("selected category with filter", data, newValue);
     // setCategory(newValue);
+    console.log("selected category", data);
     setCategory(data);
-    onSelectCategory(list);
+    // onSelectCategory(list);
   };
 
   const handleSearchCategory = (newValue) => {
@@ -75,7 +75,9 @@ export default function Categories({
   };
 
   const options = data.map((d) => (
-    <Select.Option key={d.value}>{d.label}</Select.Option>
+    <Select.Option key={d.value} value={d.value}>
+      {d.label}
+    </Select.Option>
   ));
 
   const fetchCategory = async (query, callback) => {
@@ -98,11 +100,20 @@ export default function Categories({
         const res = await req.json();
 
         if (req.status == 200) {
-          const categoriesResult = res.data.map((categories) => ({
-            label: `${categories.attributes.category_id} - ${categories.attributes.name}`,
-            value: categories.attributes.category_id,
-            category: categories.attributes,
-          }));
+          // const categoriesResult = res.data.map((categories) =>  ({
+          //   label: `${categories.attributes.category_id} - ${categories.attributes.name}`,
+          //   value: categories.attributes.category_id,
+          //   category: categories.attributes,
+          // }));
+
+          const categoriesResult = res.data.map((categories) => {
+            console.log("result categories id", categories.id);
+            return {
+              label: `${categories.attributes.category_id} - ${categories.attributes.name}`,
+              value: categories.id,
+              category: categories.attributes,
+            };
+          });
 
           callback(categoriesResult);
         }
