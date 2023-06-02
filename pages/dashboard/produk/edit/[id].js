@@ -394,6 +394,10 @@ const Edit = ({ props }) => {
     form.setFieldsValue({ SKU: productCode });
   }, [category, selectedManufactures, selectedGroups]);
 
+  useEffect(() => {
+    form.setFieldsValue({ SKU: product.attributes?.SKU });
+  }, []);
+
   const onFinishFailed = () => {
     const error = form.getFieldsError();
     error.forEach((value) => {

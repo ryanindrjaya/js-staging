@@ -7,7 +7,9 @@ import router, { useRouter } from "next/router";
 import { useSelector, useDispatch } from "react-redux";
 import { Input, notification, Select, DatePicker } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import JurnalTable from "@iso/components/ReactDataTable/Cost/JurnalTable";
+import Table from "@iso/components/ReactDataTable/Report/PurchaseReturSaleTable";
+import SearchSupplier from "@iso/components/Form/AddReport/SearchSupplier";
+import SearchLocations from "@iso/components/Form/AddReport/SearchLocations";
 import nookies from "nookies";
 import tokenVerify from "../../../../authentication/tokenVerify";
 
@@ -23,19 +25,15 @@ Jurnal.getInitialProps = async (context) => {
   const reqLocation = await fetchLocation(cookies);
   const locations = await reqLocation.json();
 
-  const reqJurnal = await fetchJurnal(cookies);
-  const jurnal = await reqJurnal.json();
-
-  const reqCOA = await fetchCOA(cookies);
-  const coa = await reqCOA.json();
+  const reqPurchasing = await fetchPurchasing(cookies);
+  const purchasing = await reqPurchasing.json();
 
   return {
     props: {
       user,
-      locations,
-      jurnal,
       dataUser,
-      coa,
+      locations,
+      purchasing,
     },
   };
 };
@@ -82,22 +80,8 @@ const fetchLocation = async (cookies) => {
   return req;
 };
 
-const fetchJurnal = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=deep";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
-
-  const req = await fetch(endpoint, options);
-  return req;
-};
-
-const fetchCOA = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?populate";
+const fetchPurchasing = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings";
   const options = {
     method: "GET",
     headers: {
@@ -112,20 +96,21 @@ const fetchCOA = async (cookies) => {
 
 function Jurnal({ props }) {
   const user = props.user;
-  const data = props.jurnal;
-  const dataUser = props.dataUser;
-  const coa = props.coa;
+  const dataUser = props?.dataUser;
+  const locations = props.locations;
+  const purchasing = props.purchasing;
   const router = useRouter();
-  const [jurnal, setJurnal] = useState(data);
+  const [supplier, setSupplier] = useState();
+  const [location, setLocation] = useState();
   const [searchParameters, setSearchParameters] = useState({});
   const dispatch = useDispatch();
 
   // Range Picker
   const { RangePicker } = DatePicker;
 
-  const handleAdd = () => {
-    router.push("/dashboard/keuangan/jurnal/tambah");
-  };
+  // const handleAdd = () => {
+  //   router.push("/dashboard/keuangan/jurnal/tambah");
+  // };
 
   const handleUpdate = (id) => {
     // router.push("/dashboard/pembelian/order_pembelian/edit/" + id);
@@ -136,54 +121,54 @@ function Jurnal({ props }) {
     );
   };
 
-  const handleDelete = async (data) => {
+  // const handleDelete = async (data) => {
 
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals/" + data.id;
-    const cookies = nookies.get(null, "token");
+  //   const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals/" + data.id;
+  //   const cookies = nookies.get(null, "token");
 
-    const options = {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-    };
+  //   const options = {
+  //     method: "DELETE",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: "Bearer " + cookies.token,
+  //     },
+  //   };
 
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
-    if (res) {
-      const res = await fetchData(cookies);
-      openNotificationWithIcon(
-        "success",
-        "Berhasil menghapus data",
-        "Jurnal yang dipilih telah berhasil dihapus. Silahkan cek kembali jurnal"
-      );
-      setJurnal(res);
-    }
-  };
+  //   const req = await fetch(endpoint, options);
+  //   const res = await req.json();
+  //   if (res) {
+  //     const res = await fetchData(cookies);
+  //     openNotificationWithIcon(
+  //       "success",
+  //       "Berhasil menghapus data",
+  //       "Jurnal yang dipilih telah berhasil dihapus. Silahkan cek kembali jurnal"
+  //     );
+  //     setJurnal(res);
+  //   }
+  // };
 
-  const openNotificationWithIcon = (type, title, message) => {
-    notification[type]({
-      message: title,
-      description: message,
-    });
-  };
+  // const openNotificationWithIcon = (type, title, message) => {
+  //   notification[type]({
+  //     message: title,
+  //     description: message,
+  //   });
+  // };
 
-  const fetchData = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=deep";
-    const options = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-    };
+  // const fetchData = async (cookies) => {
+  //   const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=deep";
+  //   const options = {
+  //     method: "GET",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: "Bearer " + cookies.token,
+  //     },
+  //   };
 
-    const req = await fetch(endpoint, options);
-    const res = req.json();
+  //   const req = await fetch(endpoint, options);
+  //   const res = req.json();
 
-    return res;
-  };
+  //   return res;
+  // };
 
   const logOut = () => {
     dispatch(logout());
@@ -254,7 +239,7 @@ function Jurnal({ props }) {
       const req = await fetch(endpoint, options);
       const res = await req.json();
 
-      setJurnal(res);
+      //setJurnal(res);
       //console.log("endpoint", endpoint, res);
     };
 
@@ -264,55 +249,22 @@ function Jurnal({ props }) {
   return (
     <>
       <Head>
-        <title>DAFTAR JURNAL MEMO</title>
+        <title>Laporan pembelian dan retur beli barang </title>
       </Head>
       <DashboardLayout>
         <LayoutWrapper style={{}}>
-          <TitlePage titleText={"DAFTAR JURNAL MEMO"} />
+          <TitlePage titleText={"LAPORAN PEMBELIAN DAN RETUR BELI BARANG"} />
           <LayoutContent>
             <div className="w-full flex justify-start">
               <div className="w-full md:w-1/4 px-3 mb-2">
-                <Select
-                  placeholder="User"
-                  size="large"
-                  style={{
-                    width: "100%",
-                  }}
-                  allowClear
-                  onChange={(e) =>
-                    setSearchParameters({ ...searchParameters, user: e })
-                  }
-                >
-                  {dataUser.map((element) => {
-                    return (
-                      <Select.Option value={element.id} key={element.name}>
-                        {element.name}
-                      </Select.Option>
-                    );
-                  })}
-                </Select>
+                 <SearchLocations
+                   onChangeLocation={setLocation}
+                 />
               </div>
               <div className="w-full md:w-1/4 px-3">
-                <Select
-                  placeholder="Akun"
-                  size="large"
-                  style={{
-                    width: "100%",
-                    marginRight: "10px",
-                  }}
-                  allowClear
-                  onChange={(e) =>
-                    setSearchParameters({ ...searchParameters, akun: e })
-                  }
-                >
-                  {coa.data.map((element) => {
-                    return (
-                      <Select.Option value={element.id} key={element.attributes.nama}>
-                        {element.attributes.nama}
-                      </Select.Option>
-                    );
-                  })}
-                </Select>
+                 <SearchSupplier 
+                   onChangeSupplier={setSupplier}
+                 />
               </div>
               <div className="w-full md:w-1/4 px-3">
                 <Select
@@ -323,14 +275,33 @@ function Jurnal({ props }) {
                     marginRight: "10px",
                   }}
                   allowClear
-                  onChange={(e) =>
-                    setSearchParameters({ ...searchParameters, tipeTransaksi: e })
-                  }
+                  // onChange={(e) =>
+                  //   setSearchParameters({ ...searchParameters, tipeTransaksi: e })
+                  // }
                 >
-                  <Select.Option value="Debit">Debit</Select.Option>
-                  <Select.Option value="Kredit">Kredit</Select.Option>
+                  <Select.Option value="tdk ada">Blom ada</Select.Option>
+                  {/* <Select.Option value="Kredit">Kredit</Select.Option> */}
                 </Select>
               </div>
+              <div className="w-full md:w-1/4 px-3">
+                <Select
+                  placeholder="Status Pembayaran"
+                  size="large"
+                  style={{
+                    width: "100%",
+                    marginRight: "10px",
+                  }}
+                  allowClear
+                  onChange={(e) =>
+                    setSearchParameters({ ...searchParameters, statusPembayaran: e })
+                  }
+                >
+                  <Select.Option value="tdk ada">Blom ada</Select.Option>
+                </Select>
+              </div>
+            </div>
+
+            <div className="w-full flex justify-end -mt-4">
               <div className="w-full md:w-1/4 px-3">
                 <RangePicker
                   size="large"
@@ -341,22 +312,7 @@ function Jurnal({ props }) {
               </div>
             </div>
 
-            <div className="w-full flex justify-between mt-2 mb-2">
-              <span className="text-black text-md font-bold ml-1 mt-5">Semua Jurnal</span>
-              <div className="float-right">
-                <button
-                  onClick={handleAdd}
-                  type="button"
-                  className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm mb-5 mx-2"
-                >
-                  <div className="text-white text-center text-sm font-bold">
-                    <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            <div className="w-full flex justify-between">
+            <div className="w-full flex justify-between mt-3">
               <button
                 onClick={handleUpdate}
                 type="button"
@@ -394,11 +350,11 @@ function Jurnal({ props }) {
                 </div>
               </button>
             </div>
-
-            <JurnalTable
-              data={jurnal}
+            
+            <Table
+              data={purchasing}
               onUpdate={handleUpdate}
-              onDelete={handleDelete}
+              //onDelete={handleDelete}
               //onPageChange={handlePageChange}
               //onChangeStatus={onChangeStatus}
               user={user}

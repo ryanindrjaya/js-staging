@@ -32,7 +32,7 @@ import debounce from "./utility/debounce";
 
 const Tambah = ({ props }) => {
   const [image, setImage] = useState();
-  const [category, setCategory] = useState();
+  const [category, setCategory] = useState(); console.log("kategori", category);
   const [uploadedOnce, setUploadedOnce] = useState(true);
   const [fileList, setFileList] = useState([]);
   const [statusSKU, setStatusSKU] = useState({
@@ -341,8 +341,7 @@ const Tambah = ({ props }) => {
       if (
         element.attributes.manufacture.data?.id == selectedManufactures &&
         element.attributes.group.data?.id == selectedGroups &&
-        element.attributes.category?.data.id ==
-          category[0]?.category?.category_id
+        element.attributes.category?.data.id == category[0]?.category?.category_id
       ) {
         manufacturesData++;
       }
@@ -371,7 +370,7 @@ const Tambah = ({ props }) => {
     ) {
       kodeProduct = categoryData + group + manufacture + manufacturesData;
     }
-
+    
     form.setFieldsValue({ SKU: kodeProduct });
   }, [category, selectedManufactures, selectedGroups, product]);
 
