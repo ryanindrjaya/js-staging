@@ -244,7 +244,7 @@ function Toko({ props }) {
 
     // create an array of promises by mapping over the productList
     const promises = products.productList.map(async (product) => {
-      const stock = await getStockAtLocation(product.id, locationId, unit);
+      const stock = await getStockAtLocation(product.id, unit);
       console.log("stock ", product.id, stock);
 
       tempData = {
@@ -265,9 +265,9 @@ function Toko({ props }) {
     }
   };
 
-  const getStockAtLocation = async (productId, locationId, unit) => {
+  const getStockAtLocation = async (productId, unit) => {
     try {
-      const response = await getStock(productId, locationId, unit);
+      const response = await getStock(productId, unit);
 
       console.log(`response ${unit}`, response?.stock?.[unit]);
 
@@ -770,6 +770,7 @@ function Toko({ props }) {
                     setProductSubTotal={setProductSubTotal}
                     dataLocationStock={dataLocationStock}
                     formObj={form}
+                    getProduct={getProductAtLocation}
                   />
                 </div>
               )}
