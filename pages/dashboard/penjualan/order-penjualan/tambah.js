@@ -15,6 +15,8 @@ import calculatePrice from "../utility/calculatePrice";
 import Customer from "@iso/components/Form/AddSale/CustomerForm";
 import nookies from "nookies";
 import moment from "moment";
+import confirm from "antd/lib/modal/confirm";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 
 PesananSales.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -184,19 +186,36 @@ function PesananSales({ props }) {
     maximumFractionDigits: 2,
   });
 
-  const onFinish = (values) => {
-    setLoading(true);
-    setInfo("sukses");
-    sale.data.forEach((element) => {
-      if (values.no_sales_sell == element.attributes.no_sales_sell) {
-        notification["error"]({
-          message: "Gagal menambahkan data",
-          description: "Data gagal ditambahkan, karena no penjualan sama",
-        });
-        setInfo("gagal");
-      }
-    });
-    setDataValues(values);
+  const onFinish = (values, accept) => {
+    if (accept) {
+      setLoading(true);
+      setInfo("sukses");
+      sale.data.forEach((element) => {
+        if (values.no_sales_sell == element.attributes.no_sales_sell) {
+          notification["error"]({
+            message: "Gagal menambahkan data",
+            description: "Data gagal ditambahkan, karena no penjualan sama",
+          });
+          setInfo("gagal");
+        }
+      });
+      setDataValues(values);
+    } else {
+      confirm({
+        title: "Apakah anda yakin?",
+        icon: <ExclamationCircleOutlined />,
+        content: "Harap periksa kembali data yang telah diinput.",
+        okText: "Ya",
+        okType: "danger",
+        cancelText: "Tidak",
+        onOk() {
+          onFinish(values, true);
+        },
+        onCancel() {
+          console.log("Cancel");
+        },
+      });
+    }
   };
 
   const createDetailSale = async () => {
@@ -286,6 +305,7 @@ function PesananSales({ props }) {
 
   useEffect(() => {
     if (listId.length > 0) {
+      console.log("list id: ", listId);
       createSale(dataValues);
     }
   }, [listId]);
@@ -295,11 +315,11 @@ function PesananSales({ props }) {
   }, [dataValues]);
 
   useEffect(() => {
-    if (customer){
+    if (customer) {
       var tempoDays = customer?.attributes?.credit_limit_duration;
       form.setFieldsValue({
         tempo_days: tempoDays.toString(),
-        tempo_time: customer?.attributes?.credit_limit_duration,
+        tempo_time: customer?.attributes?.credit_limit_duration_type,
       });
     }
   }, [customer]);
@@ -324,8 +344,6 @@ function PesananSales({ props }) {
       }
     });
   };
-
-  console.log("redux", products);
 
   return (
     <>
@@ -355,7 +373,7 @@ function PesananSales({ props }) {
               </div>
             </div>
 
-            <Form form={form} name="add" onFinish={onFinish} onFinishFailed={validateError}>
+            <Form form={form} name="add" onFinish={(values) => onFinish(values, false)} onFinishFailed={validateError}>
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-4">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item

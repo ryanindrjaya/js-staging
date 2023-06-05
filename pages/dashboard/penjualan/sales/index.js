@@ -271,6 +271,7 @@ function SalesSale({ props }) {
   const detailColumns = [
     {
       name: "Nama Produk",
+      wrap: true,
       width: "120px",
       selector: ({ attributes }) => (
         <Link href={`/dashboard/produk?id=${attributes?.product?.data?.id}`}>
@@ -579,7 +580,7 @@ function SalesSale({ props }) {
                     </Descriptions.Item>
                   </Descriptions>
                   <Descriptions size="middle" title="DETAIL PENJUALAN" bordered className="mt-2">
-                    <Descriptions.Item label={`Diskon ${selectedData?.attributes?.disc_type}`} span={2}>
+                    <Descriptions.Item label={`Diskon ${selectedData?.attributes?.disc_type || ""}`} span={2}>
                       {formatter.format(selectedData?.attributes?.disc_value || 0)}
                     </Descriptions.Item>
                     <Descriptions.Item label="Biaya Pengiriman" span={4}>

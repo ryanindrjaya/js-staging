@@ -14,6 +14,7 @@ export default function ReactDataTable({
   dataDetailTrx,
   stokString,
   formObj,
+  getProduct,
 }) {
   const dispatch = useDispatch();
   var defaultDp1 = 0;
@@ -41,6 +42,7 @@ export default function ReactDataTable({
       product: value,
       index,
     });
+    getProduct(data);
   };
 
   const onChangeQty = (value, data, index) => {
@@ -141,15 +143,15 @@ export default function ReactDataTable({
     },
     {
       name: "Stok Gudang",
-      width: "300px",
       selector: (row, idx) => {
+        const selectedUnit = products.productInfo[idx]?.unit ?? row.attributes?.unit_1;
         return (
           <div
             className={`disabled:bg-white italic ${
               dataLocationStock?.[row.id]?.includes("Kosong") ? "text-red-500" : "text-green-500"
             }`}
           >
-            {dataLocationStock?.[row.id] ?? "Pilih Gudang"}
+            {`${dataLocationStock?.[row.id]}` ?? "Pilih Gudang"}
           </div>
         );
       },

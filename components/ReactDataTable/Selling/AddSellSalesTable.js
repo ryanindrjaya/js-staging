@@ -202,6 +202,27 @@ export default function ReactDataTable({
           defaultOption = products.productInfo[idx].unit;
         }
 
+        const stock = [1, 2, 3, 4, 5].reduce((acc, curr) => {
+          if (row.attributes[`unit_${curr}`] !== null) {
+            if (curr === 1) {
+              acc = {
+                ...acc,
+                [row.attributes[`unit_${curr}`]]: row.stock?.[row.attributes[`unit_${curr}`]]?.stock,
+              };
+            } else {
+              const thisStock = row.stock?.[row.attributes[`unit_${curr}`]]?.stock || 0;
+              const conversion = row.attributes[`qty_${curr}`];
+              const parentStock = acc[row.attributes[`unit_${curr - 1}`]] * conversion;
+
+              acc = {
+                ...acc,
+                [row.attributes[`unit_${curr}`]]: thisStock + parentStock,
+              };
+            }
+          }
+          return acc;
+        }, {});
+
         return (
           <>
             <Row>
@@ -215,7 +236,7 @@ export default function ReactDataTable({
                       message: "Required",
                     },
                   ]}
-                  max={row.stock?.[defaultOption]?.stock || 0}
+                  max={stock[defaultOption] || 0}
                   min={1}
                   style={{
                     width: "30%",

@@ -137,6 +137,7 @@ function PembayaranToko({ props }) {
       }
 
       if (paymentValue >= totalHarga) {
+        await createInventoryFromPenjualan(record);
         await CreateStorePayment(
           totalHarga,
           kembali,
@@ -147,8 +148,6 @@ function PembayaranToko({ props }) {
           "Pembayaran",
           reloadPage
         );
-
-        await createInventoryFromPenjualan(record);
       } else {
         message.error("Pembayaran tidak mencukupi", 2);
       }

@@ -18,16 +18,13 @@ const getStoreSale = async (id) => {
 };
 
 const getStoreRetur = async (id) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_URL}/retur-store-sales/${id}?populate=deep`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${cookies.token}`,
-      },
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/retur-store-sales/${id}?populate=deep`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${cookies.token}`,
+    },
+  });
 
   const data = await response.json();
 
@@ -84,7 +81,6 @@ export async function createInventoryFromReturPenjualan(row) {
   const retur_store_sale_details = returStoreSale.data.attributes.retur_store_sale_details.data;
   const no_retur_store_sale = returStoreSale.data.attributes.no_retur_store_sale;
 
-
   retur_store_sale_details.forEach((element) => {
     console.log("element store detail (penjualan)", element);
     const unitOrder = element.attributes.unit;
@@ -128,7 +124,6 @@ async function addToGudang(body) {
     },
     body: JSON.stringify(body),
   });
-
 
   const data = await response.json();
   console.log("body", JSON.stringify(body));

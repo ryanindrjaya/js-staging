@@ -18,6 +18,8 @@ import LoadingAnimations from "@iso/components/Animations/Loading";
 import Customer from "@iso/components/Form/AddSale/CustomerForm";
 import ConfirmDialog from "@iso/components/Alert/ConfirmDialog";
 import createInventory from "../utility/createInventory";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
+import confirm from "antd/lib/modal/confirm";
 
 Toko.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -341,28 +343,45 @@ function Toko({ props }) {
     }
   };
 
-  const onFinish = (values) => {
-    totalBelumDibayar = grandTotal;
-    setLoading(true);
-    values.status_data = simpanData;
-    setInfo("sukses");
-    panel.data.forEach((element) => {
-      if (values.no_panel_sale == element.attributes.no_panel_sale) {
-        notification["error"]({
-          message: "Gagal menambahkan data",
-          description: "Data gagal ditambahkan, karena no penjualan sama",
-        });
-        setInfo("gagal");
-      }
+  const onFinish = (values, accept) => {
+    if (accept) {
+      totalBelumDibayar = grandTotal;
+      setLoading(true);
+      values.status_data = simpanData;
+      setInfo("sukses");
+      panel.data.forEach((element) => {
+        if (values.no_panel_sale == element.attributes.no_panel_sale) {
+          notification["error"]({
+            message: "Gagal menambahkan data",
+            description: "Data gagal ditambahkan, karena no penjualan sama",
+          });
+          setInfo("gagal");
+        }
 
-      if (customer.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
-    });
+        if (customer.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
+      });
 
-    cekLimit();
-    cekTermin();
+      cekLimit();
+      cekTermin();
 
-    setDataValues(values);
-    setLoading(false);
+      setDataValues(values);
+      setLoading(false);
+    } else {
+      confirm({
+        title: "Apakah anda yakin?",
+        icon: <ExclamationCircleOutlined />,
+        content: "Harap periksa kembali data yang telah diinput.",
+        okText: "Ya",
+        okType: "danger",
+        cancelText: "Tidak",
+        onOk() {
+          onFinish(values, true);
+        },
+        onCancel() {
+          console.log("Cancel");
+        },
+      });
+    }
   };
 
   const createDetailSale = async () => {
@@ -679,7 +698,7 @@ function Toko({ props }) {
               initialValues={{
                 remember: true,
               }}
-              onFinish={onFinish}
+              onFinish={(values) => onFinish(values, false)}
               onFinishFailed={validateError}
             >
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-5">
