@@ -14,6 +14,8 @@ import createDetailSaleFunc from "../utility/createDetailSale";
 import calculatePrice from "../utility/calculatePrice";
 import DateTimeComponent from "../../../../components/DateTime/dateTime";
 import nookies from "nookies";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
+import confirm from "antd/lib/modal/confirm";
 
 Toko.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -358,28 +360,44 @@ function Toko({ props }) {
     }
   };
 
-  const onFinish = async (values) => {
-    setLoading(true);
-
-    const isShowingPopup = await checkReturQty(values);
-    console.log("isShowingPopup", isShowingPopup);
-    if (isShowingPopup) {
-      setLoading(false);
-      return;
-    }
-
-    setInfo("sukses");
-    storeSale.data.forEach((element) => {
-      if (values.no_store_sale == element.attributes.no_store_sale) {
-        notification["error"]({
-          message: "Gagal menambahkan data",
-          description: "Data gagal ditambahkan, karena no penjualan sama",
-        });
-        setInfo("gagal");
+  const onFinish = async (values, accept) => {
+    if (accept) {
+      setLoading(true);
+      const isShowingPopup = await checkReturQty(values);
+      console.log("isShowingPopup", isShowingPopup);
+      if (isShowingPopup) {
+        setLoading(false);
+        return;
       }
-    });
-    setDataValues(values);
-    setLoading(false);
+
+      setInfo("sukses");
+      storeSale.data.forEach((element) => {
+        if (values.no_store_sale == element.attributes.no_store_sale) {
+          notification["error"]({
+            message: "Gagal menambahkan data",
+            description: "Data gagal ditambahkan, karena no penjualan sama",
+          });
+          setInfo("gagal");
+        }
+      });
+      setDataValues(values);
+      setLoading(false);
+    } else {
+      confirm({
+        title: "Apakah anda yakin?",
+        icon: <ExclamationCircleOutlined />,
+        content: "Harap periksa kembali data yang telah diinput.",
+        okText: "Ya",
+        okType: "danger",
+        cancelText: "Tidak",
+        onOk() {
+          onFinish(values, true);
+        },
+        onCancel() {
+          console.log("Cancel");
+        },
+      });
+    }
   };
 
   const createDetailSale = async () => {
@@ -623,7 +641,7 @@ function Toko({ props }) {
               initialValues={{
                 remember: true,
               }}
-              onFinish={onFinish}
+              onFinish={(values) => onFinish(values, false)}
               onFinishFailed={validateError}
             >
               <DateTimeComponent />

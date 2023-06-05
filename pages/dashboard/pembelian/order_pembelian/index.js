@@ -17,16 +17,6 @@ Pembelian.getInitialProps = async (context) => {
   const req = await fetchData(cookies);
   data = await req.json();
 
-  if (req.status !== 200) {
-    context.res.writeHead(302, {
-      Location: "/signin?session=false",
-      "Content-Type": "text/html; charset=utf-8",
-    });
-    context?.res?.end();
-
-    return {};
-  }
-
   return {
     props: {
       data,
@@ -180,18 +170,17 @@ function Pembelian({ props }) {
   };
 
   const onChangeStatus = (status, row) => {
-    row.attributes.status = status;
-    handleChangeStatus(row, row.id);
+    handleChangeStatus(status, row.id, "status");
   };
 
   const onChangeStatusPengiriman = (status, row) => {
-    handleChangeStatus(status, row.id);
+    handleChangeStatus(status, row.id, "delivery_status");
   };
 
-  const handleChangeStatus = async (status, id) => {
+  const handleChangeStatus = async (status, id, key) => {
     const newValues = {
       data: {
-        status,
+        [key]: status,
       },
     };
 
