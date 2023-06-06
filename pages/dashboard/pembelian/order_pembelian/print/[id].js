@@ -53,9 +53,9 @@ const Print = ({ props }) => {
 
     for (let index = 1; index < 6; index++) {
       if (product.attributes[`unit_${index}`] === unit) {
-        disc1 = detail.dp1 || product.attributes[`unit_${index}_dp1`] || 0;
-        disc2 = detail.dp2 || product.attributes[`unit_${index}_dp2`] || 0;
-        disc3 = detail.dp3 || product.attributes[`unit_${index}_dp3`] || 0;
+        disc1 = detail.dp1 ?? product?.attributes?.[`unit_${index}_dp1`] ?? 0;
+        disc2 = detail.dp2 ?? product?.attributes?.[`unit_${index}_dp2`] ?? 0;
+        disc3 = detail.dp3 ?? product?.attributes?.[`unit_${index}_dp3`] ?? 0;
       }
     }
 
