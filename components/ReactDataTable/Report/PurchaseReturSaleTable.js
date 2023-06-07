@@ -3,6 +3,7 @@ import AlertDialog from "../../Alert/Alert";
 import { Popover, Select, Row, Tag, notification } from "antd";
 import { EditOutlined, PrinterOutlined, UnorderedListOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
+import React, { useState } from "react";
 
 export default function ReactDataTable({
   data,
@@ -110,37 +111,226 @@ export default function ReactDataTable({
       },
     },
   };
-
+  console.log(data.data,"data");
   const columns = [
     {
       name: "Nama Produk",
-      width: "250px",
-      selector: (row) => console.log(row),
+      width: "200px",
+      cell: (row) => {
+        const cellData = row.attributes.purchasing_details.data.map((element, index) => (
+          <p key={index}>{element.attributes.product.data.attributes.name}</p>
+        ));
+
+        var cellRetur = null;
+        if(row.attributes.returs.data.length != 0){
+        const cellReturNo = row.attributes.returs.data.map((element, index) => (
+          <p key={index}>
+            <p className="mb-3"><span className="font-bold">Supplier : </span>{row.attributes.supplier.data.attributes.name}</p>
+            <p>
+              {element.attributes.retur_details.data.map((item, idx) => 
+                (<p key={idx}>{item.attributes.products.data[0].attributes.name}</p>)
+              )}
+            </p>
+            <hr/>
+            <p className="py-2"></p>
+          </p>
+        ));
+        cellRetur = cellReturNo;
+        }
+
+        return( 
+          <div className="mt-2">
+            <p className="mb-3"><span className="font-bold">Supplier : </span>{row.attributes.supplier.data.attributes.name}</p>
+            <p>{cellData}</p>
+            <hr/> 
+            <p className="py-2"> </p>
+            <p>{cellRetur}</p>
+          </div>
+        );
+      },
     },
     {
       name: "Jumlah",
-      width: "180px",
-      //selector: (row) => row.attributes?.added_by ?? "-",
+      width: "150px",
+      cell: (row) => {
+        const cellData = row.attributes.purchasing_details.data.map((element, index) => (
+          <p key={index}>{element.attributes.total_order} {element.attributes.unit_order}</p>
+        ));
+
+        var cellRetur = null;
+        if(row.attributes.returs.data.length != 0){
+        const cellReturNo = row.attributes.returs.data.map((element, index) => (
+          <p key={index}>
+            <p className="mb-3"><span className="font-bold">Tanggal : </span>{formatMyDate(row.attributes.date_purchasing)}</p>
+            <p>
+              {element.attributes.retur_details.data.map((item, idx) => 
+                (<p key={idx}>{item.attributes.qty} {item.attributes.unit}</p>)
+              )}
+            </p>
+            <hr/>
+            <p className="py-2"></p>
+          </p>
+        ));
+        cellRetur = cellReturNo;
+        }
+
+        return( 
+          <div className="mt-2">
+            <p className="mb-3"><span className="font-bold">Tanggal : </span>{formatMyDate(row.attributes.date_purchasing)}</p>
+            <p>{cellData}</p>
+            <hr/> 
+            <p className="py-2"> </p>
+            <p>{cellRetur}</p>
+          </div>
+        );
+      },
     },
     {
       name: "Harga Satuan",
-      width: "150px",
-      //selector: (row) => formatMyDate(row.attributes?.tanggal ?? "-"),
+      width: "190px",
+      cell: (row) => {
+        const cellData = row.attributes.purchasing_details.data.map((element, index) => (
+          <p key={index}>{formatter.format(element.attributes.unit_price)}</p>
+        ));
+
+        var cellRetur = null;
+        if(row.attributes.returs.data.length != 0){
+        const cellReturNo = row.attributes.returs.data.map((element, index) => (
+          <p key={index}>
+            <p className="mb-3"><span className="font-bold">No : </span>{element.attributes.no_retur}</p>
+            <p>
+              {element.attributes.retur_details.data.map((item, idx) => 
+                (<p key={idx}>{formatter.format(item.attributes.harga_satuan)}</p>)
+              )}
+            </p>
+            <hr/>
+            <p className="py-2"></p>
+          </p>
+        ));
+        cellRetur = cellReturNo;
+        }
+
+        return( 
+          <div className="mt-2">
+            <p className="mb-3"><span className="font-bold">No : </span>{row.attributes.no_purchasing}</p>
+            <p>{cellData}</p>
+            <hr/> 
+            <p className="py-2"> </p>
+            <p>{cellRetur}</p>
+          </div>
+        );
+      },
     },
     {
       name: "Diskon",
-      width: "120px",
-      //selector: (row) => row.attributes?.chart_of_account?.data?.attributes?.kode ?? "-",
+      width: "200px",
+      cell: (row) => {
+        const cellData = row.attributes.purchasing_details.data.map((element, index) => (
+          <p key={index}>
+            {formatter.format(element.attributes.disc ?? 0)} {element.attributes.dp1}% {element.attributes.dp2}% {element.attributes.dp3}% 
+          </p>
+        ));
+
+        var cellRetur = null;
+        if(row.attributes.returs.data.length != 0){
+        const cellReturNo = row.attributes.returs.data.map((element, index) => (
+          <p key={index}>
+            <p className="mb-3"><span className="font-bold">Nota Supp : </span>{element.attributes.no_nota_suppplier ?? "tidak ada"}</p>
+            <p>
+              {element.attributes.retur_details.data.map((item, idx) => 
+                (<p className="py-2" key={idx}></p>)
+              )}
+            </p>
+            <hr/>
+            <p className="py-2"></p>
+          </p>
+        ));
+        cellRetur = cellReturNo;
+        }
+
+        return( 
+          <div className="mt-2">
+            <p className="mb-3"><span className="font-bold">Nota Supp : </span>{row.attributes.no_nota_suppplier}</p>
+            <p>{cellData}</p>
+            <hr/> 
+            <p className="py-1"> </p>
+            <p>{cellRetur}</p>
+          </div>
+        );
+      },
     },
     {
       name: "Harga Satuan Stlh Diskon",
-      width: "210px",
-      //selector: (row) => row.attributes?.chart_of_account?.data?.attributes?.nama ?? "-",
+      width: "200px",
+      cell: (row) => {
+        const cellData = row.attributes.purchasing_details.data.map((element, index) => (
+          <p key={index}>{formatter.format(element.attributes.unit_price_after_disc)}</p>
+        ));
+
+        var cellRetur = null;
+        if(row.attributes.returs.data.length != 0){
+        const cellReturNo = row.attributes.returs.data.map((element, index) => (
+          <p key={index}>
+            <p className="mb-3"><span className="font-bold">Tempo : </span>{row.attributes.tempo_days} {row.attributes.tempo_time}</p>
+            <p>
+              {element.attributes.retur_details.data.map((item, idx) => 
+                (<p className="py-2" key={idx}></p>)
+              )}
+            </p>
+            <hr/>
+            <p className="py-2"></p>
+          </p>
+        ));
+        cellRetur = cellReturNo;
+        }
+
+        return( 
+          <div className="mt-2">
+            <p className="mb-3"><span className="font-bold">Tempo : </span>{row.attributes.tempo_days} {row.attributes.tempo_time}</p>
+            <p>{cellData}</p>
+            <hr/> 
+            <p className="py-2"> </p>
+            <p>{cellRetur}</p>
+          </div>
+        );
+      },
     },
     {
       name: "Subtotal",
-      width: "260px",
-      //selector: (row) => row.attributes?.catatan ?? "-",
+      width: "200px",
+      cell: (row) => {
+        var sum = row.attributes.purchasing_details.data.reduce((total, row) => total += row.attributes.sub_total, 0);
+        const cellData = row.attributes.purchasing_details.data.map((element, index) => (
+          <p key={index}>{formatter.format(element.attributes.sub_total)}</p>
+        ));
+
+        var cellRetur = null;
+        if(row.attributes.returs.data.length != 0){
+        const cellReturNo = row.attributes.returs.data.map((element, index) => (
+          <p key={index}>
+            <p className="py-2"></p>
+            <p>
+              {element.attributes.retur_details.data.map((item, idx) => 
+                (<p key={idx}>{formatter.format(item.attributes.sub_total)}</p>)
+              )}
+            </p>
+            <hr/>
+            <p>{formatter.format( element.attributes.retur_details.data.reduce((total, row) => total += row.attributes.sub_total, 0) )}</p>
+          </p>
+        ));
+        cellRetur = cellReturNo;
+        }
+
+        return( 
+          <div className="mt-2">
+            <p className="py-1"></p>
+            <p>{cellData}</p>
+            <hr/> 
+            <p>{formatter.format(sum)}</p>
+            <p>{cellRetur}</p>
+          </div>
+        );
+      },
     },
   ];
 

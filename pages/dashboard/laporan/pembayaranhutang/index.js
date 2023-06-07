@@ -7,7 +7,7 @@ import router, { useRouter } from "next/router";
 import { useSelector, useDispatch } from "react-redux";
 import { Input, notification, Select, DatePicker } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import Table from "@iso/components/ReactDataTable/Report/PurchaseReturSaleTable";
+import Table from "@iso/components/ReactDataTable/Report/PurchaseDebtTable";
 import SearchSupplier from "@iso/components/Form/AddReport/SearchSupplier";
 import SearchLocations from "@iso/components/Form/AddReport/SearchLocations";
 import nookies from "nookies";
@@ -22,18 +22,14 @@ Laporan.getInitialProps = async (context) => {
   const reqDataUser = await fetchUser(cookies);
   const dataUser = await reqDataUser.json();
 
-  const reqLocation = await fetchLocation(cookies);
-  const locations = await reqLocation.json();
-
-  const reqPurchasing = await fetchPurchasing(cookies);
-  const purchasing = await reqPurchasing.json();
+  const reqDebt = await fetchDebt(cookies);
+  const debt = await reqDebt.json();
 
   return {
     props: {
       user,
       dataUser,
-      locations,
-      purchasing,
+      debt,
     },
   };
 };
@@ -66,23 +62,8 @@ const fetchUser = async (cookies) => {
   return req;
 };
 
-const fetchLocation = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
-
-  const req = await fetch(endpoint, options);
-  return req;
-};
-
-const fetchPurchasing = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + 
-  "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products";
+const fetchDebt = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate[debt_details][populate][0]=purchasing";
   const options = {
     method: "GET",
     headers: {
@@ -98,17 +79,18 @@ const fetchPurchasing = async (cookies) => {
 function Laporan({ props }) {
   const user = props.user;
   const dataUser = props?.dataUser;
-  const locations = props.locations;
-  const purchasing = props.purchasing;
-  const [data, setData] = useState(purchasing);
+  const debt = props.debt;
   const router = useRouter();
   const [supplier, setSupplier] = useState();
-  const [location, setLocation] = useState();
   const [searchParameters, setSearchParameters] = useState({});
   const dispatch = useDispatch();
 
   // Range Picker
   const { RangePicker } = DatePicker;
+
+  const handlePrint = () => {
+    router.push("/dashboard/laporan/pembayaranhutang/print");
+  };
 
   // const handleAdd = () => {
   //   router.push("/dashboard/keuangan/jurnal/tambah");
@@ -149,12 +131,12 @@ function Laporan({ props }) {
   //   }
   // };
 
-  const openNotificationWithIcon = (type, title, message) => {
-    notification[type]({
-      message: title,
-      description: message,
-    });
-  };
+  // const openNotificationWithIcon = (type, title, message) => {
+  //   notification[type]({
+  //     message: title,
+  //     description: message,
+  //   });
+  // };
 
   // const fetchData = async (cookies) => {
   //   const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=deep";
@@ -204,17 +186,17 @@ function Laporan({ props }) {
           startDate = searchParameters?.range[0]?.format("YYYY-MM-DD");
           endDate = searchParameters?.range[1]?.format("YYYY-MM-DD");
 
-          query += `filters[date_purchasing][$gte]=${startDate}&filters[date_purchasing][$lte]=${endDate}`;
+          query += `filters[tanggal][$gte]=${startDate}&filters[tanggal][$lte]=${endDate}`;
         } else {
           query += "";
         }
 
-        // if (key === "akun" && searchParameters[key] !== undefined) {
-        //   console.log("search", searchParameters, data);
-        //   query += `filters[chart_of_account][id]=${searchParameters[key]}&`;
-        // } else {
-        //   query += "";
-        // }
+        if (key === "akun" && searchParameters[key] !== undefined) {
+          console.log("search", searchParameters, data);
+          query += `filters[chart_of_account][id]=${searchParameters[key]}&`;
+        } else {
+          query += "";
+        }
 
         // if (key === "area" || key === "wilayah") {
         //   if (searchParameters[key] !== null) {
@@ -227,9 +209,7 @@ function Laporan({ props }) {
         // }
       }
 
-      const endpoint = process.env.NEXT_PUBLIC_URL + 
-      "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&" + 
-      query;
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=deep&" + query;
 
       const cookies = nookies.get(null, "token");
       const options = {
@@ -243,7 +223,8 @@ function Laporan({ props }) {
       const req = await fetch(endpoint, options);
       const res = await req.json();
 
-      setData(res);
+      //setJurnal(res);
+      //console.log("endpoint", endpoint, res);
     };
 
     searchQuery();
@@ -252,39 +233,17 @@ function Laporan({ props }) {
   return (
     <>
       <Head>
-        <title>Laporan pembelian dan retur beli barang </title>
+        <title>Laporan pembayaran hutang pembelian </title>
       </Head>
       <DashboardLayout>
         <LayoutWrapper style={{}}>
-          <TitlePage titleText={"LAPORAN PEMBELIAN DAN RETUR BELI BARANG"} />
+          <TitlePage titleText={"LAPORAN PEMBAYARAN HUTANG PEMBELIAN"} />
           <LayoutContent>
             <div className="w-full flex justify-start">
-              <div className="w-full md:w-1/4 px-3 mb-2">
-                 <SearchLocations
-                   onChangeLocation={setLocation}
-                 />
-              </div>
               <div className="w-full md:w-1/4 px-3">
                  <SearchSupplier 
                    onChangeSupplier={setSupplier}
                  />
-              </div>
-              <div className="w-full md:w-1/4 px-3">
-                <Select
-                  placeholder="Tipe Transaksi"
-                  size="large"
-                  style={{
-                    width: "100%",
-                    marginRight: "10px",
-                  }}
-                  allowClear
-                  // onChange={(e) =>
-                  //   setSearchParameters({ ...searchParameters, tipeTransaksi: e })
-                  // }
-                >
-                  <Select.Option value="tdk ada">Blom ada</Select.Option>
-                  {/* <Select.Option value="Kredit">Kredit</Select.Option> */}
-                </Select>
               </div>
               <div className="w-full md:w-1/4 px-3">
                 <Select
@@ -299,12 +258,28 @@ function Laporan({ props }) {
                     setSearchParameters({ ...searchParameters, statusPembayaran: e })
                   }
                 >
-                  <Select.Option value="tdk ada">Blom ada</Select.Option>
+                  <Select.Option value="Dibayar">Dibayar</Select.Option>
+                  <Select.Option value="Dibayar Sebagian">Dibayar Sebagian</Select.Option>
+                  <Select.Option value="Belum Dibayar">Belum Dibayar</Select.Option>
                 </Select>
               </div>
-            </div>
-
-            <div className="w-full flex justify-end -mt-4">
+              <div className="w-full md:w-1/4 px-3">
+                <Select
+                  placeholder="Tipe Laporan"
+                  size="large"
+                  style={{
+                    width: "100%",
+                    marginRight: "10px",
+                  }}
+                  allowClear
+                  onChange={(e) =>
+                    setSearchParameters({ ...searchParameters, tipeLaporan: e })
+                  }
+                >
+                  <Select.Option value="Detail">Detail</Select.Option>
+                  <Select.Option value="Rekap">Rekap</Select.Option>
+                </Select>
+              </div>
               <div className="w-full md:w-1/4 px-3">
                 <RangePicker
                   size="large"
@@ -355,7 +330,7 @@ function Laporan({ props }) {
             </div>
             
             <Table
-              data={data}
+              data={debt}
               onUpdate={handleUpdate}
               //onDelete={handleDelete}
               //onPageChange={handlePageChange}
@@ -363,6 +338,56 @@ function Laporan({ props }) {
               user={user}
             />
 
+            {/* <table className="w-full">
+              <thead>
+                <tr>
+                  <th>No Pembayaran</th>
+                  <th>Tgl Bayar</th>
+                  <th>Nota Supplier</th>
+                  <th>No LPB</th>
+                  <th>Tgl LPB</th>
+                  <th>Nilai LPB</th>
+                  <th>Total Nilai RB</th>
+                  <th>Tunai</th>
+                  <th>Transfer</th>
+                  <th>Giro</th>
+                  <th>CN</th>
+                  <th>OTH</th>
+                  <th>Saldo Hutang</th>
+                </tr>
+              </thead>
+              <tbody>
+                {debt.data.forEach((item) => { console.log("item",item, debt.data);
+                  // <tr>
+                  //   <td>{item.attributes.no_hutang}</td>
+                  //   <td>lol</td>
+                  //   <td></td>
+                  //   <td></td>
+                  //   <td></td>
+                  //   <td></td>
+                  //   <td></td>
+                  //   <td></td>
+                  //   <td></td>
+                  //   <td></td>
+                  //   <td></td>
+                  //   <td></td>
+                  //   <td></td>
+                  // </tr>
+                })}
+              </tbody>
+            </table> */}
+
+            <div className="w-full flex justify-between mt-3">
+                <button
+                  onClick={handlePrint}
+                  type="button"
+                  className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm mb-5 mx-2"
+                >
+                  <div className="text-white text-center text-sm font-bold">
+                    <a className="text-white no-underline text-xs sm:text-xs">Print</a>
+                  </div>
+                </button>
+            </div>
             <tokenVerify logOut={logOut} />
           </LayoutContent>
         </LayoutWrapper>
