@@ -63,7 +63,7 @@ const fetchUser = async (cookies) => {
 };
 
 const fetchDebt = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate[debt_details][populate][0]=purchasing";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate[0]=supplier&populate[1]=debt_details.purchasing";
   const options = {
     method: "GET",
     headers: {
@@ -209,7 +209,7 @@ function Laporan({ props }) {
         // }
       }
 
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=deep&" + query;
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate[debt_details][populate][0]=purchasing" + query;
 
       const cookies = nookies.get(null, "token");
       const options = {
@@ -335,6 +335,7 @@ function Laporan({ props }) {
               //onDelete={handleDelete}
               //onPageChange={handlePageChange}
               //onChangeStatus={onChangeStatus}
+              tipeLaporan={searchParameters["tipeLaporan"]}
               user={user}
             />
 

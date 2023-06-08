@@ -10,6 +10,7 @@ export default function ReactDataTable({
   onPageChange,
   onChangeStatusPengiriman,
   onChangeStatus,
+  tipeLaporan,
   user,
 }) {
   const router = useRouter();
@@ -17,7 +18,8 @@ export default function ReactDataTable({
 
   const tagRed = process.env.TAG_RED;
   const tagGreen = process.env.TAG_GREEN;
-  const tagOrange = process.env.TAG_ORANGE; console.log("data", data.data);
+  const tagOrange = process.env.TAG_ORANGE; console.log("data", data.data, tipeLaporan);
+  var column = null;
 
   const openNotificationWithIcon = (type, title, message) => {
     notification[type]({
@@ -57,50 +59,6 @@ export default function ReactDataTable({
     maximumFractionDigits: 2,
   });
 
-  //const content = (row) => (
-  //    <div>
-  //        <div>
-  //            <button
-  //                onClick={() => lihat(row)}
-  //                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-  //            >
-  //                <UnorderedListOutlined className="mr-2 mt-0.5 float float-left" />
-  //                Melihat
-  //            </button>
-  //        </div>
-  //        <div>
-  //            <button
-  //                onClick={() => print(row)}
-  //                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-  //            >
-  //                <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
-  //                Cetak
-  //            </button>
-  //        </div>
-  //        {row?.attributes?.document == "Draft" ? (
-  //          <div>
-  //            <button
-  //                onClick={() => lihat(row)}
-  //                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-  //            >
-  //                <EditOutlined className="mr-2 mt-0.5 float float-left" />
-  //                Edit
-  //            </button>
-  //          </div>
-  //        ) : (
-  //            <> </>
-  //        )}
-
-  //        <AlertDialog
-  //            onCancel={onCancel}
-  //            onConfirm={onConfirm}
-  //            title="Hapus Kategori"
-  //            message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
-  //            id={row}
-  //        />
-  //    </div>
-  //);
-
   const customStyles = {
     headerStyle: { textAlign: "center" },
     headCells: {
@@ -111,16 +69,16 @@ export default function ReactDataTable({
     },
   };
 
-  const columns = [
+  const columnDetail = [
     {
       name: "No Pembayaran",
       width: "200px",
-      cell: (row) => ( <div><p key={0} className="-mt-11">{row.attributes?.no_hutang}</p></div> ),
+      cell: (row) => ( <div className="mt-1"><p key={0}>{row.attributes?.no_hutang}</p><hr/></div> ),
     },
     {
       name: "Tgl Bayar",
       width: "150px",
-      cell: (row) => ( <div><p key={0} className="-mt-11">{formatMyDate(row.attributes?.tanggal_pembayaran)}</p></div> ),
+      cell: (row) => ( <div className="mt-1"><p key={0}>{formatMyDate(row.attributes?.tanggal_pembayaran)}</p><hr/></div> ),
     },
     {
       name: "Nota Supplier",
@@ -130,7 +88,7 @@ export default function ReactDataTable({
           <p key={index}>{element.attributes.purchasing.data.attributes.no_nota_suppplier}</p>
         ));
         return( 
-          <div className="-mt-3">
+          <div className="mt-1">
             {cellData}
             <hr/> 
             <p></p>
@@ -146,7 +104,7 @@ export default function ReactDataTable({
           <p key={index}>{element.attributes.purchasing.data.attributes.no_purchasing}</p>
         ));
         return( 
-          <div className="-mt-3">
+          <div className="mt-1">
             {cellData}
             <hr/> 
             <p></p>
@@ -162,7 +120,7 @@ export default function ReactDataTable({
           <p key={index}>{element.attributes.purchasing.data.attributes.date_purchasing}</p>
         ));
         return( 
-          <div className="mt-3">
+          <div className="mt-4">
             {cellData}
             <hr/> 
             <p>Subtotal</p>
@@ -179,7 +137,7 @@ export default function ReactDataTable({
           <p key={index}>{formatter.format(element.attributes.purchasing.data.attributes.total_purchasing)}</p>
         ));
         return( 
-          <div className="mt-3">
+          <div className="mt-4">
             {cellData}
             <hr/> 
             <p>{formatter.format(sum)}</p>
@@ -196,7 +154,7 @@ export default function ReactDataTable({
           <p key={index}>{formatter.format(element.attributes.tunai)}</p>
         ));
         return( 
-          <div className="mt-3">
+          <div className="mt-4">
             {cellData}
             <hr/> 
             <p>{formatter.format(sum)}</p>
@@ -213,7 +171,7 @@ export default function ReactDataTable({
           <p key={index}>{formatter.format(element.attributes.transfer)}</p>
         ));
         return( 
-          <div className="mt-3">
+          <div className="mt-4">
             {cellData}
             <hr/> 
             <p>{formatter.format(sum)}</p>
@@ -230,7 +188,7 @@ export default function ReactDataTable({
           <p key={index}>{formatter.format(element.attributes.giro)}</p>
         ));
         return( 
-          <div className="mt-3">
+          <div className="mt-4">
             {cellData}
             <hr/> 
             <p>{formatter.format(sum)}</p>
@@ -247,7 +205,7 @@ export default function ReactDataTable({
           <p key={index}>{formatter.format(element.attributes.cn)}</p>
         ));
         return( 
-          <div className="mt-3">
+          <div className="mt-4">
             {cellData}
             <hr/> 
             <p>{formatter.format(sum)}</p>
@@ -264,7 +222,7 @@ export default function ReactDataTable({
           <p key={index}>{formatter.format(element.attributes.oth)}</p>
         ));
         return( 
-          <div className="mt-3">
+          <div className="mt-4">
             {cellData}
             <hr/> 
             <p>{formatter.format(sum)}</p>
@@ -281,7 +239,7 @@ export default function ReactDataTable({
           <p key={index}>{formatter.format(element.attributes.sisa_hutang)}</p>
         ));
         return( 
-          <div className="mt-3">
+          <div className="mt-4">
             {cellData}
             <hr/> 
             <p>{formatter.format(sum)}</p>
@@ -291,42 +249,221 @@ export default function ReactDataTable({
     },
   ];
 
+  const columnRekap = [
+    {
+      name: "No Pembayaran",
+      width: "200px",
+      cell: (row) => ( <div><span className="font-bold">Supplier : </span><span>{row.attributes?.supplier.data.attributes.name}</span></div> ),
+    },
+    {
+      name: "Tgl Bayar",
+      width: "150px",
+      cell: (row) => {
+        var tempo_days = row.attributes?.debt_details.data[0].attributes.purchasing.data.attributes.tempo_days;
+        var tempo_time = row.attributes?.debt_details.data[0].attributes.purchasing.data.attributes.tempo_time;
+        return (
+          <div>
+            <span className="font-bold">Tempo : </span>
+            <span>{tempo_days} {tempo_time}</span>
+          </div>
+        );
+      },
+    },
+    {
+      name: "Nota Supplier",
+      width: "150px",
+      // cell: (row) => {
+      //   const cellData = row.attributes.debt_details.data.map((element, index) => (
+      //     <p key={index}>{element.attributes.purchasing.data.attributes.no_nota_suppplier}</p>
+      //   ));
+      //   return( 
+      //     <div className="mt-1">
+      //       {cellData}
+      //       <hr/> 
+      //       <p></p>
+      //     </div>
+      //   );
+      // },
+    },
+    {
+      name: "No LPB",
+      width: "180px",
+      // cell: (row) => {
+      //   const cellData = row.attributes.debt_details.data.map((element, index) => (
+      //     <p key={index}>{element.attributes.purchasing.data.attributes.no_purchasing}</p>
+      //   ));
+      //   return( 
+      //     <div className="mt-1">
+      //       {cellData}
+      //       <hr/> 
+      //       <p></p>
+      //     </div>
+      //   );
+      // },
+    },
+    {
+      name: "Tgl LPB",
+      width: "150px",
+      // cell: (row) => {
+      //   const cellData = row.attributes.debt_details.data.map((element, index) => (
+      //     <p key={index}>{element.attributes.purchasing.data.attributes.date_purchasing}</p>
+      //   ));
+      //   return( 
+      //     <div className="mt-4">
+      //       {cellData}
+      //       <hr/> 
+      //       <p>Subtotal</p>
+      //     </div>
+      //   );
+      // },
+    },
+    {
+      name: "Nilai LPB",
+      width: "150px",
+      // cell: (row) => {
+      //   var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.purchasing.data.attributes.total_purchasing, 0);
+      //   const cellData = row.attributes.debt_details.data.map((element, index) => (
+      //     <p key={index}>{formatter.format(element.attributes.purchasing.data.attributes.total_purchasing)}</p>
+      //   ));
+      //   return( 
+      //     <div className="mt-4">
+      //       {cellData}
+      //       <hr/> 
+      //       <p>{formatter.format(sum)}</p>
+      //     </div>
+      //   );
+      // },
+    },
+    {
+      name: "Tunai",
+      width: "150px",
+      // cell: (row) => {
+      //   var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.tunai, 0);
+      //   const cellData = row.attributes.debt_details.data.map((element, index) => (
+      //     <p key={index}>{formatter.format(element.attributes.tunai)}</p>
+      //   ));
+      //   return( 
+      //     <div className="mt-4">
+      //       {cellData}
+      //       <hr/> 
+      //       <p>{formatter.format(sum)}</p>
+      //     </div>
+      //   );
+      // },
+    },
+    {
+      name: "Transfer",
+      width: "150px",
+      // cell: (row) => {
+      //   var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.transfer, 0);
+      //   const cellData = row.attributes.debt_details.data.map((element, index) => (
+      //     <p key={index}>{formatter.format(element.attributes.transfer)}</p>
+      //   ));
+      //   return( 
+      //     <div className="mt-4">
+      //       {cellData}
+      //       <hr/> 
+      //       <p>{formatter.format(sum)}</p>
+      //     </div>
+      //   );
+      // },
+    },
+    {
+      name: "Giro",
+      width: "150px",
+      // cell: (row) => {
+      //   var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.giro, 0);
+      //   const cellData = row.attributes.debt_details.data.map((element, index) => (
+      //     <p key={index}>{formatter.format(element.attributes.giro)}</p>
+      //   ));
+      //   return( 
+      //     <div className="mt-4">
+      //       {cellData}
+      //       <hr/> 
+      //       <p>{formatter.format(sum)}</p>
+      //     </div>
+      //   );
+      // },
+    },
+    {
+      name: "CN",
+      width: "150px",
+      // cell: (row) => {
+      //   var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.cn, 0);
+      //   const cellData = row.attributes.debt_details.data.map((element, index) => (
+      //     <p key={index}>{formatter.format(element.attributes.cn)}</p>
+      //   ));
+      //   return( 
+      //     <div className="mt-4">
+      //       {cellData}
+      //       <hr/> 
+      //       <p>{formatter.format(sum)}</p>
+      //     </div>
+      //   );
+      // },
+    },
+    {
+      name: "OTH",
+      width: "150px",
+      // cell: (row) => {
+      //   var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.oth, 0);
+      //   const cellData = row.attributes.debt_details.data.map((element, index) => (
+      //     <p key={index}>{formatter.format(element.attributes.oth)}</p>
+      //   ));
+      //   return( 
+      //     <div className="mt-4">
+      //       {cellData}
+      //       <hr/> 
+      //       <p>{formatter.format(sum)}</p>
+      //     </div>
+      //   );
+      // },
+    },
+    {
+      name: "Saldo Hutang",
+      width: "150px",
+      // cell: (row) => {
+      //   var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.sisa_hutang, 0);
+      //   const cellData = row.attributes.debt_details.data.map((element, index) => (
+      //     <p key={index}>{formatter.format(element.attributes.sisa_hutang)}</p>
+      //   ));
+      //   return( 
+      //     <div className="mt-4">
+      //       {cellData}
+      //       <hr/> 
+      //       <p>{formatter.format(sum)}</p>
+      //     </div>
+      //   );
+      // },
+    },
+  ];
+
+  const columns = [];
+
+  if(tipeLaporan == "Detail"){
+    column = columnDetail;
+  } else if(tipeLaporan == "Rekap"){
+    column = columnRekap;
+  } else {
+    column = columns;
+  }
+
   return (
-    <DataTable
-      customStyles={customStyles}
-      onChangePage={onPageChange}
-      paginationRowsPerPageOptions={[10]}
-      paginationTotalRows={data?.meta?.pagination?.total}
-      columns={columns}
-      data={data.data}
-      pagination
-      noDataComponent={"Belum ada data jurnal"}
-    />
-    // <table style={customStyles} className="w-full">
-    //   <thead>
-    //     <tr>
-    //       <th>No Pembayaran</th>
-    //       <th>Tgl Bayar</th>
-    //       <th>Nota Supplier</th>
-    //       <th>No LPB</th>
-    //       <th>Tgl LPB</th>
-    //       <th>Nilai LPB</th>
-    //       <th>Total Nilai RB</th>
-    //       <th>Tunai</th>
-    //       <th>Transfer</th>
-    //       <th>Giro</th>
-    //       <th>CN</th>
-    //       <th>OTH</th>
-    //       <th>Saldo Hutang</th>
-    //     </tr>
-    //   </thead>
-    //   <tbody>
-    //     {data.data.map((item) => {
-    //       <tr key={item.id}>
-    //         <td>{item.attributes.no_hutang}</td>
-    //       </tr>
-    //     })}
-    //   </tbody>
-    // </table>
+    <>
+      {column.length === 0 && data.data.length > 0 ? (
+        <div className="text-center">Belum ada data hutang</div>
+      ) : (
+        <DataTable
+          customStyles={customStyles}
+          onChangePage={onPageChange}
+          paginationRowsPerPageOptions={[10]}
+          paginationTotalRows={data?.meta?.pagination?.total}
+          columns={column}
+          data={data.data}
+          pagination
+          noDataComponent={"Belum ada data hutang"}
+        />
+      )}
+    </>
   );
 }

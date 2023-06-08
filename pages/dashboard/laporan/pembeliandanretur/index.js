@@ -102,13 +102,17 @@ function Laporan({ props }) {
   const purchasing = props.purchasing;
   const [data, setData] = useState(purchasing);
   const router = useRouter();
-  const [supplier, setSupplier] = useState();
-  const [location, setLocation] = useState();
+  const [queryPrint, setQueryPrint] = useState("/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products");
   const [searchParameters, setSearchParameters] = useState({});
   const dispatch = useDispatch();
 
   // Range Picker
   const { RangePicker } = DatePicker;
+
+  const handlePrint = () => {
+    console.log("data", data.data);
+    router.push("/dashboard/laporan/pembeliandanretur/print?data=" + data.data);
+  };
 
   // const handleAdd = () => {
   //   router.push("/dashboard/keuangan/jurnal/tambah");
@@ -181,6 +185,7 @@ function Laporan({ props }) {
       let query = "";
       let startDate = "";
       let endDate = "";
+      let queryTransaksi = "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&";
 
       for (const key in searchParameters) {
         // if (key === "user" && searchParameters[key] !== null) {
@@ -190,15 +195,37 @@ function Laporan({ props }) {
         //   query += "";
         // }
 
-        // if (key === "status_pembayaran") {
-        //   if (searchParameters[key] !== undefined) {
-        //     query += `filters[${key}]=${searchParameters[key]}&`;
-        //   } else {
-        //     query += "";
-        //   }
-        // } else {
-        //   query += "";
-        // }
+        if (key === "tipeTransaksi" && searchParameters[key] !== undefined) {
+          if (searchParameters[key] == "Pembelian") {
+            queryTransaksi = "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&";
+          } else if (searchParameters[key] == "Retur") {
+            queryTransaksi = "/purchasings?populate[0]=supplier&populate[1]=returs.retur_details.products&";
+          } else {
+            queryTransaksi = "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&";
+          }
+        } else {
+          queryTransaksi = "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&";
+        }
+
+        if (key === "status_pembayaran") {
+          if (searchParameters[key] !== undefined) {
+            query += `filters[${key}]=${searchParameters[key]}&`;
+          } else {
+            query += "";
+          }
+        } else {
+          query += "";
+        }
+
+        if (key === "supplier" || key === "location") {
+          if (searchParameters[key] !== undefined && searchParameters[key] !== null) {
+            query += `filters[${key}]=${searchParameters[key].id}&`;
+          } else {
+            query += "";
+          }
+        } else {
+          query += "";
+        }
 
         if (key == "range" && searchParameters[key] !== null) {
           startDate = searchParameters?.range[0]?.format("YYYY-MM-DD");
@@ -228,7 +255,9 @@ function Laporan({ props }) {
       }
 
       const endpoint = process.env.NEXT_PUBLIC_URL + 
-      "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&" + 
+      //"/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&" + 
+      //"/purchasings?populate" + 
+      queryTransaksi + 
       query;
 
       const cookies = nookies.get(null, "token");
@@ -243,6 +272,7 @@ function Laporan({ props }) {
       const req = await fetch(endpoint, options);
       const res = await req.json();
 
+      setQueryPrint(queryTransaksi + query);
       setData(res);
     };
 
@@ -261,12 +291,16 @@ function Laporan({ props }) {
             <div className="w-full flex justify-start">
               <div className="w-full md:w-1/4 px-3 mb-2">
                  <SearchLocations
-                   onChangeLocation={setLocation}
+                   onChangeLocations={(e) =>
+                    setSearchParameters({ ...searchParameters, location: e })
+                  }
                  />
               </div>
               <div className="w-full md:w-1/4 px-3">
                  <SearchSupplier 
-                   onChangeSupplier={setSupplier}
+                   onChangeSupplier={(e) =>
+                    setSearchParameters({ ...searchParameters, supplier: e })
+                  }
                  />
               </div>
               <div className="w-full md:w-1/4 px-3">
@@ -278,12 +312,12 @@ function Laporan({ props }) {
                     marginRight: "10px",
                   }}
                   allowClear
-                  // onChange={(e) =>
-                  //   setSearchParameters({ ...searchParameters, tipeTransaksi: e })
-                  // }
+                  onChange={(e) =>
+                    setSearchParameters({ ...searchParameters, tipeTransaksi: e })
+                  }
                 >
-                  <Select.Option value="tdk ada">Blom ada</Select.Option>
-                  {/* <Select.Option value="Kredit">Kredit</Select.Option> */}
+                  <Select.Option value="Pembelian">Pembelian</Select.Option>
+                  <Select.Option value="Retur">Retur</Select.Option>
                 </Select>
               </div>
               <div className="w-full md:w-1/4 px-3">
@@ -296,10 +330,12 @@ function Laporan({ props }) {
                   }}
                   allowClear
                   onChange={(e) =>
-                    setSearchParameters({ ...searchParameters, statusPembayaran: e })
+                    setSearchParameters({ ...searchParameters, status_pembayaran: e })
                   }
                 >
-                  <Select.Option value="tdk ada">Blom ada</Select.Option>
+                  <Select.Option value="Dibayar">Dibayar</Select.Option>
+                  <Select.Option value="Dibayar Sebagian">Dibayar Sebagian</Select.Option>
+                  <Select.Option value="Belum Dibayar">Belum Dibayar</Select.Option>
                 </Select>
               </div>
             </div>
@@ -363,6 +399,17 @@ function Laporan({ props }) {
               user={user}
             />
 
+            <div className="w-full flex justify-between mt-3">
+                <button
+                  onClick={handlePrint}
+                  type="button"
+                  className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm mb-5 mx-2"
+                >
+                  <div className="text-white text-center text-sm font-bold">
+                    <a className="text-white no-underline text-xs sm:text-xs">Print</a>
+                  </div>
+                </button>
+            </div>
             <tokenVerify logOut={logOut} />
           </LayoutContent>
         </LayoutWrapper>

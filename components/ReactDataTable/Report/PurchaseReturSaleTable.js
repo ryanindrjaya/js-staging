@@ -117,12 +117,16 @@ export default function ReactDataTable({
       name: "Nama Produk",
       width: "200px",
       cell: (row) => {
-        const cellData = row.attributes.purchasing_details.data.map((element, index) => (
-          <p key={index}>{element.attributes.product.data.attributes.name}</p>
-        ));
+        var cellData = null;
+        if(row.attributes?.purchasing_details){
+          const cellDetails = row.attributes.purchasing_details.data.map((element, index) => (
+            <p key={index}>{element.attributes.product.data.attributes.name}</p>
+          ));
+          cellData = cellDetails
+        }
 
         var cellRetur = null;
-        if(row.attributes.returs.data.length != 0){
+        if(row.attributes?.returs){
         const cellReturNo = row.attributes.returs.data.map((element, index) => (
           <p key={index}>
             <p className="mb-3"><span className="font-bold">Supplier : </span>{row.attributes.supplier.data.attributes.name}</p>
@@ -140,11 +144,25 @@ export default function ReactDataTable({
 
         return( 
           <div className="mt-2">
-            <p className="mb-3"><span className="font-bold">Supplier : </span>{row.attributes.supplier.data.attributes.name}</p>
-            <p>{cellData}</p>
-            <hr/> 
-            <p className="py-2"> </p>
-            <p>{cellRetur}</p>
+            {row.attributes?.purchasing_details ? (
+                  <div>
+                    <p className="mb-3"><span className="font-bold">Supplier : </span>{row.attributes.supplier.data.attributes.name}</p>
+                    <p>{cellData}</p>
+                    <hr/>
+                  </div>
+                ) : (
+                  <div hidden></div>
+              )}
+
+            {row.attributes?.returs ? (
+                  <div>
+                    <p className="py-2"> </p>
+                    <p>{cellRetur}</p>
+                  </div>
+                ) : (
+                  <div hidden></div>
+              )}
+            
           </div>
         );
       },
@@ -153,12 +171,16 @@ export default function ReactDataTable({
       name: "Jumlah",
       width: "150px",
       cell: (row) => {
-        const cellData = row.attributes.purchasing_details.data.map((element, index) => (
-          <p key={index}>{element.attributes.total_order} {element.attributes.unit_order}</p>
-        ));
+        var cellData = null;
+        if(row.attributes?.purchasing_details){
+          const cellDetails = row.attributes.purchasing_details.data.map((element, index) => (
+            <p key={index}>{element.attributes.total_order} {element.attributes.unit_order}</p>
+          ));
+        cellData = cellDetails
+        }
 
         var cellRetur = null;
-        if(row.attributes.returs.data.length != 0){
+        if(row.attributes?.returs){
         const cellReturNo = row.attributes.returs.data.map((element, index) => (
           <p key={index}>
             <p className="mb-3"><span className="font-bold">Tanggal : </span>{formatMyDate(row.attributes.date_purchasing)}</p>
@@ -176,11 +198,25 @@ export default function ReactDataTable({
 
         return( 
           <div className="mt-2">
-            <p className="mb-3"><span className="font-bold">Tanggal : </span>{formatMyDate(row.attributes.date_purchasing)}</p>
-            <p>{cellData}</p>
-            <hr/> 
-            <p className="py-2"> </p>
-            <p>{cellRetur}</p>
+            {row.attributes?.purchasing_details ? (
+                  <div>
+                    <p className="mb-3"><span className="font-bold">Tanggal : </span>{formatMyDate(row.attributes.date_purchasing)}</p>
+                    <p>{cellData}</p>
+                    <hr/>
+                  </div>
+                ) : (
+                  <div></div>
+              )}
+ 
+            {row.attributes?.returs ? (
+                  <div>
+                    <p className="py-2"> </p>
+                    <p>{cellRetur}</p>
+                  </div>
+                ) : (
+                  <div hidden></div>
+              )}
+
           </div>
         );
       },
@@ -189,12 +225,19 @@ export default function ReactDataTable({
       name: "Harga Satuan",
       width: "190px",
       cell: (row) => {
-        const cellData = row.attributes.purchasing_details.data.map((element, index) => (
-          <p key={index}>{formatter.format(element.attributes.unit_price)}</p>
-        ));
+        var cellData = null;
+        if(row.attributes?.purchasing_details){
+          const cellDetails = row.attributes.purchasing_details.data.map((element, index) => (
+            <p key={index}>{formatter.format(element.attributes.unit_price)}</p>
+          ));
+        cellData = cellDetails
+        }
+        // const cellData = row.attributes.purchasing_details.data.map((element, index) => (
+        //   <p key={index}>{formatter.format(element.attributes.unit_price)}</p>
+        // ));
 
         var cellRetur = null;
-        if(row.attributes.returs.data.length != 0){
+        if(row.attributes?.returs){
         const cellReturNo = row.attributes.returs.data.map((element, index) => (
           <p key={index}>
             <p className="mb-3"><span className="font-bold">No : </span>{element.attributes.no_retur}</p>
@@ -212,11 +255,25 @@ export default function ReactDataTable({
 
         return( 
           <div className="mt-2">
-            <p className="mb-3"><span className="font-bold">No : </span>{row.attributes.no_purchasing}</p>
-            <p>{cellData}</p>
-            <hr/> 
-            <p className="py-2"> </p>
-            <p>{cellRetur}</p>
+            {row.attributes?.purchasing_details ? (
+                  <div>
+                    <p className="mb-3"><span className="font-bold">No : </span>{row.attributes.no_purchasing}</p>
+                    <p>{cellData}</p>
+                    <hr/> 
+                  </div>
+                ) : (
+                  <div></div>
+              )}
+
+            {row.attributes?.returs ? (
+                  <div>
+                    <p className="py-2"> </p>
+                    <p>{cellRetur}</p>
+                  </div>
+                ) : (
+                  <div hidden></div>
+              )}
+            
           </div>
         );
       },
@@ -225,14 +282,23 @@ export default function ReactDataTable({
       name: "Diskon",
       width: "200px",
       cell: (row) => {
-        const cellData = row.attributes.purchasing_details.data.map((element, index) => (
+        var cellData = null;
+        if(row.attributes?.purchasing_details){
+          const cellDetails = row.attributes.purchasing_details.data.map((element, index) => (
           <p key={index}>
             {formatter.format(element.attributes.disc ?? 0)} {element.attributes.dp1}% {element.attributes.dp2}% {element.attributes.dp3}% 
           </p>
-        ));
+          ));
+        cellData = cellDetails
+        }
+        // const cellData = row.attributes.purchasing_details.data.map((element, index) => (
+        //   <p key={index}>
+        //     {formatter.format(element.attributes.disc ?? 0)} {element.attributes.dp1}% {element.attributes.dp2}% {element.attributes.dp3}% 
+        //   </p>
+        // ));
 
         var cellRetur = null;
-        if(row.attributes.returs.data.length != 0){
+        if(row.attributes?.returs){
         const cellReturNo = row.attributes.returs.data.map((element, index) => (
           <p key={index}>
             <p className="mb-3"><span className="font-bold">Nota Supp : </span>{element.attributes.no_nota_suppplier ?? "tidak ada"}</p>
@@ -250,11 +316,25 @@ export default function ReactDataTable({
 
         return( 
           <div className="mt-2">
-            <p className="mb-3"><span className="font-bold">Nota Supp : </span>{row.attributes.no_nota_suppplier}</p>
-            <p>{cellData}</p>
-            <hr/> 
-            <p className="py-1"> </p>
-            <p>{cellRetur}</p>
+            {row.attributes?.purchasing_details ? (
+                  <div>
+                    <p className="mb-3"><span className="font-bold">Nota Supp : </span>{row.attributes.no_nota_suppplier}</p>
+                    <p>{cellData}</p>
+                    <hr/> 
+                  </div>
+                ) : (
+                  <div></div>
+              )}
+
+            {row.attributes?.returs ? (
+                  <div>
+                    <p className="py-2"> </p>
+                    <p>{cellRetur}</p>
+                  </div>
+                ) : (
+                  <div hidden></div>
+              )}
+
           </div>
         );
       },
@@ -263,12 +343,19 @@ export default function ReactDataTable({
       name: "Harga Satuan Stlh Diskon",
       width: "200px",
       cell: (row) => {
-        const cellData = row.attributes.purchasing_details.data.map((element, index) => (
-          <p key={index}>{formatter.format(element.attributes.unit_price_after_disc)}</p>
-        ));
+        var cellData = null;
+        if(row.attributes?.purchasing_details){
+          const cellDetails = row.attributes.purchasing_details.data.map((element, index) => (
+            <p key={index}>{formatter.format(element.attributes.unit_price_after_disc)}</p>
+          ));
+        cellData = cellDetails
+        }
+        // const cellData = row.attributes.purchasing_details.data.map((element, index) => (
+        //   <p key={index}>{formatter.format(element.attributes.unit_price_after_disc)}</p>
+        // ));
 
         var cellRetur = null;
-        if(row.attributes.returs.data.length != 0){
+        if(row.attributes?.returs){
         const cellReturNo = row.attributes.returs.data.map((element, index) => (
           <p key={index}>
             <p className="mb-3"><span className="font-bold">Tempo : </span>{row.attributes.tempo_days} {row.attributes.tempo_time}</p>
@@ -286,11 +373,25 @@ export default function ReactDataTable({
 
         return( 
           <div className="mt-2">
-            <p className="mb-3"><span className="font-bold">Tempo : </span>{row.attributes.tempo_days} {row.attributes.tempo_time}</p>
-            <p>{cellData}</p>
-            <hr/> 
-            <p className="py-2"> </p>
-            <p>{cellRetur}</p>
+            {row.attributes?.purchasing_details ? (
+                  <div>
+                    <p className="mb-3"><span className="font-bold">Tempo : </span>{row.attributes.tempo_days} {row.attributes.tempo_time}</p>
+                    <p>{cellData}</p>
+                    <hr/> 
+                  </div>
+                ) : (
+                  <div></div>
+              )}
+
+            {row.attributes?.returs ? (
+                  <div>
+                    <p className="py-2"> </p>
+                    <p>{cellRetur}</p>
+                  </div>
+                ) : (
+                  <div hidden></div>
+              )}
+
           </div>
         );
       },
@@ -299,16 +400,25 @@ export default function ReactDataTable({
       name: "Subtotal",
       width: "200px",
       cell: (row) => {
-        var sum = row.attributes.purchasing_details.data.reduce((total, row) => total += row.attributes.sub_total, 0);
-        const cellData = row.attributes.purchasing_details.data.map((element, index) => (
-          <p key={index}>{formatter.format(element.attributes.sub_total)}</p>
-        ));
+        var cellData = null;
+        var sum = null;
+        if(row.attributes?.purchasing_details){
+          const cellDetails = row.attributes.purchasing_details.data.map((element, index) => (
+            <p key={index}>{formatter.format(element.attributes.sub_total)}</p>
+          ));
+        cellData = cellDetails
+        sum = row.attributes.purchasing_details.data.reduce((total, row) => total += row.attributes.sub_total, 0);
+        }
+        //var sum = row.attributes.purchasing_details.data.reduce((total, row) => total += row.attributes.sub_total, 0);
+        // const cellData = row.attributes.purchasing_details.data.map((element, index) => (
+        //   <p key={index}>{formatter.format(element.attributes.sub_total)}</p>
+        // ));
 
         var cellRetur = null;
-        if(row.attributes.returs.data.length != 0){
+        if(row.attributes?.returs){
         const cellReturNo = row.attributes.returs.data.map((element, index) => (
           <p key={index}>
-            <p className="py-2"></p>
+            <p className="py-1"></p>
             <p>
               {element.attributes.retur_details.data.map((item, idx) => 
                 (<p key={idx}>{formatter.format(item.attributes.sub_total)}</p>)
@@ -323,11 +433,25 @@ export default function ReactDataTable({
 
         return( 
           <div className="mt-2">
-            <p className="py-1"></p>
-            <p>{cellData}</p>
-            <hr/> 
-            <p>{formatter.format(sum)}</p>
-            <p>{cellRetur}</p>
+            {row.attributes?.purchasing_details ? (
+                  <div>
+                    <p className="py-2"></p>
+                    <p>{cellData}</p>
+                    <hr/> 
+                    <p>{formatter.format(sum)}</p> 
+                  </div>
+                ) : (
+                  <div></div>
+              )}
+
+            {row.attributes?.returs ? (
+                  <div>
+                    <p className="py-0"> </p>
+                    <p>{cellRetur}</p>
+                  </div>
+                ) : (
+                  <div hidden></div>
+              )}
           </div>
         );
       },

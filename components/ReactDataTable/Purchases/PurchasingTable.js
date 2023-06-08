@@ -301,25 +301,34 @@ export default function ReactDataTable({
       name: "Pembayaran",
       width: "150px",
       selector: (row) => {
-        const lastIndex = row.attributes.purchasing_payments?.data?.length;
-        const lastPayment =
-          row.attributes.purchasing_payments?.data[lastIndex - 1];
+        // const lastIndex = row.attributes.purchasing_payments?.data?.length;
+        // const lastPayment =
+        //   row.attributes.purchasing_payments?.data[lastIndex - 1];
 
-        if (
-          lastPayment?.attributes.payment_remaining ===
-          lastPayment?.attributes.total_payment
-        ) {
-          return <Tag color={tagRed}>Belum Lunas</Tag>;
-        } else if (
-          lastPayment?.attributes.payment_remaining > 0 &&
-          lastPayment?.attributes.payment_remaining <
-            lastPayment?.attributes.total_payment
-        ) {
-          return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
-        } else if (lastPayment?.attributes.payment_remaining <= 0) {
-          return <Tag color={tagGreen}>Lunas</Tag>;
+        // if (
+        //   lastPayment?.attributes.payment_remaining ===
+        //   lastPayment?.attributes.total_payment
+        // ) {
+        //   return <Tag color={tagRed}>Belum Lunas</Tag>;
+        // } else if (
+        //   lastPayment?.attributes.payment_remaining > 0 &&
+        //   lastPayment?.attributes.payment_remaining <
+        //     lastPayment?.attributes.total_payment
+        // ) {
+        //   return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
+        // } else if (lastPayment?.attributes.payment_remaining <= 0) {
+        //   return <Tag color={tagGreen}>Lunas</Tag>;
+        // } else {
+        //   return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
+        // }
+        if (row.attributes?.status_pembayaran == "Belum Dibayar") {
+          return <Tag color="red">{row.attributes?.status_pembayaran}</Tag>;
+        } else if (row.attributes?.status_pembayaran == "Diretur") {
+          return <Tag color="orange">{row.attributes?.status_pembayaran}</Tag>;
+        } else if (row.attributes?.status_pembayaran == "Dibayar Sebagian") {
+          return <Tag>{row.attributes?.status_pembayaran}</Tag>;
         } else {
-          return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
+          return <Tag color="green">{row.attributes?.status_pembayaran}</Tag>;
         }
         //return row.attributes.status_pembayaran;
       },
