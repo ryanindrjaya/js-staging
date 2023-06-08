@@ -12,17 +12,7 @@ import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import OrderTable from "@iso/components/ReactDataTable/Purchases/OrderTable";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  Form,
-  Button,
-  Spin,
-  Input,
-  DatePicker,
-  Select,
-  InputNumber,
-  Upload,
-  notification,
-} from "antd";
+import { Form, Button, Spin, Input, DatePicker, Select, InputNumber, Upload, notification } from "antd";
 import createDetailOrderFunc from "../../utility/createOrderDetail";
 import createOrderFunc from "../../utility/createOrder";
 import calculatePrice from "../../utility/calculatePrice";
@@ -56,16 +46,13 @@ Edit.getInitialProps = async (context) => {
   const req3 = await fetchUser(cookies);
   user = await req3.json();
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_URL}/purchases/${id}?populate=deep`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-    }
-  ).then((res) => res.json());
+  const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/purchases/${id}?populate=deep`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  }).then((res) => res.json());
 
   if (response.status === 401) {
     context.res.writeHead(302, {
@@ -150,9 +137,7 @@ function Edit({ props }) {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [productList, setProductList] = useState([]);
-  const [supplier, setSupplier] = useState(
-    initialValues.attributes.supplier?.data
-  );
+  const [supplier, setSupplier] = useState(initialValues.attributes.supplier?.data);
   const [totalPrice, setTotalPrice] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
   const [additionalFee, setAdditionalFee] = useState();
@@ -178,9 +163,7 @@ function Edit({ props }) {
   var tempLocationId;
 
   // NO PO
-  var totalPurchases = String(
-    props.purchases?.meta?.pagination.total + 1
-  ).padStart(3, "0");
+  var totalPurchases = String(props.purchases?.meta?.pagination.total + 1).padStart(3, "0");
   var today = new Date();
   var dd = String(today.getDate()).padStart(2, "0");
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
@@ -198,12 +181,7 @@ function Edit({ props }) {
   });
 
   const cleanData = (data) => {
-    const unusedKeys = [
-      "disc_rp",
-      "harga_satuan",
-      "jumlah_option",
-      "jumlah_qty",
-    ];
+    const unusedKeys = ["disc_rp", "harga_satuan", "jumlah_option", "jumlah_qty"];
     for (let key in data) {
       if (data[key] === null || data[key] === undefined) {
         delete data[key];
@@ -279,21 +257,19 @@ function Edit({ props }) {
     const editedProduct = products.productInfo;
     const detailsPO = products.productList?.map(({ attributes, id }, idx) => {
       const qty = editedProduct?.[idx]?.qty || 1;
-      const unitPriceAfterDisc = parseFloat(
-        productTotalPrice?.[idx] || attributes?.buy_price_1
-      ).toFixed(2);
+      const unitPriceAfterDisc = parseFloat(productTotalPrice?.[idx] || attributes?.buy_price_1).toFixed(2);
       const subTotal = parseFloat(unitPriceAfterDisc * qty).toFixed(2);
 
       return {
         total_order: String(editedProduct?.[idx]?.qty || 1),
         sub_total: subTotal,
         unit_order: editedProduct?.[idx]?.unit || attributes?.unit_1,
-        disc: editedProduct?.[idx]?.disc || attributes?.purchase_discount_1,
+        disc: editedProduct?.[idx]?.disc ?? attributes?.purchase_discount_1,
         unit_price: editedProduct?.[idx]?.priceUnit || attributes?.buy_price_1,
         unit_price_after_disc: unitPriceAfterDisc,
-        dp1: editedProduct?.[idx]?.d1 || attributes?.unit_1_dp1,
-        dp2: editedProduct?.[idx]?.d2 || attributes?.unit_1_dp2,
-        dp3: editedProduct?.[idx]?.d3 || attributes?.unit_1_dp3,
+        dp1: editedProduct?.[idx]?.d1 ?? attributes?.unit_1_dp1,
+        dp2: editedProduct?.[idx]?.d2 ?? attributes?.unit_1_dp2,
+        dp3: editedProduct?.[idx]?.d3 ?? attributes?.unit_1_dp3,
         products: [id],
         relation_id: editedProduct?.[idx]?.relation_id,
       };
@@ -344,7 +320,6 @@ function Edit({ props }) {
     setLoading(false);
   };
 
-
   const onChange = async () => {
     var isDuplicatedData = false;
 
@@ -378,14 +353,7 @@ function Edit({ props }) {
   };
 
   const calculatePriceAfterDisc = (row, index) => {
-    const total = calculatePrice(
-      row,
-      products,
-      productTotalPrice,
-      productSubTotal,
-      setTotalPrice,
-      index
-    );
+    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index);
 
     const formattedNumber = formatter.format(total);
     console.log("harga setelah diskon", formattedNumber);
@@ -416,14 +384,12 @@ function Edit({ props }) {
     if (type === "error") {
       notification[type]({
         message: "Gagal menambahkan data",
-        description:
-          "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
+        description: "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
       });
     } else if (type === "success") {
       notification[type]({
         message: "Berhasil menambahkan data",
-        description:
-          "Produk berhasil ditambahkan. Silahkan cek pada halaman Order Pembelian",
+        description: "Produk berhasil ditambahkan. Silahkan cek pada halaman Order Pembelian",
       });
     }
   };
@@ -470,10 +436,7 @@ function Edit({ props }) {
 
         details.forEach((element, index) => {
           const product = element.attributes?.products?.data?.[0];
-          const unit = getUnitIndex(
-            product?.attributes,
-            element?.attributes?.unit_order
-          );
+          const unit = getUnitIndex(product?.attributes, element?.attributes?.unit_order);
           dispatch({
             type: "SET_INITIAL_PRODUCT",
             product,
@@ -526,11 +489,7 @@ function Edit({ props }) {
             >
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Supplier
-                    supplier={supplier}
-                    fetching={fetching}
-                    onChangeSupplier={setSupplier}
-                  />
+                  <Supplier supplier={supplier} fetching={fetching} onChangeSupplier={setSupplier} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
@@ -645,14 +604,10 @@ function Edit({ props }) {
               </div>
 
               <div className="flex justify-end">
-                <p className="font-bold">
-                  Total Item : {products.productList.length}{" "}
-                </p>
+                <p className="font-bold">Total Item : {products.productList.length} </p>
               </div>
               <div className="flex justify-end">
-                <p className="font-bold">
-                  Total Harga : {formatter.format(totalPrice)}{" "}
-                </p>
+                <p className="font-bold">Total Harga : {formatter.format(totalPrice)} </p>
               </div>
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
@@ -669,9 +624,7 @@ function Edit({ props }) {
                   <Form.Item name="delivery_fee">
                     <InputNumber
                       onChange={sumDeliveryPrice}
-                      formatter={(value) =>
-                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                      }
+                      formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                       parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                       size="large"
                       placeholder="Biaya Pengiriman"
@@ -712,11 +665,7 @@ function Edit({ props }) {
                       }}
                     >
                       {locations.map((element) => {
-                        return (
-                          <Select.Option value={element.id}>
-                            {element.attributes.name}
-                          </Select.Option>
-                        );
+                        return <Select.Option value={element.id}>{element.attributes.name}</Select.Option>;
                       })}
                     </Select>
                   </Form.Item>
@@ -811,9 +760,7 @@ function Edit({ props }) {
               <div>
                 <p className="font-bold flex justify-end">
                   Total Order Pembelian :{" "}
-                  {grandTotal === 0
-                    ? formatter.format(totalPrice)
-                    : formatter.format(grandTotal)}
+                  {grandTotal === 0 ? formatter.format(totalPrice) : formatter.format(grandTotal)}
                 </p>
               </div>
               <Form.Item name="additional_note">
