@@ -71,17 +71,17 @@ export default function ReactDataTable({
 
   const columnDetail = [
     {
-      name: "No Pembayaran",
+      name: "No Penagihan",
       width: "200px",
       cell: (row) => ( <div className="mt-1"><p key={0}>{row.attributes?.no_hutang}</p><hr/></div> ),
     },
     {
-      name: "Tgl Bayar",
+      name: "Tgl Tagih",
       width: "150px",
       cell: (row) => ( <div className="mt-1"><p key={0}>{formatMyDate(row.attributes?.tanggal_pembayaran)}</p><hr/></div> ),
     },
     {
-      name: "Nota Supplier",
+      name: "No Invoice",
       width: "150px",
       cell: (row) => {
         const cellData = row.attributes.debt_details.data.map((element, index) => (
@@ -97,23 +97,7 @@ export default function ReactDataTable({
       },
     },
     {
-      name: "No LPB",
-      width: "180px",
-      cell: (row) => {
-        const cellData = row.attributes.debt_details.data.map((element, index) => (
-          <p key={index}>{element.attributes.purchasing.data.attributes.no_purchasing}</p>
-        ));
-        return( 
-          <div className="mt-1">
-            {cellData}
-            <hr/> 
-            <p></p>
-          </div>
-        );
-      },
-    },
-    {
-      name: "Tgl LPB",
+      name: "Tgl Invoice",
       width: "150px",
       cell: (row) => {
         const cellData = row.attributes.debt_details.data.map((element, index) => (
@@ -129,43 +113,29 @@ export default function ReactDataTable({
       },
     },
     {
-      name: "Nilai LPB",
+      name: "Total Invoice",
+      width: "180px",
+      cell: (row) => {
+        const cellData = row.attributes.debt_details.data.map((element, index) => (
+          <p key={index}>{element.attributes.purchasing.data.attributes.no_purchasing}</p>
+        ));
+        return( 
+          <div className="mt-1">
+            {cellData}
+            <hr/> 
+            <p></p>
+          </div>
+        );
+      },
+    },
+    {
+      name: "Total Retur Jual",
       width: "150px",
       cell: (row) => {
         var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.purchasing.data.attributes.total_purchasing, 0);
         const cellData = row.attributes.debt_details.data.map((element, index) => (
           <p key={index}>{formatter.format(element.attributes.purchasing.data.attributes.total_purchasing)}</p>
         ));
-        return( 
-          <div className="mt-4">
-            {cellData}
-            <hr/> 
-            <p>{formatter.format(sum)}</p>
-          </div>
-        );
-      },
-    },
-    {
-      name: "Total Nilai RB",
-      width: "150px",
-      cell: (row) => {
-        var sum = row.attributes.debt_details.data.reduce((totalRetur, row) => {
-          let total = 0;
-          total = row.attributes.purchasing.data.attributes.returs.data.reduce(
-            (accumulator, item) => accumulator + item.attributes.total_price,
-            0
-          );
-          return totalRetur + total;
-        }, 0);
-
-        const cellData = row.attributes.debt_details.data.map((row, index) => {
-          let total = 0;
-          row.attributes.purchasing.data.attributes.returs.data.forEach((item) => {
-            total += item.attributes.total_price;
-          });
-          return <p key={index}>{formatter.format(total)}</p>;
-        });
-
         return( 
           <div className="mt-4">
             {cellData}
@@ -227,7 +197,7 @@ export default function ReactDataTable({
       },
     },
     {
-      name: "CN",
+      name: "DN",
       width: "150px",
       cell: (row) => {
         var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.cn, 0);
@@ -261,7 +231,7 @@ export default function ReactDataTable({
       },
     },
     {
-      name: "Saldo Hutang",
+      name: "Saldo Piutang",
       width: "150px",
       cell: (row) => {
         var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.sisa_hutang, 0);
@@ -361,26 +331,6 @@ export default function ReactDataTable({
       },
     },
     {
-      name: "Total Nilai RB",
-      width: "150px",
-      cell: (row) => {
-        var sum = row.attributes.debt_details.data.reduce((totalRetur, row) => {
-          let total = 0;
-          total = row.attributes.purchasing.data.attributes.returs.data.reduce(
-            (accumulator, item) => accumulator + item.attributes.total_price,
-            0
-          );
-          return totalRetur + total;
-        }, 0);
-
-        return( 
-          <div className="mt-4">
-            <p>{formatter.format(sum)}</p>
-          </div>
-        );
-      },
-    },
-    {
       name: "Tunai",
       width: "150px",
       cell: (row) => {
@@ -467,7 +417,7 @@ export default function ReactDataTable({
   return (
     <>
       {column.length === 0 && data.data.length > 0 ? (
-        <div className="text-center">Belum ada data hutang</div>
+        <div className="text-center">Belum ada data piutang</div>
       ) : (
         <DataTable
           customStyles={customStyles}
@@ -477,7 +427,7 @@ export default function ReactDataTable({
           columns={column}
           data={data.data}
           pagination
-          noDataComponent={"Belum ada data hutang"}
+          noDataComponent={"Belum ada data piutang"}
         />
       )}
     </>

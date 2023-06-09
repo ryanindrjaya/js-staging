@@ -400,6 +400,11 @@ export default function Sidebar(props) {
                   <a>Pembayaran Hutang</a>
                 </Link>
               </Menu.Item>
+              <Menu.Item style={submenuStyle} key="piutang">
+                <Link href="/dashboard/laporan/piutang">
+                  <a>Piutang Penjualan</a>
+                </Link>
+              </Menu.Item>
             </SubMenu>
           </Menu>
         </Scrollbars>

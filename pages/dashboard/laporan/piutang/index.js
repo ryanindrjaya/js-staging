@@ -7,7 +7,7 @@ import router, { useRouter } from "next/router";
 import { useSelector, useDispatch } from "react-redux";
 import { Input, notification, Select, DatePicker } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import Table from "@iso/components/ReactDataTable/Report/PurchaseDebtTable";
+import Table from "@iso/components/ReactDataTable/Report/CreditTable";
 import SearchSupplier from "@iso/components/Form/AddReport/SearchSupplier";
 import SearchLocations from "@iso/components/Form/AddReport/SearchLocations";
 import nookies from "nookies";
@@ -63,7 +63,7 @@ const fetchUser = async (cookies) => {
 };
 
 const fetchDebt = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate[0]=supplier&populate[1]=debt_details.purchasing.returs";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate[0]=supplier&populate[1]=debt_details.purchasing";
   const options = {
     method: "GET",
     headers: {
@@ -213,7 +213,7 @@ function Laporan({ props }) {
         // }
       }
 
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate[0]=supplier&populate[1]=debt_details.purchasing.returs&" + query;
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate[0]=supplier&populate[1]=debt_details.purchasing&" + query;
 
       const cookies = nookies.get(null, "token");
       const options = {
@@ -237,11 +237,11 @@ function Laporan({ props }) {
   return (
     <>
       <Head>
-        <title>Laporan pembayaran hutang pembelian </title>
+        <title>Laporan piutang penjualan</title>
       </Head>
       <DashboardLayout>
         <LayoutWrapper style={{}}>
-          <TitlePage titleText={"LAPORAN PEMBAYARAN HUTANG PEMBELIAN"} />
+          <TitlePage titleText={"LAPORAN PIUTANG PENJUALAN"} />
           <LayoutContent>
             <div className="w-full flex justify-start">
               <div className="w-full md:w-1/4 px-3">
