@@ -110,8 +110,8 @@ function Laporan({ props }) {
   const { RangePicker } = DatePicker;
 
   const handlePrint = () => {
-    console.log("data", data.data);
-    router.push("/dashboard/laporan/pembeliandanretur/print?data=" + data.data);
+    // console.log("data", data.data);
+    // router.push("/dashboard/laporan/pembeliandanretur/print?data=" + data.data);
   };
 
   // const handleAdd = () => {
@@ -188,12 +188,6 @@ function Laporan({ props }) {
       let queryTransaksi = "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&";
 
       for (const key in searchParameters) {
-        // if (key === "user" && searchParameters[key] !== null) {
-        //   console.log("search", searchParameters);
-        //   //query += `filters[credit_details][customer][id]=${searchParameters[key].id}&`;
-        // } else {
-        //   query += "";
-        // }
 
         if (key === "tipeTransaksi" && searchParameters[key] !== undefined) {
           if (searchParameters[key] == "Pembelian") {
@@ -231,27 +225,11 @@ function Laporan({ props }) {
           startDate = searchParameters?.range[0]?.format("YYYY-MM-DD");
           endDate = searchParameters?.range[1]?.format("YYYY-MM-DD");
 
-          query += `filters[date_purchasing][$gte]=${startDate}&filters[date_purchasing][$lte]=${endDate}`;
+          query += `filters[date_purchasing][$gte]=${startDate}&filters[date_purchasing][$lte]=${endDate}&`;
         } else {
           query += "";
         }
 
-        // if (key === "akun" && searchParameters[key] !== undefined) {
-        //   console.log("search", searchParameters, data);
-        //   query += `filters[chart_of_account][id]=${searchParameters[key]}&`;
-        // } else {
-        //   query += "";
-        // }
-
-        // if (key === "area" || key === "wilayah") {
-        //   if (searchParameters[key] !== null) {
-        //     query += `filters[credit_details][customer][${key}][id]=${searchParameters[key].id}&`;
-        //   } else {
-        //     query += "";
-        //   }
-        // } else {
-        //   query += "";
-        // }
       }
 
       const endpoint = process.env.NEXT_PUBLIC_URL + 

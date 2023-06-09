@@ -304,6 +304,7 @@ export default function ReactDataTable({
     {
       name: "Tgl LPB",
       width: "150px",
+      //selector: (row) => console.log(row),
       // cell: (row) => {
       //   const cellData = row.attributes.debt_details.data.map((element, index) => (
       //     <p key={index}>{element.attributes.purchasing.data.attributes.date_purchasing}</p>
@@ -320,121 +321,86 @@ export default function ReactDataTable({
     {
       name: "Nilai LPB",
       width: "150px",
-      // cell: (row) => {
-      //   var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.purchasing.data.attributes.total_purchasing, 0);
-      //   const cellData = row.attributes.debt_details.data.map((element, index) => (
-      //     <p key={index}>{formatter.format(element.attributes.purchasing.data.attributes.total_purchasing)}</p>
-      //   ));
-      //   return( 
-      //     <div className="mt-4">
-      //       {cellData}
-      //       <hr/> 
-      //       <p>{formatter.format(sum)}</p>
-      //     </div>
-      //   );
-      // },
+      cell: (row) => {
+        var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.purchasing.data.attributes.total_purchasing, 0);
+        return( 
+          <div className="mt-4">
+            <p>{formatter.format(sum)}</p>
+          </div>
+        );
+      },
     },
     {
       name: "Tunai",
       width: "150px",
-      // cell: (row) => {
-      //   var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.tunai, 0);
-      //   const cellData = row.attributes.debt_details.data.map((element, index) => (
-      //     <p key={index}>{formatter.format(element.attributes.tunai)}</p>
-      //   ));
-      //   return( 
-      //     <div className="mt-4">
-      //       {cellData}
-      //       <hr/> 
-      //       <p>{formatter.format(sum)}</p>
-      //     </div>
-      //   );
-      // },
+      cell: (row) => {
+        var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.tunai, 0);
+        return( 
+          <div className="mt-4"> 
+            <p>{formatter.format(sum)}</p>
+          </div>
+        );
+      },
     },
     {
       name: "Transfer",
       width: "150px",
-      // cell: (row) => {
-      //   var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.transfer, 0);
-      //   const cellData = row.attributes.debt_details.data.map((element, index) => (
-      //     <p key={index}>{formatter.format(element.attributes.transfer)}</p>
-      //   ));
-      //   return( 
-      //     <div className="mt-4">
-      //       {cellData}
-      //       <hr/> 
-      //       <p>{formatter.format(sum)}</p>
-      //     </div>
-      //   );
-      // },
+      cell: (row) => {
+        var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.transfer, 0);
+        return( 
+          <div className="mt-4"> 
+            <p>{formatter.format(sum)}</p>
+          </div>
+        );
+      },
     },
     {
       name: "Giro",
       width: "150px",
-      // cell: (row) => {
-      //   var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.giro, 0);
-      //   const cellData = row.attributes.debt_details.data.map((element, index) => (
-      //     <p key={index}>{formatter.format(element.attributes.giro)}</p>
-      //   ));
-      //   return( 
-      //     <div className="mt-4">
-      //       {cellData}
-      //       <hr/> 
-      //       <p>{formatter.format(sum)}</p>
-      //     </div>
-      //   );
-      // },
+      cell: (row) => {
+        var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.giro, 0);
+        return( 
+          <div className="mt-4">
+            <p>{formatter.format(sum)}</p>
+          </div>
+        );
+      },
     },
     {
       name: "CN",
       width: "150px",
-      // cell: (row) => {
-      //   var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.cn, 0);
-      //   const cellData = row.attributes.debt_details.data.map((element, index) => (
-      //     <p key={index}>{formatter.format(element.attributes.cn)}</p>
-      //   ));
-      //   return( 
-      //     <div className="mt-4">
-      //       {cellData}
-      //       <hr/> 
-      //       <p>{formatter.format(sum)}</p>
-      //     </div>
-      //   );
-      // },
+      cell: (row) => {
+        var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.cn, 0);
+        return( 
+          <div className="mt-4">
+            <p>{formatter.format(sum)}</p>
+          </div>
+        );
+      },
     },
     {
       name: "OTH",
       width: "150px",
-      // cell: (row) => {
-      //   var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.oth, 0);
-      //   const cellData = row.attributes.debt_details.data.map((element, index) => (
-      //     <p key={index}>{formatter.format(element.attributes.oth)}</p>
-      //   ));
-      //   return( 
-      //     <div className="mt-4">
-      //       {cellData}
-      //       <hr/> 
-      //       <p>{formatter.format(sum)}</p>
-      //     </div>
-      //   );
-      // },
+      cell: (row) => {
+        var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.oth, 0);
+        return( 
+          <div className="mt-4">
+            <p>{formatter.format(sum)}</p>
+          </div>
+        );
+      },
     },
     {
       name: "Saldo Hutang",
       width: "150px",
-      // cell: (row) => {
-      //   var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.sisa_hutang, 0);
-      //   const cellData = row.attributes.debt_details.data.map((element, index) => (
-      //     <p key={index}>{formatter.format(element.attributes.sisa_hutang)}</p>
-      //   ));
-      //   return( 
-      //     <div className="mt-4">
-      //       {cellData}
-      //       <hr/> 
-      //       <p>{formatter.format(sum)}</p>
-      //     </div>
-      //   );
-      // },
+      cell: (row) => {
+        var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.sisa_hutang, 0);
+        return( 
+          <div className="mt-4">
+            <p>{formatter.format(sum)}</p>
+          </div>
+        );
+      },
     },
   ];
 

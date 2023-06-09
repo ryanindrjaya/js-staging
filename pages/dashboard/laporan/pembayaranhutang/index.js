@@ -80,6 +80,7 @@ function Laporan({ props }) {
   const user = props.user;
   const dataUser = props?.dataUser;
   const debt = props.debt;
+  const [data, setData] = useState(debt);
   const router = useRouter();
   const [supplier, setSupplier] = useState();
   const [searchParameters, setSearchParameters] = useState({});
@@ -89,7 +90,7 @@ function Laporan({ props }) {
   const { RangePicker } = DatePicker;
 
   const handlePrint = () => {
-    router.push("/dashboard/laporan/pembayaranhutang/print");
+    //router.push("/dashboard/laporan/pembayaranhutang/print");
   };
 
   // const handleAdd = () => {
@@ -172,28 +173,31 @@ function Laporan({ props }) {
         //   query += "";
         // }
 
-        // if (key === "status_pembayaran") {
-        //   if (searchParameters[key] !== undefined) {
-        //     query += `filters[${key}]=${searchParameters[key]}&`;
-        //   } else {
-        //     query += "";
-        //   }
-        // } else {
-        //   query += "";
-        // }
-
-        if (key == "range" && searchParameters[key] !== null) {
-          startDate = searchParameters?.range[0]?.format("YYYY-MM-DD");
-          endDate = searchParameters?.range[1]?.format("YYYY-MM-DD");
-
-          query += `filters[tanggal][$gte]=${startDate}&filters[tanggal][$lte]=${endDate}`;
+        if (key === "status_pembayaran") {
+          if (searchParameters[key] !== undefined) {
+            query += `filters[${key}]=${searchParameters[key]}&`;
+          } else {
+            query += "";
+          }
         } else {
           query += "";
         }
 
-        if (key === "akun" && searchParameters[key] !== undefined) {
-          console.log("search", searchParameters, data);
-          query += `filters[chart_of_account][id]=${searchParameters[key]}&`;
+        if (key === "supplier") {
+          if (searchParameters[key] !== undefined && searchParameters[key] !== null) {
+            console.log(searchParameters[key]);
+            query += `filters[${key}]=${searchParameters[key].id}&`;
+          } else {
+            query += "";
+          }
+        } else {
+          query += "";
+        }
+
+        if (key == "range" && searchParameters[key] !== null) {
+          startDate = searchParameters?.range[0]?.format("YYYY-MM-DD");
+          endDate = searchParameters?.range[1]?.format("YYYY-MM-DD");
+          query += `filters[tanggal_pembayaran][$gte]=${startDate}&filters[tanggal_pembayaran][$lte]=${endDate}&`;
         } else {
           query += "";
         }
@@ -209,7 +213,7 @@ function Laporan({ props }) {
         // }
       }
 
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate[debt_details][populate][0]=purchasing" + query;
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate[0]=supplier&populate[1]=debt_details.purchasing&" + query;
 
       const cookies = nookies.get(null, "token");
       const options = {
@@ -223,7 +227,7 @@ function Laporan({ props }) {
       const req = await fetch(endpoint, options);
       const res = await req.json();
 
-      //setJurnal(res);
+      setData(res);
       //console.log("endpoint", endpoint, res);
     };
 
@@ -242,7 +246,9 @@ function Laporan({ props }) {
             <div className="w-full flex justify-start">
               <div className="w-full md:w-1/4 px-3">
                  <SearchSupplier 
-                   onChangeSupplier={setSupplier}
+                   onChangeSupplier={(e) =>
+                    setSearchParameters({ ...searchParameters, supplier: e })
+                  }
                  />
               </div>
               <div className="w-full md:w-1/4 px-3">
@@ -255,7 +261,7 @@ function Laporan({ props }) {
                   }}
                   allowClear
                   onChange={(e) =>
-                    setSearchParameters({ ...searchParameters, statusPembayaran: e })
+                    setSearchParameters({ ...searchParameters, status_pembayaran: e })
                   }
                 >
                   <Select.Option value="Dibayar">Dibayar</Select.Option>
@@ -330,7 +336,7 @@ function Laporan({ props }) {
             </div>
             
             <Table
-              data={debt}
+              data={data}
               onUpdate={handleUpdate}
               //onDelete={handleDelete}
               //onPageChange={handlePageChange}
