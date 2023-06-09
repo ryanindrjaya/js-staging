@@ -100,6 +100,7 @@ export default function Supplier({ onChangeLocations, locations, fetching, disab
               filterOption={false}
               defaultActiveFirstOption={false}
               suffixIcon={<CaretDownOutlined />}
+              allowClear
             >
               {options}
             </Select>
