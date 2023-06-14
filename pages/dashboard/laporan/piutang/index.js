@@ -7,7 +7,7 @@ import router, { useRouter } from "next/router";
 import { useSelector, useDispatch } from "react-redux";
 import { Input, notification, Select, DatePicker } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import Table from "@iso/components/ReactDataTable/Report/PurchaseReturSaleTable";
+import Table from "@iso/components/ReactDataTable/Report/CreditTable";
 import SearchSupplier from "@iso/components/Form/AddReport/SearchSupplier";
 import SearchLocations from "@iso/components/Form/AddReport/SearchLocations";
 import nookies from "nookies";
@@ -22,18 +22,14 @@ Laporan.getInitialProps = async (context) => {
   const reqDataUser = await fetchUser(cookies);
   const dataUser = await reqDataUser.json();
 
-  const reqLocation = await fetchLocation(cookies);
-  const locations = await reqLocation.json();
-
-  const reqPurchasing = await fetchPurchasing(cookies);
-  const purchasing = await reqPurchasing.json();
+  const reqDebt = await fetchDebt(cookies);
+  const debt = await reqDebt.json();
 
   return {
     props: {
       user,
       dataUser,
-      locations,
-      purchasing,
+      debt,
     },
   };
 };
@@ -66,23 +62,8 @@ const fetchUser = async (cookies) => {
   return req;
 };
 
-const fetchLocation = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
-
-  const req = await fetch(endpoint, options);
-  return req;
-};
-
-const fetchPurchasing = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + 
-  "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products";
+const fetchDebt = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate[0]=supplier&populate[1]=debt_details.purchasing";
   const options = {
     method: "GET",
     headers: {
@@ -98,11 +79,10 @@ const fetchPurchasing = async (cookies) => {
 function Laporan({ props }) {
   const user = props.user;
   const dataUser = props?.dataUser;
-  const locations = props.locations;
-  const purchasing = props.purchasing;
-  const [data, setData] = useState(purchasing);
+  const debt = props.debt;
+  const [data, setData] = useState(debt);
   const router = useRouter();
-  const [queryPrint, setQueryPrint] = useState("/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products");
+  const [supplier, setSupplier] = useState();
   const [searchParameters, setSearchParameters] = useState({});
   const dispatch = useDispatch();
 
@@ -110,8 +90,7 @@ function Laporan({ props }) {
   const { RangePicker } = DatePicker;
 
   const handlePrint = () => {
-    // console.log("data", data.data);
-    // router.push("/dashboard/laporan/pembeliandanretur/print?data=" + data.data);
+    //router.push("/dashboard/laporan/pembayaranhutang/print");
   };
 
   // const handleAdd = () => {
@@ -153,12 +132,12 @@ function Laporan({ props }) {
   //   }
   // };
 
-  const openNotificationWithIcon = (type, title, message) => {
-    notification[type]({
-      message: title,
-      description: message,
-    });
-  };
+  // const openNotificationWithIcon = (type, title, message) => {
+  //   notification[type]({
+  //     message: title,
+  //     description: message,
+  //   });
+  // };
 
   // const fetchData = async (cookies) => {
   //   const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=deep";
@@ -185,21 +164,14 @@ function Laporan({ props }) {
       let query = "";
       let startDate = "";
       let endDate = "";
-      let queryTransaksi = "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&";
 
       for (const key in searchParameters) {
-
-        if (key === "tipeTransaksi" && searchParameters[key] !== undefined) {
-          if (searchParameters[key] == "Pembelian") {
-            queryTransaksi = "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&";
-          } else if (searchParameters[key] == "Retur") {
-            queryTransaksi = "/purchasings?populate[0]=supplier&populate[1]=returs.retur_details.products&";
-          } else {
-            queryTransaksi = "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&";
-          }
-        } else {
-          queryTransaksi = "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&";
-        }
+        // if (key === "user" && searchParameters[key] !== null) {
+        //   console.log("search", searchParameters);
+        //   //query += `filters[credit_details][customer][id]=${searchParameters[key].id}&`;
+        // } else {
+        //   query += "";
+        // }
 
         if (key === "status_pembayaran") {
           if (searchParameters[key] !== undefined) {
@@ -211,8 +183,9 @@ function Laporan({ props }) {
           query += "";
         }
 
-        if (key === "supplier" || key === "location") {
+        if (key === "supplier") {
           if (searchParameters[key] !== undefined && searchParameters[key] !== null) {
+            console.log(searchParameters[key]);
             query += `filters[${key}]=${searchParameters[key].id}&`;
           } else {
             query += "";
@@ -224,19 +197,23 @@ function Laporan({ props }) {
         if (key == "range" && searchParameters[key] !== null) {
           startDate = searchParameters?.range[0]?.format("YYYY-MM-DD");
           endDate = searchParameters?.range[1]?.format("YYYY-MM-DD");
-
-          query += `filters[date_purchasing][$gte]=${startDate}&filters[date_purchasing][$lte]=${endDate}&`;
+          query += `filters[tanggal_pembayaran][$gte]=${startDate}&filters[tanggal_pembayaran][$lte]=${endDate}&`;
         } else {
           query += "";
         }
 
+        // if (key === "area" || key === "wilayah") {
+        //   if (searchParameters[key] !== null) {
+        //     query += `filters[credit_details][customer][${key}][id]=${searchParameters[key].id}&`;
+        //   } else {
+        //     query += "";
+        //   }
+        // } else {
+        //   query += "";
+        // }
       }
 
-      const endpoint = process.env.NEXT_PUBLIC_URL + 
-      //"/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&" + 
-      //"/purchasings?populate" + 
-      queryTransaksi + 
-      query;
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate[0]=supplier&populate[1]=debt_details.purchasing&" + query;
 
       const cookies = nookies.get(null, "token");
       const options = {
@@ -250,8 +227,8 @@ function Laporan({ props }) {
       const req = await fetch(endpoint, options);
       const res = await req.json();
 
-      setQueryPrint(queryTransaksi + query);
       setData(res);
+      //console.log("endpoint", endpoint, res);
     };
 
     searchQuery();
@@ -260,43 +237,19 @@ function Laporan({ props }) {
   return (
     <>
       <Head>
-        <title>Laporan pembelian dan retur beli barang </title>
+        <title>Laporan piutang penjualan</title>
       </Head>
       <DashboardLayout>
         <LayoutWrapper style={{}}>
-          <TitlePage titleText={"LAPORAN PEMBELIAN DAN RETUR BELI BARANG"} />
+          <TitlePage titleText={"LAPORAN PIUTANG PENJUALAN"} />
           <LayoutContent>
             <div className="w-full flex justify-start">
-              <div className="w-full md:w-1/4 px-3 mb-2">
-                 <SearchLocations
-                   onChangeLocations={(e) =>
-                    setSearchParameters({ ...searchParameters, location: e })
-                  }
-                 />
-              </div>
               <div className="w-full md:w-1/4 px-3">
                  <SearchSupplier 
                    onChangeSupplier={(e) =>
                     setSearchParameters({ ...searchParameters, supplier: e })
                   }
                  />
-              </div>
-              <div className="w-full md:w-1/4 px-3">
-                <Select
-                  placeholder="Tipe Transaksi"
-                  size="large"
-                  style={{
-                    width: "100%",
-                    marginRight: "10px",
-                  }}
-                  allowClear
-                  onChange={(e) =>
-                    setSearchParameters({ ...searchParameters, tipeTransaksi: e })
-                  }
-                >
-                  <Select.Option value="Pembelian">Pembelian</Select.Option>
-                  <Select.Option value="Retur">Retur</Select.Option>
-                </Select>
               </div>
               <div className="w-full md:w-1/4 px-3">
                 <Select
@@ -316,9 +269,23 @@ function Laporan({ props }) {
                   <Select.Option value="Belum Dibayar">Belum Dibayar</Select.Option>
                 </Select>
               </div>
-            </div>
-
-            <div className="w-full flex justify-end -mt-4">
+              <div className="w-full md:w-1/4 px-3">
+                <Select
+                  placeholder="Tipe Laporan"
+                  size="large"
+                  style={{
+                    width: "100%",
+                    marginRight: "10px",
+                  }}
+                  allowClear
+                  onChange={(e) =>
+                    setSearchParameters({ ...searchParameters, tipeLaporan: e })
+                  }
+                >
+                  <Select.Option value="Detail">Detail</Select.Option>
+                  <Select.Option value="Rekap">Rekap</Select.Option>
+                </Select>
+              </div>
               <div className="w-full md:w-1/4 px-3">
                 <RangePicker
                   size="large"
@@ -374,8 +341,48 @@ function Laporan({ props }) {
               //onDelete={handleDelete}
               //onPageChange={handlePageChange}
               //onChangeStatus={onChangeStatus}
+              tipeLaporan={searchParameters["tipeLaporan"]}
               user={user}
             />
+
+            {/* <table className="w-full">
+              <thead>
+                <tr>
+                  <th>No Pembayaran</th>
+                  <th>Tgl Bayar</th>
+                  <th>Nota Supplier</th>
+                  <th>No LPB</th>
+                  <th>Tgl LPB</th>
+                  <th>Nilai LPB</th>
+                  <th>Total Nilai RB</th>
+                  <th>Tunai</th>
+                  <th>Transfer</th>
+                  <th>Giro</th>
+                  <th>CN</th>
+                  <th>OTH</th>
+                  <th>Saldo Hutang</th>
+                </tr>
+              </thead>
+              <tbody>
+                {debt.data.forEach((item) => { console.log("item",item, debt.data);
+                  // <tr>
+                  //   <td>{item.attributes.no_hutang}</td>
+                  //   <td>lol</td>
+                  //   <td></td>
+                  //   <td></td>
+                  //   <td></td>
+                  //   <td></td>
+                  //   <td></td>
+                  //   <td></td>
+                  //   <td></td>
+                  //   <td></td>
+                  //   <td></td>
+                  //   <td></td>
+                  //   <td></td>
+                  // </tr>
+                })}
+              </tbody>
+            </table> */}
 
             <div className="w-full flex justify-between mt-3">
                 <button

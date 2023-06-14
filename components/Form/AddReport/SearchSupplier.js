@@ -106,6 +106,7 @@ export default function Supplier({ onChangeSupplier, supplier, fetching, disable
               filterOption={false}
               defaultActiveFirstOption={false}
               suffixIcon={<CaretDownOutlined />}
+              allowClear
             >
               {options}
             </Select>
@@ -131,6 +132,7 @@ export default function Supplier({ onChangeSupplier, supplier, fetching, disable
               filterOption={false}
               defaultActiveFirstOption={false}
               suffixIcon={<CaretDownOutlined />}
+              allowClear
             >
               {options}
             </Select>

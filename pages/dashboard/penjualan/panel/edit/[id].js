@@ -51,6 +51,9 @@ Edit.getInitialProps = async (context) => {
   const reqCustomer = await fetchCustomer(cookies);
   const customer = await reqCustomer.json();
 
+  const reqCredit = await fetchCredit(cookies);
+  const credit = await reqCredit.json();
+
   return {
     props: {
       user,
@@ -58,7 +61,8 @@ Edit.getInitialProps = async (context) => {
       inven,
       panel,
       customer,
-      editData
+      editData,
+      credit
     },
   };
 };
@@ -132,6 +136,19 @@ const fetchCustomer = async (cookies) => {
     return req;
 };
 
+const fetchCredit = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/credits?populate=credit_details.customer";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+    const req = await fetch(endpoint, options);
+    return req;
+};
+
 function Edit({ props }) {
   const products = useSelector((state) => state.Order);
   const dispatch = useDispatch();
@@ -143,6 +160,7 @@ function Edit({ props }) {
   const panel = props.panel;
   const customerData = props.customer;
   const editData = props.editData.data;
+  const creditData = props.credit.data;
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -716,17 +734,27 @@ function Edit({ props }) {
   useEffect(() => {
     // set limit credit value
     totalBelumDibayar = 0;
+    var bayarCredit = 0;
+
     if(customer){
       panel.data.forEach((element) => {
         if(customer.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
+        else totalBelumDibayar = totalBelumDibayar;
       });
 
+      creditData.forEach((item) => {
+        item.attributes.credit_details.data.forEach((element) => {
+          if(customer.id == element.attributes.customer.data.id) bayarCredit += item.attributes.total_pembayaran;
+          else bayarCredit = bayarCredit;
+        });
+      });
+
+      totalBelumDibayar = totalBelumDibayar - bayarCredit;
       setLimitCredit(customer?.attributes?.credit_limit - totalBelumDibayar);
       form.setFieldsValue({
         limitCredit: formatter.format(customer?.attributes?.credit_limit - totalBelumDibayar),
       });
     }
-    console.log("cust", limitCredit - totalBelumDibayar);
   }, [customer]);
 
   useEffect(() => {
