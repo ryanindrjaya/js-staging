@@ -14,8 +14,8 @@ export default function calculatePrice(
     var tunai = 0;
     var transfer = 0;
     var giro = 0;
-    var cn = 0;
-    var oth = 0;
+    // var cn = 0;
+    // var oth = 0;
 
     if (row.sisaHutang) sisaHutang = row.sisaHutang;
 
@@ -43,23 +43,23 @@ export default function calculatePrice(
       giro = 0;
     }
 
-    if (biaya.info[index]?.cn) {
-      cn = biaya.info[index].cn;
-    } else if (biaya.info[index]?.cn == 0 || biaya.info[index]?.cn == null) {
-      cn = 0;
-    } else {
-      cn = 0;
-    }
+    // if (biaya.info[index]?.cn) {
+    //   cn = biaya.info[index].cn;
+    // } else if (biaya.info[index]?.cn == 0 || biaya.info[index]?.cn == null) {
+    //   cn = 0;
+    // } else {
+    //   cn = 0;
+    // }
 
-    if (biaya.info[index]?.oth) {
-      oth = biaya.info[index].oth;
-    } else if (biaya.info[index]?.oth == 0 || biaya.info[index]?.oth == null) {
-      oth = 0;
-    } else {
-      oth = 0;
-    }
+    // if (biaya.info[index]?.oth) {
+    //   oth = biaya.info[index].oth;
+    // } else if (biaya.info[index]?.oth == 0 || biaya.info[index]?.oth == null) {
+    //   oth = 0;
+    // } else {
+    //   oth = 0;
+    // }
 
-    sisaHutang = sisaHutang - (tunai + transfer + giro + cn + oth);
+    sisaHutang = sisaHutang - (tunai + transfer + giro);
     sisaHutangTotal[index] = sisaHutang;
 
   return sisaHutangTotal[index];

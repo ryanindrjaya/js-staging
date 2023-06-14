@@ -284,62 +284,62 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
         );
       },
     },
-    {
-      name: "ACC CN",
-      width: "150px",
-      selector: (row, idx) => {
-        var index = cekData(row);
-        var defaultAccCN = biaya.info[index]?.cn ?? 0;
+    // {
+    //   name: "ACC CN",
+    //   width: "150px",
+    //   selector: (row, idx) => {
+    //     var index = cekData(row);
+    //     var defaultAccCN = biaya.info[index]?.cn ?? 0;
 
-        return (
-          <Row align="bottom" justify="center">
-            <Form.Item name={["AccCN", `${idx}`]} noStyle>
-              <InputNumber
-                defaultValue={defaultAccCN}
-                formatter={(value) =>
-                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                  }
-                parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                min={0}
-                onChange={(e) => onChangeCn(e, row, idx)}
-                style={{
-                  width: "100px",
-                  marginRight: "10px",
-                }}
-              />
-            </Form.Item>
-          </Row>
-        );
-      },
-    },
-    {
-      name: "ACC OTH",
-      width: "150px",
-      selector: (row, idx) => {
-        var index = cekData(row);
-        var defaultAccOTH = biaya.info[index]?.oth ?? 0;
+    //     return (
+    //       <Row align="bottom" justify="center">
+    //         <Form.Item name={["AccCN", `${idx}`]} noStyle>
+    //           <InputNumber
+    //             defaultValue={defaultAccCN}
+    //             formatter={(value) =>
+    //                 value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+    //               }
+    //             parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+    //             min={0}
+    //             onChange={(e) => onChangeCn(e, row, idx)}
+    //             style={{
+    //               width: "100px",
+    //               marginRight: "10px",
+    //             }}
+    //           />
+    //         </Form.Item>
+    //       </Row>
+    //     );
+    //   },
+    // },
+    // {
+    //   name: "ACC OTH",
+    //   width: "150px",
+    //   selector: (row, idx) => {
+    //     var index = cekData(row);
+    //     var defaultAccOTH = biaya.info[index]?.oth ?? 0;
 
-        return (
-          <Row align="bottom" justify="center">
-            <Form.Item name={["AccOTH", `${idx}`]} noStyle>
-              <InputNumber
-                defaultValue={defaultAccOTH}
-                formatter={(value) =>
-                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                  }
-                parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                min={0}
-                onChange={(e) => onChangeOth(e, row, idx)}
-                style={{
-                  width: "100px",
-                  marginRight: "10px",
-                }}
-              />
-            </Form.Item>
-          </Row>
-        );
-      },
-    },
+    //     return (
+    //       <Row align="bottom" justify="center">
+    //         <Form.Item name={["AccOTH", `${idx}`]} noStyle>
+    //           <InputNumber
+    //             defaultValue={defaultAccOTH}
+    //             formatter={(value) =>
+    //                 value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+    //               }
+    //             parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+    //             min={0}
+    //             onChange={(e) => onChangeOth(e, row, idx)}
+    //             style={{
+    //               width: "100px",
+    //               marginRight: "10px",
+    //             }}
+    //           />
+    //         </Form.Item>
+    //       </Row>
+    //     );
+    //   },
+    // },
     {
       name: "Sisa Hutang Jt",
       width: "150px",

@@ -78,7 +78,10 @@ const Print = ({ props }) => {
                 <td className="border-2 p-2">{formatMyDate(
                     element?.attributes?.sales_sale?.data?.attributes?.sale_date ??
                     element?.attributes?.panel_sale?.data?.attributes?.sale_date ??
-                    element?.attributes?.non_panel_sale?.data?.attributes?.sale_date
+                    element?.attributes?.non_panel_sale?.data?.attributes?.sale_date ??
+                    element?.attributes?.sales_sale?.data?.attributes?.createdAt ??
+                    element?.attributes?.panel_sale?.data?.attributes?.createdAt ??
+                    element?.attributes?.non_panel_sale?.data?.attributes?.createdAt
                 )}</td>
                 <td className="border-2 p-2">{
                     element?.attributes?.sales_sale?.data?.attributes?.customer?.data?.attributes?.name ??
@@ -91,11 +94,9 @@ const Print = ({ props }) => {
                     element?.attributes?.non_panel_sale?.data?.attributes?.total
                 )}</td>
                 <td className="border-2 p-2">{formatter.format(element?.attributes?.total_retur)}</td>
-                <td className="border-2 p-2">{formatter.format(parseInt(
-                    element?.attributes?.sales_sale?.data?.attributes?.total ??
-                    element?.attributes?.panel_sale?.data?.attributes?.total ??
-                    element?.attributes?.non_panel_sale?.data?.attributes?.total
-                ) - element?.attributes?.total_retur - element?.attributes?.sisa_piutang )}</td>
+                <td className="border-2 p-2">{formatter.format(parseFloat(
+                    element?.attributes?.tunai + element?.attributes?.transfer + element?.attributes?.giro
+                ))}</td>
                 <td className="border-2 p-2">{formatter.format(element?.attributes?.sisa_piutang)}</td>
                 {/*<td className="border-2 p-2">{element.attributes.purchasing.data.attributes.no_nota_suppplier}</td>*/}
                 {/*<td className="border-2 p-2 text-end">{formatter.format(element.attributes.purchasing.data.attributes.total_purchasing)}</td>*/}
