@@ -7,18 +7,7 @@ var tempProductListId = [];
 var tempSupplierId = 0;
 var tempLocationId;
 
-const CreateSale = async (
-  grandTotal,
-  totalPrice,
-  values,
-  listId,
-  form,
-  router,
-  url,
-  page,
-  locations,
-  updateStock
-) => {
+const CreateSale = async (grandTotal, totalPrice, values, listId, form, router, url, page, locations, updateStock) => {
   tempProductListId = [];
 
   console.log("CREATE SELL DATA");
@@ -43,16 +32,7 @@ const CreateSale = async (
   const res = await req.json();
 
   if (req.status === 200) {
-    await putRelationSaleDetail(
-      res.data.id,
-      res.data.attributes,
-      form,
-      router,
-      url,
-      page,
-      locations,
-      updateStock
-    );
+    await putRelationSaleDetail(res.data.id, res.data.attributes, form, router, url, page, locations, updateStock);
   } else {
     openNotificationWithIcon("error");
   }
@@ -76,16 +56,7 @@ const createData = async (data, url) => {
   return req;
 };
 
-const putRelationSaleDetail = async (
-  id,
-  value,
-  form,
-  router,
-  url,
-  page,
-  locations,
-  updateStock
-) => {
+const putRelationSaleDetail = async (id, value, form, router, url, page, locations, updateStock) => {
   const user = await getUserMe();
   const dataSale = {
     data: value,
@@ -128,13 +99,12 @@ const putRelationSaleDetail = async (
     form.resetFields();
     if (page == "store sale") router.replace("/dashboard/penjualan/toko");
     if (page == "sales sale") router.replace("/dashboard/penjualan/sales");
-    if (page == "non panel sale")
-      router.replace("/dashboard/penjualan/non_panel");
+    if (page == "non panel sale") router.replace("/dashboard/penjualan/non_panel");
     if (page == "panel sale") router.replace("/dashboard/penjualan/panel");
     openNotificationWithIcon("success");
     console.log("update stock", res.data.id, locations);
     if (updateStock) {
-      updateStock(res.data.id, locations);
+      updateStock(res.data.id, locations, "subtract");
     }
   } else {
     openNotificationWithIcon("error");
@@ -161,14 +131,12 @@ const openNotificationWithIcon = (type) => {
   if (type === "error") {
     notification[type]({
       message: "Gagal menambahkan data",
-      description:
-        "Produk gagal ditambahkan. Silahkan cek NO Penjualan atau kelengkapan data lainnya",
+      description: "Produk gagal ditambahkan. Silahkan cek NO Penjualan atau kelengkapan data lainnya",
     });
   } else if (type === "success") {
     notification[type]({
       message: "Berhasil menambahkan data",
-      description:
-        "Produk berhasil ditambahkan. Silahkan cek pada halaman Pembelian Barang",
+      description: "Produk berhasil ditambahkan. Silahkan cek pada halaman Pembelian Barang",
     });
   }
 };
