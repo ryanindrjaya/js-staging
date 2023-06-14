@@ -658,12 +658,12 @@ function Hutang({ props }) {
                       <Select.Option value="giro" key="giro">
                         Bank Giro
                       </Select.Option>
-                      <Select.Option value="cn" key="cn">
+                      {/* <Select.Option value="cn" key="cn">
                         CN
                       </Select.Option>
                       <Select.Option value="oth" key="oth">
                         OTH
-                      </Select.Option>
+                      </Select.Option> */}
                     </Select>
                   </Form.Item>
                 </div>
@@ -703,12 +703,12 @@ function Hutang({ props }) {
                       <Select.Option value="giro" key="giro">
                         Bank Giro
                       </Select.Option>
-                      <Select.Option value="cn" key="cn">
+                      {/* <Select.Option value="cn" key="cn">
                         CN
                       </Select.Option>
                       <Select.Option value="oth" key="oth">
                         OTH
-                      </Select.Option>
+                      </Select.Option> */}
                     </Select>
                   </Form.Item>
                 </div>
@@ -748,12 +748,12 @@ function Hutang({ props }) {
                       <Select.Option value="giro" key="giro">
                         Bank Giro
                       </Select.Option>
-                      <Select.Option value="cn" key="cn">
+                      {/* <Select.Option value="cn" key="cn">
                         CN
                       </Select.Option>
                       <Select.Option value="oth" key="oth">
                         OTH
-                      </Select.Option>
+                      </Select.Option> */}
                     </Select>
                   </Form.Item>
                 </div>
@@ -771,7 +771,7 @@ function Hutang({ props }) {
                 </div>
               </div>
 
-              <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
+              {/* <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="bayar4">
                     <InputNumber
@@ -859,7 +859,7 @@ function Hutang({ props }) {
                     </Select>
                   </Form.Item>
                 </div>
-              </div>
+              </div> */}
 
               <div className="w-full mt-8 flex justify-between">
                 <Form.Item name="catatan" className="w-full mx-2">

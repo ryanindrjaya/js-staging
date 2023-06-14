@@ -27,12 +27,14 @@ import profile from "@iso/redux/profile/reducer";
 import githubSearch from "@iso/redux/githubSearch/reducers";
 import session from "@iso/redux/session/reducer";
 import Sales from "./application/sale/reducer";
+import Report from "./application/report/reducer";
 
 
 export default combineReducers({
   Sales,
   Order,
   Cost,
+  Report,
   Auth,
   App,
   ThemeSwitcher,

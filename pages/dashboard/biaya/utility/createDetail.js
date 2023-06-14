@@ -42,8 +42,8 @@ const createDetail = (
         var tunai = biaya.info[id]?.tunai ?? 0;
         var transfer = biaya.info[id]?.transfer ?? 0;
         var giro = biaya.info[id]?.giro ?? 0;
-        var cn = biaya.info[id]?.cn ?? 0;
-        var oth = biaya.info[id]?.oth ?? 0;
+        //var cn = biaya.info[id]?.cn ?? 0;
+        var noGiro = biaya.info[id]?.oth ?? null;
         var sisa_hutang = sisaHutang[id] ?? 0;
         var lpb = element;
         var total_retur = data[id].subtotal;
@@ -65,8 +65,9 @@ const createDetail = (
             tunai,
             transfer,
             giro,
-            cn,
-            oth,
+            // cn,
+            // oth,
+            noGiro,
             total_retur,
             sisa_hutang,
             lpb,
@@ -89,8 +90,9 @@ const POSTDetail = async (
     tunai,
     transfer,
     giro,
-    cn,
-    oth,
+    // cn,
+    // oth,
+    noGiro,
     total_retur,
     sisa_hutang,
     lpb,
@@ -110,8 +112,9 @@ const POSTDetail = async (
         tunai: tunai,
         transfer: transfer,
         giro: giro,
-        cn: cn,
-        oth: oth,
+        // cn: cn,
+        // oth: oth,
+        no_giro: noGiro,
         total_retur: total_retur,
         sisa_hutang: sisa_hutang,
         purchasing: { id: lpb.id },
@@ -127,8 +130,9 @@ const POSTDetail = async (
           tunai: tunai,
           transfer: transfer,
           giro: giro,
-          cn: cn,
-          oth: oth,
+          // cn: cn,
+          // oth: oth,
+          no_giro: noGiro,
           total_retur: total_retur,
           sisa_piutang: sisa_hutang,
           sales_sale: { id: lpb.id },
@@ -143,8 +147,9 @@ const POSTDetail = async (
           tunai: tunai,
           transfer: transfer,
           giro: giro,
-          cn: cn,
-          oth: oth,
+          // cn: cn,
+          // oth: oth,
+          no_giro: noGiro,
           total_retur: total_retur,
           sisa_piutang: sisa_hutang,
           panel_sale: { id: lpb.id },
@@ -159,8 +164,9 @@ const POSTDetail = async (
           tunai: tunai,
           transfer: transfer,
           giro: giro,
-          cn: cn,
-          oth: oth,
+          // cn: cn,
+          // oth: oth,
+          no_giro: noGiro,
           total_retur: total_retur,
           sisa_piutang: sisa_hutang,
           non_panel_sale: { id: lpb.id },

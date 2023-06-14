@@ -111,7 +111,7 @@ export default function ReactDataTable({
       },
     },
   };
-  console.log(data.data,"data");
+
   const columns = [
     {
       name: "Nama Produk",
@@ -176,7 +176,7 @@ export default function ReactDataTable({
           const cellDetails = row.attributes.purchasing_details.data.map((element, index) => (
             <p key={index}>{element.attributes.total_order} {element.attributes.unit_order}</p>
           ));
-        cellData = cellDetails
+        cellData = cellDetails;
         }
 
         var cellRetur = null;
@@ -230,7 +230,7 @@ export default function ReactDataTable({
           const cellDetails = row.attributes.purchasing_details.data.map((element, index) => (
             <p key={index}>{formatter.format(element.attributes.unit_price)}</p>
           ));
-        cellData = cellDetails
+        cellData = cellDetails;
         }
         // const cellData = row.attributes.purchasing_details.data.map((element, index) => (
         //   <p key={index}>{formatter.format(element.attributes.unit_price)}</p>
@@ -289,7 +289,7 @@ export default function ReactDataTable({
             {formatter.format(element.attributes.disc ?? 0)} {element.attributes.dp1}% {element.attributes.dp2}% {element.attributes.dp3}% 
           </p>
           ));
-        cellData = cellDetails
+        cellData = cellDetails;
         }
         // const cellData = row.attributes.purchasing_details.data.map((element, index) => (
         //   <p key={index}>
@@ -348,7 +348,7 @@ export default function ReactDataTable({
           const cellDetails = row.attributes.purchasing_details.data.map((element, index) => (
             <p key={index}>{formatter.format(element.attributes.unit_price_after_disc)}</p>
           ));
-        cellData = cellDetails
+        cellData = cellDetails;
         }
         // const cellData = row.attributes.purchasing_details.data.map((element, index) => (
         //   <p key={index}>{formatter.format(element.attributes.unit_price_after_disc)}</p>
@@ -406,7 +406,7 @@ export default function ReactDataTable({
           const cellDetails = row.attributes.purchasing_details.data.map((element, index) => (
             <p key={index}>{formatter.format(element.attributes.sub_total)}</p>
           ));
-        cellData = cellDetails
+        cellData = cellDetails;
         sum = row.attributes.purchasing_details.data.reduce((total, row) => total += row.attributes.sub_total, 0);
         }
         //var sum = row.attributes.purchasing_details.data.reduce((total, row) => total += row.attributes.sub_total, 0);
@@ -420,7 +420,7 @@ export default function ReactDataTable({
           <p key={index}>
             <p className="py-1"></p>
             <p>
-              {element.attributes.retur_details.data.map((item, idx) => 
+              {element.attributes.retur_details.data.map((item, idx) =>
                 (<p key={idx}>{formatter.format(item.attributes.sub_total)}</p>)
               )}
             </p>

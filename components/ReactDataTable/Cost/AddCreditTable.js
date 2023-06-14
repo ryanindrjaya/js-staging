@@ -1,6 +1,6 @@
 import DataTable from "react-data-table-component";
 import AlertDialog from "../../Alert/Alert";
-import { Form, Select, InputNumber, Checkbox, Popover, Modal, notification } from "antd";
+import { Form, Select, Input, InputNumber, Checkbox, Popover, Modal, notification } from "antd";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
 import { PrinterOutlined } from "@ant-design/icons";
@@ -12,6 +12,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [loading, setLoading] = useState(false);
+  console.log("biaya nich", biaya)
 
   var unit = 1;
   var priceUnit = 1;
@@ -73,7 +74,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
 
   const calculateTotalPembayaran = (data, id) => {
     if (biaya.info[id] != undefined) {
-      return (biaya.info[id]?.tunai + biaya.info[id]?.giro + biaya.info[id]?.cn + biaya.info[id]?.oth + biaya.info[id]?.transfer );
+      return (biaya.info[id]?.tunai + biaya.info[id]?.giro + biaya.info[id]?.transfer );
     } else return 0;
   };
 
@@ -92,7 +93,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       onChangeTransfer(0, data, index);
       onChangeGiro(0, data, index);
       onChangeCn(0, data, index);
-      onChangeOth(0, data, index);
+      onChangeOth(null, data, index);
       onChangeId(data.id, data, index);
     }
     
@@ -144,13 +145,13 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   const [transfer, setTransfer] = useState(0);
   const [giro, setGiro] = useState(0);
   const [cn, setCn] = useState(0);
-  const [oth, setOth] = useState(0);
+  const [oth, setOth] = useState(null);
 
   var tempTunai = 0;
   var tempTransfer = 0;
   var tempGiro = 0;
-  var tempCn = 0;
-  var tempOth = 0;
+  //var tempCn = 0;
+  var tempOth = null;
   var tempIndex = null;
   const onChangeBayar = (value, metode, row, idx) => {
 
@@ -159,13 +160,20 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
         if (metode == "tunai") { setTunai(value); tempTunai = value; }
         if (metode == "transfer") { setTransfer(value); tempTransfer = value; }
         if (metode == "giro") { setGiro(value); tempGiro = value; }
-        if (metode == "cn") { setCn(value); tempCn = value; }
-        if (metode == "oth") { setOth(value); tempOth = value; }
+        //if (metode == "cn") { setCn(value); tempCn = value; }
+        //if (metode == "oth") { setOth(value); tempOth = value; }
 
         // cek pembayaran
-        if ((row.attributes.total - row.subtotal) >= (tempTunai + tempTransfer + tempGiro + tempCn + tempOth)) setModalSisa(tunai + transfer + giro + cn + oth);
+        if ((row.attributes.total - row.subtotal) >= (tempTunai + tempTransfer + tempGiro)) setModalSisa(tunai + transfer + giro);
         else handleCek("info");
     //}
+
+    tempIndex = idx;
+  };
+
+  const onChangeNoGiro = (value, idx) => {
+    // no giro
+    setOth(value.target.value);
 
     tempIndex = idx;
   };
@@ -184,14 +192,14 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     onChangeCn(cn, row, idx);
     onChangeOth(oth, row, idx);
 
-    if ((row.attributes.total - row.subtotal) >= (tunai + transfer + giro + cn + oth)) setModalSisa(tunai + transfer + giro + cn + oth);
+    if ((row.attributes.total - row.subtotal) >= (tunai + transfer + giro)) setModalSisa(tunai + transfer + giro);
     else {
       handleCek("error");
       onChangeTunai(0, row, idx);
       onChangeTransfer(0, row, idx);
       onChangeGiro(0, row, idx);
       onChangeCn(0, row, idx);
-      onChangeOth(0, row, idx);
+      onChangeOth(null, row, idx);
     }
 
     setTimeout(() => {
@@ -209,13 +217,14 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
           bayar3: null,
           bayar4: null,
           bayar5: null,
+          noGiro: null,
       });
 
       setTunai(0);
       setTransfer(0);
       setGiro(0);
       setCn(0);
-      setOth(0);
+      setOth(null);
     }, 100);
   };
 
@@ -234,13 +243,14 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       bayar3: null,
       bayar4: null,
       bayar5: null,
+      noGiro: null,
     });
 
     setTunai(0);
     setTransfer(0);
     setGiro(0);
     setCn(0);
-    setOth(0);
+    setOth(null);
     //this.myFormRef.reset();
   };
 
@@ -322,12 +332,12 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                                   <Select.Option value="giro" key="giro">
                                       Bank Giro
                                   </Select.Option>
-                                  <Select.Option value="cn" key="cn">
+                                  {/* <Select.Option value="cn" key="cn">
                                       CN
                                   </Select.Option>
                                   <Select.Option value="oth" key="oth">
                                       OTH
-                                  </Select.Option>
+                                  </Select.Option> */}
                               </Select>
                           </Form.Item>
                       </div>
@@ -371,12 +381,12 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                                   <Select.Option value="giro" key="giro">
                                       Bank Giro
                                   </Select.Option>
-                                  <Select.Option value="cn" key="cn">
+                                  {/* <Select.Option value="cn" key="cn">
                                       CN
                                   </Select.Option>
                                   <Select.Option value="oth" key="oth">
                                       OTH
-                                  </Select.Option>
+                                  </Select.Option> */}
                               </Select>
                           </Form.Item>
                       </div>
@@ -419,12 +429,12 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                                   <Select.Option value="giro" key="giro">
                                       Bank Giro
                                   </Select.Option>
-                                  <Select.Option value="cn" key="cn">
+                                  {/* <Select.Option value="cn" key="cn">
                                       CN
                                   </Select.Option>
                                   <Select.Option value="oth" key="oth">
                                       OTH
-                                  </Select.Option>
+                                  </Select.Option> */}
                               </Select>
                           </Form.Item>
                       </div>
@@ -448,6 +458,23 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                   </div>
 
                   <div className="w-full flex justify-start">
+                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0"/>
+                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
+                          <Form.Item name="noGiro" noStyle>
+                              <Input
+                                  placeholder="No Giro"
+                                  size="large"
+                                  style={{
+                                      width: "100%",
+                                      marginRight: "10px",
+                                  }}
+                                  onChange={(values) => onChangeNoGiro(values)}
+                              />
+                          </Form.Item>
+                      </div>
+                  </div>
+
+                  {/* <div className="w-full flex justify-start">
                       <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
                           <Form.Item name="metode_bayar4" noStyle>
                               <Select
@@ -541,7 +568,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                               />
                           </Form.Item>
                       </div>
-                  </div>
+                  </div> */}
 
                   <div className="w-full flex justify-start mt-4">
                       <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0 text-center">
@@ -553,7 +580,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                       <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0 text-center">
                           <span className="font-bold">
                               {formatter.format(
-                                row.attributes?.total - (tunai + transfer + giro + cn + oth + row.subtotal)
+                                row.attributes?.total - (tunai + transfer + giro + row.subtotal)
                               )}
                           </span>
                       </div>

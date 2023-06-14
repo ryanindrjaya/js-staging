@@ -121,7 +121,7 @@ export default function ReactDataTable({
             var salesName = "";
 
               for (const key in detail) {
-                salesName += detail[key]?.attributes?.customer?.data?.attributes?.name +", ";
+                salesName += detail[key]?.attributes?.customer?.data?.attributes?.sales_name +", ";
               }
 
             return salesName;
@@ -158,7 +158,7 @@ export default function ReactDataTable({
         {
           name: "Tanggal",
           width: "120px",
-          selector: (row) => formatMyDate(row.attributes?.tanggal ?? "-"),
+          selector: (row) => formatMyDate(row.attributes?.tanggal ?? row.attributes?.publishedAt),
         },
         {
           name: "Status Penagihan",

@@ -96,6 +96,7 @@ const fetchPurchasing = async (cookies) => {
 };
 
 function Laporan({ props }) {
+  const laporan = useSelector((state) => state.Report); console.log("data laporan", laporan);
   const user = props.user;
   const dataUser = props?.dataUser;
   const locations = props.locations;
@@ -111,7 +112,12 @@ function Laporan({ props }) {
 
   const handlePrint = () => {
     // console.log("data", data.data);
-    // router.push("/dashboard/laporan/pembeliandanretur/print?data=" + data.data);
+    router.push("/dashboard/laporan/pembeliandanretur/print/" + "1");
+    //router.query.data = searchParameters;
+    data.data.forEach(element => {
+      dispatch({ type: 'ADD_LIST', list: element });  
+    });
+    
   };
 
   // const handleAdd = () => {
@@ -250,7 +256,8 @@ function Laporan({ props }) {
       const req = await fetch(endpoint, options);
       const res = await req.json();
 
-      setQueryPrint(queryTransaksi + query);
+      var allQuery = queryTransaksi + query; 
+      setQueryPrint(allQuery);
       setData(res);
     };
 

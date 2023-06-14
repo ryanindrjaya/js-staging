@@ -8,8 +8,9 @@ import { useSelector, useDispatch } from "react-redux";
 import { Input, notification, Select, DatePicker } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import Table from "@iso/components/ReactDataTable/Report/CreditTable";
-import SearchSupplier from "@iso/components/Form/AddReport/SearchSupplier";
-import SearchLocations from "@iso/components/Form/AddReport/SearchLocations";
+import SearchCustomer from "@iso/components/Form/AddReport/SearchCustomer";
+import SearchArea from "@iso/components/Form/AddReport/SearchArea";
+import SearchWilayah from "@iso/components/Form/AddReport/SearchWilayah";
 import nookies from "nookies";
 import tokenVerify from "../../../../authentication/tokenVerify";
 
@@ -63,7 +64,10 @@ const fetchUser = async (cookies) => {
 };
 
 const fetchDebt = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate[0]=supplier&populate[1]=debt_details.purchasing";
+  const endpoint = process.env.NEXT_PUBLIC_URL + 
+  "/credits?populate[0]=supplier&populate[1]=credit_details.sales_sale&populate[2]=credit_details.customer&"+
+  "populate[3]=credit_details.panel_sale.retur_panel_sales&"+
+  "populate[4]=credit_details.non_panel_sale.retur_non_panel_sales";
   const options = {
     method: "GET",
     headers: {
@@ -80,7 +84,7 @@ function Laporan({ props }) {
   const user = props.user;
   const dataUser = props?.dataUser;
   const debt = props.debt;
-  const [data, setData] = useState(debt);
+  const [data, setData] = useState(debt); console.log("data", data);
   const router = useRouter();
   const [supplier, setSupplier] = useState();
   const [searchParameters, setSearchParameters] = useState({});
@@ -213,7 +217,11 @@ function Laporan({ props }) {
         // }
       }
 
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate[0]=supplier&populate[1]=debt_details.purchasing&" + query;
+      const endpoint = process.env.NEXT_PUBLIC_URL + 
+      "/credits?populate[0]=supplier&populate[1]=credit_details.sales_sale&populate[2]=credit_details.customer&"+
+      "populate[3]=credit_details.panel_sale.retur_panel_sales&"+
+      "populate[4]=credit_details.non_panel_sale.retur_non_panel_sales"+
+      query;
 
       const cookies = nookies.get(null, "token");
       const options = {
@@ -245,10 +253,10 @@ function Laporan({ props }) {
           <LayoutContent>
             <div className="w-full flex justify-start">
               <div className="w-full md:w-1/4 px-3">
-                 <SearchSupplier 
-                   onChangeSupplier={(e) =>
-                    setSearchParameters({ ...searchParameters, supplier: e })
-                  }
+                 <SearchCustomer
+                   onChangeCustomer={(e) =>
+                     setSearchParameters({ ...searchParameters, customer: e })
+                   }
                  />
               </div>
               <div className="w-full md:w-1/4 px-3">
@@ -293,6 +301,38 @@ function Laporan({ props }) {
                     setSearchParameters({ ...searchParameters, range: e })
                   }
                 />
+              </div>
+            </div>
+
+            <div className="w-full flex justify-start">
+              <div className="w-full md:w-1/4 px-3">
+                <Select
+                  allowClear
+                  // value={filter.sales}
+                  // onClear={() => setFilter({ ...filter, sales: null })}
+                  // onSelect={(value) => setFilter({ ...filter, sales: value })}
+                  placeholder="Sales"
+                  size="large"
+                  style={{
+                    width: "100%",
+                    marginRight: "10px",
+                  }}
+                  options={dataUser}
+                />
+              </div>
+              <div className="w-full md:w-1/4 px-3">
+                  <SearchArea
+                   onChangeArea={(e) =>
+                     setSearchParameters({ ...searchParameters, area: e })
+                   }
+                 />
+              </div>
+              <div className="w-full md:w-1/4 px-3">
+                  <SearchArea
+                   onChangeWilayah={(e) =>
+                     setSearchParameters({ ...searchParameters, wilayah: e })
+                   }
+                 />
               </div>
             </div>
 

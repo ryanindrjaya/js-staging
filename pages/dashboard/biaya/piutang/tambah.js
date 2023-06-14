@@ -330,6 +330,7 @@ function Piutang({ props }) {
   });
 
   const onFinish = (values) => {
+    // save no giro to oth
     var biayaInfo = biaya.info;
 
     setLoading(true);
@@ -338,27 +339,27 @@ function Piutang({ props }) {
     var totalTunai = 0;
     var totalTransfer = 0;
     var totalGiro = 0;
-    var totalCn = 0;
-    var totalOth = 0;
+    // var totalCn = 0;
+    // var totalOth = 0;
     for (const key in biaya.info) {
       totalTunai += biaya.info[key].tunai;
       totalTransfer += biaya.info[key].transfer;
       totalGiro += biaya.info[key].giro;
-      totalCn += biaya.info[key].cn;
-      totalOth += biaya.info[key].oth;
+      //totalCn += biaya.info[key].cn;
+      //totalOth += biaya.info[key].oth;
     }
 
     values.metode_bayar1 = "tunai";
     values.metode_bayar2 = "transfer";
     values.metode_bayar3 = "giro";
-    values.metode_bayar4 = "cn";
-    values.metode_bayar5 = "oth";
+    //values.metode_bayar4 = "cn";
+    //values.metode_bayar5 = "oth";
 
     values.bayar1 = totalTunai;
     values.bayar2 = totalTransfer;
     values.bayar3 = totalGiro;
-    values.bayar4 = totalCn;
-    values.bayar5 = totalOth;
+    //values.bayar4 = totalCn;
+    //values.bayar5 = totalOth;
 
     props.piutang.data.forEach((element) => {
       if (values.no_piutang == element.attributes.no_piutang) {
@@ -550,17 +551,17 @@ function Piutang({ props }) {
     var tunai = 0;
     var transfer = 0;
     var giro = 0;
-    var cn = 0;
-    var oth = 0;
+    // var cn = 0;
+    // var oth = 0;
     for (let row in biaya.info) {
       if (biaya.info[row].pilihData == "pilih") {
         if (biaya.info[row].tunai != null) tunai = biaya.info[row].tunai;
         if (biaya.info[row].transfer != null) transfer = biaya.info[row].transfer;
         if (biaya.info[row].giro != null) giro = biaya.info[row].giro;
-        if (biaya.info[row].cn != null) cn = biaya.info[row].cn;
-        if (biaya.info[row].oth != null) oth = biaya.info[row].oth;
+        // if (biaya.info[row].cn != null) cn = biaya.info[row].cn;
+        // if (biaya.info[row].oth != null) oth = biaya.info[row].oth;
 
-        total = total + tunai + transfer + giro + cn + oth;
+        total = total + tunai + transfer + giro;
       }
     }
     return total;
@@ -612,24 +613,30 @@ function Piutang({ props }) {
 
     // sales data
     sales.forEach((row) => {
-      const lastIndex = row.attributes.purchasing_payments?.data?.length;
-      const lastPayment =
-        row.attributes.purchasing_payments.data[lastIndex - 1];
-      if (
-        lastPayment?.attributes.payment_remaining ===
-        lastPayment?.attributes.total_payment
-      ) {
-        row.status = "Belum Dibayar";
-      } else if (
-        lastPayment?.attributes.payment_remaining > 0 &&
-        lastPayment?.attributes.payment_remaining <
-          lastPayment?.attributes.total_payment
-      ) {
-        row.status = "Dibayar Sebagian";
-      } else if (lastPayment?.attributes.payment_remaining <= 0) {
-        row.status = "Selesai";
+      // const lastIndex = row.attributes.purchasing_payments?.data?.length;
+      // const lastPayment =
+      //   row.attributes.purchasing_payments.data[lastIndex - 1];
+      // if (
+      //   lastPayment?.attributes.payment_remaining ===
+      //   lastPayment?.attributes.total_payment
+      // ) {
+      //   row.status = "Belum Dibayar";
+      // } else if (
+      //   lastPayment?.attributes.payment_remaining > 0 &&
+      //   lastPayment?.attributes.payment_remaining <
+      //     lastPayment?.attributes.total_payment
+      // ) {
+      //   row.status = "Dibayar Sebagian";
+      // } else if (lastPayment?.attributes.payment_remaining <= 0) {
+      //   row.status = "Selesai";
+      // } else {
+      //   row.status = "Dibayar Sebagian";
+      // }
+
+      if(row.attributes.status_pembayaran) {
+        row.status = row.attributes.status_pembayaran;
       } else {
-        row.status = "Dibayar Sebagian";
+        row.status = "Belum Dibayar";
       }
 
       if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian") {
@@ -644,31 +651,39 @@ function Piutang({ props }) {
 
     // panel data
     panel.forEach((row) => {
-      const lastIndex = row.attributes.purchasing_payments?.data?.length;
-      const lastPayment =
-        row.attributes.purchasing_payments.data[lastIndex - 1];
-      if (
-        lastPayment?.attributes.payment_remaining ===
-        lastPayment?.attributes.total_payment
-      ) {
-        row.status = "Belum Dibayar";
-      } else if (
-        lastPayment?.attributes.payment_remaining > 0 &&
-        lastPayment?.attributes.payment_remaining <
-          lastPayment?.attributes.total_payment
-      ) {
-        row.status = "Dibayar Sebagian";
-      } else if (lastPayment?.attributes.payment_remaining <= 0) {
-        row.status = "Selesai";
+      // const lastIndex = row.attributes.purchasing_payments?.data?.length;
+      // const lastPayment =
+      //   row.attributes.purchasing_payments.data[lastIndex - 1];
+      // if (
+      //   lastPayment?.attributes.payment_remaining ===
+      //   lastPayment?.attributes.total_payment
+      // ) {
+      //   row.status = "Belum Dibayar";
+      // } else if (
+      //   lastPayment?.attributes.payment_remaining > 0 &&
+      //   lastPayment?.attributes.payment_remaining <
+      //     lastPayment?.attributes.total_payment
+      // ) {
+      //   row.status = "Dibayar Sebagian";
+      // } else if (lastPayment?.attributes.payment_remaining <= 0) {
+      //   row.status = "Selesai";
+      // } else {
+      //   row.status = "Dibayar Sebagian";
+      // }
+
+      if(row.attributes.status) {
+        row.status = row.attributes.status;
       } else {
-        row.status = "Dibayar Sebagian";
+        row.status = "Belum Dibayar";
       }
 
-      if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian") {
-        if (dataTabel.length > 0) dataTabel[dataTabel.length] = row;
-        else dataTabel[0] = row;
-        //biaya.list.push(row);
-        dispatch({ type: "ADD_LIST", list: row });
+      if(row.attributes.status_data == "Publish"){
+        if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian") {
+          if (dataTabel.length > 0) dataTabel[dataTabel.length] = row;
+          else dataTabel[0] = row;
+          //biaya.list.push(row);
+          dispatch({ type: "ADD_LIST", list: row });
+        }
       }
 
       row.keterangan = "panel";
@@ -676,31 +691,39 @@ function Piutang({ props }) {
 
     // non panel data
     nonPanel.forEach((row) => {
-      const lastIndex = row.attributes.purchasing_payments?.data?.length;
-      const lastPayment =
-        row.attributes.purchasing_payments.data[lastIndex - 1];
-      if (
-        lastPayment?.attributes.payment_remaining ===
-        lastPayment?.attributes.total_payment
-      ) {
-        row.status = "Belum Dibayar";
-      } else if (
-        lastPayment?.attributes.payment_remaining > 0 &&
-        lastPayment?.attributes.payment_remaining <
-          lastPayment?.attributes.total_payment
-      ) {
-        row.status = "Dibayar Sebagian";
-      } else if (lastPayment?.attributes.payment_remaining <= 0) {
-        row.status = "Selesai";
+      // const lastIndex = row.attributes.purchasing_payments?.data?.length;
+      // const lastPayment =
+      //   row.attributes.purchasing_payments.data[lastIndex - 1];
+      // if (
+      //   lastPayment?.attributes.payment_remaining ===
+      //   lastPayment?.attributes.total_payment
+      // ) {
+      //   row.status = "Belum Dibayar";
+      // } else if (
+      //   lastPayment?.attributes.payment_remaining > 0 &&
+      //   lastPayment?.attributes.payment_remaining <
+      //     lastPayment?.attributes.total_payment
+      // ) {
+      //   row.status = "Dibayar Sebagian";
+      // } else if (lastPayment?.attributes.payment_remaining <= 0) {
+      //   row.status = "Selesai";
+      // } else {
+      //   row.status = "Dibayar Sebagian";
+      // }
+
+      if(row.attributes.status) {
+        row.status = row.attributes.status;
       } else {
-        row.status = "Dibayar Sebagian";
+        row.status = "Belum Dibayar";
       }
 
-      if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian") {
-        if (dataTabel.length > 0) dataTabel[dataTabel.length] = row;
-        else dataTabel[0] = row;
-        //biaya.list.push(row);
-        dispatch({ type: "ADD_LIST", list: row });
+      if(row.attributes.status_data == "Publish"){
+        if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian") {
+          if (dataTabel.length > 0) dataTabel[dataTabel.length] = row;
+          else dataTabel[0] = row;
+          //biaya.list.push(row);
+          dispatch({ type: "ADD_LIST", list: row });
+        }
       }
 
       row.keterangan = "nonpanel";
@@ -714,7 +737,6 @@ function Piutang({ props }) {
         pembayaran.push({ id: idDetail, total: total});
       });
     });
-    console.log("piutang data", piutang, dataTabel, pembayaran);
 
     dataTabel.forEach((element) => {
       element.subtotal = 0;
@@ -870,6 +892,9 @@ function Piutang({ props }) {
                     >
                       <Select.Option value="Dibayar" key="Dibayar">
                         Dibayar
+                      </Select.Option>
+                      <Select.Option value="Dibayar Sebagian" key="Dibayar Sebagian">
+                        Dibayar Sebagian
                       </Select.Option>
                       <Select.Option value="Belum Dibayar" key="Belum Dibayar">
                         Belum Dibayar

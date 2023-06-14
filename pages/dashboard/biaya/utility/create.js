@@ -59,19 +59,19 @@ const Create = async (
   else if (values.metode_bayar5 == "giro") totalGiro = values.bayar5;
   else totalGiro = 0;
 
-  if (values.metode_bayar1 == "cn") totalCN = values.bayar1;
-  else if (values.metode_bayar2 == "cn") totalCN = values.bayar2;
-  else if (values.metode_bayar3 == "cn") totalCN = values.bayar3;
-  else if (values.metode_bayar4 == "cn") totalCN = values.bayar4;
-  else if (values.metode_bayar5 == "cn") totalCN = values.bayar5;
-  else totalCN = 0;
+  // if (values.metode_bayar1 == "cn") totalCN = values.bayar1;
+  // else if (values.metode_bayar2 == "cn") totalCN = values.bayar2;
+  // else if (values.metode_bayar3 == "cn") totalCN = values.bayar3;
+  // else if (values.metode_bayar4 == "cn") totalCN = values.bayar4;
+  // else if (values.metode_bayar5 == "cn") totalCN = values.bayar5;
+  // else totalCN = 0;
 
-  if (values.metode_bayar1 == "oth") totalOTH = values.bayar1;
-  else if (values.metode_bayar2 == "oth") totalOTH = values.bayar2;
-  else if (values.metode_bayar3 == "oth") totalOTH = values.bayar3;
-  else if (values.metode_bayar4 == "oth") totalOTH = values.bayar4;
-  else if (values.metode_bayar5 == "oth") totalOTH = values.bayar5;
-  else totalOTH = 0;
+  // if (values.metode_bayar1 == "oth") totalOTH = values.bayar1;
+  // else if (values.metode_bayar2 == "oth") totalOTH = values.bayar2;
+  // else if (values.metode_bayar3 == "oth") totalOTH = values.bayar3;
+  // else if (values.metode_bayar4 == "oth") totalOTH = values.bayar4;
+  // else if (values.metode_bayar5 == "oth") totalOTH = values.bayar5;
+  // else totalOTH = 0;
 
   var data = {
     data: values,
@@ -92,12 +92,12 @@ const Create = async (
           else if (element.attributes.type == "Giro" && element.attributes.setting == true) {
             putAkun(element.id, element.attributes, form, totalGiro, page);
           }
-          else if (element.attributes.type == "CN" && element.attributes.setting == true) {
-            putAkun(element.id, element.attributes, form, totalCN, page);
-          }
-          else if (element.attributes.type == "OTH" && element.attributes.setting == true) {
-            putAkun(element.id, element.attributes, form, totalOTH, page);
-          }
+          // else if (element.attributes.type == "CN" && element.attributes.setting == true) {
+          //   putAkun(element.id, element.attributes, form, totalCN, page);
+          // }
+          // else if (element.attributes.type == "OTH" && element.attributes.setting == true) {
+          //   putAkun(element.id, element.attributes, form, totalOTH, page);
+          // }
       });
     }
     
@@ -126,8 +126,16 @@ const createData = async (data, url) => {
 };
 
 const putAkun = async (id, value, form, total, page) => {
-    var saldo = parseInt(value.saldo);
-    saldo = saldo - total;
+  var saldo = parseInt(value.saldo);
+    var url = null;
+    if (page == "hutang") {
+      url = "/debt-accounts/";
+      saldo = saldo - total;
+    }
+    if (page == "piutang") {
+      url = "/credit-accounts/";
+      saldo = saldo + total;
+    } 
 
     value.saldo = saldo;
 
@@ -135,9 +143,6 @@ const putAkun = async (id, value, form, total, page) => {
         data: value,
     };
 
-    var url = null;
-    if (page == "hutang") url = "/debt-accounts/";
-    if (page == "piutang") url = "/credit-accounts/";
 
     // clean object
     for (var key in data) {
