@@ -7,15 +7,7 @@ const cookies = nookies.get(null, "token");
 var subtotalId = 0;
 var id = 0;
 
-const createDetailSale = (
-  values,
-  products,
-  productTotalPrice,
-  productSubTotal,
-  setListId,
-  url,
-  form
-) => {
+const createDetailSale = (values, products, productTotalPrice, productSubTotal, setListId, url, form, lokasiGudang) => {
   console.log("create detail function", products);
   console.log("tempList ni ===============", tempListId);
   products.productList.forEach((element, index) => {
@@ -40,14 +32,16 @@ const createDetailSale = (
     qty = products.productInfo[id]?.qty ?? 1;
     disc = products.productInfo[id]?.disc ?? 0;
     unit = products.productInfo[id]?.unit ?? element.attributes.unit_1;
-    unitPrice =
-      products.productInfo[id]?.priceUnit ?? element.attributes.sold_price_1;
+    unitPrice = products.productInfo[id]?.priceUnit ?? element.attributes.sold_price_1;
     unitPriceAfterDisc = productTotalPrice?.[id];
     subTotal = productSubTotal?.[subtotalId];
     var d1 = products.productInfo[id]?.d1 ?? element.attributes.unit_1_dp1;
     var d2 = products.productInfo[id]?.d2 ?? element.attributes.unit_1_dp2;
     margin = products.productInfo[id]?.margin ?? 0;
     var productLocationId = productLoc?.[index];
+    const dataGudang = lokasiGudang[elementId];
+
+    console.log("data gudang", dataGudang);
 
     POSTSaleDetail(
       qty,
@@ -65,7 +59,8 @@ const createDetailSale = (
       //d3,
       margin,
       productLocationId,
-      url
+      url,
+      dataGudang
     );
     id++;
     subtotalId++;
@@ -88,7 +83,8 @@ const POSTSaleDetail = async (
   //d3,
   margin,
   productLocationId,
-  url
+  url,
+  dataGudang
 ) => {
   var data = {
     data: {
@@ -103,6 +99,7 @@ const POSTSaleDetail = async (
       disc2: d2,
       margin: margin,
       location: productLocationId,
+      inventory: dataGudang,
     },
   };
 

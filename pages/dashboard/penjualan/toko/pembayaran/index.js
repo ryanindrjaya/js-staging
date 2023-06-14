@@ -137,17 +137,19 @@ function PembayaranToko({ props }) {
       }
 
       if (paymentValue >= totalHarga) {
-        await createInventoryFromPenjualan(record);
-        await CreateStorePayment(
-          totalHarga,
-          kembali,
-          paymentValue,
-          selectedPaymentMethod?.[record.id],
-          storeTrxId,
-          returTrxId,
-          "Pembayaran",
-          reloadPage
-        );
+        const inventoryOut = await createInventoryFromPenjualan(record);
+        if (inventoryOut) {
+          await CreateStorePayment(
+            totalHarga,
+            kembali,
+            paymentValue,
+            selectedPaymentMethod?.[record.id],
+            storeTrxId,
+            returTrxId,
+            "Pembayaran",
+            reloadPage
+          );
+        }
       } else {
         message.error("Pembayaran tidak mencukupi", 2);
       }

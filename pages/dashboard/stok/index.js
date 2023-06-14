@@ -47,9 +47,7 @@ export default function Riwayat({ defaultOptions }) {
 
   async function fetchHistory(product, location, start, end) {
     setFetchingHistory(true);
-    const endpoint = `${
-      process.env.NEXT_PUBLIC_URL
-    }/inventories/history?product=${product}&location=${location}${
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/inventories/history?product=${product}&location=${location}${
       start && end ? `&start_date=${start}&end_date=${end}` : ""
     }`;
     const options = {
@@ -63,6 +61,8 @@ export default function Riwayat({ defaultOptions }) {
     const response = await fetch(endpoint, options)
       .then((res) => res.json())
       .catch((err) => console.log(err));
+
+    console.log("response", response);
 
     if (response?.data) {
       setHistory(response);
@@ -267,10 +267,7 @@ export default function Riwayat({ defaultOptions }) {
                   setLoading({ ...loading, print: false });
                 }}
               />
-              <button
-                onClick={handlePrint}
-                class="print:hidden rounded-full bg-sky-400 px-4 py-2 font-bold text-white"
-              >
+              <button onClick={handlePrint} class="print:hidden rounded-full bg-sky-400 px-4 py-2 font-bold text-white">
                 <span>
                   <PrinterOutlined className="mr-1 text-lg" />
                 </span>{" "}
@@ -279,9 +276,7 @@ export default function Riwayat({ defaultOptions }) {
             </div>
             <div className="w-full mb-5 flex items-end justify-between">
               <p className="uppercase font-bold text-xl">Kartu Stok</p>
-              <p className="uppercase text-sm">
-                Cetakan Tanggal : {moment().format("DD/MM/YYYY HH:mm:ss")}
-              </p>
+              <p className="uppercase text-sm">Cetakan Tanggal : {moment().format("DD/MM/YYYY HH:mm:ss")}</p>
             </div>
 
             <p className="font-bold uppercase mb-0">{productData?.name}</p>
@@ -289,19 +284,12 @@ export default function Riwayat({ defaultOptions }) {
             <p className="uppercase mb-0">
               RENTANG TANGGAL :{" "}
               {date?.[0] && date?.[1]
-                ? `${moment(date?.[0]).format("DD/MM/YYYY")} - ${moment(date?.[0]).format(
-                    "DD/MM/YYYY"
-                  )}`
+                ? `${moment(date?.[0]).format("DD/MM/YYYY")} - ${moment(date?.[0]).format("DD/MM/YYYY")}`
                 : "-"}
             </p>
 
             {history?.units?.length > 0 ? (
-              <Table
-                bordered
-                pagination={false}
-                loading={fetchingHistory}
-                dataSource={history?.data}
-              >
+              <Table bordered pagination={false} loading={fetchingHistory} dataSource={history?.data}>
                 <Column
                   className="uppercase"
                   title="Tanggal"
@@ -310,12 +298,7 @@ export default function Riwayat({ defaultOptions }) {
                   }}
                   key="createdAt"
                 />
-                <Column
-                  className="uppercase"
-                  title="No refrensi"
-                  dataIndex="no_referensi"
-                  key="no_referensi"
-                />
+                <Column className="uppercase" title="No refrensi" dataIndex="no_referensi" key="no_referensi" />
                 <Column className="uppercase" title="Jenis" dataIndex="type" key="type" />
                 <ColumnGroup className="uppercase" title="MASUK">
                   {history?.units?.map((unit) => (
@@ -353,9 +336,7 @@ export default function Riwayat({ defaultOptions }) {
                       className="uppercase child text-center"
                       title={unit}
                       render={(_, record) => {
-                        return record.detail?.remaining_stock?.[unit] > 0
-                          ? record.detail?.remaining_stock?.[unit]
-                          : "";
+                        return record.detail?.remaining_stock?.[unit] > 0 ? record.detail?.remaining_stock?.[unit] : "";
                       }}
                       dataIndex={unit}
                       key={unit}
@@ -363,12 +344,7 @@ export default function Riwayat({ defaultOptions }) {
                   ))}
                 </ColumnGroup>
                 <Column className="uppercase" title="Pembuat" dataIndex="author" key="author" />
-                <Column
-                  className="uppercase"
-                  title="Keterangan"
-                  dataIndex="description"
-                  key="description"
-                />
+                <Column className="uppercase" title="Keterangan" dataIndex="keterangan" key="keterangan" />
               </Table>
             ) : (
               ""
@@ -585,8 +561,7 @@ export default function Riwayat({ defaultOptions }) {
                                 className="uppercase child text-center"
                                 title={unit}
                                 render={(_, record) => {
-                                  return record.detail?.type === "Masuk" &&
-                                    record.detail?.qty?.[unit] > 0
+                                  return record.detail?.type === "Masuk" && record.detail?.qty?.[unit] > 0
                                     ? record.detail?.qty?.[unit]
                                     : "";
                                 }}
@@ -601,8 +576,7 @@ export default function Riwayat({ defaultOptions }) {
                                 className="uppercase child text-center"
                                 title={unit}
                                 render={(_, record) => {
-                                  return record.detail?.type === "Keluar" &&
-                                    record.detail?.qty?.[unit] > 0
+                                  return record.detail?.type === "Keluar" && record.detail?.qty?.[unit] > 0
                                     ? record.detail?.qty?.[unit]
                                     : "";
                                 }}
@@ -626,18 +600,8 @@ export default function Riwayat({ defaultOptions }) {
                               />
                             ))}
                           </ColumnGroup>
-                          <Column
-                            className="uppercase"
-                            title="Pembuat"
-                            dataIndex="author"
-                            key="author"
-                          />
-                          <Column
-                            className="uppercase"
-                            title="Keterangan"
-                            dataIndex="description"
-                            key="description"
-                          />
+                          <Column className="uppercase" title="Pembuat" dataIndex="author" key="author" />
+                          <Column title="Keterangan" dataIndex="keterangan" key="keterangan" />
                         </Table>
                         <div className="w-full flex item justify-center">
                           {loading.print ? (

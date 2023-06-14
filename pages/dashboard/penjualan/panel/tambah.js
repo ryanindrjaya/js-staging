@@ -20,6 +20,7 @@ import ConfirmDialog from "@iso/components/Alert/ConfirmDialog";
 import createInventory from "../utility/createInventory";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import confirm from "antd/lib/modal/confirm";
+import { InventoryOutFromPanel } from "../../../../library/functions/createInventory";
 
 Toko.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -160,6 +161,8 @@ function Toko({ props }) {
   const [location, setLocation] = useState();
   const [locationData, setLocationData] = useState();
 
+  const [lokasiGudang, setLokasiGudang] = useState();
+
   const [open, setOpen] = useState(false);
 
   const submitBtn = useRef();
@@ -194,13 +197,13 @@ function Toko({ props }) {
     setBiayaPengiriman(values.target.value);
   };
 
-  const getProductAtLocation = async () => {
+  const getProductAtLocation = async (unit = 1) => {
     const locationId = form.getFieldValue("location");
     let tempData = {};
 
     // create an array of promises by mapping over the productList
     const promises = products.productList.map(async (product) => {
-      const stock = await getStockAtLocation(product.id, locationId);
+      const stock = await getStockAtLocation(product.id, unit);
       console.log("stock ", product.id, stock);
 
       tempData = {
@@ -221,30 +224,33 @@ function Toko({ props }) {
     }
   };
 
-  const getStockAtLocation = async (productId, locationId) => {
+  const getStockAtLocation = async (productId, unit) => {
     let stockString = "Stok Kosong";
     try {
-      console.log("get stock", productId, locationId);
-      const response = await getStock(productId, locationId);
+      const response = await getStock(productId, unit);
       console.log("response", response);
 
-      if (response.data.length > 0) {
-        const stock = response.data[0].attributes;
-        const product = stock.product?.data?.attributes; // use optional chaining to check if product exists
+      if (response?.data) {
+        // sort based on qty desc
+        const sortedBasedOnQty = response.data.sort((a, b) => b.availableStock - a.availableStock);
+        setLokasiGudang({
+          ...lokasiGudang,
+          [productId]: sortedBasedOnQty,
+        });
+      }
 
-        const stockUnit1 = stock.stock_unit_1;
-        const stockUnit2 = stock.stock_unit_2;
-        const stockUnit3 = stock.stock_unit_3;
-        const stockUnit4 = stock.stock_unit_4;
-        const stockUnit5 = stock.stock_unit_5;
+      console.log(`response ${unit}`, response?.stock?.[unit]);
 
-        const satuanUnit1 = product.unit_1;
-        const satuanUnit2 = product.unit_2;
-        const satuanUnit3 = product.unit_3;
-        const satuanUnit4 = product.unit_4;
-        const satuanUnit5 = product.unit_5;
+      const stringArr = [];
 
-        stockString = `${stockUnit1} ${satuanUnit1}, ${stockUnit2} ${satuanUnit2}, ${stockUnit3} ${satuanUnit3}, ${stockUnit4} ${satuanUnit4}, ${stockUnit5} ${satuanUnit5}`;
+      if (response.available) {
+        for (const [key, value] of Object.entries(response?.stock)) {
+          stringArr.push(`${value} ${key}`);
+        }
+
+        return stringArr.join(", ");
+      } else {
+        return null;
       }
     } catch (error) {
       console.error("error", error);
@@ -253,14 +259,11 @@ function Toko({ props }) {
         [productId]: "Error fetching stock data",
       });
     }
-    return stockString;
   };
 
-  async function getStock(productId, locationId) {
+  async function getStock(productId, unit) {
     const cookies = nookies.get(null, "token");
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL +
-      `/inventories?filters[location][id][$eq]=${locationId}&filters[product][id][$eq]=${productId}&populate=*`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/inventories/user/location?product=${productId}&unit=${unit}`;
     const options = {
       method: "GET",
       headers: {
@@ -271,6 +274,8 @@ function Toko({ props }) {
 
     const req = await fetch(endpoint, options);
     const res = await req.json();
+
+    console.log("res get stock at location", res);
 
     return res;
   }
@@ -328,7 +333,6 @@ function Toko({ props }) {
 
     if (data != null) {
       var difference = calculateDifference(data.attributes.sale_date, today);
-      console.log("break diff", difference);
 
       var type = customer.attributes.credit_limit_duration_type;
       var duration = customer.attributes.credit_limit_duration;
@@ -392,11 +396,12 @@ function Toko({ props }) {
       productSubTotal,
       setListId,
       "/panel-sale-details",
-      form
+      form,
+      lokasiGudang
     );
   };
 
-  const createSale = async (values) => {
+  const createSale = async (values, simpanData) => {
     values.sale_date = today;
     values.added_by = user.name;
     //values.category = selectedCategory;
@@ -405,7 +410,7 @@ function Toko({ props }) {
     values.customer = customer;
     values.area = customer?.attributes?.area?.data;
     values.wilayah = customer?.attributes?.wilayah?.data;
-    await createSaleFunc(
+    const dataId = await createSaleFunc(
       grandTotal,
       totalPrice,
       values,
@@ -415,41 +420,9 @@ function Toko({ props }) {
       "/panel-sales/",
       "panel sale",
       selectedLocationId,
-      updateStock
+      null,
+      simpanData
     );
-  };
-
-  const updateStock = async (id, locations) => {
-    // fetching data to update
-    const options = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-    };
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/panel-sales/${id}?populate=deep`;
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
-    const row = res.data;
-    console.log("row stock", row);
-
-    const trxStatus = row.attributes?.status_data;
-    //const LPBLocationId = row.attributes.location?.data?.id;
-
-    if (trxStatus == "Publish") {
-      // invetory handle
-      createInventory(row, locations);
-      //await updateProductFromTable(row);
-    }
-
-    //const poData = row.attributes?.purchase?.data;
-
-    //const resPO = await changeStatusPO(poData?.id, trxStatus);
-
-    //if (resPO.data) {
-    //  await changeStatusLPB(id, trxStatus);
-    //}
   };
 
   const onChangeProduct = async () => {
@@ -574,9 +547,9 @@ function Toko({ props }) {
 
   useEffect(() => {
     if (listId.length > 0) {
-      createSale(dataValues);
+      createSale(dataValues, simpanData);
     }
-  }, [listId]);
+  }, [listId, simpanData]);
 
   useEffect(() => {
     if (dataValues && info == "sukses") createDetailSale();
@@ -781,7 +754,7 @@ function Toko({ props }) {
                     <Select
                       onChange={(e) => {
                         setSelectedLocationId(e);
-                        getProductAtLocation(e);
+                        // getProductAtLocation(e);
                       }}
                       placeholder="Pilih Lokasi"
                       size="large"
@@ -809,6 +782,7 @@ function Toko({ props }) {
                   user={user}
                   selectedProduct={selectedProduct}
                   isBasedOnLocation={false}
+                  getProductAtLocation={getProductAtLocation}
                 />
               </div>
 
@@ -833,6 +807,7 @@ function Toko({ props }) {
                     setProductSubTotal={setProductSubTotal}
                     dataLocationStock={dataLocationStock}
                     formObj={form}
+                    getProduct={getProductAtLocation}
                   />
                 </div>
               )}

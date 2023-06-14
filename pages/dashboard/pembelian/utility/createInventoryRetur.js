@@ -13,16 +13,13 @@ const cookies = nookies.get(null, "token");
 
 // fetch data from returs
 const getReturDetails = async (id) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_URL}/returs/${id}?populate=deep`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${cookies.token}`,
-      },
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/returs/${id}?populate=deep`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${cookies.token}`,
+    },
+  });
 
   const data = await response.json();
 
@@ -37,6 +34,7 @@ async function createInventoryRetur(row) {
   const retur = await getReturDetails(row.id);
   const returDetails = retur.data.attributes.retur_details.data;
   const noRetur = retur.data.attributes.no_retur;
+  const supplier = retur.data.attributes.supplier.data.attributes.name;
 
   returDetails.forEach((element) => {
     console.log("element purchasing detail (retur)", element);
@@ -67,6 +65,7 @@ async function createInventoryRetur(row) {
       data,
       no_referensi: noRetur,
       type: "Retur Pembelian",
+      keterangan: `Retur Pembelian ke ${supplier}`,
     };
 
     await removeToGudang(body);
@@ -74,17 +73,14 @@ async function createInventoryRetur(row) {
 }
 
 async function removeToGudang(body) {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_URL}/inventories/add`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${cookies.token}`,
-      },
-      body: JSON.stringify(body),
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/inventories/subtract`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${cookies.token}`,
+    },
+    body: JSON.stringify(body),
+  });
 
   const data = await response.json();
   console.log("body", JSON.stringify(body));

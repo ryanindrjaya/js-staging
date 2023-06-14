@@ -162,6 +162,8 @@ async function getStock(productId, unit) {
   const req = await fetch(endpoint, options);
   const res = await req.json();
 
+  console.log("res get stock at location", res);
+
   return res;
 }
 
@@ -228,6 +230,8 @@ function Toko({ props }) {
   const [biayaTambahan, setBiayaTambahan] = useState();
   const [biayaPengiriman, setBiayaPengiriman] = useState(0);
 
+  const [lokasiGudang, setLokasiGudang] = useState();
+
   const tempList = [];
   const [info, setInfo] = useState();
 
@@ -243,8 +247,8 @@ function Toko({ props }) {
     let tempData = {};
 
     // create an array of promises by mapping over the productList
-    const promises = products.productList.map(async (product) => {
-      const stock = await getStockAtLocation(product.id, unit);
+    const promises = products.productList.map(async (product, idx) => {
+      const stock = await getStockAtLocation(product.id, unit, idx);
       console.log("stock ", product.id, stock);
 
       tempData = {
@@ -265,16 +269,26 @@ function Toko({ props }) {
     }
   };
 
-  const getStockAtLocation = async (productId, unit) => {
+  const getStockAtLocation = async (productId, unit, idx) => {
     try {
       const response = await getStock(productId, unit);
+      console.log("response", response);
+
+      if (response?.data) {
+        // sort based on qty desc
+        const sortedBasedOnQty = response.data.sort((a, b) => b.availableStock - a.availableStock);
+        setLokasiGudang({
+          ...lokasiGudang,
+          [productId]: sortedBasedOnQty,
+        });
+      }
 
       console.log(`response ${unit}`, response?.stock?.[unit]);
 
       const stringArr = [];
 
       for (const [key, value] of Object.entries(response?.stock)) {
-        stringArr.push(`${value}${key}`);
+        stringArr.push(`${value} ${key}`);
       }
 
       return response.available ? stringArr.join(", ") : "Stok kosong";
@@ -363,12 +377,12 @@ function Toko({ props }) {
   const onFinish = async (values, accept) => {
     if (accept) {
       setLoading(true);
-      const isShowingPopup = await checkReturQty(values);
-      console.log("isShowingPopup", isShowingPopup);
-      if (isShowingPopup) {
-        setLoading(false);
-        return;
-      }
+      // const isShowingPopup = await checkReturQty(values);
+      // console.log("isShowingPopup", isShowingPopup);
+      // if (isShowingPopup) {
+      //   setLoading(false);
+      //   return;
+      // }
 
       setInfo("sukses");
       storeSale.data.forEach((element) => {
@@ -408,7 +422,8 @@ function Toko({ props }) {
       productSubTotal,
       setListId,
       "/store-sale-details",
-      form
+      form,
+      lokasiGudang
     );
   };
 
@@ -420,6 +435,7 @@ function Toko({ props }) {
     values.ppn = ppnPrice;
     values.customer = customer;
     values.delivery_fee = biayaPengiriman;
+    values.gudang_out = lokasiGudang;
     await createSaleFunc(grandTotal, totalPrice, values, listId, form, router, "/store-sales/", "store sale");
   };
 

@@ -16,9 +16,7 @@ function SearchPO({ supplier, handleSelect, disabled }) {
     }
   };
 
-  const options = data.map((d) => (
-    <Select.Option key={d.value}>{d.label}</Select.Option>
-  ));
+  const options = data.map((d) => <Select.Option key={d.value}>{d.label}</Select.Option>);
 
   const fetchPO = async (query, callback) => {
     if (!query) {
@@ -29,7 +27,7 @@ function SearchPO({ supplier, handleSelect, disabled }) {
       try {
         const endpoint =
           process.env.NEXT_PUBLIC_URL +
-          `/purchases/?populate=deep&filters[status][$eq]=Sebagian Diterima&filters[status][$eq]=Diproses&filters[supplier][name][$eq]=${supplierName}&filters[no_po][$contains]=${query}`;
+          `/purchases/?populate=deep&filters[status][$eq]=Sebagian Diterima&filters[status][$eq]=Diproses&filters[supplier][name][$eq]=${supplierName}&filters[no_po][$contains]=${query}&sort[0]=id%3Adesc`;
         const options = {
           method: "GET",
           headers: {

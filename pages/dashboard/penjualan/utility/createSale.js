@@ -1,13 +1,26 @@
 import React from "react";
 import nookies from "nookies";
 import { notification } from "antd";
+import { InventoryOutFromNonPanel, InventoryOutFromPanel } from "../../../../library/functions/createInventory";
 
 const cookies = nookies.get(null, "token");
 var tempProductListId = [];
 var tempSupplierId = 0;
 var tempLocationId;
 
-const CreateSale = async (grandTotal, totalPrice, values, listId, form, router, url, page, locations, updateStock) => {
+const CreateSale = async (
+  grandTotal,
+  totalPrice,
+  values,
+  listId,
+  form,
+  router,
+  url,
+  page,
+  locations,
+  updateStock,
+  simpanData
+) => {
   tempProductListId = [];
 
   console.log("CREATE SELL DATA");
@@ -31,8 +44,19 @@ const CreateSale = async (grandTotal, totalPrice, values, listId, form, router, 
   const req = await createData(data, url);
   const res = await req.json();
 
+  console.log("reqq", req);
   if (req.status === 200) {
-    await putRelationSaleDetail(res.data.id, res.data.attributes, form, router, url, page, locations, updateStock);
+    await putRelationSaleDetail(
+      res.data.id,
+      res.data.attributes,
+      form,
+      router,
+      url,
+      page,
+      locations,
+      updateStock,
+      simpanData
+    );
   } else {
     openNotificationWithIcon("error");
   }
@@ -56,7 +80,7 @@ const createData = async (data, url) => {
   return req;
 };
 
-const putRelationSaleDetail = async (id, value, form, router, url, page, locations, updateStock) => {
+const putRelationSaleDetail = async (id, value, form, router, url, page, locations, updateStock, simpanData) => {
   const user = await getUserMe();
   const dataSale = {
     data: value,
@@ -95,6 +119,35 @@ const putRelationSaleDetail = async (id, value, form, router, url, page, locatio
   const req = await fetch(endpoint, options);
   const res = await req.json();
 
+  console.log("res update", res);
+
+  console.log("simpan data", simpanData);
+
+  if (res?.data && simpanData === "Publish") {
+    const getData = await fetch(endpoint + "?populate=deep,2", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    });
+    const resData = await getData.json();
+    console.log("res data", resData);
+    const customer = resData?.data?.attributes.customer?.data.attributes.name;
+    const location = resData?.data?.attributes.location?.data.attributes.name;
+    console.log("otw update stock");
+    switch (page) {
+      case "panel sale":
+        console.log("panel sale");
+        const inventoryOut = await InventoryOutFromPanel(res.data.id, customer, location);
+        break;
+      case "non panel sale":
+        console.log("non panel sale");
+        const inventoryOutNonPanel = await InventoryOutFromNonPanel(res.data.id, customer, location);
+        break;
+    }
+  }
+
   if (req.status === 200) {
     form.resetFields();
     if (page == "store sale") router.replace("/dashboard/penjualan/toko");
@@ -102,10 +155,6 @@ const putRelationSaleDetail = async (id, value, form, router, url, page, locatio
     if (page == "non panel sale") router.replace("/dashboard/penjualan/non_panel");
     if (page == "panel sale") router.replace("/dashboard/penjualan/panel");
     openNotificationWithIcon("success");
-    console.log("update stock", res.data.id, locations);
-    if (updateStock) {
-      updateStock(res.data.id, locations, "subtract");
-    }
   } else {
     openNotificationWithIcon("error");
   }

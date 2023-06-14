@@ -10,11 +10,14 @@ const Print = ({ props }) => {
   const date = new Date(props.purchases.data.attributes.order_date).toLocaleDateString("id-ID");
   const supplierName = props.purchases.data.attributes.supplier?.data?.attributes?.name;
   const supplierAddress = props.purchases.data.attributes.supplier?.data?.attributes?.address;
+  const catatan = props.purchases.data.attributes?.additional_note;
 
   const destination = props.purchases.data.attributes.location.data.attributes;
   const destionationName = destination.name;
-  const destinationStreet = `${destination.street} `;
-  const destinationAddress = `${destination.city} ${destination.province} ${destination.postal_code} ${destination.country}`;
+  const destinationStreet = `${destination?.street || ""} `;
+  const destinationAddress = `${destination?.city || ""} ${destination?.province || ""} ${
+    destination?.postal_code || ""
+  } ${destination?.country || ""}`;
 
   const items = props.purchases.data.attributes.purchase_details.data;
   const deliveryFee = props.purchases.data.attributes.delivery_fee;
@@ -77,57 +80,24 @@ const Print = ({ props }) => {
   };
 
   const getAdditionalFee = () => {
-    var desc1 = props.purchases.data.attributes[`additional_fee_1_desc`];
-    var desc2 = props.purchases.data.attributes[`additional_fee_2_desc`];
-    var desc3 = props.purchases.data.attributes[`additional_fee_3_desc`];
-    var desc4 = props.purchases.data.attributes[`additional_fee_4_desc`];
-    var desc5 = props.purchases.data.attributes[`additional_fee_5_desc`];
+    return [1, 2, 3, 4, 5].map((index) => {
+      if (props.purchases.data?.attributes?.[`additional_fee_${index}_desc`]) {
+        return (
+          <div key={index} className="grid grid-cols-2 gap-7">
+            <div className="w-full flex justify-between">
+              <span className="text-sm font-semibold text-gray-600">
+                {props.purchases.data?.attributes?.[`additional_fee_${index}_desc`]}
+              </span>
 
-    var disc1 = formatter.format(props.purchases.data.attributes[`additional_fee_1_sub`]);
-    var disc2 = formatter.format(props.purchases.data.attributes[`additional_fee_2_sub`]);
-    var disc3 = formatter.format(props.purchases.data.attributes[`additional_fee_3_sub`]);
-    var disc4 = formatter.format(props.purchases.data.attributes[`additional_fee_4_sub`]);
-    var disc5 = formatter.format(props.purchases.data.attributes[`additional_fee_5_sub`]);
-
-    return (
-      <div className="text-right">
-        {disc1 !== "Rp 0" ? (
-          <div>
-            {desc1} : {disc1}
+              <span className="text-sm font-semibold ml-5 text-gray-600 text-right">:</span>
+            </div>
+            <span className="text-sm font-semibold text-gray-600 text-left">
+              {formatter.format(props.purchases.data?.attributes?.[`additional_fee_${index}_sub`])}
+            </span>
           </div>
-        ) : (
-          <div></div>
-        )}
-        {disc2 !== "Rp 0" ? (
-          <div>
-            {desc2} : {disc2}
-          </div>
-        ) : (
-          <div></div>
-        )}
-        {disc3 !== "Rp 0" ? (
-          <div>
-            {desc3} : {disc3}
-          </div>
-        ) : (
-          <div></div>
-        )}
-        {disc4 !== "Rp 0" ? (
-          <div>
-            {desc4} : {disc4}
-          </div>
-        ) : (
-          <div></div>
-        )}
-        {disc5 !== "Rp 0" ? (
-          <div>
-            {desc5} : {disc5}
-          </div>
-        ) : (
-          <div></div>
-        )}
-      </div>
-    );
+        );
+      }
+    });
   };
 
   const print = () => {
@@ -160,7 +130,7 @@ const Print = ({ props }) => {
         </div>
       </div>
       <div className="font-bold text-lg flex justify-center mb-5">ORDER PEMBELIAN</div>
-      <div className="flex justify-between mb-5">
+      <div className="flex justify-between mb-3">
         <div>
           <div className="font-bold text-sm">KEPADA</div>
           <div className="font-bold text-sm uppercase">Nama Supplier : {supplierName}</div>
@@ -174,44 +144,59 @@ const Print = ({ props }) => {
       </div>
       <div className="flex justify-between">
         <table className="w-full">
-          <tr className="p-2">
-            <th className="border-2 p-2">NO</th>
-            <th className="border-2 p-2">ITEM</th>
-            <th className="border-2 p-2">HARGA SATUAN</th>
-            <th className="border-2 p-2">TOTAL UNIT</th>
-            <th className="border-2 p-2">DISC</th>
-            <th className="border-2 p-2">TOTAL HARGA</th>
+          <tr className="p-1">
+            <th className="border-2 p-1">NO</th>
+            <th className="border-2 p-1">ITEM</th>
+            <th className="border-2 p-1">TOTAL UNIT</th>
+            <th className="border-2 p-1">HARGA SATUAN</th>
+            <th className="border-2 p-1">DISC</th>
+            <th className="border-2 p-1">TOTAL HARGA</th>
           </tr>
           {items.map((element) => {
             index++;
             return (
               <tr>
-                <td className="border-2 p-2">{index}</td>
-                <td className="border-2 p-2">{element.attributes.products.data[0].attributes.name}</td>
-                <td className="border-2 p-2">{getHargaSatuan(element.attributes.unit_order, index)}</td>
-                <td className="border-2 p-2">
+                <td className="border-2 p-1">{index}</td>
+                <td className="border-2 p-1">{element.attributes.products.data[0].attributes.name}</td>
+                <td className="border-2 p-1">
                   {element.attributes.total_order} {element.attributes.unit_order}
                 </td>
-                <td className="border-2 p-2">{getProductDisc(element.attributes.unit_order, index)}</td>
-                <td className="border-2 p-2">{getSubTotal(index)}</td>
+                <td className="border-2 p-1">{getHargaSatuan(element.attributes.unit_order, index)}</td>
+                <td className="border-2 p-1">{getProductDisc(element.attributes.unit_order, index)}</td>
+                <td className="border-2 p-1">{getSubTotal(index)}</td>
               </tr>
             );
           })}
         </table>
       </div>
-      <div className="font-bold  text-sm uppercase mt-3 flex justify-end">TOTAL HARGA : {getTotalProduct()}</div>
-      <div className="font-bold  text-sm uppercase mt-4 flex justify-end">
-        BIAYA PENGIRIMAN : {formatter.format(deliveryFee)}
+      <div className="flex justify-between">
+        <div>
+          <div className="font-bold  text-sm uppercase mt-4 flex justify-start">TAMBAHAN :</div>
+          <div className=" text-sm uppercase mt-2 flex flex-col justify-start">{getAdditionalFee()}</div>
+        </div>
+        <div>
+          <div className="font-bold  text-sm uppercase mt-3 flex justify-end">TOTAL HARGA : {getTotalProduct()}</div>
+          <div className="font-bold  text-sm uppercase mt-4 flex justify-end">
+            BIAYA PENGIRIMAN : {formatter.format(deliveryFee)}
+          </div>
+          <div className="font-bold  text-sm uppercase mt-4 flex justify-end">
+            TOTAL PESANAN : {formatter.format(TotalHarga)}
+          </div>
+        </div>
       </div>
-      <div className="font-bold  text-sm uppercase mt-4 flex justify-end">TAMBAHAN :</div>
-      <div className=" text-sm uppercase mt-2 flex justify-end">{getAdditionalFee()}</div>
 
-      <div className="font-bold  text-sm uppercase mt-4 flex justify-end">
-        TOTAL PESANAN : {formatter.format(TotalHarga)}
+      <div className="flex justify-between items-start">
+        {catatan && (
+          <div>
+            <div className="font-bold  text-sm uppercase mt-4 flex justify-start">CATATAN :</div>
+            <div className="text-sm uppercase flex justify-start">{catatan}</div>
+          </div>
+        )}
+        <div>
+          <div className="font-bold  text-sm uppercase flex justify-end">HORMAT KAMI</div>
+          <div className="font-bold  text-sm uppercase mt-5 flex justify-end">_____________________________</div>
+        </div>
       </div>
-
-      <div className="font-bold  text-sm uppercase mt-10 flex justify-end">HORMAT KAMI</div>
-      <div className="font-bold  text-sm uppercase mt-10 flex justify-end">_____________________________</div>
     </div>
   );
 };

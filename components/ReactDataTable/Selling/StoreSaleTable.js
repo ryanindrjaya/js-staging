@@ -144,14 +144,11 @@ export default function ReactDataTable({
     {
       name: "Stok Gudang",
       selector: (row, idx) => {
-        const selectedUnit = products.productInfo[idx]?.unit ?? row.attributes?.unit_1;
         return (
           <div
-            className={`disabled:bg-white italic ${
-              dataLocationStock?.[row.id]?.includes("Kosong") ? "text-red-500" : "text-green-500"
-            }`}
+            className={`disabled:bg-white italic ${dataLocationStock?.[row.id] ? "text-green-500" : "text-red-500"}`}
           >
-            {`${dataLocationStock?.[row.id]}` ?? "Pilih Gudang"}
+            {`${dataLocationStock?.[row.id] || "Tidak Tersedia"}` ?? "Pilih Gudang"}
           </div>
         );
       },
@@ -186,6 +183,13 @@ export default function ReactDataTable({
           defaultIndex = products.productInfo[idx].unitIndex;
         }
 
+        let max = null;
+
+        if (dataLocationStock?.[row.id]) {
+          const stringArr = dataLocationStock?.[row.id]?.split(" ");
+          max = parseInt(stringArr?.[0]);
+        }
+
         return (
           <>
             <Row>
@@ -194,7 +198,7 @@ export default function ReactDataTable({
                   defaultValue={defaultQty}
                   onChange={(e) => onChangeQty(e, row, idx)}
                   min={1}
-                  max={dataDetailTrx?.data?.[idx]?.attributes?.qty} // added max qty for retur penjualan
+                  max={max || dataDetailTrx?.data?.[idx]?.attributes?.qty} // added max qty for retur penjualan
                   rules={[
                     {
                       required: true,
