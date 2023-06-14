@@ -53,8 +53,7 @@ const fetchData = async (cookies) => {
 
 const fetchUserSales = async (cookies) => {
   const endpoint =
-    process.env.NEXT_PUBLIC_URL +
-    "/users?populate=*&filters[role][name][$eq]=Sales&?filters[role][type][$eq]=Sales";
+    process.env.NEXT_PUBLIC_URL + "/users?populate=*&filters[role][name][$eq]=Sales&?filters[role][type][$eq]=Sales";
   const options = {
     method: "GET",
     headers: {
@@ -110,7 +109,7 @@ function PanelSale({ props }) {
 
   const cookies = nookies.get(null, "token");
 
-  const updateStock = async (id, locations) => {
+  const updateStock = async (id, locations, operation = "add") => {
     // fetching data to update
     const options = {
       method: "GET",
@@ -119,8 +118,7 @@ function PanelSale({ props }) {
         Authorization: "Bearer " + cookies.token,
       },
     };
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + `/panel-sales/${id}?populate=deep`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/panel-sales/${id}?populate=deep`;
     const req = await fetch(endpoint, options);
     const res = await req.json();
     const row = res.data;
@@ -139,8 +137,7 @@ function PanelSale({ props }) {
 
     var tempPayments = [];
     for (var payments in row.attributes.purchasing_payments.data) {
-      tempPayments[payments] =
-        row.attributes.purchasing_payments.data[payments].id;
+      tempPayments[payments] = row.attributes.purchasing_payments.data[payments].id;
     }
     row.attributes.purchasing_payments = tempPayments;
 
@@ -149,8 +146,7 @@ function PanelSale({ props }) {
     };
 
     const JSONdata = JSON.stringify(dataUpdate);
-    const endpointPut =
-      process.env.NEXT_PUBLIC_URL + "/panel-sales/" + id + "?populate=deep";
+    const endpointPut = process.env.NEXT_PUBLIC_URL + "/panel-sales/" + id + "?populate=deep";
     const optionsPut = {
       method: "PUT",
       headers: {
@@ -168,7 +164,7 @@ function PanelSale({ props }) {
     if (trxStatus == "Publish") {
       console.log("masuk");
       // invetory handle
-      createInventory(rowPut, locations);
+      await createInventory(rowPut, locations, operation);
     }
     console.log("tidak masuk", id, rowPut, resPut, dataUpdate);
     router.reload("/dashboard/penjualan/panel");
@@ -223,8 +219,7 @@ function PanelSale({ props }) {
     data.attributes.panel_sale_details.data.forEach((element) => {
       id = element.id;
 
-      const endpoint =
-        process.env.NEXT_PUBLIC_URL + "/panel-sale-details/" + id;
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/panel-sale-details/" + id;
       const cookies = nookies.get(null, "token");
 
       const options = {
@@ -251,18 +246,12 @@ function PanelSale({ props }) {
   const handleChangeStatus = async (values, id) => {
     // clean object
     for (var key in values.attributes) {
-      if (
-        values.attributes[key] === null ||
-        values.attributes[key] === undefined
-      ) {
+      if (values.attributes[key] === null || values.attributes[key] === undefined) {
         delete values.attributes[key];
       }
     }
 
-    if (
-      values.attributes?.document?.data === null ||
-      values.attributes?.document?.data === undefined
-    ) {
+    if (values.attributes?.document?.data === null || values.attributes?.document?.data === undefined) {
       delete values.attributes?.document;
     }
 
@@ -344,11 +333,7 @@ function PanelSale({ props }) {
                   }}
                 >
                   {locations.map((element) => {
-                    return (
-                      <Select.Option value={element.id}>
-                        {element.attributes.name}
-                      </Select.Option>
-                    );
+                    return <Select.Option value={element.id}>{element.attributes.name}</Select.Option>;
                   })}
                 </Select>
               </div>
@@ -362,11 +347,7 @@ function PanelSale({ props }) {
                   }}
                 >
                   {locations.map((element) => {
-                    return (
-                      <Select.Option value={element.id}>
-                        {element.attributes.name}
-                      </Select.Option>
-                    );
+                    return <Select.Option value={element.id}>{element.attributes.name}</Select.Option>;
                   })}
                 </Select>
               </div>
@@ -389,12 +370,7 @@ function PanelSale({ props }) {
                 </Select>
               </div>
               <div className="w-full md:w-1/5 px-3">
-                <RangePicker
-                  size="large"
-                  onChange={(e) =>
-                    setSearchParameters({ ...searchParameters, range: e })
-                  }
-                />
+                <RangePicker size="large" onChange={(e) => setSearchParameters({ ...searchParameters, range: e })} />
               </div>
               <div className="w-full md:w-1/5 px-3">
                 <Select
@@ -406,11 +382,7 @@ function PanelSale({ props }) {
                   }}
                 >
                   {user.map((element) => {
-                    return (
-                      <Select.Option value={element.id}>
-                        {element.name}
-                      </Select.Option>
-                    );
+                    return <Select.Option value={element.id}>{element.name}</Select.Option>;
                   })}
                 </Select>
               </div>
@@ -419,9 +391,7 @@ function PanelSale({ props }) {
             <div className="w-full flex justify-start mt-3">
               <div className="w-full md:w-1/5 px-3">
                 <Customer
-                  onChangeCustomer={(e) =>
-                    setSearchParameters({ ...searchParameters, customer: e })
-                  }
+                  onChangeCustomer={(e) => setSearchParameters({ ...searchParameters, customer: e })}
                   page={"PANEL"}
                 />
               </div>
@@ -433,9 +403,7 @@ function PanelSale({ props }) {
                   }}
                   placeholder="Sales"
                   allowClear
-                  onChange={(e) =>
-                    setSearchParameters({ ...searchParameters, sales: e })
-                  }
+                  onChange={(e) => setSearchParameters({ ...searchParameters, sales: e })}
                 >
                   {dataUserSales?.map((element) => {
                     return (
@@ -467,18 +435,14 @@ function PanelSale({ props }) {
             </div>
 
             <div className="w-full flex justify-between mt-0 mb-2">
-              <span className="text-black text-md font-bold ml-1 mt-5">
-                Semua Penjualan
-              </span>
+              <span className="text-black text-md font-bold ml-1 mt-5">Semua Penjualan</span>
               <button
                 onClick={handleAdd}
                 type="button"
                 className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
               >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    + Tambah
-                  </a>
+                  <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
                 </div>
               </button>
             </div>
@@ -490,9 +454,7 @@ function PanelSale({ props }) {
                 className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
               >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    Print PDF
-                  </a>
+                  <a className="text-white no-underline text-xs sm:text-xs">Print PDF</a>
                 </div>
               </button>
               <button
@@ -501,9 +463,7 @@ function PanelSale({ props }) {
                 className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
               >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    Print CSV
-                  </a>
+                  <a className="text-white no-underline text-xs sm:text-xs">Print CSV</a>
                 </div>
               </button>
               <button
@@ -512,9 +472,7 @@ function PanelSale({ props }) {
                 className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
               >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    Print XLS
-                  </a>
+                  <a className="text-white no-underline text-xs sm:text-xs">Print XLS</a>
                 </div>
               </button>
               <button
@@ -523,9 +481,7 @@ function PanelSale({ props }) {
                 className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
               >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    Kolom Tampak
-                  </a>
+                  <a className="text-white no-underline text-xs sm:text-xs">Kolom Tampak</a>
                 </div>
               </button>
             </div>

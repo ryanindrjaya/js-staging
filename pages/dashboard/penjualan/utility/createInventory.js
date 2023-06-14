@@ -11,13 +11,10 @@ import { notification } from "antd";
 
 const cookies = nookies.get(null, "token");
 
-async function createInventory(row, locations) {
+async function createInventory(row, locations, operation) {
   const data = [];
-  const saleDetails =
-    row.attributes.panel_sale_details?.data ??
-    row.attributes.non_panel_sale_details?.data;
-  const noSale =
-    row.attributes.no_panel_sale ?? row.attributes.no_non_panel_sale;
+  const saleDetails = row.attributes.panel_sale_details?.data ?? row.attributes.non_panel_sale_details?.data;
+  const noSale = row.attributes.no_panel_sale ?? row.attributes.no_non_panel_sale;
   saleDetails.forEach((element) => {
     const unit = element.attributes.unit;
     const qty = parseFloat(element.attributes.qty);
@@ -47,22 +44,19 @@ async function createInventory(row, locations) {
       type: "Terjual",
     };
 
-    addToGudang(body);
+    addToGudang(body, operation);
   }
 }
 
-async function addToGudang(body) {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_URL}/inventories/add`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${cookies.token}`,
-      },
-      body: JSON.stringify(body),
-    }
-  );
+async function addToGudang(body, operation) {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/inventories/${operation}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${cookies.token}`,
+    },
+    body: JSON.stringify(body),
+  });
 
   const data = await response.json();
   console.log("body", JSON.stringify(body));
