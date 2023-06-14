@@ -195,44 +195,66 @@ const Print = ({ props }) => {
           </thead>
           {data.list.map((row) => {
             index++;
-
+            var totalAkhir = 0;
             return(
             <tbody>
-            <tr className="my-0 py-0 ">
+            <tr>
               <td className="border-2 p-1 align-text-top">{index}</td>
               <td className="border-2 p-1">
-                <p className="-mt-1">Supplier : {row.attributes.supplier.data.attributes.name}</p>
+                <p className="-mt-3">Supplier : {row.attributes.supplier.data.attributes.name}</p>
+                <p className="-mt-3"><hr/></p>
                 {row.attributes.purchasing_details.data.map((element, index) => (
                   <p className="-mt-3" key={index}>{element.attributes.product.data.attributes.name}</p>
                 ))}
+                <p className="-mt-3"><hr/></p>
               </td>
               <td className="border-2 p-1">
-                <p className="-mt-1">Tanggal : {formatMyDate(row.attributes.date_purchasing)}</p>
+                <p className="-mt-3">Tanggal : {formatMyDate(row.attributes.date_purchasing)}</p>
+                <p className="-mt-3"><hr/></p>
                 {row.attributes.purchasing_details.data.map((element, index) => (
                   <p className="-mt-3" key={index}>{element.attributes.total_order} {element.attributes.unit_order}</p>
                 ))}
+                <p className="-mt-3"><hr/></p>
               </td>
               <td className="border-2 p-1">
-                <p className="-mt-1">No : {row.attributes.no_purchasing}</p>
+                <p className="-mt-3">No : {row.attributes.no_purchasing}</p>
+                <p className="-mt-3"><hr/></p>
                 {row.attributes.purchasing_details.data.map((element, index) => (
                   <p className="-mt-3" key={index}>{formatter.format(element.attributes.unit_price)}</p>
                 ))}
+                <p className="-mt-3"><hr/></p>
               </td>
               <td className="border-2 p-1">
-                <p className="-mt-1">No Supplier : {row.attributes.no_nota_suppplier}</p>
+                <p className="-mt-3">No Supplier : {row.attributes.no_nota_suppplier}</p>
+                <p className="-mt-3"><hr/></p>
                 {row.attributes.purchasing_details.data.map((element, index) => (
                   <p className="-mt-3" key={index}>
-                    {formatter.format(element.attributes.disc ?? 0)} {element.attributes.dp1}% {element.attributes.dp2}% {element.attributes.dp3}%
+                    <td>{formatter.format(element.attributes.disc ?? 0)}</td>
+                    <td>{element.attributes.dp1}%</td>
+                    <td>{element.attributes.dp2}%</td>
+                    <td>{element.attributes.dp3}%</td>
                   </p>
                 ))}
+                <p className="-mt-3"><hr/></p>
               </td>
               <td className="border-2 p-1">
-                <p className="-mt-1">Tempo : {row.attributes.tempo_days} {row.attributes.tempo_time}</p>
+                <p className="-mt-3 pt-3 pb-0 align-bottom">Tempo : {row.attributes.tempo_days} {row.attributes.tempo_time}</p>
+                <p className="-mt-2"><hr/></p>
                 {row.attributes.purchasing_details.data.map((element, index) => (
                   <p className="-mt-3" key={index}>{formatter.format(element.attributes.unit_price_after_disc)}</p> 
                 ))}
+                <p className="-mt-3"><hr/></p>
+                <p className="-mt-3">Subtotal</p>
               </td>
-              <td className="border-2 p-1"></td>
+              <td className="border-2 p-1 pb-1">
+              <p className="pt-2"><hr/></p>
+                {row.attributes.purchasing_details.data.map((element, index) => {
+                  totalAkhir += element.attributes.sub_total;
+                  return (<p className="-mt-3" key={index}>{formatter.format(element.attributes.sub_total)}</p>);
+                })}
+                <p className="-mt-3"><hr/></p>
+                <p className="-mt-3">{formatter.format(totalAkhir)}</p>
+              </td>
               {/* <td className="border-2 p-2">No : {formatter.format(row.attributes.unit_price)}</td>
               <td className="border-2 p-2">DISC</td>
               <td className="border-2 p-2">HARGA SATUAN STLH DISKON</td>
@@ -313,9 +335,6 @@ const Print = ({ props }) => {
       <div className="font-bold  text-sm uppercase mt-4 flex justify-end">
         TOTAL PESANAN : {formatter.format(TotalHarga)}
       </div> */}
-
-      <div className="font-bold  text-sm uppercase mt-10 flex justify-end">HORMAT KAMI</div>
-      <div className="font-bold  text-sm uppercase mt-10 flex justify-end">_____________________________</div>
     </div>
   );
 };
