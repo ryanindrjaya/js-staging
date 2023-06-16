@@ -151,7 +151,7 @@ const fetchCredit = async (cookies) => {
 };
 
 function Edit({ props }) {
-  const products = useSelector((state) => state.Order);
+  const products = useSelector((state) => state.Sales);
   const dispatch = useDispatch();
 
   var selectedProduct = products?.productList;

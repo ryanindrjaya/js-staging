@@ -164,7 +164,7 @@ export default function Reducer(state = initState, action) {
           ...state.productInfo,
           [id]: {
             ...state.productInfo[id],
-            unit_price: unit_price,
+            priceUnit: unit_price,
           },
         },
       };
