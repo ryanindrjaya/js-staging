@@ -18,7 +18,7 @@ export default function Reducer(state = initState, action) {
           [idx]: {
             priceUnit: action.product.attributes.sold_price_1,
             unit: action.product.attributes.unit_1,
-            d1: action.product.attributes.unit_1_dp1,
+            d1: action.product.attributes?.disc_1_1 ?? 0,
             d2: 0,
             d3: 0,
             disc: action.product.attributes.disc_1_1,
@@ -50,7 +50,7 @@ export default function Reducer(state = initState, action) {
             ...state.productInfo[id],
             priceUnit: data[`sold_price_${unit}`],
             unit: data[`unit_${unit}`],
-            d1: data[`unit_${unit}_dp1`],
+            d1: data[`disc_1_${unit}`],
             d2: data[`unit_${unit}_dp2`],
             d3: data[`unit_${unit}_dp3`],
             disc: data[`disc_1_${unit}`],
@@ -165,7 +165,7 @@ export default function Reducer(state = initState, action) {
           ...state.productInfo,
           [id]: {
             ...state.productInfo[id],
-            unit_price: unit_price,
+            priceUnit: unit_price,
           },
         },
       };

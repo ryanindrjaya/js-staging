@@ -185,7 +185,7 @@ const Print = ({ props }) => {
         </div>
       </div>
 
-      <div className="flex justify-between items-start">
+      <div className={`flex ${catatan ? "justify-between" : "justify-end"} w-full items-start`}>
         {catatan && (
           <div>
             <div className="font-bold  text-sm uppercase mt-4 flex justify-start">CATATAN :</div>
