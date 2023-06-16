@@ -120,7 +120,7 @@ const fetchCustomer = async (cookies) => {
 };
 
 function Toko({ props }) {
-  const products = useSelector((state) => state.Order);
+  const products = useSelector((state) => state.Sales);
   const dispatch = useDispatch();
 
   var selectedProduct = products?.productList;
@@ -813,6 +813,7 @@ function Toko({ props }) {
                     dataLocationStock={dataLocationStock}
                     formObj={form}
                     getProduct={getProductAtLocation}
+                    editPriceDisc={true}
                   />
                 </div>
               )}

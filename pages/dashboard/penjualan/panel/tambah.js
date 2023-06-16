@@ -447,7 +447,6 @@ function Toko({ props }) {
     const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index);
     return formatter.format(total);
   };
-
   const sumAdditionalPrice = () => {
     var newTotal = 0;
 
@@ -808,6 +807,7 @@ function Toko({ props }) {
                     dataLocationStock={dataLocationStock}
                     formObj={form}
                     getProduct={getProductAtLocation}
+                    editPriceDisc={true}
                   />
                 </div>
               )}
