@@ -112,10 +112,10 @@ function Laporan({ props }) {
 
   const handlePrint = () => {
     // console.log("data", data.data);
-    router.push("/dashboard/laporan/pembeliandanretur/print/" + "1");
+    router.push("/dashboard/laporan/pembeliandanretur/print/" + searchParameters?.tipeTransaksi);
     //router.query.data = searchParameters;
     data.data.forEach(element => {
-      dispatch({ type: 'ADD_LIST', list: element });  
+      dispatch({ type: 'ADD_LIST', list: element });
     });
     
   };
