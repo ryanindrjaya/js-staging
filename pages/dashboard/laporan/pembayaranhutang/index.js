@@ -90,7 +90,13 @@ function Laporan({ props }) {
   const { RangePicker } = DatePicker;
 
   const handlePrint = () => {
-    //router.push("/dashboard/laporan/pembayaranhutang/print");
+    // console.log("data", data.data);
+    router.push("/dashboard/laporan/pembayaranhutang/print/" + searchParameters?.tipeLaporan);
+    //router.query.data = searchParameters;
+    data.data.forEach(element => {
+      dispatch({ type: 'ADD_LIST', list: element });
+    });
+    
   };
 
   // const handleAdd = () => {
