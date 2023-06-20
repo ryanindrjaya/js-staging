@@ -15,12 +15,13 @@ export default function ReactDataTable({
   stokString,
   formObj,
   getProduct,
+  editPriceDisc = false,
 }) {
   const dispatch = useDispatch();
   var defaultDp1 = 0;
   var defaultDp2 = 0;
   var defaultDp3 = 0;
-  var unit = 1;
+  var unit = [];
   var priceUnit = 1;
   var tempIndex = 0;
   var stock = 0;
@@ -36,6 +37,17 @@ export default function ReactDataTable({
   };
 
   const onChangeUnit = (data, value, index) => {
+    const item = products.productList[index];
+    const newValue = item.attributes[`sold_price_${data}`];
+
+    onChangeProductPrice(newValue, value, index);
+
+    formObj.setFieldsValue({
+      harga_satuan: {
+        [index]: newValue,
+      },
+    });
+
     dispatch({
       type: "CHANGE_PRODUCT_UNIT",
       unit: data,
@@ -50,6 +62,19 @@ export default function ReactDataTable({
       type: "CHANGE_PRODUCT_QTY",
       qty: value,
       product: data,
+      index,
+    });
+  };
+
+  const onChangePriceUnit = (value, data, index, indexRow, changedValue) => {
+    onChangeProductPrice(changedValue, data, indexRow);
+  };
+
+  const onChangeProductPrice = (unit_price, product, index) => {
+    dispatch({
+      type: "CHANGE_PRODUCT_PRICE",
+      unit_price: unit_price,
+      product: product,
       index,
     });
   };
@@ -135,30 +160,33 @@ export default function ReactDataTable({
     },
   };
 
+  // number format 100,000,000 with regex
+  const numberFormat = (value) => {
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
   const columns = [
     {
       name: "Nama Produk",
       width: "150px",
+      wrap: true,
       selector: (row) => row.attributes?.name,
     },
     {
       name: "Stok Gudang",
       selector: (row, idx) => {
-        const selectedUnit = products.productInfo[idx]?.unit ?? row.attributes?.unit_1;
         return (
           <div
-            className={`disabled:bg-white italic ${
-              dataLocationStock?.[row.id]?.includes("Kosong") ? "text-red-500" : "text-green-500"
-            }`}
+            className={`disabled:bg-white italic ${dataLocationStock?.[row.id] ? "text-green-500" : "text-red-500"}`}
           >
-            {`${dataLocationStock?.[row.id]}` ?? "Pilih Gudang"}
+            {`${dataLocationStock?.[row.id] || "Tidak Tersedia"}` ?? "Pilih Gudang"}
           </div>
         );
       },
     },
     {
       name: "Harga Satuan",
-      width: "150px",
+      width: "200px",
       selector: (row, idx) => {
         var priceUnit = row.attributes?.sold_price_1;
         if (products.productInfo[idx]) {
@@ -167,7 +195,23 @@ export default function ReactDataTable({
           }
         }
 
-        return formatter.format(priceUnit);
+        return (
+          <Row align="bottom" justify="center">
+            <Form.Item name={["harga_satuan", `${idx}`]} noStyle>
+              <InputNumber
+                disabled={!editPriceDisc}
+                defaultValue={priceUnit}
+                prefix="Rp. "
+                formatter={(value) => numberFormat(value)}
+                onChange={(e) => onChangePriceUnit(e, row, unit[idx], idx, e)}
+                style={{
+                  width: "100%",
+                  marginRight: "10px",
+                }}
+              />
+            </Form.Item>
+          </Row>
+        );
       },
     },
     {
@@ -186,6 +230,15 @@ export default function ReactDataTable({
           defaultIndex = products.productInfo[idx].unitIndex;
         }
 
+        unit[idx] = defaultIndex;
+
+        let max = null;
+
+        if (dataLocationStock?.[row.id]) {
+          const stringArr = dataLocationStock?.[row.id]?.split(" ");
+          max = parseInt(stringArr?.[0]);
+        }
+
         return (
           <>
             <Row>
@@ -194,7 +247,7 @@ export default function ReactDataTable({
                   defaultValue={defaultQty}
                   onChange={(e) => onChangeQty(e, row, idx)}
                   min={1}
-                  max={dataDetailTrx?.data?.[idx]?.attributes?.qty} // added max qty for retur penjualan
+                  max={max || dataDetailTrx?.data?.[idx]?.attributes?.qty} // added max qty for retur penjualan
                   rules={[
                     {
                       required: true,
@@ -330,7 +383,7 @@ export default function ReactDataTable({
         return (
           <div className="disabled:bg-white">
             <InputNumber
-              disabled
+              disabled={!editPriceDisc}
               controls={false}
               formatter={(value) => `${value}%`}
               max={100}

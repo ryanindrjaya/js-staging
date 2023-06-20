@@ -42,12 +42,7 @@ export const CreateStorePayment = async (
     if (paymentType === "Pembayaran") {
       await updateTransaction(storeTrxId, result.data.id, reloadPage);
     } else {
-      await updateReturTransaction(
-        storeTrxId,
-        returTrxId,
-        result.data.id,
-        reloadPage
-      );
+      await updateReturTransaction(storeTrxId, returTrxId, result.data.id, reloadPage);
     }
   } catch (error) {
     console.log("create payment error", error);
@@ -132,12 +127,7 @@ export const updateTransaction = async (storeTrxId, paymentId, reloadPage) => {
 
 // ! ====================== UPDATE RETUR TRANSACTION ======================
 
-export const updateReturTransaction = async (
-  storeTrxId,
-  returTrxId,
-  paymentId,
-  reloadPage
-) => {
+export const updateReturTransaction = async (storeTrxId, returTrxId, paymentId, reloadPage) => {
   console.log("update retur transaction", storeTrxId, returTrxId, paymentId);
 
   try {
@@ -164,9 +154,9 @@ export const updateReturTransaction = async (
     // await updateMasterTransaction(storeTrxId);
 
     message.success("Transaksi Retur Lunas", 2);
-    // if (reloadPage) {
-    //   reloadPage();
-    // }
+    if (reloadPage) {
+      reloadPage();
+    }
   } catch (error) {
     console.log("update transaction error", error);
     message.error("Transaksi Gagal", 2);

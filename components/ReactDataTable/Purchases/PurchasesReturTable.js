@@ -1,21 +1,13 @@
 import DataTable from "react-data-table-component";
 import AlertDialog from "../../Alert/Alert";
-import { Popover, Select, Row, Tag, notification, Modal, Input } from "antd";
-import {
-  EditOutlined,
-  PrinterOutlined,
-  UnorderedListOutlined,
-} from "@ant-design/icons";
+import { Popover, Select, Row, Tag, notification, Modal, Input, message } from "antd";
+import { EditOutlined, PrinterOutlined, UnorderedListOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import createInventoryRetur from "../../../pages/dashboard/pembelian/utility/createInventoryRetur";
+import nookies from "nookies";
 
-export default function ReactDataTable({
-  data,
-  onDelete,
-  onPageChange,
-  onChangeStatusPengiriman,
-  onChangeStatus,
-}) {
+export default function ReactDataTable({ data, onDelete, onPageChange, onChangeStatusPengiriman, onChangeStatus }) {
   const router = useRouter();
   console.log("data index", data);
   const { Option } = Select;
@@ -39,12 +31,7 @@ export default function ReactDataTable({
   };
 
   const print = (row) => {
-    openNotificationWithIcon(
-      "info",
-      "Work In Progress",
-      "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
-    );
-    //router.push("order_pembelian/print/" + row.id);
+    router.push("/dashboard/pembelian/retur/print/" + row.id);
   };
 
   const lihat = (row) => {
@@ -226,6 +213,37 @@ export default function ReactDataTable({
     },
   };
 
+  const changeStatus = async (id, status) => {
+    const cookies = nookies.get(null);
+    try {
+      const endpoint = `${process.env.NEXT_PUBLIC_URL}/returs/${id}`;
+      const options = {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${cookies.token}`,
+        },
+        body: JSON.stringify({
+          data: {
+            status: status,
+          },
+        }),
+      };
+
+      const res = await fetch(endpoint, options);
+      const data = await res.json();
+
+      if (data?.data) {
+        message.success("Status berhasil diubah");
+        router.reload();
+      } else {
+        message.error("Status gagal diubah");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const columns = [
     {
       name: "Tindakan",
@@ -252,17 +270,25 @@ export default function ReactDataTable({
       width: "150px",
       selector: (row) => {
         return (
-          <Tag
-            color={
-              row.attributes.status === "Selesai"
-                ? "green"
-                : row.attributes.status === "Draft"
-                ? "orange"
-                : "red"
-            }
+          <Select
+            className="p-0"
+            disabled={row.attributes.status === "Selesai"}
+            onChange={(value) => {
+              changeStatus(row.id, value);
+
+              if (value === "Selesai") {
+                createInventoryRetur(row);
+              }
+            }}
+            value={row.attributes.status}
           >
-            {row.attributes.status}
-          </Tag>
+            <Select.Option value="Selesai">
+              <Tag color="green">Selesai</Tag>
+            </Select.Option>
+            <Select.Option value="Draft">
+              <Tag color="orange">Draft</Tag>
+            </Select.Option>
+          </Select>
         );
       },
     },
@@ -275,8 +301,7 @@ export default function ReactDataTable({
     {
       name: "NO LPB",
       width: "180px",
-      selector: (row) =>
-        row.attributes.purchasing?.data?.attributes?.no_purchasing ?? "-",
+      selector: (row) => row.attributes.purchasing?.data?.attributes?.no_purchasing ?? "-",
     },
     {
       name: "Lokasi",
@@ -286,16 +311,14 @@ export default function ReactDataTable({
     {
       name: "Supplier",
       width: "180px",
-      selector: (row) =>
-        row.attributes?.supplier?.data?.attributes?.name ?? "-",
+      selector: (row) => row.attributes?.supplier?.data?.attributes?.name ?? "-",
     },
 
     {
       name: "Grand Total",
       width: "180px",
       selector: (row) => {
-        const LPBTotal =
-          row.attributes?.purchasing?.data?.attributes?.total_purchasing;
+        const LPBTotal = row.attributes?.purchasing?.data?.attributes?.total_purchasing;
 
         return formatter.format(LPBTotal);
       },

@@ -135,6 +135,7 @@ export default function tambahPenyesuaian() {
           console.log(err);
         });
 
+      console.log("fetch product", response);
       if (response.data) {
         setLoading({ ...loading, product: false });
         setOptions({
@@ -158,6 +159,21 @@ export default function tambahPenyesuaian() {
       fetchProducts();
     }
   }, [debounceProducts]);
+
+  useEffect(() => {
+    if (products?.length > 0) {
+      let total_return = 0;
+      products.forEach((product) => {
+        const qty = product?.qty || 1;
+        const buy_price = product?.buy_price?.[product.unit] || 0;
+        total_return += qty * buy_price;
+      });
+
+      form.setFieldsValue({
+        total_return,
+      });
+    }
+  }, [products]);
 
   const customStyles = {
     headCells: {
@@ -189,8 +205,7 @@ export default function tambahPenyesuaian() {
         }));
 
         const sameData = products.filter(
-          (product, productIdx) =>
-            product.id === row.id && product.unit === row.unit && productIdx !== index
+          (product, productIdx) => product.id === row.id && product.unit === row.unit && productIdx !== index
         );
 
         if (sameData.length > 0) {
@@ -373,8 +388,7 @@ export default function tambahPenyesuaian() {
         if (response?.data?.id) {
           notification["success"]({
             message: "Berhasil",
-            description:
-              "Berhasil membuat penyesuaian stok, harap cek halaman penyesuaian stok untuk melihat detail",
+            description: "Berhasil membuat penyesuaian stok, harap cek halaman penyesuaian stok untuk melihat detail",
           });
 
           form.resetFields();
@@ -484,9 +498,7 @@ export default function tambahPenyesuaian() {
                 </Form.Item>
               </div>
 
-              <span className="uppercase text-[#036B82] font-bold text-xl mb-1">
-                Produk Penyesuaian
-              </span>
+              <span className="uppercase text-[#036B82] font-bold text-xl mb-1">Produk Penyesuaian</span>
               <Select
                 disabled={!selectedLocation}
                 onSearch={(value) => {

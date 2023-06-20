@@ -86,7 +86,7 @@ const Print = ({ selling }) => {
         </div>
         <div className="flex flex-col justify-start items-center">
           <p className="text-2xl font-bold m-0">INVOICE</p>
-          <p className="text-sm font-bold">NO INVOICE : {data.no_sales_sale}</p>
+          <p className="text-sm font-bold">NO INVOICE : {data.no_non_panel_sale}</p>
         </div>
         <div className="customer flex flex-col items-end">
           <div>
@@ -135,9 +135,9 @@ const Print = ({ selling }) => {
             <p className="m-0">
               <span className="font-bold">CATATAN :</span> {data?.sale_note || ""}
             </p>
-            <p className="m-0">
+            {/* <p className="m-0">
               <span className="font-bold">CATATAN STAFF :</span> {data?.sale_staff || ""}
-            </p>
+            </p> */}
           </div>
 
           <div>

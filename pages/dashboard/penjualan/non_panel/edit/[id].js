@@ -19,6 +19,7 @@ import Customer from "@iso/components/Form/AddSale/CustomerForm";
 import ConfirmDialog from "@iso/components/Alert/ConfirmDialog";
 import createInventory from "../../utility/createInventory";
 import moment from "moment";
+import { InventoryOutFromNonPanel } from "../../../../../library/functions/createInventory";
 
 Edit.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -28,8 +29,8 @@ Edit.getInitialProps = async (context) => {
   const options = {
     method: "GET",
     headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
     },
   };
 
@@ -58,7 +59,7 @@ Edit.getInitialProps = async (context) => {
       inven,
       nonPanel,
       customer,
-      editData
+      editData,
     },
   };
 };
@@ -78,17 +79,17 @@ const fetchData = async (cookies) => {
 };
 
 const fetchNonPanel = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/non-panel-sales?populate=deep";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/non-panel-sales?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
 
-    const req = await fetch(endpoint, options);
-    return req;
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
 const fetchLocation = async (cookies) => {
@@ -106,34 +107,34 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchInven = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/inventories?populate=deep";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/inventories?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
 
-    const req = await fetch(endpoint, options);
-    return req;
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
 const fetchCustomer = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/customers?populate=deep";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
-    const req = await fetch(endpoint, options);
-    return req;
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/customers?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
 function Edit({ props }) {
-  const products = useSelector((state) => state.Order);
+  const products = useSelector((state) => state.Sales);
   const dispatch = useDispatch();
 
   var selectedProduct = products?.productList;
@@ -166,11 +167,13 @@ function Edit({ props }) {
 
   const [dppActive, setDPPActive] = useState("DPP");
   const [ppnActive, setPPNActive] = useState("PPN");
-  const [simpanData, setSimpanData] = useState("Publish");
+  const [simpanData, setSimpanData] = useState(editData?.attributes?.status_data || "Publish");
   const [discMax, setDiscMax] = useState();
 
   const [location, setLocation] = useState();
   const [locationData, setLocationData] = useState();
+
+  const [lokasiGudang, setLokasiGudang] = useState();
 
   const submitBtn = useRef();
   const router = useRouter();
@@ -178,7 +181,7 @@ function Edit({ props }) {
   var today = new Date();
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
-  var date = today.getDate()+'/'+mm+'/'+yyyy;
+  var date = today.getDate() + "/" + mm + "/" + yyyy;
   var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 
   const [open, setOpen] = useState(false);
@@ -208,15 +211,15 @@ function Edit({ props }) {
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values);
-  }; 
+  };
 
-  const getProductAtLocation = async () => {
+  const getProductAtLocation = async (unit = 1) => {
     const locationId = form.getFieldValue("location");
     let tempData = {};
 
     // create an array of promises by mapping over the productList
     const promises = products.productList.map(async (product) => {
-      const stock = await getStockAtLocation(product.id, locationId);
+      const stock = await getStockAtLocation(product.id, unit);
       console.log("stock ", product.id, stock);
 
       tempData = {
@@ -237,30 +240,32 @@ function Edit({ props }) {
     }
   };
 
-  const getStockAtLocation = async (productId, locationId) => {
-    let stockString = "Stok Kosong";
+  const getStockAtLocation = async (productId, unit) => {
     try {
-      console.log("get stock", productId, locationId);
-      const response = await getStock(productId, locationId);
+      const response = await getStock(productId, unit);
       console.log("response", response);
 
-      if (response.data.length > 0) {
-        const stock = response.data[0].attributes;
-        const product = stock.product?.data?.attributes; // use optional chaining to check if product exists
+      if (response?.data) {
+        // sort based on qty desc
+        const sortedBasedOnQty = response.data.sort((a, b) => b.availableStock - a.availableStock);
+        setLokasiGudang({
+          ...lokasiGudang,
+          [productId]: sortedBasedOnQty,
+        });
+      }
 
-        const stockUnit1 = stock.stock_unit_1;
-        const stockUnit2 = stock.stock_unit_2;
-        const stockUnit3 = stock.stock_unit_3;
-        const stockUnit4 = stock.stock_unit_4;
-        const stockUnit5 = stock.stock_unit_5;
+      console.log(`response ${unit}`, response?.stock?.[unit]);
 
-        const satuanUnit1 = product.unit_1;
-        const satuanUnit2 = product.unit_2;
-        const satuanUnit3 = product.unit_3;
-        const satuanUnit4 = product.unit_4;
-        const satuanUnit5 = product.unit_5;
+      const stringArr = [];
 
-        stockString = `${stockUnit1} ${satuanUnit1}, ${stockUnit2} ${satuanUnit2}, ${stockUnit3} ${satuanUnit3}, ${stockUnit4} ${satuanUnit4}, ${stockUnit5} ${satuanUnit5}`;
+      if (response.available) {
+        for (const [key, value] of Object.entries(response?.stock)) {
+          stringArr.push(`${value} ${key}`);
+        }
+
+        return stringArr.join(", ");
+      } else {
+        return null;
       }
     } catch (error) {
       console.error("error", error);
@@ -269,24 +274,23 @@ function Edit({ props }) {
         [productId]: "Error fetching stock data",
       });
     }
-    return stockString;
   };
 
-  async function getStock(productId, locationId) {
+  async function getStock(productId, unit) {
     const cookies = nookies.get(null, "token");
-    const endpoint =
-        process.env.NEXT_PUBLIC_URL +
-        `/inventories?filters[location][id][$eq]=${locationId}&filters[product][id][$eq]=${productId}&populate=*`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/inventories/user/location?product=${productId}&unit=${unit}`;
     const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
     };
 
     const req = await fetch(endpoint, options);
     const res = await req.json();
+
+    console.log("res get stock at location", res);
 
     return res;
   }
@@ -298,12 +302,7 @@ function Edit({ props }) {
   });
 
   const cleanData = (data) => {
-    const unusedKeys = [
-      "disc_rp",
-      "harga_satuan",
-      "jumlah_option",
-      "jumlah_qty",
-    ];
+    const unusedKeys = ["disc_rp", "harga_satuan", "jumlah_option", "jumlah_qty"];
     for (let key in data) {
       if (data[key] === null || data[key] === undefined) {
         delete data[key];
@@ -361,22 +360,21 @@ function Edit({ props }) {
   };
 
   const cekLimit = async () => {
-      totalBelumDibayar = grandTotal;
+    totalBelumDibayar = grandTotal;
 
-      nonPanel.data.forEach((element) => {
-          if (customer?.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
-      });
+    nonPanel.data.forEach((element) => {
+      if (customer?.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
+    });
 
-      customerData.data.forEach((element) => {
-          if (customer?.id == element.id && totalBelumDibayar > element.attributes.credit_limit) {
-              notification["error"]({
-                  message: "Gagal menambahkan data",
-                  description:
-                      "Data gagal ditambahkan, karena melebihi limit kredit",
-              });
-              setInfo("gagal");
-          } else if (customer?.id == element.id && totalBelumDibayar <= element.attributes.credit_limit) setInfo("sukses");
-      });
+    customerData.data.forEach((element) => {
+      if (customer?.id == element.id && totalBelumDibayar > element.attributes.credit_limit) {
+        notification["error"]({
+          message: "Gagal menambahkan data",
+          description: "Data gagal ditambahkan, karena melebihi limit kredit",
+        });
+        setInfo("gagal");
+      } else if (customer?.id == element.id && totalBelumDibayar <= element.attributes.credit_limit) setInfo("sukses");
+    });
   };
 
   const calculateDifference = (date1, date2) => {
@@ -396,161 +394,134 @@ function Edit({ props }) {
   };
 
   const cekTermin = async () => {
-      let data = null;
+    let data = null;
 
-      nonPanel.data.some((element) => {
-          
-          if (customer.id == element.attributes.customer.data.id && element.attributes.status == "Belum Dibayar") {
-            //if (element.attributes.sale_date )
-            data = element;
-            return true;
-          }
-      });
-      
-      var difference = calculateDifference(data.attributes.sale_date, editData.attributes.sale_date);
-
-      var type = customer.attributes.credit_limit_duration_type;
-      var duration = customer.attributes.credit_limit_duration;
-      if (type == "Hari" && difference > duration) console.log("termin hari aman");
-      else if (type == "Bulan" && difference > (duration * 30)) console.log("termin bulan aman");
-      else {
-          notification["info"]({
-              message: "Ada penjualan yang belum dibayar",
-              description:
-                  "Dengan no : " + data.attributes.no_non_panel_sale,
-          });
+    nonPanel.data.some((element) => {
+      if (customer.id == element.attributes.customer.data.id && element.attributes.status == "Belum Dibayar") {
+        //if (element.attributes.sale_date )
+        data = element;
+        return true;
       }
-      
+    });
+
+    var difference = calculateDifference(data.attributes.sale_date, editData.attributes.sale_date);
+
+    var type = customer.attributes.credit_limit_duration_type;
+    var duration = customer.attributes.credit_limit_duration;
+    if (type == "Hari" && difference > duration) console.log("termin hari aman");
+    else if (type == "Bulan" && difference > duration * 30) console.log("termin bulan aman");
+    else {
+      notification["info"]({
+        message: "Ada penjualan yang belum dibayar",
+        description: "Dengan no : " + data.attributes.no_non_panel_sale,
+      });
+    }
   };
 
   const onFinish = async (values) => {
     setLoading(true);
     values.status_data = simpanData;
 
-    cekLimit();
-    cekTermin();
+    if (simpanData === "Publish") {
+      cekLimit();
+      cekTermin();
+    }
 
-      if (info == "sukses") {
-          try {
-              /* 
+    if (info == "sukses") {
+      try {
+        /* 
               TODO:
               * 1. Update Detail Penjualan Sales
               * 2. Update Penjualan Sales
               */
 
-              console.log("data values", values);
+        console.log("data values", values);
 
-              // master Penjualan Sales
-              values.customer = customer.id;
-              values.customer_name = customer.attributes?.name;
-              values.location = selectedLocationId;
-              values.dpp = dpp;
-              values.ppn = ppn;
-              values.total = grandTotal;
-              values.area = customer?.attributes?.area?.data;
-              values.wilayah = customer?.attributes?.wilayah?.data;
+        // master Penjualan Sales
+        values.customer = customer.id;
+        values.customer_name = customer.attributes?.name;
+        values.location = selectedLocationId;
+        values.dpp = dpp;
+        values.ppn = ppn;
+        values.total = grandTotal;
+        values.area = customer?.attributes?.area?.data;
+        values.wilayah = customer?.attributes?.wilayah?.data;
 
-              const sanitizedValues = cleanData(values);
+        const sanitizedValues = cleanData(values);
 
-              const editedProduct = products.productInfo;
-              const details = products.productList?.map(({ attributes, id }, idx) => ({
-                  qty: editedProduct?.[idx]?.qty || 1,
-                  unit: editedProduct?.[idx]?.unit || attributes?.unit_1,
-                  unit_price: editedProduct?.[idx]?.priceUnit || attributes?.sold_price_1,
-                  disc: editedProduct?.[idx]?.disc || 0,
-                  disc1: editedProduct?.[idx]?.d1 || attributes?.unit_1_dp1,
-                  disc2: editedProduct?.[idx]?.d2 || attributes?.unit_1_dp2,
-                  expired_date: values?.expired_date?.[idx]?.format("YYYY-MM-DD") || null,
-                  product: id,
-                  relation_id: editedProduct?.[idx]?.relation_id,
-                  margin: editedProduct?.[idx]?.margin || 0,
-                  sub_total: productSubTotal?.[idx],
-              }));
+        const editedProduct = products.productInfo;
+        const details = products.productList?.map(({ attributes, id }, idx) => ({
+          qty: editedProduct?.[idx]?.qty || 1,
+          unit: editedProduct?.[idx]?.unit || attributes?.unit_1,
+          unit_price: editedProduct?.[idx]?.priceUnit || attributes?.sold_price_1,
+          disc: editedProduct?.[idx]?.disc || 0,
+          disc1: editedProduct?.[idx]?.d1 || attributes?.unit_1_dp1,
+          disc2: editedProduct?.[idx]?.d2 || attributes?.unit_1_dp2,
+          expired_date: values?.expired_date?.[idx]?.format("YYYY-MM-DD") || null,
+          product: id,
+          relation_id: editedProduct?.[idx]?.relation_id,
+          margin: editedProduct?.[idx]?.margin || 0,
+          sub_total: productSubTotal?.[idx],
+        }));
 
-              let detailsId = [];
+        let detailsId = [];
 
-              for (let item in details) {
-                  var detail = details[item];
-                  var id = detail.relation_id;
-                  var postDetail = cleanData(detail);
-                  console.log("post detail", postDetail, id);
-                  if (id) {
-                      const res = await updateDetailData(postDetail, id);
-                      console.log("response update detail ==>", res);
-                      detailsId.push(res?.data?.id);
-                  } else {
-                      const res = await createDetailData(postDetail);
-                      console.log("response create detail ==>", res);
-                      detailsId.push(res?.data?.id);
-                  }
-              }
-
-              sanitizedValues.non_panel_sale_details = detailsId;
-
-              // update master Data
-              const res = await updateMasterData(sanitizedValues, editData.id);
-              console.log("response create master ==>", res);
-
-              if (res?.data?.id) {
-                  notification.success({
-                      message: "Berhasil mengubah data",
-                      description: "Data Penjualan Non Panel berhasil diubah. Silahkan cek pada halaman Penjualan Non Panel",
-                  });
-                  router.replace("/dashboard/penjualan/non_panel");
-                  updateStock(res.data.id, selectedLocationId);
-              } else {
-                  notification.error({
-                      message: "Gagal mengubah data",
-                      description: "Data Penjualan Non Panel gagal diubah. Silahkan cek data anda dan coba lagi",
-                  });
-              }
-
-              setLoading(false);
-          } catch (error) {
-              console.log(error);
-              notification.error({
-                  message: "Gagal menambahkan data",
-                  description: "Data Penjualan Non Panel gagal dibuat. Silahkan cek data anda dan coba lagi",
-              });
-              setLoading(false);
+        for (let item in details) {
+          var detail = details[item];
+          var id = detail.relation_id;
+          var postDetail = cleanData(detail);
+          console.log("post detail", postDetail, id);
+          if (id) {
+            const res = await updateDetailData(postDetail, id);
+            console.log("response update detail ==>", res);
+            detailsId.push(res?.data?.id);
+          } else {
+            const res = await createDetailData(postDetail);
+            console.log("response create detail ==>", res);
+            detailsId.push(res?.data?.id);
           }
+        }
+
+        sanitizedValues.non_panel_sale_details = detailsId;
+
+        // update master Data
+        const res = await updateMasterData(sanitizedValues, editData.id);
+        console.log("response create master ==>", res);
+
+        if (res?.data?.id) {
+          if (simpanData === "Publish") {
+            await InventoryOutFromNonPanel(
+              res.data.id,
+              customer.attributes.name,
+              editData.attributes.location.data.attributes.name
+            );
+          }
+          notification.success({
+            message: "Berhasil mengubah data",
+            description: "Data Penjualan Non Panel berhasil diubah. Silahkan cek pada halaman Penjualan Non Panel",
+          });
+          router.replace("/dashboard/penjualan/non_panel");
+          // updateStock(res.data.id, selectedLocationId);
+        } else {
+          notification.error({
+            message: "Gagal mengubah data",
+            description: "Data Penjualan Non Panel gagal diubah. Silahkan cek data anda dan coba lagi",
+          });
+        }
+
+        setLoading(false);
+      } catch (error) {
+        console.log(error);
+        notification.error({
+          message: "Gagal menambahkan data",
+          description: "Data Penjualan Non Panel gagal dibuat. Silahkan cek data anda dan coba lagi",
+        });
+        setLoading(false);
       }
+    }
 
     //setDataValues(values);
     setLoading(false);
-  };
-
-  const updateStock = async (id, locations) => {
-    // fetching data to update
-    const options = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-    };
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/non-panel-sales/${id}?populate=deep`;
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
-    const row = res.data;
-
-    const trxStatus = row.attributes?.status_data;
-    //const LPBLocationId = row.attributes.location?.data?.id;
-
-    if (trxStatus == "Publish") {
-      // invetory handle
-      console.log("inventory", row, locations);
-      createInventory(row, locations);
-      //await updateProductFromTable(row);
-    }
-
-    //const poData = row.attributes?.purchase?.data;
-
-    //const resPO = await changeStatusPO(poData?.id, trxStatus);
-
-    //if (resPO.data) {
-    //  await changeStatusLPB(id, trxStatus);
-    //}
   };
 
   const onChangeProduct = async () => {
@@ -587,7 +558,6 @@ function Edit({ props }) {
     setBiayaTambahan(newTotal);
   };
 
-  
   const setTotalWithDisc = () => {
     const disc = form.getFieldsValue(["disc_type", "disc_value"]);
 
@@ -603,12 +573,11 @@ function Edit({ props }) {
 
     newTotal = totalPrice - disc.disc_value;
     if (disc.disc_value > totalPrice) {
-        newTotal = 0;
-        notification["error"]({
-            message: "Disc tidak sesuai",
-            description:
-                "Disc tetap tidak boleh melebihi total",
-        });
+      newTotal = 0;
+      notification["error"]({
+        message: "Disc tidak sesuai",
+        description: "Disc tetap tidak boleh melebihi total",
+      });
     }
     setDiscPrice(newTotal);
   };
@@ -619,12 +588,11 @@ function Edit({ props }) {
     newTotal = totalPrice - (totalPrice * disc.disc_value) / 100;
     if (newTotal < 0) newTotal = 0;
     if (disc.disc_value > 100) {
-        newTotal = 0;
-        notification["error"]({
-            message: "Disc tidak sesuai",
-            description:
-                "Disc persentase tidak boleh 100%",
-        });
+      newTotal = 0;
+      notification["error"]({
+        message: "Disc tidak sesuai",
+        description: "Disc persentase tidak boleh 100%",
+      });
     }
     setDiscPrice(newTotal);
   };
@@ -640,7 +608,7 @@ function Edit({ props }) {
   };
 
   const handleCancel = () => {
-    console.log('Clicked cancel button');
+    console.log("Clicked cancel button");
     setOpen(false);
   };
   //end modal laporan hari ini
@@ -659,15 +627,14 @@ function Edit({ props }) {
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
 
   useEffect(() => {
-    if(products.productList.length > 0){ 
-        inven.forEach((element) => {
-            products.productList.forEach((data) => {
-              if (data.id == element.attributes.products?.data[0]?.id) {
-                data.stock = element.attributes.total_stock;
-              }  
-            });
+    if (products.productList.length > 0) {
+      inven.forEach((element) => {
+        products.productList.forEach((data) => {
+          if (data.id == element.attributes.products?.data[0]?.id) {
+            data.stock = element.attributes.total_stock;
           }
-        );
+        });
+      });
     }
   }, [products.productList]);
 
@@ -677,7 +644,7 @@ function Edit({ props }) {
 
   useEffect(() => {
     // set dpp
-    if(dppActive == "DPP"){
+    if (dppActive == "DPP") {
       setDPP(grandTotal / 1.11);
     } else {
       setDPP(0);
@@ -686,8 +653,8 @@ function Edit({ props }) {
 
   useEffect(() => {
     // set ppn
-    if(ppnActive == "PPN"){
-      setPPN((grandTotal / 1.11) * 11 / 100);
+    if (ppnActive == "PPN") {
+      setPPN(((grandTotal / 1.11) * 11) / 100);
     } else {
       setPPN(0);
     }
@@ -700,32 +667,34 @@ function Edit({ props }) {
   useEffect(() => {
     locations.forEach((element) => {
       if (element.id == location) setLocationData(element.attributes);
-    })
+    });
   }, [location]);
 
   useEffect(() => {
     // set max value
-    if(isFetchinData == false){
-      if(discType == "Tetap") setDiscMax(totalPrice);
-      if(discType == "Persentase") setDiscMax(100);
+    if (isFetchinData == false) {
+      if (discType == "Tetap") setDiscMax(totalPrice);
+      if (discType == "Persentase") setDiscMax(100);
     }
   }, [discType]);
 
   useEffect(() => {
     // set limit credit value
     totalBelumDibayar = 0;
-    if(customer){
+    if (customer) {
       nonPanel.data.forEach((element) => {
-        if(customer.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
+        if (customer.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
       });
 
-      setLimitCredit(customer?.attributes?.credit_limit - totalBelumDibayar);
-      form.setFieldsValue({
-        limitCredit: formatter.format(customer?.attributes?.credit_limit - totalBelumDibayar),
-      });
+      if (simpanData === "Publish") {
+        setLimitCredit(customer?.attributes?.credit_limit - totalBelumDibayar);
+        form.setFieldsValue({
+          limitCredit: formatter.format(customer?.attributes?.credit_limit - totalBelumDibayar),
+        });
+      }
     }
     console.log("cust", limitCredit - totalBelumDibayar);
-  }, [customer]);
+  }, [customer, simpanData]);
 
   useEffect(() => {
     // used to reset redux from value before
@@ -737,8 +706,10 @@ function Edit({ props }) {
     var dpp = "Active";
     var ppn = "Active";
 
-    if (editData.attributes?.dpp != 0 && editData.attributes?.dpp != null && editData.attributes?.dpp != undefined) dpp = "DPP";
-    if (editData.attributes?.ppn != 0 && editData.attributes?.ppn != null && editData.attributes?.ppn != undefined) ppn = "PPN";
+    if (editData.attributes?.dpp != 0 && editData.attributes?.dpp != null && editData.attributes?.dpp != undefined)
+      dpp = "DPP";
+    if (editData.attributes?.ppn != 0 && editData.attributes?.ppn != null && editData.attributes?.ppn != undefined)
+      ppn = "PPN";
 
     form.setFieldsValue({
       //customer: customerData?.attributes.name,
@@ -780,11 +751,12 @@ function Edit({ props }) {
     setPPN(editData.attributes?.ppn);
     setPPNActive(ppn);
     setAdditionalFee({
-        ...additionalFee,
-        additional_fee_1_sub: editData.attributes?.additional_fee_1_sub,
-        additional_fee_2_sub: editData.attributes?.additional_fee_2_sub,
-        additional_fee_3_sub: editData.attributes?.additional_fee_3_sub,
-    })
+      ...additionalFee,
+      additional_fee_1_sub: editData.attributes?.additional_fee_1_sub,
+      additional_fee_2_sub: editData.attributes?.additional_fee_2_sub,
+      additional_fee_3_sub: editData.attributes?.additional_fee_3_sub,
+    });
+    setSimpanData(editData.attributes?.status_data);
 
     var id = 0;
     detailsData.forEach((items) => {
@@ -807,44 +779,44 @@ function Edit({ props }) {
 
       form.setFieldsValue({
         jumlah_option: {
-            [id]: items.attributes.unit,
+          [id]: items.attributes.unit,
         },
         jumlah_qty: {
-            [id]: items.attributes.qty,
+          [id]: items.attributes.qty,
         },
         margin: {
-            [id]: items.attributes.margin,
+          [id]: items.attributes.margin,
         },
         disc_rp1: {
-            [id]: items.attributes.disc1,
+          [id]: items.attributes.disc1,
         },
         disc_rp2: {
-            [id]: items.attributes.disc2,
+          [id]: items.attributes.disc2,
         },
         expired_date: {
-            [id]: moment(items.attributes.expired_date),
+          [id]: moment(items.attributes.expired_date),
         },
       });
 
       //SET INITIAL PRODUCT
-        dispatch({
-            type: "SET_INITIAL_PRODUCT",
-            product: items?.attributes?.product?.data,
-            qty: items?.attributes?.qty,
-            unit: items?.attributes?.unit,
-            unitIndex: indexUnit,
-            priceUnit: items?.attributes?.unit_price,
-            disc: items?.attributes?.disc,
-            margin: items?.attributes?.margin,
-            relation_id: items?.id,
-            //priceAfterDisc,
-            //subTotal,
-            d1: items?.attributes?.disc1 ?? 0,
-            d2: items?.attributes?.disc2 ?? 0,
-            index: id,
-        });
+      dispatch({
+        type: "SET_INITIAL_PRODUCT",
+        product: items?.attributes?.product?.data,
+        qty: items?.attributes?.qty,
+        unit: items?.attributes?.unit,
+        unitIndex: indexUnit,
+        priceUnit: items?.attributes?.unit_price,
+        disc: items?.attributes?.disc,
+        margin: items?.attributes?.margin,
+        relation_id: items?.id,
+        //priceAfterDisc,
+        //subTotal,
+        d1: items?.attributes?.disc1 ?? 0,
+        d2: items?.attributes?.disc2 ?? 0,
+        index: id,
+      });
 
-        id++;
+      id++;
     });
 
     setTimeout(() => {
@@ -874,20 +846,19 @@ function Edit({ props }) {
           <TitlePage titleText={"Edit Penjualan Non Panel"} />
           <LayoutContent>
             <div className="w-full flex justify-between mx-2 mt-1">
-                <div className="w-full justify-start md:w-1/3">
-                  <p>{date} {time}</p>
-                </div>
-                <div className="w-full flex justify-center md:w-1/3">
-                  <button
-                    onClick={showModal}
-                    className="bg-cyan-700 rounded-md m-1 text-sm"
-                  >
-                    <p className="px-4 py-2 m-0 text-white">Laporan Penjualan Hari Ini</p>
-                  </button>
-                </div>
-                <div className="w-full flex justify-end text-right md:w-1/3">
-                  <p>{user.name}</p>
-                </div>
+              <div className="w-full justify-start md:w-1/3">
+                <p>
+                  {date} {time}
+                </p>
+              </div>
+              <div className="w-full flex justify-center md:w-1/3">
+                <button onClick={showModal} className="bg-cyan-700 rounded-md m-1 text-sm">
+                  <p className="px-4 py-2 m-0 text-white">Laporan Penjualan Hari Ini</p>
+                </button>
+              </div>
+              <div className="w-full flex justify-end text-right md:w-1/3">
+                <p>{user.name}</p>
+              </div>
 
               <Modal
                 title="Laporan Penjualan Hari Ini"
@@ -898,10 +869,7 @@ function Edit({ props }) {
                 onCancel={handleCancel}
                 footer={<div></div>}
               >
-                 <ReportTodayTable
-                   data={nonPanel}
-                   page="non panel"
-                 />
+                <ReportTodayTable data={nonPanel} page="non panel" />
               </Modal>
             </div>
 
@@ -914,19 +882,18 @@ function Edit({ props }) {
               onFinish={onFinish}
               onFinishFailed={validateError}
             >
-
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-5">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="no_non_panel_sale"
                     initialValue={categorySale}
                     rules={[
-                        {
-                            required: true,
-                            message: "Nomor Penjualan tidak boleh kosong!",
-                        },
+                      {
+                        required: true,
+                        message: "Nomor Penjualan tidak boleh kosong!",
+                      },
                     ]}
-                    >
+                  >
                     <Input style={{ height: "40px" }} placeholder="No. Penjualan" />
                   </Form.Item>
                 </div>
@@ -971,7 +938,7 @@ function Edit({ props }) {
                     />
                   </Form.Item>
                 </div>
-                
+
                 <div className="w-full md:w-1/3 px-3 mb-2">
                   <p className="m-0">Keterangan : </p>
                   <p className="m-0"> {customer?.attributes?.address}</p>
@@ -995,8 +962,6 @@ function Edit({ props }) {
                     <Select
                       onChange={(e) => {
                         setSelectedLocationId(e);
-                        getProductAtLocation(e);
-                        console.log("location e", e);
                       }}
                       placeholder="Pilih Lokasi"
                       size="large"
@@ -1006,10 +971,7 @@ function Edit({ props }) {
                     >
                       {locations.map((element) => {
                         return (
-                          <Select.Option
-                            value={element.id}
-                            key={element.attributes.name}
-                          >
+                          <Select.Option value={element.id} key={element.attributes.name}>
                             {element.attributes.name}
                           </Select.Option>
                         );
@@ -1020,37 +982,41 @@ function Edit({ props }) {
               </div>
 
               <div className="w-full flex md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
-                  <SearchBar
-                    form={form}
-                    tempList={tempList}
-                    onChange={onChangeProduct}
-                    user={user}
-                    selectedProduct={selectedProduct}
-                    isBasedOnLocation={false}
-                  />
+                <SearchBar
+                  form={form}
+                  tempList={tempList}
+                  onChange={onChangeProduct}
+                  user={user}
+                  selectedProduct={selectedProduct}
+                  isBasedOnLocation={false}
+                  getProductAtLocation={getProductAtLocation}
+                />
               </div>
 
               {isFetchinData ? (
-                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
-                    <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
-                      <LoadingAnimations />
-                    </div>
-                    <div className="text-sm align-middle text-center animate-pulse text-slate-400">Sedang Mengambil Data</div>
+                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 mx-3  md:mb-0 text-lg">
+                  <div className="w-36 h-36 flex p-4 max-w-sm mx-auto">
+                    <LoadingAnimations />
                   </div>
-                ) : (
-                  <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
-                    <StoreSaleTable
-                      products={products}
-                      productTotalPrice={productTotalPrice}
-                      setTotalPrice={setTotalPrice}
-                      setProductTotalPrice={setProductTotalPrice}
-                      calculatePriceAfterDisc={calculatePriceAfterDisc}
-                      productSubTotal={productSubTotal}
-                      setProductSubTotal={setProductSubTotal}
-                      dataLocationStock={dataLocationStock}
-                      formObj={form}
-                    />
+                  <div className="text-sm align-middle text-center animate-pulse text-slate-400">
+                    Sedang Mengambil Data
                   </div>
+                </div>
+              ) : (
+                <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
+                  <StoreSaleTable
+                    products={products}
+                    productTotalPrice={productTotalPrice}
+                    setTotalPrice={setTotalPrice}
+                    setProductTotalPrice={setProductTotalPrice}
+                    calculatePriceAfterDisc={calculatePriceAfterDisc}
+                    productSubTotal={productSubTotal}
+                    setProductSubTotal={setProductSubTotal}
+                    dataLocationStock={dataLocationStock}
+                    formObj={form}
+                    getProduct={getProductAtLocation}
+                  />
+                </div>
               )}
 
               <div className="w-full flex flex-wrap -mx-3 mb-1">
@@ -1090,7 +1056,7 @@ function Edit({ props }) {
 
                 <div className="w-full flex justify-end px-3 -mt-16">
                   <Form.Item name="totalItem" className="font-bold text-lg">
-                    <span> Total Item : {products.productList.length}{" "} </span>
+                    <span> Total Item : {products.productList.length} </span>
                   </Form.Item>
                 </div>
                 <div className="w-full flex justify-end px-3 -mt-9">
@@ -1252,8 +1218,13 @@ function Edit({ props }) {
                 {/*  <span> Biaya Tambahan </span> <span>: {formatter.format(biayaTambahan)}</span>*/}
                 {/*</Form.Item>*/}
 
-                <Form.Item name="grandTotal" value={grandTotal} className="w-full flex justify-end h-2 md:w-1/2 mx-2 mt-3">
-                  <span className="font-bold text-lg"> Total </span>  <span className="font-bold text-lg">: {formatter.format(grandTotal)}</span>
+                <Form.Item
+                  name="grandTotal"
+                  value={grandTotal}
+                  className="w-full flex justify-end h-2 md:w-1/2 mx-2 mt-3"
+                >
+                  <span className="font-bold text-lg"> Total </span>{" "}
+                  <span className="font-bold text-lg">: {formatter.format(grandTotal)}</span>
                 </Form.Item>
               </div>
 
@@ -1266,26 +1237,28 @@ function Edit({ props }) {
                 </Form.Item>
               </div>
 
-              <div  className="w-full flex justify-between">
-                  <Form.Item>
-                    {loading ? (
-                      <div className=" flex float-left ml-3 ">
-                        <Spin />
-                      </div>
-                    ) : (
-                      <button htmlType="submit" onClick={() => setSimpanData("Draft")} className="bg-cyan-700 rounded-md m-1 text-sm">
-                        <p className="px-20 py-2 m-0 text-white">
-                          SIMPAN DRAFT
-                        </p>
-                      </button>
-                    )}
-                  </Form.Item>
-                  <Form.Item>
-                    {loading ? (
-                      <div className=" flex float-left ml-3 ">
-                        <Spin />
-                      </div>
-                    ) : (
+              <div className="w-full flex justify-between">
+                <Form.Item>
+                  {loading ? (
+                    <div className=" flex float-left ml-3 ">
+                      <Spin />
+                    </div>
+                  ) : (
+                    <button
+                      htmlType="submit"
+                      onClick={() => setSimpanData("Draft")}
+                      className="bg-cyan-700 rounded-md m-1 text-sm"
+                    >
+                      <p className="px-20 py-2 m-0 text-white">SIMPAN DRAFT</p>
+                    </button>
+                  )}
+                </Form.Item>
+                <Form.Item>
+                  {loading ? (
+                    <div className=" flex float-left ml-3 ">
+                      <Spin />
+                    </div>
+                  ) : (
                     <>
                       <ConfirmDialog
                         onConfirm={() => submitBtn?.current?.click()}
@@ -1298,21 +1271,19 @@ function Edit({ props }) {
                             className="bg-cyan-700 rounded-md m-1 text-sm"
                             onClick={() => setSimpanData("Publish")}
                           >
-                            <p className="px-4 py-2 m-0 text-white">
-                              SIMPAN DAN CETAK UNTUK PEMBAYARAN PIUTANG
-                            </p>
+                            <p className="px-4 py-2 m-0 text-white">SIMPAN DAN CETAK UNTUK PEMBAYARAN PIUTANG</p>
                           </button>
                         }
                       />
                       <Button htmlType="submit" ref={submitBtn}></Button>
                     </>
-                      //<button htmlType="submit" onClick={() => setSimpanData("Publish")} className="bg-cyan-700 rounded-md m-1 text-sm">
-                      //  <p className="px-4 py-2 m-0 text-white">
-                      //    SIMPAN DAN CETAK UNTUK PEMBAYARAN PIUTANG
-                      //  </p>
-                      //</button>
-                    )}
-                  </Form.Item>
+                    //<button htmlType="submit" onClick={() => setSimpanData("Publish")} className="bg-cyan-700 rounded-md m-1 text-sm">
+                    //  <p className="px-4 py-2 m-0 text-white">
+                    //    SIMPAN DAN CETAK UNTUK PEMBAYARAN PIUTANG
+                    //  </p>
+                    //</button>
+                  )}
+                </Form.Item>
               </div>
             </Form>
           </LayoutContent>

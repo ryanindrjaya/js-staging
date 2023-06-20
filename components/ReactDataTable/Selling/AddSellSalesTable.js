@@ -313,6 +313,7 @@ export default function ReactDataTable({
           <div className="disabled:bg-white">
             <InputNumber
               controls={false}
+              disabled={true}
               formatter={(value) => `${value}%`}
               onFocus={(e) => e.target.select()}
               max={100}

@@ -15,6 +15,7 @@ async function createInventory(row) {
   const data = [];
   const purchasingDetails = row.attributes.purchasing_details.data;
   const noLPB = row.attributes.no_purchasing;
+  const supplierName = row.attributes.supplier.data.attributes.name;
 
   purchasingDetails.forEach((element) => {
     console.log("element purchasing detail", element);
@@ -45,6 +46,7 @@ async function createInventory(row) {
       data,
       no_referensi: noLPB,
       type: "Pembelian",
+      keterangan: `Pembelian dari ${supplierName}`,
     };
 
     await addToGudang(body);
@@ -52,17 +54,14 @@ async function createInventory(row) {
 }
 
 async function addToGudang(body) {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_URL}/inventories/add`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${cookies.token}`,
-      },
-      body: JSON.stringify(body),
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/inventories/add`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${cookies.token}`,
+    },
+    body: JSON.stringify(body),
+  });
 
   const data = await response.json();
 

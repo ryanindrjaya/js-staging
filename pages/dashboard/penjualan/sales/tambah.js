@@ -136,7 +136,7 @@ async function getStock(productId, locationId) {
 }
 
 function Toko({ props }) {
-  const products = useSelector((state) => state.Order);
+  const products = useSelector((state) => state.Sales);
   const dispatch = useDispatch();
 
   var selectedProduct = products?.productList;
