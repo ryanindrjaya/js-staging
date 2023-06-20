@@ -226,40 +226,40 @@ export default function ReactDataTable({
         );
       },
     },
-    {
-      name: "CN",
-      width: "150px",
-      cell: (row) => {
-        var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.cn, 0);
-        const cellData = row.attributes.debt_details.data.map((element, index) => (
-          <p key={index}>{formatter.format(element.attributes.cn)}</p>
-        ));
-        return( 
-          <div className="mt-4">
-            {cellData}
-            <hr/> 
-            <p>{formatter.format(sum)}</p>
-          </div>
-        );
-      },
-    },
-    {
-      name: "OTH",
-      width: "150px",
-      cell: (row) => {
-        var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.oth, 0);
-        const cellData = row.attributes.debt_details.data.map((element, index) => (
-          <p key={index}>{formatter.format(element.attributes.oth)}</p>
-        ));
-        return( 
-          <div className="mt-4">
-            {cellData}
-            <hr/> 
-            <p>{formatter.format(sum)}</p>
-          </div>
-        );
-      },
-    },
+    // {
+    //   name: "CN",
+    //   width: "150px",
+    //   cell: (row) => {
+    //     var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.cn, 0);
+    //     const cellData = row.attributes.debt_details.data.map((element, index) => (
+    //       <p key={index}>{formatter.format(element.attributes.cn)}</p>
+    //     ));
+    //     return( 
+    //       <div className="mt-4">
+    //         {cellData}
+    //         <hr/> 
+    //         <p>{formatter.format(sum)}</p>
+    //       </div>
+    //     );
+    //   },
+    // },
+    // {
+    //   name: "OTH",
+    //   width: "150px",
+    //   cell: (row) => {
+    //     var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.oth, 0);
+    //     const cellData = row.attributes.debt_details.data.map((element, index) => (
+    //       <p key={index}>{formatter.format(element.attributes.oth)}</p>
+    //     ));
+    //     return( 
+    //       <div className="mt-4">
+    //         {cellData}
+    //         <hr/> 
+    //         <p>{formatter.format(sum)}</p>
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       name: "Saldo Hutang",
       width: "150px",
@@ -416,30 +416,30 @@ export default function ReactDataTable({
         );
       },
     },
-    {
-      name: "CN",
-      width: "150px",
-      cell: (row) => {
-        var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.cn, 0);
-        return( 
-          <div className="mt-4">
-            <p>{formatter.format(sum)}</p>
-          </div>
-        );
-      },
-    },
-    {
-      name: "OTH",
-      width: "150px",
-      cell: (row) => {
-        var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.oth, 0);
-        return( 
-          <div className="mt-4">
-            <p>{formatter.format(sum)}</p>
-          </div>
-        );
-      },
-    },
+    // {
+    //   name: "CN",
+    //   width: "150px",
+    //   cell: (row) => {
+    //     var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.cn, 0);
+    //     return( 
+    //       <div className="mt-4">
+    //         <p>{formatter.format(sum)}</p>
+    //       </div>
+    //     );
+    //   },
+    // },
+    // {
+    //   name: "OTH",
+    //   width: "150px",
+    //   cell: (row) => {
+    //     var sum = row.attributes.debt_details.data.reduce((total, row) => total += row.attributes.oth, 0);
+    //     return( 
+    //       <div className="mt-4">
+    //         <p>{formatter.format(sum)}</p>
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       name: "Saldo Hutang",
       width: "150px",
