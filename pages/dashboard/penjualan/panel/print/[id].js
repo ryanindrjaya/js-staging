@@ -86,7 +86,7 @@ const Print = ({ selling }) => {
         </div>
         <div className="flex flex-col justify-start items-center">
           <p className="text-2xl font-bold m-0">INVOICE</p>
-          <p className="text-sm font-bold">NO INVOICE : {data.no_sales_sale}</p>
+          <p className="text-sm font-bold">NO INVOICE : {data.no_panel_sale}</p>
         </div>
         <div className="customer flex flex-col items-end">
           <div>
