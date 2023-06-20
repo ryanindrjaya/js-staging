@@ -7,7 +7,7 @@ const Print = ({ props }) => {
   const name = process.env.STAKEHOLDER_NAME;
   const noLPB = props.purchases.data.attributes.no_purchasing;
   const noPO = props?.purchases?.data?.attributes?.purchase?.data?.attributes?.no_po || "-";
-  const noNota = props.purchases.data.attributes.no_nota_suppplier ?? "-";
+  const noNota = props.purchases.data.attributes.no_bbm ?? "-";
   const date = new Date(props.purchases.data.attributes.date_purchasing).toLocaleDateString("id-ID");
   const supplierName = props.purchases.data.attributes.supplier.data.attributes.name;
   const supplierAddress = props.purchases.data.attributes.supplier.data.attributes.address;
@@ -167,7 +167,7 @@ const Print = ({ props }) => {
           <div className="font-bold text-sm uppercase">Nama Supplier : {supplierName}</div>
           <div>{supplierAddress}</div>
           <div className="font-bold  text-sm uppercase mt-4">NO SUPPLIER : {noPO}</div>
-          <div className="font-bold  text-sm uppercase">NO NOTA SUPPLIER : {noNota}</div>
+          <div className="font-bold  text-sm uppercase">NO BBM : {noNota}</div>
         </div>
         <div>
           <div className="font-bold  text-sm uppercase">ALAMAT PENGIRIMAN : {destionationName}</div>
