@@ -11,9 +11,12 @@ import {
   BankOutlined,
   UndoOutlined,
   SyncOutlined,
+  LoadingOutlined,
 } from "@ant-design/icons";
 import { useRouter } from "next/router";
-
+import { InventoryOutFromNonPanel, InventoryOutFromPanel } from "../../../library/functions/createInventory";
+import { useState } from "react";
+import nookies from "nookies";
 
 export default function ReactDataTable({
   data,
@@ -23,9 +26,9 @@ export default function ReactDataTable({
   onChangeStatus,
   returPage,
   page,
-  updateStock
+  updateStock,
 }) {
-
+  const [loadingPiutang, setLoadingPiutang] = useState(false);
   const router = useRouter();
   const { Option } = Select;
 
@@ -41,7 +44,11 @@ export default function ReactDataTable({
   };
 
   const lihat = (row) => {
-    openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
+    openNotificationWithIcon(
+      "info",
+      "Work In Progress",
+      "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
+    );
     //router.push("order_pembelian/print/" + row.id);
   };
 
@@ -50,12 +57,81 @@ export default function ReactDataTable({
     if (page == "panel") router.push("panel/edit/" + row.id);
   };
 
-  const handlePiutang = (row) => {
-    if (row.attributes.status_data == "Draft") updateStock(row.id, row?.attributes?.location?.data?.id);
-    else {
+  const handleChangeStatus = async (row) => {
+    const cookies = nookies.get(null);
+
+    const endpoint = page === "nonpanel" ? "/non-panel-sales" : "/panel-sales";
+    const url = process.env.NEXT_PUBLIC_URL + endpoint + "/" + row.id;
+
+    const status = {
+      data: {
+        status_data: "Publish",
+      },
+    };
+
+    const options = {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+      body: JSON.stringify(status),
+    };
+
+    const req = await fetch(url, options);
+    const res = await req.json();
+
+    console.log("change status", res);
+
+    if (res?.data?.id) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  const handlePiutang = async (row, page) => {
+    try {
+      if (row.attributes.status_data === "Draft") {
+        setLoadingPiutang(true);
+
+        let out = false;
+        let changeStatus = false;
+
+        const customer = row.attributes.customer.data.attributes.name;
+        const location = row.attributes.location.data.attributes.name;
+
+        changeStatus = await handleChangeStatus(row);
+
+        if (page == "nonpanel" && changeStatus) {
+          out = await InventoryOutFromNonPanel(row.id, customer, location);
+        } else if (page == "panel" && changeStatus) {
+          out = await InventoryOutFromPanel(row.id, customer, location);
+        }
+
+        if (out && changeStatus) {
+          openNotificationWithIcon(
+            "success",
+            "Dijadikan Piutang",
+            "Data berhasil dijadikan Piutang, dan stok inventory telah dikurangi"
+          );
+          router.push("/dashboard/penjualan/" + page);
+        } else {
+          openNotificationWithIcon("error", "Error", "Data gagal dijadikan Piutang");
+          setLoadingPiutang(false);
+        }
+      } else {
+        notification.error({
+          message: "Error",
+          description: "Data sudah fix, tidak dapat dilakukan perubahan.",
+        });
+      }
+    } catch (err) {
+      setLoadingPiutang(false);
+      console.log(err);
       notification.error({
         message: "Error",
-        description: "Data sudah fix, tidak dapat dilakukan perubahan.",
+        description: "Data gagal dijadikan Piutang",
       });
     }
   };
@@ -80,11 +156,10 @@ export default function ReactDataTable({
           ? "Karena status lembar pembelian barang sudah diretur."
           : row.attributes.status === "Belum Dibayar"
           ? "Karena status retur harus sudah dibayar."
-          : "Tidak bisa melakuka retur";
+          : "Tidak bisa melakukan retur";
 
       openNotificationWithIcon("error", "Maaf tidak bisa diretur", message);
     }
-
   };
 
   const onConfirm = (id) => {
@@ -106,19 +181,17 @@ export default function ReactDataTable({
     maximumFractionDigits: 2,
   });
 
-
   const content = (row) => {
-    if(page == "panel" || page == "nonpanel"){
-
+    if (page == "panel" || page == "nonpanel") {
       return (
         <div>
           <div>
             <button
-                onClick={() => print(row)}
-                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+              onClick={() => print(row)}
+              className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
             >
-                <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
-                Cetak
+              <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
+              Cetak
             </button>
           </div>
 
@@ -138,38 +211,42 @@ export default function ReactDataTable({
 
           <div>
             <button
-                onClick={() => handlePiutang(row)}
-                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+              onClick={() => handlePiutang(row, page)}
+              className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
             >
+              {loadingPiutang ? (
+                <LoadingOutlined className="mr-2 mt-0.5 float float-left animate-spin" />
+              ) : (
                 <CalculatorOutlined className="mr-2 mt-0.5 float float-left" />
-                Jadikan Piutang
+              )}
+              Jadikan Piutang
             </button>
           </div>
           <div>
             <button
-                onClick={() => lihat(row)}
-                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+              onClick={() => lihat(row)}
+              className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
             >
-                <BankOutlined className="mr-2 mt-0.5 float float-left" />
-                Pembayaran
+              <BankOutlined className="mr-2 mt-0.5 float float-left" />
+              Pembayaran
             </button>
           </div>
           <div>
             <button
-                onClick={() => lihat(row)}
-                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+              onClick={() => lihat(row)}
+              className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
             >
-                <UnorderedListOutlined className="mr-2 mt-0.5 float float-left" />
-                Melihat Pembayaran
+              <UnorderedListOutlined className="mr-2 mt-0.5 float float-left" />
+              Melihat Pembayaran
             </button>
           </div>
           <div>
             <button
-                onClick={() => returPenjualan(row)}
-                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+              onClick={() => returPenjualan(row)}
+              className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
             >
-                <UndoOutlined className="mr-2 mt-0.5 float float-left" />
-                Retur Penjualan
+              <UndoOutlined className="mr-2 mt-0.5 float float-left" />
+              Retur Penjualan
             </button>
           </div>
 
@@ -195,45 +272,40 @@ export default function ReactDataTable({
           )}
         </div>
       );
-
     } else {
-
       return (
         <div>
           <div>
             <button
-                onClick={() => print(row)}
-                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+              onClick={() => print(row)}
+              className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
             >
-                <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
-                Cetak
+              <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
+              Cetak
             </button>
           </div>
 
           <div>
             <button
-                onClick={() => returPenjualan(row)}
-                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+              onClick={() => returPenjualan(row)}
+              className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
             >
-                <UndoOutlined className="mr-2 mt-0.5 float float-left" />
-                Retur Penjualan
+              <UndoOutlined className="mr-2 mt-0.5 float float-left" />
+              Retur Penjualan
             </button>
           </div>
 
-        <AlertDialog
+          <AlertDialog
             onCancel={onCancel}
             onConfirm={onConfirm}
             title="Hapus Kategori"
             message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
             id={row.id}
-        />
+          />
         </div>
       );
-
     }
-
-  }
-
+  };
 
   const customStyles = {
     headerStyle: { textAlign: "center" },
@@ -252,7 +324,9 @@ export default function ReactDataTable({
       selector: (row) => (
         <>
           <Popover content={content(row)} placement="bottom" trigger="click">
-            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">Tindakan</button>
+            <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
+              Tindakan
+            </button>
           </Popover>
         </>
       ),
@@ -266,7 +340,7 @@ export default function ReactDataTable({
       name: "Customer",
       width: "180px",
       selector: (row) => {
-        if(page == "panel" || page == "nonpanel") return row.attributes?.customer?.data?.attributes?.name ?? "-";
+        if (page == "panel" || page == "nonpanel") return row.attributes?.customer?.data?.attributes?.name ?? "-";
         else return row.attributes?.customer_name ?? "-";
       },
     },
@@ -296,7 +370,8 @@ export default function ReactDataTable({
       width: "180px",
       selector: (row) => {
         const dataPaymentMethod =
-          row?.attributes?.store_payments?.data?.map((payment) => payment?.attributes?.payment_method).join(", ") ?? null;
+          row?.attributes?.store_payments?.data?.map((payment) => payment?.attributes?.payment_method).join(", ") ??
+          null;
 
         console.log(row.id, row?.attributes?.store_payments?.data);
         return dataPaymentMethod;
@@ -331,7 +406,10 @@ export default function ReactDataTable({
         const dataPayment = row?.attributes?.store_payments?.data ?? [];
 
         if (row.attributes.status === "Dibayar") {
-          const dataPaymentValue = dataPayment.reduce((acc, curr) => parseInt(acc) + parseInt(curr.attributes.payment), 0);
+          const dataPaymentValue = dataPayment.reduce(
+            (acc, curr) => parseInt(acc) + parseInt(curr.attributes.payment),
+            0
+          );
           const kembali = dataPaymentValue - totalHarga < 0 ? 0 : dataPaymentValue - totalHarga;
 
           return formatter.format(kembali);
