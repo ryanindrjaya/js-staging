@@ -269,9 +269,9 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
 
     return (
     <div>
-        <div>
+        {/* <div>
             <Checkbox className="text-xs font-normal py-2 px-2 rounded-md" defaultChecked={defaultCek} onChange={(value) => onChangePilih(value, row, idx)}> Pilih </Checkbox>
-        </div>
+        </div> */}
         <div>
             <button
                 //onClick={() => metodePembayaran(row)}
@@ -586,23 +586,6 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                       </div>
                   </div>
 
-                  {/*<div className="w-full flex justify-start">*/}
-                  {/*    <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0 text-center">*/}
-                  {/*        <Form.Item>*/}
-                  {/*            {loading ? (*/}
-                  {/*                <div className=" flex float-left ml-3 ">*/}
-                  {/*                    <Spin />*/}
-                  {/*                </div>*/}
-                  {/*            ) : (*/}
-                  {/*                <button htmlType="submit" className="bg-cyan-700 rounded-md m-1 text-sm px-4">*/}
-                  {/*                    <p className="px-4 py-2 m-0 text-white">*/}
-                  {/*                        SIMPAN*/}
-                  {/*                    </p>*/}
-                  {/*                </button>*/}
-                  {/*            )}*/}
-                  {/*        </Form.Item>*/}
-                  {/*    </div>*/}
-                  {/*</div>*/}
             </Modal>
         </div>
     </div>
@@ -633,18 +616,22 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   };
 
   const columns = [
-      {
-          name: "Tindakan",
-          width: "100px",
-          selector: (row, idx) => (
+    {
+      name: "Tindakan",
+      width: "180px",
+      selector: (row, idx) => {
+        var defaultCek = false;
+        return(
         <>
-            <Popover content={content(row, idx)} placement="bottom" trigger="click">
-                <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
-                    Tindakan
-                </button>
-            </Popover>
+          <Checkbox className="text-xs font-normal py-2 px-2 rounded-md" defaultChecked={defaultCek} onChange={(value) => onChangePilih(value, row, idx)}> Pilih </Checkbox>
+          <Popover content={content(row, idx)} placement="bottom" trigger="click">
+              <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
+                  Tindakan
+              </button>
+          </Popover>
         </>
-      ),
+        );
+      },
     },
     {
       name: "No Invoice",
