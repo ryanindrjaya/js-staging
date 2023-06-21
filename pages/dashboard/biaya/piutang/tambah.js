@@ -824,6 +824,10 @@ function Piutang({ props }) {
       });
 
       dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: element, index: index });
+      dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
+      dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: 0, listData: element, index: index });
+      dispatch({ type: "CHANGE_DATA_GIRO", giro: 0, listData: element, index: index });
+      dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: element.sisaHutang, listData: element, index: index });
     });
 
     //console.log("datatable", dataTabel.length);
