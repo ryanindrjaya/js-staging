@@ -201,8 +201,8 @@ const putRelationDetail = async (id, value, form, router, url, page) => {
 
   if (req.status === 200) {
     form.resetFields();
-    if(page == "hutang") router.push("/dashboard/biaya/hutang");
-    if(page == "piutang") router.push("/dashboard/biaya/piutang");
+    if(page == "hutang") router.push("/dashboard/keuangan/hutang");
+    if(page == "piutang") router.push("/dashboard/keuangan/piutang");
     openNotificationWithIcon("success");
   } else {
     openNotificationWithIcon("error");

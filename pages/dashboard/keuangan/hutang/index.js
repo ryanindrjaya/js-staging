@@ -100,11 +100,11 @@ function Hutang({ props }) {
     const [rangePicker, setRangePicker] = useState();
 
     const handleSetting = () => {
-        router.push("/dashboard/biaya/hutang/setting");
+        router.push("/dashboard/keuangan/hutang/setting");
     };
 
     const handleAdd = () => {
-        router.push("/dashboard/biaya/hutang/tambah");
+        router.push("/dashboard/keuangan/hutang/tambah");
     };
 
     const handleUpdate = (id) => {
@@ -117,7 +117,7 @@ function Hutang({ props }) {
     };
 
     const handleEdit = (id) => {
-        router.push("/dashboard/biaya/hutang/edit/" + id);
+        router.push("/dashboard/keuangan/hutang/edit/" + id);
     };
 
     const handleDelete = async (data) => {

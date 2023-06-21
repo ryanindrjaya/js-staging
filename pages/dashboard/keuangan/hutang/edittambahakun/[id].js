@@ -51,7 +51,7 @@ const Tambah = ({ props }) => {
         "Berhasil mengubah data",
         "Akun hutang telah berhasil diubah. Silahkan cek kembali akun hutang"
       );
-      router.replace("/dashboard/biaya/hutang/setting");
+      router.replace("/dashboard/keuangan/hutang/setting");
     } else {
       //res.error?.details.errors.map((error) => {
       //  const ErrorMsg = error.path[0];

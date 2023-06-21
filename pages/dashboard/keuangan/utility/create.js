@@ -129,11 +129,13 @@ const putAkun = async (id, value, form, total, page) => {
   var saldo = parseInt(value.saldo);
     var url = null;
     if (page == "hutang") {
-      url = "/debt-accounts/";
+      //url = "/debt-accounts/";
+      url = "/chart-of-accounts/";
       saldo = saldo - total;
     }
     if (page == "piutang") {
-      url = "/credit-accounts/";
+      //url = "/credit-accounts/";
+      url = "/chart-of-accounts/";
       saldo = saldo + total;
     } 
 
@@ -208,8 +210,8 @@ const putRelationDetail = async (id, value, form, router, url, page, setCreateId
 
   if (req.status === 200) {
     form.resetFields();
-    if(page == "hutang") router.replace("/dashboard/biaya/hutang");
-    if(page == "piutang") router.replace("/dashboard/biaya/piutang");
+    if(page == "hutang") router.replace("/dashboard/keuangan/hutang");
+    if(page == "piutang") router.replace("/dashboard/keuangan/piutang");
     openNotificationWithIcon("success");
 
     setCreateId(res.data);

@@ -110,11 +110,11 @@ function Piutang({ props }) {
   const { RangePicker } = DatePicker;
 
   const handleSetting = () => {
-    router.push("/dashboard/biaya/piutang/setting");
+    router.push("/dashboard/keuangan/piutang/setting");
   };
 
   const handleAdd = () => {
-    router.push("/dashboard/biaya/piutang/tambah");
+    router.push("/dashboard/keuangan/piutang/tambah");
   };
 
   const handleUpdate = (id) => {

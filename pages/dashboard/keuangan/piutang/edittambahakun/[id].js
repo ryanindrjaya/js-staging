@@ -51,7 +51,7 @@ const Tambah = ({ props }) => {
         "Berhasil mengubah data",
         "Akun piutang telah berhasil diubah. Silahkan cek kembali akun piutang"
       );
-      router.replace("/dashboard/biaya/piutang/setting");
+      router.replace("/dashboard/keuangan/piutang/setting");
     } else {
       //res.error?.details.errors.map((error) => {
       //  const ErrorMsg = error.path[0];

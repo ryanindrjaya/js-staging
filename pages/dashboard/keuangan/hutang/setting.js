@@ -21,10 +21,10 @@ Setting.getInitialProps = async (context) => {
     const akun = await reqAkun.json();
 
     return {
-        props: {
-            //user,
-            akun
-        },
+      props: {
+        //user,
+        akun
+      },
     };
 };
 
@@ -43,7 +43,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchAkun = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts?sort[0]=setting%3Adesc&sort[0]=type%3Aasc";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?sort[0]=setting%3Adesc&sort[0]=type%3Aasc";
     const options = {
         method: "GET",
         headers: {
@@ -88,7 +88,7 @@ function Setting({ props }) {
     //};
 
     const handleDelete = async (id) => {
-        const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts/" + id;
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts/" + id;
         const cookies = nookies.get(null, "token");
 
         const options = {
@@ -106,7 +106,7 @@ function Setting({ props }) {
             openNotificationWithIcon(
                 "success",
                 "Berhasil menghapus data",
-                "Akun piutang yang dipilih telah berhasil dihapus. Silahkan cek kembali akun piutang"
+                "Akun hutang yang dipilih telah berhasil dihapus. Silahkan cek kembali akun hutang"
             );
             setAkun(res);
         }
@@ -114,7 +114,7 @@ function Setting({ props }) {
 
     const handlePageChange = async (page) => {
         const cookies = nookies.get(null, "token");
-        const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts?pagination[page]=" + page;
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?pagination[page]=" + page;
 
         const options = {
             method: "GET",
@@ -141,7 +141,7 @@ function Setting({ props }) {
     };
 
     const handleTambahAkun = () => {
-        router.push("/dashboard/biaya/piutang/tambahakun");
+        router.push("/dashboard/keuangan/hutang/tambahakun");
     };
 
     const onFinish = (values) => {
@@ -154,22 +154,22 @@ function Setting({ props }) {
         var aktifLength = 0;
         //var length = 0;
         akun.data.forEach((element) => {
-            if (element.attributes.type == row.attributes.type) {
-                if (element.attributes.setting == true) aktifLength++;
-            }
+          if(element.attributes.type == row.attributes.type){
+            if(element.attributes.setting == true) aktifLength++;
+          }
 
-            //length++;
+          //length++;
         });
 
         //const cookies = nookies.get(length, "token");
 
         if (aktifLength < 1 || setting == "Tidak Aktif") {
-            if (setting == "Tidak Aktif") row.attributes.setting = false;
-            if (setting == "Aktif") row.attributes.setting = true;
+          if (setting == "Tidak Aktif") row.attributes.setting = false;
+          if (setting == "Aktif") row.attributes.setting = true;
             handleChangeSetting(row, row.id);
         } else {
-            openNotificationWithIcon("error", "Setting gagal dirubah", "Karena tipe transaksi " + row.attributes.type + " memiliki lebih dari 1 akun aktif");
-            router.push("/dashboard/biaya/piutang/setting");
+          openNotificationWithIcon("error", "Setting gagal dirubah", "Karena tipe transaksi "+row.attributes.type+" memiliki lebih dari 1 akun aktif");
+          router.push("/dashboard/keuangan/hutang/setting");
         }
     };
 
@@ -191,7 +191,7 @@ function Setting({ props }) {
 
         const JSONdata = JSON.stringify(newValues);
         const cookies = nookies.get(null, "token");
-        const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts/" + id;
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts/" + id;
 
         const options = {
             method: "PUT",
@@ -209,7 +209,7 @@ function Setting({ props }) {
             const response = await fetchData(cookies);
             setAkun(response);
 
-            openNotificationWithIcon("success", "Setting berhasil dirubah", "Setting berhasil dirubah. Silahkan cek setting piutang");
+            openNotificationWithIcon("success", "Setting berhasil dirubah", "Setting berhasil dirubah. Silahkan cek setting hutang");
         } else {
             openNotificationWithIcon("error", "Setting gagal dirubah", "Tedapat kesalahan yang menyebabkan setting tidak dapat dirubah");
         }
@@ -235,7 +235,7 @@ function Setting({ props }) {
     };
 
     const fetchData = async (cookies) => {
-        const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts?sort[0]=setting%3Adesc&sort[0]=type%3Aasc";
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?sort[0]=setting%3Adesc&sort[0]=type%3Aasc";
         const options = {
             method: "GET",
             headers: {
@@ -257,38 +257,38 @@ function Setting({ props }) {
             </Head>
             <DashboardLayout>
                 <LayoutWrapper style={{}}>
-                    <TitlePage titleText={"AKUN PEMBAYARAN PIUTANG PEMBELIAN"} />
+                    <TitlePage titleText={"AKUN PEMBAYARAN HUTANG PEMBELIAN"} />
                     <LayoutContent>
 
-                        <div className="w-full flex justify-end mb-3">
-                            <button htmlType="button" className="bg-cyan-700 rounded-md m-1 text-sm" onClick={handleTambahAkun}>
-                                <p className="px-4 py-2 m-0 text-white">
-                                    + Tambah Akun
-                                </p>
-                            </button>
-                        </div>
+                      <div className="w-full flex justify-end mb-3">
+                        <button htmlType="button" className="bg-cyan-700 rounded-md m-1 text-sm" onClick={handleTambahAkun}>
+                            <p className="px-4 py-2 m-0 text-white">
+                                + Tambah Akun
+                            </p>
+                        </button>
+                      </div>
 
-                        <Form
-                            //form={form}
-                            //name="add"
-                            initialValues={{
-                                remember: true,
-                            }}
-                            onFinish={onFinish}
-                            onFinishFailed={validateError}
-                        >
+                      <Form
+                          //form={form}
+                          //name="add"
+                          initialValues={{
+                            remember: true,
+                          }}
+                          onFinish={onFinish}
+                          onFinishFailed={validateError}
+                      >
 
-                            <DebtTable
-                                data={akun}
-                                //onUpdate={handleUpdate}
-                                onDelete={handleDelete}
-                                onPageChange={handlePageChange}
-                                //onChangeStatus={onChangeStatus}
-                                onChangeSetting={onChangeSetting}
-                                //user={user}
-                            />
+                        <DebtTable
+                          data={akun}
+                          //onUpdate={handleUpdate}
+                          onDelete={handleDelete}
+                          onPageChange={handlePageChange}
+                          //onChangeStatus={onChangeStatus}
+                          onChangeSetting={onChangeSetting}
+                          //user={user}
+                        />
 
-                        </Form>
+                      </Form>
                     </LayoutContent>
                 </LayoutWrapper>
             </DashboardLayout>

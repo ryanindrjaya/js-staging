@@ -187,8 +187,6 @@ function Hutang({ props }) {
     var totalTunai = 0;
     var totalTransfer = 0;
     var totalGiro = 0;
-    var totalCn = 0;
-    var totalOth = 0;
 
     setLoading(true);
     setInfo("sukses");
@@ -197,18 +195,14 @@ function Hutang({ props }) {
       totalTunai += biaya.info[key].tunai;
       totalTransfer += biaya.info[key].transfer;
       totalGiro += biaya.info[key].giro;
-      totalCn += biaya.info[key].cn;
-      totalOth += biaya.info[key].oth;
     }
 
-    var totalBayar = values.bayar1 + values.bayar2 + values.bayar3 + values.bayar4 + values.bayar5;
-    var totalBayarProduk = totalTunai + totalTransfer + totalGiro + totalCn + totalOth;
+    var totalBayar = values.bayar1 + values.bayar2 + values.bayar3;
+    var totalBayarProduk = totalTunai + totalTransfer + totalGiro;
     if (
       (totalTunai != values.bayar1 ||
         totalTransfer != values.bayar2 ||
-        totalGiro != values.bayar3 ||
-        totalCn != values.bayar4 ||
-        totalOth != values.bayar5) &&
+        totalGiro != values.bayar3) &&
       totalBayar != totalBayarProduk
     ) {
       notification["error"]({
