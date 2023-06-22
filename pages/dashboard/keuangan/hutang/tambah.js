@@ -106,7 +106,7 @@ const fetchHutang = async (cookies) => {
 };
 
 const fetchAkunHutang = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?populate=deep&filters[jenis_akun][$eq]=true";
   const options = {
     method: "GET",
     headers: {
@@ -126,7 +126,7 @@ function Hutang({ props }) {
   const user = props.user;
   const lpb = props.LPB.data;
   const returLPB = props.returLPB.data;
-  const akunHutang = props.akunHutang.data;
+  const akunHutang = props.akunHutang.data; console.log(akunHutang,"hutang data akun", biaya);
   const hutang = props.hutang;
   const [supplier, setSupplier] = useState();
   const [dataTabel, setDataTabel] = useState([]);
@@ -187,7 +187,7 @@ function Hutang({ props }) {
     var totalTunai = 0;
     var totalTransfer = 0;
     var totalGiro = 0;
-
+    console.log(values,"value");
     setLoading(true);
     setInfo("sukses");
 
@@ -306,6 +306,8 @@ function Hutang({ props }) {
 
   const calculatePriceTotal = (row, index) => {
     const total = calculatePrice(row, biaya, sisaHutangTotal, index);
+    //
+    //console.log(sisaHutangTotal, row);
     sisaHutang[index] = total;
     return formatter.format(total);
   };
@@ -463,24 +465,57 @@ function Hutang({ props }) {
       lpbId++;
     });
 
-    //dataTabel.push(biaya.list);
-    lpbId = 0;
+    //console.log(biaya,"hutang data", hutang.data);
+    //biaya.list[0].sisaHutangFix = 1;
+    //biaya.list[0].sisaHutang = 0;
+    var pembayaran = [];
+    var total = 0;
+    var idDetail = null;
+    hutang.data.forEach(element => {
+      element.attributes.debt_details.data.forEach(details => {
+        total = details.attributes.giro + details.attributes.transfer + details.attributes.tunai;
+        idDetail = details?.attributes?.purchasing?.data?.id;
+        pembayaran.push({ id: idDetail, total: total});
+      });
+    });
 
-    returLPB.forEach((row) => {
-      row.subtotal = 0;
-      dataTabel.forEach((element) => {
+    dataTabel.forEach((element, index) => {
+      element.subtotal = 0;
+      element.sisaHutang =  0;
+      element.dibayar = 0;
+
+      returLPB.forEach((row) => {
+        row.subtotal = 0;
+      
         if (element.attributes.no_purchasing == row.attributes.purchasing.data?.attributes.no_purchasing) {
           row.attributes.retur_lpb_details.data.forEach((detail) => {
             row.subtotal += parseInt(detail.attributes.sub_total);
           });
-          dataRetur[lpbId] = {
-            id: element.attributes.no_purchasing,
-            subtotal: row.subtotal,
-          };
+          
+          element.subtotal += row.attributes.total;
+
+          if (dataRetur.length > 0)
+            dataRetur[dataRetur.length] = {
+                id: element.attributes.no_purchasing,
+                subtotal: row.subtotal,
+            };
+          else
+            dataRetur[0] = {
+              id: element.attributes.no_purchasing,
+              subtotal: row.subtotal,
+            };
+
+          element.sisaHutang = parseInt(element.attributes.total) - parseInt(element.subtotal);
+
         }
       });
-      lpbId++;
+      
+      pembayaran.forEach((item) => {
+        if(item.id == element.id) element.dibayar += item.total;
+      });
+
     });
+
   }, []);
 
   const validateError = () => {
@@ -531,32 +566,27 @@ function Hutang({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Supplier onChangeSupplier={setSupplier} />
                 </div>
-                {/* <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item
-                    name="status_pembayaran" //initialValue={"Hari"}
-                    noStyle
-                  >
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      allowClear
-                      placeholder="Status Pembayaran"
-                      onChange={setStatusPembayaran}
-                    >
-                      <Select.Option value="Dibayar" key="Dibayar">
-                        Dibayar
-                      </Select.Option>
-                      <Select.Option value="Belum Dibayar" key="Belum Dibayar">
-                        Belum Dibayar
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
-                </div> */}
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="tanggal">
                     <RangePicker size="large" onChange={(values) => setRangePicker(values)} />
+                  </Form.Item>
+                </div>
+                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
+                  <Form.Item name="akunCOA">
+                      <Select size="large" placeholder="Akun yg akan digunakan"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Akun yg akan digunakan belum dipilih !",
+                          },
+                        ]}
+                      >
+                        {akunHutang.map((element) => (
+                          <Select.Option value={element.id} key={element.id}>
+                          {element.attributes.nama}
+                          </Select.Option>
+                        ))}
+                      </Select>
                   </Form.Item>
                 </div>
               </div>

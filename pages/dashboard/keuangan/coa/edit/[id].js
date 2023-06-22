@@ -6,7 +6,7 @@ import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import DebtTable from "@iso/components/ReactDataTable/Cost/DebtAccountTable";
 import { UserOutlined, ShopOutlined, BankOutlined } from "@ant-design/icons";
-import { Button, Select, Form, Input, InputNumber, notification } from "antd";
+import { Button, Select, Form, Input, InputNumber, Switch, notification } from "antd";
 import nookies from "nookies";
 import { toast } from "react-toastify";
 import { Spin } from "antd";
@@ -69,13 +69,15 @@ function Edit ({ props }) {
 
   // NO Akun
   const [kodeAkun, setKodeAkun] = useState(akun.data.attributes.kode);
-  const [tipeTransaksi, setTipeTransaksi] = useState(akun.data.attributes.transaksi);
+  //const [tipeTransaksi, setTipeTransaksi] = useState(akun.data.attributes.transaksi);
+
+  //jenis akun
+  const [jenisAkun, setJenisAkun] = useState(true); console.log(jenisAkun,"jenisakun");
 
   const onFinish = async (values) => {
     setLoading(true);
-    values.setting = akun.data.attributes.setting;
-    if(values.transaksi == "Debit") values.transaksi == true;
-    else values.transaksi == false;
+    values.jenis_akun = jenisAkun;
+    console.log(values, "value");
     var data = { data: values};
 
     const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts/"+ akun.data.id;
@@ -126,16 +128,30 @@ function Edit ({ props }) {
     });
   };
 
-  useEffect(() => {
-    if(tipeTransaksi == true) setTipeTransaksi("Debit");
-    else setTipeTransaksi("Kredit");
+  const switchStyle = {
+    backgroundColor: 'blue', // Set the background color
+    borderColor: 'red', // Set the border color
+    // Add any other desired styles
+  };
 
+  const onChangeSwitch = (checked) => {
+    console.log(`switch to ${checked}`);
+    setJenisAkun(checked);
+  };
+
+  useEffect(() => {
+    // if(tipeTransaksi == true) setTipeTransaksi("Debit");
+    // else setTipeTransaksi("Kredit");
     form.setFieldsValue({
       nama: akun.data.attributes.nama,
       saldo: parseInt(akun.data.attributes.saldo),
       // type: akun.data.attributes.type,
       // deskripsi: akun.data.attributes.deskripsi,
     });
+
+    if(akun?.data?.attributes?.jenis_akun == null) setJenisAkun(akun.data.attributes.jenis_akun);
+    else;
+    
   }, []);
 
   return (
@@ -215,27 +231,16 @@ function Edit ({ props }) {
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="jenis_akun"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Jenis akun tidak boleh kosong!",
-                      },
-                    ]}
+                    // rules={[
+                    //   {
+                    //     required: true,
+                    //     message: "Jenis akun tidak boleh kosong!",
+                    //   },
+                    // ]}
                   >
-                    <Select 
-                      size="large"
-                      placeholder="Jenis Akun"
-                      name="transaksi"
-                      initialValue={tipeTransaksi}
-                      allowClear
-                    >
-                      <Select.Option value="Debit" key="Debit">
-                        Debit
-                      </Select.Option>
-                      <Select.Option value="Kredit" key="Kredit">
-                        Kredit
-                      </Select.Option>
-                    </Select>
+                    <span>Kredit</span>
+                    <Switch className="mx-3" style={switchStyle} checked={jenisAkun} onChange={onChangeSwitch} />
+                    <span>Debit</span>
                   </Form.Item>
                 </div>
 

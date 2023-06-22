@@ -10,14 +10,15 @@ export default function calculatePrice(
     //setTotalPrice,
     index) {
 
-    var sisaHutang = row.attributes.total;
+    var sisaHutang = row?.attributes?.total ?? row?.attributes?.total_purchasing;
     var tunai = 0;
     var transfer = 0;
     var giro = 0;
     // var cn = 0;
     // var oth = 0;
 
-    if (row.sisaHutang) sisaHutang = row.sisaHutang;
+    if (row.sisaHutang) sisaHutang = row?.sisaHutang - row?.dibayar;
+    console.log("sisahutang", sisaHutang, row);
 
     if (biaya.info[index]?.tunai) {
       tunai = biaya.info[index].tunai;

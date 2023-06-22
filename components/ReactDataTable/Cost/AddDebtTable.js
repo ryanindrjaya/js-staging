@@ -88,7 +88,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
 
     //if(cek == "none"){
       dispatch({ type: "CHANGE_PILIH_DATA", pilihData: pilihData, listData: data, index: index });
-      dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: data.sisaHutang, listData: data, index: index });
+      dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: data.sisaHutang - data.dibayar, listData: data, index: index });
       onChangeTunai(0, data, index);
       onChangeTransfer(0, data, index);
       onChangeGiro(0, data, index);

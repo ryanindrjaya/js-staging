@@ -355,7 +355,7 @@ function Piutang({ props }) {
                   }
                 />
               </div>
-              <div className="w-full md:w-1/4 mt-0 mb-2">
+              {/* <div className="w-full md:w-1/4 mt-0 mb-2">
                 <div className="float-right">
                   <button
                     onClick={handleSetting}
@@ -369,7 +369,7 @@ function Piutang({ props }) {
                     </div>
                   </button>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             <div className="w-full flex justify-start -mt-6">

@@ -28,11 +28,14 @@ const Tambah = ({ props }) => {
   // var noAkun = String(props.akun?.meta?.pagination.total + 1).padStart(3, "0");
   // const [kodeAkun, setKodeAkun] = useState(`AC/ET/${user.id}/${noAkun}/${mm}/${yyyy}`);
 
+  //jenis akun
+  const [jenisAkun, setJenisAkun] = useState(true);
+
   const onFinish = async (values) => {
     setLoading(true);
-    values.setting = false;
-    if(values.transaksi == "Debit") values.transaksi == true;
-    else values.transaksi == false;
+    // values.setting = false;
+    // if(values.transaksi == "Debit") values.transaksi == true;
+    // else values.transaksi == false;
     console.log(values, "value");
     var data = { data: values };
 
@@ -87,6 +90,11 @@ const Tambah = ({ props }) => {
     backgroundColor: 'blue', // Set the background color
     borderColor: 'red', // Set the border color
     // Add any other desired styles
+  };
+
+  const onChangeSwitch = (checked) => {
+    console.log(`switch to ${checked}`);
+    setJenisAkun(checked);
   };
 
   //const getRole = async (roleId) => {
@@ -190,9 +198,9 @@ const Tambah = ({ props }) => {
                       },
                     ]}
                   >
-                    <span>Debit</span>
-                    <Switch className="mx-3" style={switchStyle}/>
                     <span>Kredit</span>
+                    <Switch className="mx-3" style={switchStyle} checked={jenisAkun} onChange={onChangeSwitch} />
+                    <span>Debit</span>
                   </Form.Item>
                 </div>
 

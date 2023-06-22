@@ -747,35 +747,30 @@ function Hutang({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Supplier onChangeSupplier={setSupplier} />
                 </div>
-                <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item
-                    name="status_pembayaran" //initialValue={"Hari"}
-                    noStyle
-                  >
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      allowClear
-                      placeholder="Status Pembayaran"
-                      onChange={setStatusPembayaran}
-                    >
-                      <Select.Option value="Dibayar" key="Dibayar">
-                        Dibayar
-                      </Select.Option>
-                      <Select.Option value="Belum Dibayar" key="Belum Dibayar">
-                        Belum Dibayar
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
-                </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="tanggal">
                     <RangePicker
                       size="large"
                       onChange={(values) => setRangePicker(values)}
                     />
+                  </Form.Item>
+                </div>
+                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
+                  <Form.Item name="akunCOA">
+                      <Select size="large" placeholder="Akun yg akan digunakan"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Akun yg akan digunakan belum dipilih !",
+                          },
+                        ]}
+                      >
+                        {akunHutang.map((element) => (
+                          <Select.Option value={element.id} key={element.id}>
+                          {element.attributes.nama}
+                          </Select.Option>
+                        ))}
+                      </Select>
                   </Form.Item>
                 </div>
               </div>

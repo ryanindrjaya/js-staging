@@ -110,8 +110,9 @@ export default function ReactDataTable({
       name: "Jenis Akun",
       width: "150px",
       selector: (row) => {
-        if(row.transaksi == true) return "Debit";
-        else if(row.transaksi == false) return "Kredit";
+        console.log(row,"row");
+        if(row?.attributes?.jenis_akun == true) return "Debit";
+        else if(row?.attributes?.jenis_akun == false) return "Kredit";
         else return "-";
       },
     },

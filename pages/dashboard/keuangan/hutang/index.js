@@ -5,11 +5,12 @@ import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import router, { useRouter } from "next/router";
 import { useSelector, useDispatch } from "react-redux";
-import { Input, notification, Select, DatePicker } from "antd";
+import { Button, Descriptions, Input, notification, Select, DatePicker, Modal } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import DebtTable from "@iso/components/ReactDataTable/Cost/DebtTable";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
 import nookies from "nookies";
+import { PrinterOutlined } from "@ant-design/icons";
 import tokenVerify from "../../../../authentication/tokenVerify";
 
 Hutang.getInitialProps = async (context) => {
@@ -94,10 +95,15 @@ function Hutang({ props }) {
     const [supplier, setSupplier] = useState();
     const dispatch = useDispatch();
     const [searchParameters, setSearchParameters] = useState({});
+    const cookies = nookies.get(null, "token");
 
     // Range Picker
     const { RangePicker } = DatePicker;
     const [rangePicker, setRangePicker] = useState();
+    
+    // Selected id
+    const [selected, setSelected] = useState();
+    const [openModal, setOpenModal] = useState(false);
 
     const handleSetting = () => {
         router.push("/dashboard/keuangan/hutang/setting");
@@ -246,6 +252,57 @@ function Hutang({ props }) {
       searchQuery();
     }, [searchParameters]);
 
+    // search query
+    useEffect(() => {
+        async function getById(id) {
+        const endpoint = process.env.NEXT_PUBLIC_URL + `/debts/${id}?populate=*`;
+        const options = {
+            method: "GET",
+            headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+            },
+        };
+        const req = await fetch(endpoint, options);
+        const res = await req.json();
+
+        setSelected(res?.data);
+        }
+
+        if (router?.query?.id) {
+        const id = router.query.id;
+        getById(id);
+        }
+    }, [router.query]);
+
+    useEffect(() => {
+        if (selected) {
+        setOpenModal(true);
+        }
+    }, [selected]);
+
+    function formatMyDate(value, locale = "id-ID") {
+        return new Date(value).toLocaleDateString(locale);
+    }
+
+    var formatter = new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        maximumFractionDigits: 2,
+        minimumFractionDigits: 2,
+    });
+
+    const print = () => {
+        router.replace(
+        {
+            pathname: "/dashboard/keuangan/hutang",
+        },
+        undefined,
+        { shallow: true }
+        );
+        router.push("/dashboard/keuangan/hutang/print/" + selected.id);
+    };
+
     return (
         <>
             <Head>
@@ -255,6 +312,82 @@ function Hutang({ props }) {
                 <LayoutWrapper style={{}}>
                     <TitlePage titleText={"Daftar Pembayaran Pembelian"} />
                     <LayoutContent>
+                        <Modal
+                        open={openModal}
+                        onClose={() => {
+                            router.replace(
+                            {
+                                pathname: "/dashboard/keuangan/hutang",
+                            },
+                            undefined,
+                            { shallow: true }
+                            );
+                            setOpenModal(false);
+                            setSelected();
+                        }}
+                        onCancel={() => {
+                            router.replace(
+                            {
+                                pathname: "/dashboard/keuangan/hutang",
+                            },
+                            undefined,
+                            { shallow: true }
+                            );
+                            setOpenModal(false);
+                            setSelected();
+                        }}
+                        width={1000}
+                        okButtonProps={{ style: { display: "none" } }}
+                        cancelText="Close"
+                        >
+                        {selected && (
+                            <>
+                            <Descriptions
+                                extra={
+                                <Button
+                                    onClick={print}
+                                    className="bg-cyan-700 hover:bg-cyan-800 mr-7 border-none"
+                                    type="primary"
+                                >
+                                    <PrinterOutlined className="mr-2 mt-0.5 float float-left" /> Cetak
+                                </Button>
+                                }
+                                size="middle"
+                                title="INFORMASI HUTANG"
+                                bordered
+                            >
+                                <Descriptions.Item label="Tanggal Pembayaran" span={4}>
+                                {formatMyDate(selected?.attributes?.tanggal_pembayaran)}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="No Hutang" span={2}>
+                                {selected?.attributes?.no_hutang}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="Supplier">
+                                {selected?.attributes?.supplier?.data?.attributes?.name}
+                                </Descriptions.Item>
+                            </Descriptions>
+
+                            <Descriptions className="my-3" size="middle" title="PEMBAYARAN" bordered>
+                                <Descriptions.Item label="Total Pembayaran" className="font-bold" span={2}>
+                                {formatter.format(selected?.attributes?.total_pembayaran)}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="Sisa Hutang" className="font-bold" span={2}>
+                                {formatter.format(selected?.attributes?.sisa_hutang_jatuh_tempo)}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="Tunai" span={4}>
+                                {formatter.format(selected?.attributes?.bayar1)}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="Transfer" span={4}>
+                                {formatter.format(selected?.attributes?.bayar2)}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="Giro" span={4}>
+                                {formatter.format(selected?.attributes?.bayar3)}
+                                </Descriptions.Item>
+                            </Descriptions>
+                            </>
+                        )}
+                        </Modal>
+
                         <div className="w-full flex justify-start">
                             <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                                 <Supplier
@@ -309,11 +442,11 @@ function Hutang({ props }) {
                         <div className="w-full flex justify-between mt-0 mb-2">
                             <span className="text-black text-md font-bold ml-1 mt-5">Semua Penjualan</span>
                             <div className="float-right">
-                                <button onClick={handleSetting} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm mb-5 mx-2">
+                                {/* <button onClick={handleSetting} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm mb-5 mx-2">
                                     <div className="text-white text-center text-sm font-bold">
                                         <a className="text-white no-underline text-xs sm:text-xs">Setting</a>
                                     </div>
-                                </button>
+                                </button> */}
                                 <button onClick={handleAdd} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm mb-5 mx-2">
                                     <div className="text-white text-center text-sm font-bold">
                                         <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>

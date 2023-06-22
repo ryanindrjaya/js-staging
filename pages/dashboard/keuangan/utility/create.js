@@ -29,35 +29,36 @@ const Create = async (
   var totalGiro = 0;
   var totalCN = 0;
   var totalOTH = 0;
+  var total = 0;
 
   values.status = "Dibayar";
+  total = values.bayar1 + values.bayar2 + values.bayar3;
+  // values.bayar1 = parseInt( values.bayar1 );
+  // values.bayar2 = parseInt( values.bayar2 );
+  // values.bayar3 = parseInt( values.bayar3 );
+  // values.bayar4 = parseInt( values.bayar4 );
+  // values.bayar5 = parseInt( values.bayar5 );
 
-  values.bayar1 = parseInt( values.bayar1 );
-  values.bayar2 = parseInt( values.bayar2 );
-  values.bayar3 = parseInt( values.bayar3 );
-  values.bayar4 = parseInt( values.bayar4 );
-  values.bayar5 = parseInt( values.bayar5 );
+  // if (values.metode_bayar1 == "tunai") totalTunai = values.bayar1;
+  // else if (values.metode_bayar2 == "tunai") totalTunai = values.bayar2;
+  // else if (values.metode_bayar3 == "tunai") totalTunai = values.bayar3;
+  // else if (values.metode_bayar4 == "tunai") totalTunai = values.bayar4;
+  // else if (values.metode_bayar5 == "tunai") totalTunai = values.bayar5;
+  // else totalTunai = 0;
 
-  if (values.metode_bayar1 == "tunai") totalTunai = values.bayar1;
-  else if (values.metode_bayar2 == "tunai") totalTunai = values.bayar2;
-  else if (values.metode_bayar3 == "tunai") totalTunai = values.bayar3;
-  else if (values.metode_bayar4 == "tunai") totalTunai = values.bayar4;
-  else if (values.metode_bayar5 == "tunai") totalTunai = values.bayar5;
-  else totalTunai = 0;
+  // if (values.metode_bayar1 == "transfer") totalTransfer = values.bayar1;
+  // else if (values.metode_bayar2 == "transfer") totalTransfer = values.bayar2;
+  // else if (values.metode_bayar3 == "transfer") totalTransfer = values.bayar3;
+  // else if (values.metode_bayar4 == "transfer") totalTransfer = values.bayar4;
+  // else if (values.metode_bayar5 == "transfer") totalTransfer = values.bayar5;
+  // else totalTransfer = 0;
 
-  if (values.metode_bayar1 == "transfer") totalTransfer = values.bayar1;
-  else if (values.metode_bayar2 == "transfer") totalTransfer = values.bayar2;
-  else if (values.metode_bayar3 == "transfer") totalTransfer = values.bayar3;
-  else if (values.metode_bayar4 == "transfer") totalTransfer = values.bayar4;
-  else if (values.metode_bayar5 == "transfer") totalTransfer = values.bayar5;
-  else totalTransfer = 0;
-
-  if (values.metode_bayar1 == "giro") totalGiro = values.bayar1;
-  else if (values.metode_bayar2 == "giro") totalGiro = values.bayar2;
-  else if (values.metode_bayar3 == "giro") totalGiro = values.bayar3;
-  else if (values.metode_bayar4 == "giro") totalGiro = values.bayar4;
-  else if (values.metode_bayar5 == "giro") totalGiro = values.bayar5;
-  else totalGiro = 0;
+  // if (values.metode_bayar1 == "giro") totalGiro = values.bayar1;
+  // else if (values.metode_bayar2 == "giro") totalGiro = values.bayar2;
+  // else if (values.metode_bayar3 == "giro") totalGiro = values.bayar3;
+  // else if (values.metode_bayar4 == "giro") totalGiro = values.bayar4;
+  // else if (values.metode_bayar5 == "giro") totalGiro = values.bayar5;
+  // else totalGiro = 0;
 
   // if (values.metode_bayar1 == "cn") totalCN = values.bayar1;
   // else if (values.metode_bayar2 == "cn") totalCN = values.bayar2;
@@ -83,21 +84,7 @@ const Create = async (
   if (req.status === 200) {
     if (values.document == "Publish") {
       akun.forEach((element) => {
-          if (element.attributes.type == "Tunai" && element.attributes.setting == true) {
-            putAkun(element.id, element.attributes, form, totalTunai, page);
-          }
-          else if (element.attributes.type == "Transfer" && element.attributes.setting == true) {
-            putAkun(element.id, element.attributes, form, totalTransfer, page);
-          }
-          else if (element.attributes.type == "Giro" && element.attributes.setting == true) {
-            putAkun(element.id, element.attributes, form, totalGiro, page);
-          }
-          // else if (element.attributes.type == "CN" && element.attributes.setting == true) {
-          //   putAkun(element.id, element.attributes, form, totalCN, page);
-          // }
-          // else if (element.attributes.type == "OTH" && element.attributes.setting == true) {
-          //   putAkun(element.id, element.attributes, form, totalOTH, page);
-          // }
+        putAkun(values.akunCOA, element.attributes, form, total, page);
       });
     }
     
@@ -126,7 +113,7 @@ const createData = async (data, url) => {
 };
 
 const putAkun = async (id, value, form, total, page) => {
-  var saldo = parseInt(value.saldo);
+  var saldo = parseFloat(value.saldo);
     var url = null;
     if (page == "hutang") {
       //url = "/debt-accounts/";

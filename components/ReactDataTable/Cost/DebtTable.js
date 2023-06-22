@@ -60,6 +60,17 @@ export default function ReactDataTable({
         maximumFractionDigits: 2,
     });
 
+    const openModal = (id) => {
+        router.replace(
+          {
+            pathname: "/dashboard/keuangan/hutang",
+            query: { id: id },
+          },
+          undefined,
+          { shallow: true }
+        );
+    };
+
     const content = (row) => (
         <div>
             <div>
@@ -82,25 +93,27 @@ export default function ReactDataTable({
             </div>
             {row?.attributes?.document == "Draft" ? (
               <div>
-                <button
-                    onClick={() => onUpdate(row.id)}
-                    className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-                >
-                    <EditOutlined className="mr-2 mt-0.5 float float-left" />
-                    Edit
-                </button>
+                <div>
+                    <button
+                        onClick={() => onUpdate(row.id)}
+                        className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+                    >
+                        <EditOutlined className="mr-2 mt-0.5 float float-left" />
+                        Edit
+                    </button>
+                </div>
+                <AlertDialog
+                    onCancel={onCancel}
+                    onConfirm={onConfirm}
+                    title="Hapus Kategori"
+                    message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
+                    id={row}
+                />
               </div>
             ) : (
                 <> </>
             )}
 
-            <AlertDialog
-                onCancel={onCancel}
-                onConfirm={onConfirm}
-                title="Hapus Kategori"
-                message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
-                id={row}
-            />
         </div>
     );
 
@@ -191,6 +204,9 @@ export default function ReactDataTable({
             data={data.data}
             pagination
             noDataComponent={"Belum ada data hutang"}
+            pointerOnHover
+            highlightOnHover
+            onRowClicked={(row) => openModal(row.id)}
         />
     );
 }
