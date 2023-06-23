@@ -177,6 +177,148 @@ function Hutang({ props }) {
         });
     };
 
+    const onChangeStatus = async (status, row) => {
+        
+        if(status == "Publish"){
+            const dataHutang = await changeStatusHutang(status, row.id);
+
+            if(dataHutang.attributes.document == "Publish"){
+                dataHutang.attributes.debt_details.data.forEach((item) => {
+                  const sisa_hutang = item.attributes.sisa_hutang;
+        
+                  if (sisa_hutang == 0) editPenjualanDB("Lunas", item.attributes.purchasing.data.id);
+                  else editPenjualanDB("Dibayar Sebagian", item.attributes.purchasing.data.id);
+                });
+            } else console.log("Not update lpb, karena draft");
+
+            await putAkun(dataHutang.attributes.chart_of_account.data, dataHutang.attributes.total_pembayaran);
+
+        } else console.log("Not update all, karena draft");
+    };
+
+    const putAkun = async (akun, pembayaran) => {
+      try {
+        var saldo = parseFloat(akun.attributes.saldo - pembayaran);
+
+          const data = {
+            data: {
+              saldo: saldo,
+            },
+          };
+      
+          const JSONdata = JSON.stringify(data);
+          const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts/" + akun.id;
+          const options = {
+              method: "PUT",
+              headers: {
+                  "Content-Type": "application/json",
+                  Authorization: "Bearer " + cookies.token,
+              },
+              body: JSONdata,
+          };
+      
+          const req = await fetch(endpoint, options);
+          const res = await req.json();
+
+          if (req.status === 200) {
+              console.log("akun sukses diupdate");
+          } else {
+              console.log("akun error atau tidak ada");
+          }
+        } catch (error) {
+           console.log("errorr", error);
+        }
+    };
+
+    const editPenjualanDB = async (value, id) => {
+        try {
+          const data = {
+            data: {
+              status_pembayaran: value,
+            },
+          };
+    
+          const JSONdata = JSON.stringify(data);
+          const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings/" + id;
+          const options = {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + cookies.token,
+            },
+            body: JSONdata,
+          };
+    
+          const req = await fetch(endpoint, options);
+          const res = await req.json();
+          console.log("res", res);
+          if (req.status === 200) {
+            console.log("status di penjualan sukses diupdate");
+          } else {
+            console.log("status di penjualan error atau tidak ada");
+          }
+        } catch (error) {
+          console.log("errorr", error);
+        }
+    };
+
+    const changeStatusHutang = async (status, id) => {
+        try {
+          const newValues = {
+            data: {
+                document: status,
+            },
+          };
+    
+          const JSONdata = JSON.stringify(newValues);
+          const cookies = nookies.get(null, "token");
+          const endpoint = process.env.NEXT_PUBLIC_URL + "/debts/" + id + "?populate=deep";
+    
+          const options = {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + cookies.token,
+            },
+            body: JSONdata,
+          };
+    
+          const req = await fetch(endpoint, options);
+          const res = await req.json();
+    
+          if (req.status === 200) {
+            const response = await fetchData(cookies);
+    
+            if (res.data.attributes.document === "Draft") {
+              router.reload();
+            } else {
+              setHutang(response);
+              return res.data;
+            }
+    
+            openNotificationWithIcon(
+              "success",
+              "Status hutang berhasil dirubah",
+              "Status hutang berhasil dirubah. Silahkan cek hutang"
+            );
+          } else {
+            console.log("error", res);
+            openNotificationWithIcon(
+              "error",
+              "Status hutang gagal dirubah",
+              "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah"
+            );
+          }
+        } catch (error) {
+          console.log("error", error);
+          openNotificationWithIcon(
+            "error",
+            "Status hutang gagal dirubah",
+            "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah"
+          );
+        }
+      };
+
     const openNotificationWithIcon = (type, title, message) => {
         notification[type]({
             message: title,
@@ -507,7 +649,7 @@ function Hutang({ props }) {
                           onUpdate={handleEdit}
                           onDelete={handleDelete}
                           //onPageChange={handlePageChange}
-                          //onChangeStatus={onChangeStatus}
+                          onChangeStatus={onChangeStatus}
                           user={user}
                         />
 

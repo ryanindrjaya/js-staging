@@ -166,8 +166,34 @@ export default function ReactDataTable({
         },
         {
           name: "Tanggal",
-          width: "150px",
+          width: "120px",
           selector: (row) => formatMyDate(row.attributes?.tanggal_pembayaran ?? "-"),
+        },
+        {
+          name: "Status",
+          width: "150px",
+          selector: (row) => {
+          return (
+            <>
+            <Select
+                defaultValue={row.attributes.document}
+                disabled={row.attributes.document === "Publish"}
+                bordered={false}
+                onChange={(e) => onChangeStatus(e, row)}
+                style={{
+                width: "110px",
+                }}
+            >
+                <Option value="Draft" key="Draft" className="text-black">
+                <Tag color="blue">Draft</Tag>
+                </Option>
+                <Option value="Publish" key="Publish" className="text-black">
+                <Tag color="success">Publish</Tag>
+                </Option>
+            </Select>
+            </>
+          );
+         },
         },
         {
           name: "Pembayaran",

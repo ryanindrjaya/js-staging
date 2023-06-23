@@ -78,7 +78,7 @@ const fetchDataPurchasing = async (cookies) => {
 };
 
 const fetchRetur = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-lpbs?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -125,8 +125,8 @@ function Hutang({ props }) {
 
   const user = props.user;
   const lpb = props.LPB.data;
-  const returLPB = props.returLPB.data;
-  const akunHutang = props.akunHutang.data; console.log(akunHutang,"hutang data akun", biaya);
+  const returLPB = props?.returLPB?.data;
+  const akunHutang = props.akunHutang.data;
   const hutang = props.hutang;
   const [supplier, setSupplier] = useState();
   const [dataTabel, setDataTabel] = useState([]);
@@ -242,6 +242,7 @@ function Hutang({ props }) {
     await createData(sisaHutang, values, listId, form, router, "/debts/", "hutang", akunHutang, setCreateId);
   };
 
+  //changes status pembayaran in lpb
   const editPenjualan = async (value) => {
     //var url = null;
     //var data = null;
@@ -260,12 +261,14 @@ function Hutang({ props }) {
     const res = await req.json();
 
     // TODO :::: ENHANCEMENT CODE
-    res.data.attributes.debt_details.data.forEach((item) => {
-      const sisa_hutang = item.attributes.sisa_hutang;
-      console.log("detail", item);
-      if (sisa_hutang == 0) editPenjualanDB("Lunas", item.attributes.purchasing.data.id);
-      else editPenjualanDB("Dibayar Sebagian", item.attributes.purchasing.data.id);
-    });
+    if(res.data.attributes.document == "Publish"){
+      res.data.attributes.debt_details.data.forEach((item) => {
+        const sisa_hutang = item.attributes.sisa_hutang;
+        console.log("detail", item);
+        if (sisa_hutang == 0) editPenjualanDB("Lunas", item.attributes.purchasing.data.id);
+        else editPenjualanDB("Dibayar Sebagian", item.attributes.purchasing.data.id);
+      });
+    } else console.log("Not update lpb, karena draft");
   };
 
   const editPenjualanDB = async (value, id) => {
@@ -306,8 +309,7 @@ function Hutang({ props }) {
 
   const calculatePriceTotal = (row, index) => {
     const total = calculatePrice(row, biaya, sisaHutangTotal, index);
-    //
-    //console.log(sisaHutangTotal, row);
+
     sisaHutang[index] = total;
     return formatter.format(total);
   };
@@ -488,7 +490,7 @@ function Hutang({ props }) {
         row.subtotal = 0;
       
         if (element.attributes.no_purchasing == row.attributes.purchasing.data?.attributes.no_purchasing) {
-          row.attributes.retur_lpb_details.data.forEach((detail) => {
+          row.attributes.retur_details.data.forEach((detail) => {
             row.subtotal += parseInt(detail.attributes.sub_total);
           });
           
@@ -682,12 +684,6 @@ function Hutang({ props }) {
                       <Select.Option value="giro" key="giro">
                         Bank Giro
                       </Select.Option>
-                      {/* <Select.Option value="cn" key="cn">
-                        CN
-                      </Select.Option>
-                      <Select.Option value="oth" key="oth">
-                        OTH
-                      </Select.Option> */}
                     </Select>
                   </Form.Item>
                 </div>
@@ -727,12 +723,6 @@ function Hutang({ props }) {
                       <Select.Option value="giro" key="giro">
                         Bank Giro
                       </Select.Option>
-                      {/* <Select.Option value="cn" key="cn">
-                        CN
-                      </Select.Option>
-                      <Select.Option value="oth" key="oth">
-                        OTH
-                      </Select.Option> */}
                     </Select>
                   </Form.Item>
                 </div>
@@ -772,12 +762,6 @@ function Hutang({ props }) {
                       <Select.Option value="giro" key="giro">
                         Bank Giro
                       </Select.Option>
-                      {/* <Select.Option value="cn" key="cn">
-                        CN
-                      </Select.Option>
-                      <Select.Option value="oth" key="oth">
-                        OTH
-                      </Select.Option> */}
                     </Select>
                   </Form.Item>
                 </div>
@@ -793,13 +777,10 @@ function Hutang({ props }) {
                     />
                   </Form.Item>
                 </div>
-              </div>
-
-              {/* <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="bayar4">
+                  <Form.Item name="total_giro">
                     <InputNumber
-                      placeholder="Nominal Pembayaran"
+                      placeholder="Total Giro"
                       formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                       parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                       min={0}
@@ -811,79 +792,7 @@ function Hutang({ props }) {
                     />
                   </Form.Item>
                 </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="metode_bayar4" noStyle>
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      placeholder="Metode Pembayaran"
-                    >
-                      <Select.Option value="tunai" key="tunai">
-                        Tunai
-                      </Select.Option>
-                      <Select.Option value="transfer" key="transfer">
-                        Bank Transfer
-                      </Select.Option>
-                      <Select.Option value="giro" key="giro">
-                        Bank Giro
-                      </Select.Option>
-                      <Select.Option value="cn" key="cn">
-                        CN
-                      </Select.Option>
-                      <Select.Option value="oth" key="oth">
-                        OTH
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
-                </div>
               </div>
-
-              <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="bayar5">
-                    <InputNumber
-                      placeholder="Nominal Pembayaran"
-                      formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                      parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                      min={0}
-                      style={{
-                        height: "40px",
-                        width: "100%",
-                        marginRight: "10px",
-                      }}
-                    />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="metode_bayar5" noStyle>
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      placeholder="Metode Pembayaran"
-                    >
-                      <Select.Option value="tunai" key="tunai">
-                        Tunai
-                      </Select.Option>
-                      <Select.Option value="transfer" key="transfer">
-                        Bank Transfer
-                      </Select.Option>
-                      <Select.Option value="giro" key="giro">
-                        Bank Giro
-                      </Select.Option>
-                      <Select.Option value="cn" key="cn">
-                        CN
-                      </Select.Option>
-                      <Select.Option value="oth" key="oth">
-                        OTH
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
-                </div>
-              </div> */}
 
               <div className="w-full mt-8 flex justify-between">
                 <Form.Item name="catatan" className="w-full mx-2">

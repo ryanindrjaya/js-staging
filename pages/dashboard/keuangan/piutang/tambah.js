@@ -909,9 +909,6 @@ function Piutang({ props }) {
                       onChange={setStatusPembayaran}
                       allowClear
                     >
-                      <Select.Option value="Dibayar" key="Dibayar">
-                        Dibayar
-                      </Select.Option>
                       <Select.Option value="Dibayar Sebagian" key="Dibayar Sebagian">
                         Dibayar Sebagian
                       </Select.Option>

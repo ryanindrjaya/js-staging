@@ -18,7 +18,6 @@ export default function calculatePrice(
     // var oth = 0;
 
     if (row.sisaHutang) sisaHutang = row?.sisaHutang - row?.dibayar;
-    console.log("sisahutang", sisaHutang, row);
 
     if (biaya.info[index]?.tunai) {
       tunai = biaya.info[index].tunai;

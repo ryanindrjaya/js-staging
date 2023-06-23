@@ -18,7 +18,7 @@ const Update = async (
   akun,
   dataEdit
   //locations
-) => { console.log("data edit",dataEdit, values, tempProductListId);
+) => {
   // CLEANING DATA
   listId.forEach((element) => {
     tempProductListId.push({ id: element });
@@ -29,113 +29,47 @@ const Update = async (
   var totalGiro = 0;
   var totalCN = 0;
   var totalOTH = 0;
+  var total = 0;
 
+  values.chart_of_account = values.akunCOA;
   values.status = "Dibayar";
+  total = values.bayar1 + values.bayar2 + values.bayar3;
 
-  values.bayar1 = parseInt( values.bayar1 );
-  values.bayar2 = parseInt( values.bayar2 );
-  values.bayar3 = parseInt( values.bayar3 );
-  values.bayar4 = parseInt( values.bayar4 );
-  values.bayar5 = parseInt( values.bayar5 );
-
-  if (values.metode_bayar1 == "tunai") totalTunai = values.bayar1;
-  else if (values.metode_bayar2 == "tunai") totalTunai = values.bayar2;
-  else if (values.metode_bayar3 == "tunai") totalTunai = values.bayar3;
-  else if (values.metode_bayar4 == "tunai") totalTunai = values.bayar4;
-  else if (values.metode_bayar5 == "tunai") totalTunai = values.bayar5;
-  else totalTunai = 0;
-
-  if (values.metode_bayar1 == "transfer") totalTransfer = values.bayar1;
-  else if (values.metode_bayar2 == "transfer") totalTransfer = values.bayar2;
-  else if (values.metode_bayar3 == "transfer") totalTransfer = values.bayar3;
-  else if (values.metode_bayar4 == "transfer") totalTransfer = values.bayar4;
-  else if (values.metode_bayar5 == "transfer") totalTransfer = values.bayar5;
-  else totalTransfer = 0;
-
-  if (values.metode_bayar1 == "giro") totalGiro = values.bayar1;
-  else if (values.metode_bayar2 == "giro") totalGiro = values.bayar2;
-  else if (values.metode_bayar3 == "giro") totalGiro = values.bayar3;
-  else if (values.metode_bayar4 == "giro") totalGiro = values.bayar4;
-  else if (values.metode_bayar5 == "giro") totalGiro = values.bayar5;
-  else totalGiro = 0;
-
-  if (values.metode_bayar1 == "cn") totalCN = values.bayar1;
-  else if (values.metode_bayar2 == "cn") totalCN = values.bayar2;
-  else if (values.metode_bayar3 == "cn") totalCN = values.bayar3;
-  else if (values.metode_bayar4 == "cn") totalCN = values.bayar4;
-  else if (values.metode_bayar5 == "cn") totalCN = values.bayar5;
-  else totalCN = 0;
-
-  if (values.metode_bayar1 == "oth") totalOTH = values.bayar1;
-  else if (values.metode_bayar2 == "oth") totalOTH = values.bayar2;
-  else if (values.metode_bayar3 == "oth") totalOTH = values.bayar3;
-  else if (values.metode_bayar4 == "oth") totalOTH = values.bayar4;
-  else if (values.metode_bayar5 == "oth") totalOTH = values.bayar5;
-  else totalOTH = 0;
-
-  //var data = {
-  //  data: values,
-  //};
-
-  //const req = await createData(data, url);
-  //const res = await req.json();
-
-  if (values.document == "Publish") {
-    akun.forEach((element) => {
-        if (element.attributes.type == "Tunai" && element.attributes.setting == true) {
-        putAkun(element.id, element.attributes, form, totalTunai, page);
-        }
-        else if (element.attributes.type == "Transfer" && element.attributes.setting == true) {
-        putAkun(element.id, element.attributes, form, totalTransfer, page);
-        }
-        else if (element.attributes.type == "Giro" && element.attributes.setting == true) {
-        putAkun(element.id, element.attributes, form, totalGiro, page);
-        }
-        else if (element.attributes.type == "CN" && element.attributes.setting == true) {
-        putAkun(element.id, element.attributes, form, totalCN, page);
-        }
-        else if (element.attributes.type == "OTH" && element.attributes.setting == true) {
-        putAkun(element.id, element.attributes, form, totalOTH, page);
-        }
-    });
+  const putRelation = await putRelationDetail(dataEdit?.id, values, form, router, url, page);
+  console.log(putRelation, "put relation");
+  if (putRelation.status === 200) {
+    if (values.document == "Publish") {
+      akun.forEach((element) => {
+        putAkun(values.akunCOA, element.attributes, form, total, page);
+      });
+    }
+    
+  } else {
+    openNotificationWithIcon("error");
   }
-
-  await putRelationDetail(dataEdit?.id, values, form, router, url, page);
 
 };
 
-//const createData = async (data, url) => {
-//  const endpoint = process.env.NEXT_PUBLIC_URL + url;
-//  const JSONdata = JSON.stringify(data);
-
-//  const options = {
-//    method: "POST",
-//    headers: {
-//      "Content-Type": "application/json",
-//      Authorization: "Bearer " + cookies.token,
-//    },
-//    body: JSONdata,
-//  };
-
-//  const req = await fetch(endpoint, options);
-
-//  return req;
-//};
-
 const putAkun = async (id, value, form, total, page) => {
-    var saldo = parseInt(value.saldo);
-    saldo = saldo - total;
+  var saldo = parseFloat(value.saldo);
+    var url = null;
+    if (page == "hutang") {
+      //url = "/debt-accounts/";
+      url = "/chart-of-accounts/";
+      saldo = saldo - total;
+    }
+    if (page == "piutang") {
+      //url = "/credit-accounts/";
+      url = "/chart-of-accounts/";
+      saldo = saldo + total;
+    } 
 
     value.saldo = saldo;
-    value.attributes.supplier = value.attributes.supplier.data.id;
 
     const data = {
         data: value,
     };
 
-    var url = null;
-    if (page == "hutang") url = "/debt-accounts/";
-    if (page == "piutang") url = "/credit-accounts/";
 
     // clean object
     for (var key in data) {
@@ -159,11 +93,8 @@ const putAkun = async (id, value, form, total, page) => {
     const res = await req.json();
 
     if (req.status === 200) {
-        //form.resetFields();
-        //openNotificationWithIcon("success");
         console.log("akun sukses diupdate");
     } else {
-        //openNotificationWithIcon("error");
         console.log("akun error atau tidak ada");
     }
 };
@@ -207,6 +138,8 @@ const putRelationDetail = async (id, value, form, router, url, page) => {
   } else {
     openNotificationWithIcon("error");
   }
+
+  return req;
 };
 
 const getUserMe = async () => {

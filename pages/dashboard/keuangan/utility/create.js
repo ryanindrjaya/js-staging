@@ -31,48 +31,9 @@ const Create = async (
   var totalOTH = 0;
   var total = 0;
 
+  values.chart_of_account = values.akunCOA;
   values.status = "Dibayar";
   total = values.bayar1 + values.bayar2 + values.bayar3;
-  // values.bayar1 = parseInt( values.bayar1 );
-  // values.bayar2 = parseInt( values.bayar2 );
-  // values.bayar3 = parseInt( values.bayar3 );
-  // values.bayar4 = parseInt( values.bayar4 );
-  // values.bayar5 = parseInt( values.bayar5 );
-
-  // if (values.metode_bayar1 == "tunai") totalTunai = values.bayar1;
-  // else if (values.metode_bayar2 == "tunai") totalTunai = values.bayar2;
-  // else if (values.metode_bayar3 == "tunai") totalTunai = values.bayar3;
-  // else if (values.metode_bayar4 == "tunai") totalTunai = values.bayar4;
-  // else if (values.metode_bayar5 == "tunai") totalTunai = values.bayar5;
-  // else totalTunai = 0;
-
-  // if (values.metode_bayar1 == "transfer") totalTransfer = values.bayar1;
-  // else if (values.metode_bayar2 == "transfer") totalTransfer = values.bayar2;
-  // else if (values.metode_bayar3 == "transfer") totalTransfer = values.bayar3;
-  // else if (values.metode_bayar4 == "transfer") totalTransfer = values.bayar4;
-  // else if (values.metode_bayar5 == "transfer") totalTransfer = values.bayar5;
-  // else totalTransfer = 0;
-
-  // if (values.metode_bayar1 == "giro") totalGiro = values.bayar1;
-  // else if (values.metode_bayar2 == "giro") totalGiro = values.bayar2;
-  // else if (values.metode_bayar3 == "giro") totalGiro = values.bayar3;
-  // else if (values.metode_bayar4 == "giro") totalGiro = values.bayar4;
-  // else if (values.metode_bayar5 == "giro") totalGiro = values.bayar5;
-  // else totalGiro = 0;
-
-  // if (values.metode_bayar1 == "cn") totalCN = values.bayar1;
-  // else if (values.metode_bayar2 == "cn") totalCN = values.bayar2;
-  // else if (values.metode_bayar3 == "cn") totalCN = values.bayar3;
-  // else if (values.metode_bayar4 == "cn") totalCN = values.bayar4;
-  // else if (values.metode_bayar5 == "cn") totalCN = values.bayar5;
-  // else totalCN = 0;
-
-  // if (values.metode_bayar1 == "oth") totalOTH = values.bayar1;
-  // else if (values.metode_bayar2 == "oth") totalOTH = values.bayar2;
-  // else if (values.metode_bayar3 == "oth") totalOTH = values.bayar3;
-  // else if (values.metode_bayar4 == "oth") totalOTH = values.bayar4;
-  // else if (values.metode_bayar5 == "oth") totalOTH = values.bayar5;
-  // else totalOTH = 0;
 
   var data = {
     data: values,

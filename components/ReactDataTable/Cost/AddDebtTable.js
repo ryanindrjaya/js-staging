@@ -38,7 +38,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     element.sisaHutang = element.hutangJatuhTempo;
     element.sisaHutangFix = element.hutangJatuhTempo; 
     sisaHutang[index] = element.sisaHutang;
-
+    
     index++;
   });
 
