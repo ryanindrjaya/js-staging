@@ -738,7 +738,7 @@ function Piutang({ props }) {
       });
     });
 
-    dataTabel.forEach((element) => {
+    dataTabel.forEach((element, index) => {
       element.subtotal = 0;
       element.sisaHutang = 0;
       element.dibayar = 0;
@@ -822,9 +822,27 @@ function Piutang({ props }) {
           element.sisaHutang = parseInt(element.attributes.total) - parseInt(element.subtotal);
         }
       });
+
+      dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: element, index: index });
+      dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
+      dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: 0, listData: element, index: index });
+      dispatch({ type: "CHANGE_DATA_GIRO", giro: 0, listData: element, index: index });
+      dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: element.sisaHutang, listData: element, index: index });
     });
 
+    //console.log("datatable", dataTabel.length);
+    // if (dataTable.length > 0) {
+    //   dataTable.forEach((item, index) => {
+    //     dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: item, index: index });
+    //   });
+    // }
+
   }, []);
+
+  // useEffect(() => {
+  //   //if(dataTabel)
+
+  // }, [dataTabel]);
 
   const validateError = () => {
     var listError = form.getFieldsError();
@@ -889,6 +907,7 @@ function Piutang({ props }) {
                       }}
                       placeholder="Status Pembayaran"
                       onChange={setStatusPembayaran}
+                      allowClear
                     >
                       <Select.Option value="Dibayar" key="Dibayar">
                         Dibayar
@@ -925,6 +944,7 @@ function Piutang({ props }) {
                       }}
                       placeholder="Tipe Penjualan"
                       onChange={setTipePenjualan}
+                      allowClear
                     >
                       <Select.Option value="panel" key="panel">
                         Panel
@@ -950,6 +970,7 @@ function Piutang({ props }) {
                       }}
                       placeholder="Sales"
                       onChange={setSalesSelect}
+                      allowClear
                     >
                       {dataUserSales.map((element) => {
                         return (
