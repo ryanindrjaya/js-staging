@@ -8,13 +8,12 @@ import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Row, Form, Input, InputNumber, Select, Button, Spin, notification, DatePicker } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
-import AddSellSalesTable from "@iso/components/ReactDataTable/Selling/AddSellSalesTable";
 import AddDebtTable from "@iso/components/ReactDataTable/Cost/AddDebtTable";
 import createData from "../utility/create";
 import createDetails from "../utility/createDetail";
 import calculatePrice from "../utility/calculatePrice";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
+import Coa from "@iso/components/Form/AddCost/SearchCOA";
 import nookies from "nookies";
 import LoadingAnimations from "@iso/components/Animations/Loading";
 import DataTable from "react-data-table-component";
@@ -38,6 +37,9 @@ Hutang.getInitialProps = async (context) => {
   const reqAkunHutang = await fetchAkunHutang(cookies);
   const akunHutang = await reqAkunHutang.json();
 
+  const reqCOA = await fetchAkunCOA(cookies);
+  const akunCOA = await reqCOA.json();
+
   return {
     props: {
       user,
@@ -45,6 +47,7 @@ Hutang.getInitialProps = async (context) => {
       returLPB,
       hutang,
       akunHutang,
+      akunCOA
     },
   };
 };
@@ -106,6 +109,20 @@ const fetchHutang = async (cookies) => {
 };
 
 const fetchAkunHutang = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchAkunCOA = async (cookies) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?populate=deep&filters[jenis_akun][$eq]=true";
   const options = {
     method: "GET",
@@ -127,6 +144,7 @@ function Hutang({ props }) {
   const lpb = props.LPB.data;
   const returLPB = props?.returLPB?.data;
   const akunHutang = props.akunHutang.data;
+  const dataAkunCOA = props.akunCOA.data;
   const hutang = props.hutang;
   const [supplier, setSupplier] = useState();
   const [dataTabel, setDataTabel] = useState([]);
@@ -177,6 +195,9 @@ function Hutang({ props }) {
   var noHutang = String(props.hutang?.meta?.pagination.total + 1).padStart(3, "0");
   const [categorySale, setCategorySale] = useState(`PH/ET/${user.id}/${noHutang}/${mm}/${yyyy}`);
 
+  //Akun COA
+  const [akunCOA, setAkunCOA] = useState();
+
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
@@ -190,6 +211,15 @@ function Hutang({ props }) {
     console.log(values,"value");
     setLoading(true);
     setInfo("sukses");
+
+    // if(values.akun != undefined);
+    // else {
+    //   notification["error"]({
+    //     message: "Gagal menambahkan data",
+    //     description: "Akun yg akan digunakan belum dipilih !",
+    //   });
+    //   setInfo("gagal");
+    // }
 
     for (const key in biaya.info) {
       totalTunai += biaya.info[key].tunai;
@@ -221,6 +251,62 @@ function Hutang({ props }) {
         setInfo("gagal");
       }
     });
+
+    // cek untuk akun hutang (cek coa)
+    console.log("total tunai, tranfer, giro", totalTunai, totalTransfer, totalGiro);
+    if(document == "Publish"){
+      akunHutang.forEach((item) => {
+        if(item.attributes.setting == true){
+          if(totalTunai != 0 && item.attributes.type == "Tunai"){
+            if(item.attributes.chart_of_account.data.attributes.saldo < totalTunai){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, saldo untuk akun tunai kurang untuk melakukan pembayaran.",
+              });
+              setInfo("gagal");
+            }
+          } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
+            if(item.attributes.chart_of_account.data.attributes.saldo < totalTransfer){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, saldo untuk akun transfer kurang untuk melakukan pembayaran.",
+              });
+              setInfo("gagal");
+            }
+          } else if(totalGiro != 0 && item.attributes.type == "Giro"){
+            if(item.attributes.chart_of_account.data.attributes.saldo < totalGiro){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, saldo untuk akun giro kurang untuk melakukan pembayaran.",
+              });
+              setInfo("gagal");
+            }
+          }
+        } else {
+          if(totalTunai != 0 && item.attributes.type == "Tunai"){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
+              });
+              setInfo("gagal");
+          } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
+              });
+              setInfo("gagal");
+          } else if(totalGiro != 0 && item.attributes.type == "Giro"){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
+              });
+              setInfo("gagal");
+          }
+        }
+      });
+
+    }
+
     setDataValues(values);
     setLoading(false);
   };
@@ -239,7 +325,7 @@ function Hutang({ props }) {
     values.document = document;
     values.tanggal_pembayaran = tanggal;
     values.status_pembayaran = "Dibayar";
-    await createData(sisaHutang, values, listId, form, router, "/debts/", "hutang", akunHutang, setCreateId);
+    await createData(sisaHutang, values, listId, form, router, "/debts/", "hutang", dataAkunCOA, setCreateId, akunHutang);
   };
 
   //changes status pembayaran in lpb
@@ -376,8 +462,6 @@ function Hutang({ props }) {
         totalTunai += biaya.info[key].tunai;
         totalTransfer += biaya.info[key].transfer;
         totalGiro += biaya.info[key].giro;
-        totalCn += biaya.info[key].cn;
-        totalOth += biaya.info[key].oth;
 
         if (biaya.info[key].pilihData == "pilih") {
           form.setFieldsValue({
@@ -387,10 +471,6 @@ function Hutang({ props }) {
             bayar2: totalTransfer,
             metode_bayar3: "giro",
             bayar3: totalGiro,
-            metode_bayar4: "cn",
-            bayar4: totalCn,
-            metode_bayar5: "oth",
-            bayar5: totalOth,
           });
           lastKey++;
         }
@@ -571,24 +651,6 @@ function Hutang({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="tanggal">
                     <RangePicker size="large" onChange={(values) => setRangePicker(values)} />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="akunCOA">
-                      <Select size="large" placeholder="Akun yg akan digunakan"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Akun yg akan digunakan belum dipilih !",
-                          },
-                        ]}
-                      >
-                        {akunHutang.map((element) => (
-                          <Select.Option value={element.id} key={element.id}>
-                          {element.attributes.nama}
-                          </Select.Option>
-                        ))}
-                      </Select>
                   </Form.Item>
                 </div>
               </div>

@@ -33,10 +33,10 @@ export default function ReactDataTable({
         });
     };
 
-    const lihat = (row) => {
-        openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
-        //router.push("order_pembelian/print/" + row.id);
-    };
+    // const lihat = (row) => {
+    //     openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
+    //     //router.push("order_pembelian/print/" + row.id);
+    // };
 
     const print = (row) => {
         router.push("hutang/print/" + row.id);
@@ -75,7 +75,7 @@ export default function ReactDataTable({
         <div>
             <div>
                 <button
-                    onClick={() => lihat(row)}
+                    onClick={() => openModal(row.id)}
                     className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
                 >
                     <UnorderedListOutlined className="mr-2 mt-0.5 float float-left" />

@@ -4,7 +4,7 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import router, { useRouter } from "next/router";
-import { Input, notification, Select, DatePicker } from "antd";
+import { Input, notification, Select, DatePicker, Modal, Button, Descriptions } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import CreditTable from "@iso/components/ReactDataTable/Cost/CreditTable";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
@@ -12,6 +12,7 @@ import Customer from "@iso/components/Form/AddCost/CustomerForm";
 import Area from "@iso/components/Form/AddCost/AreaForm";
 import Wilayah from "@iso/components/Form/AddCost/WilayahForm";
 import nookies from "nookies";
+import { PrinterOutlined } from "@ant-design/icons";
 
 Piutang.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -105,6 +106,11 @@ function Piutang({ props }) {
   const [piutang, setPiutang] = useState(data);
   const [supplier, setSupplier] = useState();
   const [searchParameters, setSearchParameters] = useState({});
+  const cookies = nookies.get(null, "token");
+
+  // Selected id
+  const [selected, setSelected] = useState();
+  const [openModal, setOpenModal] = useState(false);
 
   // Range Picker
   const { RangePicker } = DatePicker;
@@ -255,6 +261,57 @@ function Piutang({ props }) {
     searchQuery();
   }, [searchParameters]);
 
+  // search query
+  useEffect(() => {
+    async function getById(id) {
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/credits/${id}?populate=*`;
+    const options = {
+        method: "GET",
+        headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+        },
+    };
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    setSelected(res?.data);
+    }
+
+    if (router?.query?.id) {
+    const id = router.query.id;
+    getById(id);
+    }
+}, [router.query]);
+
+useEffect(() => {
+    if (selected) {
+    setOpenModal(true);
+    }
+}, [selected]);
+
+function formatMyDate(value, locale = "id-ID") {
+  return new Date(value).toLocaleDateString(locale);
+}
+
+var formatter = new Intl.NumberFormat("id-ID", {
+  style: "currency",
+  currency: "IDR",
+  maximumFractionDigits: 2,
+  minimumFractionDigits: 2,
+});
+
+const print = () => {
+  router.replace(
+  {
+      pathname: "/dashboard/keuangan/piutang",
+  },
+  undefined,
+  { shallow: true }
+  );
+  router.push("/dashboard/keuangan/piutang/print/" + selected.id);
+};
+
   return (
     <>
       <Head>
@@ -264,6 +321,92 @@ function Piutang({ props }) {
         <LayoutWrapper style={{}}>
           <TitlePage titleText={"Daftar Penagihan Piutang Penjualan"} />
           <LayoutContent>
+          <Modal
+            open={openModal}
+            onClose={() => {
+                router.replace(
+                {
+                    pathname: "/dashboard/keuangan/piutang",
+                },
+                undefined,
+                { shallow: true }
+                );
+                setOpenModal(false);
+                setSelected();
+            }}
+            onCancel={() => {
+                router.replace(
+                {
+                    pathname: "/dashboard/keuangan/piutang",
+                },
+                undefined,
+                { shallow: true }
+                );
+                setOpenModal(false);
+                setSelected();
+            }}
+            width={1000}
+            okButtonProps={{ style: { display: "none" } }}
+            cancelText="Close"
+            >
+            {selected && (
+                <>
+                <Descriptions
+                    extra={
+                    <Button
+                        onClick={print}
+                        className="bg-cyan-700 hover:bg-cyan-800 mr-7 border-none"
+                        type="primary"
+                    >
+                        <PrinterOutlined className="mr-2 mt-0.5 float float-left" /> Cetak
+                    </Button>
+                    }
+                    size="middle"
+                    title="INFORMASI PIUTANG"
+                    bordered
+                >
+                    <Descriptions.Item label="Tanggal Pembayaran" span={2}>
+                    {formatMyDate(selected?.attributes?.tanggal ?? selected?.attributes?.updatedAt)}
+                    {console.log(selected,"selected")}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="No Piutang" span={2}>
+                    {selected?.attributes?.no_piutang}
+                    </Descriptions.Item>
+                </Descriptions>
+
+                <Descriptions className="my-3" size="middle" title="PEMBAYARAN" bordered>
+                    <Descriptions.Item label="Total Pembayaran" className="font-bold" span={2}>
+                    {formatter.format(selected?.attributes?.total_pembayaran)}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Sisa Piutang" className="font-bold" span={2}>
+                    {formatter.format(selected?.attributes?.sisa_piutang_jatuh_tempo)}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Tunai" span={4}>
+                    {formatter.format(
+                      selected?.attributes?.credit_details?.data.reduce((accumulator, item) => {
+                        return accumulator + item.attributes.tunai;
+                      }, 0)
+                    )}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Transfer" span={4}>
+                    {formatter.format(
+                      selected?.attributes?.credit_details?.data.reduce((accumulator, item) => {
+                        return accumulator + item.attributes.transfer;
+                      }, 0)
+                    )}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Giro" span={4}>
+                    {formatter.format(
+                      selected?.attributes?.credit_details?.data.reduce((accumulator, item) => {
+                        return accumulator + item.attributes.giro;
+                      }, 0)
+                    )}
+                    </Descriptions.Item>
+                </Descriptions>
+                </>
+            )}
+            </Modal>
+
             <div className="w-full flex justify-start">
               <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                 <Customer
@@ -355,7 +498,7 @@ function Piutang({ props }) {
                   }
                 />
               </div>
-              {/* <div className="w-full md:w-1/4 mt-0 mb-2">
+              <div className="w-full md:w-1/4 mt-0 mb-2">
                 <div className="float-right">
                   <button
                     onClick={handleSetting}
@@ -369,7 +512,7 @@ function Piutang({ props }) {
                     </div>
                   </button>
                 </div>
-              </div> */}
+              </div>
             </div>
 
             <div className="w-full flex justify-start -mt-6">

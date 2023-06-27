@@ -25,6 +25,9 @@ Hutang.getInitialProps = async (context) => {
     const reqHutang = await fetchHutang(cookies);
     const hutang = await reqHutang.json();
 
+    const reqAkunHutang = await fetchAkunHutang(cookies);
+    const akunHutang = await reqAkunHutang.json();
+
     //if (req.status !== 200) {
     //    context.res.writeHead(302, {
     //        Location: "/signin?session=false",
@@ -40,6 +43,7 @@ Hutang.getInitialProps = async (context) => {
         user,
         locations,
         hutang,
+        akunHutang
       },
     };
 };
@@ -86,10 +90,25 @@ const fetchHutang = async (cookies) => {
     return req;
 };
 
+const fetchAkunHutang = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=deep";
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+  
+    const req = await fetch(endpoint, options);
+    return req;
+};
+
 function Hutang({ props }) {
     const user = props.user;
     const locations = props.locations.data;
     const data = props.hutang;
+    const akunHutang = props.akunHutang;
     const router = useRouter();
     const [hutang, setHutang] = useState(data);
     const [supplier, setSupplier] = useState();
@@ -191,12 +210,69 @@ function Hutang({ props }) {
                 });
             } else console.log("Not update lpb, karena draft");
 
-            await putAkun(dataHutang.attributes.chart_of_account.data, dataHutang.attributes.total_pembayaran);
+            // untuk memotong ke akun coa
+            console.log("data", row, akunHutang);
+            akunHutang.data.forEach((item) => {
+                if(item.attributes.setting == true){
+                    if(row.attributes.bayar1 != 0 && item.attributes.type == "Tunai"){
+                      if(item.attributes.chart_of_account.data.attributes.saldo < row.attributes.bayar1){
+                        notification["error"]({
+                          message: "Gagal menambahkan data",
+                          description: "Data gagal ditambahkan, saldo untuk akun tunai kurang untuk melakukan pembayaran.",
+                        });
+          
+                      } else {
+                        putAkun(item.attributes.chart_of_account.data, row.attributes.bayar1);
+                      }
+                    } else if(row.attributes.bayar2 != 0 && item.attributes.type == "Transfer"){
+                      if(item.attributes.chart_of_account.data.attributes.saldo < row.attributes.bayar2){
+                        notification["error"]({
+                          message: "Gagal menambahkan data",
+                          description: "Data gagal ditambahkan, saldo untuk akun transfer kurang untuk melakukan pembayaran.",
+                        });
+          
+                      } else {
+                        putAkun(item.attributes.chart_of_account.data, row.attributes.bayar2);
+                      }
+                    } else if(row.attributes.bayar3 != 0 && item.attributes.type == "Giro"){
+                      if(item.attributes.chart_of_account.data.attributes.saldo < row.attributes.bayar3){
+                        notification["error"]({
+                          message: "Gagal menambahkan data",
+                          description: "Data gagal ditambahkan, saldo untuk akun giro kurang untuk melakukan pembayaran.",
+                        });
+                        
+                      } else {
+                        putAkun(item.attributes.chart_of_account.data, row.attributes.bayar3);
+                      }
+                    }
+                  } else {
+                    if(item.attributes.type == "Tunai"){
+                        notification["error"]({
+                          message: "Gagal menambahkan data",
+                          description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
+                        });
+                        
+                    } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
+                        notification["error"]({
+                          message: "Gagal menambahkan data",
+                          description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
+                        });
+                        
+                    } else if(totalGiro != 0 && item.attributes.type == "Giro"){
+                        notification["error"]({
+                          message: "Gagal menambahkan data",
+                          description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
+                        });
+                        
+                    }
+                  }
+            });
+            //await putAkun(dataHutang.attributes.chart_of_account.data, dataHutang.attributes.total_pembayaran);
 
         } else console.log("Not update all, karena draft");
     };
 
-    const putAkun = async (akun, pembayaran) => {
+    const putAkun = async (akun, pembayaran) => { console.log("put akun", akun, pembayaran);
       try {
         var saldo = parseFloat(akun.attributes.saldo - pembayaran);
 
@@ -584,11 +660,11 @@ function Hutang({ props }) {
                         <div className="w-full flex justify-between mt-0 mb-2">
                             <span className="text-black text-md font-bold ml-1 mt-5">Semua Penjualan</span>
                             <div className="float-right">
-                                {/* <button onClick={handleSetting} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm mb-5 mx-2">
+                                <button onClick={handleSetting} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm mb-5 mx-2">
                                     <div className="text-white text-center text-sm font-bold">
                                         <a className="text-white no-underline text-xs sm:text-xs">Setting</a>
                                     </div>
-                                </button> */}
+                                </button>
                                 <button onClick={handleAdd} type="button" className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm mb-5 mx-2">
                                     <div className="text-white text-center text-sm font-bold">
                                         <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>

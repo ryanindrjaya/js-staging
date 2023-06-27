@@ -57,11 +57,22 @@ export default function ReactDataTable({
         maximumFractionDigits: 2,
     });
 
+    const openModal = (id) => {
+        router.replace(
+          {
+            pathname: "/dashboard/keuangan/piutang",
+            query: { id: id },
+          },
+          undefined,
+          { shallow: true }
+        );
+    };
+
     const content = (row) => (
         <div>
             <div>
                 <button
-                    onClick={() => lihat(row)}
+                    onClick={() => openModal(row.id)}
                     className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
                 >
                     <UnorderedListOutlined className="mr-2 mt-0.5 float float-left" />
@@ -195,6 +206,9 @@ export default function ReactDataTable({
             data={data.data}
             pagination
             noDataComponent={"Belum ada data piutang"}
+            pointerOnHover
+            highlightOnHover
+            onRowClicked={(row) => openModal(row.id)}
         />
     );
 }

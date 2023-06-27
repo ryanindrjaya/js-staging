@@ -19,10 +19,11 @@ export default function SearchBar({
   getProductAtLocation,
   location,
   disabled = false,
+  page
 }) {
   const dispatch = useDispatch();
 
-  const [akun, setAkun] = useState();
+  const [akun, setAkun] = useState(selectedAkun);
   const [data, setData] = useState([]);
   const cookies = nookies.get(null, "token");
   const productList = [];
@@ -41,17 +42,17 @@ export default function SearchBar({
     const req = await fetch(endpoint, options);
     const res = await req.json();
 
-    console.log("select COA ==>", res.data);
-
-    if (res) {
-      dispatch({ type: "ADD_AKUN_COA", akun: res.data });
-      form.setFieldsValue({ akun: undefined });
+    //console.log("select COA ==>", res.data, req.status);
+    if(req.status == 200) onChange(res.data);
+    // if (res) {
+    //   dispatch({ type: "ADD_AKUN_COA", akun: res.data });
+    //   form.setFieldsValue({ akun: undefined });
 
       //console.log("======= exce =======", getProductAtLocation);
       //if (getProductAtLocation) {
       //  getProductAtLocation(location);
       //}
-    }
+    // }
   };
 
   //const getUserInfo = async () => {
@@ -75,7 +76,7 @@ export default function SearchBar({
 
   const handleSearch = (newValue) => {
     if (newValue) {
-      fetchCOA(newValue, setData);
+      fetchCOA(newValue, setData, page);
     } else {
       setData([]);
     }
@@ -85,15 +86,21 @@ export default function SearchBar({
     <Select.Option key={d.value}>{d.label}</Select.Option>
   ));
 
-  const fetchCOA = async (query, callback) => {
+  const fetchCOA = async (query, callback, page) => {
     if (!query) {
       callback([]);
     } else {
       try {
+        var url = `/chart-of-accounts?populate=*&filters[nama][$contains]=${query}`;
+        if(page == "hutang"){
+          url += "&filters[jenis_akun][$eq]=true";
+        } else if (page == "piutang"){
+          url += "&filters[jenis_akun][$eq]=false";
+        } else ;
 
         const endpoint =
           process.env.NEXT_PUBLIC_URL +
-          `/chart-of-accounts?populate=*&filters[nama][$contains]=${query}`;
+          url;
         const options = {
           method: "GET",
           headers: {

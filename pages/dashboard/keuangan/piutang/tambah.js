@@ -262,7 +262,7 @@ function Piutang({ props }) {
   const piutang = props.piutang.data;
   //const customerData = props.customer.data[0];
   const [supplier, setSupplier] = useState();
-  const [dataTabel, setDataTabel] = useState([]);
+  const [dataTabel, setDataTabel] = useState([]); console.log("datatabel", dataTabel);
   const [dataRetur, setDataRetur] = useState([]);
   const [sisaHutang, setSisaHutang] = useState([]);
   const [sisaHutangTotal, setSisaHutangTotal] = useState({});
@@ -332,7 +332,7 @@ function Piutang({ props }) {
   const onFinish = (values) => {
     // save no giro to oth
     var biayaInfo = biaya.info;
-
+    console.log(values,"value");
     setLoading(true);
     setInfo("sukses");
 
@@ -524,9 +524,10 @@ function Piutang({ props }) {
 
   const calculatePriceTotal = (row, index) => {
     const total = calculatePrice(row, biaya, sisaHutangTotal, index);
-    sisaHutang[index] = total;
-    row.sisaPiutang = total;
-    return formatter.format(total);
+    sisaHutang[index] = total - row?.dibayar;
+    row.sisaPiutang = total - row?.dibayar;
+    var priceTotal = total - row?.dibayar;
+    return formatter.format(priceTotal);
   };
 
   const totalPiutangJatuhTempo = () => {
@@ -538,7 +539,7 @@ function Piutang({ props }) {
         if (biaya.info[row].pilihData == "pilih") {
           //total = total + biaya.list[row].sisaPiutang;
           //total = total + biaya.info[row].totalHutangJatuhTempo;
-          total = total + (biaya.list[row].attributes.total - biaya.list[row].subtotal);
+          total = total + (biaya.list[row].attributes.total - biaya.list[row].subtotal) - biaya.list[row].dibayar ;
         }
         if(biaya.info[row].totalHutangJatuhTempo == undefined) total = 0;
       };
@@ -640,8 +641,13 @@ function Piutang({ props }) {
       }
 
       if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian") {
-        if (dataTabel.length > 0) dataTabel[dataTabel.length] = row;
-        else dataTabel[0] = row;
+        if (dataTabel.length > 0) {
+          //row.sisaPiutang = row.attributes.total;
+          dataTabel[dataTabel.length] = row;
+        }
+        else{
+          dataTabel[0] = row;
+        }
         //biaya.list.push(row);
         dispatch({ type: "ADD_LIST", list: row });
       }
@@ -732,7 +738,7 @@ function Piutang({ props }) {
     // piutang
     piutang.forEach((item) => {
       item.attributes.credit_details.data.forEach((detail) => {
-        total = detail.attributes.cn + detail.attributes.giro + detail.attributes.oth + detail.attributes.transfer + detail.attributes.tunai;
+        total = detail.attributes.giro + detail.attributes.transfer + detail.attributes.tunai;
         idDetail = detail.attributes.non_panel_sale?.data?.id ?? detail.attributes.panel_sale?.data?.id ?? detail.attributes.sales_sale?.data?.id;
         pembayaran.push({ id: idDetail, total: total});
       });
@@ -744,7 +750,8 @@ function Piutang({ props }) {
       element.dibayar = 0;
 
       pembayaran.forEach((item) => {
-        if(item.id == element.id) element.attributes.total -= item.total;
+        //if(item.id == element.id) element.attributes.total -= item.total;
+        if(item.id == element.id) element.dibayar += item.total;
       });
 
       returSales.forEach((row) => {

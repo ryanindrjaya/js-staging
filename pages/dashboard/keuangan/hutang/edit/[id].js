@@ -26,6 +26,7 @@ import updateData from "../../utility/update";
 import updateDetails from "../../utility/update";
 import calculatePrice from "../../utility/calculatePrice";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
+import Coa from "@iso/components/Form/AddCost/SearchCOA";
 import nookies from "nookies";
 import LoadingAnimations from "@iso/components/Animations/Loading";
 import DataTable from "react-data-table-component";
@@ -50,6 +51,9 @@ Hutang.getInitialProps = async (context) => {
   const reqAkunHutang = await fetchAkunHutang(cookies);
   const akunHutang = await reqAkunHutang.json();
 
+  const reqCOA = await fetchAkunCOA(cookies);
+  const akunCOA = await reqCOA.json();
+
   return {
     props: {
       user,
@@ -57,6 +61,7 @@ Hutang.getInitialProps = async (context) => {
       returLPB,
       hutang,
       akunHutang,
+      akunCOA,
       id,
     },
   };
@@ -119,6 +124,20 @@ const fetchHutang = async (cookies) => {
 };
 
 const fetchAkunHutang = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchAkunCOA = async (cookies) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?populate=deep&filters[jenis_akun][$eq]=true";
   const options = {
     method: "GET",
@@ -133,13 +152,14 @@ const fetchAkunHutang = async (cookies) => {
 };
 
 function Hutang({ props }) {
-  const biaya = useSelector((state) => state.Cost);
+  const biaya = useSelector((state) => state.Cost); console.log("biaya", biaya);
   const dispatch = useDispatch();
 
   const user = props.user;
   const lpb = props.LPB.data;
   const returLPB = props.returLPB.data;
   const akunHutang = props.akunHutang.data;
+  const dataAkunCOA = props.akunCOA.data;
   const hutang = props.hutang;
   const idEdit = props.id;
   const [supplier, setSupplier] = useState();
@@ -199,7 +219,9 @@ function Hutang({ props }) {
     `PH/ET/${user.id}/${noHutang}/${mm}/${yyyy}`
   );
 
-  //const [akunCOA, setAkunCOA] = useState();
+  //Akun COA
+  const [akunCOA, setAkunCOA] = useState();
+  const [createId, setCreateId] = useState();
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -291,6 +313,61 @@ function Hutang({ props }) {
       setInfo("gagal");
     }
 
+    // cek untuk akun hutang (cek coa)
+    console.log("total tunai, tranfer, giro", totalTunai, totalTransfer, totalGiro);
+    if(document == "Publish"){
+      akunHutang.forEach((item) => {
+        if(item.attributes.setting == true){
+          if(totalTunai != 0 && item.attributes.type == "Tunai"){
+            if(item.attributes.chart_of_account.data.attributes.saldo < totalTunai){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, saldo untuk akun tunai kurang untuk melakukan pembayaran.",
+              });
+              setInfo("gagal");
+            }
+          } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
+            if(item.attributes.chart_of_account.data.attributes.saldo < totalTransfer){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, saldo untuk akun transfer kurang untuk melakukan pembayaran.",
+              });
+              setInfo("gagal");
+            }
+          } else if(totalGiro != 0 && item.attributes.type == "Giro"){
+            if(item.attributes.chart_of_account.data.attributes.saldo < totalGiro){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, saldo untuk akun giro kurang untuk melakukan pembayaran.",
+              });
+              setInfo("gagal");
+            }
+          }
+        } else {
+          if(totalTunai != 0 && item.attributes.type == "Tunai"){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
+              });
+              setInfo("gagal");
+          } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
+              });
+              setInfo("gagal");
+          } else if(totalGiro != 0 && item.attributes.type == "Giro"){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
+              });
+              setInfo("gagal");
+          }
+        }
+      });
+
+    }
+
     setDataValues(values);
     setLoading(false);
   };
@@ -337,6 +414,8 @@ function Hutang({ props }) {
     values.document = document;
     values.tanggal_pembayaran = tanggal;
     values.status_pembayaran = "Dibayar";
+    if(values.akun != undefined) values.akun = values?.akun?.value ?? values.akun;
+    else;
 
     await updateData(
       sisaHutang,
@@ -346,10 +425,69 @@ function Hutang({ props }) {
       router,
       "/debts/",
       "hutang",
+      dataAkunCOA,
+      dataEdit,
+      setCreateId,
       akunHutang,
-      dataEdit
     );
     await deleteDetail(dataEditId);
+  };
+
+  const editPenjualan = async (value) => {
+
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/debts/" + value.id + "?populate=deep";
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    // TODO :::: ENHANCEMENT CODE
+    if(res.data.attributes.document == "Publish"){
+      res.data.attributes.debt_details.data.forEach((item) => {
+        const sisa_hutang = item.attributes.sisa_hutang;
+        console.log("detail", item);
+        if (sisa_hutang == 0) editPenjualanDB("Lunas", item.attributes.purchasing.data.id);
+        else editPenjualanDB("Dibayar Sebagian", item.attributes.purchasing.data.id);
+      });
+    } else console.log("Not update lpb, karena draft");
+  };
+
+  const editPenjualanDB = async (value, id) => {
+    try {
+      const data = {
+        data: {
+          status_pembayaran: value,
+        },
+      };
+
+      const JSONdata = JSON.stringify(data);
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings/" + id;
+      const options = {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+        body: JSONdata,
+      };
+
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
+      console.log("res", res);
+      if (req.status === 200) {
+        console.log("status di penjualan sukses diupdate");
+      } else {
+        console.log("status di penjualan error atau tidak ada");
+      }
+    } catch (error) {
+      console.log("errorr", error);
+    }
   };
 
   const clearData = () => {
@@ -405,6 +543,10 @@ function Hutang({ props }) {
     const query = event.target.value;
     if (event != undefined) setSearchNoLpb(query);
   };
+
+  useEffect(() => {
+    if (createId != undefined || createId != null) editPenjualan(createId);
+  }, [createId]);
 
   useEffect(() => {
     var totalTunai = 0;
@@ -482,42 +624,42 @@ function Hutang({ props }) {
             });
             dispatch({
               type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO",
-              totalHutangJatuhTempo: parseInt(
-                dataEditId[keyId].attributes.sisa_hutang
+              totalHutangJatuhTempo: parseFloat(
+                dataEditId[keyId].attributes.sisa_hutang + dataEditId[keyId].attributes.tunai + dataEditId[keyId].attributes.transfer + dataEditId[keyId].attributes.giro
               ),
               listData: biaya.list[key],
               index: key,
             });
             dispatch({
               type: "CHANGE_DATA_TUNAI",
-              tunai: parseInt(dataEditId[keyId].attributes.tunai),
+              tunai: parseFloat(dataEditId[keyId].attributes.tunai),
               listData: biaya.list[key],
               index: key,
             });
             dispatch({
               type: "CHANGE_DATA_TRANSFER",
-              transfer: parseInt(dataEditId[keyId].attributes.transfer),
+              transfer: parseFloat(dataEditId[keyId].attributes.transfer),
               listData: biaya.list[key],
               index: key,
             });
             dispatch({
               type: "CHANGE_DATA_GIRO",
-              giro: parseInt(dataEditId[keyId].attributes.giro),
+              giro: parseFloat(dataEditId[keyId].attributes.giro),
               listData: biaya.list[key],
               index: key,
             });
-            dispatch({
-              type: "CHANGE_DATA_CN",
-              cn: parseInt(dataEditId[keyId].attributes.cn),
-              listData: biaya.list[key],
-              index: key,
-            });
-            dispatch({
-              type: "CHANGE_DATA_OTH",
-              oth: parseInt(dataEditId[keyId].attributes.oth),
-              listData: biaya.list[key],
-              index: key,
-            });
+            // dispatch({
+            //   type: "CHANGE_DATA_CN",
+            //   cn: parseInt(dataEditId[keyId].attributes.cn),
+            //   listData: biaya.list[key],
+            //   index: key,
+            // });
+            // dispatch({
+            //   type: "CHANGE_DATA_OTH",
+            //   oth: parseInt(dataEditId[keyId].attributes.oth),
+            //   listData: biaya.list[key],
+            //   index: key,
+            // });
           }
         }
       }
@@ -538,7 +680,7 @@ function Hutang({ props }) {
         },
         catatan: dataEdit?.attributes?.catatan,
         tanggal_pembayaran: moment(dataEdit?.attributes?.tanggal_pembayaran),
-        akunCOA: {
+        akun: {
           label: `${dataEdit?.attributes?.chart_of_account?.data?.attributes?.nama}`,
           value: dataEdit?.attributes?.chart_of_account?.data?.id,
         },
@@ -546,6 +688,7 @@ function Hutang({ props }) {
         total_giro: dataEdit?.attributes?.total_giro,
       });
       //setTanggal( moment(dataEdit?.attributes?.tanggal_pembayaran) );
+      setAkunCOA(dataEdit?.attributes?.chart_of_account?.data);
     }
   }, [supplier]);
 
@@ -643,7 +786,7 @@ function Hutang({ props }) {
               subtotal: row.subtotal,
             };
 
-          element.sisaHutang = parseInt(element.attributes.total) - parseInt(element.subtotal);
+          element.sisaHutang = parseFloat(element.attributes.total) - parseFloat(element.subtotal);
 
         }
       });
@@ -767,25 +910,6 @@ function Hutang({ props }) {
                       size="large"
                       onChange={(values) => setRangePicker(values)}
                     />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="akunCOA">
-                      <Select size="large" placeholder="Akun yg akan digunakan"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Akun yg akan digunakan belum dipilih !",
-                          },
-                        ]}
-                        //
-                      >
-                        {akunHutang.map((element) => (
-                          <Select.Option value={element.id} key={element.id}>
-                          {element.attributes.nama}
-                          </Select.Option>
-                        ))}
-                      </Select>
                   </Form.Item>
                 </div>
               </div>

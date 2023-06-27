@@ -4,6 +4,7 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
+import Coa from "@iso/components/Form/AddCost/SearchCOA";
 import { UserOutlined, ShopOutlined, BankOutlined } from "@ant-design/icons";
 import { Button, Select, Form, Input, InputNumber, notification } from "antd";
 import nookies from "nookies";
@@ -26,10 +27,13 @@ const Tambah = ({ props }) => {
   // NO Akun
   var noAkun = String(props.akun?.meta?.pagination.total + 1).padStart(3, "0");
   const [kodeAkun, setKodeAkun] = useState(`AH/ET/${user.id}/${noAkun}/${mm}/${yyyy}`);
+  //Akun COA
+  const [akunCOA, setAkunCOA] = useState();
 
   const onFinish = async (values) => {
     setLoading(true);
     values.setting = false;
+    values.chart_of_account = values.akun;
     var data = { data: values};
 
     const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts";
@@ -54,7 +58,7 @@ const Tambah = ({ props }) => {
         "Berhasil menambah data",
         "Akun piutang telah berhasil ditambahkan. Silahkan cek kembali akun piutang"
       );
-      router.replace("/dashboard/biaya/piutang/setting");
+      router.replace("/dashboard/keuangan/piutang/setting");
     } else {
       //res.error?.details.errors.map((error) => {
       //  const ErrorMsg = error.path[0];
@@ -160,7 +164,7 @@ const Tambah = ({ props }) => {
                     />
                   </Form.Item>
                 </div>
-                <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
+                {/* <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="saldo"
                     rules={[
@@ -184,28 +188,28 @@ const Tambah = ({ props }) => {
                       parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                     />
                   </Form.Item>
-                </div>
+                </div> */}
               </div>
 
-              <Form.Item name="type" className="w-1/4 mb-5 ml-1">
-                <Select size="large" placeholder="Type">
-                  <Select.Option value="Tunai" key="Tunai">
-                    Tunai
-                  </Select.Option>
-                  <Select.Option value="Transfer" key="Transfer">
-                    Bank Transfer
-                  </Select.Option>
-                  <Select.Option value="Giro" key="Giro">
-                    Bank Giro
-                  </Select.Option>
-                  <Select.Option value="CN" key="CN">
-                    CN
-                  </Select.Option>
-                  <Select.Option value="OTH" key="OTH">
-                    OTH
-                  </Select.Option>
-                </Select>
-              </Form.Item>
+              <div className="flex flex-wrap -mx-3 mb-2">
+                <Form.Item name="type" className="w-1/4 mb-5 ml-1">
+                  <Select size="large" placeholder="Type">
+                    <Select.Option value="Tunai" key="Tunai">
+                      Tunai
+                    </Select.Option>
+                    <Select.Option value="Transfer" key="Transfer">
+                      Bank Transfer
+                    </Select.Option>
+                    <Select.Option value="Giro" key="Giro">
+                      Bank Giro
+                    </Select.Option>
+                  </Select>
+                </Form.Item>
+
+                <Form.Item name="type" className="w-1/4 mb-5 ml-5">
+                  <Coa page="piutang" onChange={setAkunCOA}/>
+                </Form.Item>
+              </div>
 
               <div className="w-full mt-8 flex justify-between">
                 <Form.Item name="deskripsi" className="w-full mx-2">

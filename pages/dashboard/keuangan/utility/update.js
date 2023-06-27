@@ -16,7 +16,9 @@ const Update = async (
   url,
   page,
   akun,
-  dataEdit
+  dataEdit,
+  setCreateId,
+  akunHutang
   //locations
 ) => {
   // CLEANING DATA
@@ -27,20 +29,86 @@ const Update = async (
   var totalTunai = 0;
   var totalTransfer = 0;
   var totalGiro = 0;
-  var totalCN = 0;
-  var totalOTH = 0;
   var total = 0;
 
-  values.chart_of_account = values.akunCOA;
+  values.chart_of_account = values.akun;
   values.status = "Dibayar";
   total = values.bayar1 + values.bayar2 + values.bayar3;
 
-  const putRelation = await putRelationDetail(dataEdit?.id, values, form, router, url, page);
+  values.bayar1 = parseFloat( values.bayar1 );
+  values.bayar2 = parseFloat( values.bayar2 );
+  values.bayar3 = parseFloat( values.bayar3 );
+  if (values.metode_bayar1 == "tunai") totalTunai = values.bayar1;
+  else if (values.metode_bayar2 == "tunai") totalTunai = values.bayar2;
+  else if (values.metode_bayar3 == "tunai") totalTunai = values.bayar3;
+  else totalTunai = 0;
+  if (values.metode_bayar1 == "transfer") totalTransfer = values.bayar1;
+  else if (values.metode_bayar2 == "transfer") totalTransfer = values.bayar2;
+  else if (values.metode_bayar3 == "transfer") totalTransfer = values.bayar3;
+  else totalTransfer = 0;
+  if (values.metode_bayar1 == "giro") totalGiro = values.bayar1;
+  else if (values.metode_bayar2 == "giro") totalGiro = values.bayar2;
+  else if (values.metode_bayar3 == "giro") totalGiro = values.bayar3;
+  else totalGiro = 0;
+
+  const putRelation = await putRelationDetail(dataEdit?.id, values, form, router, url, page, setCreateId);
   console.log(putRelation, "put relation");
   if (putRelation.status === 200) {
     if (values.document == "Publish") {
-      akun.forEach((element) => {
-        putAkun(values.akunCOA, element.attributes, form, total, page);
+      akunHutang.forEach((item) => {
+        if(item.attributes.setting == true){
+          if(totalTunai != 0 && item.attributes.type == "Tunai"){
+            if(item.attributes.chart_of_account.data.attributes.saldo < totalTunai){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, saldo untuk akun tunai kurang untuk melakukan pembayaran.",
+              });
+
+            } else {
+              putAkun(item.attributes.chart_of_account.data.id, item.attributes.chart_of_account.data.attributes, form, totalTunai, page);
+            }
+          } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
+            if(item.attributes.chart_of_account.data.attributes.saldo < totalTransfer){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, saldo untuk akun transfer kurang untuk melakukan pembayaran.",
+              });
+
+            } else {
+              putAkun(item.attributes.chart_of_account.data.id, item.attributes.chart_of_account.data.attributes, form, totalTransfer, page);
+            }
+          } else if(totalGiro != 0 && item.attributes.type == "Giro"){
+            if(item.attributes.chart_of_account.data.attributes.saldo < totalGiro){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, saldo untuk akun giro kurang untuk melakukan pembayaran.",
+              });
+              
+            } else {
+              putAkun(item.attributes.chart_of_account.data.id, item.attributes.chart_of_account.data.attributes, form, totalGiro, page);
+            }
+          }
+        } else {
+          if(item.attributes.type == "Tunai"){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
+              });
+              
+          } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
+              });
+              
+          } else if(totalGiro != 0 && item.attributes.type == "Giro"){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
+              });
+              
+          }
+        }
       });
     }
     
@@ -51,6 +119,7 @@ const Update = async (
 };
 
 const putAkun = async (id, value, form, total, page) => {
+  id = parseInt(id);
   var saldo = parseFloat(value.saldo);
     var url = null;
     if (page == "hutang") {
@@ -99,7 +168,7 @@ const putAkun = async (id, value, form, total, page) => {
     }
 };
 
-const putRelationDetail = async (id, value, form, router, url, page) => {
+const putRelationDetail = async (id, value, form, router, url, page, setCreateId) => {
   const user = await getUserMe();
   const data = {
     data: value,
@@ -135,6 +204,8 @@ const putRelationDetail = async (id, value, form, router, url, page) => {
     if(page == "hutang") router.push("/dashboard/keuangan/hutang");
     if(page == "piutang") router.push("/dashboard/keuangan/piutang");
     openNotificationWithIcon("success");
+
+    setCreateId(res.data);
   } else {
     openNotificationWithIcon("error");
   }

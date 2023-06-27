@@ -5,6 +5,7 @@ import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import DebtTable from "../../../../components/ReactDataTable/Cost/DebtAccountTable";
+import Coa from "@iso/components/Form/AddCost/SearchCOA";
 import { UserOutlined, ShopOutlined, BankOutlined } from "@ant-design/icons";
 import { Button, Select, Form, Input, InputNumber, notification } from "antd";
 import nookies from "nookies";
@@ -15,6 +16,7 @@ import { useRouter } from "next/router";
 const Tambah = ({ props }) => {
   const [form] = Form.useForm();
   const user = props.user;
+  const coa = props.coa?.data; console.log(coa, "coa");
   const [loading, setLoading] = useState(false);
   const [selectLocations, setSelectLocation] = useState({});
   const { TextArea } = Input;
@@ -27,10 +29,13 @@ const Tambah = ({ props }) => {
   // NO Akun
   var noAkun = String(props.akun?.meta?.pagination.total + 1).padStart(3, "0");
   const [kodeAkun, setKodeAkun] = useState(`AH/ET/${user.id}/${noAkun}/${mm}/${yyyy}`);
+  //Akun COA
+  const [akunCOA, setAkunCOA] = useState();
 
   const onFinish = async (values) => {
     setLoading(true);
     values.setting = false;
+    values.chart_of_account = values.akun;
     var data = { data: values};
 
     const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts";
@@ -55,7 +60,7 @@ const Tambah = ({ props }) => {
         "Berhasil menambah data",
         "Akun hutang telah berhasil ditambahkan. Silahkan cek kembali akun hutang"
       );
-      router.replace("/dashboard/biaya/hutang/setting");
+      router.replace("/dashboard/keuangan/hutang/setting");
     } else {
       //res.error?.details.errors.map((error) => {
       //  const ErrorMsg = error.path[0];
@@ -162,53 +167,53 @@ const Tambah = ({ props }) => {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="saldo"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Saldo tidak boleh kosong!",
-                      },
-                    ]}
-                  >
-                    <InputNumber
-                      style={{ height: "50px", width: "100%" }}
-                      prefix={
-                        <BankOutlined
-                          style={{ fontSize: "150%" }}
-                          className="site-form-item-icon mr-5"
-                        />
-                      }
-                      className="py-1"
-                      placeholder="Saldo"
-                      formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                      parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                    />
-                  </Form.Item>
+                  {/* <Form.Item
+                      name="saldo"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Saldo tidak boleh kosong!",
+                        },
+                      ]}
+                    >
+                      <InputNumber
+                        style={{ height: "50px", width: "100%" }}
+                        prefix={
+                          <BankOutlined
+                            style={{ fontSize: "150%" }}
+                            className="site-form-item-icon mr-5"
+                          />
+                        }
+                        className="py-1"
+                        placeholder="Saldo"
+                        formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                        parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                      />
+                    </Form.Item> */}
                 </div>
               </div>
 
-              <Form.Item name="type" className="w-1/4 mb-5 ml-1">
-                <Select size="large" placeholder="Type">
-                  <Select.Option value="Tunai" key="Tunai">
-                    Tunai
-                  </Select.Option>
-                  <Select.Option value="Transfer" key="Transfer">
-                    Bank Transfer
-                  </Select.Option>
-                  <Select.Option value="Giro" key="Giro">
-                    Bank Giro
-                  </Select.Option>
-                  <Select.Option value="CN" key="CN">
-                    CN
-                  </Select.Option>
-                  <Select.Option value="OTH" key="OTH">
-                    OTH
-                  </Select.Option>
-                </Select>
-              </Form.Item>
+              <div className="flex flex-wrap -mx-3 mb-2">
+                <Form.Item name="type" className="w-1/4 mb-5 ml-4">
+                  <Select size="large" placeholder="Type">
+                    <Select.Option value="Tunai" key="Tunai">
+                      Tunai
+                    </Select.Option>
+                    <Select.Option value="Transfer" key="Transfer">
+                      Bank Transfer
+                    </Select.Option>
+                    <Select.Option value="Giro" key="Giro">
+                      Bank Giro
+                    </Select.Option>
+                  </Select>
+                </Form.Item>
 
-              <div className="w-full mt-8 flex justify-between">
+                <Form.Item name="type" className="w-1/4 mb-5 ml-5">
+                  <Coa page="hutang" onChange={setAkunCOA}/>
+                </Form.Item>
+              </div>
+
+              <div className="w-full mt-1 flex justify-between">
                 <Form.Item name="deskripsi" className="w-full mx-2">
                   <TextArea rows={4} placeholder="Deskripsi" />
                 </Form.Item>
@@ -245,27 +250,16 @@ Tambah.getInitialProps = async (context) => {
 
   const reqAkun = await fetchAkun(cookies);
   const akun = await reqAkun.json();
-  //const req = await fetchData(cookies, "/users-permissions/roles");
-  //data = await req.json();
 
-  //const reqLocations = await fetchData(cookies, "/locations");
-  //const resLocations = await reqLocations.json();
-
-  //if (req.status !== 200) {
-  //  context.res.writeHead(302, {
-  //    Location: "/signin?session=false",
-  //    "Content-Type": "text/html; charset=utf-8",
-  //  });
-  //  context?.res?.end();
-
-  //  return {};
-  //}
+  const reqCOA = await fetchCOA(cookies);
+  const coa = await reqCOA.json();
 
   return {
     props: {
       data,
       user,
-      akun
+      akun,
+      coa
       //locations: resLocations,
     },
   };
@@ -297,6 +291,20 @@ const fetchAkun = async (cookies) => {
 
     const req = await fetch(endpoint, options);
     return req;
+};
+
+const fetchCOA = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?populate=deep&filters[jenis_akun][$eq]=true";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
 };
 //const fetchData = async (cookies, url) => {
 //  const endpoint = process.env.NEXT_PUBLIC_URL + url;

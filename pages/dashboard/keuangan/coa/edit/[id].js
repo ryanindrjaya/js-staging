@@ -72,7 +72,7 @@ function Edit ({ props }) {
   //const [tipeTransaksi, setTipeTransaksi] = useState(akun.data.attributes.transaksi);
 
   //jenis akun
-  const [jenisAkun, setJenisAkun] = useState(true); console.log(jenisAkun,"jenisakun");
+  const [jenisAkun, setJenisAkun] = useState(true);
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -149,7 +149,7 @@ function Edit ({ props }) {
       // deskripsi: akun.data.attributes.deskripsi,
     });
 
-    if(akun?.data?.attributes?.jenis_akun == null) setJenisAkun(akun.data.attributes.jenis_akun);
+    if(akun?.data?.attributes?.jenis_akun != null) setJenisAkun(akun.data.attributes.jenis_akun);
     else;
     
   }, []);
@@ -239,7 +239,7 @@ function Edit ({ props }) {
                     // ]}
                   >
                     <span>Kredit</span>
-                    <Switch className="mx-3" style={switchStyle} checked={jenisAkun} onChange={onChangeSwitch} />
+                    <Switch className="mx-3" style={switchStyle} checked={jenisAkun} onChange={onChangeSwitch} defaultChecked={jenisAkun}/>
                     <span>Debit</span>
                   </Form.Item>
                 </div>
