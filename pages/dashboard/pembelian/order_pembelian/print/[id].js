@@ -111,6 +111,25 @@ const Print = ({ props }) => {
     maximumFractionDigits: 2,
   });
 
+  const getTotalPesanan = () => {
+    var total = 0;
+
+    // sub total produk
+    props.purchases.data.attributes.purchase_details.data.forEach((element) => {
+      total = total + element.attributes.sub_total;
+    });
+
+    // biaya pengiriman
+    total = total + (props.purchases.data.attributes?.delivery_fee || 0);
+
+    // biaya tambahan
+    [1, 2, 3, 4, 5].forEach((index) => {
+      total = total + (props.purchases.data.attributes?.[`additional_fee_${index}_sub`] || 0);
+    });
+
+    return formatter.format(total);
+  };
+
   return (
     <div className="m-3">
       <div className="flex justify-end mb-5">
@@ -179,9 +198,7 @@ const Print = ({ props }) => {
           <div className="font-bold  text-sm uppercase mt-4 flex justify-end">
             BIAYA PENGIRIMAN : {formatter.format(deliveryFee)}
           </div>
-          <div className="font-bold  text-sm uppercase mt-4 flex justify-end">
-            TOTAL PESANAN : {formatter.format(TotalHarga)}
-          </div>
+          <div className="font-bold  text-sm uppercase mt-4 flex justify-end">TOTAL PESANAN : {getTotalPesanan()}</div>
         </div>
       </div>
 
