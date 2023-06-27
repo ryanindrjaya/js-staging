@@ -80,7 +80,7 @@ const putRelationSaleDetail = async (id, value, form, router, setLoading) => {
   if (req.status === 200) {
     setLoading(false);
     form.resetFields();
-    router.replace("/dashboard/penjualan/order-penjualan");
+    router.replace(`/dashboard/penjualan/order-penjualan/print/${id}`);
     openNotificationWithIcon("success");
   } else {
     openNotificationWithIcon("error");
@@ -107,8 +107,7 @@ const openNotificationWithIcon = (type) => {
   if (type === "error") {
     notification[type]({
       message: "Gagal menambahkan data",
-      description:
-        "Produk gagal ditambahkan. Silahkan cek NO Penjualan atau kelengkapan data lainnya",
+      description: "Produk gagal ditambahkan. Silahkan cek NO Penjualan atau kelengkapan data lainnya",
     });
   } else if (type === "success") {
     notification[type]({

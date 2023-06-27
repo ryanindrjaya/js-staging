@@ -150,10 +150,16 @@ const putRelationSaleDetail = async (id, value, form, router, url, page, locatio
 
   if (req.status === 200) {
     form.resetFields();
-    if (page == "store sale") router.replace("/dashboard/penjualan/toko");
-    if (page == "sales sale") router.replace("/dashboard/penjualan/sales");
-    if (page == "non panel sale") router.replace("/dashboard/penjualan/non_panel");
-    if (page == "panel sale") router.replace("/dashboard/penjualan/panel");
+    if (page == "store sale") router.replace(`/dashboard/penjualan/toko/print/${id}`);
+    if (page == "sales sale") router.replace(`/dashboard/penjualan/sales/print/${id}`);
+    if (page == "non panel sale")
+      simpanData === "Publish"
+        ? router.replace(`/dashboard/penjualan/non_panel/print/${id}`)
+        : router.replace(`/dashboard/penjualan/non_panel`);
+    if (page == "panel sale")
+      simpanData === "Publish"
+        ? router.replace(`/dashboard/penjualan/panel/print/${id}`)
+        : router.replace(`/dashboard/penjualan/panel`);
     openNotificationWithIcon("success");
   } else {
     openNotificationWithIcon("error");
@@ -185,7 +191,7 @@ const openNotificationWithIcon = (type) => {
   } else if (type === "success") {
     notification[type]({
       message: "Berhasil menambahkan data",
-      description: "Produk berhasil ditambahkan. Silahkan cek pada halaman Pembelian Barang",
+      description: "Produk berhasil ditambahkan. Silahkan cek pada halaman Penjualan",
     });
   }
 };
