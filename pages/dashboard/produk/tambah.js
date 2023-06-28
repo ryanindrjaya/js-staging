@@ -2,15 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
-import {
-  Button,
-  Form,
-  Input,
-  message,
-  Upload,
-  notification,
-  Image,
-} from "antd";
+import { Button, Form, Input, message, Upload, notification, Image } from "antd";
 import nookies from "nookies";
 import { toast } from "react-toastify";
 import { Spin, Row } from "antd";
@@ -32,7 +24,8 @@ import debounce from "./utility/debounce";
 
 const Tambah = ({ props }) => {
   const [image, setImage] = useState();
-  const [category, setCategory] = useState(); console.log("kategori", category);
+  const [category, setCategory] = useState();
+  console.log("kategori", category);
   const [uploadedOnce, setUploadedOnce] = useState(true);
   const [fileList, setFileList] = useState([]);
   const [statusSKU, setStatusSKU] = useState({
@@ -244,14 +237,9 @@ const Tambah = ({ props }) => {
       } else {
         res?.error?.details?.errors.map((error) => {
           const ErrorMsg = error.path[0];
-          toast.error(
-            ErrorMsg === "SKU"
-              ? "SKU sudah digunakan"
-              : "Tidak dapat menambahkan Produk",
-            {
-              position: toast.POSITION.TOP_RIGHT,
-            }
-          );
+          toast.error(ErrorMsg === "SKU" ? "SKU sudah digunakan" : "Tidak dapat menambahkan Produk", {
+            position: toast.POSITION.TOP_RIGHT,
+          });
         });
       }
     } catch (error) {
@@ -264,8 +252,7 @@ const Tambah = ({ props }) => {
   const checkSKU = async (value) => {
     setStatusSKU({ status: "validating", message: "" });
 
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/products?filters[SKU][$eq]=" + value;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/products?filters[SKU][$eq]=" + value;
     const options = {
       method: "GET",
       headers: {
@@ -330,48 +317,77 @@ const Tambah = ({ props }) => {
     setDescUnit(descUnit);
   };
 
-  useEffect(() => {
-    var manufacture = "0000";
-    var group = "00";
-    var manufacturesData = "00";
-    var kodeProduct = null;
-    var categoryData = "0";
+  const fetchProductBySKU = async (sku) => {
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/products?filters[SKU][$contains]=${sku}`;
+    const options = {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
 
-    product.data.forEach((element) => {
-      if (
-        element.attributes.manufacture.data?.id == selectedManufactures &&
-        element.attributes.group.data?.id == selectedGroups &&
-        element.attributes.category?.data.id == category[0]?.category?.category_id
-      ) {
-        manufacturesData++;
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    if (req.status === 200) {
+      if (res.data.length > 0) {
+        const manufacturesNoList = [];
+        const products = res.data;
+
+        products.forEach(({ attributes }) => {
+          const { SKU } = attributes;
+
+          if (SKU) {
+            const skuArr = SKU?.split("") ?? [];
+            const manufactureNo = skuArr.slice(-3); // get last 3 digit
+            const manufactureNoStr = manufactureNo.join("");
+            manufacturesNoList.push(parseInt(manufactureNoStr));
+          }
+        });
+
+        const maxManufactureNo = manufacturesNoList.length > 0 ? Math.max(...manufacturesNoList) : 0;
+        const newManufactureNo = maxManufactureNo + 1;
+
+        const newManufactureNoStr = String(newManufactureNo).padStart(3, "0");
+
+        const newSKU = sku + newManufactureNoStr;
+
+        form.setFieldsValue({ SKU: newSKU });
+      } else {
+        form.setFieldsValue({ SKU: sku + "001" });
       }
-    });
-
-    manufacturesData = String(manufacturesData + 1).padStart(3, "0");
-
-    groups.data.forEach((element) => {
-      if (element.id == selectedGroups) group = element.attributes.code;
-    });
-
-    manufactures.data.forEach((element) => {
-      if (element.id == selectedManufactures)
-        manufacture = element.attributes.code;
-    });
-
-    group = String(group).padStart(2, "0");
-    manufacture = String(manufacture).padStart(4, "0");
-
-    if (category) categoryData = category[0]?.category.category_id;
-
-    if (
-      category != undefined &&
-      selectedManufactures.length > 0 &&
-      selectedGroups.length > 0
-    ) {
-      kodeProduct = categoryData + group + manufacture + manufacturesData;
+    } else {
+      toast.error("Error ketika mengambil data SKU", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
     }
-    
-    form.setFieldsValue({ SKU: kodeProduct });
+  };
+
+  useEffect(() => {
+    if (category && selectedManufactures && selectedGroups) {
+      var manufacture = "0000";
+      var group = "00";
+      var kodeProduct = null;
+      var categoryData = "0";
+
+      groups.data.forEach((element) => {
+        if (element.id == selectedGroups) group = element.attributes.code;
+      });
+
+      manufactures.data.forEach((element) => {
+        if (element.id == selectedManufactures) manufacture = element.attributes.code;
+      });
+
+      group = String(group).padStart(2, "0");
+      manufacture = String(manufacture).padStart(4, "0");
+
+      if (category) categoryData = category[0]?.category.category_id;
+
+      if (category != undefined && selectedManufactures.length > 0 && selectedGroups.length > 0) {
+        kodeProduct = categoryData + group + manufacture;
+        fetchProductBySKU(kodeProduct);
+      }
+    }
   }, [category, selectedManufactures, selectedGroups, product]);
 
   const onFinishFailed = () => {
@@ -419,9 +435,7 @@ const Tambah = ({ props }) => {
                     ]}
                   >
                     <Input
-                      onKeyDown={(e) =>
-                        e.key == "Enter" ? e.preventDefault() : ""
-                      }
+                      onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")}
                       style={{ height: "40px" }}
                       placeholder="Nama Produk"
                     />
@@ -439,11 +453,7 @@ const Tambah = ({ props }) => {
                     onSelect={setSelectedSubCategory}
                     selectedSubCategory={selectedSubCategory}
                   />
-                  <Groups
-                    data={groups}
-                    selectedGroups={selectedGroups}
-                    onSelect={setSelectedGroup}
-                  />
+                  <Groups data={groups} selectedGroups={selectedGroups} onSelect={setSelectedGroup} />
                   <Manufactures
                     data={manufactures.data}
                     selectedManufactures={selectedManufactures}
@@ -465,11 +475,7 @@ const Tambah = ({ props }) => {
                   >
                     <Input style={{ height: "40px" }} placeholder="SKU" />
                   </Form.Item>
-                  <Locations
-                    data={locations}
-                    onSelect={setSelectLocation}
-                    required={true}
-                  />
+                  <Locations data={locations} onSelect={setSelectLocation} required={true} />
                   <Form.Item name="description">
                     <TextArea rows={7} placeholder="Deskripsi" />
                   </Form.Item>
@@ -482,19 +488,11 @@ const Tambah = ({ props }) => {
                         <p className="ant-upload-drag-icon">
                           <FileImageOutlined />
                         </p>
-                        <p className="ant-upload-text">
-                          Klik atau tarik gambar ke kotak ini
-                        </p>
-                        <p className="ant-upload-hint  m-3">
-                          Gambar akan digunakan sebagai contoh tampilan produk
-                        </p>
+                        <p className="ant-upload-text">Klik atau tarik gambar ke kotak ini</p>
+                        <p className="ant-upload-hint  m-3">Gambar akan digunakan sebagai contoh tampilan produk</p>
                       </>
                     ) : (
-                      <Image
-                        style={{ width: "100%", height: "100%" }}
-                        preview={false}
-                        src={image}
-                      />
+                      <Image style={{ width: "100%", height: "100%" }} preview={false} src={image} />
                     )}
                   </Dragger>
                 </div>
@@ -503,11 +501,7 @@ const Tambah = ({ props }) => {
               <div>
                 <h6 className="">HARGA</h6>
               </div>
-              <UnitTable
-                getDescUnit={getDescriptionUnit}
-                descUnit={descUnit}
-                form={form}
-              />
+              <UnitTable getDescUnit={getDescriptionUnit} descUnit={descUnit} form={form} />
 
               <Form.Item className="mt-5">
                 {loading ? (

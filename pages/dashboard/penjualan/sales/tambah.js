@@ -331,7 +331,7 @@ function Toko({ props }) {
             message: "Berhasil menambahkan data",
             description: "Data Penjualan Sales berhasil dibuat. Silahkan cek pada halaman Penjualan Sales",
           });
-          router.replace("/dashboard/penjualan/sales");
+          router.replace(`/dashboard/penjualan/sales/print/${res?.data?.id}`);
         } else {
           notification.error({
             message: "Gagal menambahkan data",
