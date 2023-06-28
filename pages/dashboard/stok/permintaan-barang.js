@@ -556,6 +556,8 @@ export default function permintaanBarang() {
               return <Tag color="green">Selesai</Tag>;
             case "Dibatalkan":
               return <Tag color="red">Dibatalkan</Tag>;
+            case "Sebagian":
+              return <Tag color="orange">Sebagian</Tag>;
             default:
               return <Tag color="default">Proses</Tag>;
           }
