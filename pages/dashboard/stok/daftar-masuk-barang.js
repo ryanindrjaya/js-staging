@@ -352,7 +352,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
 
                 setData(newData);
               }}
-              defaultValue={row.accepted_status === "Selesai" ? row.sended : 0}
+              defaultValue={row.accepted_status === "Selesai" ? row.sended : row.qty}
               min={0}
               max={maxQty > 0 ? maxQty : 0}
               className="w-[30%]"

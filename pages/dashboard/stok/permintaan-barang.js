@@ -35,6 +35,9 @@ export default function permintaanBarang() {
   const debouncedLocation2 = useDebounce(location2, 200);
   const debounceProducts = useDebounce(searchProduct, 200);
 
+  const [page, setPage] = useState("request");
+  const [selectedData, setSelectedData] = useState();
+
   const [products, setProducts] = useState([]);
   const [printState, setPrintState] = useState(false);
 
