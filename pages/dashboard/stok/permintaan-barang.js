@@ -522,8 +522,29 @@ export default function permintaanBarang() {
   const HistoryPage = () => {
     const columns = [
       {
-        name: "No Referensi",
+        name: "Tindakan",
+        align: "center",
+        selector: (row) => {
+          return (
+            <button
+              onClick={() => {
+                setPrintState(true);
+                setSelectedData(row);
+              }}
+              className="bg-cyan-700 hover:bg-cyan-700/80 duration-150 rounded-md m-1 text-sm px-4 py-2 text-white"
+            >
+              Cetak
+            </button>
+          );
+        },
+      },
+      {
+        name: "No Referensi Pengirim",
         selector: (row) => row.no_referensi,
+      },
+      {
+        name: "No Referensi Penerima",
+        selector: (row) => row?.no_referensi_recipient || "-",
       },
       {
         name: "Tanggal Buat",
@@ -572,23 +593,6 @@ export default function permintaanBarang() {
         name: "Gudang Penerima",
         wrap: true,
         selector: (row) => row.location_recipient,
-      },
-      {
-        name: "Aksi",
-        align: "center",
-        selector: (row) => {
-          return (
-            <button
-              onClick={() => {
-                setPrintState(true);
-                setSelectedData(row);
-              }}
-              className="bg-cyan-700 hover:bg-cyan-700/80 duration-150 rounded-md m-1 text-sm px-4 py-2 text-white"
-            >
-              Cetak
-            </button>
-          );
-        },
       },
     ];
     return <DataTable columns={columns} data={historyData} customStyles={customStyles} keyField="no_referensi" />;
