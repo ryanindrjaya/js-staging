@@ -463,8 +463,9 @@ export default function permintaanBarang() {
 
     if (response) {
       const latestDaata = response.data?.[0];
-      const no = parseInt(latestDaata?.attributes?.no_referensi?.split("/")?.[1] || 0) + 1;
-      const noRecipient = parseInt(latestDaata?.attributes?.no_referensi?.split("/")?.[1] || 0) + 2;
+      console.log("latest data", latestDaata);
+      const no = parseInt(latestDaata?.attributes?.no_referensi_recipient?.split("/")?.[1] || 0) + 1;
+      const noRecipient = parseInt(latestDaata?.attributes?.no_referensi_recipient?.split("/")?.[1] || 0) + 2;
       const latestNoReferensi = `MT/${String(no).padStart(3, "0")}/${moment().format("DD/MM/YYYY")}`;
       const latestNoReferensiRecipient = `MT/${String(noRecipient).padStart(3, "0")}/${moment().format("DD/MM/YYYY")}`;
       form.setFieldsValue({
