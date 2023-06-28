@@ -4,7 +4,7 @@ import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import { Button, DatePicker, Form, Input, InputNumber, notification, Select, Spin, Tabs, Tag } from "antd";
+import { Button, DatePicker, Form, Input, InputNumber, notification, Select, Spin, Tabs, Tag, Tooltip } from "antd";
 import useDebounce from "../../../hooks/useDebounce";
 import nookies from "nookies";
 import { ArrowLeftOutlined, PrinterOutlined } from "@ant-design/icons";
@@ -525,6 +525,7 @@ export default function permintaanBarang() {
       {
         name: "Tindakan",
         align: "center",
+        width: "80px",
         selector: (row) => {
           return (
             <button
@@ -532,19 +533,23 @@ export default function permintaanBarang() {
                 setPrintState(true);
                 setSelectedData(row);
               }}
-              className="bg-cyan-700 hover:bg-cyan-700/80 duration-150 rounded-md m-1 text-sm px-4 py-2 text-white"
+              className="bg-cyan-700 hover:bg-cyan-700/80 duration-150 rounded-md m-1 text-sm px-1 py-1 text-white"
             >
-              Cetak
+              <Tooltip title="Cetak">
+                <PrinterOutlined className="text-lg" />
+              </Tooltip>
             </button>
           );
         },
       },
       {
         name: "No Referensi Pengirim",
+        width: "170px",
         selector: (row) => row.no_referensi,
       },
       {
         name: "No Referensi Penerima",
+        width: "170px",
         selector: (row) => row?.no_referensi_recipient || "-",
       },
       {
