@@ -46,7 +46,7 @@ const createDetail = (
         var noGiro = biaya.info[id]?.oth ?? null;
         var sisa_hutang = sisaHutang[id] ?? 0;
         var lpb = element;
-        var total_retur = data[id].subtotal;
+        var total_retur = biaya.list[id]?.subtotal;//salah
         var customer = biaya.list[id]?.attributes?.customer?.data?.id;
 
         if(sisaHutang[id] == undefined || sisaHutang[id] < 0) sisa_hutang = 0 ;

@@ -33,10 +33,10 @@ export default function ReactDataTable({
         });
     };
 
-    const lihat = (row) => {
-        openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
-        //router.push("order_pembelian/print/" + row.id);
-    };
+    // const lihat = (row) => {
+    //     openNotificationWithIcon("info", "Work In Progress", "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya");
+    //     //router.push("order_pembelian/print/" + row.id);
+    // };
 
     const print = (row) => {
         router.push("hutang/print/" + row.id);
@@ -60,11 +60,22 @@ export default function ReactDataTable({
         maximumFractionDigits: 2,
     });
 
+    const openModal = (id) => {
+        router.replace(
+          {
+            pathname: "/dashboard/keuangan/hutang",
+            query: { id: id },
+          },
+          undefined,
+          { shallow: true }
+        );
+    };
+
     const content = (row) => (
         <div>
             <div>
                 <button
-                    onClick={() => lihat(row)}
+                    onClick={() => openModal(row.id)}
                     className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
                 >
                     <UnorderedListOutlined className="mr-2 mt-0.5 float float-left" />
@@ -82,25 +93,27 @@ export default function ReactDataTable({
             </div>
             {row?.attributes?.document == "Draft" ? (
               <div>
-                <button
-                    onClick={() => onUpdate(row.id)}
-                    className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-                >
-                    <EditOutlined className="mr-2 mt-0.5 float float-left" />
-                    Edit
-                </button>
+                <div>
+                    <button
+                        onClick={() => onUpdate(row.id)}
+                        className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+                    >
+                        <EditOutlined className="mr-2 mt-0.5 float float-left" />
+                        Edit
+                    </button>
+                </div>
+                <AlertDialog
+                    onCancel={onCancel}
+                    onConfirm={onConfirm}
+                    title="Hapus Kategori"
+                    message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
+                    id={row}
+                />
               </div>
             ) : (
                 <> </>
             )}
 
-            <AlertDialog
-                onCancel={onCancel}
-                onConfirm={onConfirm}
-                title="Hapus Kategori"
-                message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
-                id={row}
-            />
         </div>
     );
 
@@ -153,8 +166,34 @@ export default function ReactDataTable({
         },
         {
           name: "Tanggal",
-          width: "150px",
+          width: "120px",
           selector: (row) => formatMyDate(row.attributes?.tanggal_pembayaran ?? "-"),
+        },
+        {
+          name: "Status",
+          width: "150px",
+          selector: (row) => {
+          return (
+            <>
+            <Select
+                defaultValue={row.attributes.document}
+                disabled={row.attributes.document === "Publish"}
+                bordered={false}
+                onChange={(e) => onChangeStatus(e, row)}
+                style={{
+                width: "110px",
+                }}
+            >
+                <Option value="Draft" key="Draft" className="text-black">
+                <Tag color="blue">Draft</Tag>
+                </Option>
+                <Option value="Publish" key="Publish" className="text-black">
+                <Tag color="success">Publish</Tag>
+                </Option>
+            </Select>
+            </>
+          );
+         },
         },
         {
           name: "Pembayaran",
@@ -191,6 +230,9 @@ export default function ReactDataTable({
             data={data.data}
             pagination
             noDataComponent={"Belum ada data hutang"}
+            pointerOnHover
+            highlightOnHover
+            onRowClicked={(row) => openModal(row.id)}
         />
     );
 }

@@ -7,10 +7,12 @@ import TitlePage from "@iso/components/TitlePage/TitlePage";
 import DebtTable from "@iso/components/ReactDataTable/Cost/DebtAccountTable";
 import { UserOutlined, ShopOutlined, BankOutlined } from "@ant-design/icons";
 import { Button, Select, Form, Input, InputNumber, notification } from "antd";
+import Coa from "@iso/components/Form/AddCost/SearchCOA";
 import nookies from "nookies";
 import { toast } from "react-toastify";
 import { Spin } from "antd";
 import { useRouter } from "next/router";
+import Supplier from "../../../../../components/Form/AddCost/SupplierForm";
 
 const Tambah = ({ props }) => {
   const [form] = Form.useForm();
@@ -23,13 +25,16 @@ const Tambah = ({ props }) => {
 
   // NO Akun
   const [kodeAkun, setKodeAkun] = useState(akun.data.attributes.kode);
+  //Akun COA
+  const [akunCOA, setAkunCOA] = useState();
 
   const onFinish = async (values) => {
     setLoading(true);
     values.setting = akun.data.attributes.setting;
-    var data = { data: values};
+    values.chart_of_account = akunCOA?.id;
+    var data = { data: values}; console.log("values", values);
 
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts/"+ akun.data.id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts/"+ akun.data.id;
     const JSONdata = JSON.stringify(data);
 
     const options = {
@@ -49,19 +54,19 @@ const Tambah = ({ props }) => {
       openNotificationWithIcon(
         "success",
         "Berhasil mengubah data",
-        "Akun piutang telah berhasil diubah. Silahkan cek kembali akun piutang"
+        "Akun hutang telah berhasil diubah. Silahkan cek kembali akun hutang"
       );
-      router.replace("/dashboard/biaya/piutang/setting");
+      router.replace("/dashboard/keuangan/hutang/setting");
     } else {
       //res.error?.details.errors.map((error) => {
       //  const ErrorMsg = error.path[0];
-        toast.error("Tidak dapat mengubah Akun Piutang", {
+        toast.error("Tidak dapat mengubah Akun Hutang", {
           position: toast.POSITION.TOP_RIGHT,
         });
         openNotificationWithIcon(
             "error",
             "Tidak dapat mengubah data",
-            "Akun piutang tidak berhasil diubah. Silahkan cek kembali akun piutang"
+            "Akun hutang tidak berhasil diubah. Silahkan cek kembali akun hutang"
         );
       //});
 
@@ -78,12 +83,35 @@ const Tambah = ({ props }) => {
   };
 
   useEffect(() => {
+    if(akunCOA){
+      form.setFieldsValue({
+        akun: {
+          label: `${akunCOA?.attributes?.nama}`,
+          value: akunCOA?.id,
+        }
+      });
+    }
+    else{
+      // form.setFieldsValue({
+      //   type: akun.data.attributes.type,
+      // });
+    }
+
+  }, [akunCOA]);
+
+  useEffect(() => {
     form.setFieldsValue({
       nama: akun.data.attributes.nama,
-      saldo: parseInt(akun.data.attributes.saldo),
+      //saldo: parseInt(akun.data.attributes.saldo),
       type: akun.data.attributes.type,
       deskripsi: akun.data.attributes.deskripsi,
+      akun: {
+        label: `${akun?.data?.attributes?.chart_of_account?.data?.attributes?.nama}`,
+        value: akun?.data?.attributes?.chart_of_account?.data?.id,
+      }
     });
+
+    setAkunCOA(akun.data.attributes.chart_of_account.data);
   }, []);
 
   return (
@@ -149,54 +177,33 @@ const Tambah = ({ props }) => {
                     />
                   </Form.Item>
                 </div>
+              </div>
+
+              <div className="flex flex-wrap -mx-3 mb-2">
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="saldo"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Saldo tidak boleh kosong!",
-                      },
-                    ]}
-                  >
-                    <InputNumber
-                      style={{ height: "50px", width: "100%" }}
-                      prefix={
-                        <BankOutlined
-                          style={{ fontSize: "150%" }}
-                          className="site-form-item-icon mr-5"
-                        />
-                      }
-                      className="py-1"
-                      placeholder="Saldo"
-                      formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                      parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                    />
+                  <Form.Item name="type">
+                    <Select size="large" placeholder="Type" allowClear>
+                      <Select.Option value="Tunai" key="Tunai">
+                        Tunai
+                      </Select.Option>
+                      <Select.Option value="Transfer" key="Transfer">
+                        Bank Transfer
+                      </Select.Option>
+                      <Select.Option value="Giro" key="Giro">
+                        Bank Giro
+                      </Select.Option>
+                    </Select>
+                  </Form.Item>
+                </div>
+
+                <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
+                  <Form.Item name="type">
+                    <Coa page="hutang" onChange={setAkunCOA}/>
                   </Form.Item>
                 </div>
               </div>
 
-              <Form.Item name="type" className="w-1/4 mb-5 ml-1">
-                <Select size="large" placeholder="Type">
-                  <Select.Option value="Tunai" key="Tunai">
-                    Tunai
-                  </Select.Option>
-                  <Select.Option value="Transfer" key="Transfer">
-                    Bank Transfer
-                  </Select.Option>
-                  <Select.Option value="Giro" key="Giro">
-                    Bank Giro
-                  </Select.Option>
-                  <Select.Option value="CN" key="CN">
-                    CN
-                  </Select.Option>
-                  <Select.Option value="OTH" key="OTH">
-                    OTH
-                  </Select.Option>
-                </Select>
-              </Form.Item>
-
-              <div className="w-full mt-8 flex justify-between">
+              <div className="w-full mt-1 flex justify-between">
                 <Form.Item name="deskripsi" className="w-full mx-2">
                   <TextArea rows={4} placeholder="Deskripsi" />
                 </Form.Item>
@@ -257,7 +264,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchAkun = async (cookies, id) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts/"+ id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts/"+ id + "?populate=chart_of_account";
     const options = {
         method: "GET",
         headers: {

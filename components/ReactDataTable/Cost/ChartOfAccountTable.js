@@ -28,7 +28,7 @@ export default function ReactDataTable({
   };
 
   const edit = (row) => {
-    //router.push("edittambahakun/" + row.id);
+    router.push("/dashboard/keuangan/coa/edit/" + row.id);
   };
 
   const lihat = (row) => {
@@ -109,13 +109,18 @@ export default function ReactDataTable({
     {
       name: "Jenis Akun",
       width: "150px",
-      selector: (row) => row.attributes?.jenis_akun ?? "-",
+      selector: (row) => {
+        console.log(row,"row");
+        if(row?.attributes?.jenis_akun == true) return "Debit";
+        else if(row?.attributes?.jenis_akun == false) return "Kredit";
+        else return "-";
+      },
     },
-    {
-      name: "Jenis Sub Akun",
-      width: "150px",
-      selector: (row) => row.attributes?.jenis_sub_akun ?? "-",
-    },
+    // {
+    //   name: "Jenis Sub Akun",
+    //   width: "150px",
+    //   selector: (row) => row.attributes?.jenis_sub_akun ?? "-",
+    // },
     {
       name: "Saldo",
       width: "300px",

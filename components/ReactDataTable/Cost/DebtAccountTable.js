@@ -109,7 +109,7 @@ export default function ReactDataTable({
         {
           name: "Saldo",
           width: "150px",
-          selector: (row) => formatter.format( row.attributes?.saldo) ?? "-",
+          selector: (row) => formatter.format( row.attributes?.chart_of_account?.data?.attributes?.saldo ?? row.attributes?.saldo ) ?? "-",
         },
         {
           name: "Tipe",

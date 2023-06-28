@@ -336,28 +336,6 @@ export default function Sidebar(props) {
               </Menu.Item>
             </SubMenu>
 
-            {/* Biaya  */}
-            <SubMenu
-              key="biaya"
-              title={
-                <span className="isoMenuHolder" style={submenuColor}>
-                  <SidebarNotesIcon size={18} />
-                  <span className="nav-text">Biaya</span>
-                </span>
-              }
-            >
-              <Menu.Item style={submenuStyle} key="hutang">
-                <Link href="/dashboard/biaya/hutang">
-                  <a>Hutang</a>
-                </Link>
-              </Menu.Item>
-              <Menu.Item style={submenuStyle} key="piutang">
-                <Link href="/dashboard/biaya/piutang">
-                  <a>Piutang</a>
-                </Link>
-              </Menu.Item>
-            </SubMenu>
-
             {/* Keuangan */}
             <SubMenu
               key="keuangan"
@@ -376,6 +354,16 @@ export default function Sidebar(props) {
               <Menu.Item style={submenuStyle} key="jurnal">
                 <Link href="/dashboard/keuangan/jurnal">
                   <a>Jurnal</a>
+                </Link>
+              </Menu.Item>
+              <Menu.Item style={submenuStyle} key="hutang">
+                <Link href="/dashboard/keuangan/hutang">
+                  <a>Hutang</a>
+                </Link>
+              </Menu.Item>
+              <Menu.Item style={submenuStyle} key="piutang">
+                <Link href="/dashboard/keuangan/piutang">
+                  <a>Piutang</a>
                 </Link>
               </Menu.Item>
             </SubMenu>

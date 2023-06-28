@@ -6,15 +6,27 @@ import ConfirmDialog from "@iso/components/Alert/ConfirmDialog";
 import { useSelector, useDispatch } from "react-redux";
 import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { Row, Form, Input, InputNumber, Select, Button, Spin, notification, DatePicker } from "antd";
+import {
+  Row,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  Button,
+  Spin,
+  notification,
+  DatePicker,
+} from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import AddSellSalesTable from "@iso/components/ReactDataTable/Selling/AddSellSalesTable";
 import AddDebtTable from "@iso/components/ReactDataTable/Cost/AddDebtTable";
-import createData from "../utility/create";
-import createDetails from "../utility/createDetail";
-import calculatePrice from "../utility/calculatePrice";
+import createData from "../../utility/create";
+import updateData from "../../utility/update";
+import updateDetails from "../../utility/update";
+import calculatePrice from "../../utility/calculatePrice";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
+import Coa from "@iso/components/Form/AddCost/SearchCOA";
 import nookies from "nookies";
 import LoadingAnimations from "@iso/components/Animations/Loading";
 import DataTable from "react-data-table-component";
@@ -22,6 +34,7 @@ import * as moment from "moment";
 
 Hutang.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
+  const { id } = context.query;
 
   const req = await fetchData(cookies);
   const user = await req.json();
@@ -38,6 +51,9 @@ Hutang.getInitialProps = async (context) => {
   const reqAkunHutang = await fetchAkunHutang(cookies);
   const akunHutang = await reqAkunHutang.json();
 
+  const reqCOA = await fetchAkunCOA(cookies);
+  const akunCOA = await reqCOA.json();
+
   return {
     props: {
       user,
@@ -45,6 +61,8 @@ Hutang.getInitialProps = async (context) => {
       returLPB,
       hutang,
       akunHutang,
+      akunCOA,
+      id,
     },
   };
 };
@@ -78,7 +96,7 @@ const fetchDataPurchasing = async (cookies) => {
 };
 
 const fetchRetur = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-lpbs?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -119,15 +137,31 @@ const fetchAkunHutang = async (cookies) => {
   return req;
 };
 
+const fetchAkunCOA = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?populate=deep&filters[jenis_akun][$eq]=true";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
 function Hutang({ props }) {
-  const biaya = useSelector((state) => state.Cost);
+  const biaya = useSelector((state) => state.Cost); console.log("biaya", biaya);
   const dispatch = useDispatch();
 
   const user = props.user;
   const lpb = props.LPB.data;
   const returLPB = props.returLPB.data;
   const akunHutang = props.akunHutang.data;
+  const dataAkunCOA = props.akunCOA.data;
   const hutang = props.hutang;
+  const idEdit = props.id;
   const [supplier, setSupplier] = useState();
   const [dataTabel, setDataTabel] = useState([]);
   const [dataRetur, setDataRetur] = useState([]);
@@ -138,12 +172,14 @@ function Hutang({ props }) {
   const [loading, setLoading] = useState(false);
   const [isFetchinData, setIsFetchingData] = useState(false);
   const [document, setDocument] = useState();
-  const [tanggal, setTanggal] = useState(moment());
+  const [tanggal, setTanggal] = useState();
 
   const [dataValues, setDataValues] = useState();
-  const [createId, setCreateId] = useState();
+  const [dataEdit, setDataEdit] = useState();
+  const [dataEditId, setDataEditId] = useState({});
 
   const [listId, setListId] = useState([]);
+  var tempListId = [];
 
   const submitBtn = useRef();
   const router = useRouter();
@@ -152,7 +188,8 @@ function Hutang({ props }) {
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
   var date = today.getDate() + "/" + mm + "/" + yyyy;
-  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  var time =
+    today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 
   const cookies = nookies.get(null, "token");
   const tempList = [];
@@ -174,8 +211,17 @@ function Hutang({ props }) {
   const [searchNoLpb, setSearchNoLpb] = useState();
 
   // NO Hutang
-  var noHutang = String(props.hutang?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`PH/ET/${user.id}/${noHutang}/${mm}/${yyyy}`);
+  var noHutang = String(props.hutang?.meta?.pagination.total + 1).padStart(
+    3,
+    "0"
+  );
+  const [categorySale, setCategorySale] = useState(
+    `PH/ET/${user.id}/${noHutang}/${mm}/${yyyy}`
+  );
+
+  //Akun COA
+  const [akunCOA, setAkunCOA] = useState();
+  const [createId, setCreateId] = useState();
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -183,32 +229,81 @@ function Hutang({ props }) {
     maximumFractionDigits: 2,
   });
 
+  const getEditHutang = async (id) => {
+    hutang.data.forEach((item) => {
+      if (id == item.id) return setDataEdit(item);
+    });
+  };
+
+  const deleteDetail = async (data) => {
+    var id = 0;
+    for (const key in data) {
+      id = data[key].id;
+
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-details/" + id;
+      const cookies = nookies.get(null, "token");
+
+      const options = {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+      };
+
+      const req = fetch(endpoint, options);
+      //const res = req.json();
+      if (req) {
+        console.log("relation deleted");
+      }
+    }
+  };
+
+  const createDetails = async (data) => {
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/debt-details/`;
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+      body: JSON.stringify(data),
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+    console.log("res", res, data, req);
+
+    if (req.status === 200) {
+      tempListId.push(res?.data?.id);
+      return res;
+    }
+  };
+
   const onFinish = (values) => {
     var totalTunai = 0;
     var totalTransfer = 0;
     var totalGiro = 0;
-    var totalCn = 0;
-    var totalOth = 0;
 
     setLoading(true);
-    setInfo("sukses");
+    setInfo("sukses"); console.log(values, "values");
 
     for (const key in biaya.info) {
       totalTunai += biaya.info[key].tunai;
       totalTransfer += biaya.info[key].transfer;
       totalGiro += biaya.info[key].giro;
-      totalCn += biaya.info[key].cn;
-      totalOth += biaya.info[key].oth;
     }
 
-    var totalBayar = values.bayar1 + values.bayar2 + values.bayar3 + values.bayar4 + values.bayar5;
-    var totalBayarProduk = totalTunai + totalTransfer + totalGiro + totalCn + totalOth;
+    var totalBayar =
+      values.bayar1 +
+      values.bayar2 +
+      values.bayar3;
+    var totalBayarProduk =
+      totalTunai + totalTransfer + totalGiro;
     if (
       (totalTunai != values.bayar1 ||
         totalTransfer != values.bayar2 ||
-        totalGiro != values.bayar3 ||
-        totalCn != values.bayar4 ||
-        totalOth != values.bayar5) &&
+        totalGiro != values.bayar3) &&
       totalBayar != totalBayarProduk
     ) {
       notification["error"]({
@@ -218,22 +313,96 @@ function Hutang({ props }) {
       setInfo("gagal");
     }
 
-    hutang.data.forEach((element) => {
-      if (values.no_hutang == element.attributes.no_hutang) {
-        notification["error"]({
-          message: "Gagal menambahkan data",
-          description: "Data gagal ditambahkan, karena no hutang sama",
-        });
-        setInfo("gagal");
-      }
-    });
+    // cek untuk akun hutang (cek coa)
+    console.log("total tunai, tranfer, giro", totalTunai, totalTransfer, totalGiro);
+    if(document == "Publish"){
+      akunHutang.forEach((item) => {
+        if(item.attributes.setting == true){
+          if(totalTunai != 0 && item.attributes.type == "Tunai"){
+            if(item.attributes.chart_of_account.data.attributes.saldo < totalTunai){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, saldo untuk akun tunai kurang untuk melakukan pembayaran.",
+              });
+              setInfo("gagal");
+            }
+          } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
+            if(item.attributes.chart_of_account.data.attributes.saldo < totalTransfer){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, saldo untuk akun transfer kurang untuk melakukan pembayaran.",
+              });
+              setInfo("gagal");
+            }
+          } else if(totalGiro != 0 && item.attributes.type == "Giro"){
+            if(item.attributes.chart_of_account.data.attributes.saldo < totalGiro){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, saldo untuk akun giro kurang untuk melakukan pembayaran.",
+              });
+              setInfo("gagal");
+            }
+          }
+        } else {
+          if(totalTunai != 0 && item.attributes.type == "Tunai"){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
+              });
+              setInfo("gagal");
+          } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
+              });
+              setInfo("gagal");
+          } else if(totalGiro != 0 && item.attributes.type == "Giro"){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
+              });
+              setInfo("gagal");
+          }
+        }
+      });
+
+    }
+
     setDataValues(values);
     setLoading(false);
   };
 
   const createDetail = async () => {
-    //await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/sales-sale-details");
-    await createDetails(dataValues, dataTabel, biaya, sisaHutang, setListId, "/debt-details", "hutang");
+    var data = null;
+    var updateData = null;
+    // cek update
+    for (const key in biaya?.info) {
+      var tunai = biaya.info[key]?.tunai ?? 0;
+      var transfer = biaya.info[key]?.transfer ?? 0;
+      var giro = biaya.info[key]?.giro ?? 0;
+      // var cn = biaya.info[key]?.cn ?? 0;
+      // var oth = biaya.info[key]?.oth ?? 0;
+      var sisa_hutang = sisaHutang[key] ?? 0;
+      var lpb = biaya?.list[key];
+      var total_retur = biaya?.list[key].subtotal;
+
+      data = {
+        data: {
+          tunai: tunai,
+          transfer: transfer,
+          giro: giro,
+          // cn: cn,
+          // oth: oth,
+          total_retur: total_retur,
+          sisa_hutang: sisa_hutang,
+          purchasing: { id: lpb.id },
+        },
+      };
+
+      if (biaya?.info[key]?.pilihData == "pilih") await createDetails(data);
+    }
+
+    setListId(tempListId);
   };
 
   const createMaster = async (values) => {
@@ -245,13 +414,26 @@ function Hutang({ props }) {
     values.document = document;
     values.tanggal_pembayaran = tanggal;
     values.status_pembayaran = "Dibayar";
-    await createData(sisaHutang, values, listId, form, router, "/debts/", "hutang", akunHutang, setCreateId);
+    if(values.akun != undefined) values.akun = values?.akun?.value ?? values.akun;
+    else;
+
+    await updateData(
+      sisaHutang,
+      values,
+      listId,
+      form,
+      router,
+      "/debts/",
+      "hutang",
+      dataAkunCOA,
+      dataEdit,
+      setCreateId,
+      akunHutang,
+    );
+    await deleteDetail(dataEditId);
   };
 
   const editPenjualan = async (value) => {
-    //var url = null;
-    //var data = null;
-    //var total = null;
 
     const endpoint = process.env.NEXT_PUBLIC_URL + "/debts/" + value.id + "?populate=deep";
     const options = {
@@ -266,12 +448,14 @@ function Hutang({ props }) {
     const res = await req.json();
 
     // TODO :::: ENHANCEMENT CODE
-    res.data.attributes.debt_details.data.forEach((item) => {
-      const sisa_hutang = item.attributes.sisa_hutang;
-      console.log("detail", item);
-      if (sisa_hutang == 0) editPenjualanDB("Lunas", item.attributes.purchasing.data.id);
-      else editPenjualanDB("Dibayar Sebagian", item.attributes.purchasing.data.id);
-    });
+    if(res.data.attributes.document == "Publish"){
+      res.data.attributes.debt_details.data.forEach((item) => {
+        const sisa_hutang = item.attributes.sisa_hutang;
+        console.log("detail", item);
+        if (sisa_hutang == 0) editPenjualanDB("Lunas", item.attributes.purchasing.data.id);
+        else editPenjualanDB("Dibayar Sebagian", item.attributes.purchasing.data.id);
+      });
+    } else console.log("Not update lpb, karena draft");
   };
 
   const editPenjualanDB = async (value, id) => {
@@ -312,6 +496,7 @@ function Hutang({ props }) {
 
   const calculatePriceTotal = (row, index) => {
     const total = calculatePrice(row, biaya, sisaHutangTotal, index);
+
     sisaHutang[index] = total;
     return formatter.format(total);
   };
@@ -320,7 +505,8 @@ function Hutang({ props }) {
     var total = 0;
     if (biaya.info != null) {
       for (let row in biaya.info) {
-        if (biaya.info[row].pilihData == "pilih") total = total + biaya.info[row].totalHutangJatuhTempo;
+        if (biaya.info[row].pilihData == "pilih")
+          total = total + biaya.info[row].totalHutangJatuhTempo;
       }
     }
     return total;
@@ -331,17 +517,14 @@ function Hutang({ props }) {
     var tunai = 0;
     var transfer = 0;
     var giro = 0;
-    var cn = 0;
-    var oth = 0;
     for (let row in biaya.info) {
       if (biaya.info[row].pilihData == "pilih") {
         if (biaya.info[row].tunai != null) tunai = biaya.info[row].tunai;
-        if (biaya.info[row].transfer != null) transfer = biaya.info[row].transfer;
+        if (biaya.info[row].transfer != null)
+          transfer = biaya.info[row].transfer;
         if (biaya.info[row].giro != null) giro = biaya.info[row].giro;
-        if (biaya.info[row].cn != null) cn = biaya.info[row].cn;
-        if (biaya.info[row].oth != null) oth = biaya.info[row].oth;
 
-        total = total + tunai + transfer + giro + cn + oth;
+        total = total + tunai + transfer + giro;
       }
     }
     return total;
@@ -412,6 +595,104 @@ function Hutang({ props }) {
   }, [listId]);
 
   useEffect(() => {
+    setSupplier(dataEdit?.attributes?.supplier?.data);
+
+    var dataEditDetail = {};
+    if (dataEdit) {
+      for (const key in dataEdit?.attributes?.debt_details.data) {
+        dataEditDetail[key] = dataEdit?.attributes?.debt_details?.data[key];
+      }
+    }
+    setDataEditId(dataEditDetail);
+  }, [dataEdit]);
+
+  useEffect(() => {
+    setIsFetchingData(true);
+
+    if (dataEdit != undefined && dataEditId != undefined) {
+      for (const keyId in dataEditId) {
+        for (const key in biaya.list) {
+          if (
+            dataEditId[keyId].attributes.purchasing.data.id ==
+            biaya.list[key].id
+          ) {
+            dispatch({
+              type: "CHANGE_PILIH_DATA",
+              pilihData: "pilih",
+              listData: biaya.list[key],
+              index: key,
+            });
+            dispatch({
+              type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO",
+              totalHutangJatuhTempo: parseFloat(
+                dataEditId[keyId].attributes.sisa_hutang + dataEditId[keyId].attributes.tunai + dataEditId[keyId].attributes.transfer + dataEditId[keyId].attributes.giro
+              ),
+              listData: biaya.list[key],
+              index: key,
+            });
+            dispatch({
+              type: "CHANGE_DATA_TUNAI",
+              tunai: parseFloat(dataEditId[keyId].attributes.tunai),
+              listData: biaya.list[key],
+              index: key,
+            });
+            dispatch({
+              type: "CHANGE_DATA_TRANSFER",
+              transfer: parseFloat(dataEditId[keyId].attributes.transfer),
+              listData: biaya.list[key],
+              index: key,
+            });
+            dispatch({
+              type: "CHANGE_DATA_GIRO",
+              giro: parseFloat(dataEditId[keyId].attributes.giro),
+              listData: biaya.list[key],
+              index: key,
+            });
+            // dispatch({
+            //   type: "CHANGE_DATA_CN",
+            //   cn: parseInt(dataEditId[keyId].attributes.cn),
+            //   listData: biaya.list[key],
+            //   index: key,
+            // });
+            // dispatch({
+            //   type: "CHANGE_DATA_OTH",
+            //   oth: parseInt(dataEditId[keyId].attributes.oth),
+            //   listData: biaya.list[key],
+            //   index: key,
+            // });
+          }
+        }
+      }
+    }
+
+    setTimeout(() => {
+      setIsFetchingData(false);
+    }, 3000);
+  }, [dataEditId]);
+
+  useEffect(() => {
+    if (supplier != undefined) {
+      form.setFieldsValue({
+        no_hutang: dataEdit?.attributes?.no_hutang,
+        supplier_id: {
+          label: `${supplier?.attributes?.id_supplier} - ${supplier?.attributes?.name}`,
+          value: supplier?.id,
+        },
+        catatan: dataEdit?.attributes?.catatan,
+        tanggal_pembayaran: moment(dataEdit?.attributes?.tanggal_pembayaran),
+        akun: {
+          label: `${dataEdit?.attributes?.chart_of_account?.data?.attributes?.nama}`,
+          value: dataEdit?.attributes?.chart_of_account?.data?.id,
+        },
+        no_giro: dataEdit?.attributes?.no_giro,
+        total_giro: dataEdit?.attributes?.total_giro,
+      });
+      //setTanggal( moment(dataEdit?.attributes?.tanggal_pembayaran) );
+      setAkunCOA(dataEdit?.attributes?.chart_of_account?.data);
+    }
+  }, [supplier]);
+
+  useEffect(() => {
     // used to reset redux from value before
     clearData();
 
@@ -459,34 +740,116 @@ function Hutang({ props }) {
       if (status == "Tempo" || statusPembayaran == "Dibayar Sebagian") {
         row.hidden = false;
         dataTabel[lpbId] = row;
-        //biaya.list.push(row);
         dispatch({ type: "ADD_LIST", list: row });
-        //dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: row, index: infoId });
-        //dispatch({ type: "CHANGE_ID", id: row.id, listData: row, index: infoId });
         infoId++;
       }
 
       lpbId++;
     });
 
-    //dataTabel.push(biaya.list);
-    lpbId = 0;
+    var pembayaran = [];
+    var total = 0;
+    var idDetail = null;
+    hutang.data.forEach(element => {
+      if(element.attributes.document == "Publish"){
+        element.attributes.debt_details.data.forEach(details => {
+          total = details.attributes.giro + details.attributes.transfer + details.attributes.tunai;
+          idDetail = details?.attributes?.purchasing?.data?.id;
+          pembayaran.push({ id: idDetail, total: total});
+        });
+      } else console.log("hutang draft");
+    });
 
-    returLPB.forEach((row) => {
-      row.subtotal = 0;
-      dataTabel.forEach((element) => {
+    dataTabel.forEach((element, index) => {
+      element.subtotal = 0;
+      element.sisaHutang =  0;
+      element.dibayar = 0;
+
+      returLPB.forEach((row) => {
+        row.subtotal = 0;
+      
         if (element.attributes.no_purchasing == row.attributes.purchasing.data?.attributes.no_purchasing) {
-          row.attributes.retur_lpb_details.data.forEach((detail) => {
+          row.attributes.retur_details.data.forEach((detail) => {
             row.subtotal += parseInt(detail.attributes.sub_total);
           });
-          dataRetur[lpbId] = {
-            id: element.attributes.no_purchasing,
-            subtotal: row.subtotal,
-          };
+          
+          element.subtotal += row.attributes.total;
+
+          if (dataRetur.length > 0)
+            dataRetur[dataRetur.length] = {
+                id: element.attributes.no_purchasing,
+                subtotal: row.subtotal,
+            };
+          else
+            dataRetur[0] = {
+              id: element.attributes.no_purchasing,
+              subtotal: row.subtotal,
+            };
+
+          element.sisaHutang = parseFloat(element.attributes.total) - parseFloat(element.subtotal);
+
         }
       });
-      lpbId++;
+      
+      pembayaran.forEach((item) => {
+        if(item.id == element.id) element.dibayar += item.total;
+      });
+
     });
+
+    // Set default velue untuk edit data
+    getEditHutang(idEdit);
+
+    for (const key in biaya.list) {
+      dispatch({
+        type: "CHANGE_PILIH_DATA",
+        pilihData: "tidak",
+        listData: biaya.list[key],
+        index: key,
+      });
+      dispatch({
+        type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO",
+        totalHutangJatuhTempo: 0,
+        listData: biaya.list[key],
+        index: key,
+      });
+      dispatch({
+        type: "CHANGE_DATA_TUNAI",
+        tunai: 0,
+        listData: biaya.list[key],
+        index: key,
+      });
+      dispatch({
+        type: "CHANGE_DATA_TRANSFER",
+        transfer: 0,
+        listData: biaya.list[key],
+        index: key,
+      });
+      dispatch({
+        type: "CHANGE_DATA_GIRO",
+        giro: 0,
+        listData: biaya.list[key],
+        index: key,
+      });
+      dispatch({
+        type: "CHANGE_DATA_CN",
+        cn: 0,
+        listData: biaya.list[key],
+        index: key,
+      });
+      dispatch({
+        type: "CHANGE_DATA_OTH",
+        oth: 0,
+        listData: biaya.list[key],
+        index: key,
+      });
+      dispatch({
+        type: "CHANGE_ID",
+        id: biaya?.list[key]?.id,
+        listData: biaya.list[key],
+        index: key,
+      });
+    }
   }, []);
 
   const validateError = () => {
@@ -531,44 +894,33 @@ function Hutang({ props }) {
                       },
                     ]}
                   >
-                    <Input style={{ height: "40px" }} placeholder="No. Hutang" />
+                    <Input
+                      style={{ height: "40px" }}
+                      placeholder="No. Hutang"
+                      disabled
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Supplier onChangeSupplier={setSupplier} />
                 </div>
-                {/* <div className="w-full md:w-1/4 px-3 mb-2">
-                  <Form.Item
-                    name="status_pembayaran" //initialValue={"Hari"}
-                    noStyle
-                  >
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      allowClear
-                      placeholder="Status Pembayaran"
-                      onChange={setStatusPembayaran}
-                    >
-                      <Select.Option value="Dibayar" key="Dibayar">
-                        Dibayar
-                      </Select.Option>
-                      <Select.Option value="Belum Dibayar" key="Belum Dibayar">
-                        Belum Dibayar
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
-                </div> */}
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="tanggal">
-                    <RangePicker size="large" onChange={(values) => setRangePicker(values)} />
+                    <RangePicker
+                      size="large"
+                      onChange={(values) => setRangePicker(values)}
+                    />
                   </Form.Item>
                 </div>
               </div>
 
               <div className="w-full md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
-                <Search size="large" id="searchBox" placeholder="Cari Nomor LPB" onChange={filterBySearch} />
+                <Search
+                  size="large"
+                  id="searchBox"
+                  placeholder="Cari Nomor LPB"
+                  onChange={filterBySearch}
+                />
               </div>
 
               {isFetchinData ? (
@@ -593,22 +945,39 @@ function Hutang({ props }) {
                     statusPembayaran={statusPembayaran}
                     rangePicker={rangePicker}
                     search={searchNoLpb}
+                    dataEdit={dataEdit}
+                    dataEditId={dataEditId}
                   />
                 </div>
               )}
 
               <div className="w-full flex flex-wrap mb-3">
-                <Form.Item name="total_item" className="w-full h-2 mx-2 flex justify-end font-bold">
+                <Form.Item
+                  name="total_item"
+                  className="w-full h-2 mx-2 flex justify-end font-bold"
+                >
                   <span> TOTAL ITEM </span> <span> : {totalItem}</span>
                 </Form.Item>
-                <Form.Item name="total_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> TOTAL HUTANG JATUH TEMPO </span> <span> : {formatter.format(totalHutangJatuhTempo())}</span>
+                <Form.Item
+                  name="total_hutang_jatuh_tempo"
+                  className="w-full h-2 mx-2 flex justify-end font-bold"
+                >
+                  <span> TOTAL HUTANG JATUH TEMPO </span>{" "}
+                  <span> : {formatter.format(totalHutangJatuhTempo())}</span>
                 </Form.Item>
-                <Form.Item name="total_pembayaran" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> TOTAL PEMBAYARAN </span> <span> : {formatter.format(totalPembayaran())}</span>
+                <Form.Item
+                  name="total_pembayaran"
+                  className="w-full h-2 mx-2 flex justify-end font-bold"
+                >
+                  <span> TOTAL PEMBAYARAN </span>{" "}
+                  <span> : {formatter.format(totalPembayaran())}</span>
                 </Form.Item>
-                <Form.Item name="sisa_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
-                  <span> SISA HUTANG JATUH TEMPO </span> <span> : {formatter.format(sisaHutangJatuhTempo())}</span>
+                <Form.Item
+                  name="sisa_hutang_jatuh_tempo"
+                  className="w-full h-2 mx-2 flex justify-end font-bold"
+                >
+                  <span> SISA HUTANG JATUH TEMPO </span>{" "}
+                  <span> : {formatter.format(sisaHutangJatuhTempo())}</span>
                 </Form.Item>
               </div>
 
@@ -629,7 +998,9 @@ function Hutang({ props }) {
                   <Form.Item name="bayar1">
                     <InputNumber
                       placeholder="Nominal Pembayaran"
-                      formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                      formatter={(value) =>
+                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      }
                       parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                       min={0}
                       style={{
@@ -658,12 +1029,6 @@ function Hutang({ props }) {
                       <Select.Option value="giro" key="giro">
                         Bank Giro
                       </Select.Option>
-                      {/* <Select.Option value="cn" key="cn">
-                        CN
-                      </Select.Option>
-                      <Select.Option value="oth" key="oth">
-                        OTH
-                      </Select.Option> */}
                     </Select>
                   </Form.Item>
                 </div>
@@ -674,7 +1039,9 @@ function Hutang({ props }) {
                   <Form.Item name="bayar2">
                     <InputNumber
                       placeholder="Nominal Pembayaran"
-                      formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                      formatter={(value) =>
+                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      }
                       parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                       min={0}
                       style={{
@@ -703,12 +1070,6 @@ function Hutang({ props }) {
                       <Select.Option value="giro" key="giro">
                         Bank Giro
                       </Select.Option>
-                      {/* <Select.Option value="cn" key="cn">
-                        CN
-                      </Select.Option>
-                      <Select.Option value="oth" key="oth">
-                        OTH
-                      </Select.Option> */}
                     </Select>
                   </Form.Item>
                 </div>
@@ -719,7 +1080,9 @@ function Hutang({ props }) {
                   <Form.Item name="bayar3">
                     <InputNumber
                       placeholder="Nominal Pembayaran"
-                      formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                      formatter={(value) =>
+                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      }
                       parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                       min={0}
                       style={{
@@ -748,12 +1111,6 @@ function Hutang({ props }) {
                       <Select.Option value="giro" key="giro">
                         Bank Giro
                       </Select.Option>
-                      {/* <Select.Option value="cn" key="cn">
-                        CN
-                      </Select.Option>
-                      <Select.Option value="oth" key="oth">
-                        OTH
-                      </Select.Option> */}
                     </Select>
                   </Form.Item>
                 </div>
@@ -769,13 +1126,10 @@ function Hutang({ props }) {
                     />
                   </Form.Item>
                 </div>
-              </div>
-
-              {/* <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="bayar4">
+                  <Form.Item name="total_giro">
                     <InputNumber
-                      placeholder="Nominal Pembayaran"
+                      placeholder="Total Giro"
                       formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                       parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                       min={0}
@@ -787,79 +1141,7 @@ function Hutang({ props }) {
                     />
                   </Form.Item>
                 </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="metode_bayar4" noStyle>
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      placeholder="Metode Pembayaran"
-                    >
-                      <Select.Option value="tunai" key="tunai">
-                        Tunai
-                      </Select.Option>
-                      <Select.Option value="transfer" key="transfer">
-                        Bank Transfer
-                      </Select.Option>
-                      <Select.Option value="giro" key="giro">
-                        Bank Giro
-                      </Select.Option>
-                      <Select.Option value="cn" key="cn">
-                        CN
-                      </Select.Option>
-                      <Select.Option value="oth" key="oth">
-                        OTH
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
-                </div>
               </div>
-
-              <div className="w-full flex flex-wrap justify-start -mx-3 mb-0 -mt-3">
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="bayar5">
-                    <InputNumber
-                      placeholder="Nominal Pembayaran"
-                      formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                      parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                      min={0}
-                      style={{
-                        height: "40px",
-                        width: "100%",
-                        marginRight: "10px",
-                      }}
-                    />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item name="metode_bayar5" noStyle>
-                    <Select
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      placeholder="Metode Pembayaran"
-                    >
-                      <Select.Option value="tunai" key="tunai">
-                        Tunai
-                      </Select.Option>
-                      <Select.Option value="transfer" key="transfer">
-                        Bank Transfer
-                      </Select.Option>
-                      <Select.Option value="giro" key="giro">
-                        Bank Giro
-                      </Select.Option>
-                      <Select.Option value="cn" key="cn">
-                        CN
-                      </Select.Option>
-                      <Select.Option value="oth" key="oth">
-                        OTH
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
-                </div>
-              </div> */}
 
               <div className="w-full mt-8 flex justify-between">
                 <Form.Item name="catatan" className="w-full mx-2">
@@ -879,7 +1161,9 @@ function Hutang({ props }) {
                       className="bg-cyan-700 rounded-md m-1 text-sm"
                       onClick={() => setDocument("Draft")}
                     >
-                      <p className="px-4 py-2 m-0 text-white">SIMPAN DAN PERBARUI</p>
+                      <p className="px-4 py-2 m-0 text-white">
+                        SIMPAN DAN PERBARUI
+                      </p>
                     </button>
                   )}
                 </Form.Item>
@@ -901,7 +1185,9 @@ function Hutang({ props }) {
                             className="bg-cyan-700 rounded-md m-1 text-sm"
                             onClick={() => setDocument("Publish")}
                           >
-                            <p className="px-4 py-2 m-0 text-white">SIMPAN DAN CETAK</p>
+                            <p className="px-4 py-2 m-0 text-white">
+                              SIMPAN DAN CETAK
+                            </p>
                           </button>
                         }
                       />

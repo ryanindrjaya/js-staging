@@ -580,7 +580,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                       <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0 text-center">
                           <span className="font-bold">
                               {formatter.format(
-                                row.attributes?.total - (tunai + transfer + giro + row.subtotal)
+                                row.attributes?.total - (tunai + transfer + giro + row.subtotal + row.dibayar)
                               )}
                           </span>
                       </div>
@@ -652,7 +652,6 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       name: "Sales",
       width: "150px",
       selector: (row) => row.attributes?.customer?.data?.attributes?.sales_name,
-      //selector: (row) => console.log("row tabel",row),
     },
     {
       name: "Nilai Invoice",
