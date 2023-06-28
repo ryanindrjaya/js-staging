@@ -4,7 +4,7 @@ import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import { Button, DatePicker, Form, Input, InputNumber, notification, Select, Spin } from "antd";
+import { Button, DatePicker, Form, Input, InputNumber, notification, Select, Spin, Tabs, Tag } from "antd";
 import useDebounce from "../../../hooks/useDebounce";
 import nookies from "nookies";
 import { ArrowLeftOutlined, PrinterOutlined } from "@ant-design/icons";
@@ -35,11 +35,13 @@ export default function permintaanBarang() {
   const debouncedLocation2 = useDebounce(location2, 200);
   const debounceProducts = useDebounce(searchProduct, 200);
 
-  const [page, setPage] = useState("request");
+  const [tab, setTab] = useState("1");
   const [selectedData, setSelectedData] = useState();
 
   const [products, setProducts] = useState([]);
   const [printState, setPrintState] = useState(false);
+
+  const [historyData, setHistoryData] = useState([]);
 
   const [form] = Form.useForm();
 
@@ -474,12 +476,120 @@ export default function permintaanBarang() {
     console.log("response from fetchLatestNoReferensi", response);
   }
 
+  // get data history
+  async function fetchDataHistory() {
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/product-request/data?sort[id]=desc`;
+    const headers = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const response = await fetch(endpoint, headers)
+      .then((res) => {
+        return res.json();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    if (response) {
+      const data = response.data;
+      setHistoryData(data);
+    }
+
+    console.log("response from fetchDataHistory", response);
+  }
+
   useEffect(() => {
     fetchLatestNoReferensi();
+    fetchDataHistory();
   }, []);
+
+  useEffect(() => {
+    // 2 === history
+    if (tab === "2") {
+      fetchDataHistory();
+    }
+  }, [tab]);
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const HistoryPage = () => {
+    const columns = [
+      {
+        name: "No Referensi",
+        selector: (row) => row.no_referensi,
+      },
+      {
+        name: "Tanggal Buat",
+        selector: (row) => moment(row.date).format("DD-MM-YYYY"),
+      },
+      {
+        name: "Status Pengiriman",
+        selector: (row) => {
+          switch (row?.status_pengiriman) {
+            case "Proses":
+              return <Tag color="default">Proses</Tag>;
+            case "Selesai":
+              return <Tag color="green">Selesai</Tag>;
+            case "Dibatalkan":
+              return <Tag color="red">Dibatalkan</Tag>;
+            case "Sebagian":
+              return <Tag color="orange">Sebagian</Tag>;
+            default:
+              return <Tag color="default">Proses</Tag>;
+          }
+        },
+      },
+      {
+        name: "Status Penerimaan",
+        selector: (row) => {
+          switch (row?.status_penerimaan) {
+            case "Proses":
+              return <Tag color="default">Proses</Tag>;
+            case "Selesai":
+              return <Tag color="green">Selesai</Tag>;
+            case "Dibatalkan":
+              return <Tag color="red">Dibatalkan</Tag>;
+            default:
+              return <Tag color="default">Proses</Tag>;
+          }
+        },
+      },
+      {
+        name: "Gudang Pengirim",
+        wrap: true,
+        selector: (row) => row.location_sender,
+      },
+      {
+        name: "Gudang Penerima",
+        wrap: true,
+        selector: (row) => row.location_recipient,
+      },
+      {
+        name: "Aksi",
+        align: "center",
+        selector: (row) => {
+          return (
+            <button
+              onClick={() => {
+                setPrintState(true);
+                setSelectedData(row);
+              }}
+              className="bg-cyan-700 hover:bg-cyan-700/80 duration-150 rounded-md m-1 text-sm px-4 py-2 text-white"
+            >
+              Cetak
+            </button>
+          );
+        },
+      },
+    ];
+    return <DataTable columns={columns} data={historyData} customStyles={customStyles} keyField="no_referensi" />;
   };
 
   return (
@@ -497,6 +607,7 @@ export default function permintaanBarang() {
                 onClick={() => {
                   setPrintState(false);
                   setLoading({ ...loading, print: false });
+                  setSelectedData();
                 }}
               />
               <button onClick={handlePrint} class="print:hidden rounded-full bg-sky-400 px-4 py-2 font-bold text-white">
@@ -518,15 +629,23 @@ export default function permintaanBarang() {
                   <p className="text-sm mb-0 uppercase">No. Referensi</p>
                   <p className="text-sm mb-0 uppercase">Lokasi Pengirim</p>
                   <p className="text-sm mb-0 uppercase">Lokasi Penerima</p>
-                  <p className="text-sm mb-0 uppercase">Deskripsi</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm mb-0 font-bold uppercase">{form.getFieldValue("date")?.format("DD/MM/YYYY")}</p>
+                  <p className="text-sm mb-0 font-bold uppercase">
+                    {selectedData
+                      ? moment(selectedData?.date)?.format("DD/MM/YYYY")
+                      : form.getFieldValue("date")?.format("DD/MM/YYYY")}
+                  </p>
 
-                  <p className="text-sm mb-0 font-bold uppercase">{form.getFieldValue("no_referensi")}</p>
-                  <p className="text-sm mb-0 font-bold uppercase">{selectedLocation1?.name}</p>
-                  <p className="text-sm mb-0 font-bold uppercase">{selectedLocation2?.name}</p>
-                  <p className="text-sm mb-0 font-bold uppercase">{form.getFieldValue("description")}</p>
+                  <p className="text-sm mb-0 font-bold uppercase">
+                    {selectedData ? selectedData?.no_referensi : form.getFieldValue("no_referensi")}
+                  </p>
+                  <p className="text-sm mb-0 font-bold uppercase">
+                    {selectedData ? selectedData?.location_sender : selectedLocation1?.name}
+                  </p>
+                  <p className="text-sm mb-0 font-bold uppercase">
+                    {selectedData ? selectedData?.location_recipient : selectedLocation2?.name}
+                  </p>
                 </div>
               </div>
 
@@ -536,11 +655,18 @@ export default function permintaanBarang() {
             <DataTable
               dense
               columns={printColumns}
-              data={products}
+              data={selectedData ? selectedData?.items ?? [] : products}
               keyField="unique_id"
               customStyles={printStyles}
               noDataComponent={`--Harap pilih produk--`}
             />
+
+            <div className="w-3/4 mt-3 flex gap-x-3">
+              <p className="text-sm mb-0 uppercase">Deskripsi : </p>
+              <p className="text-sm mb-0 font-bold uppercase">
+                {selectedData ? selectedData?.description : form.getFieldValue("description")}
+              </p>
+            </div>
           </div>
         </>
       ) : (
@@ -552,190 +678,201 @@ export default function permintaanBarang() {
             <LayoutWrapper>
               <TitlePage titleText={"Permintaan Barang"} />
               <LayoutContent>
-                <Form layout="vertical" form={form} onFinish={onFinish} onFinishFailed={onFinishFailed}>
-                  <div className="lg:w-4/5 w-full mx-auto mb-4">
-                    <div className="w-full grid grid-cols-3 mb-3 gap-3">
-                      <Form.Item
-                        rules={[
-                          {
-                            required: true,
-                            message: "Tanggal tidak boleh kosong",
-                          },
-                        ]}
-                        initialValue={moment()}
-                        name="date"
-                        className="m-0"
-                      >
-                        <DatePicker size="large" placeholder="Tanggal" className="w-full lg:col-span-1 col-span-3" />
-                      </Form.Item>
-                      <Form.Item
-                        rules={[
-                          {
-                            required: true,
-                            message: "No Referensi tidak boleh kosong",
-                          },
-                        ]}
-                        name="no_referensi"
-                        className="m-0"
-                      >
-                        <Input size="large" placeholder="No Refrensi" className="w-full lg:col-span-1 col-span-3" />
-                      </Form.Item>
-                      <Form.Item
-                        rules={[
-                          {
-                            required: true,
-                            message: "Status tidak boleh kosong",
-                          },
-                        ]}
-                        initialValue="Proses"
-                        name="status"
-                        className="m-0"
-                      >
-                        <Select
-                          size="large"
-                          placeholder="Status"
-                          options={[
-                            { label: "Proses", value: "Proses" },
-                            { label: "Sebagian", value: "Sebagian" },
-                            { label: "Selesai", value: "Selesai" },
-                          ]}
-                          className="w-full lg:col-span-1 col-span-3"
-                        />
-                      </Form.Item>
-                    </div>
-                    <div className="w-full grid grid-cols-2 gap-3">
-                      <Form.Item
-                        rules={[
-                          {
-                            required: true,
-                            message: "Harap pilih lokasi gudang pengirim",
-                          },
-                        ]}
-                        name="location_sender"
-                        className="m-0"
-                      >
-                        <Select
-                          onSearch={(value) => {
-                            setLoading({ ...loading, location1: true });
-                            setLocation1(value);
-                          }}
-                          onSelect={(value) => {
-                            const selectedLocation = JSON.parse(value);
-                            setSelectedLocation1(selectedLocation);
-                          }}
-                          value={selectedLocation1}
-                          placeholder="Lokasi Gudang Pengirim"
-                          showSearch
-                          filterOption={false}
-                          size="large"
-                          loading={loading.location1}
-                          options={options.location1}
-                        />
-                      </Form.Item>
-                      <Form.Item
-                        rules={[
-                          {
-                            required: true,
-                            message: "Harap pilih lokasi gudang penerima",
-                          },
-                        ]}
-                        name="location_recipient"
-                        className="m-0"
-                      >
-                        <Select
-                          onSearch={(value) => {
-                            setLoading({ ...loading, location2: true });
-                            setLocation2(value);
-                          }}
-                          onSelect={(value) => {
-                            const selectedLocation = JSON.parse(value);
-                            setSelectedLocation2(selectedLocation);
-                          }}
-                          value={selectedLocation2}
-                          placeholder="Lokasi Gudang Penerima"
-                          showSearch
-                          filterOption={false}
-                          size="large"
-                          loading={loading.location2}
-                          options={options.location2}
-                        />
-                      </Form.Item>
-                    </div>
-                  </div>
+                <Tabs activeKey={tab} onChange={(key) => setTab(key)}>
+                  <Tabs.TabPane tab="Buat Permintaan" key="1">
+                    <Form layout="vertical" form={form} onFinish={onFinish} onFinishFailed={onFinishFailed}>
+                      <div className="lg:w-4/5 w-full mx-auto mb-4">
+                        <div className="w-full grid grid-cols-3 mb-3 gap-3">
+                          <Form.Item
+                            rules={[
+                              {
+                                required: true,
+                                message: "Tanggal tidak boleh kosong",
+                              },
+                            ]}
+                            initialValue={moment()}
+                            name="date"
+                            className="m-0"
+                          >
+                            <DatePicker
+                              size="large"
+                              placeholder="Tanggal"
+                              className="w-full lg:col-span-1 col-span-3"
+                            />
+                          </Form.Item>
+                          <Form.Item
+                            rules={[
+                              {
+                                required: true,
+                                message: "No Referensi tidak boleh kosong",
+                              },
+                            ]}
+                            name="no_referensi"
+                            className="m-0"
+                          >
+                            <Input size="large" placeholder="No Refrensi" className="w-full lg:col-span-1 col-span-3" />
+                          </Form.Item>
+                          <Form.Item
+                            rules={[
+                              {
+                                required: true,
+                                message: "Status tidak boleh kosong",
+                              },
+                            ]}
+                            initialValue="Proses"
+                            name="status"
+                            className="m-0"
+                          >
+                            <Select
+                              size="large"
+                              placeholder="Status"
+                              options={[
+                                { label: "Proses", value: "Proses" },
+                                { label: "Sebagian", value: "Sebagian" },
+                                { label: "Selesai", value: "Selesai" },
+                              ]}
+                              className="w-full lg:col-span-1 col-span-3"
+                            />
+                          </Form.Item>
+                        </div>
+                        <div className="w-full grid grid-cols-2 gap-3">
+                          <Form.Item
+                            rules={[
+                              {
+                                required: true,
+                                message: "Harap pilih lokasi gudang pengirim",
+                              },
+                            ]}
+                            name="location_sender"
+                            className="m-0"
+                          >
+                            <Select
+                              onSearch={(value) => {
+                                setLoading({ ...loading, location1: true });
+                                setLocation1(value);
+                              }}
+                              onSelect={(value) => {
+                                const selectedLocation = JSON.parse(value);
+                                setSelectedLocation1(selectedLocation);
+                              }}
+                              value={selectedLocation1}
+                              placeholder="Lokasi Gudang Pengirim"
+                              showSearch
+                              filterOption={false}
+                              size="large"
+                              loading={loading.location1}
+                              options={options.location1}
+                            />
+                          </Form.Item>
+                          <Form.Item
+                            rules={[
+                              {
+                                required: true,
+                                message: "Harap pilih lokasi gudang penerima",
+                              },
+                            ]}
+                            name="location_recipient"
+                            className="m-0"
+                          >
+                            <Select
+                              onSearch={(value) => {
+                                setLoading({ ...loading, location2: true });
+                                setLocation2(value);
+                              }}
+                              onSelect={(value) => {
+                                const selectedLocation = JSON.parse(value);
+                                setSelectedLocation2(selectedLocation);
+                              }}
+                              value={selectedLocation2}
+                              placeholder="Lokasi Gudang Penerima"
+                              showSearch
+                              filterOption={false}
+                              size="large"
+                              loading={loading.location2}
+                              options={options.location2}
+                            />
+                          </Form.Item>
+                        </div>
+                      </div>
 
-                  <span className="uppercase text-[#036B82] font-bold text-xl mb-1">Produk Transfer</span>
-                  {products.length > 0 && (
-                    <span className="text-xs text-gray-400 ml-3">
-                      *Jika terdapat unit yang tidak muncul, kemungkinan unit produk kosong di gudang pengirim
-                    </span>
-                  )}
-                  <Select
-                    disabled={!selectedLocation1}
-                    onSearch={(value) => {
-                      setLoading({ ...loading, product: true });
-                      setSearchProduct(value);
-                    }}
-                    onSelect={(value) => {
-                      const selectedProduct = JSON.parse(value);
+                      <span className="uppercase text-[#036B82] font-bold text-xl mb-1">Produk Transfer</span>
+                      {products.length > 0 && (
+                        <span className="text-xs text-gray-400 ml-3">
+                          *Jika terdapat unit yang tidak muncul, kemungkinan unit produk kosong di gudang pengirim
+                        </span>
+                      )}
+                      <Select
+                        disabled={!selectedLocation1}
+                        onSearch={(value) => {
+                          setLoading({ ...loading, product: true });
+                          setSearchProduct(value);
+                        }}
+                        onSelect={(value) => {
+                          const selectedProduct = JSON.parse(value);
 
-                      if (selectedProduct.available_units.length > 0) {
-                        selectedProduct.unique_id = generateRandomId();
-                        setProducts([...products, selectedProduct]);
-                      } else {
-                        notification["error"]({
-                          message: "Produk kosong",
-                          description: "Stok produk kosong di gudang pengirim",
-                        });
-                      }
-                    }}
-                    value={null}
-                    size="large"
-                    placeholder={!selectedLocation1 ? "Pilih lokasi gudang pengirim" : "Pilih produk"}
-                    filterOption={false}
-                    showSearch
-                    className={`w-full mb-3 border-[3px] rounded-lg ${
-                      !selectedLocation1 ? "" : "hover:border-[#036B82] border-[#036B82]"
-                    }`}
-                    loading={loading.product}
-                    options={options.products}
-                  />
+                          if (selectedProduct.available_units.length > 0) {
+                            selectedProduct.unique_id = generateRandomId();
+                            setProducts([...products, selectedProduct]);
+                          } else {
+                            notification["error"]({
+                              message: "Produk kosong",
+                              description: "Stok produk kosong di gudang pengirim",
+                            });
+                          }
+                        }}
+                        value={null}
+                        size="large"
+                        placeholder={!selectedLocation1 ? "Pilih lokasi gudang pengirim" : "Pilih produk"}
+                        filterOption={false}
+                        showSearch
+                        className={`w-full mb-3 border-[3px] rounded-lg ${
+                          !selectedLocation1 ? "" : "hover:border-[#036B82] border-[#036B82]"
+                        }`}
+                        loading={loading.product}
+                        options={options.products}
+                      />
 
-                  <DataTable
-                    columns={columns}
-                    data={products}
-                    keyField="unique_id"
-                    customStyles={customStyles}
-                    noDataComponent={`--Harap pilih produk--`}
-                  />
+                      <DataTable
+                        columns={columns}
+                        data={products}
+                        keyField="unique_id"
+                        customStyles={customStyles}
+                        noDataComponent={`--Harap pilih produk--`}
+                      />
 
-                  <Form.Item name="description" className="m-0">
-                    <Input.TextArea className="mt-5 w-full" placeholder="Deskripsi" rows={5} />
-                  </Form.Item>
+                      <Form.Item name="description" className="m-0">
+                        <Input.TextArea className="mt-5 w-full" placeholder="Deskripsi" rows={5} />
+                      </Form.Item>
 
-                  <div className="w-full flex item-center gap-3 mt-5 justify-center">
-                    {loading.send ? (
-                      <Spin />
-                    ) : (
-                      <button
-                        type="submit"
-                        className="bg-cyan-700 lg:w-2/5 w-2/4 hover:bg-cyan-700/80 duration-150 rounded-md m-1 text-sm"
-                      >
-                        <p className="px-4 py-2 m-0 text-white">KIRIM</p>
-                      </button>
-                    )}
-                    {loading.cetak ? (
-                      <Spin />
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={handlePrintData}
-                        className="bg-cyan-700 lg:w-2/5 w-2/4 hover:bg-cyan-700/80 duration-150 rounded-md m-1 text-sm"
-                      >
-                        <p className="px-4 py-2 m-0 text-white">CETAK</p>
-                      </button>
-                    )}
-                  </div>
-                </Form>
+                      <div className="w-full flex item-center gap-3 mt-5 justify-center">
+                        {loading.send ? (
+                          <Spin />
+                        ) : (
+                          <button
+                            type="submit"
+                            className="bg-cyan-700 lg:w-2/5 w-2/4 hover:bg-cyan-700/80 duration-150 rounded-md m-1 text-sm"
+                          >
+                            <p className="px-4 py-2 m-0 text-white">KIRIM</p>
+                          </button>
+                        )}
+                        {loading.cetak ? (
+                          <Spin />
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={handlePrintData}
+                            className="bg-cyan-700 lg:w-2/5 w-2/4 hover:bg-cyan-700/80 duration-150 rounded-md m-1 text-sm"
+                          >
+                            <p className="px-4 py-2 m-0 text-white">CETAK</p>
+                          </button>
+                        )}
+                      </div>
+                    </Form>
+                  </Tabs.TabPane>
+                  <Tabs.TabPane tab="History Permintaan" key="2">
+                    <HistoryPage />
+                  </Tabs.TabPane>
+                </Tabs>
               </LayoutContent>
             </LayoutWrapper>
           </DashboardLayout>

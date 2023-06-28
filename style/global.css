@@ -29,6 +29,24 @@
   align-items: center !important;
 }
 
+.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #036b82 !important;
+}
+
+.ant-tabs-tab:hover {
+  color: #036b82 !important;
+}
+.ant-tabs-tab:active {
+  color: #036b82 !important;
+}
+.ant-tabs-tab:focus {
+  color: #036b82 !important;
+}
+
+.ant-tabs-ink-bar {
+  background-color: #036b82 !important;
+}
+
 /*========= END CHANGE PLACEHOLDER COLOR ==============*/
 @media print {
   .ant-table-thead .ant-table-cell {
@@ -203,9 +221,7 @@ html[dir="rtl"] .ant-btn.ant-btn-loading:not(.ant-btn-circle):not(.ant-btn-circl
   padding-right: 29px;
 }
 
-html[dir="rtl"]
-  .ant-btn.ant-btn-loading:not(.ant-btn-circle):not(.ant-btn-circle-outline)
-  .anticon {
+html[dir="rtl"] .ant-btn.ant-btn-loading:not(.ant-btn-circle):not(.ant-btn-circle-outline) .anticon {
   margin-right: -14px;
   margin-left: 0;
 }
