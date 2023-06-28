@@ -230,7 +230,7 @@ const fetchNonPanel = async (cookies) => {
 
 const fetchAkunPiutang = async (cookies) => {
   const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/credit-accounts?populate";
+    process.env.NEXT_PUBLIC_URL + "/credit-accounts?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -260,13 +260,13 @@ function Piutang({ props }) {
   const nonPanel = props.nonPanel.data;
   const returNonPanel = props.returNonPanel.data;
   const piutang = props.piutang.data;
+  const akunPiutang = props.akunPiutang.data;
   //const customerData = props.customer.data[0];
   const [supplier, setSupplier] = useState();
-  const [dataTabel, setDataTabel] = useState([]);
+  const [dataTabel, setDataTabel] = useState([]); console.log("datatabel", dataTabel);
   const [dataRetur, setDataRetur] = useState([]);
   const [sisaHutang, setSisaHutang] = useState([]);
   const [sisaHutangTotal, setSisaHutangTotal] = useState({});
-  const akunPiutang = props.akunPiutang.data;
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -332,34 +332,26 @@ function Piutang({ props }) {
   const onFinish = (values) => {
     // save no giro to oth
     var biayaInfo = biaya.info;
-
+    console.log(values,"value");
     setLoading(true);
     setInfo("sukses");
 
     var totalTunai = 0;
     var totalTransfer = 0;
     var totalGiro = 0;
-    // var totalCn = 0;
-    // var totalOth = 0;
     for (const key in biaya.info) {
       totalTunai += biaya.info[key].tunai;
       totalTransfer += biaya.info[key].transfer;
       totalGiro += biaya.info[key].giro;
-      //totalCn += biaya.info[key].cn;
-      //totalOth += biaya.info[key].oth;
     }
 
     values.metode_bayar1 = "tunai";
     values.metode_bayar2 = "transfer";
     values.metode_bayar3 = "giro";
-    //values.metode_bayar4 = "cn";
-    //values.metode_bayar5 = "oth";
 
     values.bayar1 = totalTunai;
     values.bayar2 = totalTransfer;
     values.bayar3 = totalGiro;
-    //values.bayar4 = totalCn;
-    //values.bayar5 = totalOth;
 
     props.piutang.data.forEach((element) => {
       if (values.no_piutang == element.attributes.no_piutang) {
@@ -370,6 +362,61 @@ function Piutang({ props }) {
         setInfo("gagal");
       }
     });
+
+    // cek untuk akun hutang (cek coa)
+    console.log("total tunai, tranfer, giro", totalTunai, totalTransfer, totalGiro);
+    if(document == "Publish"){
+      akunPiutang.forEach((item) => {
+        if(item.attributes.setting == true){
+          if(totalTunai != 0 && item.attributes.type == "Tunai"){
+            if(item.attributes.chart_of_account.data.attributes.saldo < totalTunai){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, saldo untuk akun tunai kurang untuk melakukan pembayaran.",
+              });
+              setInfo("gagal");
+            }
+          } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
+            if(item.attributes.chart_of_account.data.attributes.saldo < totalTransfer){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, saldo untuk akun transfer kurang untuk melakukan pembayaran.",
+              });
+              setInfo("gagal");
+            }
+          } else if(totalGiro != 0 && item.attributes.type == "Giro"){
+            if(item.attributes.chart_of_account.data.attributes.saldo < totalGiro){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, saldo untuk akun giro kurang untuk melakukan pembayaran.",
+              });
+              setInfo("gagal");
+            }
+          }
+        } else {
+          if(totalTunai != 0 && item.attributes.type == "Tunai"){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
+              });
+              setInfo("gagal");
+          } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
+              });
+              setInfo("gagal");
+          } else if(totalGiro != 0 && item.attributes.type == "Giro"){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
+              });
+              setInfo("gagal");
+          }
+        }
+      });
+
+    }
 
     setDataValues(values);
     setLoading(false);
@@ -407,7 +454,8 @@ function Piutang({ props }) {
       "/credits/",
       "piutang",
       akunPiutang,
-      setCreateId
+      setCreateId,
+      akunPiutang,
     );
     //console.log("Create master data", createId);
     //editPenjualan(createId);
@@ -442,9 +490,7 @@ function Piutang({ props }) {
           const data = sale;
           console.log("link url", url);
           const pembayaran =
-            item.attributes.cn +
             item.attributes.giro +
-            item.attributes.oth +
             item.attributes.transfer +
             item.attributes.tunai;
           const total =
@@ -524,9 +570,10 @@ function Piutang({ props }) {
 
   const calculatePriceTotal = (row, index) => {
     const total = calculatePrice(row, biaya, sisaHutangTotal, index);
-    sisaHutang[index] = total;
-    row.sisaPiutang = total;
-    return formatter.format(total);
+    sisaHutang[index] = total - row?.dibayar;
+    row.sisaPiutang = total - row?.dibayar;
+    var priceTotal = total - row?.dibayar;
+    return formatter.format(priceTotal);
   };
 
   const totalPiutangJatuhTempo = () => {
@@ -536,9 +583,7 @@ function Piutang({ props }) {
       for(let row in biaya.info) {
 
         if (biaya.info[row].pilihData == "pilih") {
-          //total = total + biaya.list[row].sisaPiutang;
-          //total = total + biaya.info[row].totalHutangJatuhTempo;
-          total = total + (biaya.list[row].attributes.total - biaya.list[row].subtotal);
+          total = total + (biaya.list[row].attributes.total - biaya.list[row].subtotal) - biaya.list[row].dibayar ;
         }
         if(biaya.info[row].totalHutangJatuhTempo == undefined) total = 0;
       };
@@ -558,8 +603,6 @@ function Piutang({ props }) {
         if (biaya.info[row].tunai != null) tunai = biaya.info[row].tunai;
         if (biaya.info[row].transfer != null) transfer = biaya.info[row].transfer;
         if (biaya.info[row].giro != null) giro = biaya.info[row].giro;
-        // if (biaya.info[row].cn != null) cn = biaya.info[row].cn;
-        // if (biaya.info[row].oth != null) oth = biaya.info[row].oth;
 
         total = total + tunai + transfer + giro;
       }
@@ -613,25 +656,6 @@ function Piutang({ props }) {
 
     // sales data
     sales.forEach((row) => {
-      // const lastIndex = row.attributes.purchasing_payments?.data?.length;
-      // const lastPayment =
-      //   row.attributes.purchasing_payments.data[lastIndex - 1];
-      // if (
-      //   lastPayment?.attributes.payment_remaining ===
-      //   lastPayment?.attributes.total_payment
-      // ) {
-      //   row.status = "Belum Dibayar";
-      // } else if (
-      //   lastPayment?.attributes.payment_remaining > 0 &&
-      //   lastPayment?.attributes.payment_remaining <
-      //     lastPayment?.attributes.total_payment
-      // ) {
-      //   row.status = "Dibayar Sebagian";
-      // } else if (lastPayment?.attributes.payment_remaining <= 0) {
-      //   row.status = "Selesai";
-      // } else {
-      //   row.status = "Dibayar Sebagian";
-      // }
 
       if(row.attributes.status_pembayaran) {
         row.status = row.attributes.status_pembayaran;
@@ -640,8 +664,13 @@ function Piutang({ props }) {
       }
 
       if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian") {
-        if (dataTabel.length > 0) dataTabel[dataTabel.length] = row;
-        else dataTabel[0] = row;
+        if (dataTabel.length > 0) {
+          //row.sisaPiutang = row.attributes.total;
+          dataTabel[dataTabel.length] = row;
+        }
+        else{
+          dataTabel[0] = row;
+        }
         //biaya.list.push(row);
         dispatch({ type: "ADD_LIST", list: row });
       }
@@ -651,25 +680,6 @@ function Piutang({ props }) {
 
     // panel data
     panel.forEach((row) => {
-      // const lastIndex = row.attributes.purchasing_payments?.data?.length;
-      // const lastPayment =
-      //   row.attributes.purchasing_payments.data[lastIndex - 1];
-      // if (
-      //   lastPayment?.attributes.payment_remaining ===
-      //   lastPayment?.attributes.total_payment
-      // ) {
-      //   row.status = "Belum Dibayar";
-      // } else if (
-      //   lastPayment?.attributes.payment_remaining > 0 &&
-      //   lastPayment?.attributes.payment_remaining <
-      //     lastPayment?.attributes.total_payment
-      // ) {
-      //   row.status = "Dibayar Sebagian";
-      // } else if (lastPayment?.attributes.payment_remaining <= 0) {
-      //   row.status = "Selesai";
-      // } else {
-      //   row.status = "Dibayar Sebagian";
-      // }
 
       if(row.attributes.status) {
         row.status = row.attributes.status;
@@ -691,25 +701,6 @@ function Piutang({ props }) {
 
     // non panel data
     nonPanel.forEach((row) => {
-      // const lastIndex = row.attributes.purchasing_payments?.data?.length;
-      // const lastPayment =
-      //   row.attributes.purchasing_payments.data[lastIndex - 1];
-      // if (
-      //   lastPayment?.attributes.payment_remaining ===
-      //   lastPayment?.attributes.total_payment
-      // ) {
-      //   row.status = "Belum Dibayar";
-      // } else if (
-      //   lastPayment?.attributes.payment_remaining > 0 &&
-      //   lastPayment?.attributes.payment_remaining <
-      //     lastPayment?.attributes.total_payment
-      // ) {
-      //   row.status = "Dibayar Sebagian";
-      // } else if (lastPayment?.attributes.payment_remaining <= 0) {
-      //   row.status = "Selesai";
-      // } else {
-      //   row.status = "Dibayar Sebagian";
-      // }
 
       if(row.attributes.status) {
         row.status = row.attributes.status;
@@ -732,7 +723,7 @@ function Piutang({ props }) {
     // piutang
     piutang.forEach((item) => {
       item.attributes.credit_details.data.forEach((detail) => {
-        total = detail.attributes.cn + detail.attributes.giro + detail.attributes.oth + detail.attributes.transfer + detail.attributes.tunai;
+        total = detail.attributes.giro + detail.attributes.transfer + detail.attributes.tunai;
         idDetail = detail.attributes.non_panel_sale?.data?.id ?? detail.attributes.panel_sale?.data?.id ?? detail.attributes.sales_sale?.data?.id;
         pembayaran.push({ id: idDetail, total: total});
       });
@@ -744,7 +735,8 @@ function Piutang({ props }) {
       element.dibayar = 0;
 
       pembayaran.forEach((item) => {
-        if(item.id == element.id) element.attributes.total -= item.total;
+        //if(item.id == element.id) element.attributes.total -= item.total;
+        if(item.id == element.id) element.dibayar += item.total;
       });
 
       returSales.forEach((row) => {
@@ -909,9 +901,6 @@ function Piutang({ props }) {
                       onChange={setStatusPembayaran}
                       allowClear
                     >
-                      <Select.Option value="Dibayar" key="Dibayar">
-                        Dibayar
-                      </Select.Option>
                       <Select.Option value="Dibayar Sebagian" key="Dibayar Sebagian">
                         Dibayar Sebagian
                       </Select.Option>

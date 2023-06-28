@@ -43,7 +43,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchAkun = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?sort[0]=setting%3Adesc&sort[0]=type%3Aasc";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?sort[0]=setting%3Adesc&sort[1]=type%3Aasc&populate=chart_of_account";
     const options = {
         method: "GET",
         headers: {
@@ -141,7 +141,7 @@ function Setting({ props }) {
     };
 
     const handleTambahAkun = () => {
-        router.push("/dashboard/biaya/hutang/tambahakun");
+        router.push("/dashboard/keuangan/hutang/tambahakun");
     };
 
     const onFinish = (values) => {
@@ -169,7 +169,7 @@ function Setting({ props }) {
             handleChangeSetting(row, row.id);
         } else {
           openNotificationWithIcon("error", "Setting gagal dirubah", "Karena tipe transaksi "+row.attributes.type+" memiliki lebih dari 1 akun aktif");
-          router.push("/dashboard/biaya/hutang/setting");
+          router.push("/dashboard/keuangan/hutang/setting");
         }
     };
 
@@ -186,7 +186,11 @@ function Setting({ props }) {
         }
 
         const newValues = {
-            data: values.attributes,
+            //data: values.attributes,
+            data: {
+              setting: values.attributes.setting,
+              saldo: values?.attributes?.chart_of_account?.data?.attributes?.saldo,
+            }
         };
 
         const JSONdata = JSON.stringify(newValues);

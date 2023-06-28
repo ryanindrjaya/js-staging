@@ -6,7 +6,7 @@ import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import DebtTable from "../../../../components/ReactDataTable/Cost/DebtAccountTable";
 import { UserOutlined, ShopOutlined, BankOutlined, UnorderedListOutlined } from "@ant-design/icons";
-import { Button, Select, Form, Input, InputNumber, notification } from "antd";
+import { Button, Select, Form, Input, InputNumber, Switch, notification } from "antd";
 import nookies from "nookies";
 import { toast } from "react-toastify";
 import { Spin } from "antd";
@@ -28,9 +28,15 @@ const Tambah = ({ props }) => {
   // var noAkun = String(props.akun?.meta?.pagination.total + 1).padStart(3, "0");
   // const [kodeAkun, setKodeAkun] = useState(`AC/ET/${user.id}/${noAkun}/${mm}/${yyyy}`);
 
+  //jenis akun
+  const [jenisAkun, setJenisAkun] = useState(true);
+
   const onFinish = async (values) => {
     setLoading(true);
-    values.setting = false;
+    // values.setting = false;
+    // if(values.transaksi == "Debit") values.transaksi == true;
+    // else values.transaksi == false;
+    console.log(values, "value");
     var data = { data: values };
 
     const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts";
@@ -78,6 +84,17 @@ const Tambah = ({ props }) => {
       message: title,
       description: message,
     });
+  };
+
+  const switchStyle = {
+    backgroundColor: 'blue', // Set the background color
+    borderColor: 'red', // Set the border color
+    // Add any other desired styles
+  };
+
+  const onChangeSwitch = (checked) => {
+    console.log(`switch to ${checked}`);
+    setJenisAkun(checked);
   };
 
   //const getRole = async (roleId) => {
@@ -181,55 +198,13 @@ const Tambah = ({ props }) => {
                       },
                     ]}
                   >
-                    <Select 
-                      size="large"
-                      placeholder="Jenis Akun"
-                      allowClear
-                    >
-                      <Select.Option value="ASET LANCAR" key="ASET LANCAR">
-                        ASET LANCAR
-                      </Select.Option>
-                      <Select.Option value="KAS & BANK" key="KAS & BANK">
-                        KAS & BANK
-                      </Select.Option>
-                      <Select.Option value="ASET TAK BERWUJUD" key="ASET TAK BERWUJUD">
-                        ASET TAK BERWUJUD
-                      </Select.Option>
-                      <Select.Option value="PIUTANG" key="PIUTANG">
-                        PIUTANG
-                      </Select.Option>
-                      <Select.Option value="PERSEDIAAN" key="PERSEDIAAN">
-                        PERSEDIAAN
-                      </Select.Option>
-                      <Select.Option value="AKTIVA LANCAR LAINNYA" key="AKTIVA LANCAR LAINNYA">
-                        AKTIVA LANCAR LAINNYA
-                      </Select.Option>
-                      <Select.Option value="AKTIVA TETAP" key="AKTIVA TETAP">
-                        AKTIVA TETAP
-                      </Select.Option>
-                      <Select.Option value="KEWAJIBAN" key="KEWAJIBAN">
-                        KEWAJIBAN
-                      </Select.Option>
-                      <Select.Option value="MODAL" key="MODAL">
-                        MODAL
-                      </Select.Option>
-                      <Select.Option value="PENDAPATAN" key="PENDAPATAN">
-                        PENDAPATAN
-                      </Select.Option>
-                      <Select.Option value="HARGA POKOK PENJUALAN" key="HARGA POKOK PENJUALAN">
-                        HARGA POKOK PENJUALAN
-                      </Select.Option>
-                      <Select.Option value="BIAYA OPERASONAL" key="BIAYA OPERASONAL">
-                        BIAYA OPERASONAL
-                      </Select.Option>
-                      <Select.Option value="PENDAPATAN BEBAN LAINNYA" key="PENDAPATAN BEBAN LAINNYA">
-                        PENDAPATAN (BEBAN) LAINNYA
-                      </Select.Option>
-                    </Select>
+                    <span>Kredit</span>
+                    <Switch className="mx-3" style={switchStyle} checked={jenisAkun} onChange={onChangeSwitch} />
+                    <span>Debit</span>
                   </Form.Item>
                 </div>
 
-                <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
+                {/* <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
                   <Form.Item 
                     name="jenis_sub_akun"
                   >
@@ -252,7 +227,7 @@ const Tambah = ({ props }) => {
                       </Select.Option>
                     </Select>
                   </Form.Item>
-                </div>
+                </div> */}
               </div>
 
               <Form.Item>
