@@ -18,7 +18,7 @@ const Tambah = ({ props }) => {
   const [form] = Form.useForm();
   const user = props.user;
   const akun = props.akun;
-  const [loading, setLoading] = useState(false); console.log("akun data",akun.data);
+  const [loading, setLoading] = useState(false);
   const { TextArea } = Input;
   const cookies = nookies.get(null, "token");
   const router = useRouter();
@@ -26,12 +26,12 @@ const Tambah = ({ props }) => {
   // NO Akun
   const [kodeAkun, setKodeAkun] = useState(akun.data.attributes.kode);
   //Akun COA
-  const [akunCOA, setAkunCOA] = useState(); console.log("akun coa", akunCOA);
+  const [akunCOA, setAkunCOA] = useState();
 
   const onFinish = async (values) => {
     setLoading(true);
     values.setting = akun.data.attributes.setting;
-    values.chart_of_account = akunCOA.id;
+    values.chart_of_account = akunCOA?.id;
     var data = { data: values}; console.log("values", values);
 
     const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts/"+ akun.data.id;
@@ -191,12 +191,6 @@ const Tambah = ({ props }) => {
                       </Select.Option>
                       <Select.Option value="Giro" key="Giro">
                         Bank Giro
-                      </Select.Option>
-                      <Select.Option value="CN" key="CN">
-                        CN
-                      </Select.Option>
-                      <Select.Option value="OTH" key="OTH">
-                        OTH
                       </Select.Option>
                     </Select>
                   </Form.Item>

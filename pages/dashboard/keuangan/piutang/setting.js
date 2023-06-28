@@ -43,7 +43,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchAkun = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts?sort[0]=setting%3Adesc&sort[0]=type%3Aasc";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts?sort[0]=setting%3Adesc&sort[0]=type%3Aasc&populate=chart_of_account";
     const options = {
         method: "GET",
         headers: {
@@ -186,7 +186,11 @@ function Setting({ props }) {
         }
 
         const newValues = {
-            data: values.attributes,
+            //data: values.attributes,
+            data: {
+              setting: values.attributes.setting,
+              saldo: values?.attributes?.chart_of_account?.data?.attributes?.saldo,
+            }
         };
 
         const JSONdata = JSON.stringify(newValues);

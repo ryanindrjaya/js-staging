@@ -29,12 +29,16 @@ Piutang.getInitialProps = async (context) => {
   const reqPiutang = await fetchPiutang(cookies);
   const piutang = await reqPiutang.json();
 
+  const reqAkunPiutang = await fetchAkunPiutang(cookies);
+  const akunPiutang = await reqAkunPiutang.json();
+
   return {
     props: {
       user,
       dataUserSales,
       locations,
       piutang,
+      akunPiutang
     },
   };
 };
@@ -97,13 +101,28 @@ const fetchPiutang = async (cookies) => {
   return req;
 };
 
+const fetchAkunPiutang = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
 function Piutang({ props }) {
   const user = props.user;
   const locations = props.locations.data;
   const data = props.piutang;
   const dataUserSales = props.dataUserSales;
+  const akunPiutang = props.akunPiutang;
   const router = useRouter();
-  const [piutang, setPiutang] = useState(data);
+  const [piutang, setPiutang] = useState(data); console.log("Piutang", piutang.data);
   const [supplier, setSupplier] = useState();
   const [searchParameters, setSearchParameters] = useState({});
   const cookies = nookies.get(null, "token");
@@ -181,6 +200,258 @@ function Piutang({ props }) {
         console.log("relation deleted");
       }
     });
+  };
+
+  const fetchDataCredit = async (cookies) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/credits?populate=deep";
+    const options = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+        },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = req.json();
+
+    return res;
+  };
+
+  const onChangeStatus = async (status, row) => {
+        
+    if(status == "Publish"){
+        const dataPiutang = await changeStatusPiutang(status, row.id);
+
+        if(dataPiutang.attributes.document == "Publish"){
+            dataPiutang.attributes.credit_details.data.forEach((item) => {
+              const sisa_piutang = item.attributes.sisa_piutang;
+    
+              // if (sisa_piutang == 0) editPenjualanDB("Lunas", item.attributes.purchasing.data.id);
+              // else editPenjualanDB("Dibayar Sebagian", item.attributes.purchasing.data.id);
+
+              const saleTypes = ["non_panel_sale", "panel_sale", "sales_sale"];
+              for (const saleType of saleTypes) {
+                const sale = item.attributes[saleType].data;
+                if (sale != null) {
+                  let url = `/${saleType}s/${sale.id}`;
+                  url = url.replaceAll("_", "-");
+                  const data = sale;
+                  console.log("link url", url);
+                  const pembayaran =
+                    item.attributes.giro +
+                    item.attributes.transfer +
+                    item.attributes.tunai;
+                  const total =
+                    pembayaran +
+                    item.attributes.total_retur +
+                    item.attributes.sisa_piutang;
+                  const floatTotal = parseFloat(total.toFixed(2));
+                  const floatDataTotal = parseFloat(data.attributes.total.toFixed(2));
+
+                  if (
+                    floatTotal == floatDataTotal &&
+                    item.attributes.sisa_piutang == 0
+                  ) {
+                    data.attributes.status = "Dibayar";
+                  } else if (
+                    floatTotal == floatDataTotal &&
+                    item.attributes.sisa_piutang > 0
+                  ) {
+                    data.attributes.status = "Dibayar Sebagian";
+                  } else {
+                    console.log("error update status pembayaran di penjualan");
+                  }
+
+                  data.attributes[`${saleType}_details`] = data.attributes[
+                    `${saleType}_details`
+                  ].data.map((detail) => detail.id);
+                  data.attributes[`retur_${saleType}s`] = data.attributes[
+                    `retur_${saleType}s`
+                  ].data.map((retur) => retur.id);
+
+                  data.attributes.area = data.attributes.area.data.id;
+                  data.attributes.customer = data.attributes.customer.data.id;
+                  data.attributes.location = data.attributes.location.data.id;
+                  data.attributes.wilayah = data.attributes.wilayah.data.id;
+
+                  //if (data && url) editPenjualanDB(data.attributes, url);
+                  if (data && url){
+                    //editPenjualanDB(data.attributes, url);
+                    if (sisa_piutang == 0) editPenjualanDB(data.attributes.status, url);
+                    else editPenjualanDB(data.attributes.status, url);
+                  }
+                }
+              }
+              
+            });
+        } else console.log("Not update lpb, karena draft");
+
+        // untuk memotong ke akun coa
+        console.log("data", row, akunPiutang);
+        akunPiutang.data.forEach((item) => {
+            if(item.attributes.setting == true){
+                row.attributes.credit_details.data.forEach((row) => {
+                  if(row.attributes.tunai != 0 && item.attributes.type == "Tunai"){
+                      putAkun(item.attributes.chart_of_account.data, row.attributes.tunai);
+                
+                  } else if(row.attributes.transfer != 0 && item.attributes.type == "Transfer"){
+                      putAkun(item.attributes.chart_of_account.data, row.attributes.transfer);
+                    
+                  } else if(row.attributes.giro != 0 && item.attributes.type == "Giro"){
+                      putAkun(item.attributes.chart_of_account.data, row.attributes.giro);
+                    
+                  }
+                });
+
+            } else {
+                if(item.attributes.type == "Tunai"){
+                    notification["error"]({
+                      message: "Gagal menambahkan data",
+                      description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
+                    });
+                    
+                } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
+                    notification["error"]({
+                      message: "Gagal menambahkan data",
+                      description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
+                    });
+                    
+                } else if(totalGiro != 0 && item.attributes.type == "Giro"){
+                    notification["error"]({
+                      message: "Gagal menambahkan data",
+                      description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
+                    });
+                    
+                }
+              }
+        });
+        //await putAkun(dataHutang.attributes.chart_of_account.data, dataHutang.attributes.total_pembayaran);
+
+    } else console.log("Not update all, karena draft");
+};
+
+const putAkun = async (akun, pembayaran) => { console.log("put akun", akun, pembayaran);
+  try {
+    var saldo = parseFloat((akun.attributes.saldo ?? 0) + pembayaran);
+
+      const data = {
+        data: {
+          saldo: saldo,
+        },
+      };
+  
+      const JSONdata = JSON.stringify(data);
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts/" + akun.id;
+      const options = {
+          method: "PUT",
+          headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + cookies.token,
+          },
+          body: JSONdata,
+      };
+  
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
+
+      if (req.status === 200) {
+          console.log("akun sukses diupdate");
+      } else {
+          console.log("akun error atau tidak ada");
+      }
+    } catch (error) {
+       console.log("errorr", error);
+    }
+};
+
+const editPenjualanDB = async (value, url) => {
+    try {
+      const data = {
+        data: {
+          status: value,
+        },
+      };
+
+      const JSONdata = JSON.stringify(data);
+      const endpoint = process.env.NEXT_PUBLIC_URL + url;
+      const options = {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+        body: JSONdata,
+      };
+
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
+      console.log("res", res);
+      if (req.status === 200) {
+        console.log("status di pembelian sukses diupdate");
+      } else {
+        console.log("status di pembelian error atau tidak ada");
+      }
+    } catch (error) {
+      console.log("errorr", error);
+    }
+};
+
+const changeStatusPiutang = async (status, id) => {
+    try {
+      const newValues = {
+        data: {
+            document: status,
+        },
+      };
+
+      const JSONdata = JSON.stringify(newValues);
+      const cookies = nookies.get(null, "token");
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/credits/" + id + "?populate=deep";
+
+      const options = {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+        body: JSONdata,
+      };
+
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
+
+      if (req.status === 200) {
+        const response = await fetchDataCredit(cookies);
+
+        if (res.data.attributes.document === "Draft") {
+          router.reload();
+        } else {
+          setPiutang(response);
+          return res.data;
+        }
+
+        openNotificationWithIcon(
+          "success",
+          "Status hutang berhasil dirubah",
+          "Status hutang berhasil dirubah. Silahkan cek hutang"
+        );
+      } else {
+        console.log("error", res);
+        openNotificationWithIcon(
+          "error",
+          "Status hutang gagal dirubah",
+          "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah"
+        );
+      }
+    } catch (error) {
+      console.log("error", error);
+      openNotificationWithIcon(
+        "error",
+        "Status hutang gagal dirubah",
+        "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah"
+      );
+    }
   };
 
   const openNotificationWithIcon = (type, title, message) => {
@@ -573,7 +844,7 @@ const print = () => {
               onUpdate={handleUpdate}
               onDelete={handleDelete}
               //onPageChange={handlePageChange}
-              //onChangeStatus={onChangeStatus}
+              onChangeStatus={onChangeStatus}
               //user={user}
             />
           </LayoutContent>

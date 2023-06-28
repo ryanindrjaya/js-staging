@@ -17,7 +17,7 @@ const Create = async (
   page,
   akun,
   setCreateId,
-  akunHutang,
+  akunSetting,
   //locations
 ) => {
   // CLEANING DATA
@@ -63,7 +63,7 @@ const Create = async (
     if (values.document == "Publish") {
       //akun.forEach((element) => {
 
-        akunHutang.forEach((item) => {
+        akunSetting.forEach((item) => {
           if(item.attributes.setting == true){
             if(totalTunai != 0 && item.attributes.type == "Tunai"){
               if(item.attributes.chart_of_account.data.attributes.saldo < totalTunai){
