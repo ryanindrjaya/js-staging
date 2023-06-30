@@ -44,10 +44,21 @@ export default function calculatePrice(row, products, productTotalPrice, product
   }
 
   if (disc > 0) {
+    console.log("disc = ", disc);
     priceUnit = priceUnit - disc;
   }
 
-  priceUnit = priceUnit + (priceUnit * margin) / 100;
+  console.log("dp1", Dp1);
+
+  margin = (priceUnit * margin) / 100;
+
+  console.log("priceUnit = ", priceUnit);
+  console.log("margin (%) = ", margin);
+
+  priceUnit = priceUnit + margin;
+
+  console.log("priceUnit + margin (%) = ", priceUnit);
+
   var price1 = calculatePercentage(priceUnit, Dp1);
   var price2 = calculatePercentage(price1, Dp2);
   //var price2 = price1;

@@ -60,9 +60,7 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchStore = async (cookies) => {
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL +
-    "/store-sales?sort[0]=createdAt:desc&populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales?sort[0]=createdAt:desc&populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -127,8 +125,7 @@ function Toko({ props }) {
 
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/store-sales?pagination[page]=" + page;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales?pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -162,18 +159,12 @@ function Toko({ props }) {
   const handleChangeStatus = async (values, id) => {
     // clean object
     for (var key in values.attributes) {
-      if (
-        values.attributes[key] === null ||
-        values.attributes[key] === undefined
-      ) {
+      if (values.attributes[key] === null || values.attributes[key] === undefined) {
         delete values.attributes[key];
       }
     }
 
-    if (
-      values.attributes?.document?.data === null ||
-      values.attributes?.document?.data === undefined
-    ) {
+    if (values.attributes?.document?.data === null || values.attributes?.document?.data === undefined) {
       delete values.attributes?.document;
     }
 
@@ -255,11 +246,7 @@ function Toko({ props }) {
                   }}
                 >
                   {locations.map((element) => {
-                    return (
-                      <Select.Option value={element.id}>
-                        {element.attributes.name}
-                      </Select.Option>
-                    );
+                    return <Select.Option value={element.id}>{element.attributes.name}</Select.Option>;
                   })}
                 </Select>
               </div>
@@ -273,11 +260,7 @@ function Toko({ props }) {
                   }}
                 >
                   {locations.map((element) => {
-                    return (
-                      <Select.Option value={element.id}>
-                        {element.attributes.name}
-                      </Select.Option>
-                    );
+                    return <Select.Option value={element.id}>{element.attributes.name}</Select.Option>;
                   })}
                 </Select>
               </div>
@@ -300,11 +283,7 @@ function Toko({ props }) {
                 </Select>
               </div>
               <div className="w-full md:w-1/5 px-3">
-                <DatePicker
-                  placeholder="Rentang Tanggal"
-                  size="large"
-                  style={{ width: "100%" }}
-                />
+                <DatePicker placeholder="Rentang Tanggal" size="large" style={{ width: "100%" }} />
               </div>
               <div className="w-full md:w-1/5 px-3">
                 <Select
@@ -316,11 +295,7 @@ function Toko({ props }) {
                   }}
                 >
                   {user.map((element) => {
-                    return (
-                      <Select.Option value={element.id}>
-                        {element.name}
-                      </Select.Option>
-                    );
+                    return <Select.Option value={element.id}>{element.name}</Select.Option>;
                   })}
                 </Select>
               </div>
@@ -395,9 +370,7 @@ function Toko({ props }) {
             </div>
 
             <div className="w-full flex justify-between mt-0 mb-2">
-              <span className="text-black text-md font-bold ml-1 mt-5">
-                Semua Penjualan
-              </span>
+              <span className="text-black text-md font-bold ml-1 mt-5">Semua Penjualan</span>
               <div className="mt-5">
                 <button
                   onClick={handleAdd}
@@ -405,9 +378,7 @@ function Toko({ props }) {
                   className="bg-cyan-700 mx-2 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
                 >
                   <div className="text-white text-center text-sm font-bold">
-                    <a className="text-white no-underline text-xs sm:text-xs">
-                      + Tambah
-                    </a>
+                    <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
                   </div>
                 </button>
 
@@ -435,9 +406,7 @@ function Toko({ props }) {
                 className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
               >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    Print PDF
-                  </a>
+                  <a className="text-white no-underline text-xs sm:text-xs">Print PDF</a>
                 </div>
               </button>
               <button
@@ -446,9 +415,7 @@ function Toko({ props }) {
                 className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
               >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    Print CSV
-                  </a>
+                  <a className="text-white no-underline text-xs sm:text-xs">Print CSV</a>
                 </div>
               </button>
               <button
@@ -457,9 +424,7 @@ function Toko({ props }) {
                 className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
               >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    Print XLS
-                  </a>
+                  <a className="text-white no-underline text-xs sm:text-xs">Print XLS</a>
                 </div>
               </button>
               <button
@@ -468,9 +433,7 @@ function Toko({ props }) {
                 className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
               >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    Kolom Tampak
-                  </a>
+                  <a className="text-white no-underline text-xs sm:text-xs">Kolom Tampak</a>
                 </div>
               </button>
             </div>
@@ -482,6 +445,7 @@ function Toko({ props }) {
               onPageChange={handlePageChange}
               onChangeStatus={onChangeStatus}
               returPage={returPage}
+              page="toko"
             />
           </LayoutContent>
         </LayoutWrapper>

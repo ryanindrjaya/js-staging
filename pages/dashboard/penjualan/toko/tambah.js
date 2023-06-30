@@ -168,7 +168,6 @@ async function getStock(productId, unit) {
 }
 
 function Toko({ props }) {
-  console.log("props", props);
   const cookies = nookies.get(null, "token");
   const products = useSelector((state) => state.Sales);
   const dispatch = useDispatch();

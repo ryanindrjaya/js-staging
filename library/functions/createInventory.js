@@ -271,7 +271,7 @@ export async function createInventoryFromPenjualan(row) {
   }
 }
 
-export async function createInventoryFromReturPenjualan(row) {
+export async function createInventoryFromReturPenjualan(row, customer) {
   const data = [];
 
   const returStoreSale = await getStoreRetur(row.id);
@@ -307,14 +307,15 @@ export async function createInventoryFromReturPenjualan(row) {
       data,
       no_referensi: no_retur_store_sale,
       type: "Retur Penjualan",
+      keterangan: `Retur Penjualan dari ${customer}`,
     };
 
-    await addToGudang(body);
+    await addToGudang(body, "add");
   }
 }
 
-async function addToGudang(body) {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/inventories/subtract`, {
+async function addToGudang(body, operation = "subtract") {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/inventories/${operation}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
