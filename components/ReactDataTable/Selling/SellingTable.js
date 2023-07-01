@@ -186,7 +186,7 @@ export default function ReactDataTable({
     const returId = row.attributes.retur_store_sale?.data?.id;
 
     if (returId) {
-      if (returPage == "toko") router.push("toko/retur/print/" + row.id);
+      if (returPage == "toko") router.push("toko/retur/print/" + returId);
       if (returPage == "sales") router.push("sales/retur/print/" + row.id);
       if (returPage == "nonpanel") router.push("non_panel/retur/print/" + row.id);
       if (returPage == "panel") router.push("panel/retur/print/" + row.id);
