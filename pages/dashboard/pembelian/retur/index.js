@@ -44,7 +44,7 @@ Retur.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs?populate=*";
   const options = {
     method: "GET",
     headers: {

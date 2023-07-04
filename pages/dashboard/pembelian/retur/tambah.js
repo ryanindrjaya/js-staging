@@ -65,7 +65,7 @@ Retur.getInitialProps = async (context) => {
 };
 
 const fetchLocation = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -79,7 +79,7 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchDataRetur = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -93,7 +93,7 @@ const fetchDataRetur = async (cookies) => {
 };
 
 const fetchDataLPB = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=*";
   const options = {
     method: "GET",
     headers: {
