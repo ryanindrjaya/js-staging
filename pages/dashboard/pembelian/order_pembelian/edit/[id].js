@@ -46,7 +46,7 @@ Edit.getInitialProps = async (context) => {
   const req3 = await fetchUser(cookies);
   user = await req3.json();
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/purchases/${id}?populate=deep`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/purchases/${id}?populate=*, supplier, location , purchase_details.products.*`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -132,7 +132,7 @@ function Edit({ props }) {
   const dispatch = useDispatch();
 
   var locations = props.locations.data;
-  const initialValues = props.data;
+  const initialValues = props.data; console.log("initialValues", initialValues);
   const user = props.user;
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);

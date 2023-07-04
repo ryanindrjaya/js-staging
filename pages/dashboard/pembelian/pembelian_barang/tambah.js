@@ -91,7 +91,7 @@ const fetchDataPurchasing = async (cookies) => {
 };
 
 const fetchDataPurchase = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/?populate=deep&filters[delivery_status][$eq]=Terkirim";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/?populate=*&filters[delivery_status][$eq]=Terkirim";
   const options = {
     method: "GET",
     headers: {
@@ -224,7 +224,7 @@ function Tambah({ props }) {
     // const supplierName = supplier?.attributes?.name;
     // console.log("this is validate step", nomorPO, supplierName);
 
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/purchasings?populate=deep&filters[purchase][id][$eq]=` + id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/purchasings?populate=*&filters[purchase][id][$eq]=` + id;
     console.log(endpoint);
     const options = {
       method: "GET",

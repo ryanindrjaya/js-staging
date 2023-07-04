@@ -37,7 +37,7 @@ Pembelian.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=*";
   const options = {
     method: "GET",
     headers: {

@@ -122,7 +122,7 @@ const fetchDataPurchasing = async (cookies) => {
 };
 
 const fetchDataPurchase = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/?populate=deep&filters[delivery_status][$eq]=Terkirim";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases/?populate=*&filters[delivery_status][$eq]=Terkirim";
   const options = {
     method: "GET",
     headers: {

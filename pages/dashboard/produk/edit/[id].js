@@ -634,7 +634,7 @@ const fetchProduct = async (cookies, context) => {
 };
 
 const fetchDataProduct = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/products?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/products?populate=*";
   const options = {
     method: "GET",
     headers: {
