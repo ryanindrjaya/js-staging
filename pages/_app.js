@@ -15,21 +15,21 @@ import { ToastContainer } from "react-toastify";
 import { useSelector, useDispatch } from "react-redux";
 import Router from "next/router";
 import Middleware from "../components/Middleware";
+import ErrorBoundary from "../components/ErrorBoundary";
 
 class CustomApp extends App {
   render() {
     const { Component, pageProps, store } = this.props;
 
-
     return (
       <Provider store={store}>
         <ThemeProvider>
           <Middleware>
-            <Component {...pageProps} />
+            <ErrorBoundary>
+              <Component {...pageProps} />
+            </ErrorBoundary>
           </Middleware>
-          <ToastContainer
-            toastStyle={{ backgroundColor: "black", color: "white" }}
-          />
+          <ToastContainer toastStyle={{ backgroundColor: "black", color: "white" }} />
         </ThemeProvider>
       </Provider>
     );

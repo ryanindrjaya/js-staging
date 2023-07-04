@@ -4,19 +4,7 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import {
-  Form,
-  Input,
-  DatePicker,
-  Button,
-  message,
-  Upload,
-  Select,
-  Spin,
-  notification,
-  InputNumber,
-  Modal,
-} from "antd";
+import { Form, Input, DatePicker, Button, message, Upload, Select, Spin, notification, InputNumber, Modal } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import nookies from "nookies";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
@@ -33,8 +21,7 @@ ReturToko.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/store-sales/" + id + "?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales/" + id + "?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -89,8 +76,7 @@ const fetchDataLocation = async (cookies) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/retur-store-sales?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-store-sales?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -160,8 +146,7 @@ function ReturToko({ props }) {
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
   var date = today.getDate() + "/" + mm + "/" + yyyy;
-  var time =
-    today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 
   // DPP & PPN
   const [dpp, setDPP] = useState(0);
@@ -180,18 +165,12 @@ function ReturToko({ props }) {
   const [faktur, setFaktur] = useState(store.data.attributes.faktur);
   const [customer, setCustomer] = useState(store.data.attributes.customer_name);
   const [saleDate, setSaleDate] = useState(store.data.attributes.sale_date);
-  const [locationStore, setLocationStore] = useState(
-    store.data.attributes.location.data.attributes.name
-  );
-  const [addFee1Desc, setaddFee1Desc] = useState(
-    store.data.attributes.additional_fee_1_desc
-  );
-  const [addFee2Desc, setaddFee2Desc] = useState(
-    store.data.attributes.additional_fee_2_desc
-  );
-  const [addFee3Desc, setaddFee3Desc] = useState(
-    store.data.attributes.additional_fee_3_desc
-  );
+  const [locationStore, setLocationStore] = useState(store.data.attributes.location.data.attributes.name);
+  const [addFee1Desc, setaddFee1Desc] = useState(store.data.attributes.additional_fee_1_desc);
+  const [addFee2Desc, setaddFee2Desc] = useState(store.data.attributes.additional_fee_2_desc);
+  const [addFee3Desc, setaddFee3Desc] = useState(store.data.attributes.additional_fee_3_desc);
+
+  const [lokasiGudang, setLokasiGudang] = useState();
 
   // Button Include
   const [btnDisc, setBtnDisc] = useState("Uninclude");
@@ -235,24 +214,13 @@ function ReturToko({ props }) {
         [idx]: res.data[0].attributes,
       });
 
-      const unit1 = product.unit_1
-        ? stok.stock_unit_1 + " " + product.unit_1
-        : "";
-      const unit2 = product.unit_2
-        ? stok.stock_unit_2 + " " + product.unit_2
-        : "";
-      const unit3 = product.unit_3
-        ? stok.stock_unit_3 + " " + product.unit_3
-        : "";
-      const unit4 = product.unit_4
-        ? stok.stock_unit_4 + " " + product.unit_4
-        : "";
-      const unit5 = product.unit_5
-        ? stok.stock_unit_5 + " " + product.unit_5
-        : "";
+      const unit1 = product.unit_1 ? stok.stock_unit_1 + " " + product.unit_1 : "";
+      const unit2 = product.unit_2 ? stok.stock_unit_2 + " " + product.unit_2 : "";
+      const unit3 = product.unit_3 ? stok.stock_unit_3 + " " + product.unit_3 : "";
+      const unit4 = product.unit_4 ? stok.stock_unit_4 + " " + product.unit_4 : "";
+      const unit5 = product.unit_5 ? stok.stock_unit_5 + " " + product.unit_5 : "";
 
-      stokGudang =
-        unit1 + " " + unit2 + " " + unit3 + " " + unit4 + " " + unit5;
+      stokGudang = unit1 + " " + unit2 + " " + unit3 + " " + unit4 + " " + unit5;
 
       setStokString({
         ...stokString,
@@ -278,8 +246,7 @@ function ReturToko({ props }) {
       const unit4 = product.unit_4 ? "0" + " " + product.unit_4 : "";
       const unit5 = product.unit_5 ? "0" + " " + product.unit_5 : "";
 
-      stokGudang =
-        unit1 + " " + unit2 + " " + unit3 + " " + unit4 + " " + unit5;
+      stokGudang = unit1 + " " + unit2 + " " + unit3 + " " + unit4 + " " + unit5;
 
       setStokString({
         ...stokString,
@@ -297,8 +264,7 @@ function ReturToko({ props }) {
       const productId = products.productList[index]?.id;
       const productName = products.productList[index]?.attributes?.name;
       const unitIndex = values?.jumlah_option?.[index] ?? 1;
-      const productUnit =
-        products.productList[index]?.attributes?.["unit_" + unitIndex];
+      const productUnit = products.productList[index]?.attributes?.["unit_" + unitIndex];
 
       if (typeof unitIndex === "string") {
         productUnit = unitIndex;
@@ -338,10 +304,7 @@ function ReturToko({ props }) {
         title: "Retur Gagal",
         content: (
           <div>
-            <p>
-              Item ini tidak bisa dilakukan retur. Silahkan cek kembali stok
-              gudang yang tersedia:
-            </p>
+            <p>Item ini tidak bisa dilakukan retur. Silahkan cek kembali stok gudang yang tersedia:</p>
             <ul>
               {cannotBeReturnedProducts.map((product) => (
                 <li>{product === undefined ? "" : `- ${product}`} </li>
@@ -372,17 +335,14 @@ function ReturToko({ props }) {
     if (grandTotalFloat > paymentFloat) {
       notification["error"]({
         message: "Overprice",
-        description:
-          "Harga retur melebih dari Sisa pembayaran / Harga Penjualan",
+        description: "Harga retur melebih dari Sisa pembayaran / Harga Penjualan",
       });
       setLoading(false);
       return;
     }
 
     returStore.data.forEach((element) => {
-      if (
-        values.no_retur_store_sale == element.attributes.no_retur_store_sale
-      ) {
+      if (values.no_retur_store_sale == element.attributes.no_retur_store_sale) {
         notification["error"]({
           message: "Gagal menambahkan data",
           description: "Data gagal ditambahkan, karena no penjualan sama",
@@ -410,7 +370,8 @@ function ReturToko({ props }) {
       productSubTotal,
       setListId,
       "/retur-store-sale-details",
-      form
+      form,
+      lokasiGudang
     );
   };
 
@@ -506,13 +467,9 @@ function ReturToko({ props }) {
     // if both are same then we should not set new price for grand total.
     // if they are not, then set new grand total
     if (discPrice !== totalPrice && discPrice !== 0) {
-      setGrandTotal(
-        discPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan)
-      );
+      setGrandTotal(discPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
     } else {
-      setGrandTotal(
-        totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan)
-      );
+      setGrandTotal(totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
     }
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
 
@@ -567,6 +524,7 @@ function ReturToko({ props }) {
       additional_fee_1_sub: store.data.attributes?.additional_fee_1_sub,
       additional_fee_2_sub: store.data.attributes?.additional_fee_2_sub,
       additional_fee_3_sub: store.data.attributes?.additional_fee_3_sub,
+      retur_date: moment(),
     });
 
     const retur_details = store.data.attributes.store_sale_details.data;
@@ -658,8 +616,9 @@ function ReturToko({ props }) {
 
     console.log("product list", productList.productList);
     // create an array of promises by mapping over the productList
-    const promises = products.productList.map(async (product) => {
-      const stock = await getStockAtLocation(product.id, locationStoreId);
+    const promises = products.productList.map(async (product, idx) => {
+      const unit = products.productInfo[idx]?.unitIndex;
+      const stock = await getStockAtLocation(product.id, unit);
 
       tempData = {
         ...tempData,
@@ -679,30 +638,33 @@ function ReturToko({ props }) {
   };
 
   // get stock at location id
-  const getStockAtLocation = async (productId, locationId) => {
+  const getStockAtLocation = async (productId, unit) => {
     let stockString = "Stok Kosong";
     try {
-      console.log("get stock", productId, locationId);
-      const response = await getStock(productId, locationId);
+      const response = await getStock(productId, unit);
       console.log("response", response);
 
-      if (response.data.length > 0) {
-        const stock = response.data[0].attributes;
-        const product = stock.product?.data?.attributes; // use optional chaining to check if product exists
+      if (response?.data) {
+        // sort based on qty desc
+        const sortedBasedOnQty = response.data.sort((a, b) => b.availableStock - a.availableStock);
+        setLokasiGudang({
+          ...lokasiGudang,
+          [productId]: sortedBasedOnQty,
+        });
+      }
 
-        const stockUnit1 = stock.stock_unit_1;
-        const stockUnit2 = stock.stock_unit_2;
-        const stockUnit3 = stock.stock_unit_3;
-        const stockUnit4 = stock.stock_unit_4;
-        const stockUnit5 = stock.stock_unit_5;
+      console.log(`response ${unit}`, response?.stock?.[unit]);
 
-        const satuanUnit1 = product.unit_1;
-        const satuanUnit2 = product.unit_2;
-        const satuanUnit3 = product.unit_3;
-        const satuanUnit4 = product.unit_4;
-        const satuanUnit5 = product.unit_5;
+      const stringArr = [];
 
-        stockString = `${stockUnit1} ${satuanUnit1}, ${stockUnit2} ${satuanUnit2}, ${stockUnit3} ${satuanUnit3}, ${stockUnit4} ${satuanUnit4}, ${stockUnit5} ${satuanUnit5}`;
+      if (response.available) {
+        for (const [key, value] of Object.entries(response?.stock)) {
+          stringArr.push(`${value} ${key}`);
+        }
+
+        return stringArr.join(", ");
+      } else {
+        return null;
       }
     } catch (error) {
       console.error("error", error);
@@ -711,14 +673,11 @@ function ReturToko({ props }) {
         [productId]: "Error fetching stock data",
       });
     }
-    return stockString;
   };
 
-  async function getStock(productId, locationId) {
+  async function getStock(productId, unit) {
     const cookies = nookies.get(null, "token");
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL +
-      `/inventories?filters[location][id][$eq]=${locationId}&filters[product][id][$eq]=${productId}&populate=*`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/inventories/user/location?product=${productId}&unit=${unit}`;
     const options = {
       method: "GET",
       headers: {
@@ -729,6 +688,8 @@ function ReturToko({ props }) {
 
     const req = await fetch(endpoint, options);
     const res = await req.json();
+
+    console.log("res get stock at location", res);
 
     return res;
   }
@@ -753,9 +714,7 @@ function ReturToko({ props }) {
             >
               <div className="w-full flex flex-wrap justify-start -mx-3 mt-1">
                 <div className="w-full md:w-1/3 px-3 mt-2 md:mb-0">
-                  <p className="text-sm text-start ml-9">
-                    No Faktur : {faktur}
-                  </p>
+                  <p className="text-sm text-start ml-9">No Faktur : {faktur}</p>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mt-2 md:mb-0">
                   <p className="text-sm text-start">Customer : {customer}</p>
@@ -763,9 +722,7 @@ function ReturToko({ props }) {
               </div>
               <div className="w-full flex flex-wrap justify-start -mx-3">
                 <div className="w-full md:w-1/3 px-3 md:mb-0">
-                  <p className="text-sm text-start ml-9">
-                    Tanggal : {saleDate}
-                  </p>
+                  <p className="text-sm text-start ml-9">Tanggal : {saleDate}</p>
                 </div>
                 <div className="w-full md:w-1/3 px-3 md:mb-0">
                   <p className="text-sm text-start">Lokasi : {locationStore}</p>
@@ -788,10 +745,7 @@ function ReturToko({ props }) {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "40px" }}
-                      placeholder="No. Penjualan"
-                    />
+                    <Input style={{ height: "40px" }} placeholder="No. Penjualan" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -941,51 +895,26 @@ function ReturToko({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full flex flex-wrap md:w-1/3 justify-start -mt-14 mb-3">
-                  <Form.Item
-                    name="dpp"
-                    value={dpp}
-                    className="w-full h-2 md:w-1/2 mx-2"
-                  >
+                  <Form.Item name="dpp" value={dpp} className="w-full h-2 md:w-1/2 mx-2">
                     <span> DPP </span> <span>: {formatter.format(dpp)}</span>
                   </Form.Item>
-                  <Form.Item
-                    name="ppn"
-                    value={ppn}
-                    className="w-full h-2 md:w-1/2 mx-2"
-                  >
+                  <Form.Item name="ppn" value={ppn} className="w-full h-2 md:w-1/2 mx-2">
                     <span> PPN </span> <span>: {formatter.format(ppn)}</span>
                   </Form.Item>
-                  <Form.Item
-                    name="grandtotal"
-                    value={totalPrice}
-                    className="w-full h-2 md:w-1/2 mx-2"
-                  >
-                    <span> Total </span>{" "}
-                    <span>: {formatter.format(totalPrice)}</span>
+                  <Form.Item name="grandtotal" value={totalPrice} className="w-full h-2 md:w-1/2 mx-2">
+                    <span> Total </span> <span>: {formatter.format(totalPrice)}</span>
                   </Form.Item>
-                  <Form.Item
-                    name="biayaTambahan"
-                    value={biayaTambahan}
-                    className="w-full h-2 md:w-1/2 mx-2"
-                  >
-                    <span> Biaya Tambahan </span>{" "}
-                    <span>: {formatter.format(biayaTambahan)}</span>
+                  <Form.Item name="biayaTambahan" value={biayaTambahan} className="w-full h-2 md:w-1/2 mx-2">
+                    <span> Biaya Tambahan </span> <span>: {formatter.format(biayaTambahan)}</span>
                   </Form.Item>
 
-                  <Form.Item
-                    name="grandTotal"
-                    value={grandTotal}
-                    className="w-full h-2 md:w-1/2 mx-2 mt-3 text-lg"
-                  >
-                    <span> Total </span>{" "}
-                    <span>: {formatter.format(grandTotal)}</span>
+                  <Form.Item name="grandTotal" value={grandTotal} className="w-full h-2 md:w-1/2 mx-2 mt-3 text-lg">
+                    <span> Total </span> <span>: {formatter.format(grandTotal)}</span>
                   </Form.Item>
                 </div>
               </div>
               <div className="w-full flex md:w-3/4 justify-end mb-2">
-                <p className="mb-4 font-bold text-center">
-                  Biaya Tambahan Lain Lain
-                </p>
+                <p className="mb-4 font-bold text-center">Biaya Tambahan Lain Lain</p>
               </div>
               <div className="w-full flex flex-wrap justify-end mb-3">
                 <div className="w-full md:w-1/3 px-3 mb-2 text-end md:mb-0 mt-2">
@@ -1049,8 +978,7 @@ function ReturToko({ props }) {
                           setBtnAddFee1("Include");
                           setAdditionalFee({
                             ...additionalFee,
-                            additional_fee_1_sub:
-                              store.data.attributes?.additional_fee_1_sub,
+                            additional_fee_1_sub: store.data.attributes?.additional_fee_1_sub,
                           });
                         }}
                         className="bg-cyan-700 rounded-md m-1 text-sm"
@@ -1081,8 +1009,7 @@ function ReturToko({ props }) {
                           setBtnAddFee2("Include");
                           setAdditionalFee({
                             ...additionalFee,
-                            additional_fee_2_sub:
-                              store.data.attributes?.additional_fee_2_sub,
+                            additional_fee_2_sub: store.data.attributes?.additional_fee_2_sub,
                           });
                         }}
                         className="bg-cyan-700 rounded-md m-1 text-sm"
@@ -1113,8 +1040,7 @@ function ReturToko({ props }) {
                           setBtnAddFee3("Include");
                           setAdditionalFee({
                             ...additionalFee,
-                            additional_fee_3_sub:
-                              store.data.attributes?.additional_fee_3_sub,
+                            additional_fee_3_sub: store.data.attributes?.additional_fee_3_sub,
                           });
                         }}
                         className="bg-cyan-700 rounded-md m-1 text-sm"
@@ -1151,9 +1077,7 @@ function ReturToko({ props }) {
                       htmlType="submit"
                       className="bg-cyan-700 rounded-md m-1 text-sm"
                     >
-                      <p className="px-4 py-2 m-0 text-white">
-                        SIMPAN DAN CETAK UNTUK BAYAR
-                      </p>
+                      <p className="px-4 py-2 m-0 text-white">SIMPAN DAN CETAK UNTUK BAYAR</p>
                     </button>
                   )}
                 </Form.Item>
@@ -1168,9 +1092,7 @@ function ReturToko({ props }) {
                       htmlType="submit"
                       className="bg-cyan-700 rounded-md m-1 text-sm"
                     >
-                      <p className="px-4 py-2 m-0 text-white">
-                        SIMPAN JADIKAN HUTANG
-                      </p>
+                      <p className="px-4 py-2 m-0 text-white">SIMPAN JADIKAN HUTANG</p>
                     </button>
                   )}
                 </Form.Item>
