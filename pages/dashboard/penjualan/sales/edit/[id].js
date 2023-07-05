@@ -72,7 +72,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchSalesSale = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -100,7 +100,7 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchInven = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/inventories?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/inventories?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -114,7 +114,7 @@ const fetchInven = async (cookies) => {
 };
 
 const fetchSalesSell = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sells?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sells?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -766,7 +766,7 @@ function Toko({ props }) {
     // const supplierName = supplier?.attributes?.name;
     // console.log("this is validate step", nomorPO, supplierName);
 
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/sales-sales?populate=deep&filters[sales_sell][id][$eq]=` + id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/sales-sales?populate=*&filters[sales_sell][id][$eq]=` + id;
     console.log(endpoint);
     const options = {
       method: "GET",

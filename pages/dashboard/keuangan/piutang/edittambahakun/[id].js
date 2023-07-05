@@ -192,7 +192,7 @@ const Tambah = ({ props }) => {
                 </div>
 
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
-                  <Form.Item name="type">
+                  <Form.Item name="chart_of_account">
                     <Coa page="piutang" onChange={setAkunCOA}/>
                   </Form.Item>
                 </div>

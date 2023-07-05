@@ -67,7 +67,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchDataPurchasing = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -81,7 +81,7 @@ const fetchDataPurchasing = async (cookies) => {
 };
 
 const fetchRetur = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -95,7 +95,7 @@ const fetchRetur = async (cookies) => {
 };
 
 const fetchHutang = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate=*, debt_details.purchasing";
   const options = {
     method: "GET",
     headers: {
@@ -109,7 +109,7 @@ const fetchHutang = async (cookies) => {
 };
 
 const fetchAkunHutang = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -123,7 +123,7 @@ const fetchAkunHutang = async (cookies) => {
 };
 
 const fetchAkunCOA = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?populate=deep&filters[jenis_akun][$eq]=true";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?populate=*&filters[jenis_akun][$eq]=true";
   const options = {
     method: "GET",
     headers: {
@@ -145,7 +145,7 @@ function Hutang({ props }) {
   const returLPB = props?.returLPB?.data;
   const akunHutang = props.akunHutang.data;
   const dataAkunCOA = props.akunCOA.data;
-  const hutang = props.hutang;
+  const hutang = props.hutang; console.log("hutang", hutang);
   const [supplier, setSupplier] = useState();
   const [dataTabel, setDataTabel] = useState([]);
   const [dataRetur, setDataRetur] = useState([]);

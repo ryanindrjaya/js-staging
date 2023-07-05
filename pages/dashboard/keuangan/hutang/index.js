@@ -77,7 +77,7 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchHutang = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate=deep";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate=*";
     const options = {
         method: "GET",
         headers: {
@@ -91,7 +91,7 @@ const fetchHutang = async (cookies) => {
 };
 
 const fetchAkunHutang = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=deep";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=*";
     const options = {
       method: "GET",
       headers: {
@@ -348,7 +348,7 @@ function Hutang({ props }) {
     
           const JSONdata = JSON.stringify(newValues);
           const cookies = nookies.get(null, "token");
-          const endpoint = process.env.NEXT_PUBLIC_URL + "/debts/" + id + "?populate=deep";
+          const endpoint = process.env.NEXT_PUBLIC_URL + "/debts/" + id + "?populate=*";
     
           const options = {
             method: "PUT",
@@ -403,7 +403,7 @@ function Hutang({ props }) {
     };
 
     const fetchData = async (cookies) => {
-        const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate=deep";
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate=*";
         const options = {
             method: "GET",
             headers: {
@@ -449,7 +449,7 @@ function Hutang({ props }) {
 
         }
 
-        const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate=deep&" + query;
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate=*&" + query;
 
         const cookies = nookies.get(null, "token");
         const options = {

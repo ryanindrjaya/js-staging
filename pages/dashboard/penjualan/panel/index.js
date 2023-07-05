@@ -81,7 +81,7 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchPanelSales = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/panel-sales?populate=deep&sort[createdAt]=desc";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/panel-sales?populate=*&sort[createdAt]=desc";
   const options = {
     method: "GET",
     headers: {

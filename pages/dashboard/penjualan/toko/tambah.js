@@ -92,7 +92,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchStoreSale = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -120,7 +120,7 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchInven = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/inventories?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/inventories?populate=*";
   const options = {
     method: "GET",
     headers: {

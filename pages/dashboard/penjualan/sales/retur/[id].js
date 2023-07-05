@@ -78,7 +78,7 @@ const fetchDataLocation = async (cookies) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-sales-sales?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-sales-sales?populate=*";
   const options = {
     method: "GET",
     headers: {
