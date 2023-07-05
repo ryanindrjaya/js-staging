@@ -83,7 +83,7 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchJurnal = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -170,7 +170,7 @@ function Jurnal({ props }) {
   };
 
   const fetchData = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=deep";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*";
     const options = {
       method: "GET",
       headers: {

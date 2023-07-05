@@ -33,9 +33,7 @@ const Tambah = ({ props }) => {
 
   const onFinish = async (values) => {
     setLoading(true);
-    // values.setting = false;
-    // if(values.transaksi == "Debit") values.transaksi == true;
-    // else values.transaksi == false;
+    values.jenis_akun = jenisAkun;
     console.log(values, "value");
     var data = { data: values };
 
@@ -191,15 +189,9 @@ const Tambah = ({ props }) => {
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="jenis_akun"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Jenis akun tidak boleh kosong!",
-                      },
-                    ]}
                   >
                     <span>Kredit</span>
-                    <Switch className="mx-3" style={switchStyle} checked={jenisAkun} onChange={onChangeSwitch} />
+                    <Switch className="mx-3" style={switchStyle} checked={jenisAkun} onChange={onChangeSwitch} defaultChecked={jenisAkun}/>
                     <span>Debit</span>
                   </Form.Item>
                 </div>
@@ -256,13 +248,10 @@ Tambah.getInitialProps = async (context) => {
   const req = await fetchData(cookies);
   const user = await req.json();
 
-  const reqAkun = await fetchAkun(cookies);
-  const akun = await reqAkun.json();
+  // const reqAkun = await fetchAkun(cookies);
+  // const akun = await reqAkun.json();
   //const req = await fetchData(cookies, "/users-permissions/roles");
   //data = await req.json();
-
-  //const reqLocations = await fetchData(cookies, "/locations");
-  //const resLocations = await reqLocations.json();
 
   //if (req.status !== 200) {
   //  context.res.writeHead(302, {
@@ -278,8 +267,7 @@ Tambah.getInitialProps = async (context) => {
     props: {
       data,
       user,
-      akun,
-      //locations: resLocations,
+      //akun,
     },
   };
 };
@@ -298,18 +286,18 @@ const fetchData = async (cookies) => {
   return req;
 };
 
-const fetchAkun = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?populate=deep";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
+// const fetchAkun = async (cookies) => {
+//   const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?populate=*";
+//   const options = {
+//     method: "GET",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: "Bearer " + cookies.token,
+//     },
+//   };
 
-  const req = await fetch(endpoint, options);
-  return req;
-};
+//   const req = await fetch(endpoint, options);
+//   return req;
+// };
 
 export default Tambah;

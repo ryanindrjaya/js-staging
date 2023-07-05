@@ -195,7 +195,7 @@ const Tambah = ({ props }) => {
 
               <div className="flex flex-wrap -mx-3 mb-2">
                 <Form.Item name="type" className="w-1/4 mb-5 ml-4">
-                  <Select size="large" placeholder="Type">
+                  <Select size="large" placeholder="Type" allowClear>
                     <Select.Option value="Tunai" key="Tunai">
                       Tunai
                     </Select.Option>
@@ -208,7 +208,7 @@ const Tambah = ({ props }) => {
                   </Select>
                 </Form.Item>
 
-                <Form.Item name="type" className="w-1/4 mb-5 ml-5">
+                <Form.Item name="chart_of_account" className="w-1/4 mb-5 ml-5">
                   <Coa page="hutang" onChange={setAkunCOA}/>
                 </Form.Item>
               </div>
@@ -280,7 +280,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchAkun = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=deep";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=*";
     const options = {
         method: "GET",
         headers: {
@@ -294,7 +294,7 @@ const fetchAkun = async (cookies) => {
 };
 
 const fetchCOA = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?populate=deep&filters[jenis_akun][$eq]=true";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?populate=*&filters[jenis_akun][$eq]=true";
   const options = {
     method: "GET",
     headers: {

@@ -62,7 +62,7 @@ const fetchLocation = async (cookies) => {
 const fetchStore = async (cookies) => {
   const endpoint =
     process.env.NEXT_PUBLIC_URL +
-    "/store-sales?sort[0]=createdAt:desc&populate=deep";
+    "/store-sales?sort[0]=createdAt:desc&populate=*";
   const options = {
     method: "GET",
     headers: {

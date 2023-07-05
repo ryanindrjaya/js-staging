@@ -206,7 +206,7 @@ const Tambah = ({ props }) => {
                   </Select>
                 </Form.Item>
 
-                <Form.Item name="type" className="w-1/4 mb-5 ml-5">
+                <Form.Item name="chart_of_account" className="w-1/4 mb-5 ml-5">
                   <Coa page="piutang" onChange={setAkunCOA}/>
                 </Form.Item>
               </div>
@@ -288,7 +288,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchAkun = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts?populate=deep";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts?populate=*";
     const options = {
         method: "GET",
         headers: {

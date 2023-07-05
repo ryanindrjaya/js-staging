@@ -66,7 +66,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchPanel = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/panel-sales?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/panel-sales?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -94,7 +94,7 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchInven = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/inventories?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/inventories?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -108,7 +108,7 @@ const fetchInven = async (cookies) => {
 };
 
 const fetchCustomer = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/customers?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/customers?populate=*";
   const options = {
     method: "GET",
     headers: {

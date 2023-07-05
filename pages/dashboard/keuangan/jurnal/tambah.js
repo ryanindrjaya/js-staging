@@ -78,7 +78,7 @@ const fetchUser = async (cookies) => {
 };
 
 const fetchJurnal = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -106,7 +106,7 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchInven = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/inventories?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/inventories?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -300,7 +300,8 @@ function Jurnal({ props }) {
     if (!isDuplicatedData) {
       setAkunList((list) => [...list, tempList[0]]);
     }
-  };
+
+  }; console.log("tempList",tempList,akunList);
 
   const clearData = () => {
     dispatch({ type: "CLEAR_DATA" });

@@ -83,7 +83,7 @@ const fetchLocation = async (cookies) => {
 
 const fetchNonPanelSales = async (cookies) => {
   const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/non-panel-sales?populate=deep";
+    process.env.NEXT_PUBLIC_URL + "/non-panel-sales?populate=*&sort[createdAt]=desc";
   const options = {
     method: "GET",
     headers: {

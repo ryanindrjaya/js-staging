@@ -100,7 +100,7 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchSell = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sells?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sells?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -333,7 +333,7 @@ function Sales({ props }) {
   useEffect(() => {
     const fetchSellData = async (query) => {
       setLoading(true);
-      const endpoint = process.env.NEXT_PUBLIC_URL + `/sales-sells?populate=deep&${query}`;
+      const endpoint = process.env.NEXT_PUBLIC_URL + `/sales-sells?populate=*&${query}`;
       const options = {
         method: "GET",
         headers: {

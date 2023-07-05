@@ -110,7 +110,7 @@ const fetchDataLocation = async (cookies) => {
 
 const fetchData = async (cookies) => {
   const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/retur-panel-sales?populate=deep";
+    process.env.NEXT_PUBLIC_URL + "/retur-panel-sales?populate=*";
   const options = {
     method: "GET",
     headers: {

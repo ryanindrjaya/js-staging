@@ -82,7 +82,7 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchSales = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -436,7 +436,7 @@ function SalesSale({ props }) {
     const fetchDataSales = async (query) => {
       setLoading(true);
       const cookies = nookies.get(null, "token");
-      const endpoint = process.env.NEXT_PUBLIC_URL + `/sales-sales?populate=deep&${query}`;
+      const endpoint = process.env.NEXT_PUBLIC_URL + `/sales-sales?populate=*&${query}`;
       const options = {
         method: "GET",
         headers: {

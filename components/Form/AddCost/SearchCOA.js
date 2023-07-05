@@ -44,15 +44,15 @@ export default function SearchBar({
 
     //console.log("select COA ==>", res.data, req.status);
     if(req.status == 200) onChange(res.data);
-    // if (res) {
-    //   dispatch({ type: "ADD_AKUN_COA", akun: res.data });
-    //   form.setFieldsValue({ akun: undefined });
+    if (res) {
+      dispatch({ type: "ADD_AKUN_COA", akun: res.data });
+      //form.setFieldsValue({ akun: undefined });
 
-      //console.log("======= exce =======", getProductAtLocation);
-      //if (getProductAtLocation) {
+      // console.log("======= exce =======", getProductAtLocation);
+      // if (getProductAtLocation) {
       //  getProductAtLocation(location);
-      //}
-    // }
+      // }
+    }
   };
 
   //const getUserInfo = async () => {
