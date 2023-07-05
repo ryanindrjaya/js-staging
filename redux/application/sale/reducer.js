@@ -21,8 +21,9 @@ export default function Reducer(state = initState, action) {
             d1: action.product.attributes?.disc_1_1 ?? 0,
             d2: 0,
             d3: 0,
-            disc: action.product.attributes.disc_1_1,
+            disc: 0,
             qty: 1,
+            unitIndex: 1,
           },
         },
       };
@@ -54,6 +55,7 @@ export default function Reducer(state = initState, action) {
             d2: data[`unit_${unit}_dp2`],
             d3: data[`unit_${unit}_dp3`],
             disc: data[`disc_1_${unit}`],
+            unitIndex: unit,
           },
         },
       };

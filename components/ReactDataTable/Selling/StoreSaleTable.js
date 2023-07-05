@@ -54,7 +54,7 @@ export default function ReactDataTable({
       product: value,
       index,
     });
-    getProduct(data);
+    getProduct(data, item?.id);
   };
 
   const onChangeQty = (value, data, index) => {
@@ -160,7 +160,7 @@ export default function ReactDataTable({
     },
   };
 
-  // number format 100,000,000 with regex
+  // number format 100,000,000.00 with regex
   const numberFormat = (value) => {
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
@@ -203,6 +203,7 @@ export default function ReactDataTable({
                 defaultValue={priceUnit}
                 prefix="Rp. "
                 formatter={(value) => numberFormat(value)}
+                parser={(value) => value.replace(/\Rp\s?|(\.*)/g, "")}
                 onChange={(e) => onChangePriceUnit(e, row, unit[idx], idx, e)}
                 style={{
                   width: "100%",

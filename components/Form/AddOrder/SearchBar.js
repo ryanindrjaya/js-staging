@@ -45,12 +45,8 @@ export default function SearchBar({
 
     if (res) {
       dispatch({ type: "ADD_PRODUCT", product: res.data });
+      getProductAtLocation(1, res.data.id);
       form.setFieldsValue({ products: undefined });
-
-      console.log("======= exce =======", getProductAtLocation);
-      if (getProductAtLocation) {
-        getProductAtLocation(location);
-      }
     }
   };
 
@@ -81,9 +77,7 @@ export default function SearchBar({
     }
   };
 
-  const options = data.map((d) => (
-    <Select.Option key={d.value}>{d.label}</Select.Option>
-  ));
+  const options = data.map((d) => <Select.Option key={d.value}>{d.label}</Select.Option>);
 
   const fetchProduct = async (query, callback) => {
     if (!query) {
@@ -115,9 +109,7 @@ export default function SearchBar({
         if (req.status == 200) {
           const filteredProductByLocation = res.data.filter((item) =>
             item.attributes.locations.data.some((location) =>
-              user.locations.some(
-                (userLocation) => userLocation.id === location.id
-              )
+              user.locations.some((userLocation) => userLocation.id === location.id)
             )
           );
 

@@ -1,7 +1,11 @@
 import React from "react";
 import nookies from "nookies";
 import { notification } from "antd";
-import { InventoryOutFromNonPanel, InventoryOutFromPanel } from "../../../../library/functions/createInventory";
+import {
+  InventoryOutFromNonPanel,
+  InventoryOutFromPanel,
+  createInventoryFromReturPenjualan,
+} from "../../../../library/functions/createInventory";
 
 const cookies = nookies.get(null, "token");
 var tempProductListId = [];
@@ -123,7 +127,9 @@ const putRelationSaleDetail = async (id, value, form, router, url, page, locatio
 
   console.log("simpan data", simpanData);
 
-  if (res?.data && simpanData === "Publish") {
+  const posted = simpanData !== "Draft";
+
+  if (res?.data && posted && page !== "store sale") {
     const getData = await fetch(endpoint + "?populate=deep,2", {
       method: "GET",
       headers: {
@@ -133,8 +139,9 @@ const putRelationSaleDetail = async (id, value, form, router, url, page, locatio
     });
     const resData = await getData.json();
     console.log("res data", resData);
-    const customer = resData?.data?.attributes.customer?.data.attributes.name;
-    const location = resData?.data?.attributes.location?.data.attributes.name;
+    const location = resData?.data?.attributes?.location?.data?.attributes?.name;
+    const customer =
+      resData?.data?.attributes?.customer?.data?.attributes?.name ?? resData?.data?.attributes?.customer_name;
     console.log("otw update stock");
     switch (page) {
       case "panel sale":
@@ -145,12 +152,33 @@ const putRelationSaleDetail = async (id, value, form, router, url, page, locatio
         console.log("non panel sale");
         const inventoryOutNonPanel = await InventoryOutFromNonPanel(res.data.id, customer, location);
         break;
+      case "retur store sale":
+        console.log("retur store sale");
+        const inventoryInReturStore = await createInventoryFromReturPenjualan(res.data, customer, location);
+
+        const putStatus = {
+          data: {
+            status: "Diretur",
+          },
+        };
+
+        const putStatusReq = await fetch(endpoint, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+          body: JSON.stringify(putStatus),
+        });
+
+        break;
     }
   }
 
   if (req.status === 200) {
     form.resetFields();
     if (page == "store sale") router.replace(`/dashboard/penjualan/toko/print/${id}`);
+    if (page == "retur store sale") router.replace(`/dashboard/penjualan/toko/retur/print/${id}`);
     if (page == "sales sale") router.replace(`/dashboard/penjualan/sales/print/${id}`);
     if (page == "non panel sale")
       simpanData === "Publish"

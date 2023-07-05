@@ -55,6 +55,7 @@ export default function ReactDataTable({
   const handleEdit = (row) => {
     if (page == "nonpanel") router.push("non_panel/edit/" + row.id);
     if (page == "panel") router.push("panel/edit/" + row.id);
+    if (page == "toko") router.push("toko/edit/" + row.id);
   };
 
   const handleChangeStatus = async (row) => {
@@ -181,6 +182,23 @@ export default function ReactDataTable({
     maximumFractionDigits: 2,
   });
 
+  function printReturPenjualan(row) {
+    const returId = row.attributes.retur_store_sale?.data?.id;
+
+    if (returId) {
+      if (returPage == "toko") router.push("toko/retur/print/" + returId);
+      if (returPage == "sales") router.push("sales/retur/print/" + row.id);
+      if (returPage == "nonpanel") router.push("non_panel/retur/print/" + row.id);
+      if (returPage == "panel") router.push("panel/retur/print/" + row.id);
+    } else {
+      openNotificationWithIcon(
+        "error",
+        "Maaf tidak bisa dicetak",
+        "Data retur belum ada, silahkan buat retur terlebih dahulu"
+      );
+    }
+  }
+
   const content = (row) => {
     if (page == "panel" || page == "nonpanel") {
       return (
@@ -272,6 +290,66 @@ export default function ReactDataTable({
           )}
         </div>
       );
+    } else if (page === "toko") {
+      return (
+        <div>
+          <div>
+            <button
+              onClick={() => print(row)}
+              className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+            >
+              <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
+              Cetak
+            </button>
+          </div>
+
+          {row.attributes.status === "Dibayar" ? (
+            <></>
+          ) : row?.attributes?.retur_store_sale?.data?.id ? (
+            <></>
+          ) : (
+            <div>
+              <button
+                onClick={() => handleEdit(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+              >
+                <EditOutlined className="mr-2 mt-0.5 float float-left" />
+                Edit
+              </button>
+            </div>
+          )}
+
+          {row?.attributes?.retur_store_sale?.data?.id ? (
+            <div>
+              <button
+                onClick={() => printReturPenjualan(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+              >
+                <UndoOutlined className="mr-2 mt-0.5 float float-left" />
+                Cetak Retur Penjualan
+              </button>
+            </div>
+          ) : (
+            <div>
+              <button
+                onClick={() => returPenjualan(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+              >
+                <UndoOutlined className="mr-2 mt-0.5 float float-left" />
+                Retur Penjualan
+              </button>
+            </div>
+          )}
+
+          <AlertDialog
+            onCancel={onCancel}
+            onConfirm={onConfirm}
+            title="Hapus Kategori"
+            message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
+            id={row.id}
+          />
+        </div>
+      );
     } else {
       return (
         <div>
@@ -360,6 +438,8 @@ export default function ReactDataTable({
           return <Tag color="orange">{row.attributes?.status}</Tag>;
         } else if (row.attributes?.status == "Dibayar Sebagian") {
           return <Tag>{row.attributes?.status}</Tag>;
+        } else if (row.attributes?.retur_store_sale?.data?.id) {
+          return <Tag color="orange">Diretur</Tag>;
         } else {
           return <Tag color="green">{row.attributes?.status}</Tag>;
         }

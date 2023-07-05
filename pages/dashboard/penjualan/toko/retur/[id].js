@@ -105,7 +105,7 @@ const fetchUser = async (cookies) => {
 };
 
 function ReturToko({ props }) {
-  const products = useSelector((state) => state.Order);
+  const products = useSelector((state) => state.Sales);
   const dispatch = useDispatch();
 
   var selectedProduct = products?.productList;
@@ -342,7 +342,7 @@ function ReturToko({ props }) {
     }
 
     returStore.data.forEach((element) => {
-      if (values.no_retur_store_sale == element.attributes.no_retur_store_sale) {
+      if (values.no_retur_store_sale === element.attributes.no_retur_store_sale) {
         notification["error"]({
           message: "Gagal menambahkan data",
           description: "Data gagal ditambahkan, karena no penjualan sama",
@@ -393,8 +393,10 @@ function ReturToko({ props }) {
       form,
       router,
       "/retur-store-sales/",
-      "store sale",
-      locations
+      "retur store sale",
+      locations,
+      null,
+      simpanData
     );
   };
 
@@ -481,7 +483,7 @@ function ReturToko({ props }) {
     if (listId.length > 0) {
       createSale(dataValues);
     }
-  }, [listId]);
+  }, [listId, simpanData]);
 
   useEffect(() => {
     if (dataValues && info == "sukses") createDetailSale();
