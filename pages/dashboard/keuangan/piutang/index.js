@@ -88,7 +88,7 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchPiutang = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/credits?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/credits?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -102,7 +102,7 @@ const fetchPiutang = async (cookies) => {
 };
 
 const fetchAkunPiutang = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -203,7 +203,7 @@ function Piutang({ props }) {
   };
 
   const fetchDataCredit = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/credits?populate=deep";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/credits?populate=*";
     const options = {
         method: "GET",
         headers: {
@@ -407,7 +407,7 @@ const changeStatusPiutang = async (status, id) => {
 
       const JSONdata = JSON.stringify(newValues);
       const cookies = nookies.get(null, "token");
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/credits/" + id + "?populate=deep";
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/credits/" + id + "?populate=*";
 
       const options = {
         method: "PUT",
@@ -510,8 +510,7 @@ const changeStatusPiutang = async (status, id) => {
         }
       }
 
-      const endpoint =
-        process.env.NEXT_PUBLIC_URL + "/credits?populate=deep&" + query;
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/credits?populate=*, credit_details.customer.area, credit_details.customer.wilayah&" + query;
 
       const cookies = nookies.get(null, "token");
       const options = {

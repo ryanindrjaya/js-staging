@@ -127,7 +127,7 @@ const fetchUserSales = async (cookies) => {
 };
 
 const fetchPiutang = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/credits?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/credits?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -142,7 +142,7 @@ const fetchPiutang = async (cookies) => {
 
 const fetchReturSales = async (cookies) => {
   const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/retur-sales-sales?populate=deep";
+    process.env.NEXT_PUBLIC_URL + "/retur-sales-sales?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -156,7 +156,7 @@ const fetchReturSales = async (cookies) => {
 };
 
 const fetchSales = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?populate=*, customer.area, customer.wilayah";
   const options = {
     method: "GET",
     headers: {
@@ -171,7 +171,7 @@ const fetchSales = async (cookies) => {
 
 const fetchReturPanel = async (cookies) => {
   const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/retur-panel-sales?populate=deep";
+    process.env.NEXT_PUBLIC_URL + "/retur-panel-sales?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -185,7 +185,7 @@ const fetchReturPanel = async (cookies) => {
 };
 
 const fetchPanel = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/panel-sales?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/panel-sales?populate=*, customer.area, customer.wilayah";
   const options = {
     method: "GET",
     headers: {
@@ -200,7 +200,7 @@ const fetchPanel = async (cookies) => {
 
 const fetchReturNonPanel = async (cookies) => {
   const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/retur-non-panel-sales?populate=deep";
+    process.env.NEXT_PUBLIC_URL + "/retur-non-panel-sales?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -215,7 +215,7 @@ const fetchReturNonPanel = async (cookies) => {
 
 const fetchNonPanel = async (cookies) => {
   const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/non-panel-sales?populate=deep";
+    process.env.NEXT_PUBLIC_URL + "/non-panel-sales?populate=*, customer.area, customer.wilayah";
   const options = {
     method: "GET",
     headers: {
@@ -230,7 +230,7 @@ const fetchNonPanel = async (cookies) => {
 
 const fetchAkunPiutang = async (cookies) => {
   const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/credit-accounts?populate=deep";
+    process.env.NEXT_PUBLIC_URL + "/credit-accounts?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -467,7 +467,7 @@ function Piutang({ props }) {
     //var total = null;
 
     const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/credits/" + value.id + "?populate=deep";
+      process.env.NEXT_PUBLIC_URL + "/credits/" + value.id + "?populate=*";
     const options = {
       method: "GET",
       headers: {
