@@ -14,6 +14,7 @@ export default function ReactDataTable({
     onPageChange,
     onChangeStatusPengiriman,
     onChangeStatus,
+    onUpdate,
     user,
 }) {
     const router = useRouter();
