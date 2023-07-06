@@ -395,6 +395,22 @@ export default function ReactDataTable({
     },
   };
 
+  const openModal = (id, row) => {
+    var path = "";
+    if(row.attributes.no_panel_sale) path = "/dashboard/penjualan/panel";
+    else if(row.attributes.no_non_panel_sale) path = "/dashboard/penjualan/non_panel";
+    else path = "";
+
+    router.replace(
+      {
+        pathname: path,
+        query: { id: id },
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
+
   const columns = [
     {
       name: "Tindakan",
@@ -502,7 +518,6 @@ export default function ReactDataTable({
     {
       name: "Lokasi Penjualan",
       width: "180px",
-      //selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
       selector: (row) => row.attributes?.location.data.attributes.name ?? "-",
     },
     {
@@ -532,6 +547,9 @@ export default function ReactDataTable({
       data={data.data}
       pagination
       noDataComponent={"Belum ada data Penjualan"}
+      pointerOnHover
+      highlightOnHover
+      onRowClicked={(row) => openModal(row.id, row)}
     />
   );
 }
