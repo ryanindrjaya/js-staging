@@ -45,7 +45,9 @@ export default function SearchBar({
 
     if (res) {
       dispatch({ type: "ADD_PRODUCT", product: res.data });
-      getProductAtLocation(1, res.data.id);
+      if (getProductAtLocation) {
+        getProductAtLocation(1, res.data.id);
+      }
       form.setFieldsValue({ products: undefined });
     }
   };

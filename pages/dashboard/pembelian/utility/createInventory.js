@@ -13,11 +13,27 @@ const cookies = nookies.get(null, "token");
 
 async function createInventory(row) {
   const data = [];
-  const purchasingDetails = row.attributes.purchasing_details.data;
+
+  const dataDetails = await fetch(`${process.env.NEXT_PUBLIC_URL}/purchasings/${row.id}?populate=deep`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${cookies.token}`,
+    },
+  })
+    .then((res) => res.json())
+    .then((res) => res.data?.attributes?.purchasing_details?.data)
+    .catch((err) => {
+      console.log("error", err);
+      return [];
+    });
+
+  console.log("data details", dataDetails);
+
   const noLPB = row.attributes.no_purchasing;
   const supplierName = row.attributes.supplier.data.attributes.name;
 
-  purchasingDetails.forEach((element) => {
+  dataDetails.forEach((element) => {
     console.log("element purchasing detail", element);
 
     const unitOrder = element.attributes.unit_order;
