@@ -1,16 +1,20 @@
 import Head from "next/head";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import router, { useRouter } from "next/router";
-import { Input, notification, Select, DatePicker } from "antd";
+import { Input, notification, Select, DatePicker, Modal, message, Descriptions, Button, Tag } from "antd";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
 import SellingTable from "../../../../components/ReactDataTable/Selling/SellingTable";
 import Customer from "@iso/components/Form/AddCost/CustomerForm";
 import createInventory from "../utility/createInventory";
 import LoadingAnimations from "@iso/components/Animations/Loading";
+import { PrinterOutlined } from "@ant-design/icons";
+import DataTable from "react-data-table-component";
 import nookies from "nookies";
+import moment from "moment";
+import Link from "next/link";
 
 PanelSale.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -106,8 +110,17 @@ function PanelSale({ props }) {
 
   // Range Picker
   const { RangePicker } = DatePicker;
+    // modal
+  const [selectedData, setSelectedData] = useState(null);
+  const [openModal, setOpenModal] = useState(false);
 
   const cookies = nookies.get(null, "token");
+
+  var formatter = new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 2,
+  });
 
   const updateStock = async (id, locations, operation = "add") => {
     // fetching data to update
@@ -313,6 +326,126 @@ function PanelSale({ props }) {
     });
   };
 
+  const customStyles = {
+    headerStyle: { textAlign: "center" },
+    headCells: {
+      style: {
+        color: "white",
+        background: "#036B82",
+      },
+    },
+  };
+
+  const getStatusPembayaran = (row) => {
+    const tagRed = process.env.TAG_RED;
+    const tagGreen = process.env.TAG_GREEN;
+    const tagOrange = process.env.TAG_ORANGE;
+
+    if (row.attributes.status == "Belum Dibayar") {
+      return <Tag color={tagRed}>{row.attributes.status}</Tag>;
+    } else if (row.attributes.status == "Dibayar Sebagian") {
+      return <Tag color={tagOrange}>{row.attributes.status}</Tag>;
+    } else if (row.attributes.status == "Dibayar") {
+      return <Tag color={tagGreen}>{row.attributes.status}</Tag>;
+    } else {
+      return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
+    }
+  };
+
+  useEffect(() => {
+    async function fetchOne(id) {
+      message.loading({ content: "Mengambil data", duration: 8000, key: "fetch" });
+      const cookies = nookies.get();
+      const endpoint = process.env.NEXT_PUBLIC_URL + `/panel-sales/${id}?populate=deep`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+      };
+
+      const res = await fetch(endpoint, options)
+        .then((r) => r.json())
+        .catch((e) => console.log(e));
+
+      if (res.data) {
+        message.destroy("fetch");
+        setSelectedData(res.data);
+        setOpenModal(true);
+      } else {
+        message.error({ content: "Gagal mengambil data", key: "fetch" });
+      }
+    }
+    if (router.query.id) {
+      fetchOne(router.query.id);
+    }
+  }, [router.query]);
+
+  const detailColumns = [
+    {
+      name: "Nama Produk",
+      wrap: true,
+      width: "120px",
+      selector: ({ attributes }) => (
+        <Link href={`/dashboard/produk?id=${attributes?.product?.data?.id}`}>
+          <span className="text-blue-500 cursor-pointer hover:text-blue-700">
+            {attributes?.product?.data?.attributes?.name || ""}
+          </span>
+        </Link>
+      ),
+    },
+    {
+      name: "EXP Date",
+      width: "120px",
+      selector: ({ attributes }) => moment(attributes?.expired_date).format("DD/MM/YYYY"),
+    },
+    {
+      name: "Jumlah",
+      selector: ({ attributes }) => attributes?.qty || "",
+    },
+    {
+      name: "Unit",
+      selector: ({ attributes }) => attributes?.unit || "",
+    },
+    {
+      name: "Harga Jual",
+      width: "150px",
+      selector: ({ attributes }) => formatter.format(attributes?.unit_price || 0) || "-",
+    },
+    {
+      name: "Diskon",
+      selector: ({ attributes }) => formatter.format(attributes?.disc || 0) || "-",
+    },
+    {
+      name: "D1",
+      selector: ({ attributes }) => (attributes?.disc1 ? `${attributes?.disc1}%` : ""),
+    },
+    {
+      name: "D2",
+      selector: ({ attributes }) => (attributes?.disc2 ? `${attributes?.disc2}%` : ""),
+    },
+    // {
+    //   name: "Margin",
+    //   selector: ({ attributes }) => (attributes?.margin ? `${attributes?.margin}%` : ""),
+    // },
+    {
+      name: "Sub Total",
+      width: "150px",
+      selector: ({ attributes }) => formatter.format(attributes?.sub_total || 0) || "-",
+    },
+  ];
+
+  const print = () => {
+    router.replace(
+      {
+        pathname: "/dashboard/penjualan/panel/print/" + selectedData.id,
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
+
   return (
     <>
       <Head>
@@ -322,6 +455,123 @@ function PanelSale({ props }) {
         <LayoutWrapper style={{}}>
           <TitlePage titleText={"Daftar Penjualan Panel"} />
           <LayoutContent>
+
+          <Modal
+              open={openModal}
+              onClose={() => {
+                router.replace(
+                  {
+                    pathname: router.pathname,
+                  },
+                  undefined,
+                  { shallow: true }
+                );
+                setOpenModal(false);
+                setSelectedData();
+              }}
+              onCancel={() => {
+                router.replace(
+                  {
+                    pathname: router.pathname,
+                  },
+                  undefined,
+                  { shallow: true }
+                );
+                setOpenModal(false);
+                setSelectedData();
+              }}
+              width={1000}
+              okButtonProps={{ style: { display: "none" } }}
+              cancelText="Close"
+            >
+              {selectedData && (
+                <>
+                  <Descriptions
+                    extra={
+                      <Button onClick={print} className="bg-cyan-700 hover:bg-cyan-800 mr-7 border-none" type="primary">
+                        <PrinterOutlined className="mr-2 mt-0.5 float float-left" /> Cetak
+                      </Button>
+                    }
+                    size="middle"
+                    title="INFORMASI PENJUALAN PANEL"
+                    bordered
+                  >
+                    <Descriptions.Item label="Tanggal Penjualan" span={4}>
+                      {selectedData?.attributes?.sale_date}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="No Penjualan Panel" span={4}>
+                      {selectedData?.attributes?.no_panel_sale}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="No Inventory" span={2}>
+                      {selectedData?.attributes?.no_inventory}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Customer">
+                      {selectedData?.attributes?.customer?.data?.attributes?.name}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Status Pembayaran" span={4}>
+                      {getStatusPembayaran(selectedData)}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Tempo" span={4}>
+                      {selectedData?.attributes?.tempo_days} {selectedData?.attributes?.tempo_time}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Lokasi" span={4}>
+                      {selectedData?.attributes?.location?.data?.attributes?.name}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Catatan" span={2}>
+                      {selectedData?.attributes?.sale_note}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Catatan Staff" span={2}>
+                      {selectedData?.attributes?.sale_staff}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Ditambahkan Oleh" span={2}>
+                      {selectedData?.attributes?.added_by}
+                    </Descriptions.Item>
+                  </Descriptions>
+                  <Descriptions size="middle" title="DETAIL PENJUALAN" bordered className="mt-2">
+                    <Descriptions.Item label={`Diskon ${selectedData?.attributes?.disc_type || ""}`} span={2}>
+                      {formatter.format(selectedData?.attributes?.disc_value || 0)}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Biaya Pengiriman" span={4}>
+                      {formatter.format(selectedData?.attributes?.delivery_fee || 0)}
+                    </Descriptions.Item>
+                    {[1, 2, 3].map((item) => {
+                      if (
+                        selectedData?.attributes?.[`additional_fee_${item}_sub`] &&
+                        selectedData?.attributes?.[`additional_fee_${item}_desc`]
+                      ) {
+                        return (
+                          <Descriptions.Item label={`Biaya Tambahan ${item}`} span={4}>
+                            <p className="font-semibold m-0">
+                              {selectedData?.attributes?.[`additional_fee_${item}_desc`]}
+                            </p>
+                            {formatter.format(selectedData?.attributes?.[`additional_fee_${item}_sub`] || 0)}
+                          </Descriptions.Item>
+                        );
+                      }
+                    })}
+                    <Descriptions.Item label="DPP" span={2}>
+                      {formatter.format(selectedData?.attributes?.dpp || 0)}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="PPN" span={2}>
+                      {formatter.format(selectedData?.attributes?.ppn || 0)}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Total">
+                      {formatter.format(selectedData?.attributes?.total || 0)}
+                    </Descriptions.Item>
+                  </Descriptions>
+
+                  <div className="mt-2">
+                    <p className="mb-2 text-base font-semibold uppercase">Detail Item</p>
+                    <DataTable
+                      customStyles={customStyles}
+                      columns={detailColumns}
+                      data={selectedData?.attributes?.panel_sale_details?.data}
+                    />
+                  </div>
+                </>
+              )}
+            </Modal>
+
             <div className="w-full flex justify-start">
               <div className="w-full md:w-1/5 px-3">
                 <Select
