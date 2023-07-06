@@ -284,7 +284,7 @@ export default function Riwayat({ defaultOptions }) {
             <p className="uppercase mb-0">
               RENTANG TANGGAL :{" "}
               {date?.[0] && date?.[1]
-                ? `${moment(date?.[0]).format("DD/MM/YYYY")} - ${moment(date?.[0]).format("DD/MM/YYYY")}`
+                ? `${moment(date?.[0]).format("DD/MM/YYYY")} - ${moment(date?.[1]).format("DD/MM/YYYY")}`
                 : "-"}
             </p>
 
@@ -601,7 +601,7 @@ export default function Riwayat({ defaultOptions }) {
                             ))}
                           </ColumnGroup>
                           <Column className="uppercase" title="Pembuat" dataIndex="author" key="author" />
-                          <Column title="Keterangan" dataIndex="keterangan" key="keterangan" />
+                          <Column width={250} title="Keterangan" dataIndex="keterangan" key="keterangan" />
                         </Table>
                         <div className="w-full flex item justify-center">
                           {loading.print ? (
