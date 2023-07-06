@@ -1,11 +1,26 @@
 import nookies from "nookies";
 import { notification } from "antd";
 
+const cookies = nookies.get(null, "token");
+
 const updateProductFromTable = async (data) => {
   try {
-    const purchasingDetails = data?.attributes?.purchasing_details?.data;
-    console.log("purchasingDetails", purchasingDetails);
-    const promises = purchasingDetails.map(async (element) => {
+    const dataDetails = await fetch(`${process.env.NEXT_PUBLIC_URL}/purchasings/${data.id}?populate=deep`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${cookies.token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((res) => res.data?.attributes?.purchasing_details?.data)
+      .catch((err) => {
+        console.log("error", err);
+        return [];
+      });
+    console.log("purchasingDetails", dataDetails);
+
+    const promises = dataDetails.map(async (element) => {
       await updateAPI(element);
     });
 
@@ -19,8 +34,6 @@ const updateProductFromTable = async (data) => {
 const updateAPI = async (element) => {
   console.log("updating all api");
   try {
-    const cookies = nookies.get(null, "token");
-
     const unit = element?.attributes?.unit_order;
     const unitPrice = element?.attributes?.unit_price;
     const disc = element?.attributes?.disc;

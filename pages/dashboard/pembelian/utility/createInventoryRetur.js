@@ -68,7 +68,9 @@ async function createInventoryRetur(row) {
       keterangan: `Retur Pembelian ke ${supplier}`,
     };
 
-    await removeToGudang(body);
+    const gudang = await removeToGudang(body);
+
+    return gudang;
   }
 }
 
@@ -91,11 +93,15 @@ async function removeToGudang(body) {
       message: "Produk Keluar",
       description: "Produk keluar dari gudang asal",
     });
+
+    return true;
   } else {
     notification.error({
       message: "Error",
       description: data?.message,
     });
+
+    return false;
   }
 }
 

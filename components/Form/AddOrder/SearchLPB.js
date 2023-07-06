@@ -5,8 +5,7 @@ import { Form, Select } from "antd";
 
 const fetchLPBById = async (id, callback) => {
   const cookies = nookies.get(null, "token");
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=deep`;
+  const endpoint = process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=deep`;
   const options = {
     method: "GET",
     headers: {
@@ -35,20 +34,20 @@ function SearchLPB({ supplier, handleSelect, disabled }) {
     }
   };
 
-  const options = data.map((d) => (
-    <Select.Option key={d.value}>{d.label}</Select.Option>
-  ));
+  const options = data.map((d) => <Select.Option key={d.value}>{d.label}</Select.Option>);
 
   const fetchLPB = async (query, callback) => {
     if (!query) {
       callback([]);
     } else {
-      let supplierName = supplier?.attributes?.name;
+      let supplierId = supplier?.id;
+
+      console.log("supplier id = ", supplierId);
 
       try {
         const endpoint =
           process.env.NEXT_PUBLIC_URL +
-          `/purchasings/?populate=deep&filters[status_pembayaran][$eq]=Belum Lunas&filters[supplier][name][$eq]=${supplierName}&filters[no_purchasing][$contains]=${query}`;
+          `/purchasings?filters[supplier][id][$eq]=${supplierId}&filters[status_pembayaran][$eq]=Belum Lunas&filters[no_purchasing][$containsi]=${query}&sort[0]=id:desc`;
         const options = {
           method: "GET",
           headers: {
@@ -57,10 +56,12 @@ function SearchLPB({ supplier, handleSelect, disabled }) {
           },
         };
 
+        console.log("endpoint lpb", endpoint);
+
         const req = await fetch(endpoint, options);
         const res = await req.json();
 
-        console.log("result lpb", query, res);
+        console.log("result lpb", res);
 
         if (req.status == 200) {
           const lpb = res?.data?.map((lpb) => ({

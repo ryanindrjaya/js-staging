@@ -1,22 +1,11 @@
 import DataTable from "react-data-table-component";
 import AlertDialog from "../../Alert/AlertCancel";
 import { Popover, Select, Row, Tag, notification } from "antd";
-import {
-  EditOutlined,
-  PrinterOutlined,
-  UnorderedListOutlined,
-  CalculatorOutlined,
-} from "@ant-design/icons";
+import { EditOutlined, PrinterOutlined, UnorderedListOutlined, CalculatorOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
 import { IoIosSwap } from "react-icons/io";
 
-export default function ReactDataTable({
-  data,
-  onDelete,
-  onUpdate,
-  onPageChange,
-  onChangeStatus,
-}) {
+export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange, onChangeStatus }) {
   const router = useRouter();
   const { Option } = Select;
 
@@ -161,7 +150,6 @@ export default function ReactDataTable({
           Pembayaran
         </button>
       </div>
-
     </div>
   );
 
@@ -197,8 +185,7 @@ export default function ReactDataTable({
     {
       name: "Supplier",
       width: "180px",
-      selector: (row) =>
-        row.attributes?.supplier?.data?.attributes?.name ?? "-",
+      selector: (row) => row.attributes?.supplier?.data?.attributes?.name ?? "-",
     },
     {
       name: "Nota Supplier",
@@ -233,11 +220,7 @@ export default function ReactDataTable({
               <Option value="Diproses" key="Diproses" className="text-black">
                 <Tag color="default">Diproses</Tag>
               </Option>
-              <Option
-                value="Dibatalkan"
-                key="Dibatalkan"
-                className="text-black"
-              >
+              <Option value="Dibatalkan" key="Dibatalkan" className="text-black">
                 <Tag color="error">Dibatalkan</Tag>
               </Option>
               <Option value="Diretur" key="Diretur" className="text-black">
@@ -279,15 +262,9 @@ export default function ReactDataTable({
             return <Tag color="green">Selesai</Tag>;
           }
         } else {
-          if (
-            statusPembayaran === "Belum Lunas" &&
-            purchasingHistory?.length > 0
-          ) {
+          if (statusPembayaran === "Belum Lunas" && purchasingHistory?.length > 0) {
             return <Tag color={tagRed}>Tempo</Tag>;
-          } else if (
-            statusPembayaran === "Lunas" &&
-            purchasingHistory.length > 0
-          ) {
+          } else if (statusPembayaran === "Lunas" && purchasingHistory.length > 0) {
             return <Tag color={tagGreen}>Selesai</Tag>;
           } else {
             return <Tag color={tagOrange}>Menunggu</Tag>;
@@ -321,7 +298,7 @@ export default function ReactDataTable({
         // } else {
         //   return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
         // }
-        if (row.attributes?.status_pembayaran == "Belum Dibayar") {
+        if (row.attributes?.status_pembayaran == "Belum Lunas") {
           return <Tag color="red">{row.attributes?.status_pembayaran}</Tag>;
         } else if (row.attributes?.status_pembayaran == "Diretur") {
           return <Tag color="orange">{row.attributes?.status_pembayaran}</Tag>;
@@ -336,8 +313,7 @@ export default function ReactDataTable({
     {
       name: "Total Beli",
       width: "150px",
-      selector: (row) =>
-        formatter.format(row.attributes?.total_purchasing ?? 0),
+      selector: (row) => formatter.format(row.attributes?.total_purchasing ?? 0),
     },
   ];
 

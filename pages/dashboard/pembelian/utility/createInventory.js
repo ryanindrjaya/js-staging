@@ -28,8 +28,6 @@ async function createInventory(row) {
       return [];
     });
 
-  console.log("data details", dataDetails);
-
   const noLPB = row.attributes.no_purchasing;
   const supplierName = row.attributes.supplier.data.attributes.name;
 

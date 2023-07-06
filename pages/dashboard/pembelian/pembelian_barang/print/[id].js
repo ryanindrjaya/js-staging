@@ -24,6 +24,8 @@ const Print = ({ props }) => {
   const deliveryFee = props.purchases.data.attributes.delivery_fee;
   const TotalHarga = props.purchases.data.attributes.total_purchasing;
 
+  const catatan = props.purchases.data.attributes.additional_note;
+
   var index = 0;
 
   const getHargaSatuan = (unit, index) => {
@@ -211,6 +213,9 @@ const Print = ({ props }) => {
         <div>
           <div className="font-bold  text-sm uppercase mt-3 flex justify-start">TAMBAHAN :</div>
           <div className=" text-sm uppercase mt-2 flex flex-col justify-start">{getAdditionalFee()}</div>
+
+          <div className="font-bold  text-sm uppercase mt-3 flex justify-start">CATATAN :</div>
+          <div className=" text-sm mt-1 flex flex-col justify-start">{catatan}</div>
         </div>
         <div className="flex flex-col justify-center">
           <div className="font-bold  text-sm uppercase flex justify-end">TOTAL HARGA : {getTotalProduct()}</div>

@@ -192,14 +192,19 @@ export default function ReactDataTable({ data, onDelete, onPageChange, onChangeS
           </div>
         </Modal>
       </div>
-      <AlertDialog
-        buttonText="Batalkan"
-        onCancel={onCancel}
-        onConfirm={onConfirm}
-        title="Batalkan Retur Pembelian"
-        message="Transaksi return akan dirubah menjadi status dibatalkan. Lanjutkan?"
-        id={row.id}
-      />
+
+      {row.attributes.status === "Selesai" ? (
+        <div hidden></div>
+      ) : (
+        <AlertDialog
+          buttonText="Batalkan"
+          onCancel={onCancel}
+          onConfirm={onConfirm}
+          title="Batalkan Retur Pembelian"
+          message="Transaksi return akan dirubah menjadi status dibatalkan. Lanjutkan?"
+          id={row.id}
+        />
+      )}
     </div>
   );
 
@@ -213,10 +218,19 @@ export default function ReactDataTable({ data, onDelete, onPageChange, onChangeS
     },
   };
 
-  const changeStatus = async (id, status) => {
+  const changeStatus = async (row, status) => {
     const cookies = nookies.get(null);
     try {
-      const endpoint = `${process.env.NEXT_PUBLIC_URL}/returs/${id}`;
+      if (status === "Selesai") {
+        const success = await createInventoryRetur(row);
+
+        if (!success) {
+          message.error("Gagal membuat retur");
+          return;
+        }
+      }
+
+      const endpoint = `${process.env.NEXT_PUBLIC_URL}/returs/${row.id}`;
       const options = {
         method: "PUT",
         headers: {
@@ -274,11 +288,7 @@ export default function ReactDataTable({ data, onDelete, onPageChange, onChangeS
             className="p-0"
             disabled={row.attributes.status === "Selesai"}
             onChange={(value) => {
-              changeStatus(row.id, value);
-
-              if (value === "Selesai") {
-                createInventoryRetur(row);
-              }
+              changeStatus(row, value);
             }}
             value={row.attributes.status}
           >
