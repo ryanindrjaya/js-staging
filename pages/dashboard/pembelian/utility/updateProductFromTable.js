@@ -26,8 +26,10 @@ const updateProductFromTable = async (data) => {
 
     await Promise.all(promises);
     console.log("Data updated successfully");
+    openNotificationWithIcon("success");
   } catch (error) {
     console.error("Error updating data:", error);
+    openNotificationWithIcon("error");
   }
 };
 
@@ -104,11 +106,8 @@ const updateAPI = async (element) => {
 
     console.log("res updateProductFromTable", res, JSONdata);
 
-    if (req.status === 200) {
-      openNotificationWithIcon("success");
-    } else {
+    if (req.status !== 200) {
       console.log("error updateProductFromTable", res);
-      openNotificationWithIcon("error");
     }
   } catch (error) {
     console.log(error);

@@ -61,7 +61,7 @@ const Print = ({ props }) => {
       }
     }
 
-    return `${formatter.format(discInput)}, ${disc1}%, ${disc2}%, ${disc3}%`;
+    return `${formatter.format(discInput)}, ${disc1 || 0}%, ${disc2 || 0}%, ${disc3 || 0}%`;
   };
 
   const getSubTotal = (index) => {

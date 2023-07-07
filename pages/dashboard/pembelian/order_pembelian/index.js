@@ -25,7 +25,7 @@ Pembelian.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases?populate=*&sort[0]=id:desc";
   const options = {
     method: "GET",
     headers: {
@@ -94,7 +94,7 @@ function Pembelian({ props }) {
 
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases?pagination[page]=" + page;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases?sort[0]=id:desc&pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -154,7 +154,7 @@ function Pembelian({ props }) {
       keywords +
       "&filters[$or][1][no_po][$contains]=" +
       keywords +
-      "&populate=*";
+      "&populate=*&sort[0]=id:desc";
 
     const cookies = nookies.get(null, "token");
     const options = {
@@ -226,7 +226,7 @@ function Pembelian({ props }) {
   };
 
   const fetchData = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases?populate=*";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchases?populate=*&sort[0]=id:desc";
     const options = {
       method: "GET",
       headers: {

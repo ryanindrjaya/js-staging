@@ -166,7 +166,7 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange,
   const columns = [
     {
       name: "Tindakan",
-      width: "180px",
+      width: "100px",
       selector: (row) => (
         <>
           <Popover content={content(row)} placement="bottom" trigger="click">
@@ -185,6 +185,7 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange,
     {
       name: "Supplier",
       width: "180px",
+      wrap: true,
       selector: (row) => row.attributes?.supplier?.data?.attributes?.name ?? "-",
     },
     {
@@ -200,6 +201,7 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange,
     {
       name: "Lokasi",
       width: "200px",
+      wrap: true,
       selector: (row) => row.attributes?.location?.data?.attributes?.name,
     },
     {

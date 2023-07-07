@@ -158,6 +158,8 @@ function EditLPB({ props }) {
   const initialValues = props.data;
   const user = props.user;
 
+  const initialItems = initialValues?.attributes?.purchase?.data?.attributes?.purchase_details?.data;
+
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [supplier, setSupplier] = useState(initialValues.attributes.supplier?.data);
@@ -302,7 +304,7 @@ function EditLPB({ props }) {
           dp1: editedProduct?.[idx]?.d1 || attributes?.unit_1_dp1,
           dp2: editedProduct?.[idx]?.d2 || attributes?.unit_1_dp2,
           dp3: editedProduct?.[idx]?.d3 || attributes?.unit_1_dp3,
-          products: [id],
+          product: id,
           relation_id: editedProduct?.[idx]?.relation_id,
           location: values?.product_location?.[idx],
           expired_date: expiredDate,
@@ -953,6 +955,7 @@ function EditLPB({ props }) {
                       setProductSubTotal={setProductSubTotal}
                       locations={locations}
                       formObj={form}
+                      initialQty={initialItems?.length}
                     />
                   </div>
                 )}

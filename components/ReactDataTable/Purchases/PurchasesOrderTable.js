@@ -122,11 +122,13 @@ export default function ReactDataTable({
     {
       name: "Supplier",
       width: "200px",
+      wrap: true,
       selector: (row) => row.attributes?.supplier?.data?.attributes?.name,
     },
     {
       name: "Lokasi",
       width: "200px",
+      wrap: true,
       selector: (row) => row.attributes?.location?.data?.attributes?.name,
     },
 

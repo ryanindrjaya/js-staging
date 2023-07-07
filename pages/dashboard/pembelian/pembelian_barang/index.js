@@ -37,7 +37,7 @@ Pembelian.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=*&sort[0]=id:desc";
   const options = {
     method: "GET",
     headers: {
@@ -284,7 +284,7 @@ function Pembelian({ props }) {
   };
 
   const fetchData = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=deep";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=*&sort[0]=id:desc";
     const options = {
       method: "GET",
       headers: {
@@ -409,11 +409,7 @@ function Pembelian({ props }) {
                 <>
                   <Descriptions
                     extra={
-                      <Button
-                        onClick={print}
-                        className="bg-cyan-700 hover:bg-cyan-800 mr-7 border-none"
-                        type="primary"
-                      >
+                      <Button onClick={print} className="bg-cyan-700 hover:bg-cyan-800 mr-7 border-none" type="primary">
                         <PrinterOutlined className="mr-2 mt-0.5 float float-left" /> Cetak
                       </Button>
                     }
@@ -431,9 +427,7 @@ function Pembelian({ props }) {
                       {selectedLPB?.attributes?.supplier?.data?.attributes?.name}
                     </Descriptions.Item>
                     <Descriptions.Item label="Status" span={2}>
-                      <Tag color={getTagColor(selectedLPB?.attributes?.status)}>
-                        {selectedLPB?.attributes?.status}
-                      </Tag>
+                      <Tag color={getTagColor(selectedLPB?.attributes?.status)}>{selectedLPB?.attributes?.status}</Tag>
                     </Descriptions.Item>
                     <Descriptions.Item label="Lokasi" span={2}>
                       {selectedLPB?.attributes?.location?.data?.attributes?.name}
