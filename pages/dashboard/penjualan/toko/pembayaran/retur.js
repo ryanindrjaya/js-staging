@@ -5,6 +5,7 @@ import {
   Input,
   InputNumber,
   Popconfirm,
+  Popover,
   Select,
   Skeleton,
   Space,
@@ -25,6 +26,7 @@ import { useRouter } from "next/router";
 import ReturDrawer from "../../../../../components/Drawer/ReturDrawer";
 import { CreateStorePayment } from "../../../../../library/functions/createStorePayment";
 import { createInventoryFromReturPenjualan } from "../../../../../library/functions/createInventory";
+import { MenuOutlined } from "@ant-design/icons";
 
 PembayaranToko.getInitialProps = async (context) => {
   try {
@@ -66,9 +68,7 @@ const fetchData = async (cookies) => {
 };
 
 const fethcRetur = async (cookies) => {
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL +
-    "/retur-store-sales?sort[0]=createdAt:desc&populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-store-sales?sort[0]=createdAt:desc&populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -82,11 +82,7 @@ const fethcRetur = async (cookies) => {
 };
 
 const getCheckInUser = async (cookies, user) => {
-  const today = new Date()
-    .toLocaleDateString("en-GB")
-    .split("/")
-    .reverse()
-    .join("-");
+  const today = new Date().toLocaleDateString("en-GB").split("/").reverse().join("-");
   const tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000)
     .toLocaleDateString("en-GB")
     .split("/")
@@ -114,7 +110,7 @@ function PembayaranToko({ props }) {
   const cookies = nookies.get();
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState();
-  const [paymentValue, setPaymentValue] = useState(0);
+  const [paymentValue, setPaymentValue] = useState({});
   const dataRetur = props?.paymentRetur?.data;
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedDrawerData, setSelectedDrawerData] = useState({});
@@ -135,18 +131,18 @@ function PembayaranToko({ props }) {
 
     try {
       const totalHarga = record.attributes?.total ?? 0;
-      let kembali = paymentValue - totalHarga;
+      let kembali = paymentValue[returTrxId] - totalHarga;
 
       // if kembali is negative, return 0
       if (kembali < 0) {
         kembali = 0;
       }
 
-      if (paymentValue >= totalHarga) {
+      if (paymentValue[returTrxId] >= totalHarga) {
         await CreateStorePayment(
           totalHarga,
           kembali,
-          paymentValue,
+          paymentValue[returTrxId],
           selectedPaymentMethod?.[record.id],
           storeTrxId,
           returTrxId,
@@ -226,9 +222,7 @@ function PembayaranToko({ props }) {
                   <div className="w-full md:w-2/5 mb-2 md:mb-0"></div>
                   <div className="w-full md:w-1/5 mb-2 md:mb-0">
                     <Button
-                      onClick={() =>
-                        router.push("/dashboard/penjualan/toko/pembayaran")
-                      }
+                      onClick={() => router.push("/dashboard/penjualan/toko/pembayaran")}
                       size="large"
                       className="mr-2 border rounded-md"
                       style={{
@@ -261,33 +255,15 @@ function PembayaranToko({ props }) {
                 />
 
                 {/* TABEL COMPONENT */}
-                <Table
-                  dataSource={dataRetur}
-                  className="custom-table"
-                  rowClassName="custom-row"
-                >
-                  <Column
-                    title="No Faktur"
-                    dataIndex={["attributes", "no_retur_store_sale"]}
-                    key="faktur"
-                  />
-                  <Column
-                    title="Nama Customer"
-                    dataIndex={["attributes", "customer_name"]}
-                    key="customer_name"
-                  />
+                <Table dataSource={dataRetur} className="custom-table" rowClassName="custom-row">
+                  <Column title="No Faktur" dataIndex={["attributes", "no_retur_store_sale"]} key="faktur" />
+                  <Column title="Nama Customer" dataIndex={["attributes", "customer_name"]} key="customer_name" />
                   <Column
                     title="Status"
                     dataIndex={["attributes", "status"]}
                     key="status"
                     render={(status) => (
-                      <>
-                        {status === "Dibayar" ? (
-                          <Tag color="green">{status}</Tag>
-                        ) : (
-                          <Tag color="red">{status}</Tag>
-                        )}
-                      </>
+                      <>{status === "Dibayar" ? <Tag color="green">{status}</Tag> : <Tag color="red">{status}</Tag>}</>
                     )}
                   />
                   <Column
@@ -296,9 +272,7 @@ function PembayaranToko({ props }) {
                     render={(record) => {
                       const dataPaymentMethod =
                         record?.attributes?.store_payments?.data
-                          ?.map(
-                            (payment) => payment?.attributes?.payment_method
-                          )
+                          ?.map((payment) => payment?.attributes?.payment_method)
                           .join(", ") ?? null;
                       return (
                         <Select
@@ -314,15 +288,9 @@ function PembayaranToko({ props }) {
                           }}
                         >
                           <Select.Option value="TUNAI">TUNAI</Select.Option>
-                          <Select.Option value="TRANSFER">
-                            TRANSFER
-                          </Select.Option>
-                          <Select.Option value="BANK BCA">
-                            BANK BCA
-                          </Select.Option>
-                          <Select.Option value="DEBIT BCA">
-                            DEBIT BCA
-                          </Select.Option>
+                          <Select.Option value="TRANSFER">TRANSFER</Select.Option>
+                          <Select.Option value="BANK BCA">BANK BCA</Select.Option>
+                          <Select.Option value="DEBIT BCA">DEBIT BCA</Select.Option>
                           <Select.Option value="LAINNYA">LAINNYA</Select.Option>
                         </Select>
                       );
@@ -331,39 +299,35 @@ function PembayaranToko({ props }) {
                   <Column
                     title="Total Harga"
                     key="total_harga"
-                    render={(record) => (
-                      <>{formatter.format(record.attributes?.total ?? 0)}</>
-                    )}
+                    render={(record) => <>{formatter.format(record.attributes?.total ?? 0)}</>}
                   />
                   <Column
                     title="Dibayar"
                     key="dibayar"
                     render={(record) => {
-                      const dataPayment =
-                        record?.attributes?.store_payments?.data ?? [];
+                      const dataPayment = record?.attributes?.store_payments?.data ?? [];
 
                       const dataPaymentValue =
                         dataPayment.length > 1
-                          ? dataPayment.reduce(
-                              (acc, curr) =>
-                                parseFloat(acc) +
-                                parseFloat(curr.attributes.payment),
-                              0
-                            )
+                          ? dataPayment.reduce((acc, curr) => parseFloat(acc) + parseFloat(curr.attributes.payment), 0)
                           : dataPayment.length === 1
                           ? dataPayment[0].attributes.payment
                           : 0;
 
                       return (
                         <InputNumber
+                          onFocus={(e) => e.target.select()}
                           disabled={record.attributes.status === "Dibayar"}
-                          onChange={setPaymentValue}
+                          onChange={(v) =>
+                            setPaymentValue({
+                              ...paymentValue,
+                              [record.id]: v,
+                            })
+                          }
                           placeholder="Masukan Nominal"
                           min={0}
                           defaultValue={dataPaymentValue}
-                          formatter={(value) =>
-                            `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                          }
+                          formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                           parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
                           style={{ width: 150 }}
                         />
@@ -376,24 +340,18 @@ function PembayaranToko({ props }) {
                     key="kembali"
                     render={(record) => {
                       const totalHarga = record.attributes?.total ?? 0;
-                      const dataPayment =
-                        record?.attributes?.store_payments?.data ?? [];
+                      const dataPayment = record?.attributes?.store_payments?.data ?? [];
 
                       if (record.attributes.status === "Dibayar") {
                         const dataPaymentValue = dataPayment.reduce(
-                          (acc, curr) =>
-                            parseFloat(acc) +
-                            parseFloat(curr.attributes.payment),
+                          (acc, curr) => parseFloat(acc) + parseFloat(curr.attributes.payment),
                           0
                         );
-                        const kembali =
-                          dataPaymentValue - totalHarga < 0
-                            ? 0
-                            : dataPaymentValue - totalHarga;
+                        const kembali = dataPaymentValue - totalHarga < 0 ? 0 : dataPaymentValue - totalHarga;
                         return formatter.format(kembali);
                       }
 
-                      const kembali = paymentValue - totalHarga;
+                      const kembali = paymentValue?.[record.id] ? paymentValue[record.id] - totalHarga : 0;
                       return formatter.format(Math.max(kembali, 0));
                     }}
                   />
@@ -406,38 +364,48 @@ function PembayaranToko({ props }) {
                       }
 
                       return (
-                        <div>
-                          <Popconfirm
-                            title={
-                              "Pembayaran akan dilakukan sebesar " +
-                              formatter.format(paymentValue) +
-                              ". Lanjutkan?"
-                            }
-                            description={
-                              "Pembayaran akan dilakukan sebesar " +
-                              formatter.format(paymentValue) +
-                              ". Lanjutkan?"
-                            }
-                            onConfirm={() => confirm(record)}
-                            onCancel={cancel}
-                            okButtonProps={{
-                              style: { backgroundColor: "#00b894" },
-                            }}
-                            okText="Bayar"
-                            cancelText="Batalkan"
-                          >
-                            <Button className="rounded-md mr-2 hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
-                              Bayar
-                            </Button>
-                          </Popconfirm>
+                        <Popover
+                          showArrow={false}
+                          trigger="click"
+                          content={
+                            <div className="flex flex-col justify-start gap-2">
+                              <Popconfirm
+                                placement="topLeft"
+                                title={
+                                  "Pembayaran akan dilakukan sebesar " +
+                                  formatter.format(paymentValue?.[record.id] ?? 0) +
+                                  ". Lanjutkan?"
+                                }
+                                description={
+                                  "Pembayaran akan dilakukan sebesar " +
+                                  formatter.format(paymentValue?.[record.id] ?? 0) +
+                                  ". Lanjutkan?"
+                                }
+                                onConfirm={() => confirm(record)}
+                                onCancel={cancel}
+                                okButtonProps={{
+                                  style: { backgroundColor: "#00b894" },
+                                }}
+                                okText="Bayar"
+                                cancelText="Batalkan"
+                              >
+                                <Button className="rounded-md mr-2 hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
+                                  Bayar
+                                </Button>
+                              </Popconfirm>
 
-                          <Button
-                            onClick={() => onOpenDrawer(record)}
-                            className="rounded-md"
-                          >
-                            Pemb. Lain
-                          </Button>
-                        </div>
+                              <Button
+                                className="rounded-md mr-2 hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
+                                onClick={() => onOpenDrawer(record)}
+                              >
+                                Pemb. Lain
+                              </Button>
+                            </div>
+                          }
+                          placement="bottomLeft"
+                        >
+                          <MenuOutlined className="text-xl cursor-pointer hover:text-primary transition-colors duration-75" />
+                        </Popover>
                       );
                     }}
                   />

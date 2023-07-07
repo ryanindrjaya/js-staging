@@ -48,6 +48,35 @@
   background-color: #036b82 !important;
 }
 
+.ant-table-filter-trigger {
+  color: #ffffff !important;
+}
+
+.ant-table-filter-trigger:hover {
+  color: #e8e8e8 !important;
+}
+
+.ant-checkbox-checked .ant-checkbox-inner {
+  background-color: #036b82 !important;
+  border-color: #036b82 !important;
+}
+
+.ant-btn-primary {
+  background-color: #036b82 !important;
+  border-color: #036b82 !important;
+  color: #ffffff !important;
+}
+
+.ant-btn-link {
+  color: #036b82 !important;
+}
+
+.ant-dropdown-menu-item-selected,
+.ant-dropdown-menu-submenu-title-selected {
+  background-color: rgba(3, 132, 161, 0.081) !important;
+  color: #036b82 !important;
+}
+
 /*========= END CHANGE PLACEHOLDER COLOR ==============*/
 @media print {
   .ant-table-thead .ant-table-cell {

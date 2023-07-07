@@ -92,6 +92,7 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
           <Option value="KARTU KREDIT">Kartu Kredit</Option>
         </Select>
         <InputNumber
+          onFocus={(e) => e.target.select()}
           placeholder="Masukan Nominal"
           min={0}
           formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}

@@ -60,9 +60,7 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchStore = async (cookies) => {
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL +
-    "/store-sales?sort[0]=createdAt:desc&populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales?sort[0]=id:desc&populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -115,7 +113,7 @@ function Toko({ props }) {
     const req = await fetch(endpoint, options);
     const res = await req.json();
     if (res) {
-      const res = await fetchData(cookies);
+      const res = await fetchStore(cookies);
       openNotificationWithIcon(
         "success",
         "Berhasil menghapus data",
@@ -127,7 +125,7 @@ function Toko({ props }) {
 
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales?pagination[page]=" + page;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales?sort[0]=id:desc&pagination[page]=" + page;
 
     const options = {
       method: "GET",

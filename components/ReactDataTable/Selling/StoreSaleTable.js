@@ -54,7 +54,7 @@ export default function ReactDataTable({
       product: value,
       index,
     });
-    getProduct(data, item?.id);
+    getProduct(data, index);
   };
 
   const onChangeQty = (value, data, index) => {
@@ -176,10 +176,8 @@ export default function ReactDataTable({
       name: "Stok Gudang",
       selector: (row, idx) => {
         return (
-          <div
-            className={`disabled:bg-white italic ${dataLocationStock?.[row.id] ? "text-green-500" : "text-red-500"}`}
-          >
-            {`${dataLocationStock?.[row.id] || "Tidak Tersedia"}` ?? "Pilih Gudang"}
+          <div className={`disabled:bg-white italic ${dataLocationStock?.[idx] ? "text-green-500" : "text-red-500"}`}>
+            {`${dataLocationStock?.[idx] || "Tidak Tersedia"}` ?? "Pilih Gudang"}
           </div>
         );
       },

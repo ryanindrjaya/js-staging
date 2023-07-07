@@ -46,7 +46,7 @@ export default function SearchBar({
     if (res) {
       dispatch({ type: "ADD_PRODUCT", product: res.data });
       if (getProductAtLocation) {
-        getProductAtLocation(1, res.data.id);
+        getProductAtLocation(1);
       }
       form.setFieldsValue({ products: undefined });
     }

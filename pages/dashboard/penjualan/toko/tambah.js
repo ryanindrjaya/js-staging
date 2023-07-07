@@ -241,21 +241,25 @@ function Toko({ props }) {
   const trxNumber = String(userLastDocNumber).padStart(3, "0");
   const [categorySale, setCategorySale] = useState(`${userCodeName}/${trxNumber}/${mm}/${yyyy}`);
 
-  const getProductAtLocation = async (unit = 1) => {
+  const getProductAtLocation = async (unit = 1, changedIdx = products?.productList?.length - 1 ?? 0) => {
     const locationId = form.getFieldValue("location");
-    let tempData = {};
+    let tempData = dataLocationStock;
+
+    console.log("changedIdx", changedIdx);
 
     // create an array of promises by mapping over the productList
     const promises = products.productList.map(async (product, idx) => {
-      const stock = await getStockAtLocation(product.id, unit, idx);
-      console.log("stock ", product.id, stock);
+      if (idx === changedIdx) {
+        const stock = await getStockAtLocation(product.id, unit, idx);
+        console.log("stock ", product.id, stock);
 
-      tempData = {
-        ...tempData,
-        [product.id]: stock,
-      };
+        tempData = {
+          ...tempData,
+          [idx]: stock,
+        };
 
-      return stock; // return a promise from each iteration
+        return stock; // return a promise from each iteration
+      }
     });
 
     try {
@@ -268,6 +272,8 @@ function Toko({ props }) {
     }
   };
 
+  console.log("dataLocationStock", dataLocationStock);
+
   const getStockAtLocation = async (productId, unit, idx) => {
     try {
       const response = await getStock(productId, unit);
@@ -278,7 +284,7 @@ function Toko({ props }) {
         const sortedBasedOnQty = response.data.sort((a, b) => b.availableStock - a.availableStock);
         setLokasiGudang({
           ...lokasiGudang,
-          [productId]: sortedBasedOnQty,
+          [idx]: sortedBasedOnQty,
         });
       }
 

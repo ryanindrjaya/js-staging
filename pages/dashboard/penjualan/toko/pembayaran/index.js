@@ -5,6 +5,7 @@ import {
   Input,
   InputNumber,
   Popconfirm,
+  Popover,
   Select,
   Skeleton,
   Space,
@@ -25,6 +26,7 @@ import { useRouter } from "next/router";
 import PembayaranDrawer from "../../../../../components/Drawer/PembayaranDrawer";
 import { CreateStorePayment } from "../../../../../library/functions/createStorePayment";
 import { createInventoryFromPenjualan } from "../../../../../library/functions/createInventory";
+import { MenuOutlined } from "@ant-design/icons";
 
 PembayaranToko.getInitialProps = async (context) => {
   try {
@@ -108,7 +110,7 @@ function PembayaranToko({ props }) {
   const cookies = nookies.get();
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState();
-  const [paymentValue, setPaymentValue] = useState(0);
+  const [paymentValue, setPaymentValue] = useState({});
   const dataSales = props?.paymentSales?.data;
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedDrawerData, setSelectedDrawerData] = useState({});
@@ -129,26 +131,28 @@ function PembayaranToko({ props }) {
 
     try {
       const totalHarga = record.attributes?.total ?? 0;
-      let kembali = paymentValue - totalHarga;
+      let kembali = paymentValue[storeTrxId] - totalHarga;
 
       // if kembali is negative, return 0
       if (kembali < 0) {
         kembali = 0;
       }
 
-      if (paymentValue >= totalHarga) {
+      if (paymentValue[storeTrxId] >= totalHarga) {
         const inventoryOut = await createInventoryFromPenjualan(record);
         if (inventoryOut) {
           await CreateStorePayment(
             totalHarga,
             kembali,
-            paymentValue,
+            paymentValue[storeTrxId],
             selectedPaymentMethod?.[record.id],
             storeTrxId,
             returTrxId,
             "Pembayaran",
             reloadPage
           );
+        } else {
+          message.error("Inventory gagal dibuat, transaksi tidak dapat dilakukan.", 2);
         }
       } else {
         message.error("Pembayaran tidak mencukupi", 2);
@@ -259,6 +263,17 @@ function PembayaranToko({ props }) {
                     title="Status"
                     dataIndex={["attributes", "status"]}
                     key="status"
+                    filters={[
+                      {
+                        text: "Dibayar",
+                        value: "Dibayar",
+                      },
+                      {
+                        text: "Belum Dibayar",
+                        value: "Belum Dibayar",
+                      },
+                    ]}
+                    onFilter={(value, record) => record.attributes.status.indexOf(value) === 0}
                     render={(status) => (
                       <>
                         {status === "Dibayar" ? (
@@ -279,11 +294,14 @@ function PembayaranToko({ props }) {
                         record?.attributes?.store_payments?.data
                           ?.map((payment) => payment?.attributes?.payment_method)
                           .join(", ") ?? null;
+
+                      const status = record.attributes.status;
+
                       return (
                         <Select
                           disabled={record.attributes.status === "Dibayar" || record.attributes.status === "Diretur"}
                           placeholder="Pilih Metode Pembayaran"
-                          defaultValue={dataPaymentMethod}
+                          value={status !== "Belum Dibayar" ? dataPaymentMethod : selectedPaymentMethod?.[record.id]}
                           style={{ width: 120 }}
                           onChange={(value) => {
                             setSelectedPaymentMethod({
@@ -311,9 +329,10 @@ function PembayaranToko({ props }) {
                     key="dibayar"
                     render={(record) => {
                       const dataPayment = record?.attributes?.store_payments?.data ?? [];
+                      const status = record.attributes.status;
 
                       const dataPaymentValue =
-                        dataPayment.length > 1
+                        dataPayment.length > 1 && status !== "Belum Dibayar"
                           ? dataPayment.reduce((acc, curr) => parseFloat(acc) + parseFloat(curr.attributes.payment), 0)
                           : dataPayment.length === 1
                           ? dataPayment[0].attributes.payment
@@ -321,11 +340,17 @@ function PembayaranToko({ props }) {
 
                       return (
                         <InputNumber
+                          onFocus={(e) => e.target.select()}
                           disabled={record.attributes.status === "Dibayar" || record.attributes.status === "Diretur"}
-                          onChange={setPaymentValue}
+                          onChange={(v) =>
+                            setPaymentValue({
+                              ...paymentValue,
+                              [record.id]: v,
+                            })
+                          }
                           placeholder="Masukan Nominal"
                           min={0}
-                          defaultValue={dataPaymentValue}
+                          value={status !== "Belum Dibayar" ? dataPaymentValue : paymentValue?.[record.id] ?? 0}
                           formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                           parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
                           style={{ width: 150 }}
@@ -350,7 +375,7 @@ function PembayaranToko({ props }) {
                         return formatter.format(kembali);
                       }
 
-                      const kembali = paymentValue - totalHarga;
+                      const kembali = paymentValue?.[record.id] ? paymentValue?.[record.id] - totalHarga : 0;
                       return formatter.format(Math.max(kembali, 0));
                     }}
                   />
@@ -363,31 +388,48 @@ function PembayaranToko({ props }) {
                       }
 
                       return (
-                        <div>
-                          <Popconfirm
-                            title={
-                              "Pembayaran akan dilakukan sebesar " + formatter.format(paymentValue) + ". Lanjutkan?"
-                            }
-                            description={
-                              "Pembayaran akan dilakukan sebesar " + formatter.format(paymentValue) + ". Lanjutkan?"
-                            }
-                            onConfirm={() => confirm(record)}
-                            onCancel={cancel}
-                            okButtonProps={{
-                              style: { backgroundColor: "#00b894" },
-                            }}
-                            okText="Bayar"
-                            cancelText="Batalkan"
-                          >
-                            <Button className="rounded-md mr-2 hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
-                              Bayar
-                            </Button>
-                          </Popconfirm>
+                        <Popover
+                          showArrow={false}
+                          trigger="click"
+                          content={
+                            <div className="flex flex-col justify-start gap-2">
+                              <Popconfirm
+                                placement="topLeft"
+                                title={
+                                  "Pembayaran akan dilakukan sebesar " +
+                                  formatter.format(paymentValue?.[record.id] ?? 0) +
+                                  ". Lanjutkan?"
+                                }
+                                description={
+                                  "Pembayaran akan dilakukan sebesar " +
+                                  formatter.format(paymentValue?.[record.id] ?? 0) +
+                                  ". Lanjutkan?"
+                                }
+                                onConfirm={() => confirm(record)}
+                                onCancel={cancel}
+                                okButtonProps={{
+                                  style: { backgroundColor: "#00b894" },
+                                }}
+                                okText="Bayar"
+                                cancelText="Batalkan"
+                              >
+                                <Button className="rounded-md mr-2 hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
+                                  Bayar
+                                </Button>
+                              </Popconfirm>
 
-                          <Button onClick={() => onOpenDrawer(record)} className="rounded-md">
-                            Pemb. Lain
-                          </Button>
-                        </div>
+                              <Button
+                                className="rounded-md mr-2 hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
+                                onClick={() => onOpenDrawer(record)}
+                              >
+                                Pemb. Lain
+                              </Button>
+                            </div>
+                          }
+                          placement="bottomLeft"
+                        >
+                          <MenuOutlined className="text-xl cursor-pointer hover:text-primary transition-colors duration-75" />
+                        </Popover>
                       );
                     }}
                   />

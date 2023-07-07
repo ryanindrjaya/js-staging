@@ -268,6 +268,8 @@ export async function createInventoryFromPenjualan(row) {
       message: "Error",
       description: "Gagal membuat inventory",
     });
+
+    return false;
   }
 }
 
