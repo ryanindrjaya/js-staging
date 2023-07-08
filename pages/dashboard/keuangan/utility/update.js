@@ -26,35 +26,41 @@ const Update = async (
     tempProductListId.push({ id: element });
   });
 
-  var totalTunai = 0;
-  var totalTransfer = 0;
-  var totalGiro = 0;
+  var totalTunai = values.bayar1;
+  var totalTransfer = values.bayar2;
+  var totalGiro = values.bayar3;
   var total = 0;
 
   values.chart_of_account = values.akun;
   values.status = "Dibayar";
   total = values.bayar1 + values.bayar2 + values.bayar3;
 
-  values.bayar1 = parseFloat( values.bayar1 );
-  values.bayar2 = parseFloat( values.bayar2 );
-  values.bayar3 = parseFloat( values.bayar3 );
-  if (values.metode_bayar1 == "tunai") totalTunai = values.bayar1;
-  else if (values.metode_bayar2 == "tunai") totalTunai = values.bayar2;
-  else if (values.metode_bayar3 == "tunai") totalTunai = values.bayar3;
-  else totalTunai = 0;
-  if (values.metode_bayar1 == "transfer") totalTransfer = values.bayar1;
-  else if (values.metode_bayar2 == "transfer") totalTransfer = values.bayar2;
-  else if (values.metode_bayar3 == "transfer") totalTransfer = values.bayar3;
-  else totalTransfer = 0;
-  if (values.metode_bayar1 == "giro") totalGiro = values.bayar1;
-  else if (values.metode_bayar2 == "giro") totalGiro = values.bayar2;
-  else if (values.metode_bayar3 == "giro") totalGiro = values.bayar3;
-  else totalGiro = 0;
+  if(page == "hutang"){
+    values.bayar1 = parseFloat( values.bayar1 );
+    values.bayar2 = parseFloat( values.bayar2 );
+    values.bayar3 = parseFloat( values.bayar3 );
+    if (values.metode_bayar1 == "tunai") totalTunai = values.bayar1;
+    else if (values.metode_bayar2 == "tunai") totalTunai = values.bayar2;
+    else if (values.metode_bayar3 == "tunai") totalTunai = values.bayar3;
+    else totalTunai = 0;
+    if (values.metode_bayar1 == "transfer") totalTransfer = values.bayar1;
+    else if (values.metode_bayar2 == "transfer") totalTransfer = values.bayar2;
+    else if (values.metode_bayar3 == "transfer") totalTransfer = values.bayar3;
+    else totalTransfer = 0;
+    if (values.metode_bayar1 == "giro") totalGiro = values.bayar1;
+    else if (values.metode_bayar2 == "giro") totalGiro = values.bayar2;
+    else if (values.metode_bayar3 == "giro") totalGiro = values.bayar3;
+    else totalGiro = 0;
+  }
 
   const putRelation = await putRelationDetail(dataEdit?.id, values, form, router, url, page, setCreateId);
   console.log(putRelation, "put relation");
   if (putRelation.status === 200) {
     if (values.document == "Publish") {
+
+      var akunTunai = false;
+      var akunTransfer = false;
+      var akunGiro = false;
       akunHutang.forEach((item) => {
         if(item.attributes.setting == true){
           if(totalTunai != 0 && item.attributes.type == "Tunai"){
@@ -67,6 +73,8 @@ const Update = async (
             } else {
               putAkun(item.attributes.chart_of_account.data.id, item.attributes.chart_of_account.data.attributes, form, totalTunai, page);
             }
+
+            akunTunai = true;
           } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
             if(item.attributes.chart_of_account.data.attributes.saldo < totalTransfer){
               notification["error"]({
@@ -77,6 +85,8 @@ const Update = async (
             } else {
               putAkun(item.attributes.chart_of_account.data.id, item.attributes.chart_of_account.data.attributes, form, totalTransfer, page);
             }
+
+            akunTransfer = true;;
           } else if(totalGiro != 0 && item.attributes.type == "Giro"){
             if(item.attributes.chart_of_account.data.attributes.saldo < totalGiro){
               notification["error"]({
@@ -87,33 +97,35 @@ const Update = async (
             } else {
               putAkun(item.attributes.chart_of_account.data.id, item.attributes.chart_of_account.data.attributes, form, totalGiro, page);
             }
-          }
-        } else {
-          if(item.attributes.type == "Tunai"){
-              notification["error"]({
-                message: "Gagal menambahkan data",
-                description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
-              });
-              
-          } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
-              notification["error"]({
-                message: "Gagal menambahkan data",
-                description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
-              });
-              
-          } else if(totalGiro != 0 && item.attributes.type == "Giro"){
-              notification["error"]({
-                message: "Gagal menambahkan data",
-                description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
-              });
-              
+
+            akunGiro = true;;
           }
         }
       });
+      
+      if(totalTunai != 0 && akunTunai != true){
+          notification["error"]({
+            message: "Gagal menambahkan data",
+            description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
+          });
+          
+      } else if(totalTransfer != 0 && akunTunai != true){
+          notification["error"]({
+            message: "Gagal menambahkan data",
+            description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
+          });
+          
+      } else if(totalGiro  != 0 && akunTunai != true){
+          notification["error"]({
+            message: "Gagal menambahkan data",
+            description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
+          });    
+      }
+
     }
     
   } else {
-    openNotificationWithIcon("error");
+    openNotificationWithIcon("error", page);
   }
 
 };
@@ -134,11 +146,10 @@ const putAkun = async (id, value, form, total, page) => {
     } 
 
     value.saldo = saldo;
-
+    
     const data = {
         data: value,
     };
-
 
     // clean object
     for (var key in data) {
@@ -203,11 +214,11 @@ const putRelationDetail = async (id, value, form, router, url, page, setCreateId
     form.resetFields();
     if(page == "hutang") router.push("/dashboard/keuangan/hutang");
     if(page == "piutang") router.push("/dashboard/keuangan/piutang");
-    openNotificationWithIcon("success");
-
+    openNotificationWithIcon("success", page);
+    console.log("res.data", res.data);
     setCreateId(res.data);
   } else {
-    openNotificationWithIcon("error");
+    openNotificationWithIcon("error", page);
   }
 
   return req;
@@ -229,18 +240,26 @@ const getUserMe = async () => {
   return res;
 };
 
-const openNotificationWithIcon = (type) => {
+const openNotificationWithIcon = (type, page) => {
+  var descrip = null;
+  var descripError = null;
+  if(page == "hutang"){
+    descrip = "Data yg dipilih berhasil ditambahkan. Silahkan cek pada halaman Hutang";
+    descripError = "Data yg dipilih gagal ditambahkan. Silahkan cek NO hutang atau kelengkapan data lainnya";
+  } else if (page == "piutang"){
+    descrip = "Data yg dipilih berhasil ditambahkan. Silahkan cek pada halaman Hutang";
+    descripError = "Data yg dipilih gagal ditambahkan. Silahkan cek NO piutang atau kelengkapan data lainnya";
+  }
+
   if (type === "error") {
     notification[type]({
       message: "Gagal menambahkan data",
-      description:
-        "Data lpb yg dipilih gagal ditambahkan. Silahkan cek NO hutang atau kelengkapan data lainnya",
+      description: descripError,
     });
   } else if (type === "success") {
     notification[type]({
       message: "Berhasil menambahkan data",
-      description:
-        "Data lpb yg dipilih berhasil ditambahkan. Silahkan cek pada halaman Hutang",
+      description: descrip ,
     });
   }
 };
