@@ -19,10 +19,11 @@ import {
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import AddSellSalesTable from "@iso/components/ReactDataTable/Selling/AddSellSalesTable";
-import AddCreditTable from "../../../../components/ReactDataTable/Cost/AddCreditTable";
-import createData from "../utility/create";
-import createDetails from "../utility/createDetail";
-import calculatePrice from "../utility/calculatePrice";
+import AddCreditTable from "@iso/components/ReactDataTable/Cost/AddCreditTable";
+import createData from "../../utility/create";
+import updateData from "../../utility/update";
+import createDetails from "../../utility/createDetail";
+import calculatePrice from "../../utility/calculatePrice";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
 import Customer from "@iso/components/Form/AddCost/CustomerForm";
 import Area from "@iso/components/Form/AddCost/AreaForm";
@@ -31,6 +32,18 @@ import nookies from "nookies";
 
 Piutang.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
+  const { id } = context.query;
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/credits/" + id + "?populate=deep";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const reqEdit = await fetch(endpoint, options);
+  const editData = await reqEdit.json();
 
   const req = await fetchData(cookies);
   const user = await req.json();
@@ -65,6 +78,9 @@ Piutang.getInitialProps = async (context) => {
   const reqAkunPiutang = await fetchAkunPiutang(cookies);
   const akunPiutang = await reqAkunPiutang.json();
 
+  const reqCOA = await fetchAkunCOA(cookies);
+  const akunCOA = await reqCOA.json();
+
   return {
     props: {
       user,
@@ -78,6 +94,8 @@ Piutang.getInitialProps = async (context) => {
       nonPanel,
       returNonPanel,
       akunPiutang,
+      editData,
+      akunCOA,
     },
   };
 };
@@ -243,6 +261,20 @@ const fetchAkunPiutang = async (cookies) => {
   return req;
 };
 
+const fetchAkunCOA = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?populate=*&filters[jenis_akun][$eq]=false";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
 function Piutang({ props }) {
   const biaya = useSelector((state) => state.Cost);
   const dispatch = useDispatch();
@@ -261,6 +293,9 @@ function Piutang({ props }) {
   const returNonPanel = props.returNonPanel.data;
   const piutang = props.piutang.data;
   const akunPiutang = props.akunPiutang.data;
+  const dataEdit = props.editData.data;
+  const dataAkunCOA = props.akunCOA.data;
+  const [dataEditId, setDataEditId] = useState({});
   //const customerData = props.customer.data[0];
   const [supplier, setSupplier] = useState();
   const [dataTabel, setDataTabel] = useState([]);
@@ -332,7 +367,7 @@ function Piutang({ props }) {
   const onFinish = (values) => {
     // save no giro to oth
     var biayaInfo = biaya.info;
-    console.log(values,"value");
+    
     setLoading(true);
     setInfo("sukses");
 
@@ -353,18 +388,18 @@ function Piutang({ props }) {
     values.bayar2 = totalTransfer;
     values.bayar3 = totalGiro;
 
-    props.piutang.data.forEach((element) => {
-      if (values.no_piutang == element.attributes.no_piutang) {
-        notification["error"]({
-          message: "Gagal menambahkan data",
-          description: "Data gagal ditambahkan, karena no piutang sama",
-        });
-        setInfo("gagal");
-      }
-    });
+    // props.piutang.data.forEach((element) => {
+    //   if (values.no_piutang == element.attributes.no_piutang) {
+    //     notification["error"]({
+    //       message: "Gagal menambahkan data",
+    //       description: "Data gagal ditambahkan, karena no piutang sama",
+    //     });
+    //     setInfo("gagal");
+    //   }
+    // });
 
     // cek untuk akun hutang (cek coa)
-    console.log("total tunai, tranfer, giro", totalTunai, totalTransfer, totalGiro);
+    
     if(document == "Publish"){
       akunPiutang.forEach((item) => {
         if(item.attributes.setting == true){
@@ -422,6 +457,30 @@ function Piutang({ props }) {
     setLoading(false);
   };
 
+  const deleteDetail = async (data) => {
+    var id = 0;
+    for (const key in data) {
+      id = data[key].id;
+
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-details/" + id;
+      const cookies = nookies.get(null, "token");
+
+      const options = {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+      };
+
+      const req = fetch(endpoint, options);
+      //const res = req.json();
+      if (req) {
+        console.log("relation deleted");
+      }
+    }
+  };
+
   const createDetail = async () => {
     //await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/sales-sale-details");
     await createDetails(
@@ -445,7 +504,7 @@ function Piutang({ props }) {
     values.wilayah = wilayah;
     values.document = document;
     values.status_pembayaran = "Dibayar";
-    await createData(
+    await updateData(
       sisaHutang,
       values,
       listId,
@@ -453,12 +512,14 @@ function Piutang({ props }) {
       router,
       "/credits/",
       "piutang",
-      akunPiutang,
+      dataAkunCOA,
+      dataEdit,
       setCreateId,
       akunPiutang,
     );
     //console.log("Create master data", createId);
     //editPenjualan(createId);
+    await deleteDetail(dataEditId);
   };
 
   const editPenjualan = async (value) => {
@@ -483,13 +544,12 @@ function Piutang({ props }) {
     res.data.attributes.credit_details.data.forEach((item) => {
       const saleTypes = ["non_panel_sale", "panel_sale", "sales_sale"];
       for (const saleType of saleTypes) {
-        const sale = item.attributes[saleType].data;
-        console.log(sale, "sale nih", item);
+        const sale = item.attributes[saleType].data; console.log(sale, "sale nih baru editPenjualan", item.attributes[saleType]);
         if (sale != null) {
           let url = `/${saleType}s/${sale.id}`;
           url = url.replaceAll("_", "-");
           const data = sale;
-          console.log("link url", url);
+          
           const pembayaran =
             item.attributes.giro +
             item.attributes.transfer +
@@ -618,6 +678,18 @@ function Piutang({ props }) {
     total = totalPiutang - totalBayar;
     return total;
   };
+
+  useEffect(() => {
+    setSupplier(dataEdit?.attributes?.supplier?.data);
+
+    var dataEditDetail = {};
+    if (dataEdit) {
+      for (const key in dataEdit?.attributes?.credit_details.data) {
+        dataEditDetail[key] = dataEdit?.attributes?.credit_details?.data[key];
+      }
+    }
+    setDataEditId(dataEditDetail);
+  }, [dataEdit]);
 
   useEffect(() => {
     if (createId != undefined || createId != null) {
@@ -776,7 +848,6 @@ function Piutang({ props }) {
         ) {
 
           element.subtotal += row.attributes.total;
-          console.log("row", row);
 
           if (dataRetur.length > 0)
             dataRetur[dataRetur.length] = {
@@ -817,27 +888,68 @@ function Piutang({ props }) {
           element.sisaHutang = parseInt(element.attributes.total) - parseInt(element.subtotal);
         }
       });
-
-      dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: element, index: index });
-      dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
-      dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: 0, listData: element, index: index });
-      dispatch({ type: "CHANGE_DATA_GIRO", giro: 0, listData: element, index: index });
-      dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: element.sisaHutang, listData: element, index: index });
+      
+      dataEdit.attributes.credit_details.data.forEach((item) => {
+        
+        if(element.keterangan == "sales"){
+          if(item.attributes.sales_sale?.data?.attributes?.no_sales_sale == element.attributes.no_sales_sale){
+            dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "pilih", listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_TUNAI", tunai: item.attributes.tunai, listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: item.attributes.transfer, listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_GIRO", giro: item.attributes.giro, listData: element, index: index });
+            dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: item.attributes.sisa_piutang, listData: element, index: index });
+          } else {
+            dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: 0, listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_GIRO", giro: 0, listData: element, index: index });
+            dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: element.sisaHutang, listData: element, index: index });
+          }
+        } else if(element.keterangan == "panel"){
+          if(item.attributes.panel_sale?.data?.attributes?.no_panel_sale == element.attributes.no_panel_sale){
+            dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "pilih", listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_TUNAI", tunai: item.attributes.tunai, listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: item.attributes.transfer, listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_GIRO", giro: item.attributes.giro, listData: element, index: index });
+            dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: item.attributes.sisa_piutang, listData: element, index: index });
+          } else {
+            dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: 0, listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_GIRO", giro: 0, listData: element, index: index });
+            dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: element.sisaHutang, listData: element, index: index });
+          }
+        } else if(element.keterangan == "nonpanel"){
+          if(item.attributes.non_panel_sale?.data?.attributes?.no_non_panel_sale == element.attributes.no_non_panel_sale){
+            dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "pilih", listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_TUNAI", tunai: item.attributes.tunai, listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: item.attributes.transfer, listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_GIRO", giro: item.attributes.giro, listData: element, index: index });
+            dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: item.attributes.sisa_piutang, listData: element, index: index });
+          } else {
+            dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: 0, listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_GIRO", giro: 0, listData: element, index: index });
+            dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: element.sisaHutang, listData: element, index: index });
+          }
+        } else {
+          dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: element, index: index });
+          dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
+          dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: 0, listData: element, index: index });
+          dispatch({ type: "CHANGE_DATA_GIRO", giro: 0, listData: element, index: index });
+          dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: element.sisaHutang, listData: element, index: index });
+        }
+      });
+        
+      });
+    
+    form.setFieldsValue({
+      no_piutang: dataEdit?.attributes?.no_piutang,
+      catatan: dataEdit?.attributes?.catatan,
     });
 
-    //console.log("datatable", dataTabel.length);
-    // if (dataTable.length > 0) {
-    //   dataTable.forEach((item, index) => {
-    //     dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: item, index: index });
-    //   });
-    // }
-
   }, []);
-
-  // useEffect(() => {
-  //   //if(dataTabel)
-
-  // }, [dataTabel]);
 
   const validateError = () => {
     var listError = form.getFieldsError();

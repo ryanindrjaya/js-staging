@@ -124,7 +124,7 @@ const fetchHutang = async (cookies) => {
 };
 
 const fetchAkunHutang = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=*&filters[setting][$eq]=true";
   const options = {
     method: "GET",
     headers: {
@@ -152,7 +152,7 @@ const fetchAkunCOA = async (cookies) => {
 };
 
 function Hutang({ props }) {
-  const biaya = useSelector((state) => state.Cost); console.log("biaya", biaya);
+  const biaya = useSelector((state) => state.Cost);
   const dispatch = useDispatch();
 
   const user = props.user;

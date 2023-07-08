@@ -143,12 +143,12 @@ function Piutang({ props }) {
   };
 
   const handleUpdate = (id) => {
-    // router.push("/dashboard/pembelian/order_pembelian/edit/" + id);
-    openNotificationWithIcon(
-      "info",
-      "Work In Progress",
-      "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
-    );
+    router.push("/dashboard/keuangan/piutang/edit/" + id);
+    // openNotificationWithIcon(
+    //   "info",
+    //   "Work In Progress",
+    //   "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
+    // );
   };
 
   const handleDelete = async (data) => {
