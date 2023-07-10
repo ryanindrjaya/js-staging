@@ -621,9 +621,13 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       width: "180px",
       selector: (row, idx) => {
         var defaultCek = false;
+        if(biaya.info[idx]){
+          if(biaya.info[idx].pilihData == "pilih") defaultCek = true;
+          else defaultCek = false;
+        } 
         return(
         <>
-          <Checkbox className="text-xs font-normal py-2 px-2 rounded-md" defaultChecked={defaultCek} onChange={(value) => onChangePilih(value, row, idx)}> Pilih </Checkbox>
+          <Checkbox className="text-xs font-normal py-2 px-2 rounded-md" checked={defaultCek} onChange={(value) => onChangePilih(value, row, idx)}> Pilih </Checkbox>
           <Popover content={content(row, idx)} placement="bottom" trigger="click">
               <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
                   Tindakan

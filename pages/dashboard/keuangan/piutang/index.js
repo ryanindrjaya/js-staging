@@ -102,7 +102,7 @@ const fetchPiutang = async (cookies) => {
 };
 
 const fetchAkunPiutang = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts?populate=*&filters[setting][$eq]=true";
   const options = {
     method: "GET",
     headers: {
@@ -143,12 +143,12 @@ function Piutang({ props }) {
   };
 
   const handleUpdate = (id) => {
-    // router.push("/dashboard/pembelian/order_pembelian/edit/" + id);
-    openNotificationWithIcon(
-      "info",
-      "Work In Progress",
-      "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
-    );
+    router.push("/dashboard/keuangan/piutang/edit/" + id);
+    // openNotificationWithIcon(
+    //   "info",
+    //   "Work In Progress",
+    //   "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
+    // );
   };
 
   const handleDelete = async (data) => {
@@ -289,44 +289,56 @@ function Piutang({ props }) {
 
         // untuk memotong ke akun coa
         console.log("data", row, akunPiutang);
-        akunPiutang.data.forEach((item) => {
-            if(item.attributes.setting == true){
-                row.attributes.credit_details.data.forEach((row) => {
-                  if(row.attributes.tunai != 0 && item.attributes.type == "Tunai"){
-                      putAkun(item.attributes.chart_of_account.data, row.attributes.tunai);
-                
-                  } else if(row.attributes.transfer != 0 && item.attributes.type == "Transfer"){
-                      putAkun(item.attributes.chart_of_account.data, row.attributes.transfer);
-                    
-                  } else if(row.attributes.giro != 0 && item.attributes.type == "Giro"){
-                      putAkun(item.attributes.chart_of_account.data, row.attributes.giro);
-                    
-                  }
-                });
+        var akunTunai = false;
+        var akunTransfer = false;
+        var akunGiro = false;
 
-            } else {
-                if(item.attributes.type == "Tunai"){
-                    notification["error"]({
-                      message: "Gagal menambahkan data",
-                      description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
-                    });
-                    
-                } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
-                    notification["error"]({
-                      message: "Gagal menambahkan data",
-                      description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
-                    });
-                    
-                } else if(totalGiro != 0 && item.attributes.type == "Giro"){
-                    notification["error"]({
-                      message: "Gagal menambahkan data",
-                      description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
-                    });
-                    
-                }
+        dataPiutang.attributes.credit_details.data.forEach((row) => {
+          akunPiutang.data.forEach((item) => {
+            if(item.attributes.setting == true){
+              if(row.attributes.tunai > 0 && item.attributes.type == "Tunai"){
+                
+                putAkun(item.attributes.chart_of_account.data, row.attributes.tunai);
+    
+                akunTunai = true;
+              } else if(row.attributes.transfer > 0 && item.attributes.type == "Transfer"){
+                
+                putAkun(item.attributes.chart_of_account.data, row.attributes.transfer);
+    
+                akunTransfer = true;;
+              } else if(row.attributes.giro > 0 && item.attributes.type == "Giro"){
+
+                putAkun(item.attributes.chart_of_account.data, row.attributes.giro);
+    
+                akunGiro = true;;
               }
+            }
+          });
+          
+          if(row.attributes.tunai != 0 && akunTunai != true){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
+              });
+              
+          } else if(row.attributes.transfer != 0 && akunTunai != true){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
+              });
+              
+          } else if(row.attributes.giro  != 0 && akunTunai != true){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
+              });    
+          }
+
+          akunTunai = false;
+          akunTransfer = false;
+          akunGiro = false;
         });
-        //await putAkun(dataHutang.attributes.chart_of_account.data, dataHutang.attributes.total_pembayaran);
+
 
     } else console.log("Not update all, karena draft");
 };
@@ -407,7 +419,7 @@ const changeStatusPiutang = async (status, id) => {
 
       const JSONdata = JSON.stringify(newValues);
       const cookies = nookies.get(null, "token");
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/credits/" + id + "?populate=*";
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/credits/" + id + "?populate=deep";
 
       const options = {
         method: "PUT",
