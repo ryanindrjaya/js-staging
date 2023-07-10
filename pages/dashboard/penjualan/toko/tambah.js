@@ -245,8 +245,6 @@ function Toko({ props }) {
     const locationId = form.getFieldValue("location");
     let tempData = dataLocationStock;
 
-    console.log("changedIdx", changedIdx);
-
     // create an array of promises by mapping over the productList
     const promises = products.productList.map(async (product, idx) => {
       if (idx === changedIdx) {
@@ -272,8 +270,6 @@ function Toko({ props }) {
     }
   };
 
-  console.log("dataLocationStock", dataLocationStock);
-
   const getStockAtLocation = async (productId, unit, idx) => {
     try {
       const response = await getStock(productId, unit);
@@ -298,7 +294,7 @@ function Toko({ props }) {
 
       return response.available ? stringArr.join(", ") : "Stok kosong";
     } catch (error) {
-      console.error("error", error);
+      console.log("error", error);
       setDataLocationStock({
         ...dataLocationStock,
         [productId]: "Error fetching stock data",
