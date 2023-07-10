@@ -344,7 +344,19 @@ export default function Riwayat({ defaultOptions }) {
                   ))}
                 </ColumnGroup>
                 <Column className="uppercase" title="Pembuat" dataIndex="author" key="author" />
-                <Column className="uppercase" title="Keterangan" dataIndex="keterangan" key="keterangan" />
+                <Column
+                  className="uppercase"
+                  title="Keterangan"
+                  render={(value) => {
+                    return (
+                      <div className="w-full whitespace-pre-wrap">
+                        <p>{value}</p>
+                      </div>
+                    );
+                  }}
+                  dataIndex="keterangan"
+                  key="keterangan"
+                />
               </Table>
             ) : (
               ""

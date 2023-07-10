@@ -16,6 +16,7 @@ export default function SalesTable({
   formObj,
   retur = false,
   locations = [],
+  getProduct,
 }) {
   const dispatch = useDispatch();
   var defaultDp1 = 0;
@@ -43,6 +44,8 @@ export default function SalesTable({
       product: value,
       index,
     });
+
+    getProduct(data, index);
   };
 
   const onChangeQty = (value, data, index) => {
@@ -143,25 +146,12 @@ export default function SalesTable({
     },
     {
       name: "Stok Gudang",
-      width: "300px",
-      omit: retur,
-      wrap: true,
       selector: (row, idx) => {
-        if (dataLocationStock?.[row.id]) {
-          const stock = dataLocationStock?.[row.id];
-
-          const arrStock = [];
-
-          for (let unit in stock.stok_gudang) {
-            const qty = stock.stok_gudang[unit];
-
-            arrStock.push(`${qty}${unit}`);
-          }
-
-          return <div className="disabled:bg-white whitespace-normal italic text-gray-500">{arrStock.join(", ")}</div>;
-        } else {
-          return <div className="disabled:bg-white italic text-gray-500">Stok Kosong</div>;
-        }
+        return (
+          <div className={`disabled:bg-white italic ${dataLocationStock?.[idx] ? "text-green-500" : "text-red-500"}`}>
+            {`${dataLocationStock?.[idx] || "Tidak Tersedia"}` ?? "Pilih Gudang"}
+          </div>
+        );
       },
     },
     {
@@ -185,10 +175,6 @@ export default function SalesTable({
         var defaultQty = 1;
         var defaultUnit = row.attributes?.unit_1;
         var defaultIndex = 1;
-        let max = 0;
-        let min = max > 0 ? 1 : 0;
-        const stock = dataLocationStock?.[row.id]?.stock;
-        const conversion = dataLocationStock?.[row.id]?.conversion;
 
         if (products.productInfo[idx]?.qty) {
           defaultQty = products.productInfo[idx].qty;
@@ -201,40 +187,7 @@ export default function SalesTable({
           defaultUnit = products.productInfo[idx].unit;
         }
 
-        if (stock) {
-          max = stock[defaultUnit].qty;
-        } else if (retur) {
-          if (defaultUnit === dataLocationStock?.[row.id]?.order_details?.unit) {
-            max = dataLocationStock?.[row.id]?.order_details?.qty;
-          } else {
-            // set max based on product conversion
-            let productConversion = {};
-            let orderUnitIndex;
-
-            [1, 2, 3, 4, 5].forEach((i) => {
-              if (row?.attributes[`unit_${i}`] === dataLocationStock?.[row.id]?.order_details?.unit) {
-                orderUnitIndex = i;
-              }
-            });
-
-            for (let i = orderUnitIndex; i <= 5; i++) {
-              if (row?.attributes[`unit_${i}`]) {
-                const unit = row?.attributes[`unit_${i}`];
-                const conversion = row?.attributes[`qty_${i}`];
-                const previousConversion = productConversion[row?.attributes[`unit_${i - 1}`]] || 1;
-                if (i !== orderUnitIndex) {
-                  productConversion[unit] = conversion * previousConversion;
-                } else {
-                  productConversion[unit] = conversion;
-                }
-              }
-            }
-
-            const stockBasedOnOrder = productConversion[defaultUnit] * dataLocationStock?.[row.id]?.order_details?.qty;
-
-            max = stockBasedOnOrder > 0 ? stockBasedOnOrder : 0;
-          }
-        }
+        const maxStock = dataLocationStock?.[idx] ? parseInt(dataLocationStock[idx]?.split(" ")[0]) : 0;
 
         return (
           <>
@@ -244,7 +197,7 @@ export default function SalesTable({
                   defaultValue={defaultQty}
                   onChange={(e) => onChangeQty(e, row, idx)}
                   min={1}
-                  max={max} // added max qty for retur penjualan
+                  max={maxStock}
                   rules={[
                     {
                       required: true,

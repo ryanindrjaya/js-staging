@@ -26,12 +26,6 @@ EditToko.getInitialProps = async (context) => {
   const reqLocation = await fetchLocation(cookies);
   const locations = await reqLocation.json();
 
-  const reqInven = await fetchInven(cookies);
-  const inven = await reqInven.json();
-
-  const reqStoreSale = await fetchStoreSale(cookies);
-  const storeSale = await reqStoreSale.json();
-
   const reqCustomer = await fetchCustomer(cookies);
   const customer = await reqCustomer.json();
 
@@ -46,8 +40,6 @@ EditToko.getInitialProps = async (context) => {
       user,
       userLastDocNumber,
       locations,
-      inven,
-      storeSale,
       customer,
       initialData,
     },
@@ -111,36 +103,8 @@ const fetchData = async (cookies) => {
   return req;
 };
 
-const fetchStoreSale = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales?populate=deep";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
-
-  const req = await fetch(endpoint, options);
-  return req;
-};
-
 const fetchLocation = async (cookies) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
-
-  const req = await fetch(endpoint, options);
-  return req;
-};
-
-const fetchInven = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/inventories?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -199,10 +163,6 @@ function EditToko({ props }) {
   const userCodeName = user.codename || "-";
 
   const userLastDocNumber = props.userLastDocNumber;
-
-  const inven = props.inven.data;
-  const storeSale = props.storeSale;
-  const customerData = props.customer.data[0];
 
   const initialValues = props.initialData?.data;
 
@@ -264,23 +224,36 @@ function EditToko({ props }) {
   const trxNumber = String(userLastDocNumber).padStart(3, "0");
   const [categorySale, setCategorySale] = useState(`${userCodeName}/${trxNumber}/${mm}/${yyyy}`);
 
-  const getProductAtLocation = async (unit, productId) => {
-    const stock = await getStockAtLocation(productId, unit);
-    console.log("stock ", productId, stock);
+  const getProductAtLocation = async (unit = 1, changedIdx = products?.productList?.length - 1 ?? 0) => {
+    const locationId = form.getFieldValue("location");
+    let tempData = dataLocationStock;
+
+    // create an array of promises by mapping over the productList
+    const promises = products.productList.map(async (product, idx) => {
+      if (idx === changedIdx) {
+        const stock = await getStockAtLocation(product.id, unit, idx);
+        console.log("stock ", product.id, stock);
+
+        tempData = {
+          ...tempData,
+          [idx]: stock,
+        };
+
+        return stock; // return a promise from each iteration
+      }
+    });
 
     try {
       // use Promise.all() to execute all promises in parallel
-      setDataLocationStock({
-        ...dataLocationStock,
-        [productId]: stock,
-      }); // update state after all promises have resolved
+      await Promise.all(promises);
+      setDataLocationStock(tempData); // update state after all promises have resolved
       console.log("done");
     } catch (error) {
       console.error(error); // handle errors that may occur
     }
   };
 
-  const getStockAtLocation = async (productId, unit) => {
+  const getStockAtLocation = async (productId, unit, idx) => {
     try {
       const response = await getStock(productId, unit);
       console.log("response", response);
@@ -290,7 +263,7 @@ function EditToko({ props }) {
         const sortedBasedOnQty = response.data.sort((a, b) => b.availableStock - a.availableStock);
         setLokasiGudang({
           ...lokasiGudang,
-          [productId]: sortedBasedOnQty,
+          [idx]: sortedBasedOnQty,
         });
       }
 
@@ -304,10 +277,10 @@ function EditToko({ props }) {
 
       return response.available ? stringArr.join(", ") : "Stok kosong";
     } catch (error) {
-      console.error("error", error);
+      console.log("error", error);
       setDataLocationStock({
         ...dataLocationStock,
-        [productId]: "Error fetching stock data",
+        [idx]: "Error fetching stock data",
       });
     }
   };
@@ -476,6 +449,7 @@ function EditToko({ props }) {
           relation_id: editedProduct?.[idx]?.relation_id,
           margin: editedProduct?.[idx]?.margin || 0,
           sub_total: productSubTotal?.[idx],
+          inventory: lokasiGudang?.[idx],
         }));
 
         console.log("details", details);
@@ -692,6 +666,15 @@ function EditToko({ props }) {
     clearData();
 
     if (initialValues) {
+      const getStockData = async (productId, indexUnit, i) => {
+        const stock = await getStockAtLocation(productId, indexUnit, i);
+
+        setDataLocationStock((prev) => ({
+          ...prev,
+          [i]: stock,
+        }));
+      };
+
       console.log(initialValues);
       form.setFieldsValue({
         ...initialValues.attributes,
@@ -747,13 +730,20 @@ function EditToko({ props }) {
 
           let unitIndex = 1;
 
-          [1, 2, 3, 4, 5].forEach((i) => {
+          for (let i = 1; 1 <= 5; i++) {
             if (product?.attributes?.[`unit_${i}`] === unit) {
               unitIndex = i;
-            }
-          });
 
-          getProductAtLocation(unitIndex, product?.id);
+              break;
+            }
+          }
+
+          setLokasiGudang((prev) => ({
+            ...prev,
+            [index]: element.attributes?.inventory,
+          }));
+
+          getStockData(product?.id, unitIndex, index);
 
           form.setFieldsValue({
             ...initialValues.attributes,
@@ -765,6 +755,12 @@ function EditToko({ props }) {
             },
             margin: {
               [index]: element.attributes?.margin,
+            },
+            jumlah_qty: {
+              [index]: element.attributes?.qty,
+            },
+            jumlah_option: {
+              [index]: unitIndex,
             },
           });
 

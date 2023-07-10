@@ -7,7 +7,7 @@ const cookies = nookies.get(null, "token");
 
 var id = 0;
 
-const createDetailOrderSale = (values, products, setListId, url) => {
+const createDetailOrderSale = (values, products, setListId, url, lokasiGudang) => {
   products.productList.forEach((element, idx) => {
     console.log("element", element, products);
     //default value
@@ -19,27 +19,18 @@ const createDetailOrderSale = (values, products, setListId, url) => {
 
     qty = products.productInfo[idx]?.qty ?? 1;
     unit = products.productInfo[idx]?.unit ?? element.attributes.unit_1;
-    unitPrice = products.productInfo?.[idx]?.unit_price ?? element.attributes.sold_price_1;
+    unitPrice = products.productInfo?.[idx]?.priceUnit ?? element.attributes.sold_price_1;
 
     var d1 = products.productInfo[idx]?.d1;
     var d2 = products.productInfo[idx]?.d2;
 
-    POSTSaleDetail(qty, unit, unitPrice, idx, setListId, products, elementId, d1, d2, url);
+    const inventory = lokasiGudang?.[idx];
+
+    POSTSaleDetail(qty, unit, unitPrice, idx, setListId, products, elementId, d1, d2, url, inventory);
   });
 };
 
-const POSTSaleDetail = async (
-  qty,
-  unit,
-  unitPrice,
-  id,
-  setListId,
-  products,
-  elementId,
-  d1,
-  d2,
-  url
-) => {
+const POSTSaleDetail = async (qty, unit, unitPrice, id, setListId, products, elementId, d1, d2, url, inventory) => {
   var data = {
     data: {
       qty: qty,
@@ -48,6 +39,7 @@ const POSTSaleDetail = async (
       product: { id: elementId },
       disc1: d1,
       disc2: d2,
+      inventory: inventory,
     },
   };
 

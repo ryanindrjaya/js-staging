@@ -120,8 +120,8 @@ const Print = ({ selling }) => {
               <td className="border-2 p-2">{attributes.product.data.attributes.name}</td>
               <td className="border-2 p-2">{formatter.format(attributes?.unit_price || 0)}</td>
               <td className="border-2 p-2">{formatter.format(attributes?.disc || 0)}</td>
-              <td className="border-2 p-2">{attributes?.disc1 ? `${attributes?.disc1}%` : ""}</td>
-              <td className="border-2 p-2">{attributes?.disc2 ? `${attributes?.disc2}%` : ""}</td>
+              <td className="border-2 p-2">{attributes?.disc1 ? `${attributes?.disc1}%` : "0%"}</td>
+              <td className="border-2 p-2">{attributes?.disc2 ? `${attributes?.disc2}%` : "0%"}</td>
               <td className="border-2 p-2">{getHargaNet(attributes)}</td>
               <td className="border-2 p-2">{formatter.format(attributes?.sub_total || 0)}</td>
             </tr>

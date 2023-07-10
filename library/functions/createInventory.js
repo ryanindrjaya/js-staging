@@ -17,6 +17,18 @@ const getStoreSale = async (id) => {
   return data;
 };
 
+const getSalesSale = async (id) => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/sales-sales/${id}?populate=deep`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${cookies.token}`,
+    },
+  });
+  const data = await response.json();
+  return data;
+};
+
 const getPanelSale = async (id) => {
   const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/panel-sales/${id}?populate=deep`, {
     method: "GET",
@@ -194,6 +206,82 @@ export async function InventoryOutFromNonPanel(id, customer, location) {
       message: "Error",
       description: "Gagal membuat inventory",
     });
+  }
+}
+
+export async function createInventoryFromPenjualanSales(row) {
+  try {
+    const data = [];
+
+    //   console.log("row", row);
+    const salesSale = await getSalesSale(row.id);
+    const sales_sale_details = salesSale.data.attributes.sales_sale_details.data;
+    const storeLocation = salesSale.data.attributes.location.data;
+    const no_sales_sale = salesSale.data.attributes.no_sales_sale;
+    const customer = salesSale.data.attributes.customer?.data?.attributes?.name;
+
+    sales_sale_details.forEach((element) => {
+      console.log("element store detail (penjualan)", element);
+      let totalOrder = parseInt(element.attributes.qty);
+      const unitOrder = element.attributes.unit;
+      const product = element.attributes.product.data;
+      const expDate = element.attributes.expired_date;
+      const batch = element.attributes?.batch ?? "";
+      const dataGudang = element.attributes.inventory || [];
+
+      for (let i = 0; i < dataGudang.length; i++) {
+        const detailInven = dataGudang[i];
+        const qty = parseInt(detailInven.availableStock);
+        const location = detailInven.location;
+
+        console.log({
+          totalOrder,
+          unitOrder,
+          product,
+          location,
+          qty,
+        });
+
+        if (totalOrder > 0) {
+          if (unitOrder && product && location) {
+            const item = {
+              location: location,
+              product: product.id,
+              unit: detailInven?.unit || unitOrder,
+              qty: totalOrder >= qty ? qty : totalOrder,
+              exp_date: expDate,
+              batch,
+            };
+
+            data.push(item);
+            totalOrder -= qty;
+          }
+        } else {
+          break;
+        }
+      }
+    });
+
+    if (data.length > 0) {
+      const body = {
+        data,
+        no_referensi: no_sales_sale,
+        type: "Terjual",
+        keterangan: `Penjualan ke ${customer} di ${storeLocation.attributes.name}`,
+      };
+
+      const status = await addToGudang(body);
+
+      return status;
+    }
+  } catch (error) {
+    console.log("createInventoryFromPenjualan error", error);
+    notification.error({
+      message: "Error",
+      description: "Gagal membuat inventory",
+    });
+
+    return false;
   }
 }
 

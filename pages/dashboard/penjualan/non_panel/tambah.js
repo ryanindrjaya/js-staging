@@ -198,21 +198,23 @@ function Toko({ props }) {
     setBiayaPengiriman(values.target.value);
   };
 
-  const getProductAtLocation = async (unit = 1) => {
+  const getProductAtLocation = async (unit = 1, changedIdx = products?.productList?.length - 1 ?? 0) => {
     const locationId = form.getFieldValue("location");
-    let tempData = {};
+    let tempData = dataLocationStock;
 
     // create an array of promises by mapping over the productList
-    const promises = products.productList.map(async (product) => {
-      const stock = await getStockAtLocation(product.id, unit);
-      console.log("stock ", product.id, stock);
+    const promises = products.productList.map(async (product, idx) => {
+      if (idx === changedIdx) {
+        const stock = await getStockAtLocation(product.id, unit, idx);
+        console.log("stock ", product.id, stock);
 
-      tempData = {
-        ...tempData,
-        [product.id]: stock,
-      };
+        tempData = {
+          ...tempData,
+          [idx]: stock,
+        };
 
-      return stock; // return a promise from each iteration
+        return stock; // return a promise from each iteration
+      }
     });
 
     try {
@@ -225,7 +227,7 @@ function Toko({ props }) {
     }
   };
 
-  const getStockAtLocation = async (productId, unit) => {
+  const getStockAtLocation = async (productId, unit, idx) => {
     try {
       const response = await getStock(productId, unit);
       console.log("response", response);
@@ -233,30 +235,26 @@ function Toko({ props }) {
       if (response?.data) {
         // sort based on qty desc
         const sortedBasedOnQty = response.data.sort((a, b) => b.availableStock - a.availableStock);
-        setLokasiGudang({
-          ...lokasiGudang,
-          [productId]: sortedBasedOnQty,
-        });
+        setLokasiGudang((prev) => ({
+          ...prev,
+          [idx]: sortedBasedOnQty,
+        }));
       }
 
       console.log(`response ${unit}`, response?.stock?.[unit]);
 
       const stringArr = [];
 
-      if (response.available) {
-        for (const [key, value] of Object.entries(response?.stock)) {
-          stringArr.push(`${value} ${key}`);
-        }
-
-        return stringArr.join(", ");
-      } else {
-        return null;
+      for (const [key, value] of Object.entries(response?.stock)) {
+        stringArr.push(`${value} ${key}`);
       }
+
+      return response.available ? stringArr.join(", ") : "Stok kosong";
     } catch (error) {
       console.error("error", error);
       setDataLocationStock({
         ...dataLocationStock,
-        [productId]: "Error fetching stock data",
+        [idx]: "Error fetching stock data",
       });
     }
   };

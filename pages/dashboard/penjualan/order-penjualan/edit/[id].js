@@ -161,6 +161,9 @@ function EditPesananSales({ props }) {
   const [grandTotal, setGrandTotal] = useState(0);
   const [selectedLocation, setSelectedLocation] = useState();
 
+  const [dataLocationStock, setDataLocationStock] = useState();
+  const [lokasiGudang, setLokasiGudang] = useState();
+
   const router = useRouter();
   const { TextArea } = Input;
   var today = new Date();
@@ -260,6 +263,7 @@ function EditPesananSales({ props }) {
         disc2: editedProduct?.[idx]?.d2 || attributes?.unit_1_dp2,
         product: id,
         relation_id: editedProduct?.[idx]?.relation_id,
+        inventory: lokasiGudang?.[idx],
       };
     });
 
@@ -294,8 +298,7 @@ function EditPesananSales({ props }) {
     if (res?.data?.id) {
       notification.success({
         message: "Berhasil mengubah data",
-        description:
-          "Data Order Penjualan berhasil diubah. Silahkan cek pada halaman Order Penjualan",
+        description: "Data Order Penjualan berhasil diubah. Silahkan cek pada halaman Order Penjualan",
       });
       router.replace("/dashboard/penjualan/order-penjualan");
     } else {
@@ -396,6 +399,15 @@ function EditPesananSales({ props }) {
   useEffect(() => {
     dispatch({ type: "CLEAR_DATA" });
 
+    const getStockData = async (productId, indexUnit, i) => {
+      const stock = await getStockAtLocation(productId, indexUnit, i);
+
+      setDataLocationStock((prev) => ({
+        ...prev,
+        [i]: stock,
+      }));
+    };
+
     if (initialValues) {
       form.setFieldsValue({
         customer: customerData?.attributes.name,
@@ -412,7 +424,8 @@ function EditPesananSales({ props }) {
 
         console.log("details", details);
 
-        details.forEach((element, index) => {
+        for (let index = 0; index < details?.length; index++) {
+          const element = details[index];
           const product = element.attributes?.product?.data;
           const unit = getUnitIndex(product?.attributes, element?.attributes?.unit);
           dispatch({
@@ -428,10 +441,12 @@ function EditPesananSales({ props }) {
             relation_id: element?.id,
           });
 
+          getStockData(product?.id, unit, index);
+
           if (index === details.length - 1) {
             setIsFetchingData(false);
           }
-        });
+        }
       }
     } else {
       notification["error"]({
@@ -459,7 +474,87 @@ function EditPesananSales({ props }) {
     });
   };
 
-  console.log("redux", products);
+  async function getStock(productId, unit) {
+    const cookies = nookies.get(null, "token");
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/inventories/user/location?product=${productId}&unit=${unit}`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    console.log("res get stock at location", res);
+
+    return res;
+  }
+
+  const getProductAtLocation = async (unit = 1, changedIdx = products?.productList?.length - 1 ?? 0) => {
+    const locationId = form.getFieldValue("location");
+    let tempData = dataLocationStock;
+
+    // create an array of promises by mapping over the productList
+    const promises = products.productList.map(async (product, idx) => {
+      if (idx === changedIdx) {
+        const stock = await getStockAtLocation(product.id, unit, idx);
+        console.log("stock ", product.id, stock);
+
+        tempData = {
+          ...tempData,
+          [idx]: stock,
+        };
+
+        return stock; // return a promise from each iteration
+      }
+    });
+
+    try {
+      // use Promise.all() to execute all promises in parallel
+      await Promise.all(promises);
+      setDataLocationStock(tempData); // update state after all promises have resolved
+      console.log("done");
+    } catch (error) {
+      console.error(error); // handle errors that may occur
+    }
+  };
+
+  console.log("dataLocationStock", dataLocationStock);
+
+  const getStockAtLocation = async (productId, unit, idx) => {
+    try {
+      const response = await getStock(productId, unit);
+      console.log("response", response);
+
+      if (response?.data) {
+        // sort based on qty desc
+        const sortedBasedOnQty = response.data.sort((a, b) => b.availableStock - a.availableStock);
+        setLokasiGudang({
+          ...lokasiGudang,
+          [idx]: sortedBasedOnQty,
+        });
+      }
+
+      console.log(`response ${unit}`, response?.stock?.[unit]);
+
+      const stringArr = [];
+
+      for (const [key, value] of Object.entries(response?.stock)) {
+        stringArr.push(`${value} ${key}`);
+      }
+
+      return response.available ? stringArr.join(", ") : "Stok kosong";
+    } catch (error) {
+      console.error("error", error);
+      setDataLocationStock({
+        ...dataLocationStock,
+        [idx]: "Error fetching stock data",
+      });
+    }
+  };
 
   return (
     <>
@@ -573,6 +668,7 @@ function EditPesananSales({ props }) {
                   selectedProduct={selectedProduct}
                   isBasedOnLocation={false}
                   inventoryLocation={selectedLocation}
+                  getProductAtLocation={getProductAtLocation}
                   available
                 />
               </div>
@@ -594,7 +690,8 @@ function EditPesananSales({ props }) {
                       productTotalPrice={productTotalPrice}
                       setTotalPrice={setTotalPrice}
                       setProductTotalPrice={setProductTotalPrice}
-                      //calculatePriceAfterDisc={calculatePriceAfterDisc}
+                      dataLocationStock={dataLocationStock}
+                      getProduct={getProductAtLocation}
                       productSubTotal={productSubTotal}
                       locations={locations}
                       formObj={form}

@@ -13,6 +13,7 @@ import DataTable from "react-data-table-component";
 import moment from "moment";
 import Link from "next/link";
 import createInventorySelling from "../utility/createInventorySelling";
+import { createInventoryFromPenjualanSales } from "../../../../library/functions/createInventory";
 
 SalesSale.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -82,7 +83,7 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchSales = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?populate=*&sort[0]=id:desc";
   const options = {
     method: "GET",
     headers: {
@@ -162,7 +163,7 @@ function SalesSale({ props }) {
 
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?pagination[page]=" + page;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?sort[0]=id:desc&pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -212,8 +213,8 @@ function SalesSale({ props }) {
     if (res) {
       openNotificationWithIcon(
         "success",
-        "Berhasil mengubah status",
-        "Status Penjualan Sales yang dipilih telah berhasil diubah. Silahkan cek kembali Penjualan Sales"
+        "Berhasil mengubah status Order Pembelian",
+        "Status PO yang dipilih telah berhasil diubah. Silahkan cek kembali Order Penjualan"
       );
     }
   };
@@ -221,9 +222,18 @@ function SalesSale({ props }) {
   const onChangeStatus = async (status, row) => {
     if (status === "Diterima") {
       if (row?.attributes?.sales_sell?.data) {
-        await createInventorySelling(row);
-        await changeStatusOrder(row);
-        handleChangeStatus(status, row.id);
+        const inventoryOut = await createInventoryFromPenjualanSales(row);
+
+        if (inventoryOut) {
+          await changeStatusOrder(row);
+          handleChangeStatus(status, row.id);
+        } else {
+          openNotificationWithIcon(
+            "error",
+            "Gagal membuat data inventory",
+            "Harap cek kembali data yang diinput dan harap cek kembali stok gudang."
+          );
+        }
       } else {
         openNotificationWithIcon(
           "error",
@@ -305,15 +315,15 @@ function SalesSale({ props }) {
     },
     {
       name: "D1",
-      selector: ({ attributes }) => (attributes?.disc1 ? `${attributes?.disc1}%` : ""),
+      selector: ({ attributes }) => (attributes?.disc1 ? `${attributes?.disc1}%` : "0%"),
     },
     {
       name: "D2",
-      selector: ({ attributes }) => (attributes?.disc2 ? `${attributes?.disc2}%` : ""),
+      selector: ({ attributes }) => (attributes?.disc2 ? `${attributes?.disc2}%` : "0%"),
     },
     {
       name: "Margin",
-      selector: ({ attributes }) => (attributes?.margin ? `${attributes?.margin}%` : ""),
+      selector: ({ attributes }) => (attributes?.margin ? `${attributes?.margin}%` : "0%"),
     },
     {
       name: "Sub Total",
@@ -436,7 +446,7 @@ function SalesSale({ props }) {
     const fetchDataSales = async (query) => {
       setLoading(true);
       const cookies = nookies.get(null, "token");
-      const endpoint = process.env.NEXT_PUBLIC_URL + `/sales-sales?populate=*&${query}`;
+      const endpoint = process.env.NEXT_PUBLIC_URL + `/sales-sales?sort[0]=id:desc&populate=*&${query}`;
       const options = {
         method: "GET",
         headers: {

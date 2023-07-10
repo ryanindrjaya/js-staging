@@ -127,24 +127,6 @@ const fetchSalesSell = async (cookies) => {
   return req;
 };
 
-async function getStock(productId, locationId) {
-  const cookies = nookies.get(null, "token");
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + `/inventories/stock?location=${locationId}&product=${productId}&populate=*`;
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
-
-  const req = await fetch(endpoint, options);
-  const res = await req.json();
-
-  return res;
-}
-
 function Toko({ props }) {
   const products = useSelector((state) => state.Sales);
   const dispatch = useDispatch();
@@ -182,6 +164,8 @@ function Toko({ props }) {
   const [dppActive, setDPPActive] = useState("Active");
   const [ppnActive, setPPNActive] = useState("Active");
   const [discMax, setDiscMax] = useState();
+
+  const [lokasiGudang, setLokasiGudang] = useState();
 
   const router = useRouter();
   const { TextArea } = Input;
@@ -281,6 +265,8 @@ function Toko({ props }) {
     return res;
   };
 
+  console.log("product redux", products);
+
   const onFinish = async (values) => {
     setLoading(true);
     try {
@@ -316,6 +302,7 @@ function Toko({ props }) {
         relation_id: editedProduct?.[idx]?.relation_id,
         margin: editedProduct?.[idx]?.margin || 0,
         sub_total: productSubTotal?.[idx],
+        inventory: lokasiGudang?.[idx],
       }));
 
       console.log("details", details);
@@ -544,12 +531,6 @@ function Toko({ props }) {
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
 
   useEffect(() => {
-    if (products.productList.length > 0) {
-      getProductAtLocation();
-    }
-  }, [products.productList]);
-
-  useEffect(() => {
     sumAdditionalPrice();
   }, [additionalFee]);
 
@@ -588,8 +569,29 @@ function Toko({ props }) {
     if (discType == "Persentase") setDiscMax(100);
   }, [discType]);
 
+  function getUnitIndex(data, selected) {
+    let unit = 0;
+
+    for (let key in data) {
+      if (key.includes("unit_") && data[key] === selected) {
+        unit = parseInt(key.replace("unit_", ""));
+      }
+    }
+
+    return unit;
+  }
+
   useEffect(() => {
     dispatch({ type: "CLEAR_DATA" });
+
+    const getStockData = async (productId, indexUnit, i) => {
+      const stock = await getStockAtLocation(productId, indexUnit, i);
+
+      setDataLocationStock((prev) => ({
+        ...prev,
+        [i]: stock,
+      }));
+    };
 
     if (initialValues) {
       console.log(initialValues);
@@ -646,9 +648,11 @@ function Toko({ props }) {
       if (initialValues.attributes.sales_sale_details?.data.length > 0) {
         const details = initialValues.attributes.sales_sale_details.data;
 
-        details.forEach((element, index) => {
+        for (let index = 0; index < details?.length; index++) {
+          const element = details[index];
           const product = element.attributes?.product?.data;
           const unit = element?.attributes?.unit;
+          const unitIndex = getUnitIndex(product?.attributes, element?.attributes?.unit);
 
           form.setFieldsValue({
             ...initialValues.attributes,
@@ -661,9 +665,15 @@ function Toko({ props }) {
             margin: {
               [index]: element.attributes?.margin,
             },
+            jumlah_qty: {
+              [index]: element.attributes?.qty,
+            },
+            jumlah_option: {
+              [index]: unitIndex,
+            },
           });
 
-          console.log("element ==>", element);
+          getStockData(product?.id, unitIndex, index);
 
           dispatch({
             type: "SET_INITIAL_PRODUCT",
@@ -675,16 +685,15 @@ function Toko({ props }) {
             disc: element.attributes?.disc || 0,
             d1: element.attributes?.disc1,
             d2: element.attributes?.disc2,
-            unitIndex: unit,
+            unitIndex: unitIndex,
             relation_id: element.id,
             margin: element.attributes?.margin || 0,
           });
 
           if (index === details.length - 1) {
-            getProductAtLocation(initialValues.attributes?.location?.data?.id);
             setIsFetchingData(false);
           }
-        });
+        }
       }
     } else {
       notification["error"]({
@@ -712,52 +721,85 @@ function Toko({ props }) {
     });
   };
 
-  const getStockAtLocation = async (productId, locationId) => {
-    try {
-      console.log("get stock", productId, locationId);
-      const response = await getStock(productId, locationId);
-      console.log("response", response);
+  async function getStock(productId, unit) {
+    const cookies = nookies.get(null, "token");
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/inventories/user/location?product=${productId}&unit=${unit}`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
 
-      return response;
-    } catch (error) {
-      console.error("error", error);
-      setDataLocationStock({
-        ...dataLocationStock,
-        [productId]: "Error fetching stock data",
-      });
-    }
-  };
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
 
-  const getProductAtLocation = async (locationId) => {
-    let tempData = {};
-    const location = selectedLocationId || initialValues?.attributes?.location?.data?.id || locationId;
-    setIsFetchingData(true);
+    console.log("res get stock at location", res);
+
+    return res;
+  }
+
+  const getProductAtLocation = async (unit = 1, changedIdx = products?.productList?.length - 1 ?? 0) => {
+    const locationId = form.getFieldValue("location");
+    let tempData = dataLocationStock;
 
     // create an array of promises by mapping over the productList
-    const promises = products.productList.map(async (product) => {
-      const res = await getStockAtLocation(product.id, location);
-      const stock = res?.data?.[0];
+    const promises = products.productList.map(async (product, idx) => {
+      if (idx === changedIdx) {
+        const stock = await getStockAtLocation(product.id, unit, idx);
+        console.log("stock ", product.id, stock);
 
-      tempData = {
-        ...tempData,
-        [product.id]: stock,
-      };
+        tempData = {
+          ...tempData,
+          [idx]: stock,
+        };
 
-      return stock; // return a promise from each iteration
+        return stock; // return a promise from each iteration
+      }
     });
 
     try {
       // use Promise.all() to execute all promises in parallel
       await Promise.all(promises);
-      console.log("tempdata", tempData);
-
       setDataLocationStock(tempData); // update state after all promises have resolved
-
-      setIsFetchingData(false);
       console.log("done");
     } catch (error) {
       console.error(error); // handle errors that may occur
-      setIsFetchingData(false);
+    }
+  };
+
+  console.log("dataLocationStock", dataLocationStock);
+
+  const getStockAtLocation = async (productId, unit, idx) => {
+    try {
+      const response = await getStock(productId, unit);
+      console.log("response", response);
+
+      if (response?.data) {
+        // sort based on qty desc
+        const sortedBasedOnQty = response.data.sort((a, b) => b.availableStock - a.availableStock);
+        setLokasiGudang({
+          ...lokasiGudang,
+          [idx]: sortedBasedOnQty,
+        });
+      }
+
+      console.log(`response ${unit}`, response?.stock?.[unit]);
+
+      const stringArr = [];
+
+      for (const [key, value] of Object.entries(response?.stock)) {
+        stringArr.push(`${value} ${key}`);
+      }
+
+      return response.available ? stringArr.join(", ") : "Stok kosong";
+    } catch (error) {
+      console.error("error", error);
+      setDataLocationStock({
+        ...dataLocationStock,
+        [idx]: "Error fetching stock data",
+      });
     }
   };
 
@@ -954,6 +996,7 @@ function Toko({ props }) {
                     productSubTotal={productSubTotal}
                     setProductSubTotal={setProductSubTotal}
                     dataLocationStock={dataLocationStock}
+                    getProduct={getProductAtLocation}
                     locations={locations}
                     formObj={form}
                   />

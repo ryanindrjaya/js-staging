@@ -10,6 +10,8 @@ import { Row, Form, Input, Select, InputNumber, DatePicker, Button, notification
 import PurchasingPaymentTable from "../../../../../components/ReactDataTable/Purchases/PurchasingPaymentTable";
 import * as moment from "moment";
 import SalesPaymentTable from "../../../../../components/ReactDataTable/Selling/SalesPaymentTable";
+import "moment/locale/id";
+moment.locale("id");
 
 Pembayaran.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -284,7 +286,7 @@ function Pembayaran({ props }) {
 
   const getPaymentData = async (paymentId) => {
     const id = props.purchases.data.id;
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales/" + id + "?populate=*";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales/" + id + "?populate=deep";
     const cookies = nookies.get(null, "token");
     const options = {
       method: "GET",
@@ -319,7 +321,7 @@ function Pembayaran({ props }) {
     data.location = { id: data.location.data.id };
     data.sales_sell = { id: data.sales_sell?.data?.id };
     data.sales_sale_details = list;
-    data.purchasing_payments = [{ id: paymentId }];
+    data.purchasing_payments = [...data?.purchasing_payments?.data?.map(({ id }) => id), paymentId];
 
     const postData = { data: data };
     const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales/" + id;
@@ -578,7 +580,7 @@ function Pembayaran({ props }) {
               <div className="my-5">
                 <p className="font-bold">Riwayat Pembayaran</p>
                 {purchasingHistory.map((element) => {
-                  var date = new Date(element.attributes.payment_date).toLocaleDateString();
+                  var date = moment(element.attributes.payment_date).format("DD MMMM YYYY");
                   return (
                     <Collapse accordion>
                       <Panel header={date} key={date}>

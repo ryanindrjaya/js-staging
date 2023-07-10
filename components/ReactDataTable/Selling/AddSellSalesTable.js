@@ -10,6 +10,8 @@ export default function ReactDataTable({
   locations,
   setTotalPrice,
   formObj,
+  getProduct,
+  dataLocationStock,
 }) {
   const dispatch = useDispatch();
 
@@ -69,6 +71,8 @@ export default function ReactDataTable({
       hargaSatuan = value.attributes.buy_price_5;
       priceUnit = hargaSatuan;
     }
+
+    getProduct(data, index);
 
     //formObj.setFieldsValue({
     //  harga_satuan: hargaSatuan,
@@ -144,14 +148,12 @@ export default function ReactDataTable({
     {
       name: "Jumlah Stock",
       wrap: true,
-      selector: (row) => {
-        console.log("row stock", row.stock);
-        let result = [];
-        for (let unit in row?.stock) {
-          result.push(`${row?.stock?.[unit].stock}${row?.stock?.[unit].unit}`);
-        }
-
-        return result.join(", ");
+      selector: (row, idx) => {
+        return (
+          <div className={`disabled:bg-white italic ${dataLocationStock?.[idx] ? "text-green-500" : "text-red-500"}`}>
+            {`${dataLocationStock?.[idx] || "Tidak Tersedia"}` ?? "Pilih Gudang"}
+          </div>
+        );
       },
     },
     {
@@ -202,26 +204,7 @@ export default function ReactDataTable({
           defaultOption = products.productInfo[idx].unit;
         }
 
-        const stock = [1, 2, 3, 4, 5].reduce((acc, curr) => {
-          if (row.attributes[`unit_${curr}`] !== null) {
-            if (curr === 1) {
-              acc = {
-                ...acc,
-                [row.attributes[`unit_${curr}`]]: row.stock?.[row.attributes[`unit_${curr}`]]?.stock,
-              };
-            } else {
-              const thisStock = row.stock?.[row.attributes[`unit_${curr}`]]?.stock || 0;
-              const conversion = row.attributes[`qty_${curr}`];
-              const parentStock = acc[row.attributes[`unit_${curr - 1}`]] * conversion;
-
-              acc = {
-                ...acc,
-                [row.attributes[`unit_${curr}`]]: thisStock + parentStock,
-              };
-            }
-          }
-          return acc;
-        }, {});
+        const maxStock = dataLocationStock?.[idx] ? parseInt(dataLocationStock[idx]?.split(" ")[0]) : 0;
 
         return (
           <>
@@ -236,7 +219,7 @@ export default function ReactDataTable({
                       message: "Required",
                     },
                   ]}
-                  max={stock[defaultOption] || 0}
+                  max={maxStock}
                   min={1}
                   style={{
                     width: "30%",

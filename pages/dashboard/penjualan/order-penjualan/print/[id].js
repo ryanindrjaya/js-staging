@@ -93,10 +93,7 @@ function CetakPesananSales({ props }) {
   return (
     <div className="mx-20 my-3">
       <div className="flex justify-end mb-5">
-        <button
-          onClick={print}
-          class="print:hidden rounded-full bg-sky-400 px-4 py-2 font-bold text-white"
-        >
+        <button onClick={print} class="print:hidden rounded-full bg-sky-400 px-4 py-2 font-bold text-white">
           <span>
             <PrinterOutlined className="mr-1 text-lg" />
           </span>{" "}
@@ -151,15 +148,9 @@ function CetakPesananSales({ props }) {
               return (
                 <tr key={index} className="border">
                   <td className="py-3 px-4 border-r">{attributes?.qty + " " + attributes?.unit}</td>
-                  <td className="py-3 px-4 border-r">
-                    {attributes.product?.data?.attributes?.name}
-                  </td>
-                  <td className="py-3 px-4 border-r">
-                    {attributes?.disc1 ? `${attributes?.disc1}%` : ""}
-                  </td>
-                  <td className="py-3 px-4 border-r">
-                    {attributes?.disc2 ? `${attributes?.disc2}%` : ""}
-                  </td>
+                  <td className="py-3 px-4 border-r">{attributes.product?.data?.attributes?.name}</td>
+                  <td className="py-3 px-4 border-r">{`${attributes?.disc1 ?? 0}%`}</td>
+                  <td className="py-3 px-4 border-r">{`${attributes?.disc2 ?? 0}%`}</td>
                   <td className="py-3 px-4">{formatter.format(subTotal)}</td>
                 </tr>
               );
@@ -178,12 +169,8 @@ function CetakPesananSales({ props }) {
           <p>DIBUAT OLEH {maker}</p>
         </div>
         <div>
-          <p className="font-bold text-sm m-1">
-            TOTAL ORDER PENJUALAN : {formatter.format(totalPemesanan)}
-          </p>
-          <p className="font-bold text-sm m-1">
-            Total Pesanan : {formatter.format(totalPemesanan)}
-          </p>
+          <p className="font-bold text-sm m-1">TOTAL ORDER PENJUALAN : {formatter.format(totalPemesanan)}</p>
+          <p className="font-bold text-sm m-1">Total Pesanan : {formatter.format(totalPemesanan)}</p>
         </div>
       </div>
     </div>

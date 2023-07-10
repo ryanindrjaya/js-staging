@@ -100,7 +100,7 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchSell = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sells?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sells?populate=*&sort[0]=id:desc";
   const options = {
     method: "GET",
     headers: {
@@ -243,11 +243,11 @@ function Sales({ props }) {
     },
     {
       name: "D1",
-      selector: ({ attributes }) => (attributes?.disc1 ? `${attributes?.disc1}%` : ""),
+      selector: ({ attributes }) => (attributes?.disc1 ? `${attributes?.disc1}%` : "0%"),
     },
     {
       name: "D2",
-      selector: ({ attributes }) => (attributes?.disc2 ? `${attributes?.disc2}%` : ""),
+      selector: ({ attributes }) => (attributes?.disc2 ? `${attributes?.disc2}%` : "0%"),
     },
     {
       name: "Sub Total",
@@ -333,7 +333,7 @@ function Sales({ props }) {
   useEffect(() => {
     const fetchSellData = async (query) => {
       setLoading(true);
-      const endpoint = process.env.NEXT_PUBLIC_URL + `/sales-sells?populate=*&${query}`;
+      const endpoint = process.env.NEXT_PUBLIC_URL + `/sales-sells?sort[0]=id:desc&populate=*&${query}`;
       const options = {
         method: "GET",
         headers: {

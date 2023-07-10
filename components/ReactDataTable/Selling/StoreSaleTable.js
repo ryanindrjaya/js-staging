@@ -233,8 +233,8 @@ export default function ReactDataTable({
 
         let max = null;
 
-        if (dataLocationStock?.[row.id]) {
-          const stringArr = dataLocationStock?.[row.id]?.split(" ");
+        if (dataLocationStock?.[idx]) {
+          const stringArr = dataLocationStock?.[idx]?.split(" ");
           max = parseInt(stringArr?.[0]);
         }
 
@@ -246,7 +246,7 @@ export default function ReactDataTable({
                   defaultValue={defaultQty}
                   onChange={(e) => onChangeQty(e, row, idx)}
                   min={1}
-                  max={max || dataDetailTrx?.data?.[idx]?.attributes?.qty} // added max qty for retur penjualan
+                  max={max ?? dataDetailTrx?.data?.[idx]?.attributes?.qty} // added max qty for retur penjualan
                   rules={[
                     {
                       required: true,

@@ -116,7 +116,11 @@ export default function ReactDataTable({
             "Dijadikan Piutang",
             "Data berhasil dijadikan Piutang, dan stok inventory telah dikurangi"
           );
-          router.push("/dashboard/penjualan/" + page);
+          if (page == "nonpanel") {
+            router.push("/dashboard/penjualan/non_panel");
+          } else {
+            router.push("/dashboard/penjualan/" + page);
+          }
         } else {
           openNotificationWithIcon("error", "Error", "Data gagal dijadikan Piutang");
           setLoadingPiutang(false);
@@ -397,8 +401,8 @@ export default function ReactDataTable({
 
   const openModal = (id, row) => {
     var path = "";
-    if(row.attributes.no_panel_sale) path = "/dashboard/penjualan/panel";
-    else if(row.attributes.no_non_panel_sale) path = "/dashboard/penjualan/non_panel";
+    if (row.attributes.no_panel_sale) path = "/dashboard/penjualan/panel";
+    else if (row.attributes.no_non_panel_sale) path = "/dashboard/penjualan/non_panel";
     else path = "";
 
     router.replace(

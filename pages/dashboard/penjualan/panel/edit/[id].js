@@ -231,21 +231,23 @@ function Edit({ props }) {
     setBiayaPengiriman(values);
   };
 
-  const getProductAtLocation = async (unit = 1) => {
+  const getProductAtLocation = async (unit = 1, changedIdx = products?.productList?.length - 1 ?? 0) => {
     const locationId = form.getFieldValue("location");
-    let tempData = {};
+    let tempData = dataLocationStock;
 
     // create an array of promises by mapping over the productList
-    const promises = products.productList.map(async (product) => {
-      const stock = await getStockAtLocation(product.id, unit);
-      console.log("stock ", product.id, stock);
+    const promises = products.productList.map(async (product, idx) => {
+      if (idx === changedIdx) {
+        const stock = await getStockAtLocation(product.id, unit, idx);
+        console.log("stock ", product.id, stock);
 
-      tempData = {
-        ...tempData,
-        [product.id]: stock,
-      };
+        tempData = {
+          ...tempData,
+          [idx]: stock,
+        };
 
-      return stock; // return a promise from each iteration
+        return stock; // return a promise from each iteration
+      }
     });
 
     try {
@@ -258,7 +260,7 @@ function Edit({ props }) {
     }
   };
 
-  const getStockAtLocation = async (productId, unit) => {
+  const getStockAtLocation = async (productId, unit, idx) => {
     try {
       const response = await getStock(productId, unit);
       console.log("response", response);
@@ -268,7 +270,7 @@ function Edit({ props }) {
         const sortedBasedOnQty = response.data.sort((a, b) => b.availableStock - a.availableStock);
         setLokasiGudang({
           ...lokasiGudang,
-          [productId]: sortedBasedOnQty,
+          [idx]: sortedBasedOnQty,
         });
       }
 
@@ -276,20 +278,16 @@ function Edit({ props }) {
 
       const stringArr = [];
 
-      if (response.available) {
-        for (const [key, value] of Object.entries(response?.stock)) {
-          stringArr.push(`${value} ${key}`);
-        }
-
-        return stringArr.join(", ");
-      } else {
-        return null;
+      for (const [key, value] of Object.entries(response?.stock)) {
+        stringArr.push(`${value} ${key}`);
       }
+
+      return response.available ? stringArr.join(", ") : "Stok kosong";
     } catch (error) {
-      console.error("error", error);
+      console.log("error", error);
       setDataLocationStock({
         ...dataLocationStock,
-        [productId]: "Error fetching stock data",
+        [idx]: "Error fetching stock data",
       });
     }
   };
@@ -481,6 +479,7 @@ function Edit({ props }) {
           relation_id: editedProduct?.[idx]?.relation_id,
           margin: editedProduct?.[idx]?.margin || 0,
           sub_total: productSubTotal?.[idx],
+          inventory: lokasiGudang?.[idx],
         }));
 
         let detailsId = [];
@@ -760,6 +759,15 @@ function Edit({ props }) {
     clearData();
     setProductSubTotal({});
 
+    const getStockData = async (productId, indexUnit, i) => {
+      const stock = await getStockAtLocation(productId, indexUnit, i);
+
+      setDataLocationStock((prev) => ({
+        ...prev,
+        [i]: stock,
+      }));
+    };
+
     var detailsData = editData.attributes?.panel_sale_details?.data;
     var dpp = "Active";
     var ppn = "Active";
@@ -817,7 +825,7 @@ function Edit({ props }) {
     setSimpanData(editData.attributes?.status_data);
 
     var id = 0;
-    detailsData.forEach((items) => {
+    detailsData.forEach((items, idx) => {
       var indexUnit = 1;
       var unitOrder = items.attributes.unit;
       var productUnit = items.attributes.product.data.attributes;
@@ -827,6 +835,13 @@ function Edit({ props }) {
           indexUnit = index;
         }
       }
+
+      setLokasiGudang((prev) => ({
+        ...prev,
+        [idx]: items.attributes?.inventory,
+      }));
+
+      getStockData(items?.attributes?.product?.data?.id, indexUnit, idx);
 
       //var dateString = items.attributes.expired_date;
       var dateString = new Date();

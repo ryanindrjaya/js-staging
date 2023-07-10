@@ -118,7 +118,7 @@ const fetchCustomer = async (cookies) => {
 };
 
 function PesananSales({ props }) {
-  const products = useSelector((state) => state.Order);
+  const products = useSelector((state) => state.Sales);
   const dispatch = useDispatch();
 
   var selectedProduct = products?.productList;
@@ -141,13 +141,14 @@ function PesananSales({ props }) {
   const [listId, setListId] = useState([]);
   const [productTotalPrice, setProductTotalPrice] = useState({});
   const [productSubTotal, setProductSubTotal] = useState({});
-  useState({});
   //const [discPrice, setDiscPrice] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
-  useState({});
   const [grandTotal, setGrandTotal] = useState(0);
   const [selectedLocation, setSelectedLocation] = useState();
   const [time, setTime] = useState(moment().format("HH:mm:ss"));
+
+  const [dataLocationStock, setDataLocationStock] = useState();
+  const [lokasiGudang, setLokasiGudang] = useState();
 
   const router = useRouter();
   const { TextArea } = Input;
@@ -219,7 +220,7 @@ function PesananSales({ props }) {
   };
 
   const createDetailSale = async () => {
-    await createDetailOrderSaleFunc(dataValues, products, setListId, "/sales-sell-details", true);
+    await createDetailOrderSaleFunc(dataValues, products, setListId, "/sales-sell-details", lokasiGudang);
   };
 
   const createSale = async (values) => {
@@ -345,6 +346,88 @@ function PesananSales({ props }) {
     });
   };
 
+  async function getStock(productId, unit) {
+    const cookies = nookies.get(null, "token");
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/inventories/user/location?product=${productId}&unit=${unit}`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    console.log("res get stock at location", res);
+
+    return res;
+  }
+
+  const getProductAtLocation = async (unit = 1, changedIdx = products?.productList?.length - 1 ?? 0) => {
+    const locationId = form.getFieldValue("location");
+    let tempData = dataLocationStock;
+
+    // create an array of promises by mapping over the productList
+    const promises = products.productList.map(async (product, idx) => {
+      if (idx === changedIdx) {
+        const stock = await getStockAtLocation(product.id, unit, idx);
+        console.log("stock ", product.id, stock);
+
+        tempData = {
+          ...tempData,
+          [idx]: stock,
+        };
+
+        return stock; // return a promise from each iteration
+      }
+    });
+
+    try {
+      // use Promise.all() to execute all promises in parallel
+      await Promise.all(promises);
+      setDataLocationStock(tempData); // update state after all promises have resolved
+      console.log("done");
+    } catch (error) {
+      console.error(error); // handle errors that may occur
+    }
+  };
+
+  console.log("dataLocationStock", dataLocationStock);
+
+  const getStockAtLocation = async (productId, unit, idx) => {
+    try {
+      const response = await getStock(productId, unit);
+      console.log("response", response);
+
+      if (response?.data) {
+        // sort based on qty desc
+        const sortedBasedOnQty = response.data.sort((a, b) => b.availableStock - a.availableStock);
+        setLokasiGudang({
+          ...lokasiGudang,
+          [idx]: sortedBasedOnQty,
+        });
+      }
+
+      console.log(`response ${unit}`, response?.stock?.[unit]);
+
+      const stringArr = [];
+
+      for (const [key, value] of Object.entries(response?.stock)) {
+        stringArr.push(`${value} ${key}`);
+      }
+
+      return response.available ? stringArr.join(", ") : "Stok kosong";
+    } catch (error) {
+      console.error("error", error);
+      setDataLocationStock({
+        ...dataLocationStock,
+        [idx]: "Error fetching stock data",
+      });
+    }
+  };
+
   return (
     <>
       <Head>
@@ -458,6 +541,7 @@ function PesananSales({ props }) {
                   selectedProduct={selectedProduct}
                   isBasedOnLocation={false}
                   inventoryLocation={selectedLocation}
+                  getProductAtLocation={getProductAtLocation}
                   available
                 />
               </div>
@@ -479,7 +563,8 @@ function PesananSales({ props }) {
                       productTotalPrice={productTotalPrice}
                       setTotalPrice={setTotalPrice}
                       setProductTotalPrice={setProductTotalPrice}
-                      //calculatePriceAfterDisc={calculatePriceAfterDisc}
+                      dataLocationStock={dataLocationStock}
+                      getProduct={getProductAtLocation}
                       productSubTotal={productSubTotal}
                       locations={locations}
                       formObj={form}

@@ -117,10 +117,9 @@ const fetchSalesSell = async (cookies) => {
   return req;
 };
 
-async function getStock(productId, locationId) {
+async function getStock(productId, unit) {
   const cookies = nookies.get(null, "token");
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + `/inventories/stock?location=${locationId}&product=${productId}&populate=*`;
+  const endpoint = process.env.NEXT_PUBLIC_URL + `/inventories/user/location?product=${productId}&unit=${unit}`;
   const options = {
     method: "GET",
     headers: {
@@ -178,6 +177,8 @@ function Toko({ props }) {
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
   var date = today.getDate() + "/" + mm + "/" + yyyy;
+
+  const [lokasiGudang, setLokasiGudang] = useState();
 
   // setInterval(() => {
   //   setTime(moment().format("HH:mm:ss"));
@@ -287,6 +288,7 @@ function Toko({ props }) {
         values.ppn = ppn;
         values.status = "Diproses";
         values.total = grandTotal;
+        values.status_pembayaran = "Belum Lunas";
 
         const sanitizedValues = cleanData(values);
 
@@ -297,13 +299,14 @@ function Toko({ props }) {
           unit: editedProduct?.[idx]?.unit || attributes?.unit_1,
           unit_price: editedProduct?.[idx]?.priceUnit || attributes?.sold_price_1,
           disc: editedProduct?.[idx]?.disc || 0,
-          disc1: editedProduct?.[idx]?.d1 || attributes?.unit_1_dp1,
+          disc1: editedProduct?.[idx]?.d1 || attributes?.disc_1_1,
           disc2: editedProduct?.[idx]?.d2 || attributes?.unit_1_dp2,
           expired_date: values?.expired_date?.[idx]?.format("YYYY-MM-DD") || null,
           product: id,
           relation_id: editedProduct?.[idx]?.relation_id,
           margin: editedProduct?.[idx]?.margin || 0,
           sub_total: productSubTotal?.[idx],
+          inventory: lokasiGudang?.[idx],
         }));
 
         console.log("details", details);
@@ -500,8 +503,9 @@ function Toko({ props }) {
     });
 
     var id = 0;
-    sales_sell_details.forEach((element) => {
-      console.log("element", element);
+
+    for (let i = 0; i < sales_sell_details?.length; i++) {
+      const element = sales_sell_details[i];
       var indexUnit = 1;
       var unitOrder = element.attributes.unit;
       var productUnit = element.attributes.product.data.attributes;
@@ -525,6 +529,18 @@ function Toko({ props }) {
         },
       });
 
+      setLokasiGudang((prev) => ({
+        ...prev,
+        [i]: element.attributes.inventory,
+      }));
+
+      const stock = await getStockAtLocation(productId, indexUnit, i);
+
+      setDataLocationStock((prev) => ({
+        ...prev,
+        [i]: stock,
+      }));
+
       //SET INITIAL PRODUCT
       dispatch({
         type: "SET_INITIAL_PRODUCT",
@@ -538,13 +554,12 @@ function Toko({ props }) {
         index: id,
       });
       id++;
-    });
-    setTimeout(() => {
-      setIsFetchingData(false);
-      message.success({ content: "Data berhasil diambil", key: "updatable", duration: 2 });
-    }, 3000);
+    }
+
+    setIsFetchingData(false);
+    message.success({ content: "Data berhasil diambil", key: "updatable", duration: 2 });
   };
-  console.log("product", products);
+  console.log("lokasi gudang", lokasiGudang);
 
   const clearData = () => {
     dispatch({ type: "CLEAR_DATA" });
@@ -561,12 +576,6 @@ function Toko({ props }) {
       setGrandTotal(totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
     }
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
-
-  useEffect(() => {
-    if (products.productList.length > 0) {
-      getProductAtLocation();
-    }
-  }, [products.productList]);
 
   useEffect(() => {
     sumAdditionalPrice();
@@ -636,52 +645,64 @@ function Toko({ props }) {
     });
   };
 
-  const getStockAtLocation = async (productId, locationId) => {
-    try {
-      console.log("get stock", productId, locationId);
-      const response = await getStock(productId, locationId);
-      console.log("response", response);
-
-      return response;
-    } catch (error) {
-      console.error("error", error);
-      setDataLocationStock({
-        ...dataLocationStock,
-        [productId]: "Error fetching stock data",
-      });
-    }
-  };
-
-  const getProductAtLocation = async (locationId) => {
-    let tempData = {};
-    const location = locationId || selectedLocationId;
-    setIsFetchingData(true);
+  const getProductAtLocation = async (unit = 1, changedIdx = products?.productList?.length - 1 ?? 0) => {
+    const locationId = form.getFieldValue("location");
+    let tempData = dataLocationStock;
 
     // create an array of promises by mapping over the productList
-    const promises = products.productList.map(async (product) => {
-      const res = await getStockAtLocation(product.id, location);
-      const stock = res?.data?.[0];
+    const promises = products.productList.map(async (product, idx) => {
+      if (idx === changedIdx) {
+        const stock = await getStockAtLocation(product.id, unit, idx);
+        console.log("stock ", product.id, stock);
 
-      tempData = {
-        ...tempData,
-        [product.id]: stock,
-      };
+        tempData = {
+          ...tempData,
+          [idx]: stock,
+        };
 
-      return stock; // return a promise from each iteration
+        return stock; // return a promise from each iteration
+      }
     });
 
     try {
       // use Promise.all() to execute all promises in parallel
       await Promise.all(promises);
-      console.log("tempdata", tempData);
-
       setDataLocationStock(tempData); // update state after all promises have resolved
-
-      setIsFetchingData(false);
       console.log("done");
     } catch (error) {
       console.error(error); // handle errors that may occur
-      setIsFetchingData(false);
+    }
+  };
+
+  const getStockAtLocation = async (productId, unit, idx) => {
+    try {
+      const response = await getStock(productId, unit);
+      console.log("response", response);
+
+      if (response?.data) {
+        // sort based on qty desc
+        const sortedBasedOnQty = response.data.sort((a, b) => b.availableStock - a.availableStock);
+        setLokasiGudang((prev) => ({
+          ...prev,
+          [idx]: sortedBasedOnQty,
+        }));
+      }
+
+      console.log(`response ${unit}`, response?.stock?.[unit]);
+
+      const stringArr = [];
+
+      for (const [key, value] of Object.entries(response?.stock)) {
+        stringArr.push(`${value} ${key}`);
+      }
+
+      return response.available ? stringArr.join(", ") : "Stok kosong";
+    } catch (error) {
+      console.error("error", error);
+      setDataLocationStock({
+        ...dataLocationStock,
+        [idx]: "Error fetching stock data",
+      });
     }
   };
 
@@ -710,7 +731,7 @@ function Toko({ props }) {
       notification["error"]({
         message: "Tidak dapat menambahkan data PO",
         description:
-          "Data LPB ini sudah memilik LPB yang terpasang. Silahkan cek kembali atau gunakan dokumen PO lainnya ",
+          "Data PO ini sudah memiliki PO yang terpasang. Silahkan cek kembali atau gunakan dokumen PO lainnya ",
       });
     } else {
       // fetch po
@@ -825,7 +846,7 @@ function Toko({ props }) {
                     <Select
                       onChange={(e) => {
                         setSelectedLocationId(e);
-                        getProductAtLocation(e);
+                        // getProductAtLocation(e);
                       }}
                       placeholder="Pilih Lokasi"
                       size="large"
@@ -879,6 +900,7 @@ function Toko({ props }) {
                     dataLocationStock={dataLocationStock}
                     locations={locations}
                     formObj={form}
+                    getProduct={getProductAtLocation}
                   />
                 </div>
               )}

@@ -27,7 +27,7 @@ function SearchOrder({ customer, handleSelect, disabled }) {
       try {
         const endpoint =
           process.env.NEXT_PUBLIC_URL +
-          `/sales-sells/?populate=deep&filters[status][$eq]=Sebagian Diterima&filters[status][$eq]=Diproses&filters[customer][id][$eq]=${customerId}&filters[no_sales_sell][$contains]=${query}`;
+          `/sales-sells/?populate=deep&filters[status][$eq]=Sebagian Diterima&filters[status][$eq]=Diproses&filters[customer][id][$eq]=${customerId}&filters[no_sales_sell][$contains]=${query}&sort[0]=id:desc`;
         const options = {
           method: "GET",
           headers: {
