@@ -376,6 +376,7 @@ function Toko({ props }) {
         okText: "Ya",
         okType: "danger",
         cancelText: "Tidak",
+        centered: true,
         onOk() {
           onFinish(values, true);
         },
