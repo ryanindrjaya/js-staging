@@ -104,7 +104,7 @@ function Laporan({ props }) {
   const [data, setData] = useState(purchasing);
   const router = useRouter();
   const [queryPrint, setQueryPrint] = useState("/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products");
-  const [searchParameters, setSearchParameters] = useState({tipeTransaksi : undefined}); console.log(searchParameters, "searchParameters");
+  const [searchParameters, setSearchParameters] = useState({});
   const dispatch = useDispatch();
   var index = 0;
 
@@ -272,9 +272,15 @@ function Laporan({ props }) {
       setData(res);
     };
 
+    if(searchParameters.tipeTransaksi == undefined){
+      searchParameters.tipeTransaksi = "undefined";
+    }
     searchQuery();
   }, [searchParameters]);
 
+  useEffect(() => {
+    setSearchParameters({tipeTransaksi : "undefined"});
+  }, []);
 
   return (
     <>
@@ -603,7 +609,7 @@ function Laporan({ props }) {
               <div hidden></div>     
             )}
 
-            {searchParameters.tipeTransaksi === undefined ? (
+            {searchParameters.tipeTransaksi === "undefined"  ? (
             <div>
             <h5 className="-mt-10">Laporan Pembelian</h5>
             <table name="pembelian" className="w-full text-xs">
@@ -862,8 +868,8 @@ function Laporan({ props }) {
                         </td>
                       </tr>
                       <tr>
-                        <td className="border-2 p-1 text-right mr-2" colSpan="6">Subtotal : </td>
-                        <td className="border-2 p-1">{formatter.format(element.attributes.retur_details.data.reduce((total, row) => total += row.attributes.sub_total, 0))}</td>
+                        <td className="border-2 p-1 text-right mr-2 w-fit" colspan="6">Subtotal : </td>
+                        <td className="border-2 p-1 w-fit">{formatter.format(element.attributes.retur_details.data.reduce((total, row) => total += row.attributes.sub_total, 0))}</td>
                       </tr>
                     </tbody>
                     );
