@@ -165,30 +165,19 @@ const Supplier = ({ props }) => {
                     title="INFO SUPPLIER"
                     bordered
                   >
-                    <Descriptions.Item label="Nama Supplier">
-                      {selected?.attributes?.name}
-                    </Descriptions.Item>
+                    <Descriptions.Item label="Nama Supplier">{selected?.attributes?.name}</Descriptions.Item>
                     <Descriptions.Item span={2} label="Kode Supplier">
                       {selected?.attributes?.id_supplier}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Telepon">
-                      {selected?.attributes?.phone}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Alamat">
-                      {selected?.attributes?.address}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Email">
-                      {selected?.attributes?.email}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Nomor NPWP">
-                      {selected?.attributes?.nomor_npwp || ""}
-                    </Descriptions.Item>
+                    <Descriptions.Item label="Telepon">{selected?.attributes?.phone}</Descriptions.Item>
+                    <Descriptions.Item label="Alamat">{selected?.attributes?.address}</Descriptions.Item>
+                    <Descriptions.Item label="Email">{selected?.attributes?.email}</Descriptions.Item>
+                    <Descriptions.Item label="Nomor NPWP">{selected?.attributes?.nomor_npwp || ""}</Descriptions.Item>
                     <Descriptions.Item span={2} label="Nama NPWP">
                       {selected?.attributes?.nama_npwp || ""}
                     </Descriptions.Item>
                     <Descriptions.Item label="Saldo Awal">
-                      {`${selected?.attributes?.balance}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",") ||
-                        0}
+                      {`${selected?.attributes?.balance}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",") || 0}
                     </Descriptions.Item>
                     <Descriptions.Item span={2} label="Termin Pembayaran">
                       {selected?.attributes?.credit_limit_duration || 0}{" "}
@@ -239,16 +228,6 @@ Supplier.getInitialProps = async (context) => {
 
   const req = await fetchData(cookies);
   data = await req.json();
-
-  if (req.status !== 200) {
-    context.res.writeHead(302, {
-      Location: "/signin?session=false",
-      "Content-Type": "text/html; charset=utf-8",
-    });
-    context?.res?.end();
-
-    return {};
-  }
 
   return {
     props: {

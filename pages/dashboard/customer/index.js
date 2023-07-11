@@ -23,16 +23,6 @@ Customer.getInitialProps = async (context) => {
   const area = await fetchData(cookies, "/areas").then((res) => res.json());
   const wilayah = await fetchData(cookies, "/wilayahs").then((res) => res.json());
 
-  if (req.status !== 200) {
-    context.res.writeHead(302, {
-      Location: "/signin?session=false",
-      "Content-Type": "text/html; charset=utf-8",
-    });
-    context?.res?.end();
-
-    return {};
-  }
-
   return {
     props: {
       data,
@@ -149,9 +139,7 @@ function Customer({ props }) {
 
   useEffect(() => {
     async function getCustomerById(id) {
-      const data = await fetchData(cookies, `/customers/${id}?populate=*`).then((res) =>
-        res.json()
-      );
+      const data = await fetchData(cookies, `/customers/${id}?populate=*`).then((res) => res.json());
       console.log("date", data.data.attributes);
       setSelectedCustomer(data.data);
     }
@@ -245,43 +233,25 @@ function Customer({ props }) {
                     title="INFO CUSTOMER"
                     bordered
                   >
-                    <Descriptions.Item label="Nama">
-                      {selectedCustomer?.attributes?.name}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Kode Customer">
-                      {selectedCustomer?.attributes?.code}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="No Telepon">
-                      {selectedCustomer?.attributes?.phone}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Kota">
-                      {selectedCustomer?.attributes?.city}
-                    </Descriptions.Item>
+                    <Descriptions.Item label="Nama">{selectedCustomer?.attributes?.name}</Descriptions.Item>
+                    <Descriptions.Item label="Kode Customer">{selectedCustomer?.attributes?.code}</Descriptions.Item>
+                    <Descriptions.Item label="No Telepon">{selectedCustomer?.attributes?.phone}</Descriptions.Item>
+                    <Descriptions.Item label="Kota">{selectedCustomer?.attributes?.city}</Descriptions.Item>
                     <Descriptions.Item label="Alamat" span={2}>
                       {selectedCustomer?.attributes?.address}
                     </Descriptions.Item>
                     <Descriptions.Item label="Golongan Customer">
-                      <Badge
-                        status="processing"
-                        text={selectedCustomer?.attributes?.customer_type}
-                      />
+                      <Badge status="processing" text={selectedCustomer?.attributes?.customer_type} />
                     </Descriptions.Item>
                     <Descriptions.Item label="Tipe Penjualan" span={2}>
                       {selectedCustomer?.attributes?.tipe_penjualan?.map((item) => (
                         <Tag color={getTagColor(item)}>{item}</Tag>
                       ))}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Deskripsi">
-                      {selectedCustomer?.attributes?.description}
-                    </Descriptions.Item>
+                    <Descriptions.Item label="Deskripsi">{selectedCustomer?.attributes?.description}</Descriptions.Item>
                   </Descriptions>
                   {/* AREA SALES INFO */}
-                  <Descriptions
-                    className="mt-3"
-                    size="middle"
-                    title="AREA SALES & KREDIT LIMIT"
-                    bordered
-                  >
+                  <Descriptions className="mt-3" size="middle" title="AREA SALES & KREDIT LIMIT" bordered>
                     <Descriptions.Item label="Nama Sales" span={3}>
                       {selectedCustomer?.attributes?.sales_name}
                     </Descriptions.Item>
@@ -292,20 +262,14 @@ function Customer({ props }) {
                       {selectedCustomer?.attributes?.wilayah?.data?.attributes?.name}
                     </Descriptions.Item>
                     <Descriptions.Item label="Batas Kredit">
-                      {`${selectedCustomer?.attributes?.credit_limit || 0}`.replace(
-                        /\B(?=(\d{3})+(?!\d))/g,
-                        ","
-                      )}
+                      {`${selectedCustomer?.attributes?.credit_limit || 0}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                     </Descriptions.Item>
                     <Descriptions.Item label="Termin Pembayaran" span={2}>
                       {selectedCustomer?.attributes?.credit_limit_duration}{" "}
                       {selectedCustomer?.attributes?.credit_limit_duration_type}
                     </Descriptions.Item>
                     <Descriptions.Item label="Saldo Awal" span={3}>
-                      {`${selectedCustomer?.attributes?.saldo_awal || 0}`.replace(
-                        /\B(?=(\d{3})+(?!\d))/g,
-                        ","
-                      )}
+                      {`${selectedCustomer?.attributes?.saldo_awal || 0}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                     </Descriptions.Item>
                   </Descriptions>
                   {/* INFO NPWP */}
@@ -319,9 +283,7 @@ function Customer({ props }) {
                     <Descriptions.Item label="Alamat NPWP" span={3}>
                       {selectedCustomer?.attributes?.alamat_npwp}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Nomor NIK">
-                      {selectedCustomer?.attributes?.nik}
-                    </Descriptions.Item>
+                    <Descriptions.Item label="Nomor NIK">{selectedCustomer?.attributes?.nik}</Descriptions.Item>
                   </Descriptions>
                 </>
               )}
@@ -411,11 +373,7 @@ function Customer({ props }) {
               </div>
             </div>
 
-            <CustomerTable
-              data={user?.data || []}
-              onDelete={handleDelete}
-              onUpdate={handleUpdate}
-            />
+            <CustomerTable data={user?.data || []} onDelete={handleDelete} onUpdate={handleUpdate} />
           </LayoutContent>
         </LayoutWrapper>
       </DashboardLayout>

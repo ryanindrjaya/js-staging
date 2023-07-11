@@ -31,13 +31,6 @@ Dashboard.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
 
   if (!cookies.token) {
-    context.res.writeHead(302, {
-      Location: "/signin?session=false",
-      "Content-Type": "text/html; charset=utf-8",
-    });
-    context?.res?.end();
-
-    return {};
   }
 
   return {

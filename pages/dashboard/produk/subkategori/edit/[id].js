@@ -72,7 +72,8 @@ const Edit = ({ props }) => {
     } else {
       try {
         const endpoint =
-          process.env.NEXT_PUBLIC_URL + `/categories?filters[$or][0][name][$contains]=${query}&filters[$or][1][category_id][$contains]=${query}`;
+          process.env.NEXT_PUBLIC_URL +
+          `/categories?filters[$or][0][name][$contains]=${query}&filters[$or][1][category_id][$contains]=${query}`;
         const options = {
           method: "GET",
           headers: {
@@ -130,7 +131,11 @@ const Edit = ({ props }) => {
               onFinish={onFinish}
             >
               <div className="flex flex-wrap -mx-3 mb-6">
-                <Form.Item name="category_id" initialValues={categorySelected.id} className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
+                <Form.Item
+                  name="category_id"
+                  initialValues={categorySelected.id}
+                  className="w-full md:w-1/3 px-3 mb-2 md:mb-0"
+                >
                   <Select
                     defaultValue={`${categorySelected.attributes.category_id} - ${categorySelected.attributes.name}`}
                     size="large"
@@ -222,13 +227,6 @@ Edit.getInitialProps = async (context) => {
   const categories = await resCategory.json();
 
   if (res.status !== 200) {
-    context.res.writeHead(302, {
-      Location: "/signin?session=false",
-      "Content-Type": "text/html; charset=utf-8",
-    });
-    context?.res?.end();
-
-    return {};
   }
 
   return {

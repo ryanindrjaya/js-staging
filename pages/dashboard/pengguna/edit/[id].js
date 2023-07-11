@@ -35,14 +35,13 @@ const Edit = ({ props }) => {
       data.locations.forEach((element) => {
         if (element.value) {
           newLocation.push(element.value);
-        } else{
+        } else {
           newLocation.push(element);
         }
       });
     } catch (error) {
       console.log("no location detected");
     }
-
 
     data.locations = newLocation;
     console.log(data);
@@ -78,8 +77,7 @@ const Edit = ({ props }) => {
   };
 
   const getRole = async (roleId) => {
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/users-permissions/roles/" + roleId;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/users-permissions/roles/" + roleId;
     const options = {
       method: "GET",
       headers: {
@@ -126,12 +124,7 @@ const Edit = ({ props }) => {
                     <Input
                       disabled
                       style={{ height: "50px" }}
-                      prefix={
-                        <UserOutlined
-                          style={{ fontSize: "150%" }}
-                          className="site-form-item-icon mr-5"
-                        />
-                      }
+                      prefix={<UserOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
                       placeholder="Username"
                     />
                   </Form.Item>
@@ -149,12 +142,7 @@ const Edit = ({ props }) => {
                   >
                     <Input
                       style={{ height: "50px" }}
-                      prefix={
-                        <UserOutlined
-                          style={{ fontSize: "150%" }}
-                          className="site-form-item-icon mr-5"
-                        />
-                      }
+                      prefix={<UserOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
                       placeholder="Nama"
                     />
                   </Form.Item>
@@ -172,12 +160,7 @@ const Edit = ({ props }) => {
                   >
                     <Input
                       style={{ height: "50px" }}
-                      prefix={
-                        <MailOutlined
-                          style={{ fontSize: "150%" }}
-                          className="site-form-item-icon mr-5"
-                        />
-                      }
+                      prefix={<MailOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
                       placeholder="Email"
                     />
                   </Form.Item>
@@ -192,11 +175,7 @@ const Edit = ({ props }) => {
                 required
               />
 
-              <Form.Item
-                name="role_id"
-                className="w-1/4 mb-5 ml-1"
-                initialValue={userRole.id}
-              >
+              <Form.Item name="role_id" className="w-1/4 mb-5 ml-1" initialValue={userRole.id}>
                 <Select placeholder="Role">
                   {role.map((role) =>
                     role.name === "Authenticated" || role.name === "Public" ? (
@@ -216,10 +195,7 @@ const Edit = ({ props }) => {
                     <Spin />
                   </div>
                 ) : (
-                  <Button
-                    htmlType="submit"
-                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
-                  >
+                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
                     Submit
                   </Button>
                 )}
@@ -255,13 +231,6 @@ Edit.getInitialProps = async (context) => {
   const resLocations = await reqLocations.json();
 
   if (res.status !== 200) {
-    context.res.writeHead(302, {
-      Location: "/signin?session=false",
-      "Content-Type": "text/html; charset=utf-8",
-    });
-    context?.res?.end();
-
-    return {};
   }
 
   return {

@@ -2,15 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
-import {
-  Button,
-  Form,
-  Input,
-  message,
-  Upload,
-  notification,
-  Image,
-} from "antd";
+import { Button, Form, Input, message, Upload, notification, Image } from "antd";
 import nookies from "nookies";
 import { toast } from "react-toastify";
 import { Spin, Row } from "antd";
@@ -41,9 +33,7 @@ const Edit = ({ props }) => {
   const NEXT_PUBLIC_URL = process.env.IMAGE_URL;
 
   const [image, setImage] = useState(
-    product.attributes?.image?.data
-      ? product.attributes?.image?.data?.attributes
-      : null
+    product.attributes?.image?.data ? product.attributes?.image?.data?.attributes : null
   );
 
   const [category, setCategory] = useState();
@@ -120,10 +110,7 @@ const Edit = ({ props }) => {
   };
 
   const categoryChecker = (values) => {
-    if (
-      values.category_id ===
-      `${initCategory.attributes.category_id} - ${initCategory.attributes.name}`
-    ) {
+    if (values.category_id === `${initCategory.attributes.category_id} - ${initCategory.attributes.name}`) {
       values.category_id = idCategory;
     } else {
       values.category_id = parseInt(values.category_id);
@@ -277,8 +264,7 @@ const Edit = ({ props }) => {
     console.log(data);
 
     for (let index = 1; index < 6; index++) {
-      if (data[`purchase_discount_${index}`] === "-")
-        delete data[`purchase_discount_${index}`];
+      if (data[`purchase_discount_${index}`] === "-") delete data[`purchase_discount_${index}`];
     }
 
     const formData = new FormData();
@@ -287,9 +273,7 @@ const Edit = ({ props }) => {
     if (file) {
       if (product.attributes?.image?.data) {
         // delete old image
-        const deleteImage = await deleteOldImage(
-          product.attributes?.image?.data.id
-        );
+        const deleteImage = await deleteOldImage(product.attributes?.image?.data.id);
         console.log("deleteImage", deleteImage);
       }
       formData.append("files.image", file);
@@ -366,8 +350,7 @@ const Edit = ({ props }) => {
       if (
         element.attributes.manufacture.data?.id == selectedManufactures &&
         element.attributes.group.data?.id == selectedGroups &&
-        element.attributes.category.data?.id ==
-          category[0]?.category?.category_id
+        element.attributes.category.data?.id == category[0]?.category?.category_id
       ) {
         manufacturesData++;
       }
@@ -380,8 +363,7 @@ const Edit = ({ props }) => {
     });
 
     manufactures.data.forEach((element) => {
-      if (element.id == selectedManufactures)
-        manufactureCode = element.attributes.code;
+      if (element.id == selectedManufactures) manufactureCode = element.attributes.code;
     });
 
     groupCode = String(groupCode).padStart(2, "0");
@@ -442,10 +424,7 @@ const Edit = ({ props }) => {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "40px" }}
-                      placeholder="Nama Produk"
-                    />
+                    <Input style={{ height: "40px" }} placeholder="Nama Produk" />
                   </Form.Item>
                   <Categories
                     initialValue={`${initCategory.attributes.category_id} - ${initCategory.attributes.name}`}
@@ -460,16 +439,9 @@ const Edit = ({ props }) => {
                     subCategories={subCategories}
                     onSelect={setSelectedSubCategory}
                     selectedSubCategory={selectedSubCategory}
-                    initialValue={`${
-                      product.attributes?.sub_category?.data?.attributes.name ??
-                      ""
-                    }`}
+                    initialValue={`${product.attributes?.sub_category?.data?.attributes.name ?? ""}`}
                   />
-                  <Groups
-                    data={groups}
-                    onSelect={setSelectedGroup}
-                    initialValue={product.attributes?.group?.data}
-                  />
+                  <Groups data={groups} onSelect={setSelectedGroup} initialValue={product.attributes?.group?.data} />
                   <Manufactures
                     data={manufactures.data}
                     initialValue={product.attributes?.manufacture?.data}
@@ -495,10 +467,7 @@ const Edit = ({ props }) => {
                     onSelect={setSelectLocation}
                     initialValue={product.attributes?.locations.data}
                   />
-                  <Form.Item
-                    name="description"
-                    initialValue={product.attributes?.description ?? ""}
-                  >
+                  <Form.Item name="description" initialValue={product.attributes?.description ?? ""}>
                     <TextArea rows={7} placeholder="Deskripsi" />
                   </Form.Item>
                 </div>
@@ -510,12 +479,8 @@ const Edit = ({ props }) => {
                         <p className="ant-upload-drag-icon">
                           <FileImageOutlined />
                         </p>
-                        <p className="ant-upload-text">
-                          Klik atau tarik gambar ke kotak ini
-                        </p>
-                        <p className="ant-upload-hint  m-3">
-                          Gambar akan digunakan sebagai contoh tampilan produk
-                        </p>
+                        <p className="ant-upload-text">Klik atau tarik gambar ke kotak ini</p>
+                        <p className="ant-upload-hint  m-3">Gambar akan digunakan sebagai contoh tampilan produk</p>
                       </>
                     ) : (
                       <Image
@@ -532,11 +497,7 @@ const Edit = ({ props }) => {
                 <h6 className="">HARGA</h6>
               </div>
 
-              <UnitTable
-                initialValue={product.attributes}
-                getDescUnit={getDescriptionUnit}
-                descUnit={descUnit}
-              />
+              <UnitTable initialValue={product.attributes} getDescUnit={getDescriptionUnit} descUnit={descUnit} />
 
               <Form.Item>
                 {loading ? (
@@ -595,13 +556,6 @@ Edit.getInitialProps = async (context) => {
   const subCategories = await reqSubCategories.json();
 
   if (reqProduct.status !== 200) {
-    context.res.writeHead(302, {
-      Location: "/signin?session=false",
-      "Content-Type": "text/html; charset=utf-8",
-    });
-    context?.res?.end();
-
-    return {};
   }
 
   return {
@@ -619,8 +573,7 @@ Edit.getInitialProps = async (context) => {
 
 const fetchProduct = async (cookies, context) => {
   const id = context?.query?.id;
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/products/" + id + "?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/products/" + id + "?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -676,10 +629,7 @@ const fetchDataManufactures = async (cookies) => {
 };
 
 const fetchDataSubCategories = async (cookies, categoryId) => {
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL +
-    "/sub-categories?populate[category][filters][id][$eq]=" +
-    categoryId;
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/sub-categories?populate[category][filters][id][$eq]=" + categoryId;
   const options = {
     method: "GET",
     headers: {

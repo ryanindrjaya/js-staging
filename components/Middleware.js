@@ -9,16 +9,26 @@ function Middleware({ children }) {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  useEffect(async () => {
+  useEffect(() => {
     const firstPath = router.pathname.split("/")[1];
 
-    // await istokenValid(token);
-    // let isValid = await istokenValid(token);
+    const istokenValid = async () => {
+      const endpoint = process.env.NEXT_PUBLIC_URL + `/products?pagination[limit]=1`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+      };
 
-    // if (!isValid) {
-    //   router.push("/");
-    // } else {
-    // }
+      const req = await fetch(endpoint, options);
+
+      if (req.status === 401) {
+        dispatch({ type: "SET_SESSION", message: "Sesi anda telah berakhir, harap login kembali" });
+        router.push("/");
+      }
+    };
 
     if (firstPath === "dashboard" && !token) {
       dispatch({ type: "SET_SESSION", message: "Sesi anda telah berakhir, harap login kembali" });
@@ -26,31 +36,14 @@ function Middleware({ children }) {
     } else {
       if (token && firstPath === "") {
         router.push("/dashboard");
+        return;
       }
+
+      istokenValid();
     }
   }, []);
 
   return <>{children}</>;
 }
-
-const istokenValid = async (token) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + `/products`;
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + token,
-    },
-  };
-
-  const req = await fetch(endpoint, options);
-  const res = await req.json();
-
-  if (req.status === 401) {
-    return false;
-  } else {
-    return true;
-  }
-};
 
 export default Middleware;

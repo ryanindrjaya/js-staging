@@ -203,11 +203,7 @@ const Tambah = ({ props }) => {
                     },
                   ]}
                 >
-                  <Input
-                    readOnly={customerType !== "KARYAWAN"}
-                    placeholder="Kode Customer *"
-                    required
-                  />
+                  <Input readOnly={customerType !== "KARYAWAN"} placeholder="Kode Customer *" required />
                 </Form.Item>
                 <Form.Item
                   className="w-full"
@@ -303,11 +299,7 @@ const Tambah = ({ props }) => {
                   ]}
                   initialValue="TOKO"
                 >
-                  <Select
-                    defaultValue={"TOKO"}
-                    onChange={setCustomerCode}
-                    placeholder="Golongan Customer *"
-                  >
+                  <Select defaultValue={"TOKO"} onChange={setCustomerCode} placeholder="Golongan Customer *">
                     <Select.Option value="PANEL">PANEL</Select.Option>
                     <Select.Option value="NON PANEL">NON PANEL</Select.Option>
                     <Select.Option value="SALES">SALES</Select.Option>
@@ -329,11 +321,7 @@ const Tambah = ({ props }) => {
                   ]}
                   initialValue={["TOKO"]}
                 >
-                  <Select
-                    disabled={customerType === "TOKO"}
-                    placeholder="Tipe Penjualan *"
-                    mode="multiple"
-                  >
+                  <Select disabled={customerType === "TOKO"} placeholder="Tipe Penjualan *" mode="multiple">
                     <Select.Option value="PANEL">PANEL</Select.Option>
                     <Select.Option value="NON PANEL">NON PANEL</Select.Option>
                     <Select.Option value="SALES">SALES</Select.Option>
@@ -372,13 +360,9 @@ const Tambah = ({ props }) => {
                   <Form.Item className="w-full" name="sales_name">
                     <Select
                       optionFilterProp="children"
-                      filterOption={(input, option) =>
-                        (option?.label ?? "").toLowerCase().includes(input)
-                      }
+                      filterOption={(input, option) => (option?.label ?? "").toLowerCase().includes(input)}
                       filterSort={(optionA, optionB) =>
-                        (optionA?.label ?? "")
-                          .toLowerCase()
-                          .localeCompare((optionB?.label ?? "").toLowerCase())
+                        (optionA?.label ?? "").toLowerCase().localeCompare((optionB?.label ?? "").toLowerCase())
                       }
                       showSearch
                       options={users}
@@ -436,17 +420,8 @@ const Tambah = ({ props }) => {
                           Termin Pembayaran
                         </span>
                       </Form.Item>
-                      <Form.Item
-                        noStyle
-                        className="w-full"
-                        name="credit_limit_duration_type"
-                        initialValue="Hari"
-                      >
-                        <Select
-                          disabled={customerType === "TOKO"}
-                          style={{ width: "70%" }}
-                          defaultValue="Hari"
-                        >
+                      <Form.Item noStyle className="w-full" name="credit_limit_duration_type" initialValue="Hari">
+                        <Select disabled={customerType === "TOKO"} style={{ width: "70%" }} defaultValue="Hari">
                           <Select.Option value="Hari">Hari</Select.Option>
                           <Select.Option value="Bulan">Bulan</Select.Option>
                         </Select>
@@ -500,46 +475,28 @@ const Tambah = ({ props }) => {
               <div hidden={!showForm.npwp}>
                 <div className="flex md:flex-row flex-col gap-x-10 w-full">
                   <Form.Item className="w-full" name="nama_npwp">
-                    <Input
-                      onInput={(e) => (e.target.value = e.target.value.toUpperCase())}
-                      placeholder="Nama NPWP"
-                    />
+                    <Input onInput={(e) => (e.target.value = e.target.value.toUpperCase())} placeholder="Nama NPWP" />
                   </Form.Item>
                   <Form.Item className="w-full" name="nomor_npwp">
-                    <Input
-                      onInput={(e) => (e.target.value = e.target.value.toUpperCase())}
-                      placeholder="Nomor NPWP"
-                    />
+                    <Input onInput={(e) => (e.target.value = e.target.value.toUpperCase())} placeholder="Nomor NPWP" />
                   </Form.Item>
                 </div>
 
                 <div className="flex md:flex-row flex-col gap-x-10 w-full">
                   <Form.Item className="w-full" name="alamat_npwp">
-                    <Input
-                      onInput={(e) => (e.target.value = e.target.value.toUpperCase())}
-                      placeholder="Alamat NPWP"
-                    />
+                    <Input onInput={(e) => (e.target.value = e.target.value.toUpperCase())} placeholder="Alamat NPWP" />
                   </Form.Item>
                   <Form.Item className="w-full pointer-events-none hidden md:block opacity-0">
-                    <Input
-                      onInput={(e) => (e.target.value = e.target.value.toUpperCase())}
-                      disabled
-                    />
+                    <Input onInput={(e) => (e.target.value = e.target.value.toUpperCase())} disabled />
                   </Form.Item>
                 </div>
 
                 <div className="flex md:flex-row flex-col gap-x-10 w-full">
                   <Form.Item className="w-full" name="nik">
-                    <Input
-                      onInput={(e) => (e.target.value = e.target.value.toUpperCase())}
-                      placeholder="Nomor NIK"
-                    />
+                    <Input onInput={(e) => (e.target.value = e.target.value.toUpperCase())} placeholder="Nomor NIK" />
                   </Form.Item>
                   <Form.Item className="w-full pointer-events-none hidden md:block opacity-0">
-                    <Input
-                      onInput={(e) => (e.target.value = e.target.value.toUpperCase())}
-                      disabled
-                    />
+                    <Input onInput={(e) => (e.target.value = e.target.value.toUpperCase())} disabled />
                   </Form.Item>
                 </div>
               </div>
@@ -550,10 +507,7 @@ const Tambah = ({ props }) => {
                     <Spin />
                   </div>
                 ) : (
-                  <Button
-                    htmlType="submit"
-                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700"
-                  >
+                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700">
                     Submit
                   </Button>
                 )}
@@ -581,16 +535,6 @@ Tambah.getInitialProps = async (context) => {
     value: user.name,
     label: user.name,
   }));
-
-  if (req.status !== 200) {
-    context.res.writeHead(302, {
-      Location: "/signin?session=false",
-      "Content-Type": "text/html; charset=utf-8",
-    });
-    context?.res?.end();
-
-    return {};
-  }
 
   return {
     props: {

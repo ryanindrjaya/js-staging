@@ -5,17 +5,7 @@ import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import {
-  Form,
-  Input,
-  DatePicker,
-  Button,
-  message,
-  Modal,
-  Select,
-  Spin,
-  notification,
-} from "antd";
+import { Form, Input, DatePicker, Button, message, Modal, Select, Spin, notification } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import nookies from "nookies";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
@@ -46,13 +36,6 @@ Retur.getInitialProps = async (context) => {
   const user = await reqUser.json();
 
   if (reqLocation.status !== 200) {
-    context.res.writeHead(302, {
-      Location: "/signin?session=false",
-      "Content-Type": "text/html; charset=utf-8",
-    });
-    context?.res?.end();
-
-    return {};
   }
 
   return {
@@ -201,24 +184,13 @@ function Retur({ props }) {
         [idx]: res.data[0].attributes,
       });
 
-      const unit1 = product.unit_1
-        ? stok.stock_unit_1 + " " + product.unit_1
-        : "";
-      const unit2 = product.unit_2
-        ? stok.stock_unit_2 + " " + product.unit_2
-        : "";
-      const unit3 = product.unit_3
-        ? stok.stock_unit_3 + " " + product.unit_3
-        : "";
-      const unit4 = product.unit_4
-        ? stok.stock_unit_4 + " " + product.unit_4
-        : "";
-      const unit5 = product.unit_5
-        ? stok.stock_unit_5 + " " + product.unit_5
-        : "";
+      const unit1 = product.unit_1 ? stok.stock_unit_1 + " " + product.unit_1 : "";
+      const unit2 = product.unit_2 ? stok.stock_unit_2 + " " + product.unit_2 : "";
+      const unit3 = product.unit_3 ? stok.stock_unit_3 + " " + product.unit_3 : "";
+      const unit4 = product.unit_4 ? stok.stock_unit_4 + " " + product.unit_4 : "";
+      const unit5 = product.unit_5 ? stok.stock_unit_5 + " " + product.unit_5 : "";
 
-      stokGudang =
-        unit1 + " " + unit2 + " " + unit3 + " " + unit4 + " " + unit5;
+      stokGudang = unit1 + " " + unit2 + " " + unit3 + " " + unit4 + " " + unit5;
 
       setStokString({
         ...stokString,
@@ -238,8 +210,7 @@ function Retur({ props }) {
       const unit4 = product.unit_4 ? "0" + " " + product.unit_4 : "";
       const unit5 = product.unit_5 ? "0" + " " + product.unit_5 : "";
 
-      stokGudang =
-        unit1 + " " + unit2 + " " + unit3 + " " + unit4 + " " + unit5;
+      stokGudang = unit1 + " " + unit2 + " " + unit3 + " " + unit4 + " " + unit5;
 
       setStokString({
         ...stokString,
@@ -254,14 +225,10 @@ function Retur({ props }) {
 
     for (let index in dataGudang) {
       const qty = values?.jumlah_qty?.[index] ?? 1;
-      const unitIndex =
-        values?.jumlah_option?.[index] ??
-        products?.productInfo?.[index].unit ??
-        1;
+      const unitIndex = values?.jumlah_option?.[index] ?? products?.productInfo?.[index].unit ?? 1;
       const productId = products.productList[index]?.id;
       const productName = products.productList[index]?.attributes?.name;
-      const productUnit =
-        products.productList[index]?.attributes?.["unit_" + unitIndex];
+      const productUnit = products.productList[index]?.attributes?.["unit_" + unitIndex];
       const gudangLocatioId = dataGudang?.[index].location?.data?.id ?? 0;
 
       if (typeof unitIndex === "string") {
@@ -301,10 +268,7 @@ function Retur({ props }) {
         title: "Retur Gagal",
         content: (
           <div>
-            <p>
-              Item ini tidak bisa dilakukan retur. Silahkan cek kembali stok
-              gudang yang tersedia:
-            </p>
+            <p>Item ini tidak bisa dilakukan retur. Silahkan cek kembali stok gudang yang tersedia:</p>
             <ul>
               {cannotBeReturnedProducts.map((product) => (
                 <li>{product === undefined ? "" : `- ${product}`} </li>
@@ -396,8 +360,7 @@ function Retur({ props }) {
 
   const fetchReturdata = async (id) => {
     //clearData();
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=deep`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=deep`;
     const options = {
       method: "GET",
       headers: {
@@ -532,30 +495,15 @@ function Retur({ props }) {
       expProduct.push(moment(momentStringDetail));
       batch.push(element.attributes.batch);
 
-      if (
-        element.attributes.products?.data[0]?.attributes.unit_1 ==
-        element.attributes.unit
-      ) {
+      if (element.attributes.products?.data[0]?.attributes.unit_1 == element.attributes.unit) {
         indexUnit = 1;
-      } else if (
-        element.attributes.products?.data[0]?.attributes.unit_2 ==
-        element.attributes.unit
-      ) {
+      } else if (element.attributes.products?.data[0]?.attributes.unit_2 == element.attributes.unit) {
         indexUnit = 2;
-      } else if (
-        element.attributes.products?.data[0]?.attributes.unit_3 ==
-        element.attributes.unit
-      ) {
+      } else if (element.attributes.products?.data[0]?.attributes.unit_3 == element.attributes.unit) {
         indexUnit = 3;
-      } else if (
-        element.attributes.products?.data[0]?.attributes.unit_4 ==
-        element.attributes.unit
-      ) {
+      } else if (element.attributes.products?.data[0]?.attributes.unit_4 == element.attributes.unit) {
         indexUnit = 4;
-      } else if (
-        element.attributes.products?.data[0]?.attributes.unit_5 ==
-        element.attributes.unit
-      ) {
+      } else if (element.attributes.products?.data[0]?.attributes.unit_5 == element.attributes.unit) {
         indexUnit = 5;
       } else indexUnit = 1;
 
@@ -719,10 +667,7 @@ function Retur({ props }) {
                     >
                       {locations.map((element) => {
                         return (
-                          <Select.Option
-                            value={element.id}
-                            key={element.attributes.name}
-                          >
+                          <Select.Option value={element.id} key={element.attributes.name}>
                             {element.attributes.name}
                           </Select.Option>
                         );
@@ -843,44 +788,29 @@ function Retur({ props }) {
                     </Select>
                   </Form.Item>
                 </div>
-                <p className="font-bold">
-                  Total Item : {products.productList.length}{" "}
-                </p>
+                <p className="font-bold">Total Item : {products.productList.length} </p>
               </div>
               <div className="flex justify-end">
-                <p className="font-bold">
-                  DPP : {formatterTotal.format(getDPP())}
-                </p>
+                <p className="font-bold">DPP : {formatterTotal.format(getDPP())}</p>
               </div>
               <div className="flex justify-end">
-                <p className="font-bold">
-                  PPN : {formatterTotal.format(getPPN())}
-                </p>
+                <p className="font-bold">PPN : {formatterTotal.format(getPPN())}</p>
               </div>
               <div className="flex justify-end">
-                <p className="font-bold">
-                  Total Harga : {formatterTotal.format(totalPrice)}{" "}
-                </p>
+                <p className="font-bold">Total Harga : {formatterTotal.format(totalPrice)} </p>
               </div>
 
               <div className="flex justify-end mt-5">
-                <p className="font-bold">
-                  Total LPB :{" "}
-                  {formatter.format(getPaymentRemaining().LPBPayment ?? 0)}{" "}
-                </p>
+                <p className="font-bold">Total LPB : {formatter.format(getPaymentRemaining().LPBPayment ?? 0)} </p>
               </div>
               <div className="flex justify-end">
                 <p className="font-bold text-green-600">
-                  Pembayaran Selesai :{" "}
-                  {formatter.format(getPaymentRemaining().returPayment ?? 0)}{" "}
+                  Pembayaran Selesai : {formatter.format(getPaymentRemaining().returPayment ?? 0)}{" "}
                 </p>
               </div>
               <div className="flex justify-end">
                 <p className="font-bold text-red-400">
-                  Sisa Pembayaran :{" "}
-                  {formatter.format(
-                    getPaymentRemaining().returPaymentRemaining ?? 0
-                  )}{" "}
+                  Sisa Pembayaran : {formatter.format(getPaymentRemaining().returPaymentRemaining ?? 0)}{" "}
                 </p>
               </div>
 

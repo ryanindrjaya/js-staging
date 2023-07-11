@@ -716,16 +716,6 @@ daftarKeluarBarang.getInitialProps = async (context) => {
 
   let options = [];
 
-  if (req.status !== 200) {
-    context.res.writeHead(302, {
-      Location: "/signin?session=false",
-      "Content-Type": "text/html; charset=utf-8",
-    });
-    context?.res?.end();
-
-    return {};
-  }
-
   if (data?.data?.length > 0) {
     options = data.data.map(({ attributes, id }) => {
       return {

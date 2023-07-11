@@ -12,17 +12,7 @@ import Supplier from "@iso/components/Form/AddOrder/SupplierForm";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import OrderTable from "../../../../components/ReactDataTable/Purchases/OrderTable";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  Form,
-  Button,
-  Spin,
-  Input,
-  DatePicker,
-  Select,
-  InputNumber,
-  Upload,
-  notification,
-} from "antd";
+import { Form, Button, Spin, Input, DatePicker, Select, InputNumber, Upload, notification } from "antd";
 import createDetailOrderFunc from "../utility/createOrderDetail";
 import createOrderFunc from "../utility/createOrder";
 import calculatePrice from "../utility/calculatePrice";
@@ -43,16 +33,6 @@ Tambah.getInitialProps = async (context) => {
 
   const req3 = await fetchUser(cookies);
   user = await req3.json();
-
-  if (req.status !== 200) {
-    context.res.writeHead(302, {
-      Location: "/signin?session=false",
-      "Content-Type": "text/html; charset=utf-8",
-    });
-    context?.res?.end();
-
-    return {};
-  }
 
   return {
     props: {
@@ -140,9 +120,7 @@ function Tambah({ props }) {
   var tempLocationId;
 
   // NO PO
-  var totalPurchases = String(
-    props.purchases?.meta?.pagination.total + 1
-  ).padStart(3, "0");
+  var totalPurchases = String(props.purchases?.meta?.pagination.total + 1).padStart(3, "0");
   var today = new Date();
   var dd = String(today.getDate()).padStart(2, "0");
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
@@ -167,14 +145,7 @@ function Tambah({ props }) {
 
   const createDetailOrder = async () => {
     // console.log("info total", productTotalPrice, productSubTotal);
-    createDetailOrderFunc(
-      products,
-      productTotalPrice,
-      productSubTotal,
-      setListId,
-      "/purchase-details",
-      dataValues
-    );
+    createDetailOrderFunc(products, productTotalPrice, productSubTotal, setListId, "/purchase-details", dataValues);
   };
 
   const createOrder = async (values) => {
@@ -214,14 +185,7 @@ function Tambah({ props }) {
   };
 
   const calculatePriceAfterDisc = (row, index) => {
-    const total = calculatePrice(
-      row,
-      products,
-      productTotalPrice,
-      productSubTotal,
-      setTotalPrice,
-      index
-    );
+    const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index);
 
     const formattedNumber = formatter.format(total);
     console.log("product", products);
@@ -266,14 +230,12 @@ function Tambah({ props }) {
     if (type === "error") {
       notification[type]({
         message: "Gagal menambahkan data",
-        description:
-          "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
+        description: "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
       });
     } else if (type === "success") {
       notification[type]({
         message: "Berhasil menambahkan data",
-        description:
-          "Produk berhasil ditambahkan. Silahkan cek pada halaman Order Pembelian",
+        description: "Produk berhasil ditambahkan. Silahkan cek pada halaman Order Pembelian",
       });
     }
   };
@@ -446,14 +408,10 @@ function Tambah({ props }) {
               </div>
 
               <div className="flex justify-end">
-                <p className="font-bold">
-                  Total Item : {products.productList.length}{" "}
-                </p>
+                <p className="font-bold">Total Item : {products.productList.length} </p>
               </div>
               <div className="flex justify-end">
-                <p className="font-bold">
-                  Total Harga : {formatter.format(totalPrice)}{" "}
-                </p>
+                <p className="font-bold">Total Harga : {formatter.format(totalPrice)} </p>
               </div>
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
@@ -470,9 +428,7 @@ function Tambah({ props }) {
                   <Form.Item name="delivery_fee">
                     <InputNumber
                       onChange={sumDeliveryPrice}
-                      formatter={(value) =>
-                        value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                      }
+                      formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                       parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                       size="large"
                       placeholder="Biaya Pengiriman"
@@ -513,11 +469,7 @@ function Tambah({ props }) {
                       }}
                     >
                       {locations.map((element) => {
-                        return (
-                          <Select.Option value={element.id}>
-                            {element.attributes.name}
-                          </Select.Option>
-                        );
+                        return <Select.Option value={element.id}>{element.attributes.name}</Select.Option>;
                       })}
                     </Select>
                   </Form.Item>
@@ -624,9 +576,7 @@ function Tambah({ props }) {
               <div>
                 <p className="font-bold flex justify-end">
                   Total Order Pembelian :{" "}
-                  {grandTotal === 0
-                    ? formatter.format(totalPrice)
-                    : formatter.format(grandTotal)}
+                  {grandTotal === 0 ? formatter.format(totalPrice) : formatter.format(grandTotal)}
                 </p>
               </div>
               <Form.Item name="additional_note">

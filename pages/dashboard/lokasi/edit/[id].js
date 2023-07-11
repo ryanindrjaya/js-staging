@@ -44,9 +44,14 @@ const Edit = ({ props }) => {
       res.error?.details.errors.map((error) => {
         const ErrorMsg = error.path[0];
         console.log(ErrorMsg);
-        toast.error(ErrorMsg === "location_id" ? "Lokasi yang dimasukkan sudah ada. Silahkan coba yang lain" : "Tidak dapat memperbarui Lokasi", {
-          position: toast.POSITION.TOP_RIGHT,
-        });
+        toast.error(
+          ErrorMsg === "location_id"
+            ? "Lokasi yang dimasukkan sudah ada. Silahkan coba yang lain"
+            : "Tidak dapat memperbarui Lokasi",
+          {
+            position: toast.POSITION.TOP_RIGHT,
+          }
+        );
       });
     }
 
@@ -166,13 +171,6 @@ Edit.getInitialProps = async (context) => {
   const locationData = await res.json();
 
   if (res.status !== 200) {
-    context.res.writeHead(302, {
-      Location: "/signin?session=false",
-      "Content-Type": "text/html; charset=utf-8",
-    });
-    context?.res?.end();
-
-    return {};
   }
 
   return {

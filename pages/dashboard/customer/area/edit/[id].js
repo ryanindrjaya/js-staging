@@ -72,10 +72,7 @@ const Edit = ({ props }) => {
                     },
                   ]}
                 >
-                  <Input
-                    onInput={(e) => (e.target.value = e.target.value.toUpperCase())}
-                    placeholder="Kode Area"
-                  />
+                  <Input onInput={(e) => (e.target.value = e.target.value.toUpperCase())} placeholder="Kode Area" />
                 </Form.Item>
                 <Form.Item
                   className="w-full"
@@ -87,10 +84,7 @@ const Edit = ({ props }) => {
                     },
                   ]}
                 >
-                  <Input
-                    onInput={(e) => (e.target.value = e.target.value.toUpperCase())}
-                    placeholder="Nama Area"
-                  />
+                  <Input onInput={(e) => (e.target.value = e.target.value.toUpperCase())} placeholder="Nama Area" />
                 </Form.Item>
               </div>
 
@@ -108,10 +102,7 @@ const Edit = ({ props }) => {
                     <Spin />
                   </div>
                 ) : (
-                  <Button
-                    htmlType="submit"
-                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
-                  >
+                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
                     Submit
                   </Button>
                 )}
@@ -140,13 +131,6 @@ Edit.getInitialProps = async (context) => {
   const data = await res.json();
 
   if (res.status !== 200) {
-    context.res.writeHead(302, {
-      Location: "/signin?session=false",
-      "Content-Type": "text/html; charset=utf-8",
-    });
-    context?.res?.end();
-
-    return {};
   }
 
   return {

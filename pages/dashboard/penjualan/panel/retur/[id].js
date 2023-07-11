@@ -4,15 +4,7 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import {
-  Form,
-  Input,
-  DatePicker,
-  Select,
-  Spin,
-  notification,
-  InputNumber,
-} from "antd";
+import { Form, Input, DatePicker, Select, Spin, notification, InputNumber } from "antd";
 import nookies from "nookies";
 import SearchBar from "../../.../../../../../components/Form/AddOrder/SearchBar";
 import { useSelector, useDispatch } from "react-redux";
@@ -28,8 +20,7 @@ ReturPanel.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/panel-sales/" + id + "?populate=deep";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/panel-sales/" + id + "?populate=deep";
   const options = {
     method: "GET",
     headers: {
@@ -55,16 +46,6 @@ ReturPanel.getInitialProps = async (context) => {
   const dataUser = await fetchUser(cookies);
   const user = await dataUser.json();
 
-  if (req.status !== 200) {
-    context.res.writeHead(302, {
-      Location: "/signin?session=false",
-      "Content-Type": "text/html; charset=utf-8",
-    });
-    context?.res?.end();
-
-    return {};
-  }
-
   return {
     props: {
       data,
@@ -78,10 +59,7 @@ ReturPanel.getInitialProps = async (context) => {
 };
 
 const fetchPiutang = async (cookies, id) => {
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL +
-    "/credit-details?populate=*&filters[panel_sale][id][$eq]=" +
-    id;
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-details?populate=*&filters[panel_sale][id][$eq]=" + id;
   const options = {
     method: "GET",
     headers: {
@@ -109,8 +87,7 @@ const fetchDataLocation = async (cookies) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/retur-panel-sales?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-panel-sales?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -125,10 +102,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchPaymentRetur = async (cookies, id) => {
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL +
-    "/retur-panel-sales?populate=*&filters[panel_sale][id][$eq]=" +
-    id;
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-panel-sales?populate=*&filters[panel_sale][id][$eq]=" + id;
   const options = {
     method: "GET",
     headers: {
@@ -201,8 +175,7 @@ function ReturPanel({ props }) {
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
   var date = today.getDate() + "/" + mm + "/" + yyyy;
-  var time =
-    today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 
   // DPP & PPN
   const [dpp, setDPP] = useState(0);
@@ -218,22 +191,12 @@ function ReturPanel({ props }) {
 
   //set data retur
   const [faktur, setFaktur] = useState(panel.data.attributes.faktur);
-  const [customer, setCustomer] = useState(
-    panel.data.attributes.customer?.data?.attributes.name
-  );
+  const [customer, setCustomer] = useState(panel.data.attributes.customer?.data?.attributes.name);
   const [saleDate, setSaleDate] = useState(panel.data.attributes.sale_date);
-  const [locationStore, setLocationStore] = useState(
-    panel.data.attributes.location.data.attributes.name
-  );
-  const [addFee1Desc, setaddFee1Desc] = useState(
-    panel.data.attributes.additional_fee_1_desc
-  );
-  const [addFee2Desc, setaddFee2Desc] = useState(
-    panel.data.attributes.additional_fee_2_desc
-  );
-  const [addFee3Desc, setaddFee3Desc] = useState(
-    panel.data.attributes.additional_fee_3_desc
-  );
+  const [locationStore, setLocationStore] = useState(panel.data.attributes.location.data.attributes.name);
+  const [addFee1Desc, setaddFee1Desc] = useState(panel.data.attributes.additional_fee_1_desc);
+  const [addFee2Desc, setaddFee2Desc] = useState(panel.data.attributes.additional_fee_2_desc);
+  const [addFee3Desc, setaddFee3Desc] = useState(panel.data.attributes.additional_fee_3_desc);
 
   // Button Include
   const [btnDisc, setBtnDisc] = useState("Uninclude");
@@ -243,9 +206,7 @@ function ReturPanel({ props }) {
 
   // NO panel
   var noPanel = String(returPanel?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(
-    `RPN/ET/${user.id}/${noPanel}/${mm}/${yyyy}`
-  );
+  const [categorySale, setCategorySale] = useState(`RPN/ET/${user.id}/${noPanel}/${mm}/${yyyy}`);
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);
@@ -362,8 +323,7 @@ function ReturPanel({ props }) {
 
     let totalPiutang = 0;
     dataPiutang?.data?.forEach((element) => {
-      const totalPembayaran =
-        element?.attributes?.credit?.data?.attributes?.total_pembayaran;
+      const totalPembayaran = element?.attributes?.credit?.data?.attributes?.total_pembayaran;
       totalPiutang = totalPiutang + totalPembayaran;
     });
 
@@ -378,17 +338,14 @@ function ReturPanel({ props }) {
     if (grandTotalFloat > remainingPayment) {
       notification["error"]({
         message: "Overprice",
-        description:
-          "Harga retur melebih dari Sisa pembayaran / Harga Penjualan",
+        description: "Harga retur melebih dari Sisa pembayaran / Harga Penjualan",
       });
       setLoading(false);
       return;
     }
 
     returPanel.data.forEach((element) => {
-      if (
-        values.no_retur_panel_sale == element.attributes.no_retur_panel_sale
-      ) {
+      if (values.no_retur_panel_sale == element.attributes.no_retur_panel_sale) {
         notification["error"]({
           message: "Gagal menambahkan data",
           description: "Data gagal ditambahkan, karena no penjualan sama",
@@ -461,8 +418,7 @@ function ReturPanel({ props }) {
         Authorization: "Bearer " + cookies.token,
       },
     };
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + `/panel-sales/${panelId}?populate=deep`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/panel-sales/${panelId}?populate=deep`;
     const req = await fetch(endpoint, options);
     const res = await req.json();
     const row = res.data;
@@ -531,13 +487,9 @@ function ReturPanel({ props }) {
     // if both are same then we should not set new price for grand total.
     // if they are not, then set new grand total
     if (discPrice !== totalPrice && discPrice !== 0) {
-      setGrandTotal(
-        discPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan)
-      );
+      setGrandTotal(discPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
     } else {
-      setGrandTotal(
-        totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan)
-      );
+      setGrandTotal(totalPrice + parseFloat(biayaPengiriman) + parseFloat(biayaTambahan));
     }
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
 
@@ -653,9 +605,7 @@ function ReturPanel({ props }) {
 
               <div className="w-full flex flex-wrap justify-start -mx-3">
                 <div className="w-full md:w-1/3 px-3 md:mb-0">
-                  <p className="text-sm text-start ml-9">
-                    Tanggal : {saleDate}
-                  </p>
+                  <p className="text-sm text-start ml-9">Tanggal : {saleDate}</p>
                 </div>
                 <div className="w-full md:w-1/3 px-3 md:mb-0">
                   <p className="text-sm text-start">Lokasi : {locationStore}</p>
@@ -679,10 +629,7 @@ function ReturPanel({ props }) {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "40px" }}
-                      placeholder="No. Penjualan"
-                    />
+                    <Input style={{ height: "40px" }} placeholder="No. Penjualan" />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -708,10 +655,7 @@ function ReturPanel({ props }) {
                     >
                       {locations.map((element) => {
                         return (
-                          <Select.Option
-                            value={element.id}
-                            key={element.attributes.name}
-                          >
+                          <Select.Option value={element.id} key={element.attributes.name}>
                             {element.attributes.name}
                           </Select.Option>
                         );
@@ -876,43 +820,20 @@ function ReturPanel({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full flex flex-wrap md:w-1/3 justify-start -mt-14 mb-3">
-                  <Form.Item
-                    name="dpp"
-                    value={dpp}
-                    className="w-full h-2 md:w-1/2 mx-2"
-                  >
+                  <Form.Item name="dpp" value={dpp} className="w-full h-2 md:w-1/2 mx-2">
                     <span> DPP </span> <span>: {formatter.format(dpp)}</span>
                   </Form.Item>
-                  <Form.Item
-                    name="ppn"
-                    value={ppn}
-                    className="w-full h-2 md:w-1/2 mx-2"
-                  >
+                  <Form.Item name="ppn" value={ppn} className="w-full h-2 md:w-1/2 mx-2">
                     <span> PPN </span> <span>: {formatter.format(ppn)}</span>
                   </Form.Item>
-                  <Form.Item
-                    name="grandtotal"
-                    value={totalPrice}
-                    className="w-full h-2 md:w-1/2 mx-2"
-                  >
-                    <span> Total </span>{" "}
-                    <span>: {formatter.format(totalPrice)}</span>
+                  <Form.Item name="grandtotal" value={totalPrice} className="w-full h-2 md:w-1/2 mx-2">
+                    <span> Total </span> <span>: {formatter.format(totalPrice)}</span>
                   </Form.Item>
-                  <Form.Item
-                    name="biayaTambahan"
-                    value={biayaTambahan}
-                    className="w-full h-2 md:w-1/2 mx-2"
-                  >
-                    <span> Biaya Tambahan </span>{" "}
-                    <span>: {formatter.format(biayaTambahan)}</span>
+                  <Form.Item name="biayaTambahan" value={biayaTambahan} className="w-full h-2 md:w-1/2 mx-2">
+                    <span> Biaya Tambahan </span> <span>: {formatter.format(biayaTambahan)}</span>
                   </Form.Item>
-                  <Form.Item
-                    name="grandTotal"
-                    value={grandTotal}
-                    className="w-full h-2 md:w-1/2 mx-2 mt-3 text-lg"
-                  >
-                    <span> Total </span>{" "}
-                    <span>: {formatter.format(grandTotal)}</span>
+                  <Form.Item name="grandTotal" value={grandTotal} className="w-full h-2 md:w-1/2 mx-2 mt-3 text-lg">
+                    <span> Total </span> <span>: {formatter.format(grandTotal)}</span>
                   </Form.Item>
                   {/* <Form.Item
                     name="test1"
@@ -932,9 +853,7 @@ function ReturPanel({ props }) {
               </div>
 
               <div className="w-full flex md:w-3/4 justify-end mb-2">
-                <p className="mb-4 font-bold text-center">
-                  Biaya Tambahan Lain Lain
-                </p>
+                <p className="mb-4 font-bold text-center">Biaya Tambahan Lain Lain</p>
               </div>
               <div className="w-full flex flex-wrap justify-end mb-3">
                 <div className="w-full md:w-1/3 px-3 mb-2 text-end md:mb-0 mt-2">
@@ -998,8 +917,7 @@ function ReturPanel({ props }) {
                           setBtnAddFee1("Include");
                           setAdditionalFee({
                             ...additionalFee,
-                            additional_fee_1_sub:
-                              panel.data.attributes?.additional_fee_1_sub,
+                            additional_fee_1_sub: panel.data.attributes?.additional_fee_1_sub,
                           });
                         }}
                         className="bg-cyan-700 rounded-md m-1 text-sm"
@@ -1030,8 +948,7 @@ function ReturPanel({ props }) {
                           setBtnAddFee2("Include");
                           setAdditionalFee({
                             ...additionalFee,
-                            additional_fee_2_sub:
-                              panel.data.attributes?.additional_fee_2_sub,
+                            additional_fee_2_sub: panel.data.attributes?.additional_fee_2_sub,
                           });
                         }}
                         className="bg-cyan-700 rounded-md m-1 text-sm"
@@ -1062,8 +979,7 @@ function ReturPanel({ props }) {
                           setBtnAddFee3("Include");
                           setAdditionalFee({
                             ...additionalFee,
-                            additional_fee_3_sub:
-                              panel.data.attributes?.additional_fee_3_sub,
+                            additional_fee_3_sub: panel.data.attributes?.additional_fee_3_sub,
                           });
                         }}
                         className="bg-cyan-700 rounded-md m-1 text-sm"
@@ -1101,9 +1017,7 @@ function ReturPanel({ props }) {
                       htmlType="submit"
                       className="bg-cyan-700 rounded-md m-1 text-sm"
                     >
-                      <p className="px-8 py-2 m-0 text-white">
-                        SIMPAN DAN CETAK
-                      </p>
+                      <p className="px-8 py-2 m-0 text-white">SIMPAN DAN CETAK</p>
                     </button>
                   )}
                 </Form.Item>
