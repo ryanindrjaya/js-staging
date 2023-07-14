@@ -431,7 +431,7 @@ function Edit({ props }) {
             qty: parseInt(element.attributes?.total_order || 0),
             unit: element.attributes?.unit_order,
             priceUnit: element.attributes?.unit_price || 0,
-            disc: element.attributes?.disc || 0,
+            disc: element.attributes?.disc,
             d1: element.attributes?.dp1,
             d2: element.attributes?.dp2,
             d3: element.attributes?.dp3,

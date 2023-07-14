@@ -326,7 +326,7 @@ export default function OrderTable({
         var defaultDisc = products?.productList[idx]?.attributes?.purchase_discount_1 || 0;
         console.log("test disc", products.productInfo[idx]?.disc);
 
-        if (products.productInfo[idx]?.disc) {
+        if (products.productInfo[idx].disc !== null || products.productInfo[idx].disc !== undefined) {
           defaultDisc = products?.productInfo[idx]?.disc;
         }
 
