@@ -50,6 +50,17 @@ const Print = ({ selling }) => {
     return formatter.format(hargaNet ?? 0);
   };
 
+  const getSubTotal = (data) => {
+    const price = data.unit_price - (data?.disc || 0);
+    const priceWithMargin = price + (price * data.margin) / 100;
+    const price1 = calculatePercentage(priceWithMargin, data?.disc1 || 0);
+    const hargaNet = calculatePercentage(price1, data?.disc2 || 0);
+
+    const subTotal = hargaNet * data.qty;
+
+    return formatter.format(subTotal ?? 0);
+  };
+
   return (
     <div className="m-2">
       <div className="flex print:hidden justify-end mb-5">
@@ -123,7 +134,7 @@ const Print = ({ selling }) => {
               <td className="border-2 p-2">{attributes?.disc1 ? `${attributes?.disc1}%` : ""}</td>
               <td className="border-2 p-2">{attributes?.disc2 ? `${attributes?.disc2}%` : ""}</td>
               <td className="border-2 p-2">{getHargaNet(attributes)}</td>
-              <td className="border-2 p-2">{formatter.format(attributes?.sub_total || 0)}</td>
+              <td className="border-2 p-2">{getSubTotal(attributes)}</td>
             </tr>
           );
         })}
