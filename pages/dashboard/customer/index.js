@@ -98,7 +98,7 @@ function Customer({ props }) {
         if (searchParameters[key]?.length > 0) {
           if (key === "tipe_penjualan") {
             const parameter = searchParameters[key].map((item) => item).join(", ");
-            query += `filters[$and][${index}][tipe_penjualan_query][$contains]=${parameter}&`;
+            query += `filters[$and][${index}][tipe_penjualan_query][$eq]=${parameter}&`;
             index++;
             continue;
           }
