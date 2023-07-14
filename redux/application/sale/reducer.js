@@ -19,7 +19,7 @@ export default function Reducer(state = initState, action) {
             priceUnit: action.product.attributes.sold_price_1,
             unit: action.product.attributes.unit_1,
             d1: action.product.attributes?.disc_1_1 ?? 0,
-            d2: action.product.attributes?.unit_1_dp2 ?? 0,
+            d2: 0,
             d3: 0,
             disc: 0,
             qty: 1,
