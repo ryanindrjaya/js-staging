@@ -119,9 +119,7 @@ export default function OrderTable({
         [indexRow]: value,
       },
       disc_rp: {
-        [indexRow]:
-          products?.productInfo?.[indexRow]?.disc ??
-          data.attributes[`purchase_discount_${index}`],
+        [indexRow]: products?.productInfo?.[indexRow]?.disc ?? data.attributes[`purchase_discount_${index}`],
       },
     });
   };
@@ -208,38 +206,24 @@ export default function OrderTable({
                   min={0}
                   onChange={(e) => {
                     const selectedUnitIndex =
-                      formObj.getFieldValue("jumlah_option") ??
-                      products?.productInfo[idx]?.unitIndex;
+                      formObj.getFieldValue("jumlah_option") ?? products?.productInfo[idx]?.unitIndex;
 
                     console.log(products);
 
-                    console.log(
-                      "test data onchange",
-                      e,
-                      row,
-                      selectedUnitIndex,
-                      idx
-                    );
+                    console.log("test data onchange", e, row, selectedUnitIndex, idx);
                     // console.log("selected unit", selectedUnitIndex);
                     // onChangePriceUnit(e, row, unit, selectedUnitIndex[idx])
 
                     // edit prupose
                     // console.log("edit ", products?.productInfo[idx]?.unitIndex);
 
-                    onChangePriceUnit(
-                      e,
-                      row,
-                      selectedUnitIndex?.[idx] ?? 1,
-                      idx
-                    );
+                    onChangePriceUnit(e, row, selectedUnitIndex?.[idx] ?? 1, idx);
                   }}
                   style={{
                     width: "150px",
                     marginRight: "10px",
                   }}
-                  formatter={(value) =>
-                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                  }
+                  formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                   parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                 />
               </Form.Item>
@@ -296,50 +280,35 @@ export default function OrderTable({
                   {row.attributes?.unit_1 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_1 === null}
-                      value={1}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_1 === null} value={1}>
                       {row.attributes?.unit_1}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_2 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_2 === null}
-                      value={2}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_2 === null} value={2}>
                       {row.attributes?.unit_2}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_3 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_3 === null}
-                      value={3}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_3 === null} value={3}>
                       {row.attributes?.unit_3}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_4 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_4 === null}
-                      value={4}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_4 === null} value={4}>
                       {row.attributes?.unit_4}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_5 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_5 === null}
-                      value={5}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_5 === null} value={5}>
                       {row.attributes?.unit_5}
                     </Select.Option>
                   )}
@@ -354,14 +323,11 @@ export default function OrderTable({
       name: "Diskon",
       width: "150px",
       selector: (row, idx) => {
-        var defaultDisc = 0;
+        var defaultDisc = products?.productList[idx]?.attributes?.purchase_discount_1 || 0;
         console.log("test disc", products.productInfo[idx]?.disc);
 
         if (products.productInfo[idx]?.disc) {
           defaultDisc = products?.productInfo[idx]?.disc;
-        } else {
-          defaultDisc =
-            products?.productList[idx]?.attributes?.purchase_discount_1;
         }
 
         return (
@@ -376,9 +342,7 @@ export default function OrderTable({
                   width: "100px",
                   marginRight: "10px",
                 }}
-                formatter={(value) =>
-                  value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                }
+                formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                 parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
               />
             </Form.Item>
