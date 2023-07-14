@@ -218,7 +218,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
         location_recipient: row.location_recipient.id,
         product: row.product.id,
         req_qty: row.qty,
-        qty: row.send_qty,
+        qty: row?.send_qty ? row?.send_qty : row?.accepted > 0 ? row?.qty - row?.accepted : row?.qty,
         unit: row?.send_unit || row?.sended_unit || row?.unit,
         type: "Transfer Masuk",
         accepted: row?.accepted || 0,
@@ -244,6 +244,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
         });
         setRefetch(!refetch);
       } else {
+        console.log("response mutasi masuk", response);
         notification.error({
           message: response?.error?.message || "Gagal menerima ke stok",
           desciption: "Stok gagal diterima, silahkan coba lagi",
@@ -328,10 +329,15 @@ export default function daftarKeluarBarang({ companyOptions }) {
       width: "260px",
       selector: (row, index) => {
         let maxQty = row?.qty;
+        let defValue = row.accepted_status === "Selesai" ? row.sended : row.qty;
         const units = row.product_units;
 
         if (row.accepted_status === "Selesai") {
           maxQty = 9999;
+        }
+
+        if (row?.accepted > 0 && row?.accepted < row?.qty) {
+          defValue = row?.qty - row?.accepted;
         }
 
         return (
@@ -352,7 +358,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
 
                 setData(newData);
               }}
-              defaultValue={row.accepted_status === "Selesai" ? row.sended : row.qty}
+              defaultValue={defValue}
               min={0}
               max={maxQty > 0 ? maxQty : 0}
               className="w-[30%]"
