@@ -344,8 +344,8 @@ export default function ReactDataTable({
       width: "150px",
       selector: (row, idx) => {
         var defaultDisc = row?.attributes?.purchase_discount_1 || 0;
-        if (products.productInfo[idx]?.disc) {
-          defaultDisc = products.productInfo[idx].disc;
+        if (products.productInfo[idx].disc !== null || products.productInfo[idx].disc !== undefined) {
+          defaultDisc = products?.productInfo[idx]?.disc;
         }
 
         return (
