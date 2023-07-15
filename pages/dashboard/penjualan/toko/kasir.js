@@ -172,9 +172,13 @@ function Kasir({ props }) {
         .reverse()
         .join("-");
 
-      const endpoint =
+      const endpointBuka =
         process.env.NEXT_PUBLIC_URL +
         `/cashiers?filters[cashier_name][id][$eq]=${user.id}&populate=*&filters[createdAt][$gte]=${today}&filters[createdAt][$lte]=${tomorrow}&filters[type][$eq]=CHECK IN`;
+      const endpointTutup =
+        process.env.NEXT_PUBLIC_URL +
+        `/cashiers?filters[cashier_name][id][$eq]=${user.id}&populate=*&filters[createdAt][$gte]=${today}&filters[createdAt][$lte]=${tomorrow}&filters[type][$eq]=CHECK OUT`;
+
       const options = {
         method: "GET",
         headers: {
@@ -183,12 +187,20 @@ function Kasir({ props }) {
         },
       };
 
-      const req = await fetch(endpoint, options);
+      const req = await fetch(endpointBuka, options);
       const res = await req.json();
 
+      const reqTutup = await fetch(endpointTutup, options);
+      const resTutup = await reqTutup.json();
+
       if (res.data.length > 0) {
-        openNotification("error", "Anda sudah melakukan check in", "Mengarahkan ke halaman pembayaran");
-        router.replace("/dashboard/penjualan/toko/pembayaran");
+        if (resTutup.data.length > 0) {
+          openNotification("error", "Shift anda sudah ditutup", "Mengarahkan ke halaman toko");
+          router.replace("/dashboard/penjualan/toko");
+        } else {
+          openNotification("error", "Anda sudah melakukan check in", "Mengarahkan ke halaman pembayaran");
+          router.replace("/dashboard/penjualan/toko/pembayaran");
+        }
       }
     };
 

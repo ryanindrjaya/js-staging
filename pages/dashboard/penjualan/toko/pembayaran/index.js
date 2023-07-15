@@ -92,7 +92,31 @@ const getCheckInUser = async (cookies, user) => {
 
   const endpoint =
     process.env.NEXT_PUBLIC_URL +
-    `/cashiers?filters[cashier_name][id][$eq]=${user.id}&populate=*&filters[createdAt][$gte]=${today}&filters[createdAt][$lte]=${tomorrow}`;
+    `/cashiers?filters[cashier_name][id][$eq]=${user.id}&populate=*&filters[createdAt][$gte]=${today}&filters[createdAt][$lte]=${tomorrow}&filters[type][$eq]=CHECK IN`;
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  const res = await req.json();
+
+  return res;
+};
+const getCheckOutUser = async (cookies, user) => {
+  const today = new Date().toLocaleDateString("en-GB").split("/").reverse().join("-");
+  const tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000)
+    .toLocaleDateString("en-GB")
+    .split("/")
+    .reverse()
+    .join("-");
+
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL +
+    `/cashiers?filters[cashier_name][id][$eq]=${user.id}&populate=*&filters[createdAt][$gte]=${today}&filters[createdAt][$lte]=${tomorrow}&filters[type][$eq]=CHECK OUT`;
   const options = {
     method: "GET",
     headers: {
@@ -193,8 +217,8 @@ function PembayaranToko({ props }) {
       const user = await res.json();
 
       const resCheckIn = await getCheckInUser(cookies, user);
-      console.log("resCheckIn", resCheckIn);
-      if (resCheckIn?.data?.length === 0) {
+      const resCheckOut = await getCheckOutUser(cookies, user);
+      if (resCheckIn?.data?.length === 0 || resCheckOut?.data?.length > 0) {
         router.replace("/dashboard/penjualan/toko/kasir");
       }
 
