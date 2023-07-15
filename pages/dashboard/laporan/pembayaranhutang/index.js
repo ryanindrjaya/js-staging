@@ -12,6 +12,7 @@ import SearchSupplier from "@iso/components/Form/AddReport/SearchSupplier";
 import SearchLocations from "@iso/components/Form/AddReport/SearchLocations";
 import nookies from "nookies";
 import tokenVerify from "../../../../authentication/tokenVerify";
+import moment from "moment";
 
 Laporan.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -25,11 +26,19 @@ Laporan.getInitialProps = async (context) => {
   const reqDebt = await fetchDebt(cookies);
   const debt = await reqDebt.json();
 
+  const reqLPB = await fetchLPB(cookies);
+  const lpb = await reqLPB.json();
+
+  const reqSupplier = await fetchSupplier(cookies);
+  const supplier = await reqSupplier.json();
+
   return {
     props: {
       user,
       dataUser,
       debt,
+      lpb,
+      supplier
     },
   };
 };
@@ -63,7 +72,35 @@ const fetchUser = async (cookies) => {
 };
 
 const fetchDebt = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate[0]=supplier&populate[1]=debt_details.purchasing.returs";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate[0]=supplier&populate[1]=debt_details.purchasing.returs&filters[document][$eq]=Publish";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchLPB = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings?populate=*";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchSupplier = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/suppliers?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -80,28 +117,54 @@ function Laporan({ props }) {
   const user = props.user;
   const dataUser = props?.dataUser;
   const debt = props.debt;
+  const lpb = props.lpb;
   const [data, setData] = useState(debt);
   const router = useRouter();
-  const [supplier, setSupplier] = useState();
-  const [searchParameters, setSearchParameters] = useState({});
+  const [supplier, setSupplier] = useState(props.supplier.data);
+  const [searchParameters, setSearchParameters] = useState({}); 
   const dispatch = useDispatch();
+
+  var dataSupplier = [];
+  var totalHarga = [];
+  var totalNilaiLPB = 0;
+  var totalRetur = 0;
+  var totalTunai = 0;
+  var totalTransfer = 0;
+  var totalGiro = 0;
+  var totalSisaHutang = 0;
+  var idPurchasing = null;
+  var tempData = debt;
 
   // Range Picker
   const { RangePicker } = DatePicker;
+  const defaultRange = [moment().startOf('month'), moment().endOf('month')];
 
   const handlePrint = () => {
-    // console.log("data", data.data);
     router.push("/dashboard/laporan/pembayaranhutang/print/" + searchParameters?.tipeLaporan);
-    //router.query.data = searchParameters;
+    
     data.data.forEach(element => {
       dispatch({ type: 'ADD_LIST', list: element });
     });
-    
+    supplier.forEach(element => {
+      dispatch({ type: 'ADD_SUPPLIER', supplier: element });
+    });
+
+    dispatch({ type: 'ADD_PARAMETER', supplier: searchParameters?.supplier, range: searchParameters?.range, debt: debt });
   };
 
   // const handleAdd = () => {
   //   router.push("/dashboard/keuangan/jurnal/tambah");
   // };
+
+  var formatter = new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 2,
+  });
+
+  function formatMyDate(value, locale = "id-ID") {
+    return new Date(value).toLocaleDateString(locale);
+  }
 
   const handleUpdate = (id) => {
     // router.push("/dashboard/pembelian/order_pembelian/edit/" + id);
@@ -165,6 +228,56 @@ function Laporan({ props }) {
     dispatch(logout());
   };
 
+  const rekapSaldoHutang = (item, data) => {
+    var totalSaldoHutang = 0;
+    var idPurchasing = 0;
+      //totalSaldoHutang = 0;
+      
+      if(searchParameters?.supplier?.id === item.id || searchParameters?.supplier === null){
+        
+        data.data.map((row) => {
+            var rowDate = moment(row.attributes.tanggal_pembayaran);
+            var startDate = moment(searchParameters?.range[0]).subtract(1, 'month').startOf('month');;
+            var endDate = moment(searchParameters?.range[1]).subtract(1, 'month').endOf('month');
+
+            if (item.id === row.attributes?.supplier?.data?.id) {
+
+              row.attributes.debt_details.data.forEach((row) => {
+                if (
+                  idPurchasing !== row.attributes?.purchasing?.data?.id &&
+                  rowDate.isSameOrAfter(startDate, 'day') &&
+                  rowDate.isSameOrBefore(endDate, 'day')
+                  ) {
+                  idPurchasing = row.attributes?.purchasing?.data?.id;
+                  totalSaldoHutang += row.attributes.sisa_hutang;
+                
+                } else if (
+                  idPurchasing === row.attributes?.purchasing?.data?.id &&
+                  rowDate.isSameOrAfter(startDate, 'day') &&
+                  rowDate.isSameOrBefore(endDate, 'day')
+                  ) {
+                  var sisa =
+                    row.attributes.tunai +
+                    row.attributes.transfer +
+                    row.attributes.giro +
+                    row.attributes.sisa_hutang;
+                  totalSaldoHutang = (totalSaldoHutang - sisa) + row.attributes.sisa_hutang;
+                }
+              });
+
+            }    
+        })
+      }
+        
+    return (formatter.format(totalSaldoHutang));
+  }
+
+  const rekapTanggal = (search) => {
+    var currentDate = search.range[0];
+    const defaultEndDate = currentDate.clone().subtract(1, 'month').endOf('month'); // Get the end of the previous month
+    return formatMyDate(defaultEndDate);
+  }
+
   useEffect(() => {
     const searchQuery = async () => {
       let query = "";
@@ -201,6 +314,7 @@ function Laporan({ props }) {
         }
 
         if (key == "range" && searchParameters[key] !== null) {
+          console.log(searchParameters[key], "range");
           startDate = searchParameters?.range[0]?.format("YYYY-MM-DD");
           endDate = searchParameters?.range[1]?.format("YYYY-MM-DD");
           query += `filters[tanggal_pembayaran][$gte]=${startDate}&filters[tanggal_pembayaran][$lte]=${endDate}&`;
@@ -219,7 +333,7 @@ function Laporan({ props }) {
         // }
       }
 
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate[0]=supplier&populate[1]=debt_details.purchasing.returs&" + query;
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate[0]=supplier&populate[1]=debt_details.purchasing.returs&filters[document][$eq]=Publish&" + query;
 
       const cookies = nookies.get(null, "token");
       const options = {
@@ -239,6 +353,10 @@ function Laporan({ props }) {
 
     searchQuery();
   }, [searchParameters]);
+
+  useEffect(() => {
+    setSearchParameters({tipeLaporan : "Detail", supplier: null, range: defaultRange});
+  }, []);
 
   return (
     <>
@@ -279,6 +397,7 @@ function Laporan({ props }) {
                 <Select
                   placeholder="Tipe Laporan"
                   size="large"
+                  defaultValue={"Detail"}
                   style={{
                     width: "100%",
                     marginRight: "10px",
@@ -295,9 +414,11 @@ function Laporan({ props }) {
               <div className="w-full md:w-1/4 px-3">
                 <RangePicker
                   size="large"
+                  defaultValue={defaultRange}
                   onChange={(e) =>
                     setSearchParameters({ ...searchParameters, range: e })
                   }
+                  allowClear={false} 
                 />
               </div>
             </div>
@@ -341,7 +462,7 @@ function Laporan({ props }) {
               </button>
             </div>
             
-            <Table
+            {/* <Table
               data={data}
               onUpdate={handleUpdate}
               //onDelete={handleDelete}
@@ -349,46 +470,346 @@ function Laporan({ props }) {
               //onChangeStatus={onChangeStatus}
               tipeLaporan={searchParameters["tipeLaporan"]}
               user={user}
-            />
+            /> */}
 
-            {/* <table className="w-full">
+          <div className="justify-between">
+            {searchParameters.tipeLaporan === "Detail" ? (
+            <div> Detail
+              <table name="pembelian" className="w-full text-xs" >
               <thead>
-                <tr>
-                  <th>No Pembayaran</th>
-                  <th>Tgl Bayar</th>
-                  <th>Nota Supplier</th>
-                  <th>No LPB</th>
-                  <th>Tgl LPB</th>
-                  <th>Nilai LPB</th>
-                  <th>Total Nilai RB</th>
-                  <th>Tunai</th>
-                  <th>Transfer</th>
-                  <th>Giro</th>
-                  <th>CN</th>
-                  <th>OTH</th>
-                  <th>Saldo Hutang</th>
+                <tr className="p-2">
+                  <th className="border-2 p-1">No Pembayaran</th>
+                  <th className="border-2 p-1">Tgl Bayar</th>
+                  <th className="border-2 p-1">Nota Supplier</th>
+                  <th className="border-2 p-1">No LPB</th>
+                  <th className="border-2 p-1">Tgl LPB</th>
+                  <th className="border-2 p-1">Nilai LPB</th>
+                  <th className="border-2 p-1">Total Nilai RB</th>
+                  <th className="border-2 p-1">Tunai</th>
+                  <th className="border-2 p-1">Transfer</th>
+                  <th className="border-2 p-1">Giro</th>
+                  <th className="border-2 p-1">Saldo Hutang</th>
+                  <th className="border-2 p-1">CN</th>
+                  <th className="border-2 p-1">DN</th>
                 </tr>
               </thead>
               <tbody>
-                {debt.data.forEach((item) => { console.log("item",item, debt.data);
-                  // <tr>
-                  //   <td>{item.attributes.no_hutang}</td>
-                  //   <td>lol</td>
-                  //   <td></td>
-                  //   <td></td>
-                  //   <td></td>
-                  //   <td></td>
-                  //   <td></td>
-                  //   <td></td>
-                  //   <td></td>
-                  //   <td></td>
-                  //   <td></td>
-                  //   <td></td>
-                  //   <td></td>
-                  // </tr>
+                {supplier.map((item) => {
+
+                  if(searchParameters?.supplier?.id === item.id || searchParameters?.supplier === null){
+                    return(
+                      <React.Fragment key={item.id}>
+                      <tr>
+                        <td className="border-2 p-1 align-top" colSpan={4}>Supplier : {item.attributes.name}</td>
+                        <td className="border-2 p-1 align-top" colSpan={2}>Tempo : 0</td>
+                        <td className="border-2 p-1 align-top" >Saldo Per : </td>
+                        <td className="border-2 p-1 align-top" >{rekapTanggal(searchParameters)}</td>
+                        <td className="border-2 p-1 align-top align-left" colSpan={3}>{rekapSaldoHutang(item, tempData)}</td>
+                        <td className="border-2 p-1 align-top align-left" />
+                        <td className="border-2 p-1 align-top align-left" />
+                      </tr>
+  
+                      {data.data.map((row) => {
+                        // var totalTunai = 0;
+                        if (item.id === row.attributes?.supplier?.data?.id) {
+                          var sumRetur = row.attributes.debt_details.data.reduce((total, row) => {
+                            if (row.attributes.purchasing?.data?.attributes?.returs) {
+                              var totalRetur = row.attributes.purchasing.data.attributes.returs.data.reduce(
+                                (sum, item) => (sum + item.attributes.total_price),
+                                0
+                              );
+                              return total + totalRetur;
+                            } else {
+                              return total + 0;
+                            }
+                          }, 0);
+                          
+                          totalRetur = sumRetur;
+
+                          var sumTunai = row.attributes.debt_details.data.reduce(
+                            (total, row) => (total += row.attributes.tunai),
+                            0
+                          );
+                          totalTunai += sumTunai;
+                          var sumTransfer = row.attributes.debt_details.data.reduce(
+                            (total, row) => (total += row.attributes.transfer),
+                            0
+                          );
+                          totalTransfer += sumTransfer;
+                          var sumGiro = row.attributes.debt_details.data.reduce(
+                            (total, row) => (total += row.attributes.giro),
+                            0
+                          );
+                          totalGiro += sumGiro;
+    
+                          row.attributes.debt_details.data.forEach((row) => {
+                            if (idPurchasing !== row.attributes?.purchasing?.data?.id) {
+                              idPurchasing = row.attributes?.purchasing?.data?.id;
+                              totalSisaHutang += row.attributes.sisa_hutang;
+                              totalNilaiLPB += row.attributes?.purchasing?.data?.attributes?.total_purchasing;
+                            } else if (idPurchasing === row.attributes?.purchasing?.data?.id) {
+                              var sisa =
+                                row.attributes.tunai +
+                                row.attributes.transfer +
+                                row.attributes.giro +
+                                row.attributes.sisa_hutang;
+                              totalSisaHutang = (totalSisaHutang - sisa) + row.attributes.sisa_hutang;
+                            }
+                          });
+    
+                          return (
+                            <React.Fragment key={row.attributes?.no_hutang}>
+                              <tr>
+                                <td className="border-2 p-1 align-top ">{row.attributes?.no_hutang}</td>
+                                <td className="border-2 p-1 align-top ">
+                                  {formatMyDate(row.attributes?.tanggal_pembayaran)}
+                                </td>
+                                <td className="border-2 p-1">
+                                  {row.attributes.debt_details.data.map((element, index) => (
+                                    <React.Fragment key={index}>
+                                      <tr>{element.attributes.purchasing.data.attributes.no_nota_suppplier}</tr>
+                                    </React.Fragment>
+                                  ))}
+                                </td>
+                                <td className="border-2 p-1">
+                                  {row.attributes.debt_details.data.map((element, index) => (
+                                    <React.Fragment key={index}>
+                                      <tr>{element.attributes.purchasing.data.attributes.no_purchasing}</tr>
+                                    </React.Fragment>
+                                  ))}
+                                </td>
+                                <td className="border-2 p-1">
+                                  {row.attributes.debt_details.data.map((element, index) => (
+                                    <React.Fragment key={index}>
+                                      <tr>{formatMyDate(element.attributes.purchasing.data.attributes.date_purchasing)}</tr>
+                                    </React.Fragment>
+                                  ))}
+                                </td>
+                                <td className="border-2 p-1">
+                                  {row.attributes.debt_details.data.map((element, index) => (
+                                    <React.Fragment key={index}>
+                                      <tr className="text-right">
+                                        {formatter.format(element.attributes.purchasing.data.attributes.total_purchasing)}
+                                      </tr>
+                                    </React.Fragment>
+                                  ))}
+                                </td>
+                                <td className="border-2 p-1">
+                                  {row.attributes.debt_details.data.map((row, index) => {
+                                    var totalRetur = 0;
+                                    if(row.attributes.purchasing?.data?.attributes?.returs){
+                                      row.attributes.purchasing.data.attributes.returs.data.forEach((item) => {
+                                        totalRetur += item.attributes.total_price;
+                                      });
+                                    }
+                                    return (
+                                      <React.Fragment key={index}>
+                                        <tr className="text-right">{formatter.format(totalRetur)}</tr>
+                                      </React.Fragment>
+                                    );
+                                  }
+                                  )}
+                                </td>
+                                <td className="border-2 p-1">
+                                  {row.attributes.debt_details.data.map((element, index) => (
+                                    <React.Fragment key={index}>
+                                      <tr className="text-right">{formatter.format(element.attributes.tunai)}</tr>
+                                    </React.Fragment>
+                                  ))}
+                                </td>
+                                <td className="border-2 p-1">
+                                  {row.attributes.debt_details.data.map((element, index) => (
+                                    <React.Fragment key={index}>
+                                      <tr className="text-right">{formatter.format(element.attributes.transfer)}</tr>
+                                    </React.Fragment>
+                                  ))}
+                                </td>
+                                <td className="border-2 p-1">
+                                  {row.attributes.debt_details.data.map((element, index) => (
+                                    <React.Fragment key={index}>
+                                      <tr className="text-right">{formatter.format(element.attributes.giro)}</tr>
+                                    </React.Fragment>
+                                  ))}
+                                </td>
+                                <td className="border-2 p-1">
+                                  {row.attributes.debt_details.data.map((element, index) => {
+                                    var totalRetur = 0;
+                                    if(element.attributes.purchasing?.data?.attributes?.returs){
+                                      element.attributes.purchasing.data.attributes.returs.data.forEach((item) => {
+                                        totalRetur += item.attributes.total_price;
+                                      });
+                                    }
+                                    return (
+                                      <React.Fragment key={index}>
+                                        <tr className="text-right">{formatter.format(element.attributes.sisa_hutang - totalRetur)}</tr>
+                                      </React.Fragment>
+                                    );
+                                  })}
+                                </td>
+                                <td className="border-2 p-1"/>
+                                <td className="border-2 p-1"/>
+                              </tr>
+                            </React.Fragment>
+                          );
+                        }
+                        return null;
+                      })}
+  
+                      <tr>
+                        <td className="border-2 p-1" colSpan={4}></td>
+                        
+                        <td className="border-2 p-1">Subtotal :</td>
+                        <td className="border-2 p-1">{formatter.format(totalNilaiLPB)}</td>
+                        <td className="border-2 p-1">{formatter.format(totalRetur)}</td>
+                        <td className="border-2 p-1">{formatter.format(totalTunai)}</td>
+                        <td className="border-2 p-1">{formatter.format(totalTransfer)}</td>
+                        <td className="border-2 p-1">{formatter.format(totalGiro)}</td>
+                        <td className="border-2 p-1">{formatter.format(totalSisaHutang)}</td>
+                        <td className="border-2 p-1"/>
+                        <td className="border-2 p-1"/>
+                      </tr>
+                      <tr hidden>
+                      {totalNilaiLPB = 0}
+                      {totalRetur = 0}
+                      {totalTunai = 0}
+                      {totalTransfer = 0}
+                      {totalGiro = 0}
+                      {totalSisaHutang = 0}
+                      </tr>
+  
+                      </React.Fragment>
+                    );
+                  }
                 })}
               </tbody>
-            </table> */}
+              </table>
+            </div>
+              ) : (
+              <div hidden></div>
+            )}    
+
+            {searchParameters.tipeLaporan === "Rekap" ? (
+            <div> Rekap
+              <table name="pembelian" className="w-full text-xs" >
+              <thead>
+                <tr className="p-2">
+                  <th className="border-2 p-1">No Pembayaran</th>
+                  <th className="border-2 p-1">Tgl Bayar</th>
+                  <th className="border-2 p-1">Nota Supplier</th>
+                  <th className="border-2 p-1">No LPB</th>
+                  <th className="border-2 p-1">Tgl LPB</th>
+                  <th className="border-2 p-1">Nilai LPB</th>
+                  <th className="border-2 p-1">Total Nilai RB</th>
+                  <th className="border-2 p-1">Tunai</th>
+                  <th className="border-2 p-1">Transfer</th>
+                  <th className="border-2 p-1">Giro</th>
+                  <th className="border-2 p-1">Saldo Hutang</th>
+                  <th className="border-2 p-1">CN</th>
+                  <th className="border-2 p-1">DN</th>
+                </tr>
+              </thead>
+              <tbody>
+                {supplier.map((item) => {
+
+                  if(searchParameters?.supplier?.id === item.id || searchParameters?.supplier === null){
+                    return(
+                      <React.Fragment key={item.id}>
+                      <tr>
+                        <td className="border-2 p-1 align-top" colSpan={4}>Supplier : {item.attributes.name}</td>
+                        <td className="border-2 p-1 align-top" colSpan={2}>Tempo : 0</td>
+                        <td className="border-2 p-1 align-top" >Saldo Per : </td>
+                        <td className="border-2 p-1 align-top" >{rekapTanggal(searchParameters)}</td>
+                        <td className="border-2 p-1 align-top align-left" colSpan={3}>{rekapSaldoHutang(item, tempData)}</td>
+                        <td className="border-2 p-1 align-top align-left" />
+                        <td className="border-2 p-1 align-top align-left" />
+                      </tr>
+
+                      {data.data.map((row) => {
+                        // var totalTunai = 0;
+                        if (item.id === row.attributes?.supplier?.data?.id) {
+                          var sumRetur = row.attributes.debt_details.data.reduce((total, row) => {
+                            if (row.attributes.purchasing?.data?.attributes?.returs) {
+                              var totalRetur = row.attributes.purchasing.data.attributes.returs.data.reduce(
+                                (sum, item) => (sum + item.attributes.total_price),
+                                0
+                              );
+                              return total + totalRetur;
+                            } else {
+                              return total + 0;
+                            }
+                          }, 0);
+                          
+                          totalRetur = sumRetur;
+
+                          var sumTunai = row.attributes.debt_details.data.reduce(
+                            (total, row) => (total += row.attributes.tunai),
+                            0
+                          );
+                          totalTunai += sumTunai;
+                          var sumTransfer = row.attributes.debt_details.data.reduce(
+                            (total, row) => (total += row.attributes.transfer),
+                            0
+                          );
+                          totalTransfer += sumTransfer;
+                          var sumGiro = row.attributes.debt_details.data.reduce(
+                            (total, row) => (total += row.attributes.giro),
+                            0
+                          );
+                          totalGiro += sumGiro;
+    
+                          row.attributes.debt_details.data.forEach((row) => {
+                            if (idPurchasing !== row.attributes?.purchasing?.data?.id) {
+                              idPurchasing = row.attributes?.purchasing?.data?.id;
+                              totalSisaHutang += row.attributes.sisa_hutang;
+                              totalNilaiLPB += row.attributes?.purchasing?.data?.attributes?.total_purchasing;
+                            } else if (idPurchasing === row.attributes?.purchasing?.data?.id) {
+                              var sisa =
+                                row.attributes.tunai +
+                                row.attributes.transfer +
+                                row.attributes.giro +
+                                row.attributes.sisa_hutang;
+                              totalSisaHutang = (totalSisaHutang - sisa) + row.attributes.sisa_hutang;
+                            }
+                          });
+  
+                        }
+                        
+                      })}
+
+                      <tr>
+                        <td className="border-2 p-1" colSpan={4}></td>
+                        
+                        <td className="border-2 p-1">Subtotal :</td>
+                        <td className="border-2 p-1">{formatter.format(totalNilaiLPB)}</td>
+                        <td className="border-2 p-1">{formatter.format(totalRetur)}</td>
+                        <td className="border-2 p-1">{formatter.format(totalTunai)}</td>
+                        <td className="border-2 p-1">{formatter.format(totalTransfer)}</td>
+                        <td className="border-2 p-1">{formatter.format(totalGiro)}</td>
+                        <td className="border-2 p-1">{formatter.format(totalSisaHutang)}</td>
+                        <td className="border-2 p-1"/>
+                        <td className="border-2 p-1"/>
+                      </tr>
+                      <tr hidden>
+                      {totalNilaiLPB = 0}
+                      {totalRetur = 0}
+                      {totalTunai = 0}
+                      {totalTransfer = 0}
+                      {totalGiro = 0}
+                      {totalSisaHutang = 0}
+                      </tr>
+
+                      </React.Fragment>
+                    );
+                  }
+                })}
+              </tbody>
+              </table>
+            </div>
+            ) : (
+              <div hidden></div>
+            )}
+
+          </div>
 
             <div className="w-full flex justify-between mt-3">
                 <button
