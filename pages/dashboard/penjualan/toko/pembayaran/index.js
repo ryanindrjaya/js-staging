@@ -111,6 +111,7 @@ function PembayaranToko({ props }) {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState();
   const [paymentValue, setPaymentValue] = useState({});
+  const [othValue, setOthValue] = useState({});
   const dataSales = props?.paymentSales?.data;
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedDrawerData, setSelectedDrawerData] = useState({});
@@ -138,7 +139,13 @@ function PembayaranToko({ props }) {
         kembali = 0;
       }
 
-      if (paymentValue[storeTrxId] >= totalHarga) {
+      const oth = othValue[storeTrxId];
+      const bayar = paymentValue[storeTrxId];
+      const sisaPembayaran = totalHarga - bayar + oth;
+
+      const mencukupi = sisaPembayaran <= 0;
+
+      if (mencukupi) {
         const inventoryOut = await createInventoryFromPenjualan(record);
         if (inventoryOut) {
           await CreateStorePayment(
@@ -149,7 +156,8 @@ function PembayaranToko({ props }) {
             storeTrxId,
             returTrxId,
             "Pembayaran",
-            reloadPage
+            reloadPage,
+            othValue[storeTrxId]
           );
         } else {
           message.error("Inventory gagal dibuat, transaksi tidak dapat dilakukan.", 2);
@@ -256,9 +264,22 @@ function PembayaranToko({ props }) {
                 />
 
                 {/* TABEL COMPONENT */}
-                <Table dataSource={dataSales} className="custom-table" rowClassName="custom-row">
+                <Table
+                  size="small"
+                  dataSource={dataSales}
+                  className="custom-table"
+                  scroll={{
+                    x: 1000,
+                  }}
+                  rowClassName="custom-row"
+                >
                   <Column title="No Faktur" dataIndex={["attributes", "no_store_sale"]} key="faktur" />
-                  <Column title="Nama Customer" dataIndex={["attributes", "customer_name"]} key="customer_name" />
+                  <Column
+                    title="Nama Customer"
+                    className="whitespace-pre-wrap"
+                    dataIndex={["attributes", "customer_name"]}
+                    key="customer_name"
+                  />
                   <Column
                     title="Status"
                     dataIndex={["attributes", "status"]}
@@ -299,9 +320,16 @@ function PembayaranToko({ props }) {
 
                       return (
                         <Select
-                          disabled={record.attributes.status === "Dibayar" || record.attributes.status === "Diretur"}
+                          aria-readonly={
+                            record.attributes.status === "Dibayar" || record.attributes.status === "Diretur"
+                          }
                           placeholder="Pilih Metode Pembayaran"
                           value={status !== "Belum Dibayar" ? dataPaymentMethod : selectedPaymentMethod?.[record.id]}
+                          className={
+                            record.attributes.status === "Dibayar" || record.attributes.status === "Diretur"
+                              ? "pointer-events-none"
+                              : ""
+                          }
                           style={{ width: 120 }}
                           onChange={(value) => {
                             setSelectedPaymentMethod({
@@ -341,7 +369,9 @@ function PembayaranToko({ props }) {
                       return (
                         <InputNumber
                           onFocus={(e) => e.target.select()}
-                          disabled={record.attributes.status === "Dibayar" || record.attributes.status === "Diretur"}
+                          aria-readonly={
+                            record.attributes.status === "Dibayar" || record.attributes.status === "Diretur"
+                          }
                           onChange={(v) =>
                             setPaymentValue({
                               ...paymentValue,
@@ -353,6 +383,55 @@ function PembayaranToko({ props }) {
                           value={status !== "Belum Dibayar" ? dataPaymentValue : paymentValue?.[record.id] ?? 0}
                           formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                           parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
+                          className={
+                            record.attributes.status === "Dibayar" || record.attributes.status === "Diretur"
+                              ? "pointer-events-none"
+                              : "pointer-events-auto"
+                          }
+                          style={{ width: 150 }}
+                        />
+                      );
+                    }}
+                  />
+                  <Column
+                    title="OTH"
+                    key="oth"
+                    render={(record) => {
+                      let initialValue = othValue?.[record.id];
+                      const dataPayment = record?.attributes?.store_payments?.data ?? [];
+
+                      if (record.attributes.status === "Dibayar" || record.attributes.status === "Diretur") {
+                        const dataOTH = dataPayment.reduce(
+                          (acc, curr) => (curr.attributes.oth ? parseFloat(acc) + parseFloat(curr.attributes.oth) : 0),
+                          0
+                        );
+
+                        initialValue = dataOTH;
+                      }
+
+                      return (
+                        <InputNumber
+                          onFocus={(e) => e.target.select()}
+                          aria-readonly={
+                            record.attributes.status === "Dibayar" || record.attributes.status === "Diretur"
+                          }
+                          placeholder="Masukan Nominal"
+                          value={initialValue ?? 0}
+                          onChange={(v) => {
+                            setOthValue({
+                              ...othValue,
+                              [record.id]: v,
+                            });
+                          }}
+                          formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                          parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
+                          className={
+                            record.attributes.status === "Dibayar" || record.attributes.status === "Diretur"
+                              ? `pointer-events-none ${initialValue < 0 ? "text-red-600" : ""}`
+                              : othValue?.[record.id] < 0
+                              ? "text-red-600"
+                              : ""
+                          }
                           style={{ width: 150 }}
                         />
                       );
@@ -360,23 +439,57 @@ function PembayaranToko({ props }) {
                   />
 
                   <Column
-                    title="Kembali"
+                    title="Pengembalian"
                     key="kembali"
                     render={(record) => {
                       const totalHarga = record.attributes?.total ?? 0;
                       const dataPayment = record?.attributes?.store_payments?.data ?? [];
+                      const payment = paymentValue?.[record.id] ?? 0;
+                      const oth = othValue?.[record.id] ?? 0;
 
                       if (record.attributes.status === "Dibayar" || record.attributes.status === "Diretur") {
                         const dataPaymentValue = dataPayment.reduce(
-                          (acc, curr) => parseFloat(acc) + parseFloat(curr.attributes.payment),
+                          (acc, curr) =>
+                            parseFloat(acc) +
+                            parseFloat(curr.attributes.payment) -
+                            parseFloat(curr.attributes?.oth ?? 0),
                           0
                         );
+
                         const kembali = dataPaymentValue - totalHarga < 0 ? 0 : dataPaymentValue - totalHarga;
                         return formatter.format(kembali);
                       }
 
-                      const kembali = paymentValue?.[record.id] ? paymentValue?.[record.id] - totalHarga : 0;
+                      const kembali = payment - totalHarga - oth;
+
                       return formatter.format(Math.max(kembali, 0));
+                    }}
+                  />
+                  <Column
+                    title="Sisa Pembayaran"
+                    key="sisa_pembayaran"
+                    render={(record) => {
+                      const totalHarga = record.attributes?.total ?? 0;
+                      const dataPayment = record?.attributes?.store_payments?.data ?? [];
+                      const bayar = paymentValue?.[record.id] ?? 0;
+                      const oth = othValue?.[record.id] ?? 0;
+
+                      if (record.attributes.status === "Dibayar" || record.attributes.status === "Diretur") {
+                        const sumPayment = dataPayment.reduce(
+                          (acc, curr) => parseFloat(acc) + parseFloat(curr.attributes.payment),
+                          0
+                        );
+                        const kembali = sumPayment < totalHarga < 0 ? totalHarga - sumPayment : 0;
+                        return formatter.format(kembali);
+                      }
+
+                      if (bayar) {
+                        let sisa = totalHarga - bayar + oth;
+
+                        return formatter.format(sisa < 0 ? 0 : sisa);
+                      } else {
+                        return formatter.format(0);
+                      }
                     }}
                   />
                   <Column

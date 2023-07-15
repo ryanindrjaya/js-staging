@@ -276,7 +276,8 @@ function PembayaranToko({ props }) {
                           .join(", ") ?? null;
                       return (
                         <Select
-                          disabled={record.attributes.status === "Dibayar"}
+                          aria-readonly={record.attributes.status === "Dibayar"}
+                          className={record.attributes.status === "Dibayar" ? "pointer-events-none" : ""}
                           placeholder="Pilih Metode Pembayaran"
                           defaultValue={dataPaymentMethod}
                           style={{ width: 120 }}
@@ -317,7 +318,8 @@ function PembayaranToko({ props }) {
                       return (
                         <InputNumber
                           onFocus={(e) => e.target.select()}
-                          disabled={record.attributes.status === "Dibayar"}
+                          aria-readonly={record.attributes.status === "Dibayar"}
+                          className={record.attributes.status === "Dibayar" ? "pointer-events-none" : ""}
                           onChange={(v) =>
                             setPaymentValue({
                               ...paymentValue,

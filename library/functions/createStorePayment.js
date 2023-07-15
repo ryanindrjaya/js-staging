@@ -12,17 +12,19 @@ export const CreateStorePayment = async (
   storeTrxId,
   returTrxId,
   paymentType,
-  reloadPage
+  reloadPage,
+  oth = 0
 ) => {
   //   create payment
   try {
     const data = {
       data: {
         nominal: nominal,
-        charge: charge,
+        charge: charge - oth,
         payment: payment,
         payment_method: paymentMethod,
         type: paymentType,
+        oth: String(oth),
       },
     };
 
@@ -39,6 +41,8 @@ export const CreateStorePayment = async (
     const response = await fetch(endpoint, options);
     const result = await response.json();
 
+    console.log("create store payment", result);
+
     if (paymentType === "Pembayaran") {
       await updateTransaction(storeTrxId, result.data.id, reloadPage);
     } else {
@@ -50,14 +54,7 @@ export const CreateStorePayment = async (
   }
 };
 
-export const CreateStorePaymenWithoutUpdate = async (
-  nominal,
-  charge,
-  payment,
-  paymentMethod,
-  paymentType,
-  storeTrxId
-) => {
+export const CreateStorePaymenWithoutUpdate = async (nominal, charge, payment, paymentMethod, paymentType, oth) => {
   //   create payment
   try {
     const data = {
@@ -67,6 +64,7 @@ export const CreateStorePaymenWithoutUpdate = async (
         payment: payment,
         payment_method: paymentMethod,
         type: paymentType,
+        oth: String(oth),
       },
     };
 

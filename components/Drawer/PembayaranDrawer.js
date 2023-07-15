@@ -22,7 +22,7 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
         if (option && nominal) {
           const {
             data: { id },
-          } = await CreateStorePaymenWithoutUpdate(total, totalCharge, nominal, option, "Pembayaran", id);
+          } = await CreateStorePaymenWithoutUpdate(total, totalCharge, nominal, option, "Pembayaran", oth);
           console.log("response api", id);
           listPaymentId.push(id);
         }
@@ -61,6 +61,8 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
     },
   ]);
 
+  const [oth, setOth] = useState(0);
+
   const handleDrawerClose = () => {
     setValues(
       Array.from({ length: 3 }, () => ({
@@ -85,8 +87,8 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
     };
 
     return (
-      <div key={index} className="mt-5">
-        <Select style={{ width: 120 }} className="mr-2" value={values[index].option} onChange={handleChangeOption}>
+      <div key={index} className="mt-4 grid grid-cols-2">
+        <Select className="mr-2" value={values[index].option} onChange={handleChangeOption}>
           <Option value="CASH">Cash</Option>
           <Option value="TRANSFER BANK">Transfer Bank</Option>
           <Option value="KARTU KREDIT">Kartu Kredit</Option>
@@ -95,9 +97,9 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
           onFocus={(e) => e.target.select()}
           placeholder="Masukan Nominal"
           min={0}
+          className="w-full"
           formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
           parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
-          style={{ width: 150 }}
           value={values[index].nominal}
           onChange={handleChangeNominal}
           key={index}
@@ -107,8 +109,8 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
   };
 
   const totalInputValue = values.reduce((acc, cur) => acc + cur.nominal, 0);
-  const totalAfterInput = data?.total - totalInputValue; // sisa pembayaran
-  const totalCharge = totalAfterInput <= 0 ? (data?.total - totalInputValue) * -1 : 0;
+  const totalAfterInput = data?.total - (totalInputValue - oth); // sisa pembayaran
+  const totalCharge = totalAfterInput <= 0 ? Math.abs(data?.total - totalInputValue + oth) : 0;
   return (
     <Drawer title={`Pembayaran Lainnya`} placement="right" size="default" onClose={handleDrawerClose} open={openDrawer}>
       <p>No.Faktur : {data?.faktur ?? ""}</p>
@@ -117,8 +119,35 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
 
       {Array.from({ length: 3 }, (_, i) => renderInput(i))}
 
-      <p className="mt-5">Sisa Pembayaran : {formatter.format(totalAfterInput < 0 ? 0 : totalAfterInput)}</p>
-      <p className="mt-2 font-medium text-red-400">Pengembalian : {formatter.format(totalCharge)}</p>
+      <div className="grid items-center grid-cols-2 mt-4">
+        <p className="m-0">OTH</p>
+        <InputNumber
+          onFocus={(e) => e.target.select()}
+          className={`w-full ${oth < 0 ? "text-red-500" : ""}`}
+          value={oth}
+          formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+          parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
+          onChange={setOth}
+        />
+      </div>
+
+      <div className="grid items-center grid-cols-2 mt-4">
+        <p className="m-0">Pengembalian</p>
+        <InputNumber
+          aria-readonly
+          className="w-full pointer-events-none"
+          value={totalCharge}
+          min={0}
+          formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+          parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
+        />
+      </div>
+
+      <div className="grid items-center grid-cols-2 mt-4">
+        <p className="m-0">Sisa Pembayaran</p>
+
+        <p className="m-0">{formatter.format(totalAfterInput < 0 ? 0 : totalAfterInput)}</p>
+      </div>
 
       <Popconfirm
         title={"Pembayaran akan dilakukan sebesar " + formatter.format(totalInputValue) + ". Lanjutkan?"}
@@ -127,10 +156,11 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
         okButtonProps={{
           style: { backgroundColor: "#00b894" },
         }}
+        placement="topLeft"
         okText="Bayar"
         cancelText="Batalkan"
       >
-        <Button className="rounded-md mr-2 hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
+        <Button className="rounded-md mt-4 hover:text-white hover:bg-cyan-700 border border-cyan-700" block>
           Bayar
         </Button>
       </Popconfirm>
