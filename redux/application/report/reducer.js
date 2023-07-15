@@ -2,6 +2,8 @@ const initState = {
   list: [],
   info: {},
   preData: {},
+  supplier: [],
+  searchParameters: {},
 };
 
 export default function Reducer(state = initState, action) {
@@ -32,8 +34,29 @@ export default function Reducer(state = initState, action) {
         },
       };
 
+    case "ADD_SUPPLIER":
+      state.supplier.push(action.supplier);
+      return {
+        ...state,
+        supplier: [...state.supplier],
+      };
+
+    case "ADD_PARAMETER":
+      let searchParameters = state.searchParameters;
+      return {
+        ...state,
+        searchParameters: {
+          ...searchParameters,
+          [0]: {
+            supplier: action.supplier,
+            range: action.range,
+            debt: action.debt
+          },
+        },
+      };
+
     case "CLEAR_DATA":
-      state = { list: [], info: {}, preData: {} };
+      state = { list: [], info: {}, preData: {}, supplier: [], searchParameters: {}};
       return state;
 
     default:

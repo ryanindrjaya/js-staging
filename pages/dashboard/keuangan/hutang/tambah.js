@@ -145,7 +145,7 @@ function Hutang({ props }) {
   const returLPB = props?.returLPB?.data;
   const akunHutang = props.akunHutang.data;
   const dataAkunCOA = props.akunCOA.data;
-  const hutang = props.hutang; console.log("hutang", hutang);
+  const hutang = props.hutang;
   const [supplier, setSupplier] = useState();
   const [dataTabel, setDataTabel] = useState([]);
   const [dataRetur, setDataRetur] = useState([]);

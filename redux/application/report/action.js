@@ -17,6 +17,18 @@ const actions = {
     data,
   }),
 
+  addSupplier: (supplier) => ({
+    type: "ADD_SUPPLIER",
+    supplier,
+  }),
+
+  addParameter: (supplier, range) => ({
+    type: "ADD_PARAMETER",
+    supplier,
+    range,
+    debt
+  }),
+
   clearValue: () => ({
     type: "CLEAR_DATA",
   }),
