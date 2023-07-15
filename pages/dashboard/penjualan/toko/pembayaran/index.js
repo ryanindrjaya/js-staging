@@ -26,7 +26,8 @@ import { useRouter } from "next/router";
 import PembayaranDrawer from "../../../../../components/Drawer/PembayaranDrawer";
 import { CreateStorePayment } from "../../../../../library/functions/createStorePayment";
 import { createInventoryFromPenjualan } from "../../../../../library/functions/createInventory";
-import { MenuOutlined } from "@ant-design/icons";
+import { MenuOutlined, AuditOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import confirm from "antd/lib/modal/confirm";
 
 PembayaranToko.getInitialProps = async (context) => {
   try {
@@ -126,7 +127,7 @@ function PembayaranToko({ props }) {
     router.reload();
   };
 
-  const confirm = async (record) => {
+  const confirmPembayaran = async (record) => {
     const returTrxId = null;
     const storeTrxId = record.id;
 
@@ -203,6 +204,28 @@ function PembayaranToko({ props }) {
     checkInUser();
   }, []);
 
+  const handleTutupKasir = (confirmed) => {
+    if (confirmed) {
+      router.replace("/dashboard/penjualan/toko/kasir?status=tutup");
+    } else {
+      confirm({
+        title: "Apakah anda yakin ingin menutup kasir?",
+        icon: <ExclamationCircleOutlined />,
+        content: "Data penjualan akan masuk ke laporan penjualan toko.",
+        okText: "Ya",
+        okType: "danger",
+        cancelText: "Tidak",
+        centered: true,
+        onOk() {
+          handleTutupKasir(true);
+        },
+        onCancel() {
+          console.log("Cancel");
+        },
+      });
+    }
+  };
+
   return (
     <>
       <Head>
@@ -210,7 +233,19 @@ function PembayaranToko({ props }) {
       </Head>
       <DashboardLayout>
         <LayoutWrapper style={{}}>
-          <TitlePage titleText={"PEMBAYARAN TOKO"} />
+          <TitlePage
+            titleText={"PEMBAYARAN TOKO"}
+            button={
+              <Button
+                onClick={() => handleTutupKasir(false)}
+                size="large"
+                className="mr-2 border flex items-center rounded-md bg-cyan-700 text-white hover:bg-cyan-800 "
+              >
+                <AuditOutlined />
+                <span className="ml-2">Tutup Kasir</span>
+              </Button>
+            }
+          />
           <LayoutContent>
             {isLoading ? (
               <Skeleton />
@@ -518,7 +553,7 @@ function PembayaranToko({ props }) {
                                   formatter.format(paymentValue?.[record.id] ?? 0) +
                                   ". Lanjutkan?"
                                 }
-                                onConfirm={() => confirm(record)}
+                                onConfirm={() => confirmPembayaran(record)}
                                 onCancel={cancel}
                                 okButtonProps={{
                                   style: { backgroundColor: "#00b894" },
