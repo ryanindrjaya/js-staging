@@ -277,9 +277,30 @@ export default function PembayaranToko() {
                   title="Tanggal"
                   key="date"
                   dataIndex="date"
+                  sorter={(a, b) => moment(a.date).unix() - moment(b.date).unix()}
                 />
                 <Column className="uppercase" title="Akun Pembayaran" key="account" dataIndex="account" />
-                <Column className="uppercase" title="No Faktur" key="no_faktur" dataIndex="no_faktur" />
+                <Column
+                  sorter={(a, b) => {
+                    const nomorA = a.no_faktur.split("/")[1];
+                    const nomorB = b.no_faktur.split("/")[1];
+
+                    const bulanA = a.no_faktur.split("/")[2];
+                    const bulanB = b.no_faktur.split("/")[2];
+
+                    const tahunA = a.no_faktur.split("/")[3];
+                    const tahunB = b.no_faktur.split("/")[3];
+
+                    const sumA = parseInt(tahunA + bulanA + nomorA);
+                    const sumB = parseInt(tahunB + bulanB + nomorB);
+
+                    return sumA - sumB;
+                  }}
+                  className="uppercase"
+                  title="No Faktur"
+                  key="no_faktur"
+                  dataIndex="no_faktur"
+                />
                 <Column
                   align="center"
                   render={(value) => formatter.format(value)}

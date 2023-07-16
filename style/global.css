@@ -117,6 +117,17 @@
   max-width: min-content;
 }
 
+.ant-table-thead th.ant-table-column-sort {
+  background: #036b82;
+  color: white;
+  /* prevent word break */
+  white-space: nowrap;
+}
+
+.ant-table-thead th.ant-table-column-has-sorters:hover {
+  background: #036b82d2 !important;
+}
+
 .ant-table-cell {
   padding-top: 0 !important;
   padding-bottom: 0 !important;
