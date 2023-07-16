@@ -87,7 +87,7 @@ export default function PembayaranToko() {
 
     setLoading({ ...loading, admin: true });
 
-    const roles = ["Admin", "Kasir", "Penjualan"];
+    const roles = ["Admin", "Kasir", "Penjualan", "Keuangan"];
 
     let endpoint = `/users?`;
 
