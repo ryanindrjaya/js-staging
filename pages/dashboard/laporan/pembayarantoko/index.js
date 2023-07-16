@@ -169,7 +169,7 @@ export default function PembayaranToko() {
           </Summary.Cell>
           <Summary.Cell align="center" index={1} colSpan={3}>
             <div className="bg-[#036b82] py-1 mt-2">
-              <span className="text-white font-bold pr-24">{formatter.format(data?.summary?.debit ?? 0)}</span>
+              <span className="text-white font-bold pr-24">{formatter.format(data?.summary?.total ?? 0)}</span>
             </div>
           </Summary.Cell>
         </Summary.Row>
