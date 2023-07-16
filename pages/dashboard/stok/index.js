@@ -414,6 +414,7 @@ export default function Riwayat({ defaultOptions }) {
                         setDate();
                       }
                     }}
+                    placeholder={["Tanggal Mulai", "Tanggal Selesai"]}
                     size="middle"
                   />
                 </div>

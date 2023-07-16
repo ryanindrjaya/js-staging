@@ -253,9 +253,9 @@ function Kasir({ props }) {
                   </Form.Item>
 
                   <p className="text-cyan-700 text-xs mt-3 max-w-lg">
-                    SILAHKAN MEMASUKAN NOMINAL KAS ON HAND ANDA SEBELUM {status === "tutup" ? "MENUTUP" : "MEMBUKA"}{" "}
-                    KASIR PEMBAYARAN JIKA ANDA TIDAK MEMILIKI KAS ON HAND SILAHKAN KLIK
-                    {status === "tutup" ? "TUTUP" : "BUKA"}
+                    {status === "tutup"
+                      ? "SILAHKAN MEMASUKAN NOMINAL KAS ON HAND SEBELUM MENUTUP KASIR PEMBAYARAN. NOMINAL KAS ON HAND AKAN TERCATAT PADA LAPORAN PEMBAYARAN"
+                      : "SILAHKAN MEMASUKAN NOMINAL KAS ON HAND ANDA SEBELUM MEMBUKA KASIR PEMBAYARAN JIKA ANDA TIDAK MEMILIKI KAS ON HAND SILAHKAN KLIK BUKA"}
                   </p>
 
                   <Button className="mt-3 rounded-md px-5" loading={isLoading} htmlType="submit">

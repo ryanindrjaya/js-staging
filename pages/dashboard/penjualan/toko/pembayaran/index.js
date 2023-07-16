@@ -235,7 +235,8 @@ function PembayaranToko({ props }) {
       confirm({
         title: "Apakah anda yakin ingin menutup kasir?",
         icon: <ExclamationCircleOutlined />,
-        content: "Data penjualan akan masuk ke laporan penjualan toko.",
+        content:
+          "Data penjualan akan masuk ke laporan penjualan toko. Kasir untuk hari ini tidak dapat dibuka kembali setelah ditutup.",
         okText: "Ya",
         okType: "danger",
         cancelText: "Tidak",

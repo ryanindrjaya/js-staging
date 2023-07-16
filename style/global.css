@@ -77,6 +77,10 @@
   color: #036b82 !important;
 }
 
+.ant-table-summary tr td {
+  padding: 0 !important;
+}
+
 /*========= END CHANGE PLACEHOLDER COLOR ==============*/
 @media print {
   .ant-table-thead .ant-table-cell {
