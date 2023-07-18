@@ -63,7 +63,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
 
   const cekData = (data) => {
     for (const key in biaya.list) {
-      if(biaya.list[key].id == data.id) return key;
+      if(biaya.list[key].id === data.id && biaya.list[key].keterangan === data.keterangan) return key;
     }
   };
 
@@ -697,9 +697,9 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
         let salesFilter = item.attributes.customer.data.attributes.sales_name;
 
         //show pilih data
-        if(biaya.info[id]?.pilihData == "pilih"){
-          return item;
-        } else {}
+        // if(biaya.info[id]?.pilihData == "pilih"){
+        //   return item;
+        // } else {}
 
         if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
             sales == undefined && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == undefined
@@ -786,8 +786,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
             && tipePenjualan == item.keterangan
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == item.status && customer?.id == customerNama &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -796,8 +798,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
             && tipePenjualan == undefined
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == item.status && customer?.id == customerNama &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -806,8 +810,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
             && tipePenjualan == item.keterangan
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == item.status && customer?.id == customerNama &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -816,8 +822,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
             && tipePenjualan == undefined
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == item.status && customer?.id == customerNama &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -826,8 +834,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
             && tipePenjualan == item.keterangan
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == item.status && customer?.id == customerNama &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -836,8 +846,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
             && tipePenjualan == undefined
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == item.status && customer?.id == customerNama &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -846,8 +858,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
             && tipePenjualan == item.keterangan
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == item.status && customer?.id == customerNama &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -856,8 +870,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
             && tipePenjualan == undefined
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == item.status && customer?.id == undefined &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -938,8 +954,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
             && tipePenjualan == item.keterangan
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == item.status && customer?.id == undefined &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -948,8 +966,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
             && tipePenjualan == undefined
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == item.status && customer?.id == undefined &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -958,8 +978,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
             && tipePenjualan == item.keterangan
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == item.status && customer?.id == undefined &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -968,8 +990,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
             && tipePenjualan == undefined
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == item.status && customer?.id == undefined &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -978,8 +1002,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
             && tipePenjualan == item.keterangan
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == item.status && customer?.id == undefined &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -988,8 +1014,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
             && tipePenjualan == undefined
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == item.status && customer?.id == undefined &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -998,8 +1026,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
             && tipePenjualan == item.keterangan
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == item.status && customer?.id == undefined &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -1008,8 +1038,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
             && tipePenjualan == undefined
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == undefined && customer?.id == customerNama &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -1090,8 +1122,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
             && tipePenjualan == item.keterangan
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == undefined && customer?.id == customerNama &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -1100,8 +1134,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
             && tipePenjualan == undefined
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == undefined && customer?.id == customerNama &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -1110,8 +1146,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
             && tipePenjualan == item.keterangan
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == undefined && customer?.id == customerNama &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -1120,8 +1158,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
             && tipePenjualan == undefined
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == undefined && customer?.id == customerNama &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -1130,8 +1170,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
             && tipePenjualan == item.keterangan
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == undefined && customer?.id == customerNama &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -1140,8 +1182,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
             && tipePenjualan == undefined
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == undefined && customer?.id == customerNama &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -1150,8 +1194,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
             && tipePenjualan == item.keterangan
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == undefined && customer?.id == customerNama &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -1160,8 +1206,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
             && tipePenjualan == undefined
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == undefined && customer?.id == undefined &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -1242,8 +1290,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
             && tipePenjualan == item.keterangan
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == undefined && customer?.id == undefined &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -1252,8 +1302,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
             && tipePenjualan == undefined
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == undefined && customer?.id == undefined &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -1262,8 +1314,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
             && tipePenjualan == item.keterangan
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == undefined && customer?.id == undefined &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -1272,8 +1326,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
             && tipePenjualan == undefined
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == undefined && customer?.id == undefined &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -1282,8 +1338,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
             && tipePenjualan == item.keterangan
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == undefined && customer?.id == undefined &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -1292,8 +1350,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
             && tipePenjualan == undefined
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == undefined && customer?.id == undefined &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -1302,8 +1362,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
             && tipePenjualan == item.keterangan
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
         if( statusPembayaran == undefined && customer?.id == undefined &&
             min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
@@ -1312,8 +1374,10 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
             sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
             && tipePenjualan == undefined
         ) {
-            if (item.keterangan == "sales") return item;
-            else { };
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else { };
         }
 
         if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
@@ -1358,50 +1422,66 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
         if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
           sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
           sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == undefined
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
           sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == item.keterangan
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
           sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == undefined
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
           sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
           sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == undefined
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
           sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == item.keterangan
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
           sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == undefined
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
           sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
@@ -1446,98 +1526,130 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
         if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
           sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
           sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == undefined
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
           sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == item.keterangan
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
           sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == undefined
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
           sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
           sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == undefined
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
           sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == item.keterangan
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
           sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == undefined
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
           sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
           sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == undefined
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
           sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == item.keterangan
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
           sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == undefined
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
           sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
           sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == undefined
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
           sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == item.keterangan
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
           sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == undefined
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
           sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
@@ -1582,50 +1694,66 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
         if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
           sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
           sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == undefined
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
           sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == item.keterangan
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
           sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == undefined
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
           sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
           sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == undefined
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
           sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == item.keterangan
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
           sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == undefined
         ){
-          if(item.keterangan == "sales") return item;
-          else { };
+          if (item.keterangan == "sales") return item;
+            else if (item.keterangan == "panel") return item;
+            else if (item.keterangan == "nonpanel") return item;
+            else { };
         }
         if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
           sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
