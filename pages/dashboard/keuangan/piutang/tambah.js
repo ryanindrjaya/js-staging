@@ -520,7 +520,7 @@ function Piutang({ props }) {
           ].data.map((detail) => detail.id);
           data.attributes[`retur_${saleType}s`] = data.attributes[
             `retur_${saleType}s`
-          ].data.map((retur) => retur.id);
+          ]?.data?.map((retur) => retur?.id);
 
           data.attributes.area = data.attributes.area.data.id;
           data.attributes.customer = data.attributes.customer.data.id;
@@ -653,20 +653,22 @@ function Piutang({ props }) {
     // used to reset redux from value before
     clearData();
     var sisaHutang = 0;
-    var pembayaran = [];
+    var pembayaran = []; console.log("pembayaran", pembayaran);
     var total = 0;
     var idDetail = null;
 
     // sales data
-    sales.forEach((row) => {
+    sales.forEach((row) => { console.log("row sales", row);
 
-      if(row.attributes.status_pembayaran) {
+      if(row.attributes.status_pembayaran && row.attributes.status === "Diterima") {
         row.status = row.attributes.status_pembayaran;
+      } if(row.attributes.status_pembayaran && row.attributes.status === "Diproses") {
+        row.status = row.attributes.status;
       } else {
         row.status = "Belum Dibayar";
       }
 
-      if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian") {
+      if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian" || row.status == "Belum Lunas") {
         if (dataTabel.length > 0) {
           //row.sisaPiutang = row.attributes.total;
           dataTabel[dataTabel.length] = row;
