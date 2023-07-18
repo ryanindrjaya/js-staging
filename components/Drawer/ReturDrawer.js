@@ -1,13 +1,12 @@
 import { Button, Drawer, InputNumber, Popconfirm, Select } from "antd";
-import {
-  CreateStorePaymenWithoutUpdate,
-  updateReturTransaction,
-} from "../../library/functions/createStorePayment";
+import { CreateStorePaymenWithoutUpdate, updateReturTransaction } from "../../library/functions/createStorePayment";
 import React, { useState } from "react";
 import { createInventoryFromReturPenjualan } from "../../library/functions/createInventory";
 
 function ReturDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
   const data = record?.attributes;
+
+  console.log("record", record);
   const storeTrxId = data?.store_sale?.data?.id;
 
   const confirm = async () => {
@@ -27,11 +26,12 @@ function ReturDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
             data: { id },
           } = await CreateStorePaymenWithoutUpdate(
             total,
-            totalCharge,
+            totalAfterInput,
             nominal,
             option,
             "Retur",
-            id
+            id,
+            totalAfterInput
           );
           console.log("response api", id);
           listPaymentId.push(id);
@@ -54,12 +54,20 @@ function ReturDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
     minimumFractionDigits: 2,
   });
 
-  const [values, setValues] = useState(
-    Array.from({ length: 3 }, () => ({
-      option: "",
+  const [values, setValues] = useState([
+    {
+      option: "CASH",
       nominal: 0,
-    }))
-  );
+    },
+    {
+      option: "TRANSFER BANK",
+      nominal: 0,
+    },
+    {
+      option: "KARTU KREDIT",
+      nominal: 0,
+    },
+  ]);
 
   const handleDrawerClose = () => {
     setValues(
@@ -85,25 +93,19 @@ function ReturDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
     };
 
     return (
-      <div key={index} className="mt-5">
-        <Select
-          style={{ width: 120 }}
-          className="mr-2"
-          value={values[index].option}
-          onChange={handleChangeOption}
-        >
+      <div key={index} className="mt-4 grid grid-cols-2">
+        <Select className="mr-2" value={values[index].option} onChange={handleChangeOption}>
           <Option value="CASH">Cash</Option>
           <Option value="TRANSFER BANK">Transfer Bank</Option>
           <Option value="KARTU KREDIT">Kartu Kredit</Option>
         </Select>
         <InputNumber
+          onFocus={(e) => e.target.select()}
           placeholder="Masukan Nominal"
           min={0}
-          formatter={(value) =>
-            `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-          }
+          className="w-full"
+          formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
           parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
-          style={{ width: 150 }}
           value={values[index].nominal}
           onChange={handleChangeNominal}
           key={index}
@@ -114,46 +116,38 @@ function ReturDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
 
   const totalInputValue = values.reduce((acc, cur) => acc + cur.nominal, 0);
   const totalAfterInput = data?.total - totalInputValue;
-  const totalCharge =
-    totalAfterInput <= 0 ? (data?.total - totalInputValue) * -1 : 0;
 
   return (
-    <Drawer
-      title={`Pembayaran Lainnya`}
-      placement="right"
-      size="default"
-      onClose={handleDrawerClose}
-      open={openDrawer}
-    >
-      <p>No.Faktur : {data?.faktur ?? ""}</p>
+    <Drawer title={`Pembayaran Lainnya`} placement="right" size="default" onClose={handleDrawerClose} open={openDrawer}>
+      <p>No.Faktur : {data?.no_retur_store_sale ?? ""}</p>
       <p>Nama Customer : {data?.customer_name ?? ""}</p>
-      <p>Total Harga : {formatter.format(data?.total ?? 0)}</p>
+      <p>Total Retur Penjualan : {formatter.format(data?.total ?? 0)}</p>
 
       {Array.from({ length: 3 }, (_, i) => renderInput(i))}
 
-      <p className="mt-5">
-        Sisa Pembayaran :{" "}
-        {formatter.format(totalAfterInput < 0 ? 0 : totalAfterInput)}
-      </p>
-      <p className="mt-2 font-medium text-red-400">
-        Pengembalian : {formatter.format(totalCharge)}
-      </p>
+      <div className="grid items-center grid-cols-2 mt-4">
+        <p className="m-0">OTH</p>
+        <InputNumber
+          aria-readonly
+          className={`w-full pointer-events-none ${totalAfterInput < 0 ? "text-red-500" : ""}`}
+          value={totalAfterInput}
+          formatter={(value) => formatter.format(value)}
+          parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
+        />
+      </div>
 
       <Popconfirm
-        title={
-          "Pembayaran akan dilakukan sebesar " +
-          formatter.format(totalInputValue) +
-          ". Lanjutkan?"
-        }
+        title={"Pembayaran akan dilakukan sebesar " + formatter.format(totalInputValue) + ". Lanjutkan?"}
         onConfirm={() => confirm()}
         onCancel={cancel}
         okButtonProps={{
           style: { backgroundColor: "#00b894" },
         }}
+        placement="topLeft"
         okText="Bayar"
         cancelText="Batalkan"
       >
-        <Button className="rounded-md mr-2 hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
+        <Button className="rounded-md mt-4 hover:text-white hover:bg-cyan-700 border border-cyan-700" block>
           Bayar
         </Button>
       </Popconfirm>

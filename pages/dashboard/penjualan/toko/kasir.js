@@ -1,6 +1,6 @@
 import { Button, Form, InputNumber, notification } from "antd";
 import Head from "next/dist/shared/lib/head";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import LayoutContent from "@iso/components/utility/layoutContent";
@@ -41,12 +41,10 @@ function Kasir({ props }) {
   const cookies = nookies.get(null, "token");
   const router = useRouter();
 
+  const status = router.query?.status;
+
   const isUserAlreadyCheckIn = async (cookies) => {
-    const today = new Date()
-      .toLocaleDateString("en-GB")
-      .split("/")
-      .reverse()
-      .join("-");
+    const today = new Date().toLocaleDateString("en-GB").split("/").reverse().join("-");
     const tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000)
       .toLocaleDateString("en-GB")
       .split("/")
@@ -74,9 +72,7 @@ function Kasir({ props }) {
     return false;
   };
 
-  const onFinish = async (values) => {
-    setIsLoading(true);
-
+  const bukaKasir = async (values) => {
     const isCheckIn = await isUserAlreadyCheckIn(cookies);
     if (isCheckIn) {
       openNotification("error", "Gagal", "Anda sudah melakukan check in");
@@ -114,17 +110,106 @@ function Kasir({ props }) {
       router.replace("/dashboard/penjualan/toko/pembayaran");
     } else {
       console.log("error cashiers", res);
-      openNotification(
-        "error",
-        "Gagal",
-        "Terdapat kesalahan saat akan mengirimkan data"
-      );
+      openNotification("error", "Gagal", "Terdapat kesalahan saat akan mengirimkan data");
+    }
+  };
+
+  const tutupKasir = async (values) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/cashiers";
+    values.cash_in_hand = values.cash_in_hand ?? 0;
+    const data = {
+      data: {
+        ...values,
+        cashier_name: user,
+        type: "CHECK OUT",
+      },
+    };
+
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+      body: JSON.stringify(data),
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    if (req.status === 200) {
+      console.log("response cashiers", res);
+      form.resetFields();
+
+      openNotification("success", "Berhasil", "Kasir berhasil ditutup");
+      router.replace("/dashboard/penjualan/toko");
+    } else {
+      console.log("error cashiers", res);
+      openNotification("error", "Gagal", "Terdapat kesalahan saat akan mengirimkan data");
+    }
+  };
+
+  const onFinish = async (values) => {
+    setIsLoading(true);
+
+    if (status === "tutup") {
+      tutupKasir(values);
+    } else {
+      bukaKasir(values);
     }
 
     setIsLoading(false);
   };
 
   const onFinishFailed = (errorInfo) => {};
+
+  useEffect(() => {
+    const isUserAlreadyCheckIn = async () => {
+      const today = new Date().toLocaleDateString("en-GB").split("/").reverse().join("-");
+      const tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000)
+        .toLocaleDateString("en-GB")
+        .split("/")
+        .reverse()
+        .join("-");
+
+      const endpointBuka =
+        process.env.NEXT_PUBLIC_URL +
+        `/cashiers?filters[cashier_name][id][$eq]=${user.id}&populate=*&filters[createdAt][$gte]=${today}&filters[createdAt][$lte]=${tomorrow}&filters[type][$eq]=CHECK IN`;
+      const endpointTutup =
+        process.env.NEXT_PUBLIC_URL +
+        `/cashiers?filters[cashier_name][id][$eq]=${user.id}&populate=*&filters[createdAt][$gte]=${today}&filters[createdAt][$lte]=${tomorrow}&filters[type][$eq]=CHECK OUT`;
+
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+      };
+
+      const req = await fetch(endpointBuka, options);
+      const res = await req.json();
+
+      const reqTutup = await fetch(endpointTutup, options);
+      const resTutup = await reqTutup.json();
+
+      if (res.data.length > 0) {
+        if (resTutup.data.length > 0) {
+          openNotification("error", "Shift anda sudah ditutup", "Mengarahkan ke halaman toko");
+          router.replace("/dashboard/penjualan/toko");
+        } else {
+          openNotification("error", "Anda sudah melakukan check in", "Mengarahkan ke halaman pembayaran");
+          router.replace("/dashboard/penjualan/toko/pembayaran");
+        }
+      }
+    };
+
+    const status = router.query?.status;
+
+    if (!status) {
+      isUserAlreadyCheckIn();
+    }
+  }, [router.query]);
 
   // show antd notification
   const openNotification = (type, message, description) => {
@@ -153,17 +238,13 @@ function Kasir({ props }) {
             >
               <div className="flex justify-center items-center h-screen">
                 <div className="text-center">
-                  <h5 className="text-xl font-bold">BUKA KASIR</h5>
+                  <h5 className="text-xl font-bold">{status === "tutup" ? "TUTUP KASIR" : "BUKA KASIR"}</h5>
                   <p className="text-lg">{user?.name ?? "-"}</p>
                   <DateTimeComponent />
                   <Form.Item name="cash_in_hand" noStyle>
                     <InputNumber
-                      onKeyDown={(e) =>
-                        e.key == "Enter" ? e.preventDefault() : ""
-                      }
-                      formatter={(value) =>
-                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                      }
+                      onKeyDown={(e) => (e.key == "Enter" ? e.preventDefault() : "")}
+                      formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                       size="large"
                       style={{
                         width: "50%",
@@ -172,17 +253,13 @@ function Kasir({ props }) {
                   </Form.Item>
 
                   <p className="text-cyan-700 text-xs mt-3 max-w-lg">
-                    SILAHKAN MEMASUKAN NOMINAL KAS ON HAND ANDA SEBELUM MEMBUKA
-                    KASIR PEMBAYARAN JIKA ANDA TIDAK MEMILIKI KAS ON HAND
-                    SILAHKAN KLIK BUKA
+                    {status === "tutup"
+                      ? "SILAHKAN MEMASUKAN NOMINAL KAS ON HAND SEBELUM MENUTUP KASIR PEMBAYARAN. NOMINAL KAS ON HAND AKAN TERCATAT PADA LAPORAN PEMBAYARAN"
+                      : "SILAHKAN MEMASUKAN NOMINAL KAS ON HAND ANDA SEBELUM MEMBUKA KASIR PEMBAYARAN JIKA ANDA TIDAK MEMILIKI KAS ON HAND SILAHKAN KLIK BUKA"}
                   </p>
 
-                  <Button
-                    className="mt-3 rounded-md px-5"
-                    loading={isLoading}
-                    htmlType="submit"
-                  >
-                    BUKA
+                  <Button className="mt-3 rounded-md px-5" loading={isLoading} htmlType="submit">
+                    {status === "tutup" ? "TUTUP" : "BUKA"}
                   </Button>
                 </div>
               </div>

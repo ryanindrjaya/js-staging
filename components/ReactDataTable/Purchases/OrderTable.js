@@ -119,7 +119,7 @@ export default function OrderTable({
         [indexRow]: value,
       },
       disc_rp: {
-        [indexRow]: products?.productInfo?.[indexRow]?.disc ?? data.attributes[`purchase_discount_${index}`],
+        [indexRow]: data.attributes[`purchase_discount_${index}`],
       },
     });
   };
@@ -324,10 +324,9 @@ export default function OrderTable({
       width: "150px",
       selector: (row, idx) => {
         var defaultDisc = products?.productList[idx]?.attributes?.purchase_discount_1 || 0;
-        console.log("test disc", products.productInfo[idx]?.disc);
 
-        if (products.productInfo[idx].disc !== null || products.productInfo[idx].disc !== undefined) {
-          defaultDisc = products?.productInfo[idx]?.disc;
+        if (products.productInfo[idx]?.disc !== undefined) {
+          defaultDisc = products.productInfo[idx].disc;
         }
 
         return (

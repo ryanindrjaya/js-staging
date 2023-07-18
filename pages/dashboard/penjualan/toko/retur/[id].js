@@ -198,27 +198,25 @@ function ReturToko({ props }) {
     if (res.data.length > 0) {
       const product = dataProduct.attributes;
       const stok = res.data[0].attributes;
-      let stokGudang = "";
+      let stokGudang = [];
       setDataGudang({
         ...dataGudang,
         [idx]: res.data[0].attributes,
       });
 
-      const unit1 = product.unit_1 ? stok.stock_unit_1 + " " + product.unit_1 : "";
-      const unit2 = product.unit_2 ? stok.stock_unit_2 + " " + product.unit_2 : "";
-      const unit3 = product.unit_3 ? stok.stock_unit_3 + " " + product.unit_3 : "";
-      const unit4 = product.unit_4 ? stok.stock_unit_4 + " " + product.unit_4 : "";
-      const unit5 = product.unit_5 ? stok.stock_unit_5 + " " + product.unit_5 : "";
-
-      stokGudang = unit1 + " " + unit2 + " " + unit3 + " " + unit4 + " " + unit5;
+      [1, 2, 3, 4, 5].forEach((item) => {
+        if (product?.[`unit_${item}`]) {
+          stokGudang.push(stok[`stock_unit_${item}`] + " " + product[`unit_${item}`]);
+        }
+      });
 
       setStokString({
         ...stokString,
-        [idx]: stokGudang,
+        [idx]: stokGudang.join(", "),
       });
     } else {
       const product = dataProduct.attributes;
-      let stokGudang = "";
+      let stokGudang = [];
       setDataGudang({
         ...dataGudang,
         [idx]: {
@@ -230,17 +228,15 @@ function ReturToko({ props }) {
         },
       });
 
-      const unit1 = product.unit_1 ? "0" + " " + product.unit_1 : "";
-      const unit2 = product.unit_2 ? "0" + " " + product.unit_2 : "";
-      const unit3 = product.unit_3 ? "0" + " " + product.unit_3 : "";
-      const unit4 = product.unit_4 ? "0" + " " + product.unit_4 : "";
-      const unit5 = product.unit_5 ? "0" + " " + product.unit_5 : "";
-
-      stokGudang = unit1 + " " + unit2 + " " + unit3 + " " + unit4 + " " + unit5;
+      [1, 2, 3, 4, 5].forEach((item) => {
+        if (product?.[`unit_${item}`]) {
+          stokGudang.push(0 + " " + product[`unit_${item}`]);
+        }
+      });
 
       setStokString({
         ...stokString,
-        [idx]: stokGudang,
+        [idx]: stokGudang.join(", "),
       });
     }
   };
@@ -610,11 +606,11 @@ function ReturToko({ props }) {
     // create an array of promises by mapping over the productList
     const promises = products.productList.map(async (product, idx) => {
       const unit = products.productInfo[idx]?.unitIndex;
-      const stock = await getStockAtLocation(product.id, unit);
+      const stock = await getStockAtLocation(product.id, unit, idx);
 
       tempData = {
         ...tempData,
-        [product.id]: stock,
+        [idx]: stock,
       };
 
       return stock; // return a promise from each iteration
@@ -630,8 +626,7 @@ function ReturToko({ props }) {
   };
 
   // get stock at location id
-  const getStockAtLocation = async (productId, unit) => {
-    let stockString = "Stok Kosong";
+  const getStockAtLocation = async (productId, unit, index) => {
     try {
       const response = await getStock(productId, unit);
       console.log("response", response);
@@ -641,7 +636,7 @@ function ReturToko({ props }) {
         const sortedBasedOnQty = response.data.sort((a, b) => b.availableStock - a.availableStock);
         setLokasiGudang({
           ...lokasiGudang,
-          [productId]: sortedBasedOnQty,
+          [index]: sortedBasedOnQty,
         });
       }
 
@@ -662,7 +657,7 @@ function ReturToko({ props }) {
       console.error("error", error);
       setDataLocationStock({
         ...dataLocationStock,
-        [productId]: "Error fetching stock data",
+        [index]: "Error fetching stock data",
       });
     }
   };
