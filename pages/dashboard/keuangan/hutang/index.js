@@ -91,7 +91,7 @@ const fetchHutang = async (cookies) => {
 };
 
 const fetchAkunHutang = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=*";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=*&filters[setting][$eq]=true";
     const options = {
       method: "GET",
       headers: {
@@ -206,7 +206,7 @@ function Hutang({ props }) {
                   const sisa_hutang = item.attributes.sisa_hutang;
         
                   if (sisa_hutang == 0) editPenjualanDB("Lunas", item.attributes.purchasing.data.id);
-                  else editPenjualanDB("Dibayar Sebagian", item.attributes.purchasing.data.id);
+                  //else editPenjualanDB("Dibayar Sebagian", item.attributes.purchasing.data.id);
                 });
             } else console.log("Not update lpb, karena draft");
 
@@ -298,8 +298,16 @@ function Hutang({ props }) {
 
           if (req.status === 200) {
               console.log("akun sukses diupdate");
+              notification["success"]({
+                message: "Sukses menambahkan data",
+                description: "Pembayaran yang dilakukan sukses.",
+              });
           } else {
               console.log("akun error atau tidak ada");
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Pembayaran yang dilakukan gagal.",
+              });
           }
         } catch (error) {
            console.log("errorr", error);
@@ -348,7 +356,7 @@ function Hutang({ props }) {
     
           const JSONdata = JSON.stringify(newValues);
           const cookies = nookies.get(null, "token");
-          const endpoint = process.env.NEXT_PUBLIC_URL + "/debts/" + id + "?populate=*";
+          const endpoint = process.env.NEXT_PUBLIC_URL + "/debts/" + id + "?populate=deep";
     
           const options = {
             method: "PUT",
