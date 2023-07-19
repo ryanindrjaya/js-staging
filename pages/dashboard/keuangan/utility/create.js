@@ -1,6 +1,7 @@
 import React from "react";
 import nookies from "nookies";
 import { notification } from "antd";
+import updateJurnal from "../utility/updateJurnal";
 
 const cookies = nookies.get(null, "token");
 var tempProductListId = [];
@@ -75,7 +76,7 @@ const Create = async (
               });
 
             } else {
-              putAkun(item.attributes.chart_of_account.data.id, item.attributes.chart_of_account.data.attributes, form, totalTunai, page);
+              putAkun(item.attributes.chart_of_account.data.id, item.attributes.chart_of_account.data.attributes, form, totalTunai, page, values?.no_hutang, values?.no_piutang);
             }
 
             akunTunai = true;
@@ -87,7 +88,7 @@ const Create = async (
               });
 
             } else {
-              putAkun(item.attributes.chart_of_account.data.id, item.attributes.chart_of_account.data.attributes, form, totalTransfer, page);
+              putAkun(item.attributes.chart_of_account.data.id, item.attributes.chart_of_account.data.attributes, form, totalTransfer, page, values?.no_hutang, values?.no_piutang);
             }
 
             akunTransfer = true;;
@@ -99,7 +100,7 @@ const Create = async (
               });
               
             } else {
-              putAkun(item.attributes.chart_of_account.data.id, item.attributes.chart_of_account.data.attributes, form, totalGiro, page);
+              putAkun(item.attributes.chart_of_account.data.id, item.attributes.chart_of_account.data.attributes, form, totalGiro, page, values?.no_hutang, values?.no_piutang);
             }
 
             akunGiro = true;;
@@ -152,7 +153,8 @@ const createData = async (data, url) => {
   return req;
 };
 
-const putAkun = async (id, value, form, total, page) => {
+const putAkun = async (id, value, form, total, page, noHutang, noPiutang) => {
+  const user = await getUserMe();
   var saldo = parseFloat(value.saldo);
     var url = null;
     if (page == "hutang") {
@@ -197,7 +199,8 @@ const putAkun = async (id, value, form, total, page) => {
     if (req.status === 200) {
         //form.resetFields();
         //openNotificationWithIcon("success");
-        console.log("akun sukses diupdate");
+        console.log("akun sukses diupdate", req, res);
+        updateJurnal(res.data, page, noHutang, noPiutang, total, user);
     } else {
         //openNotificationWithIcon("error");
         console.log("akun error atau tidak ada");

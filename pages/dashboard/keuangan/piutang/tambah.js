@@ -320,7 +320,7 @@ function Piutang({ props }) {
     "0"
   );
   const [categorySale, setCategorySale] = useState(
-    `PH/ET/${user.id}/${noPiutang}/${mm}/${yyyy}`
+    `PP/ET/${user.id}/${noPiutang}/${mm}/${yyyy}`
   );
 
   var formatter = new Intl.NumberFormat("id-ID", {
