@@ -329,6 +329,7 @@ function PesananSales({ props }) {
   useEffect(() => {
     // used to reset redux from value before
     clearData();
+    form.resetFields();
     form.setFieldsValue({
       customer: customerData?.attributes.name,
     });
