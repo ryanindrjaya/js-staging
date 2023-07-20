@@ -4,6 +4,7 @@ import Popover from "@iso/components/uielements/popover";
 import authAction from "../../authentication/actions";
 import TopbarDropdownWrapper from "./TopbarDropdown.styles";
 import { IoIosLogOut } from "react-icons/io";
+import { destroyCookie } from "nookies";
 
 const { logout } = authAction;
 import userpic from "@iso/assets/images/user1.png";
@@ -15,9 +16,16 @@ export default function TopbarUser() {
     setVisibility((visible) => !visible);
   }
 
+  const logoutUser = () => {
+    destroyCookie(null, "token", { path: "/" });
+    destroyCookie(null, "role", { path: "/" });
+
+    dispatch(logout());
+  };
+
   const content = (
     <TopbarDropdownWrapper className="isoUserDropdown">
-      <a className="isoDropdownLink" onClick={() => dispatch(logout())}>
+      <a className="isoDropdownLink" onClick={logoutUser}>
         <IoIosLogOut className="mr-2" />
         Logout
       </a>
