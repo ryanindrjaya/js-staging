@@ -109,7 +109,7 @@ const fetchHutang = async (cookies) => {
 };
 
 const fetchAkunHutang = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=*&filters[setting][$eq]=true";
   const options = {
     method: "GET",
     headers: {
@@ -255,7 +255,7 @@ function Hutang({ props }) {
     // cek untuk akun hutang (cek coa)
     console.log("total tunai, tranfer, giro", totalTunai, totalTransfer, totalGiro);
     if(document == "Publish"){
-      akunHutang.forEach((item) => {
+      akunHutang.forEach((item) => { console.log("item", item);
         if(item.attributes.setting == true){
           if(totalTunai != 0 && item.attributes.type == "Tunai"){
             if(item.attributes.chart_of_account.data.attributes.saldo < totalTunai){

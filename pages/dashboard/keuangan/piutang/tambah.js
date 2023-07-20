@@ -127,7 +127,7 @@ const fetchUserSales = async (cookies) => {
 };
 
 const fetchPiutang = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/credits?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/credits?populate=*, credit_details.sales_sale.*, credit_details.panel_sale.*, credit_details.non_panel_sale.*";
   const options = {
     method: "GET",
     headers: {
@@ -320,7 +320,7 @@ function Piutang({ props }) {
     "0"
   );
   const [categorySale, setCategorySale] = useState(
-    `PH/ET/${user.id}/${noPiutang}/${mm}/${yyyy}`
+    `PP/ET/${user.id}/${noPiutang}/${mm}/${yyyy}`
   );
 
   var formatter = new Intl.NumberFormat("id-ID", {
@@ -520,7 +520,7 @@ function Piutang({ props }) {
           ].data.map((detail) => detail.id);
           data.attributes[`retur_${saleType}s`] = data.attributes[
             `retur_${saleType}s`
-          ].data.map((retur) => retur.id);
+          ]?.data?.map((retur) => retur?.id);
 
           data.attributes.area = data.attributes.area.data.id;
           data.attributes.customer = data.attributes.customer.data.id;
@@ -660,13 +660,15 @@ function Piutang({ props }) {
     // sales data
     sales.forEach((row) => {
 
-      if(row.attributes.status_pembayaran) {
+      if(row.attributes.status_pembayaran && row.attributes.status === "Diterima") {
         row.status = row.attributes.status_pembayaran;
+      } if(row.attributes.status_pembayaran && row.attributes.status === "Diproses") {
+        row.status = row.attributes.status;
       } else {
         row.status = "Belum Dibayar";
       }
 
-      if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian") {
+      if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian" || row.status == "Belum Lunas") {
         if (dataTabel.length > 0) {
           //row.sisaPiutang = row.attributes.total;
           dataTabel[dataTabel.length] = row;
@@ -724,11 +726,25 @@ function Piutang({ props }) {
     });
 
     // piutang
+    var keterangan = null;
     piutang.forEach((item) => {
-      item.attributes.credit_details.data.forEach((detail) => {
+      item.attributes.credit_details.data.forEach((detail, index) => {
         total = detail.attributes.giro + detail.attributes.transfer + detail.attributes.tunai;
-        idDetail = detail.attributes.non_panel_sale?.data?.id ?? detail.attributes.panel_sale?.data?.id ?? detail.attributes.sales_sale?.data?.id;
-        pembayaran.push({ id: idDetail, total: total});
+        if(detail.attributes.sales_sale?.data != null){
+          idDetail = detail.attributes.sales_sale?.data?.id;
+          keterangan = "sales";
+        } else if (detail.attributes.panel_sale?.data != null) {
+          idDetail = detail.attributes.panel_sale?.data?.id;
+          keterangan = "panel";
+        } else if (detail.attributes.non_panel_sale?.data != null) {
+          idDetail = detail.attributes.non_panel_sale?.data?.id;
+          keterangan = "nonpanel";
+        } else { 
+          console.log("piutang data salah");
+        }
+        //idDetail = detail.attributes.non_panel_sale?.data?.id ?? detail.attributes.panel_sale?.data?.id ?? detail.attributes.sales_sale?.data?.id;
+        pembayaran[index] = { id: idDetail, total: total, keterangan: keterangan};
+
       });
     });
 
@@ -737,9 +753,9 @@ function Piutang({ props }) {
       element.sisaHutang = 0;
       element.dibayar = 0;
 
-      pembayaran.forEach((item) => {
+      pembayaran.forEach((item) => { console.log("item id", item, element.id);
         //if(item.id == element.id) element.attributes.total -= item.total;
-        if(item.id == element.id) element.dibayar += item.total;
+        if(item.id === element.id && item.keterangan === element.keterangan) element.dibayar += item.total;
       });
 
       returSales.forEach((row) => {
@@ -776,7 +792,6 @@ function Piutang({ props }) {
         ) {
 
           element.subtotal += row.attributes.total;
-          console.log("row", row);
 
           if (dataRetur.length > 0)
             dataRetur[dataRetur.length] = {
