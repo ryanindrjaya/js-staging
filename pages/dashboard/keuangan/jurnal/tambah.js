@@ -25,11 +25,11 @@ Jurnal.getInitialProps = async (context) => {
   const reqDataUser = await fetchUser(cookies);
   const dataUser = await reqDataUser.json();
 
-  const reqLocation = await fetchLocation(cookies);
-  const locations = await reqLocation.json();
+  // const reqLocation = await fetchLocation(cookies);
+  // const locations = await reqLocation.json();
 
-  const reqInven = await fetchInven(cookies);
-  const inven = await reqInven.json();
+  // const reqInven = await fetchInven(cookies);
+  // const inven = await reqInven.json();
 
   const reqJurnal = await fetchJurnal(cookies);
   const jurnal = await reqJurnal.json();
@@ -41,8 +41,8 @@ Jurnal.getInitialProps = async (context) => {
     props: {
       user,
       dataUser,
-      locations,
-      inven,
+      //locations,
+      //inven,
       jurnal,
       customer,
     },
@@ -91,33 +91,33 @@ const fetchJurnal = async (cookies) => {
   return req;
 };
 
-const fetchLocation = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
+// const fetchLocation = async (cookies) => {
+//   const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
+//   const options = {
+//     method: "GET",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: "Bearer " + cookies.token,
+//     },
+//   };
 
-  const req = await fetch(endpoint, options);
-  return req;
-};
+//   const req = await fetch(endpoint, options);
+//   return req;
+// };
 
-const fetchInven = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/inventories?populate=*";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
+// const fetchInven = async (cookies) => {
+//   const endpoint = process.env.NEXT_PUBLIC_URL + "/inventories?populate=*";
+//   const options = {
+//     method: "GET",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: "Bearer " + cookies.token,
+//     },
+//   };
 
-  const req = await fetch(endpoint, options);
-  return req;
-};
+//   const req = await fetch(endpoint, options);
+//   return req;
+// };
 
 const fetchCustomer = async (cookies) => {
   let name = "walk in customer";
@@ -139,9 +139,9 @@ function Jurnal({ props }) {
   const dispatch = useDispatch();
 
   var selectedAkun = akuns?.akun;
-  const locations = props.locations.data;
+  //const locations = props.locations.data;
   const user = props.user;
-  const inven = props.inven.data;
+  //const inven = props.inven.data;
   const jurnal = props.jurnal;
   const customerData = props.customer.data[0];
   const dataUser = props.dataUser;
@@ -186,6 +186,7 @@ function Jurnal({ props }) {
   // NO Jurnal
   var noJurnal = String(props.jurnal?.meta?.pagination.total + 1).padStart(3, "0");
   const [categorySale, setCategorySale] = useState(`JM/${user.id}/${noJurnal}/${mm}/${yyyy}`);
+  var keterangan = "sukses";
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -240,8 +241,29 @@ function Jurnal({ props }) {
       values.kredit = values.kreditData[index];
       values.chart_of_account = item.id;
 
+      var saldo = parseFloat(item?.attributes?.saldo); 
+
+      //default debit
+      if(item.attributes.jenis_akun === true && (saldo + values.debit) > values.kredit){
+        saldo = (saldo + values.debit) - values.kredit;
+        putAkun(item, saldo);
+
+      } else if (item.attributes.jenis_akun === false && (saldo + values.kredit) > values.debit){
+        saldo = (saldo + values.kredit) - values.debit;
+        putAkun(item, saldo);
+
+      } else {
+        notification["error"]({
+          message: "Gagal menambahkan data",
+          description: "Saldo akun kurang untuk melakukan pembayaran.",
+        });
+        
+      }
+
       const req = createData(values);
+      
     });
+
   };
 
   const createData = async (values) => {
@@ -286,6 +308,45 @@ function Jurnal({ props }) {
         description: "Jurnal berhasil ditambahkan.",
       });
     }
+  };
+
+  const putAkun = (item, saldo) => {
+
+      const data = {
+        data: {
+          saldo: saldo,
+        },
+      };
+  
+      const JSONdata = JSON.stringify(data);
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts/" + item.id;
+      const options = {
+          method: "PUT",
+          headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + cookies.token,
+          },
+          body: JSONdata,
+      };
+  
+      const req = fetch(endpoint, options);
+      //const res = req.json();
+  
+      if (req.status === 200) {
+          notification["success"]({
+            message: "Sukses menambahkan data",
+            description: "Silahkan cek akun COA",
+          });
+          console.log("akun sukses diupdate", req);
+      } else {
+          notification["error"]({
+            message: "Gagal menambahkan data",
+            description: "akun error atau tidak ada.",
+          });
+          console.log("akun error atau tidak ada");
+      }
+
+      //return res;
   };
 
   const onChangeAkun = async () => {
@@ -340,6 +401,8 @@ function Jurnal({ props }) {
       tanggal: moment(),
     });
     setCustomer(customerData);
+    setTotalDebitValue(0);
+    setTotalKreditValue(0);
   }, []);
 
   const validateError = () => {
