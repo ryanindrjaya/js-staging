@@ -64,48 +64,33 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
   const [oth, setOth] = useState(0);
 
   const handleDrawerClose = () => {
-    setValues(
-      Array.from({ length: 3 }, () => ({
-        option: "",
+    setValues([
+      {
+        option: "CASH",
         nominal: 0,
-      }))
-    );
+      },
+      {
+        option: "TRANSFER BANK",
+        nominal: 0,
+      },
+      {
+        option: "KARTU KREDIT",
+        nominal: 0,
+      },
+    ]);
     onCloseDrawer();
   };
 
-  const renderInput = (index) => {
-    const handleChangeOption = (value) => {
-      const newValues = [...values];
-      newValues[index].option = value;
-      setValues(newValues);
-    };
+  const handleChangeOption = (value, index) => {
+    const newValues = [...values];
+    newValues[index].option = value;
+    setValues(newValues);
+  };
 
-    const handleChangeNominal = (value) => {
-      const newValues = [...values];
-      newValues[index].nominal = value;
-      setValues(newValues);
-    };
-
-    return (
-      <div key={index} className="mt-4 grid grid-cols-2">
-        <Select className="mr-2" value={values[index].option} onChange={handleChangeOption}>
-          <Option value="CASH">Cash</Option>
-          <Option value="TRANSFER BANK">Transfer Bank</Option>
-          <Option value="KARTU KREDIT">Kartu Kredit</Option>
-        </Select>
-        <InputNumber
-          onFocus={(e) => e.target.select()}
-          placeholder="Masukan Nominal"
-          min={0}
-          className="w-full"
-          formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-          parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
-          value={values[index].nominal}
-          onChange={handleChangeNominal}
-          key={index}
-        />
-      </div>
-    );
+  const handleChangeNominal = (value, index) => {
+    const newValues = [...values];
+    newValues[index].nominal = value;
+    setValues(newValues);
   };
 
   const totalInputValue = values.reduce((acc, cur) => acc + cur.nominal, 0);
@@ -117,7 +102,59 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
       <p>Nama Customer : {data?.customer_name ?? ""}</p>
       <p>Total Harga : {formatter.format(data?.total ?? 0)}</p>
 
-      {Array.from({ length: 3 }, (_, i) => renderInput(i))}
+      <div className="mt-4 grid grid-cols-2">
+        <Select className="mr-2" value={values[0]?.option} onChange={(v) => handleChangeOption(v, 0)}>
+          <Select.Option value="CASH">Cash</Select.Option>
+          <Select.Option value="TRANSFER BANK">Transfer Bank</Select.Option>
+          <Select.Option value="KARTU KREDIT">Kartu Kredit</Select.Option>
+        </Select>
+        <InputNumber
+          onFocus={(e) => e.target.select()}
+          placeholder="Masukan Nominal"
+          min={0}
+          className="w-full"
+          formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+          parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
+          value={values[0]?.nominal}
+          onChange={(v) => handleChangeNominal(v, 0)}
+        />
+      </div>
+
+      <div className="mt-4 grid grid-cols-2">
+        <Select className="mr-2" value={values[1]?.option} onChange={(v) => handleChangeOption(v, 1)}>
+          <Select.Option value="CASH">Cash</Select.Option>
+          <Select.Option value="TRANSFER BANK">Transfer Bank</Select.Option>
+          <Select.Option value="KARTU KREDIT">Kartu Kredit</Select.Option>
+        </Select>
+        <InputNumber
+          onFocus={(e) => e.target.select()}
+          placeholder="Masukan Nominal"
+          min={0}
+          className="w-full"
+          formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+          parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
+          value={values[1]?.nominal}
+          onChange={(v) => handleChangeNominal(v, 1)}
+        />
+      </div>
+
+      <div className="mt-4 grid grid-cols-2">
+        <Select className="mr-2" value={values[2]?.option} onChange={(v) => handleChangeOption(v, 2)}>
+          <Select.Option value="CASH">Cash</Select.Option>
+          <Select.Option value="TRANSFER BANK">Transfer Bank</Select.Option>
+          <Select.Option value="KARTU KREDIT">Kartu Kredit</Select.Option>
+        </Select>
+        <InputNumber
+          onFocus={(e) => e.target.select()}
+          placeholder="Masukan Nominal"
+          min={0}
+          className="w-full"
+          formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+          parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
+          value={values[2]?.nominal}
+          onChange={(v) => handleChangeNominal(v, 2)}
+        />
+      </div>
 
       <div className="grid items-center grid-cols-2 mt-4">
         <p className="m-0">OTH</p>
