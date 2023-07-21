@@ -648,7 +648,15 @@ export default function daftarKeluarBarang({ companyOptions }) {
                         });
                       }
                     }}
-                    onCancel={() => {}}
+                    onCancel={() => {
+                      setCancelModal({
+                        ...cancelModal,
+                        visible: false,
+                        id: null,
+                        reason: "",
+                        loading: false,
+                      });
+                    }}
                   >
                     <p>Apakah anda yakin akan membatalkan permintaan ini? Harap isi alasan pembatalan dibawah ini:</p>
                     <Input.TextArea
@@ -740,13 +748,15 @@ export default function daftarKeluarBarang({ companyOptions }) {
                       }}
                       okText="Ya"
                       cancelText="Tidak"
-                      onConfirm={() =>
+                      onConfirm={() => {
+                        if (data.length === 0) return;
+
                         setCancelModal({
                           ...cancelModal,
                           visible: true,
                           bulk: true,
-                        })
-                      }
+                        });
+                      }}
                       placement="top"
                     >
                       <Button className="flex gap-x-2 items-center font-bold" type="default" danger>
