@@ -8,6 +8,8 @@ var tempSupplierId = 0;
 var tempLocationId;
 
 const CreateOrderSale = async (values, listId, form, router, setLoading) => {
+  tempProductListId = [];
+  
   // CLEANING DATA
   listId.forEach((element) => {
     tempProductListId.push({ id: element });
@@ -82,7 +84,6 @@ const putRelationSaleDetail = async (id, value, form, router, setLoading) => {
     form.resetFields();
     router.replace(`/dashboard/penjualan/order-penjualan/print/${id}`);
     openNotificationWithIcon("success");
-    tempProductListId = [];
   } else {
     openNotificationWithIcon("error");
   }
