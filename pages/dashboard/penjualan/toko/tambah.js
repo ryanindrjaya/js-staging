@@ -614,6 +614,12 @@ function Toko({ props }) {
     setSelectedCategory(category);
   };
 
+  const handleEnterSubmit = (e) => {
+    if (e.keyCode === 13) {
+      onFinish(form.getFieldsValue(), false);
+    }
+  };
+
   return (
     <>
       <Head>
@@ -661,6 +667,7 @@ function Toko({ props }) {
               }}
               onFinish={(values) => onFinish(values, false)}
               onFinishFailed={validateError}
+              onKeyUp={handleEnterSubmit}
             >
               <DateTimeComponent />
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-1">

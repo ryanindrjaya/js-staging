@@ -279,6 +279,12 @@ function Tambah({ props }) {
     });
   }, []);
 
+  const handleEnterSubmit = (e) => {
+    if (e.keyCode === 13) {
+      onFinish(form.getFieldsValue(), false);
+    }
+  };
+
   return (
     <>
       <Head>
@@ -296,6 +302,7 @@ function Tambah({ props }) {
               }}
               onFinish={onFinish}
               onFinishFailed={onFinishFailed}
+              onKeyUp={handleEnterSubmit}
             >
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">

@@ -302,6 +302,8 @@ function Toko({ props }) {
     });
   };
 
+  const warningLimit = () => {};
+
   const calculateDifference = (date1, date2) => {
     const d1 = new Date(date1);
     const d2 = new Date(date2);
@@ -573,7 +575,7 @@ function Toko({ props }) {
   }, [ppnActive, grandTotal]);
 
   useEffect(() => {
-    cekLimit();
+    warningLimit();
   }, [grandTotal]);
 
   useEffect(() => {

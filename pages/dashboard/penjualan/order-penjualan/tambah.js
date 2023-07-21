@@ -429,6 +429,12 @@ function PesananSales({ props }) {
     }
   };
 
+  const handleEnterSubmit = (e) => {
+    if (e.keyCode === 13) {
+      onFinish(form.getFieldsValue(), false);
+    }
+  };
+
   return (
     <>
       <Head>
@@ -457,7 +463,13 @@ function PesananSales({ props }) {
               </div>
             </div>
 
-            <Form form={form} name="add" onFinish={(values) => onFinish(values, false)} onFinishFailed={validateError}>
+            <Form
+              onKeyUp={handleEnterSubmit}
+              form={form}
+              name="add"
+              onFinish={(values) => onFinish(values, false)}
+              onFinishFailed={validateError}
+            >
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-4">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
