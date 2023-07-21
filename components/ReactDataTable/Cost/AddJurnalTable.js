@@ -1,6 +1,6 @@
 import DataTable from "react-data-table-component";
 import AlertDialog from "../../Alert/Alert";
-import { Input, InputNumber, Select, Form, Row, DatePicker } from "antd";
+import { Input, InputNumber, Select, Form, Row, DatePicker, notification } from "antd";
 import { useDispatch } from "react-redux";
 
 export default function ReactDataTable({
@@ -37,11 +37,37 @@ export default function ReactDataTable({
   const onChangeKredit = (value, row, index) => {
     dispatch({ type: "CHANGE_KREDIT", kredit: value, data: row, index: index });
     setKreditValue(value);
+    var saldo = parseFloat(row?.attributes?.saldo);
+
+    //default kredit
+    if(row.attributes.jenis_akun === true && saldo > value){
+    } else if (row.attributes.jenis_akun === false){
+    } else {
+      notification["error"]({
+        message: "Gagal menambahkan data",
+        description: "Saldo akun kurang untuk melakukan pembayaran.",
+      });
+
+    }
+
   };
 
-  const onChangeDebit = (value, row, index) => {
+  const onChangeDebit = (value, row, index) => { console.log("row", row);
     dispatch({ type: "CHANGE_DEBIT", debit: value, data: row, index: index });
     setDebitValue(value);
+    var saldo = parseFloat(row?.attributes?.saldo);
+
+    //default debit
+    if(row.attributes.jenis_akun === true){
+    } else if (row.attributes.jenis_akun === false && saldo > value){
+    } else {
+      notification["error"]({
+        message: "Gagal menambahkan data",
+        description: "Saldo akun kurang untuk melakukan pembayaran.",
+      });
+
+    }
+
   };
 
   const onConfirm = (id) => { console.log("id nih", id);
