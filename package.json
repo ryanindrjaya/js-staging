@@ -132,5 +132,8 @@
 		"nodemon": "^2.0.4",
 		"redux-devtools-extension": "^2.13.8",
 		"sass": "^1.43.2"
+	},
+	"engines": {
+		"node": "16.x"
 	}
 }
