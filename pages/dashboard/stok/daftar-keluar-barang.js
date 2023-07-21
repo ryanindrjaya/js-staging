@@ -83,7 +83,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
       console.log("no ref ==>", noRefs);
 
       if (noRefs?.data?.length > 0) {
-        const options = noRefs.data.map((item) => ({
+        const options = noRefs.data.reverse().map((item) => ({
           label: item,
           value: item,
         }));
