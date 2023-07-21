@@ -11,6 +11,7 @@ import {
   Select,
   Skeleton,
   Space,
+  Spin,
   Table,
   Tag,
   message,
@@ -684,10 +685,16 @@ function PembayaranToko({ props }) {
                     />
                   </Table>
                 ) : (
-                  <Empty
-                    description="Tidak ada data penjualan pada tanggal ini."
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                  />
+                  <div className="w-full flex justify-center">
+                    {loadingTable ? (
+                      <Spin />
+                    ) : (
+                      <Empty
+                        description="Tidak ada data penjualan pada tanggal ini."
+                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      />
+                    )}
+                  </div>
                 )}
               </>
             )}
