@@ -82,6 +82,7 @@ const putRelationSaleDetail = async (id, value, form, router, setLoading) => {
     form.resetFields();
     router.replace(`/dashboard/penjualan/order-penjualan/print/${id}`);
     openNotificationWithIcon("success");
+    tempProductListId = [];
   } else {
     openNotificationWithIcon("error");
   }
