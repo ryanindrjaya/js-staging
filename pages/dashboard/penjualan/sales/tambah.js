@@ -283,7 +283,6 @@ function Toko({ props }) {
         values.customer = customer.id;
         values.customer_name = customer.attributes?.name;
         values.sales_sell = preorderData?.id;
-        values.location = selectedLocationId;
         values.dpp = dpp;
         values.ppn = ppn;
         values.status = "Diproses";
@@ -832,33 +831,6 @@ function Toko({ props }) {
                         Bulan
                       </Select.Option>
                     </Select>
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="location"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Lokasi tidak boleh kosong!",
-                      },
-                    ]}
-                  >
-                    <Select
-                      onChange={(e) => {
-                        setSelectedLocationId(e);
-                        // getProductAtLocation(e);
-                      }}
-                      placeholder="Pilih Lokasi"
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      options={locations?.map(({ attributes, id }) => ({
-                        value: id,
-                        label: attributes.name,
-                      }))}
-                    />
                   </Form.Item>
                 </div>
               </div>

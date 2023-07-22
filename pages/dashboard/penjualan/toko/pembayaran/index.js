@@ -80,7 +80,7 @@ const fethcPaymentSales = async (cookies, start = startDate, end = endDate) => {
 
   const endpoint =
     process.env.NEXT_PUBLIC_URL +
-    `/store-sales?sort[0]=createdAt:desc&populate=*&filters[createdAt][$gte]=${start}&filters[createdAt][$lte]=${end}`;
+    `/store-sales?sort[0]=createdAt:desc&populate=*&filters[createdAt][$gte]=${start}&filters[createdAt][$lte]=${end}&filters[status][$eq]=Belum Dibayar`;
   const options = {
     method: "GET",
     headers: {
@@ -153,6 +153,8 @@ function PembayaranToko({ props }) {
   const [date, setDate] = useState([moment().startOf("day"), moment().endOf("day")]);
   const [selectedDrawerData, setSelectedDrawerData] = useState({});
   const [loadingTable, setLoadingTable] = useState(false);
+  const [refetch, setRefetch] = useState(false);
+  const [kembalian, setKembalian] = useState({});
   const router = useRouter();
   const formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -161,7 +163,7 @@ function PembayaranToko({ props }) {
   });
 
   const reloadPage = () => {
-    router.reload();
+    setRefetch(!refetch);
   };
 
   const confirmPembayaran = async (record) => {
@@ -170,17 +172,21 @@ function PembayaranToko({ props }) {
 
     try {
       const totalHarga = record.attributes?.total ?? 0;
-      let kembali = paymentValue[storeTrxId] - totalHarga;
+      let kembali = kembalian?.[storeTrxId] ?? 0;
 
-      // if kembali is negative, return 0
-      if (kembali < 0) {
-        kembali = 0;
-      }
-
-      const oth = othValue[storeTrxId];
+      const oth = othValue?.[storeTrxId] ?? 0;
       const bayar = paymentValue[storeTrxId];
       const sisaPembayaran = parseFloat(totalHarga - bayar + oth).toFixed(2);
-      const mencukupi = sisaPembayaran <= 0;
+      const mencukupi = parseFloat(sisaPembayaran) <= 0;
+
+      console.log({
+        oth,
+        totalHarga,
+        kembali,
+        bayar,
+        sisaPembayaran,
+        mencukupi,
+      });
 
       if (mencukupi) {
         const inventoryOut = await createInventoryFromPenjualan(record);
@@ -304,12 +310,29 @@ function PembayaranToko({ props }) {
     }
 
     fetchDataSales();
-  }, [router.query]);
+  }, [router.query, refetch]);
+
+  useEffect(() => {
+    if (paymentValue && othValue) {
+      for (const [key, value] of Object.entries(paymentValue)) {
+        const totalHarga = dataSales.find((data) => data.id === parseInt(key))?.attributes?.total ?? 0;
+        const oth = othValue[key] ?? 0;
+        const bayar = value ?? 0;
+
+        const totalKembalian = bayar - totalHarga - oth;
+
+        setKembalian({
+          ...kembalian,
+          [key]: totalKembalian < 0 ? 0 : parseFloat(totalKembalian).toFixed(2),
+        });
+      }
+    }
+  }, [paymentValue, othValue]);
 
   return (
     <>
       <Head>
-        <title>Penjualan Toko</title>
+        <title>Pembayaran Toko</title>
       </Head>
       <DashboardLayout>
         <LayoutWrapper style={{}}>
@@ -581,8 +604,6 @@ function PembayaranToko({ props }) {
                       render={(record) => {
                         const totalHarga = record.attributes?.total ?? 0;
                         const dataPayment = record?.attributes?.store_payments?.data ?? [];
-                        const payment = paymentValue?.[record.id] ?? 0;
-                        const oth = othValue?.[record.id] ?? 0;
 
                         if (record.attributes.status === "Dibayar" || record.attributes.status === "Diretur") {
                           const dataPaymentValue = dataPayment.reduce(
@@ -597,9 +618,25 @@ function PembayaranToko({ props }) {
                           return formatter.format(kembali);
                         }
 
-                        const kembali = payment - totalHarga - oth;
-
-                        return formatter.format(Math.max(kembali, 0));
+                        return (
+                          <InputNumber
+                            onFocus={(e) => e.target.select()}
+                            aria-readonly={
+                              record.attributes.status === "Dibayar" || record.attributes.status === "Diretur"
+                            }
+                            placeholder="Masukan Nominal"
+                            value={kembalian?.[record.id] ?? 0}
+                            onChange={(v) => {
+                              setKembalian({
+                                ...othValue,
+                                [record.id]: v,
+                              });
+                            }}
+                            formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                            parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
+                            style={{ width: 150 }}
+                          />
+                        );
                       }}
                     />
                     <Column

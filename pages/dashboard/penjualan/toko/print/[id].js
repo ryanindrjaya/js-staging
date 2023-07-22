@@ -39,14 +39,13 @@ function CetakPenjualan({ props }) {
   const name = process.env.STAKEHOLDER_NAME;
   const data = sales.data.attributes;
 
+  // stakeholder info
+  const stakeholderAddress = "Jalan Merdeka Timur II/10 RT/RW 001/001 Malang";
+  const stakeholderPhone = "(0341) 325837/369339/322208";
+
   // header left
-  const address =
-    data.location.data.attributes.street +
-    ", " +
-    data.location.data.attributes.city +
-    ", " +
-    data.location.data.attributes.province;
-  const phone = data.location.data.attributes.phone;
+  const address = stakeholderAddress;
+  const phone = stakeholderPhone;
   const date = data.sale_date; // "2023-04-08"
   const formattedDate = new Date(date).toLocaleDateString("en-GB");
   console.log(formattedDate); // "08/04/2023"

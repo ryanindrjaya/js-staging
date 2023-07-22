@@ -110,7 +110,7 @@ function PanelSale({ props }) {
 
   // Range Picker
   const { RangePicker } = DatePicker;
-    // modal
+  // modal
   const [selectedData, setSelectedData] = useState(null);
   const [openModal, setOpenModal] = useState(false);
 
@@ -455,8 +455,7 @@ function PanelSale({ props }) {
         <LayoutWrapper style={{}}>
           <TitlePage titleText={"Daftar Penjualan Panel"} />
           <LayoutContent>
-
-          <Modal
+            <Modal
               open={openModal}
               onClose={() => {
                 router.replace(
@@ -513,9 +512,6 @@ function PanelSale({ props }) {
                     </Descriptions.Item>
                     <Descriptions.Item label="Tempo" span={4}>
                       {selectedData?.attributes?.tempo_days} {selectedData?.attributes?.tempo_time}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Lokasi" span={4}>
-                      {selectedData?.attributes?.location?.data?.attributes?.name}
                     </Descriptions.Item>
                     <Descriptions.Item label="Catatan" span={2}>
                       {selectedData?.attributes?.sale_note}

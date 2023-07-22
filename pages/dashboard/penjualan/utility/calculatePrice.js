@@ -6,8 +6,8 @@ export default function calculatePrice(row, products, productTotalPrice, product
   var disc = 0;
   var margin = 0;
 
-  var Dp1 = row.attributes?.unit_1_dp1;
-  var Dp2 = row.attributes?.unit_1_dp2;
+  var Dp1 = row.attributes?.disc_1_1;
+  var Dp2 = 0;
 
   // check if Dp1, Dp2, Dp3 changed
   if (products.productInfo[index]?.d1) {
@@ -41,23 +41,17 @@ export default function calculatePrice(row, products, productTotalPrice, product
   // check if margin changed
   if (products.productInfo[index]?.margin) {
     margin = products.productInfo[index]?.margin ?? 0;
+  } else if (products.productInfo[index]?.margin === 0 || products.productInfo[index]?.margin === null) {
+    margin = 0;
   }
 
   if (disc > 0) {
-    console.log("disc = ", disc);
     priceUnit = priceUnit - disc;
   }
 
-  console.log("dp1", Dp1);
-
   margin = (priceUnit * margin) / 100;
 
-  console.log("priceUnit = ", priceUnit);
-  console.log("margin (%) = ", margin);
-
   priceUnit = priceUnit + margin;
-
-  console.log("priceUnit + margin (%) = ", priceUnit);
 
   var price1 = calculatePercentage(priceUnit, Dp1);
   var price2 = calculatePercentage(price1, Dp2);

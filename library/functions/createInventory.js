@@ -66,9 +66,25 @@ const getStoreRetur = async (id) => {
   return data;
 };
 
+const updateLocations = async ({ id, body, url }) => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/${url}/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${cookies.token}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  const data = await response.json();
+
+  return data;
+};
+
 export async function InventoryOutFromPanel(id, customer, location) {
   try {
     const data = [];
+    const locations = [];
 
     //   console.log("row", row);
     const sale = await getPanelSale(id);
@@ -99,6 +115,10 @@ export async function InventoryOutFromPanel(id, customer, location) {
 
         if (totalOrder > 0) {
           if (unitOrder && product && location) {
+            if (!locations.includes(location)) {
+              locations.push(location);
+            }
+
             const item = {
               location: location,
               product: product.id,
@@ -118,11 +138,26 @@ export async function InventoryOutFromPanel(id, customer, location) {
     });
 
     if (data.length > 0) {
+      updateLocations({
+        id: row.id,
+        body: {
+          data: {
+            locations: locations,
+          },
+        },
+        url: "panel-sales",
+      });
+
+      const promises = locations.map((location) => getLocationsDetail(location));
+      const locationsDetail = await Promise.all(promises);
+
       const body = {
         data,
         no_referensi: no_ref,
         type: "Terjual",
-        keterangan: `Penjualan ke ${customer} di ${location}`,
+        keterangan: `Penjualan ke ${customer} di ${
+          locationsDetail?.map((location) => location.data?.attributes?.name).join(", ") || "Gudang"
+        }`,
       };
 
       const status = await addToGudang(body);
@@ -137,9 +172,10 @@ export async function InventoryOutFromPanel(id, customer, location) {
     });
   }
 }
-export async function InventoryOutFromNonPanel(id, customer, location) {
+export async function InventoryOutFromNonPanel(id, customer) {
   try {
     const data = [];
+    const locations = [];
 
     //   console.log("row", row);
     const sale = await getNonPanelSale(id);
@@ -170,6 +206,10 @@ export async function InventoryOutFromNonPanel(id, customer, location) {
 
         if (totalOrder > 0) {
           if (unitOrder && product && location) {
+            if (!locations.includes(location)) {
+              locations.push(location);
+            }
+
             const item = {
               location: location,
               product: product.id,
@@ -189,11 +229,26 @@ export async function InventoryOutFromNonPanel(id, customer, location) {
     });
 
     if (data.length > 0) {
+      updateLocations({
+        id: row.id,
+        body: {
+          data: {
+            locations: locations,
+          },
+        },
+        url: "non-panel-sales",
+      });
+
+      const promises = locations.map((location) => getLocationsDetail(location));
+      const locationsDetail = await Promise.all(promises);
+
       const body = {
         data,
         no_referensi: no_ref,
         type: "Terjual",
-        keterangan: `Penjualan ke ${customer} di ${location}`,
+        keterangan: `Penjualan ke ${customer} di ${
+          locationsDetail?.map((location) => location.data?.attributes?.name).join(", ") || "Gudang"
+        }`,
       };
 
       const status = await addToGudang(body);
@@ -212,11 +267,11 @@ export async function InventoryOutFromNonPanel(id, customer, location) {
 export async function createInventoryFromPenjualanSales(row) {
   try {
     const data = [];
+    const locations = [];
 
     //   console.log("row", row);
     const salesSale = await getSalesSale(row.id);
     const sales_sale_details = salesSale.data.attributes.sales_sale_details.data;
-    const storeLocation = salesSale.data.attributes.location.data;
     const no_sales_sale = salesSale.data.attributes.no_sales_sale;
     const customer = salesSale.data.attributes.customer?.data?.attributes?.name;
 
@@ -244,6 +299,10 @@ export async function createInventoryFromPenjualanSales(row) {
 
         if (totalOrder > 0) {
           if (unitOrder && product && location) {
+            if (!locations.includes(location)) {
+              locations.push(location);
+            }
+
             const item = {
               location: location,
               product: product.id,
@@ -263,11 +322,26 @@ export async function createInventoryFromPenjualanSales(row) {
     });
 
     if (data.length > 0) {
+      updateLocations({
+        id: row.id,
+        body: {
+          data: {
+            locations: locations,
+          },
+        },
+        url: "sales-sales",
+      });
+
+      const promises = locations.map((location) => getLocationsDetail(location));
+      const locationsDetail = await Promise.all(promises);
+
       const body = {
         data,
         no_referensi: no_sales_sale,
         type: "Terjual",
-        keterangan: `Penjualan ke ${customer} di ${storeLocation.attributes.name}`,
+        keterangan: `Penjualan ke ${customer} di ${
+          locationsDetail?.map((location) => location.data?.attributes?.name).join(", ") || "Gudang"
+        }`,
       };
 
       const status = await addToGudang(body);
@@ -285,14 +359,28 @@ export async function createInventoryFromPenjualanSales(row) {
   }
 }
 
+const getLocationsDetail = async (id) => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/locations/${id}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${cookies.token}`,
+    },
+  });
+
+  const data = await response.json();
+
+  return data;
+};
+
 export async function createInventoryFromPenjualan(row) {
   try {
     const data = [];
+    const locations = [];
 
     //   console.log("row", row);
     const storeSale = await getStoreSale(row.id);
     const store_sale_details = storeSale.data.attributes.store_sale_details.data;
-    const storeLocation = storeSale.data.attributes.location.data;
     const no_store_sale = storeSale.data.attributes.no_store_sale;
     const customer = storeSale.data.attributes.customer_name;
 
@@ -320,6 +408,10 @@ export async function createInventoryFromPenjualan(row) {
 
         if (totalOrder > 0) {
           if (unitOrder && product && location) {
+            if (!locations.includes(location)) {
+              locations.push(location);
+            }
+
             const item = {
               location: location,
               product: product.id,
@@ -339,11 +431,26 @@ export async function createInventoryFromPenjualan(row) {
     });
 
     if (data.length > 0) {
+      updateLocations({
+        id: row.id,
+        body: {
+          data: {
+            locations: locations,
+          },
+        },
+        url: "store-sales",
+      });
+
+      const promises = locations.map((location) => getLocationsDetail(location));
+      const locationsDetail = await Promise.all(promises);
+
       const body = {
         data,
         no_referensi: no_store_sale,
         type: "Terjual",
-        keterangan: `Penjualan ke ${customer} di ${storeLocation.attributes.name}`,
+        keterangan: `Penjualan ke ${customer} di ${
+          locationsDetail?.map((location) => location.data?.attributes?.name).join(", ") || "Gudang"
+        }`,
       };
 
       const status = await addToGudang(body);

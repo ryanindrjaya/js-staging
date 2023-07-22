@@ -142,7 +142,7 @@ export default function PembayaranToko() {
     return (
       <>
         <Summary.Row>
-          <Summary.Cell align="right" colSpan={5} index={0}>
+          <Summary.Cell align="right" colSpan={6} index={0}>
             <div className="border-y border-black py-1 mt-4 ">
               <span className="pr-5 font-bold">SUB TOTAL</span>
             </div>
@@ -162,7 +162,7 @@ export default function PembayaranToko() {
           </Summary.Cell>
         </Summary.Row>
         <Summary.Row>
-          <Summary.Cell align="right" colSpan={5} index={0}>
+          <Summary.Cell align="right" colSpan={6} index={0}>
             <div className="bg-[#036b82] py-1 mt-2 ">
               <span className="pr-5 font-bold text-white">TOTAL</span>
             </div>
@@ -174,7 +174,7 @@ export default function PembayaranToko() {
           </Summary.Cell>
         </Summary.Row>
         <Summary.Row>
-          <Summary.Cell align="right" colSpan={4} index={0}>
+          <Summary.Cell align="right" colSpan={5} index={0}>
             <div className="bg-transparent py-1 mt-2 ">
               <span className="pr-5 font-bold text-white"></span>
             </div>
@@ -269,8 +269,16 @@ export default function PembayaranToko() {
                 loading={loading.table}
                 dataSource={data.data}
                 pagination={false}
+                scroll={{ x: 1000 }}
               >
                 <Column title="DITAMBAHKAN OLEH" key="added_by" dataIndex="added_by" />
+                <Column
+                  className="uppercase"
+                  align="left"
+                  title="Catatan Staff"
+                  key="catatan"
+                  dataIndex="catatan_staff"
+                />
                 <Column
                   render={(value) => moment(value).format("DD/MM/YYYY HH:mm:ss")}
                   className="uppercase"

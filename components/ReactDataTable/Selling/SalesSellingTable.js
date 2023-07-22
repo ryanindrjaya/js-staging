@@ -346,12 +346,6 @@ export default function SalesSellingTable({
       },
     },
     {
-      name: "Lokasi Penjualan",
-      width: "180px",
-      //selector: (row) => row.attributes?.supplier.data.attributes.name ?? "-",
-      selector: (row) => row.attributes?.location.data.attributes.name ?? "-",
-    },
-    {
       name: "Catatan Staff",
       width: "180px",
       selector: (row) => row.attributes?.sale_staff ?? "-",
