@@ -28,6 +28,7 @@ import Customer from "@iso/components/Form/AddCost/CustomerForm";
 import Area from "@iso/components/Form/AddCost/AreaForm";
 import Wilayah from "@iso/components/Form/AddCost/WilayahForm";
 import nookies from "nookies";
+import moment from "moment";
 
 Piutang.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -352,6 +353,8 @@ function Piutang({ props }) {
     values.bayar1 = totalTunai;
     values.bayar2 = totalTransfer;
     values.bayar3 = totalGiro;
+
+    if(values.tanggal === null || values.tanggal === undefined) values.tanggal = moment();
 
     props.piutang.data.forEach((element) => {
       if (values.no_piutang == element.attributes.no_piutang) {
@@ -1004,6 +1007,7 @@ function Piutang({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="tanggal">
                     <DatePicker
+                      defaultValue={moment()}
                       rules={[
                         {
                           required: true,
