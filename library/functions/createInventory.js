@@ -115,8 +115,14 @@ export async function InventoryOutFromPanel(id, customer, location) {
 
         if (totalOrder > 0) {
           if (unitOrder && product && location) {
-            if (!locations.includes(location)) {
-              locations.push(location);
+            if (!locations.some((loc) => loc.location === location)) {
+              locations.push({
+                location,
+                stok_keluar: totalOrder >= qty ? qty : totalOrder,
+                unit: detailInven?.unit || unitOrder,
+                product: product.id,
+                product_name: product.attributes.name,
+              });
             }
 
             const item = {
@@ -139,16 +145,17 @@ export async function InventoryOutFromPanel(id, customer, location) {
 
     if (data.length > 0) {
       updateLocations({
-        id: row.id,
+        id: id,
         body: {
           data: {
-            locations: locations,
+            locations: locations.map((loc) => loc.location),
+            detail_mutasi_stok: locations,
           },
         },
         url: "panel-sales",
       });
 
-      const promises = locations.map((location) => getLocationsDetail(location));
+      const promises = locations.map((location) => getLocationsDetail(location.location));
       const locationsDetail = await Promise.all(promises);
 
       const body = {
@@ -206,8 +213,14 @@ export async function InventoryOutFromNonPanel(id, customer) {
 
         if (totalOrder > 0) {
           if (unitOrder && product && location) {
-            if (!locations.includes(location)) {
-              locations.push(location);
+            if (!locations.some((loc) => loc.location === location)) {
+              locations.push({
+                location,
+                stok_keluar: totalOrder >= qty ? qty : totalOrder,
+                unit: detailInven?.unit || unitOrder,
+                product: product.id,
+                product_name: product.attributes.name,
+              });
             }
 
             const item = {
@@ -230,16 +243,17 @@ export async function InventoryOutFromNonPanel(id, customer) {
 
     if (data.length > 0) {
       updateLocations({
-        id: row.id,
+        id: id,
         body: {
           data: {
-            locations: locations,
+            locations: locations.map((loc) => loc.location),
+            detail_mutasi_stok: locations,
           },
         },
         url: "non-panel-sales",
       });
 
-      const promises = locations.map((location) => getLocationsDetail(location));
+      const promises = locations.map((item) => getLocationsDetail(item.location));
       const locationsDetail = await Promise.all(promises);
 
       const body = {
@@ -299,8 +313,14 @@ export async function createInventoryFromPenjualanSales(row) {
 
         if (totalOrder > 0) {
           if (unitOrder && product && location) {
-            if (!locations.includes(location)) {
-              locations.push(location);
+            if (!locations.some((loc) => loc.location === location)) {
+              locations.push({
+                location,
+                stok_keluar: totalOrder >= qty ? qty : totalOrder,
+                unit: detailInven?.unit || unitOrder,
+                product: product.id,
+                product_name: product.attributes.name,
+              });
             }
 
             const item = {
@@ -326,13 +346,14 @@ export async function createInventoryFromPenjualanSales(row) {
         id: row.id,
         body: {
           data: {
-            locations: locations,
+            locations: locations.map((loc) => loc.location),
+            detail_mutasi_stok: locations,
           },
         },
         url: "sales-sales",
       });
 
-      const promises = locations.map((location) => getLocationsDetail(location));
+      const promises = locations.map((item) => getLocationsDetail(item.location));
       const locationsDetail = await Promise.all(promises);
 
       const body = {
@@ -408,8 +429,14 @@ export async function createInventoryFromPenjualan(row) {
 
         if (totalOrder > 0) {
           if (unitOrder && product && location) {
-            if (!locations.includes(location)) {
-              locations.push(location);
+            if (!locations.some((loc) => loc.location === location)) {
+              locations.push({
+                location,
+                stok_keluar: totalOrder >= qty ? qty : totalOrder,
+                unit: detailInven?.unit || unitOrder,
+                product: product.id,
+                product_name: product.attributes.name,
+              });
             }
 
             const item = {
@@ -435,13 +462,14 @@ export async function createInventoryFromPenjualan(row) {
         id: row.id,
         body: {
           data: {
-            locations: locations,
+            locations: locations.map((loc) => loc.location),
+            detail_mutasi_stok: locations,
           },
         },
         url: "store-sales",
       });
 
-      const promises = locations.map((location) => getLocationsDetail(location));
+      const promises = locations.map((item) => getLocationsDetail(item.location));
       const locationsDetail = await Promise.all(promises);
 
       const body = {

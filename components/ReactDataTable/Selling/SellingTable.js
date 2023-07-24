@@ -476,9 +476,16 @@ export default function ReactDataTable({
         const dataPaymentMethod =
           row?.attributes?.store_payments?.data?.map((payment) => payment?.attributes?.payment_method).join(", ") ??
           null;
-
-        console.log(row.id, row?.attributes?.store_payments?.data);
         return dataPaymentMethod;
+      },
+    },
+    {
+      name: "Lokasi",
+      width: "180px",
+      wrap: true,
+      selector: (row) => {
+        const locations = row?.attributes?.locations?.data?.map((item) => item?.attributes?.name).join(", ") ?? null;
+        return locations;
       },
     },
     {

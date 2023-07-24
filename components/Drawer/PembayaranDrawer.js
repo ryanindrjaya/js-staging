@@ -36,6 +36,7 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
     await createInventoryFromPenjualan(record);
 
     reloadPage();
+    onCloseDrawer();
   };
 
   const cancel = (data) => {};
@@ -107,7 +108,7 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
 
   useEffect(() => {
     setTotalAfterInput(data?.total - totalInputValue + oth);
-  }, [totalInputValue]);
+  }, [totalInputValue, oth]);
 
   useEffect(() => {
     console.log("kembalian", totalCharge);

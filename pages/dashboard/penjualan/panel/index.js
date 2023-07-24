@@ -71,7 +71,7 @@ const fetchUserSales = async (cookies) => {
 };
 
 const fetchLocation = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations?pagination[limit]=1000";
   const options = {
     method: "GET",
     headers: {
@@ -446,6 +446,34 @@ function PanelSale({ props }) {
     );
   };
 
+  const mutasiStokColumns = [
+    {
+      name: "Produk",
+      wrap: true,
+      selector: ({ product_name = "Nama Produk" }) => {
+        return product_name.toUpperCase();
+      },
+    },
+    {
+      name: "Stok Keluar",
+      selector: ({ stok_keluar = 0, unit = "" }) => `${stok_keluar} ${unit}`,
+    },
+    {
+      name: "Lokasi",
+      selector: ({ location }) => {
+        const selectedLocation = locations.find((item) => item.id === location);
+        return selectedLocation?.attributes?.name || "-";
+      },
+    },
+    {
+      name: "Detail",
+      align: "center",
+      selector: ({ product, location }) => (
+        <Link href={`/dashboard/stok?product=${product}&location=${location}`}>Lihat Kartu Stok</Link>
+      ),
+    },
+  ];
+
   return (
     <>
       <Head>
@@ -562,6 +590,15 @@ function PanelSale({ props }) {
                       customStyles={customStyles}
                       columns={detailColumns}
                       data={selectedData?.attributes?.panel_sale_details?.data}
+                    />
+                  </div>
+
+                  <div className="mt-2">
+                    <p className="mb-2 text-base font-semibold uppercase">Detail Mutasi Stok</p>
+                    <DataTable
+                      customStyles={customStyles}
+                      columns={mutasiStokColumns}
+                      data={selectedData?.attributes?.detail_mutasi_stok ?? []}
                     />
                   </div>
                 </>

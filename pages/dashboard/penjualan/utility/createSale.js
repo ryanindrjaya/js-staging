@@ -139,22 +139,21 @@ const putRelationSaleDetail = async (id, value, form, router, url, page, locatio
     });
     const resData = await getData.json();
     console.log("res data", resData);
-    const location = resData?.data?.attributes?.location?.data?.attributes?.name;
     const customer =
       resData?.data?.attributes?.customer?.data?.attributes?.name ?? resData?.data?.attributes?.customer_name;
     console.log("otw update stock");
     switch (page) {
       case "panel sale":
         console.log("panel sale");
-        const inventoryOut = await InventoryOutFromPanel(res.data.id, customer, location);
+        const inventoryOut = await InventoryOutFromPanel(res.data.id, customer);
         break;
       case "non panel sale":
         console.log("non panel sale");
-        const inventoryOutNonPanel = await InventoryOutFromNonPanel(res.data.id, customer, location);
+        const inventoryOutNonPanel = await InventoryOutFromNonPanel(res.data.id, customer);
         break;
       case "retur store sale":
         console.log("retur store sale");
-        const inventoryInReturStore = await createInventoryFromReturPenjualan(res.data, customer, location);
+        const inventoryInReturStore = await createInventoryFromReturPenjualan(res.data, customer);
 
         const putStatus = {
           data: {
