@@ -74,7 +74,6 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange 
   const columns = [
     {
       name: "Tindakan",
-      width: "w-1/5",
       selector: (row) => (
         <>
           <Popover content={content(row)} placement="bottom">
@@ -87,31 +86,26 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange 
     },
     {
       name: "SKU",
-      width: "150px",
       sortable: true,
       selector: (row) => row.attributes?.SKU,
     },
     {
       name: "Nama Produk",
-      width: "w-1/5",
       sortable: true,
       selector: (row) => row.attributes?.name,
     },
     {
       name: "Kategori",
-      width: "w-1/5",
       sortable: true,
       selector: (row) => row.attributes?.category?.data?.attributes?.name,
     },
     {
       name: "Pabrikasi",
-      width: "w-1/5",
       sortable: true,
       selector: (row) => row.attributes?.manufacture?.data?.attributes?.name,
     },
     {
       name: "Deskripsi",
-      width: "w-1/5",
       sortable: true,
       selector: (row) => row.attributes?.description,
     },
