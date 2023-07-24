@@ -163,7 +163,6 @@ function Toko({ props }) {
   const [totalPrice, setTotalPrice] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
   const [dataLocationStock, setDataLocationStock] = useState();
-  const [selectedLocationId, setSelectedLocationId] = useState();
   const [preorderData, setPreOrderData] = useState();
   const [time, setTime] = useState(moment().format("HH:mm:ss"));
 
@@ -487,14 +486,12 @@ function Toko({ props }) {
 
     form.setFieldsValue({
       sale_date: moment(momentString),
-      location: dataSalesSell.location.data.attributes.name,
       tempo_days: dataSalesSell.tempo_days,
       tempo_time: dataSalesSell.tempo_time,
       sale_note: dataSalesSell.sale_note,
       customer: dataSalesSell.customer?.data?.attributes.name,
     });
     setCustomer(dataSalesSell.customer.data);
-    setSelectedLocationId(dataSalesSell.location?.data?.id);
     setPreOrderData(res.data);
 
     dispatch({

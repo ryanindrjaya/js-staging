@@ -456,7 +456,8 @@ function PanelSale({ props }) {
     },
     {
       name: "Stok Keluar",
-      selector: ({ stok_keluar = 0, unit = "" }) => `${stok_keluar} ${unit}`,
+      selector: ({ stok_keluar = [] }) =>
+        stok_keluar?.length > 0 ? stok_keluar?.map(({ qty, unit }) => `${qty} ${unit}`)?.join(", ") : "",
     },
     {
       name: "Lokasi",

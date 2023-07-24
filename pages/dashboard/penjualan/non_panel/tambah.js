@@ -387,6 +387,7 @@ function Toko({ props }) {
       });
     }
   };
+  console.log("products", products);
 
   const createDetailSale = async () => {
     await createDetailSaleFunc(

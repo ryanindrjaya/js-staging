@@ -115,14 +115,28 @@ export async function InventoryOutFromPanel(id, customer, location) {
 
         if (totalOrder > 0) {
           if (unitOrder && product && location) {
-            if (!locations.some((loc) => loc.location === location)) {
+            const uid = `${product.id}${location}`;
+            if (!locations.some((loc) => loc.uid === uid)) {
               locations.push({
+                uid,
                 location,
-                stok_keluar: totalOrder >= qty ? qty : totalOrder,
-                unit: detailInven?.unit || unitOrder,
+                stok_keluar: [
+                  {
+                    qty: totalOrder >= qty ? qty : totalOrder,
+                    unit: detailInven?.unit || unitOrder,
+                  },
+                ],
                 product: product.id,
                 product_name: product.attributes.name,
               });
+            } else {
+              const index = locations.findIndex((loc) => loc.uid === uid);
+              if (index >= 0) {
+                locations[index].stok_keluar.push({
+                  qty: totalOrder >= qty ? qty : totalOrder,
+                  unit: detailInven?.unit || unitOrder,
+                });
+              }
             }
 
             const item = {
@@ -213,14 +227,28 @@ export async function InventoryOutFromNonPanel(id, customer) {
 
         if (totalOrder > 0) {
           if (unitOrder && product && location) {
-            if (!locations.some((loc) => loc.location === location)) {
+            const uid = `${product.id}${location}`;
+            if (!locations.some((loc) => loc.uid === uid)) {
               locations.push({
+                uid,
                 location,
-                stok_keluar: totalOrder >= qty ? qty : totalOrder,
-                unit: detailInven?.unit || unitOrder,
+                stok_keluar: [
+                  {
+                    qty: totalOrder >= qty ? qty : totalOrder,
+                    unit: detailInven?.unit || unitOrder,
+                  },
+                ],
                 product: product.id,
                 product_name: product.attributes.name,
               });
+            } else {
+              const index = locations.findIndex((loc) => loc.uid === uid);
+              if (index >= 0) {
+                locations[index].stok_keluar.push({
+                  qty: totalOrder >= qty ? qty : totalOrder,
+                  unit: detailInven?.unit || unitOrder,
+                });
+              }
             }
 
             const item = {
@@ -313,14 +341,28 @@ export async function createInventoryFromPenjualanSales(row) {
 
         if (totalOrder > 0) {
           if (unitOrder && product && location) {
-            if (!locations.some((loc) => loc.location === location)) {
+            const uid = `${product.id}${location}`;
+            if (!locations.some((loc) => loc.uid === uid)) {
               locations.push({
+                uid,
                 location,
-                stok_keluar: totalOrder >= qty ? qty : totalOrder,
-                unit: detailInven?.unit || unitOrder,
+                stok_keluar: [
+                  {
+                    qty: totalOrder >= qty ? qty : totalOrder,
+                    unit: detailInven?.unit || unitOrder,
+                  },
+                ],
                 product: product.id,
                 product_name: product.attributes.name,
               });
+            } else {
+              const index = locations.findIndex((loc) => loc.uid === uid);
+              if (index >= 0) {
+                locations[index].stok_keluar.push({
+                  qty: totalOrder >= qty ? qty : totalOrder,
+                  unit: detailInven?.unit || unitOrder,
+                });
+              }
             }
 
             const item = {
@@ -429,14 +471,28 @@ export async function createInventoryFromPenjualan(row) {
 
         if (totalOrder > 0) {
           if (unitOrder && product && location) {
-            if (!locations.some((loc) => loc.location === location)) {
+            const uid = `${product.id}${location}`;
+            if (!locations.some((loc) => loc.uid === uid)) {
               locations.push({
+                uid,
                 location,
-                stok_keluar: totalOrder >= qty ? qty : totalOrder,
-                unit: detailInven?.unit || unitOrder,
+                stok_keluar: [
+                  {
+                    qty: totalOrder >= qty ? qty : totalOrder,
+                    unit: detailInven?.unit || unitOrder,
+                  },
+                ],
                 product: product.id,
                 product_name: product.attributes.name,
               });
+            } else {
+              const index = locations.findIndex((loc) => loc.uid === uid);
+              if (index >= 0) {
+                locations[index].stok_keluar.push({
+                  qty: totalOrder >= qty ? qty : totalOrder,
+                  unit: detailInven?.unit || unitOrder,
+                });
+              }
             }
 
             const item = {

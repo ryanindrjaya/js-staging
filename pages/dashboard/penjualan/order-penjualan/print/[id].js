@@ -41,13 +41,8 @@ function CetakPesananSales({ props }) {
   const customer = data.customer.data?.attributes;
 
   // header left
-  const address =
-    data.location.data.attributes.street +
-    ", " +
-    data.location.data.attributes.city +
-    ", " +
-    data.location.data.attributes.province;
-  const phone = data.location.data.attributes.phone;
+  const address = "Jalan Merdeka Timur II/10 RT/RW 001/001 Malang";
+  const phone = "(0341) 325837/369339/322208";
   const date = data.sale_date; // "2023-04-08"
   const formattedDate = new Date(date).toLocaleDateString("en-GB");
   console.log(formattedDate); // "08/04/2023"
