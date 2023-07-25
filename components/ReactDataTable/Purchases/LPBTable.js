@@ -215,38 +215,6 @@ export default function ReactDataTable({
       selector: (row) => row.attributes?.name,
     },
     {
-      name: "Harga Satuan",
-      width: "150px",
-      selector: (row, idx) => {
-        var priceUnit = row.attributes?.buy_price_1;
-        if (products.productInfo[idx]?.priceUnit) {
-          priceUnit = products.productInfo[idx].priceUnit;
-        }
-        return (
-          <>
-            <Row>
-              <Form.Item name={["harga_satuan", `${idx}`]} noStyle>
-                <InputNumber
-                  disabled
-                  defaultValue={priceUnit}
-                  min={0}
-                  onChange={(e) => {
-                    onChangePriceUnit(e, row, unit[idx], idx, e);
-                  }}
-                  style={{
-                    width: "150px",
-                    marginRight: "10px",
-                  }}
-                  formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                />
-              </Form.Item>
-            </Row>
-          </>
-        );
-      },
-    },
-    {
       name: "Jumlah Pesanan",
       width: "239px",
       selector: (row, idx) => {
@@ -269,7 +237,7 @@ export default function ReactDataTable({
             <Row>
               <Form.Item name={["jumlah_qty", `${idx}`]} noStyle>
                 <InputNumber
-                  disabled={idx + 1 <= initialQty}
+                  disabled
                   defaultValue={defaultQty}
                   onChange={(e) => onChangeQty(e, row, idx)}
                   rules={[
@@ -286,7 +254,7 @@ export default function ReactDataTable({
 
               <Form.Item name={["jumlah_option", `${idx}`]} noStyle>
                 <Select
-                  disabled={idx + 1 <= initialQty}
+                  disabled
                   defaultValue={defaultIndex}
                   onChange={(value) => {
                     console.log("jumlah option  value ", value);
@@ -340,6 +308,38 @@ export default function ReactDataTable({
       },
     },
     {
+      name: "Harga Satuan",
+      width: "150px",
+      selector: (row, idx) => {
+        var priceUnit = row.attributes?.buy_price_1;
+        if (products.productInfo[idx]?.priceUnit) {
+          priceUnit = products.productInfo[idx].priceUnit;
+        }
+        return (
+          <>
+            <Row>
+              <Form.Item name={["harga_satuan", `${idx}`]} noStyle>
+                <InputNumber
+                  disabled
+                  defaultValue={priceUnit}
+                  min={0}
+                  onChange={(e) => {
+                    onChangePriceUnit(e, row, unit[idx], idx, e);
+                  }}
+                  style={{
+                    width: "150px",
+                    marginRight: "10px",
+                  }}
+                  formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                />
+              </Form.Item>
+            </Row>
+          </>
+        );
+      },
+    },
+    {
       name: "Diskon",
       width: "150px",
       selector: (row, idx) => {
@@ -352,7 +352,7 @@ export default function ReactDataTable({
           <Row align="bottom" justify="center">
             <Form.Item name={["disc_rp", `${idx}`]} noStyle>
               <InputNumber
-                disabled={idx + 1 <= initialQty}
+                disabled
                 defaultValue={defaultDisc}
                 min={0}
                 onChange={(e) => onChangeDisc(e, row, idx)}
@@ -386,7 +386,7 @@ export default function ReactDataTable({
         return (
           <div className="disabled:bg-white">
             <InputNumber
-              disabled={idx + 1 <= initialQty}
+              disabled
               controls={false}
               formatter={(value) => `${value}%`}
               max={100}
@@ -420,7 +420,7 @@ export default function ReactDataTable({
         return (
           <div className="disabled:bg-white">
             <InputNumber
-              disabled={idx + 1 <= initialQty}
+              disabled
               controls={false}
               formatter={(value) => `${value}%`}
               max={100}
@@ -454,7 +454,7 @@ export default function ReactDataTable({
         return (
           <div className="disabled:bg-white">
             <InputNumber
-              disabled={idx + 1 <= initialQty}
+              disabled
               controls={false}
               formatter={(value) => `${value}%`}
               max={100}

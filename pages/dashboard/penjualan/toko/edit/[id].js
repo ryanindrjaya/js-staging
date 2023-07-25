@@ -938,37 +938,6 @@ function EditToko({ props }) {
                     </Select>
                   </Form.Item>
                 </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="location"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Lokasi tidak boleh kosong!",
-                      },
-                    ]}
-                  >
-                    <Select
-                      placeholder="Pilih Lokasi"
-                      onChange={(e) => {
-                        setSelectedLocationId(e);
-                        // getProductAtLocation(e);
-                      }}
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                    >
-                      {locations.map((element) => {
-                        return (
-                          <Select.Option value={element.id} key={element.attributes.name}>
-                            {element.attributes.name}
-                          </Select.Option>
-                        );
-                      })}
-                    </Select>
-                  </Form.Item>
-                </div>
               </div>
               <div className="w-full flex md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
                 <SearchBar
@@ -1223,10 +1192,7 @@ function EditToko({ props }) {
                 <p className="font-bold text-lg">Total Penjualan: {formatter.format(grandTotal)}</p>
               </div>
               <div className="w-full flex justify-between">
-                <Form.Item name="sale_note" className="w-full md:w-1/2 mx-2">
-                  <TextArea rows={4} placeholder="Catatan Penjualan" />
-                </Form.Item>
-                <Form.Item name="sale_staff" className="w-full md:w-1/2 mx-2">
+                <Form.Item name="sale_staff" className="w-full">
                   <TextArea rows={4} placeholder="Catatan Staff" />
                 </Form.Item>
               </div>

@@ -1,6 +1,6 @@
 import { Button, Drawer, InputNumber, Popconfirm, Select } from "antd";
 import { CreateStorePaymenWithoutUpdate, updateTransaction } from "../../library/functions/createStorePayment";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createInventoryFromPenjualan } from "../../library/functions/createInventory";
 
 function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
@@ -36,6 +36,7 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
     await createInventoryFromPenjualan(record);
 
     reloadPage();
+    onCloseDrawer();
   };
 
   const cancel = (data) => {};
@@ -62,6 +63,9 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
   ]);
 
   const [oth, setOth] = useState(0);
+  const [totalCharge, setTotalCharge] = useState(0); // total charge [totalInputValue - oth
+  const [totalInputValue, setTotalInputValue] = useState(0); // total after input [data?.total - totalInputValue + oth
+  const [totalAfterInput, setTotalAfterInput] = useState(0); // total after input [data?.total - totalInputValue + oth
 
   const handleDrawerClose = () => {
     setValues([
@@ -93,9 +97,23 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
     setValues(newValues);
   };
 
-  const totalInputValue = values.reduce((acc, cur) => acc + cur.nominal, 0);
-  const totalAfterInput = data?.total - (totalInputValue - oth); // sisa pembayaran
-  const totalCharge = totalAfterInput <= 0 ? Math.abs(data?.total - totalInputValue + oth) : 0;
+  useEffect(() => {
+    console.log("total after input", totalAfterInput);
+    setTotalCharge(totalAfterInput <= 0 ? parseFloat(Math.abs(data?.total - totalInputValue + oth)).toFixed(2) : 0);
+  }, [totalAfterInput, oth]);
+
+  useEffect(() => {
+    setTotalInputValue(values.reduce((acc, { nominal }) => acc + nominal, 0));
+  }, [values]);
+
+  useEffect(() => {
+    setTotalAfterInput(data?.total - totalInputValue + oth);
+  }, [totalInputValue, oth]);
+
+  useEffect(() => {
+    console.log("kembalian", totalCharge);
+  }, [totalCharge]);
+
   return (
     <Drawer title={`Pembayaran Lainnya`} placement="right" size="default" onClose={handleDrawerClose} open={openDrawer}>
       <p>No.Faktur : {data?.faktur ?? ""}</p>
@@ -164,19 +182,23 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
           value={oth}
           formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
           parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
-          onChange={setOth}
+          onChange={(v) => setOth(v)}
         />
       </div>
 
       <div className="grid items-center grid-cols-2 mt-4">
         <p className="m-0">Pengembalian</p>
         <InputNumber
-          aria-readonly
-          className="w-full pointer-events-none"
+          onFocus={(e) => e.target.select()}
+          className="w-full"
           value={totalCharge}
           min={0}
           formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
           parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
+          onChange={(v) => {
+            console.log("total charge", v);
+            setTotalCharge(v);
+          }}
         />
       </div>
 

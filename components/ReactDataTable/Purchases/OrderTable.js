@@ -189,50 +189,6 @@ export default function OrderTable({
       selector: (row, idx) => row.attributes?.name,
     },
     {
-      name: "Harga Satuan",
-      width: "150px",
-      selector: (row, idx) => {
-        var priceUnit = row.attributes?.buy_price_1;
-        if (products.productInfo[idx]?.priceUnit) {
-          console.log("price unit", products.productInfo[idx].priceUnit);
-          priceUnit = products.productInfo[idx].priceUnit;
-        }
-        return (
-          <>
-            <Row>
-              <Form.Item name={["harga_satuan", `${idx}`]} noStyle>
-                <InputNumber
-                  defaultValue={priceUnit}
-                  min={0}
-                  onChange={(e) => {
-                    const selectedUnitIndex =
-                      formObj.getFieldValue("jumlah_option") ?? products?.productInfo[idx]?.unitIndex;
-
-                    console.log(products);
-
-                    console.log("test data onchange", e, row, selectedUnitIndex, idx);
-                    // console.log("selected unit", selectedUnitIndex);
-                    // onChangePriceUnit(e, row, unit, selectedUnitIndex[idx])
-
-                    // edit prupose
-                    // console.log("edit ", products?.productInfo[idx]?.unitIndex);
-
-                    onChangePriceUnit(e, row, selectedUnitIndex?.[idx] ?? 1, idx);
-                  }}
-                  style={{
-                    width: "150px",
-                    marginRight: "10px",
-                  }}
-                  formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                />
-              </Form.Item>
-            </Row>
-          </>
-        );
-      },
-    },
-    {
       name: "Jumlah Pesanan",
       width: "230px",
       selector: (row, idx) => {
@@ -319,6 +275,51 @@ export default function OrderTable({
         );
       },
     },
+    {
+      name: "Harga Satuan",
+      width: "150px",
+      selector: (row, idx) => {
+        var priceUnit = row.attributes?.buy_price_1;
+        if (products.productInfo[idx]?.priceUnit) {
+          console.log("price unit", products.productInfo[idx].priceUnit);
+          priceUnit = products.productInfo[idx].priceUnit;
+        }
+        return (
+          <>
+            <Row>
+              <Form.Item name={["harga_satuan", `${idx}`]} noStyle>
+                <InputNumber
+                  defaultValue={priceUnit}
+                  min={0}
+                  onChange={(e) => {
+                    const selectedUnitIndex =
+                      formObj.getFieldValue("jumlah_option") ?? products?.productInfo[idx]?.unitIndex;
+
+                    console.log(products);
+
+                    console.log("test data onchange", e, row, selectedUnitIndex, idx);
+                    // console.log("selected unit", selectedUnitIndex);
+                    // onChangePriceUnit(e, row, unit, selectedUnitIndex[idx])
+
+                    // edit prupose
+                    // console.log("edit ", products?.productInfo[idx]?.unitIndex);
+
+                    onChangePriceUnit(e, row, selectedUnitIndex?.[idx] ?? 1, idx);
+                  }}
+                  style={{
+                    width: "150px",
+                    marginRight: "10px",
+                  }}
+                  formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                />
+              </Form.Item>
+            </Row>
+          </>
+        );
+      },
+    },
+
     {
       name: "Diskon",
       width: "150px",

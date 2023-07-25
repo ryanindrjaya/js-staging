@@ -163,7 +163,6 @@ function Toko({ props }) {
   const [totalPrice, setTotalPrice] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
   const [dataLocationStock, setDataLocationStock] = useState();
-  const [selectedLocationId, setSelectedLocationId] = useState();
   const [preorderData, setPreOrderData] = useState();
   const [time, setTime] = useState(moment().format("HH:mm:ss"));
 
@@ -283,7 +282,6 @@ function Toko({ props }) {
         values.customer = customer.id;
         values.customer_name = customer.attributes?.name;
         values.sales_sell = preorderData?.id;
-        values.location = selectedLocationId;
         values.dpp = dpp;
         values.ppn = ppn;
         values.status = "Diproses";
@@ -301,7 +299,7 @@ function Toko({ props }) {
           disc: editedProduct?.[idx]?.disc || 0,
           disc1: editedProduct?.[idx]?.d1 || attributes?.disc_1_1,
           disc2: editedProduct?.[idx]?.d2 || attributes?.unit_1_dp2,
-          expired_date: values?.expired_date?.[idx]?.format("YYYY-MM-DD") || null,
+          // expired_date: values?.expired_date?.[idx]?.format("YYYY-MM-DD") || null,
           product: id,
           relation_id: editedProduct?.[idx]?.relation_id,
           margin: editedProduct?.[idx]?.margin || 0,
@@ -488,14 +486,12 @@ function Toko({ props }) {
 
     form.setFieldsValue({
       sale_date: moment(momentString),
-      location: dataSalesSell.location.data.attributes.name,
       tempo_days: dataSalesSell.tempo_days,
       tempo_time: dataSalesSell.tempo_time,
       sale_note: dataSalesSell.sale_note,
       customer: dataSalesSell.customer?.data?.attributes.name,
     });
     setCustomer(dataSalesSell.customer.data);
-    setSelectedLocationId(dataSalesSell.location?.data?.id);
     setPreOrderData(res.data);
 
     dispatch({
@@ -832,33 +828,6 @@ function Toko({ props }) {
                         Bulan
                       </Select.Option>
                     </Select>
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="location"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Lokasi tidak boleh kosong!",
-                      },
-                    ]}
-                  >
-                    <Select
-                      onChange={(e) => {
-                        setSelectedLocationId(e);
-                        // getProductAtLocation(e);
-                      }}
-                      placeholder="Pilih Lokasi"
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      options={locations?.map(({ attributes, id }) => ({
-                        value: id,
-                        label: attributes.name,
-                      }))}
-                    />
                   </Form.Item>
                 </div>
               </div>

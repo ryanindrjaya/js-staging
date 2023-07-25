@@ -69,7 +69,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchLocation = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations?pagination[limit]=1000";
   const options = {
     method: "GET",
     headers: {
@@ -493,6 +493,35 @@ function SalesSale({ props }) {
     }
   }, [filter]);
 
+  const mutasiStokColumns = [
+    {
+      name: "Produk",
+      wrap: true,
+      selector: ({ product_name = "Nama Produk" }) => {
+        return product_name.toUpperCase();
+      },
+    },
+    {
+      name: "Stok Keluar",
+      selector: ({ stok_keluar = [] }) =>
+        stok_keluar?.length > 0 ? stok_keluar?.map(({ qty, unit }) => `${qty} ${unit}`)?.join(", ") : "",
+    },
+    {
+      name: "Lokasi",
+      selector: ({ location }) => {
+        const selectedLocation = locations.find((item) => item.id === location);
+        return selectedLocation?.attributes?.name || "-";
+      },
+    },
+    {
+      name: "Detail",
+      align: "center",
+      selector: ({ product, location }) => (
+        <Link href={`/dashboard/stok?product=${product}&location=${location}`}>Lihat Kartu Stok</Link>
+      ),
+    },
+  ];
+
   return (
     <>
       <Head>
@@ -576,9 +605,6 @@ function SalesSale({ props }) {
                     <Descriptions.Item label="Tempo" span={4}>
                       {selectedData?.attributes?.tempo_days} {selectedData?.attributes?.tempo_time}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Lokasi" span={4}>
-                      {selectedData?.attributes?.location?.data?.attributes?.name}
-                    </Descriptions.Item>
                     <Descriptions.Item label="Catatan" span={2}>
                       {selectedData?.attributes?.sale_note}
                     </Descriptions.Item>
@@ -628,6 +654,15 @@ function SalesSale({ props }) {
                       customStyles={customStyles}
                       columns={detailColumns}
                       data={selectedData?.attributes?.sales_sale_details?.data}
+                    />
+                  </div>
+
+                  <div className="mt-2">
+                    <p className="mb-2 text-base font-semibold uppercase">Detail Mutasi Stok</p>
+                    <DataTable
+                      customStyles={customStyles}
+                      columns={mutasiStokColumns}
+                      data={selectedData?.attributes?.detail_mutasi_stok ?? []}
                     />
                   </div>
                 </>

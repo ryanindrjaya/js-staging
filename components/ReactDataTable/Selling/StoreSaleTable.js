@@ -32,8 +32,27 @@ export default function ReactDataTable({
     maximumFractionDigits: 2,
   });
 
-  const onDeleteProduct = (value) => {
-    dispatch({ type: "REMOVE_PRODUCT", index: value });
+  const onDeleteProduct = (index, product) => {
+    console.log("products", product);
+    dispatch({ type: "REMOVE_PRODUCT", index: index });
+
+    formObj.setFieldsValue({
+      harga_satuan: {
+        [index]: product.sold_price_1,
+      },
+      jumlah_qty: {
+        [index]: 1,
+      },
+      jumlah_option: {
+        [index]: 1,
+      },
+      disc_rp: {
+        [index]: 0,
+      },
+      margin: {
+        [index]: 0,
+      },
+    });
   };
 
   const onChangeUnit = (data, value, index) => {
@@ -127,7 +146,7 @@ export default function ReactDataTable({
     setTotalPrice(sum);
   };
 
-  const onConfirm = (id) => {
+  const onConfirm = (id, product) => {
     var newSubTotalProduct = productSubTotal;
     var newProductInfo = products.productInfo;
 
@@ -136,7 +155,7 @@ export default function ReactDataTable({
 
     setProductSubTotal(newSubTotalProduct);
     let subtotal = productSubTotal;
-    onDeleteProduct(id);
+    onDeleteProduct(id, product);
 
     subtotal[id + 1] = 0;
     setProductSubTotal(subtotal);
@@ -243,6 +262,7 @@ export default function ReactDataTable({
             <Row>
               <Form.Item name={["jumlah_qty", `${idx}`]} noStyle>
                 <InputNumber
+                  onFocus={(e) => e.target.select()}
                   defaultValue={defaultQty}
                   onChange={(e) => onChangeQty(e, row, idx)}
                   min={1}
@@ -324,6 +344,7 @@ export default function ReactDataTable({
                 formatter={(value) => `${value}%`}
                 min={0}
                 max={100}
+                onFocus={(e) => e.target.select()}
                 onChange={(e) => onChangeMargin(e, row, idx)}
                 style={{
                   width: "100px",
@@ -348,6 +369,7 @@ export default function ReactDataTable({
           <Row align="bottom" justify="center">
             <Form.Item name={["disc_rp", `${idx}`]} noStyle>
               <InputNumber
+                onFocus={(e) => e.target.select()}
                 defaultValue={defaultDisc}
                 min={0}
                 onChange={(e) => onChangeDisc(e, row, idx)}
@@ -385,6 +407,7 @@ export default function ReactDataTable({
               disabled={!editPriceDisc}
               controls={false}
               formatter={(value) => `${value}%`}
+              onFocus={(e) => e.target.select()}
               max={100}
               min={0}
               value={defaultDp1}
@@ -420,6 +443,7 @@ export default function ReactDataTable({
               controls={false}
               formatter={(value) => `${value}%`}
               max={100}
+              onFocus={(e) => e.target.select()}
               min={0}
               defaultValue={defaultDp2}
               name={["disc_rp2", `${idx}`]}
@@ -472,7 +496,7 @@ export default function ReactDataTable({
       selector: (row, idx) => (
         <AlertDialog
           onCancel={onCancel}
-          onConfirm={onConfirm}
+          onConfirm={() => onConfirm(idx, row.attributes)}
           title="Hapus Produk"
           message="Produk akan dihapus dari daftar ini. Lanjutkan?"
           id={idx}

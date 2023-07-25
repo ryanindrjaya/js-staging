@@ -57,8 +57,7 @@ const fetchData = async (cookies) => {
 
 const fetchUserSales = async (cookies) => {
   const endpoint =
-    process.env.NEXT_PUBLIC_URL +
-    "/users?populate=*&filters[role][name][$eq]=Sales&?filters[role][type][$eq]=Sales";
+    process.env.NEXT_PUBLIC_URL + "/users?populate=*&filters[role][name][$eq]=Sales&?filters[role][type][$eq]=Sales";
   const options = {
     method: "GET",
     headers: {
@@ -72,7 +71,7 @@ const fetchUserSales = async (cookies) => {
 };
 
 const fetchLocation = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations?pagination[limit]=1000";
   const options = {
     method: "GET",
     headers: {
@@ -86,8 +85,7 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchNonPanelSales = async (cookies) => {
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/non-panel-sales?populate=*&sort[createdAt]=desc";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/non-panel-sales?populate=*&sort[createdAt]=desc";
   const options = {
     method: "GET",
     headers: {
@@ -133,8 +131,7 @@ function NonPanelSale({ props }) {
         Authorization: "Bearer " + cookies.token,
       },
     };
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + `/non-panel-sales/${id}?populate=deep`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/non-panel-sales/${id}?populate=deep`;
     const req = await fetch(endpoint, options);
     const res = await req.json();
     const row = res.data;
@@ -147,15 +144,13 @@ function NonPanelSale({ props }) {
 
     var tempDetails = [];
     for (var details in row.attributes.non_panel_sale_details.data) {
-      tempDetails[details] =
-        row.attributes.non_panel_sale_details.data[details].id;
+      tempDetails[details] = row.attributes.non_panel_sale_details.data[details].id;
     }
     row.attributes.non_panel_sale_details = tempDetails;
 
     var tempPayments = [];
     for (var payments in row.attributes.purchasing_payments.data) {
-      tempPayments[payments] =
-        row.attributes.purchasing_payments.data[payments].id;
+      tempPayments[payments] = row.attributes.purchasing_payments.data[payments].id;
     }
     row.attributes.purchasing_payments = tempPayments;
 
@@ -164,8 +159,7 @@ function NonPanelSale({ props }) {
     };
 
     const JSONdata = JSON.stringify(dataUpdate);
-    const endpointPut =
-      process.env.NEXT_PUBLIC_URL + "/non-panel-sales/" + id + "?populate=deep";
+    const endpointPut = process.env.NEXT_PUBLIC_URL + "/non-panel-sales/" + id + "?populate=deep";
     const optionsPut = {
       method: "PUT",
       headers: {
@@ -205,8 +199,7 @@ function NonPanelSale({ props }) {
   const handleDelete = async (data) => {
     handleDeleteRelation(data);
 
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/non-panel-sales/" + data.id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/non-panel-sales/" + data.id;
     const cookies = nookies.get(null, "token");
 
     const options = {
@@ -239,8 +232,7 @@ function NonPanelSale({ props }) {
     data.attributes.non_panel_sale_details.data.forEach((element) => {
       id = element.id;
 
-      const endpoint =
-        process.env.NEXT_PUBLIC_URL + "/non-panel-sale-details/" + id;
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/non-panel-sale-details/" + id;
       const cookies = nookies.get(null, "token");
 
       const options = {
@@ -267,18 +259,12 @@ function NonPanelSale({ props }) {
   const handleChangeStatus = async (values, id) => {
     // clean object
     for (var key in values.attributes) {
-      if (
-        values.attributes[key] === null ||
-        values.attributes[key] === undefined
-      ) {
+      if (values.attributes[key] === null || values.attributes[key] === undefined) {
         delete values.attributes[key];
       }
     }
 
-    if (
-      values.attributes?.document?.data === null ||
-      values.attributes?.document?.data === undefined
-    ) {
+    if (values.attributes?.document?.data === null || values.attributes?.document?.data === undefined) {
       delete values.attributes?.document;
     }
 
@@ -460,6 +446,35 @@ function NonPanelSale({ props }) {
     );
   };
 
+  const mutasiStokColumns = [
+    {
+      name: "Produk",
+      wrap: true,
+      selector: ({ product_name = "Nama Produk" }) => {
+        return product_name.toUpperCase();
+      },
+    },
+    {
+      name: "Stok Keluar",
+      selector: ({ stok_keluar = [] }) =>
+        stok_keluar?.length > 0 ? stok_keluar?.map(({ qty, unit }) => `${qty} ${unit}`)?.join(", ") : "",
+    },
+    {
+      name: "Lokasi",
+      selector: ({ location }) => {
+        const selectedLocation = locations.find((item) => item.id === location);
+        return selectedLocation?.attributes?.name || "-";
+      },
+    },
+    {
+      name: "Detail",
+      align: "center",
+      selector: ({ product, location }) => (
+        <Link href={`/dashboard/stok?product=${product}&location=${location}`}>Lihat Kartu Stok</Link>
+      ),
+    },
+  ];
+
   return (
     <>
       <Head>
@@ -469,8 +484,7 @@ function NonPanelSale({ props }) {
         <LayoutWrapper style={{}}>
           <TitlePage titleText={"Daftar Penjualan Non Panel"} />
           <LayoutContent>
-
-          <Modal
+            <Modal
               open={openModal}
               onClose={() => {
                 router.replace(
@@ -528,9 +542,6 @@ function NonPanelSale({ props }) {
                     <Descriptions.Item label="Tempo" span={4}>
                       {selectedData?.attributes?.tempo_days} {selectedData?.attributes?.tempo_time}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Lokasi" span={4}>
-                      {selectedData?.attributes?.location?.data?.attributes?.name}
-                    </Descriptions.Item>
                     <Descriptions.Item label="Catatan" span={2}>
                       {selectedData?.attributes?.sale_note}
                     </Descriptions.Item>
@@ -582,6 +593,15 @@ function NonPanelSale({ props }) {
                       data={selectedData?.attributes?.non_panel_sale_details?.data}
                     />
                   </div>
+
+                  <div className="mt-2">
+                    <p className="mb-2 text-base font-semibold uppercase">Detail Mutasi Stok</p>
+                    <DataTable
+                      customStyles={customStyles}
+                      columns={mutasiStokColumns}
+                      data={selectedData?.attributes?.detail_mutasi_stok ?? []}
+                    />
+                  </div>
                 </>
               )}
             </Modal>
@@ -597,11 +617,7 @@ function NonPanelSale({ props }) {
                   }}
                 >
                   {locations.map((element) => {
-                    return (
-                      <Select.Option value={element.id}>
-                        {element.attributes.name}
-                      </Select.Option>
-                    );
+                    return <Select.Option value={element.id}>{element.attributes.name}</Select.Option>;
                   })}
                 </Select>
               </div>
@@ -615,11 +631,7 @@ function NonPanelSale({ props }) {
                   }}
                 >
                   {locations.map((element) => {
-                    return (
-                      <Select.Option value={element.id}>
-                        {element.attributes.name}
-                      </Select.Option>
-                    );
+                    return <Select.Option value={element.id}>{element.attributes.name}</Select.Option>;
                   })}
                 </Select>
               </div>
@@ -642,12 +654,7 @@ function NonPanelSale({ props }) {
                 </Select>
               </div>
               <div className="w-full md:w-1/5 px-3">
-                <RangePicker
-                  size="large"
-                  onChange={(e) =>
-                    setSearchParameters({ ...searchParameters, range: e })
-                  }
-                />
+                <RangePicker size="large" onChange={(e) => setSearchParameters({ ...searchParameters, range: e })} />
               </div>
               <div className="w-full md:w-1/5 px-3">
                 <Select
@@ -659,11 +666,7 @@ function NonPanelSale({ props }) {
                   }}
                 >
                   {user.map((element) => {
-                    return (
-                      <Select.Option value={element.id}>
-                        {element.name}
-                      </Select.Option>
-                    );
+                    return <Select.Option value={element.id}>{element.name}</Select.Option>;
                   })}
                 </Select>
               </div>
@@ -672,9 +675,7 @@ function NonPanelSale({ props }) {
             <div className="w-full flex justify-start mt-3">
               <div className="w-full md:w-1/5 px-3">
                 <Customer
-                  onChangeCustomer={(e) =>
-                    setSearchParameters({ ...searchParameters, customer: e })
-                  }
+                  onChangeCustomer={(e) => setSearchParameters({ ...searchParameters, customer: e })}
                   page={"NON PANEL"}
                 />
               </div>
@@ -686,9 +687,7 @@ function NonPanelSale({ props }) {
                   }}
                   placeholder="Sales"
                   allowClear
-                  onChange={(e) =>
-                    setSearchParameters({ ...searchParameters, sales: e })
-                  }
+                  onChange={(e) => setSearchParameters({ ...searchParameters, sales: e })}
                 >
                   {dataUserSales?.map((element) => {
                     return (
@@ -716,18 +715,14 @@ function NonPanelSale({ props }) {
             </div>
 
             <div className="w-full flex justify-between mt-0 mb-2">
-              <span className="text-black text-md font-bold ml-1 mt-5">
-                Semua Penjualan
-              </span>
+              <span className="text-black text-md font-bold ml-1 mt-5">Semua Penjualan</span>
               <button
                 onClick={handleAdd}
                 type="button"
                 className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
               >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    + Tambah
-                  </a>
+                  <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
                 </div>
               </button>
             </div>
@@ -739,9 +734,7 @@ function NonPanelSale({ props }) {
                 className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
               >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    Print PDF
-                  </a>
+                  <a className="text-white no-underline text-xs sm:text-xs">Print PDF</a>
                 </div>
               </button>
               <button
@@ -750,9 +743,7 @@ function NonPanelSale({ props }) {
                 className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
               >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    Print CSV
-                  </a>
+                  <a className="text-white no-underline text-xs sm:text-xs">Print CSV</a>
                 </div>
               </button>
               <button
@@ -761,9 +752,7 @@ function NonPanelSale({ props }) {
                 className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
               >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    Print XLS
-                  </a>
+                  <a className="text-white no-underline text-xs sm:text-xs">Print XLS</a>
                 </div>
               </button>
               <button
@@ -772,9 +761,7 @@ function NonPanelSale({ props }) {
                 className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
               >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">
-                    Kolom Tampak
-                  </a>
+                  <a className="text-white no-underline text-xs sm:text-xs">Kolom Tampak</a>
                 </div>
               </button>
             </div>

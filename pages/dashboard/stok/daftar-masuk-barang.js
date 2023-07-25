@@ -4,7 +4,19 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import Head from "next/head";
-import { DatePicker, Empty, Input, InputNumber, Modal, notification, Popconfirm, Select, Tag, Tooltip } from "antd";
+import {
+  Button,
+  DatePicker,
+  Empty,
+  Input,
+  InputNumber,
+  Modal,
+  notification,
+  Popconfirm,
+  Select,
+  Tag,
+  Tooltip,
+} from "antd";
 import moment from "moment";
 import nookies from "nookies";
 import { useRouter } from "next/router";
@@ -29,11 +41,13 @@ export default function daftarKeluarBarang({ companyOptions }) {
     reason: "",
     loading: false,
     author: null,
+    bulk: false,
   });
   const router = useRouter();
   const [printable, setPrintable] = useState(false);
   const [queryProduct, setQueryProduct] = useState("");
   const [filtered, setFiltered] = useState(null);
+  const [loadingSend, setLoadingSend] = useState(false);
 
   const handleFilterProducts = (e) => {
     setQueryProduct(e.target.value);
@@ -84,7 +98,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
       console.log("fetch no ref recipient", noRefs);
 
       if (noRefs?.data?.length > 0) {
-        const options = noRefs.data.map((item) => ({
+        const options = noRefs.data.reverse().map((item) => ({
           label: item,
           value: item,
         }));
@@ -168,37 +182,22 @@ export default function daftarKeluarBarang({ companyOptions }) {
       console.log("response cancel", response);
 
       if (response?.data) {
-        setCancelModal({
-          visible: false,
-          id: null,
-          reason: "",
-          loading: false,
-        });
-        notification.success({
+        return {
+          success: true,
           message: "Berhasil membatalkan data",
-          description: "Data berhasil dibatalkan.",
-        });
-        setRefetch(!refetch);
+          description: "Data berhasil dibatalkan",
+        };
       } else {
-        setCancelModal({
-          ...cancelModal,
-          loading: false,
-        });
-        notification.error({
-          message: response?.error?.message || "Gagal membatalkan data",
-          description: "Silahkan coba lagi",
-        });
+        return {
+          success: false,
+          message: "Gagal membatalkan data",
+        };
       }
     } catch (error) {
-      setCancelModal({
-        ...cancelModal,
-        loading: false,
-      });
-      console.log("error delete", error);
-      notification.error({
-        message: response?.error || "Gagal membatalkan data",
-        description: "Harap hubungi admin",
-      });
+      return {
+        success: false,
+        message: "Gagal membatalkan data",
+      };
     }
   };
 
@@ -223,6 +222,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
         type: "Transfer Masuk",
         accepted: row?.accepted || 0,
         no_referensi: row?.no_referensi_recipient ?? row?.no_referensi,
+        keterangan: `Penerimaan Stok dari ${row.location_sender.name}`,
       };
 
       const endpoint = `${process.env.NEXT_PUBLIC_URL}/product-request/transfer`;
@@ -238,22 +238,78 @@ export default function daftarKeluarBarang({ companyOptions }) {
       const response = await req.json();
 
       if (response?.data) {
-        notification.success({
-          message: "Berhasil menerima ke stok",
-          description: "Stok berhasil diterima, silahkan ganti status untuk melihat data yang sudah diterima",
-        });
-        setRefetch(!refetch);
+        return {
+          success: true,
+          message: "Berhasil mengirim ke stok",
+          description:
+            "Stok berhasil dikirim ke gudang tujuan, silahkan ganti status untuk melihat data yang sudah dikirim",
+        };
       } else {
-        console.log("response mutasi masuk", response);
-        notification.error({
-          message: response?.error?.message || "Gagal menerima ke stok",
-          desciption: "Stok gagal diterima, silahkan coba lagi",
-        });
+        return {
+          success: false,
+          message: response?.error?.message || response?.error || "Gagal mengirim ke stok",
+          location: row.location_sender.id,
+          product: row.product.id,
+        };
       }
     } catch (error) {
-      console.log(error);
+      return {
+        success: false,
+        message: error?.message || error?.error || "Terjadi kesalahan server",
+      };
     }
   };
+
+  async function handleBulkSend() {
+    if (data.length === 0) return;
+
+    setLoadingSend(true);
+
+    const promises = data.map((item, index) => handleAddToStock(item, index));
+
+    const responses = await Promise.all(promises);
+
+    const success = responses.filter((item) => item.success === true);
+    const failed = responses.filter((item) => item.success === false);
+
+    if (success.length > 0) {
+      notification.success({
+        message: "Berhasil menerima stok",
+        description: "Stok berhasil diterima, silahkan cek riwayat inventory.",
+      });
+    }
+
+    if (failed.length > 0) {
+      for (let i = 0; i < failed.length; i++) {
+        notification.error({
+          message: failed?.message || "Gagal mengirim ke stok",
+          description: (
+            <span
+              className="text-sm cursor-pointer m-0 text-blue-400 hover:text-blue-600"
+              onClick={() => {
+                router.replace(
+                  {
+                    pathname: "/dashboard/stok",
+                    query: {
+                      location: failed.location,
+                      product: failed.product,
+                    },
+                  },
+                  undefined,
+                  { shallow: true }
+                );
+              }}
+            >
+              Lihat Stok
+            </span>
+          ),
+        });
+      }
+    }
+
+    setRefetch(!refetch);
+    setLoadingSend(false);
+  }
 
   const columns = [
     {
@@ -275,6 +331,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
     {
       name: "Transfer Dari",
       center: true,
+      wrap: true,
       selector: (row) => (
         <Tooltip title={row.location_sender.name} className="w-min">
           {row.location_sender.name}
@@ -424,7 +481,41 @@ export default function daftarKeluarBarang({ companyOptions }) {
               }}
               okText="Ya"
               cancelText="Tidak"
-              onConfirm={() => handleAddToStock(row, index)}
+              onConfirm={() => {
+                handleAddToStock(row, index).then((res) => {
+                  if (res.success) {
+                    notification.success({
+                      message: res.message,
+                      description: res.description,
+                    });
+                    setRefetch(!refetch);
+                  } else {
+                    notification.error({
+                      message: res?.message || "Gagal mengirim ke stok",
+                      description: (
+                        <span
+                          className="text-sm cursor-pointer m-0 text-blue-400 hover:text-blue-600"
+                          onClick={() => {
+                            router.replace(
+                              {
+                                pathname: "/dashboard/stok",
+                                query: {
+                                  location: res.location,
+                                  product: res.product,
+                                },
+                              },
+                              undefined,
+                              { shallow: true }
+                            );
+                          }}
+                        >
+                          Lihat Stok
+                        </span>
+                      ),
+                    });
+                  }
+                });
+              }}
             >
               <CheckCircleFilled title="Kirim Barang" className="text-3xl text-green-700" />
             </Popconfirm>
@@ -444,6 +535,56 @@ export default function daftarKeluarBarang({ companyOptions }) {
       selector: (row) => row?.cancel_author || "-",
     },
   ];
+
+  async function handleBulkCancel() {
+    setCancelModal({
+      ...cancelModal,
+      loading: true,
+    });
+
+    try {
+      const promises = data.map((item) => handleCancelData(item.id));
+
+      const responses = await Promise.all(promises);
+
+      const success = responses.filter((item) => item.success === true);
+      const failed = responses.filter((item) => item.success === false);
+
+      if (success.length > 0) {
+        notification.success({
+          message: "Berhasil membatalkan data",
+          description: "Data berhasil dibatalkan",
+        });
+      }
+
+      if (failed.length > 0) {
+        for (let i = 0; i < failed.length; i++) {
+          notification.error({
+            message: failed?.message || "Gagal membatalkan data",
+          });
+        }
+      }
+
+      setRefetch(!refetch);
+      setLoadingSend(false);
+      setCancelModal({
+        ...cancelModal,
+        loading: false,
+        visible: false,
+      });
+    } catch (e) {
+      console.log(e);
+      setCancelModal({
+        ...cancelModal,
+        loading: false,
+        visible: false,
+      });
+      notification.error({
+        message: "Gagal membatalkan data",
+        description: "Terjadi kesalahan server saat membatalkan data",
+      });
+    }
+  }
 
   return (
     <>
@@ -488,8 +629,34 @@ export default function daftarKeluarBarang({ companyOptions }) {
                       danger: true,
                       disabled: cancelModal.reason === "",
                     }}
-                    onOk={() => handleCancelData(cancelModal.id)}
-                    onCancel={() => {}}
+                    onOk={() => {
+                      if (cancelModal?.bulk) {
+                        handleBulkCancel();
+                      } else {
+                        handleCancelData(cancelModal.id).then((res) => {
+                          if (res.success) {
+                            notification.success({
+                              message: res.message,
+                              description: res.description,
+                            });
+                            setRefetch(!refetch);
+                          } else {
+                            notification.error({
+                              message: res?.message || "Gagal membatalkan data",
+                            });
+                          }
+                        });
+                      }
+                    }}
+                    onCancel={() => {
+                      setCancelModal({
+                        ...cancelModal,
+                        visible: false,
+                        id: null,
+                        reason: "",
+                        loading: false,
+                      });
+                    }}
                   >
                     <p>Apakah anda yakin akan membatalkan permintaan ini? Harap isi alasan pembatalan dibawah ini:</p>
                     <Input.TextArea
@@ -571,6 +738,54 @@ export default function daftarKeluarBarang({ companyOptions }) {
                   customStyles={customStyles}
                   noDataComponent={`--Tidak ada data--`}
                 />
+
+                {statusFilter !== "Selesai" && statusFilter !== "Dibatalkan" ? (
+                  <div className="mt-4 flex gap-x-4">
+                    <Popconfirm
+                      title="Apakah anda yakin ingin membatalkan permintaan ini?"
+                      okButtonProps={{
+                        danger: true,
+                      }}
+                      okText="Ya"
+                      cancelText="Tidak"
+                      onConfirm={() => {
+                        if (data.length === 0) return;
+
+                        setCancelModal({
+                          ...cancelModal,
+                          visible: true,
+                          bulk: true,
+                        });
+                      }}
+                      placement="top"
+                    >
+                      <Button className="flex gap-x-2 items-center font-bold" type="default" danger>
+                        Batalkan Semua
+                      </Button>
+                    </Popconfirm>
+                    <Popconfirm
+                      placement="top"
+                      title="Apakah anda yakin ingin mengirim permintaan ini?"
+                      okButtonProps={{
+                        type: "default",
+                      }}
+                      okText="Ya"
+                      cancelText="Tidak"
+                      onConfirm={handleBulkSend}
+                    >
+                      <Button
+                        loading={loadingSend}
+                        icon={<CheckCircleFilled title="Kirim Barang" className="text-xl" />}
+                        className="flex gap-x-2 items-center font-bold"
+                        type="primary"
+                      >
+                        Terima Semua
+                      </Button>
+                    </Popconfirm>
+                  </div>
+                ) : (
+                  ""
+                )}
               </>
             ) : (
               <Empty description="Pilih Gudang Terlebih Dahulu" image={Empty.PRESENTED_IMAGE_SIMPLE} />

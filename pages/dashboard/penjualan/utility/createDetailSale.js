@@ -29,15 +29,15 @@ const createDetailSale = (values, products, productTotalPrice, productSubTotal, 
       .format();
 
     var elementId = element.id;
-    qty = products.productInfo[id]?.qty ?? 1;
-    disc = products.productInfo[id]?.disc ?? 0;
-    unit = products.productInfo[id]?.unit ?? element.attributes.unit_1;
-    unitPrice = products.productInfo[id]?.priceUnit ?? element.attributes.sold_price_1;
-    unitPriceAfterDisc = productTotalPrice?.[id];
-    subTotal = productSubTotal?.[subtotalId];
-    var d1 = products.productInfo[id]?.d1 ?? element.attributes.disc_1_1;
-    var d2 = products.productInfo[id]?.d2 ?? element.attributes.unit_1_dp2;
-    margin = products.productInfo[id]?.margin ?? 0;
+    qty = products.productInfo[index]?.qty ?? 1;
+    disc = products.productInfo[index]?.disc ?? 0;
+    unit = products.productInfo[index]?.unit ?? element.attributes.unit_1;
+    unitPrice = products.productInfo[index]?.priceUnit ?? element.attributes.sold_price_1;
+    unitPriceAfterDisc = productTotalPrice?.[index];
+    subTotal = productSubTotal?.[index];
+    var d1 = products.productInfo[index]?.d1 ?? element.attributes.disc_1_1;
+    var d2 = products.productInfo[index]?.d2 ?? 0;
+    margin = products.productInfo[index]?.margin ?? 0;
     var productLocationId = productLoc?.[index];
     const dataGudang = lokasiGudang[index];
 

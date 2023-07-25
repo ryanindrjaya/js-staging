@@ -118,16 +118,12 @@ export default function ReactDataTable({
     console.log("onChangePriceUnit", value, data, index, indexRow);
     var tempPriceUnit = [];
 
-    const selectedUnit =
-      formObj.getFieldValue(`jumlah_option`) || products.productInfo;
-    const selectedUnitIndex =
-      selectedUnit?.[indexRow]?.unitIndex || selectedUnit?.[indexRow] || index;
+    const selectedUnit = formObj.getFieldValue(`jumlah_option`) || products.productInfo;
+    const selectedUnitIndex = selectedUnit?.[indexRow]?.unitIndex || selectedUnit?.[indexRow] || index;
 
     const discRp = formObj.getFieldValue(`disc_rp`) || products.productInfo;
     const discRpIndex =
-      discRp?.[indexRow]?.disc ||
-      discRp?.[indexRow] ||
-      data.attributes[`purchase_discount_${selectedUnitIndex}`];
+      discRp?.[indexRow]?.disc || discRp?.[indexRow] || data.attributes[`purchase_discount_${selectedUnitIndex}`];
     console.log("change discount to ", discRpIndex, discRp);
     onChangeDisc(discRpIndex, data, indexRow);
 
@@ -243,37 +239,6 @@ export default function ReactDataTable({
       selector: (row) => row.attributes?.name,
     },
     {
-      name: "Harga Satuan",
-      width: "150px",
-      selector: (row, idx) => {
-        var priceUnit = row.attributes?.buy_price_1;
-        if (products.productInfo[idx]?.priceUnit) {
-          priceUnit = products.productInfo[idx].priceUnit;
-        }
-        return (
-          <>
-            <Row>
-              <Form.Item name={["harga_satuan", `${idx}`]} noStyle>
-                <InputNumber
-                  defaultValue={priceUnit}
-                  min={0}
-                  onChange={(e) => onChangePriceUnit(e, row, unit[idx], idx, e)}
-                  style={{
-                    width: "150px",
-                    marginRight: "10px",
-                  }}
-                  formatter={(value) =>
-                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                  }
-                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                />
-              </Form.Item>
-            </Row>
-          </>
-        );
-      },
-    },
-    {
       name: "Jumlah Pesanan",
       width: "239px",
       selector: (row, idx) => {
@@ -325,50 +290,35 @@ export default function ReactDataTable({
                   {row.attributes?.unit_1 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_1 === null}
-                      value={1}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_1 === null} value={1}>
                       {row.attributes?.unit_1}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_2 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_2 === null}
-                      value={2}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_2 === null} value={2}>
                       {row.attributes?.unit_2}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_3 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_3 === null}
-                      value={3}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_3 === null} value={3}>
                       {row.attributes?.unit_3}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_4 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_4 === null}
-                      value={4}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_4 === null} value={4}>
                       {row.attributes?.unit_4}
                     </Select.Option>
                   )}
                   {row.attributes?.unit_5 === null ? (
                     <></>
                   ) : (
-                    <Select.Option
-                      disabled={row.attributes?.unit_5 === null}
-                      value={5}
-                    >
+                    <Select.Option disabled={row.attributes?.unit_5 === null} value={5}>
                       {row.attributes?.unit_5}
                     </Select.Option>
                   )}
@@ -379,6 +329,36 @@ export default function ReactDataTable({
         );
       },
     },
+    {
+      name: "Harga Satuan",
+      width: "150px",
+      selector: (row, idx) => {
+        var priceUnit = row.attributes?.buy_price_1;
+        if (products.productInfo[idx]?.priceUnit) {
+          priceUnit = products.productInfo[idx].priceUnit;
+        }
+        return (
+          <>
+            <Row>
+              <Form.Item name={["harga_satuan", `${idx}`]} noStyle>
+                <InputNumber
+                  defaultValue={priceUnit}
+                  min={0}
+                  onChange={(e) => onChangePriceUnit(e, row, unit[idx], idx, e)}
+                  style={{
+                    width: "150px",
+                    marginRight: "10px",
+                  }}
+                  formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                />
+              </Form.Item>
+            </Row>
+          </>
+        );
+      },
+    },
+
     {
       name: "Diskon",
       width: "150px",
@@ -399,9 +379,7 @@ export default function ReactDataTable({
                   width: "100px",
                   marginRight: "10px",
                 }}
-                formatter={(value) =>
-                  value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                }
+                formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                 parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
               />
             </Form.Item>
@@ -512,11 +490,7 @@ export default function ReactDataTable({
       name: "Stok Gudang",
       width: "300px",
       selector: (row, idx) => {
-        return (
-          <div className="disabled:bg-white italic text-gray-500">
-            {stokString?.[idx] ?? "Pilih Gudang"}
-          </div>
-        );
+        return <div className="disabled:bg-white italic text-gray-500">{stokString?.[idx] ?? "Pilih Gudang"}</div>;
       },
     },
     {
@@ -548,10 +522,7 @@ export default function ReactDataTable({
               >
                 {locations.map((element) => {
                   return (
-                    <Select.Option
-                      value={element.id}
-                      key={element.attributes.name}
-                    >
+                    <Select.Option value={element.id} key={element.attributes.name}>
                       {element.attributes.name}
                     </Select.Option>
                   );
@@ -580,11 +551,7 @@ export default function ReactDataTable({
               ]}
               noStyle
             >
-              <DatePicker
-                placeholder="EXP. Date"
-                size="normal"
-                format={"DD/MM/YYYY"}
-              />
+              <DatePicker placeholder="EXP. Date" size="normal" format={"DD/MM/YYYY"} />
             </Form.Item>
           </>
         );

@@ -89,12 +89,7 @@ export default function SearchBar({
         let queryLocations = await getUserInfo();
 
         const endpoint =
-          process.env.NEXT_PUBLIC_URL +
-          `/products?populate=*&filters[name][$contains]=${query}&${queryLocations}${
-            available && inventoryLocation
-              ? `&filters[locations][inventories][total_stock][$gt]=0&filters[locations][id][$eq]=${inventoryLocation}`
-              : ""
-          }`;
+          process.env.NEXT_PUBLIC_URL + `/products?populate=*&filters[name][$contains]=${query}&${queryLocations}`;
         const options = {
           method: "GET",
           headers: {

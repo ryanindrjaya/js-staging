@@ -172,7 +172,6 @@ function Edit({ props }) {
   const [dataValues, setDataValues] = useState();
   const [selectedCategory, setSelectedCategory] = useState("BEBAS");
   const [deliveryFee, setDeliveryFee] = useState(0);
-  const [selectedLocationId, setSelectedLocationId] = useState();
   const [dataLocationStock, setDataLocationStock] = useState();
 
   const [listId, setListId] = useState([]);
@@ -457,7 +456,6 @@ function Edit({ props }) {
         // master Penjualan Sales
         values.customer = customer.id;
         values.customer_name = customer.attributes?.name;
-        values.location = selectedLocationId;
         values.dpp = dpp;
         values.ppn = ppn;
         values.total = grandTotal;
@@ -519,7 +517,6 @@ function Edit({ props }) {
             description: "Data Penjualan Panel berhasil diubah. Silahkan cek pada halaman Penjualan Panel",
           });
           router.replace("/dashboard/penjualan/panel");
-          updateStock(res.data.id, selectedLocationId);
         } else {
           notification.error({
             message: "Gagal mengubah data",
@@ -807,7 +804,6 @@ function Edit({ props }) {
     });
 
     setCustomer(editData.attributes?.customer?.data);
-    setSelectedLocationId(editData.attributes?.location?.data.id);
     getProductAtLocation(editData.attributes?.location?.data.id);
     setDiscType(editData.attributes?.disc_type);
     handleBiayaPengiriman(editData.attributes?.delivery_fee);
@@ -1020,37 +1016,6 @@ function Edit({ props }) {
                 <div className="w-full md:w-1/3 px-3 mb-2">
                   <Form.Item name="no_inventory">
                     <Input style={{ height: "40px" }} placeholder="No Inv" />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="location"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Lokasi tidak boleh kosong!",
-                      },
-                    ]}
-                  >
-                    <Select
-                      onChange={(e) => {
-                        setSelectedLocationId(e);
-                        // getProductAtLocation(e);
-                      }}
-                      placeholder="Pilih Lokasi"
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                    >
-                      {locations.map((element) => {
-                        return (
-                          <Select.Option value={element.id} key={element.attributes.name}>
-                            {element.attributes.name}
-                          </Select.Option>
-                        );
-                      })}
-                    </Select>
                   </Form.Item>
                 </div>
               </div>

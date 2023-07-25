@@ -308,73 +308,6 @@ function Toko({ props }) {
     maximumFractionDigits: 2,
   });
 
-  const checkReturQty = async (values) => {
-    try {
-      const cannotBeReturnedProducts = [];
-
-      const promises = products.productList.map(async (product, index) => {
-        const qty = values?.jumlah_qty?.[index] ?? 1;
-        const unitIndex = values?.jumlah_option?.[index] ?? 1;
-        let productUnit = product.attributes?.[`unit_${unitIndex}`];
-        const gudangLocatioId = selectedLocationId;
-
-        if (typeof unitIndex === "string") {
-          productUnit = unitIndex;
-        }
-
-        const returData = {
-          location: gudangLocatioId,
-          product: product.id,
-          unit: productUnit,
-          qty: qty,
-        };
-
-        const endpoint = `${process.env.NEXT_PUBLIC_URL}/product/check`;
-        const options = {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${cookies.token}`,
-          },
-          body: JSON.stringify(returData),
-        };
-
-        const req = await fetch(endpoint, options);
-        const res = await req.json();
-        console.log("repsonse", res, JSON.stringify(returData));
-        if (!res?.available) {
-          cannotBeReturnedProducts.push(product.attributes.name);
-        }
-      });
-
-      await Promise.all(promises);
-      console.log("cannotBeReturnedProducts", cannotBeReturnedProducts);
-      if (cannotBeReturnedProducts.length > 0) {
-        Modal.error({
-          title: "Retur Gagal",
-          content: (
-            <div>
-              <p>Item ini tidak bisa dilakukan retur. Silahkan cek kembali stok gudang yang tersedia:</p>
-              <ul>
-                {cannotBeReturnedProducts.map((product) => (
-                  <li key={product}>{product === undefined ? "" : `- ${product}`} </li>
-                ))}
-              </ul>
-            </div>
-          ),
-        });
-
-        return true;
-      }
-
-      return false;
-    } catch (error) {
-      console.log("error", error);
-
-      return false;
-    }
-  };
-
   const onFinish = async (values, accept) => {
     if (accept) {
       setLoading(true);
@@ -614,6 +547,12 @@ function Toko({ props }) {
     setSelectedCategory(category);
   };
 
+  const handleEnterSubmit = (e) => {
+    if (e.keyCode === 13) {
+      onFinish(form.getFieldsValue(), false);
+    }
+  };
+
   return (
     <>
       <Head>
@@ -661,6 +600,7 @@ function Toko({ props }) {
               }}
               onFinish={(values) => onFinish(values, false)}
               onFinishFailed={validateError}
+              onKeyUp={handleEnterSubmit}
             >
               <DateTimeComponent />
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-1">
@@ -721,37 +661,6 @@ function Toko({ props }) {
                       <Select.Option value="Bulan" key="Bulan">
                         Bulan
                       </Select.Option>
-                    </Select>
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="location"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Lokasi tidak boleh kosong!",
-                      },
-                    ]}
-                  >
-                    <Select
-                      placeholder="Pilih Lokasi"
-                      onChange={(e) => {
-                        setSelectedLocationId(e);
-                        // getProductAtLocation(e);
-                      }}
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                    >
-                      {locations.map((element) => {
-                        return (
-                          <Select.Option value={element.id} key={element.attributes.name}>
-                            {element.attributes.name}
-                          </Select.Option>
-                        );
-                      })}
                     </Select>
                   </Form.Item>
                 </div>
@@ -1009,10 +918,7 @@ function Toko({ props }) {
                 <p className="font-bold text-lg">Total Penjualan: {formatter.format(grandTotal)}</p>
               </div>
               <div className="w-full flex justify-between">
-                <Form.Item name="sale_note" className="w-full md:w-1/2 mx-2">
-                  <TextArea rows={4} placeholder="Catatan Penjualan" />
-                </Form.Item>
-                <Form.Item name="sale_staff" className="w-full md:w-1/2 mx-2">
+                <Form.Item name="sale_staff" className="w-full ">
                   <TextArea rows={4} placeholder="Catatan Staff" />
                 </Form.Item>
               </div>

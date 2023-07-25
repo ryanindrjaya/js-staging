@@ -27,7 +27,7 @@ function SearchPO({ supplier, handleSelect, disabled }) {
       try {
         const endpoint =
           process.env.NEXT_PUBLIC_URL +
-          `/purchases/?populate=deep&filters[status][$eq]=Sebagian Diterima&filters[status][$eq]=Diproses&filters[supplier][name][$eq]=${supplierName}&filters[no_po][$contains]=${query}&sort[0]=id%3Adesc`;
+          `/purchases?filters[status][$eq]=Sebagian Diterima&filters[status][$eq]=Diproses&filters[supplier][name][$eq]=${supplierName}&filters[no_po][$contains]=${query}&sort[0]=id%3Adesc`;
         const options = {
           method: "GET",
           headers: {

@@ -100,14 +100,13 @@ export default function ReactDataTable({
         let changeStatus = false;
 
         const customer = row.attributes.customer.data.attributes.name;
-        const location = row.attributes.location.data.attributes.name;
 
         changeStatus = await handleChangeStatus(row);
 
         if (page == "nonpanel" && changeStatus) {
-          out = await InventoryOutFromNonPanel(row.id, customer, location);
+          out = await InventoryOutFromNonPanel(row.id, customer);
         } else if (page == "panel" && changeStatus) {
-          out = await InventoryOutFromPanel(row.id, customer, location);
+          out = await InventoryOutFromPanel(row.id, customer);
         }
 
         if (out && changeStatus) {
@@ -445,7 +444,12 @@ export default function ReactDataTable({
     {
       name: "No Faktur",
       width: "180px",
-      selector: (row) => row.attributes?.no_store_sale || row.attributes?.no_sales_sale || "-",
+      selector: (row) =>
+        row.attributes?.no_store_sale ||
+        row.attributes?.no_sales_sale ||
+        row.attributes?.no_non_panel_sale ||
+        row.attributes?.no_panel_sale ||
+        "-",
     },
     {
       name: <div className="">Status</div>,
@@ -472,9 +476,16 @@ export default function ReactDataTable({
         const dataPaymentMethod =
           row?.attributes?.store_payments?.data?.map((payment) => payment?.attributes?.payment_method).join(", ") ??
           null;
-
-        console.log(row.id, row?.attributes?.store_payments?.data);
         return dataPaymentMethod;
+      },
+    },
+    {
+      name: "Lokasi",
+      width: "180px",
+      wrap: true,
+      selector: (row) => {
+        const locations = row?.attributes?.locations?.data?.map((item) => item?.attributes?.name).join(", ") ?? null;
+        return locations;
       },
     },
     {
@@ -517,12 +528,6 @@ export default function ReactDataTable({
 
         return formatter.format(0);
       },
-    },
-
-    {
-      name: "Lokasi Penjualan",
-      width: "180px",
-      selector: (row) => row.attributes?.location.data.attributes.name ?? "-",
     },
     {
       name: "Catatan Staff",

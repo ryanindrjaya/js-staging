@@ -1,14 +1,17 @@
 import Head from "next/head";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import router, { useRouter } from "next/router";
-import { Input, notification, Select, DatePicker } from "antd";
-import { BarcodeOutlined } from "@ant-design/icons";
+import { Input, notification, Select, DatePicker, Modal, Descriptions, message, Button } from "antd";
+import { BarcodeOutlined, PrinterOutlined } from "@ant-design/icons";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
 import SellingTable from "../../../../components/ReactDataTable/Selling/SellingTable";
 import nookies from "nookies";
+import DataTable from "react-data-table-component";
+import moment from "moment";
+import Link from "next/link";
 
 Toko.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -46,7 +49,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchLocation = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations?pagination[limit]=1000";
   const options = {
     method: "GET",
     headers: {
@@ -80,6 +83,15 @@ function Toko({ props }) {
   const router = useRouter();
   const [sell, setSell] = useState(data);
   const [returPage, setReturPage] = useState("toko");
+
+  const [selectedData, setSelectedData] = useState(null);
+  const [openModal, setOpenModal] = useState(false);
+
+  const formatter = new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 2,
+  });
 
   const handleAdd = () => {
     router.push("/dashboard/penjualan/toko/tambah");
@@ -226,6 +238,142 @@ function Toko({ props }) {
     });
   };
 
+  useEffect(() => {
+    async function fetchOne(id) {
+      message.loading({ content: "Mengambil data", duration: 8000, key: "fetch" });
+      const cookies = nookies.get();
+      const endpoint = process.env.NEXT_PUBLIC_URL + `/store-sales/${id}?populate=deep,4`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+      };
+
+      const res = await fetch(endpoint, options)
+        .then((r) => r.json())
+        .catch((e) => console.log(e));
+
+      if (res.data) {
+        message.destroy("fetch");
+
+        console.log("detail penjualan", res.data);
+
+        setSelectedData(res.data);
+        setOpenModal(true);
+      } else {
+        message.error({ content: "Gagal mengambil data", key: "fetch" });
+      }
+    }
+    if (router.query.id) {
+      fetchOne(router.query.id);
+    }
+  }, [router.query]);
+
+  const detailColumns = [
+    {
+      name: "Nama Produk",
+      wrap: true,
+      width: "120px",
+      selector: ({ attributes }) => (
+        <Link href={`/dashboard/produk?id=${attributes?.product?.data?.id}`}>
+          <span className="text-blue-500 cursor-pointer hover:text-blue-700">
+            {attributes?.product?.data?.attributes?.name || ""}
+          </span>
+        </Link>
+      ),
+    },
+    {
+      name: "EXP Date",
+      width: "120px",
+      selector: ({ attributes }) => moment(attributes?.expired_date).format("DD/MM/YYYY"),
+    },
+    {
+      name: "Jumlah",
+      selector: ({ attributes }) => attributes?.qty || "",
+    },
+    {
+      name: "Unit",
+      selector: ({ attributes }) => attributes?.unit || "",
+    },
+    {
+      name: "Harga Jual",
+      width: "150px",
+      selector: ({ attributes }) => formatter.format(attributes?.unit_price || 0) || "-",
+    },
+    {
+      name: "Diskon",
+      selector: ({ attributes }) => formatter.format(attributes?.disc || 0) || "-",
+    },
+    {
+      name: "D1",
+      selector: ({ attributes }) => (attributes?.disc1 ? `${attributes?.disc1}%` : "0%"),
+    },
+    {
+      name: "D2",
+      selector: ({ attributes }) => (attributes?.disc2 ? `${attributes?.disc2}%` : "0%"),
+    },
+    {
+      name: "Margin",
+      selector: ({ attributes }) => (attributes?.margin ? `${attributes?.margin}%` : "0%"),
+    },
+    {
+      name: "Sub Total",
+      width: "150px",
+      selector: ({ attributes }) => formatter.format(attributes?.sub_total || 0) || "-",
+    },
+  ];
+
+  const mutasiStokColumns = [
+    {
+      name: "Produk",
+      wrap: true,
+      selector: ({ product_name = "Nama Produk" }) => {
+        return product_name.toUpperCase();
+      },
+    },
+    {
+      name: "Stok Keluar",
+      selector: ({ stok_keluar = [] }) =>
+        stok_keluar?.length > 0 ? stok_keluar?.map(({ qty, unit }) => `${qty} ${unit}`)?.join(", ") : "",
+    },
+    {
+      name: "Lokasi",
+      selector: ({ location }) => {
+        const selectedLocation = locations.find((item) => item.id === location);
+        return selectedLocation?.attributes?.name || "-";
+      },
+    },
+    {
+      name: "Detail",
+      align: "center",
+      selector: ({ product, location }) => (
+        <Link href={`/dashboard/stok?product=${product}&location=${location}`}>Lihat Kartu Stok</Link>
+      ),
+    },
+  ];
+
+  const customStyles = {
+    headerStyle: { textAlign: "center" },
+    headCells: {
+      style: {
+        color: "white",
+        background: "#036B82",
+      },
+    },
+  };
+
+  const handlePrint = () => {
+    router.replace(
+      {
+        pathname: "/dashboard/penjualan/toko/print/" + selectedData.id,
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
+
   return (
     <>
       <Head>
@@ -235,6 +383,120 @@ function Toko({ props }) {
         <LayoutWrapper style={{}}>
           <TitlePage titleText={"Daftar Penjualan Toko"} />
           <LayoutContent>
+            <Modal
+              open={openModal}
+              onClose={() => {
+                router.replace(
+                  {
+                    pathname: router.pathname,
+                  },
+                  undefined,
+                  { shallow: true }
+                );
+                setOpenModal(false);
+                setSelectedData();
+              }}
+              onCancel={() => {
+                router.replace(
+                  {
+                    pathname: router.pathname,
+                  },
+                  undefined,
+                  { shallow: true }
+                );
+                setOpenModal(false);
+                setSelectedData();
+              }}
+              width={1000}
+              okButtonProps={{ style: { display: "none" } }}
+              cancelText="Close"
+            >
+              {selectedData && (
+                <>
+                  <Descriptions
+                    extra={
+                      <Button
+                        onClick={handlePrint}
+                        className="bg-cyan-700 hover:bg-cyan-800 mr-7 border-none"
+                        type="primary"
+                      >
+                        <PrinterOutlined className="mr-2 mt-0.5 float float-left" /> Cetak
+                      </Button>
+                    }
+                    size="middle"
+                    title="INFORMASI PENJUALAN TOKO"
+                    bordered
+                  >
+                    <Descriptions.Item label="Tanggal Penjualan" span={4}>
+                      {selectedData?.attributes?.sale_date}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="No Penjualan Toko" span={4}>
+                      {selectedData?.attributes?.no_store_sale}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Customer" span={4}>
+                      {selectedData?.attributes?.customer_name}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Catatan Staff" span={2}>
+                      {selectedData?.attributes?.sale_staff ?? "-"}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Ditambahkan Oleh" span={2}>
+                      {selectedData?.attributes?.added_by}
+                    </Descriptions.Item>
+                  </Descriptions>
+                  <Descriptions size="middle" title="DETAIL PENJUALAN" bordered className="mt-2">
+                    <Descriptions.Item label={`Diskon ${selectedData?.attributes?.disc_type || ""}`} span={2}>
+                      {formatter.format(selectedData?.attributes?.disc_value || 0)}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Biaya Pengiriman" span={4}>
+                      {formatter.format(selectedData?.attributes?.delivery_fee || 0)}
+                    </Descriptions.Item>
+                    {[1, 2, 3].map((item) => {
+                      if (
+                        selectedData?.attributes?.[`additional_fee_${item}_sub`] &&
+                        selectedData?.attributes?.[`additional_fee_${item}_desc`]
+                      ) {
+                        return (
+                          <Descriptions.Item label={`Biaya Tambahan ${item}`} span={4}>
+                            <p className="font-semibold m-0">
+                              {selectedData?.attributes?.[`additional_fee_${item}_desc`]}
+                            </p>
+                            {formatter.format(selectedData?.attributes?.[`additional_fee_${item}_sub`] || 0)}
+                          </Descriptions.Item>
+                        );
+                      }
+                    })}
+                    <Descriptions.Item label="DPP" span={2}>
+                      {formatter.format(selectedData?.attributes?.dpp || 0)}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="PPN" span={2}>
+                      {formatter.format(selectedData?.attributes?.ppn || 0)}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Total">
+                      {formatter.format(selectedData?.attributes?.total || 0)}
+                    </Descriptions.Item>
+                  </Descriptions>
+
+                  <div className="mt-2">
+                    <p className="mb-2 text-base font-semibold uppercase">Detail Item</p>
+                    <DataTable
+                      customStyles={customStyles}
+                      columns={detailColumns}
+                      data={selectedData?.attributes?.store_sale_details?.data}
+                    />
+                  </div>
+
+                  <div className="mt-2">
+                    <p className="mb-2 text-base font-semibold uppercase">Detail Mutasi Stok</p>
+                    <DataTable
+                      customStyles={customStyles}
+                      columns={mutasiStokColumns}
+                      data={selectedData?.attributes?.detail_mutasi_stok ?? []}
+                    />
+                  </div>
+                </>
+              )}
+            </Modal>
+
             <div className="w-full flex justify-start">
               <div className="w-full md:w-1/5 px-3">
                 <Select

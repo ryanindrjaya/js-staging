@@ -31,9 +31,6 @@ EditPesananSales.getInitialProps = async (context) => {
   const req = await fetchData(cookies);
   const user = await req.json();
 
-  const reqLocation = await fetchLocation(cookies);
-  const locations = await reqLocation.json();
-
   const reqInven = await fetchInven(cookies);
   const inven = await reqInven.json();
 
@@ -46,7 +43,6 @@ EditPesananSales.getInitialProps = async (context) => {
   return {
     props: {
       user,
-      locations,
       inven,
       sale,
       customer,
@@ -71,20 +67,6 @@ const fetchData = async (cookies) => {
 
 const fetchSale = async (cookies) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sells?populate=*";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
-
-  const req = await fetch(endpoint, options);
-  return req;
-};
-
-const fetchLocation = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
   const options = {
     method: "GET",
     headers: {
@@ -130,13 +112,11 @@ function EditPesananSales({ props }) {
   const dispatch = useDispatch();
 
   var selectedProduct = products?.productList;
-  const locations = props.locations.data;
   const user = props.user;
   const inven = props.inven.data;
   const sale = props.sale;
   const initialValues = {
     ...props.data?.attributes,
-    location: props.data?.attributes?.location?.data.id,
   };
   const masterId = props.data?.id;
   const customerData = initialValues?.customer.data;
@@ -159,7 +139,6 @@ function EditPesananSales({ props }) {
   //const [discPrice, setDiscPrice] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
-  const [selectedLocation, setSelectedLocation] = useState();
 
   const [dataLocationStock, setDataLocationStock] = useState();
   const [lokasiGudang, setLokasiGudang] = useState();
@@ -627,36 +606,6 @@ function EditPesananSales({ props }) {
                     </Select>
                   </Form.Item>
                 </div>
-                <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="location"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Lokasi tidak boleh kosong!",
-                      },
-                    ]}
-                  >
-                    <Select
-                      placeholder="Pilih Lokasi"
-                      size="large"
-                      style={{
-                        width: "100%",
-                      }}
-                      onChange={(value) => {
-                        setSelectedLocation(value);
-                      }}
-                    >
-                      {locations.map((element) => {
-                        return (
-                          <Select.Option value={element.id} key={element.attributes.name}>
-                            {element.attributes.name}
-                          </Select.Option>
-                        );
-                      })}
-                    </Select>
-                  </Form.Item>
-                </div>
               </div>
 
               <div className="w-full flex md:w-4/4 px-3 mb-2 mt-2 mx-0  md:mb-0">
@@ -667,7 +616,6 @@ function EditPesananSales({ props }) {
                   user={user}
                   selectedProduct={selectedProduct}
                   isBasedOnLocation={false}
-                  inventoryLocation={selectedLocation}
                   getProductAtLocation={getProductAtLocation}
                   available
                 />
@@ -693,7 +641,6 @@ function EditPesananSales({ props }) {
                       dataLocationStock={dataLocationStock}
                       getProduct={getProductAtLocation}
                       productSubTotal={productSubTotal}
-                      locations={locations}
                       formObj={form}
                     />
                   </div>
