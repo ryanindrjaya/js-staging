@@ -22,10 +22,11 @@ const UpdateJurnal = async (
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
   var jurnal = await getJurnal();
-  var noJurnal = String(jurnal?.meta?.pagination.total + 1).padStart(3, "0");
+  var noJurnal = String(jurnal?.meta?.pagination?.total + 1).padStart(3, "0");
   console.log("get jurnal", jurnal);
 
-  var values = akun;
+  var values = { ...akun };
+  delete values.id;
   values.no_jurnal = "";
   values.catatan = "";
   values.debit = 0;
@@ -47,6 +48,8 @@ const UpdateJurnal = async (
   var data = {
     data: values,
   };
+
+  console.log("req create data", data);
 
   const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals/";
   const JSONdata = JSON.stringify(data);

@@ -274,20 +274,28 @@ export default function SalesSellingTable({
       name: "Status Pembayaran",
       width: "150px",
       selector: (row) => {
-        const lastIndex = row.attributes.purchasing_payments?.data?.length;
-        const lastPayment = row.attributes.purchasing_payments?.data[lastIndex - 1];
+        // const lastIndex = row.attributes.purchasing_payments?.data?.length;
+        // const lastPayment = row.attributes.purchasing_payments?.data[lastIndex - 1];
 
-        if (lastPayment?.attributes.payment_remaining === lastPayment?.attributes.total_payment) {
+        // if (lastPayment?.attributes.payment_remaining === lastPayment?.attributes.total_payment) {
+        //   return <Tag color={tagRed}>Belum Lunas</Tag>;
+        // } else if (
+        //   lastPayment?.attributes.payment_remaining > 0 &&
+        //   lastPayment?.attributes.payment_remaining < lastPayment?.attributes.total_payment
+        // ) {
+        //   return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
+        // } else if (lastPayment?.attributes.payment_remaining <= 0) {
+        //   return <Tag color={tagGreen}>Lunas</Tag>;
+        // } else {
+        //   return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
+        // }
+
+        if (row.attributes.status_pembayaran === "Belum Lunas"){
           return <Tag color={tagRed}>Belum Lunas</Tag>;
-        } else if (
-          lastPayment?.attributes.payment_remaining > 0 &&
-          lastPayment?.attributes.payment_remaining < lastPayment?.attributes.total_payment
-        ) {
+        } else if (row.attributes.status_pembayaran === "Dibayar Sebagian") {
           return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
-        } else if (lastPayment?.attributes.payment_remaining <= 0) {
-          return <Tag color={tagGreen}>Lunas</Tag>;
-        } else {
-          return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
+        } else if (row.attributes.status_pembayaran === "Dibayar") {
+          return <Tag color={tagGreen}>Dibayar</Tag>;
         }
       },
     },

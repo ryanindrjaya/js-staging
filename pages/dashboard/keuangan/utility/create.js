@@ -22,6 +22,8 @@ const Create = async (
   //locations
 ) => {
   // CLEANING DATA
+  tempProductListId = [];
+
   listId.forEach((element) => {
     tempProductListId.push({ id: element });
   });
