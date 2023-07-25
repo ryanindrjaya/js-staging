@@ -36,6 +36,8 @@ async function createInventoryRetur(row) {
   const noRetur = retur.data.attributes.no_retur;
   const supplier = retur.data.attributes.supplier.data.attributes.name;
 
+  console.log("details retur", returDetails);
+
   returDetails.forEach((element) => {
     console.log("element purchasing detail (retur)", element);
 

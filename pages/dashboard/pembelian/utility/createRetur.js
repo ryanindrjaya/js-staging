@@ -7,6 +7,30 @@ var tempProductListId = [];
 var tempSupplierId = 0;
 var tempLocationId;
 
+const changeStatusLPB = async (id) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings/" + id;
+  const data = {
+    data: {
+      status: "Diretur",
+    },
+  };
+
+  const JSONdata = JSON.stringify(data);
+  const options = {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+    body: JSONdata,
+  };
+
+  const req = await fetch(endpoint, options);
+  const res = await req.json();
+
+  console.log("response change status lpb", res);
+};
+
 const CreateRetur = async (
   grandTotal,
   totalPrice,
@@ -15,7 +39,8 @@ const CreateRetur = async (
   form,
   router,
   lpbId,
-  createInventoryRetur
+  createInventoryRetur,
+  clearData
 ) => {
   tempProductListId = [];
   // CLEANING DATA
@@ -40,10 +65,10 @@ const CreateRetur = async (
     data: values,
   };
 
-  await createData(data, form, router, lpbId, createInventoryRetur);
+  await createData(data, form, router, lpbId, createInventoryRetur, clearData);
 };
 
-const createData = async (data, form, router, lpbId, createInventoryRetur) => {
+const createData = async (data, form, router, lpbId, createInventoryRetur, clearData) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/returs";
   const JSONdata = JSON.stringify(data);
   const options = {
@@ -61,25 +86,20 @@ const createData = async (data, form, router, lpbId, createInventoryRetur) => {
   console.log("res", res);
 
   if (req.status === 200) {
-    await putRelationRetur(
-      res.data.id,
-      res.data.attributes,
-      form,
-      router,
-      lpbId
-    );
-
     // * if status is Selesai, create inventory retur
     if (data.data.status === "Selesai") {
-      await createInventoryRetur(res.data);
+      createInventoryRetur(res.data);
+      changeStatusLPB(lpbId);
     }
+
+    putRelationRetur(res.data.id, res.data.attributes, form, router, lpbId, clearData);
   } else {
     console.log("error here");
     openNotificationWithIcon("error");
   }
 };
 
-const putRelationRetur = async (id, value, form, router, lpbId) => {
+const putRelationRetur = async (id, value, form, router, lpbId, clearData) => {
   const user = await getUserMe();
   const dataRetur = {
     data: value,
@@ -113,7 +133,7 @@ const putRelationRetur = async (id, value, form, router, lpbId) => {
   console.log("reponse put relation retur", res);
 
   if (req.status === 200) {
-    form.resetFields();
+    clearData();
     router.replace("/dashboard/pembelian/retur");
     openNotificationWithIcon("success");
   } else {
@@ -141,14 +161,12 @@ const openNotificationWithIcon = (type) => {
   if (type === "error") {
     notification[type]({
       message: "Gagal menambahkan data",
-      description:
-        "Retur gagal ditambahkan 1. Silahkan cek NO Retur atau kelengkapan data lainnya",
+      description: "Retur gagal ditambahkan 1. Silahkan cek NO Retur atau kelengkapan data lainnya",
     });
   } else if (type === "success") {
     notification[type]({
       message: "Berhasil menambahkan data",
-      description:
-        "Retur berhasil ditambahkan. Silahkan cek pada halaman Retur Pembelian",
+      description: "Retur berhasil ditambahkan. Silahkan cek pada halaman Retur Pembelian",
     });
   }
 };

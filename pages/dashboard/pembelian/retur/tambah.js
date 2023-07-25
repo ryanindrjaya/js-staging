@@ -309,12 +309,33 @@ function Retur({ props }) {
     setLoading(false);
   };
 
+  const clearData = () => {
+    dispatch({ type: "CLEAR_DATA" });
+    setProductTotalPrice({});
+    setProductSubTotal({});
+    setTotalPrice(0);
+    setGrandTotal(0);
+    setListId([]);
+    setLpbData();
+    form.resetFields();
+  };
+
   const createDetailRetur = async () => {
     createDetailReturFunc(products, productTotalPrice, productSubTotal, setListId, "/retur-details", dataValues);
   };
 
   const createRetur = async (values) => {
-    await createReturFunc(grandTotal, totalPrice, values, listId, form, router, lpbData?.id, createInventoryRetur);
+    await createReturFunc(
+      grandTotal,
+      totalPrice,
+      values,
+      listId,
+      form,
+      router,
+      lpbData?.id,
+      createInventoryRetur,
+      clearData
+    );
 
     // create retur inventory
   };
@@ -438,6 +459,10 @@ function Retur({ props }) {
   useEffect(() => {
     dispatch({ type: "CLEAR_DATA" });
     setProductValue();
+
+    return () => {
+      dispatch({ type: "CLEAR_DATA" });
+    };
   }, []);
 
   const data = {

@@ -21,7 +21,7 @@ const fetchLPBById = async (id, callback) => {
   callback(res.data);
 };
 
-function SearchLPB({ supplier, handleSelect, disabled }) {
+function SearchLPB({ supplier, handleSelect, disabled, retur }) {
   const cookies = nookies.get(null, "token");
   const [data, setData] = useState([]);
   const [lpbData, setlpbData] = useState();
