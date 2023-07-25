@@ -4,12 +4,12 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import Head from "next/head";
-import { DatePicker, Empty, Select, Spin, Table, Tag } from "antd";
+import { Button, DatePicker, Empty, Select, Spin, Table, Tag } from "antd";
 import { useRouter } from "next/dist/client/router";
 import nookies from "nookies";
 import useDebounce from "../../../hooks/useDebounce";
 import moment from "moment";
-import { PrinterOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import { PrinterOutlined, ArrowLeftOutlined, SyncOutlined } from "@ant-design/icons";
 
 const { Column, ColumnGroup } = Table;
 
@@ -42,6 +42,8 @@ export default function Riwayat({ defaultOptions }) {
 
   const [locationData, setLocationData] = useState();
   const [productData, setProductData] = useState();
+
+  const [refetch, setRefetch] = useState(false);
 
   const printArea = useRef();
 
@@ -133,7 +135,7 @@ export default function Riwayat({ defaultOptions }) {
       setSelectedProduct(parseInt(router.query.product));
       setSelectedLocation(parseInt(router.query.location));
     }
-  }, [router.query, date]);
+  }, [router.query, date, refetch]);
 
   useEffect(() => {
     async function fetchProducts() {
@@ -543,7 +545,19 @@ export default function Riwayat({ defaultOptions }) {
                         </div>
                       </div>
                     </div>
-                    <p className="m-0">Keterangan Unit : {data.conversion}</p>
+
+                    <div className="w-full flex justify-between">
+                      <p className="m-0">Keterangan Unit : {data.conversion}</p>
+
+                      <Button
+                        type="text"
+                        onClick={() => setRefetch(!refetch)}
+                        className="text-gray-400 flex  items-center"
+                      >
+                        <SyncOutlined />
+                        Refresh data
+                      </Button>
+                    </div>
                     {history?.units?.length > 0 ? (
                       <>
                         <Table
