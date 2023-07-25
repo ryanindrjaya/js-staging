@@ -28,6 +28,7 @@ import Customer from "@iso/components/Form/AddCost/CustomerForm";
 import Area from "@iso/components/Form/AddCost/AreaForm";
 import Wilayah from "@iso/components/Form/AddCost/WilayahForm";
 import nookies from "nookies";
+import moment from "moment";
 
 Piutang.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -353,6 +354,8 @@ function Piutang({ props }) {
     values.bayar2 = totalTransfer;
     values.bayar3 = totalGiro;
 
+    if(values.tanggal === null || values.tanggal === undefined) values.tanggal = moment();
+
     props.piutang.data.forEach((element) => {
       if (values.no_piutang == element.attributes.no_piutang) {
         notification["error"]({
@@ -484,7 +487,10 @@ function Piutang({ props }) {
       const saleTypes = ["non_panel_sale", "panel_sale", "sales_sale"];
       for (const saleType of saleTypes) {
         const sale = item.attributes[saleType].data;
-        console.log(sale, "sale nih", item);
+        console.log(sale, "sale nih", item, saleType);
+        // var saleStatus = null;
+        // if (saleType === "sales_sale") saleStatus = data.attributes.status_pembayaran;
+
         if (sale != null) {
           let url = `/${saleType}s/${sale.id}`;
           url = url.replaceAll("_", "-");
@@ -501,16 +507,21 @@ function Piutang({ props }) {
           const floatTotal = parseFloat(total.toFixed(2));
           const floatDataTotal = parseFloat(data.attributes.total.toFixed(2));
 
+          //console.log("item nih", item, floatTotal, floatDataTotal);
           if (
-            floatTotal == floatDataTotal &&
+            
             item.attributes.sisa_piutang == 0
           ) {
             data.attributes.status = "Dibayar";
+            if (saleType == "sales_sale") data.attributes.status_pembayaran = "Dibayar";
+
           } else if (
-            floatTotal == floatDataTotal &&
+            
             item.attributes.sisa_piutang > 0
           ) {
             data.attributes.status = "Dibayar Sebagian";
+            if (saleType == "sales_sale") data.attributes.status_pembayaran = "Dibayar Sebagian";
+
           } else {
             console.log("error update status pembayaran di penjualan");
           }
@@ -522,24 +533,34 @@ function Piutang({ props }) {
             `retur_${saleType}s`
           ]?.data?.map((retur) => retur?.id);
 
-          data.attributes.area = data.attributes.area.data.id;
-          data.attributes.customer = data.attributes.customer.data.id;
-          data.attributes.location = data.attributes.location.data.id;
-          data.attributes.wilayah = data.attributes.wilayah.data.id;
+          data.attributes.area = data?.attributes?.area?.data?.id;
+          data.attributes.customer = data?.attributes?.customer?.data?.id;
+          data.attributes.location = data?.attributes?.location?.data?.id;
+          data.attributes.wilayah = data?.attributes?.wilayah?.data?.id;
 
-          if (data && url) editPenjualanDB(data.attributes, url);
+          if (data && url) editPenjualanDB(data.attributes, url, saleType);
         }
       }
     });
   };
 
-  const editPenjualanDB = async (value, url) => {
+  const editPenjualanDB = async (value, url, type) => {
     try {
-      const data = {
-        data: {
-          status: value.status,
-        },
-      };
+      var tempData = null;
+      if (type === "sales_sale"){
+        tempData = {
+          data: {
+            status_pembayaran: value.status_pembayaran,
+          },
+        };  
+      } else {
+        tempData = {
+          data: {
+            status: value.status,
+          },
+        };  
+      }
+      const data = tempData;
 
       const JSONdata = JSON.stringify(data);
       const endpoint = process.env.NEXT_PUBLIC_URL + url;
@@ -658,11 +679,11 @@ function Piutang({ props }) {
     var idDetail = null;
 
     // sales data
-    sales.forEach((row) => {
+    sales.forEach((row) => { console.log(row, "sales buosss");
 
-      if(row.attributes.status_pembayaran && row.attributes.status === "Diterima") {
+      if(row.attributes.status === "Diterima") {
         row.status = row.attributes.status_pembayaran;
-      } if(row.attributes.status_pembayaran && row.attributes.status === "Diproses") {
+      } else if(row.attributes.status === "Diproses") {
         row.status = row.attributes.status;
       } else {
         row.status = "Belum Dibayar";
@@ -727,25 +748,28 @@ function Piutang({ props }) {
 
     // piutang
     var keterangan = null;
+    var indexPiutang = 0;
     piutang.forEach((item) => {
-      item.attributes.credit_details.data.forEach((detail, index) => {
+      item.attributes.credit_details.data.forEach((detail) => {
         total = detail.attributes.giro + detail.attributes.transfer + detail.attributes.tunai;
-        if(detail.attributes.sales_sale?.data != null){
+        if(detail.attributes.sales_sale?.data !== null){
           idDetail = detail.attributes.sales_sale?.data?.id;
           keterangan = "sales";
-        } else if (detail.attributes.panel_sale?.data != null) {
+        } else if (detail.attributes.panel_sale?.data !== null) {
           idDetail = detail.attributes.panel_sale?.data?.id;
           keterangan = "panel";
-        } else if (detail.attributes.non_panel_sale?.data != null) {
+        } else if (detail.attributes.non_panel_sale?.data !== null) {
           idDetail = detail.attributes.non_panel_sale?.data?.id;
           keterangan = "nonpanel";
         } else { 
           console.log("piutang data salah");
         }
         //idDetail = detail.attributes.non_panel_sale?.data?.id ?? detail.attributes.panel_sale?.data?.id ?? detail.attributes.sales_sale?.data?.id;
-        pembayaran[index] = { id: idDetail, total: total, keterangan: keterangan};
+        pembayaran[indexPiutang] = { id: idDetail, total: total, keterangan: keterangan};
+        indexPiutang++;
 
       });
+
     });
 
     dataTabel.forEach((element, index) => {
@@ -753,7 +777,7 @@ function Piutang({ props }) {
       element.sisaHutang = 0;
       element.dibayar = 0;
 
-      pembayaran.forEach((item) => { console.log("item id", item, element.id);
+      pembayaran.forEach((item) => {
         //if(item.id == element.id) element.attributes.total -= item.total;
         if(item.id === element.id && item.keterangan === element.keterangan) element.dibayar += item.total;
       });
@@ -1004,6 +1028,7 @@ function Piutang({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="tanggal">
                     <DatePicker
+                      defaultValue={moment()}
                       rules={[
                         {
                           required: true,

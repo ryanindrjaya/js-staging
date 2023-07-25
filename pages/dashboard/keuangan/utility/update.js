@@ -1,6 +1,7 @@
 import React from "react";
 import nookies from "nookies";
 import { notification } from "antd";
+import updateJurnal from "../utility/updateJurnal";
 
 const cookies = nookies.get(null, "token");
 var tempProductListId = [];
@@ -71,7 +72,7 @@ const Update = async (
               });
 
             } else {
-              putAkun(item.attributes.chart_of_account.data.id, item.attributes.chart_of_account.data.attributes, form, totalTunai, page);
+              putAkun(item.attributes.chart_of_account.data.id, item.attributes.chart_of_account.data.attributes, form, totalTunai, page, values?.no_hutang, values?.no_piutang);
             }
 
             akunTunai = true;
@@ -83,7 +84,7 @@ const Update = async (
               });
 
             } else {
-              putAkun(item.attributes.chart_of_account.data.id, item.attributes.chart_of_account.data.attributes, form, totalTransfer, page);
+              putAkun(item.attributes.chart_of_account.data.id, item.attributes.chart_of_account.data.attributes, form, totalTransfer, page, values?.no_hutang, values?.no_piutang);
             }
 
             akunTransfer = true;;
@@ -95,7 +96,7 @@ const Update = async (
               });
               
             } else {
-              putAkun(item.attributes.chart_of_account.data.id, item.attributes.chart_of_account.data.attributes, form, totalGiro, page);
+              putAkun(item.attributes.chart_of_account.data.id, item.attributes.chart_of_account.data.attributes, form, totalGiro, page, values?.no_hutang, values?.no_piutang);
             }
 
             akunGiro = true;;
@@ -130,7 +131,9 @@ const Update = async (
 
 };
 
-const putAkun = async (id, value, form, total, page) => {
+const putAkun = async (id, value, form, total, page, noHutang, noPiutang) => {
+  const user = await getUserMe();
+
   id = parseInt(id);
   var saldo = parseFloat(value.saldo);
     var url = null;
@@ -174,6 +177,7 @@ const putAkun = async (id, value, form, total, page) => {
 
     if (req.status === 200) {
         console.log("akun sukses diupdate");
+        updateJurnal(res.data, page, noHutang, noPiutang, total, user);
     } else {
         console.log("akun error atau tidak ada");
     }

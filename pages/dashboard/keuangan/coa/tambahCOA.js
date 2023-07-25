@@ -49,7 +49,7 @@ const Tambah = ({ props }) => {
       body: JSONdata,
     };
 
-    const req = await fetch(endpoint, options);
+    const req = await fetch(endpoint, options); console.log(req, "req value");
     const res = await req.json();
 
     if (req.status === 200) {
@@ -182,6 +182,7 @@ const Tambah = ({ props }) => {
                       placeholder="Saldo"
                       formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                       parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                      max={1000000000}
                     />
                   </Form.Item>
                 </div>
