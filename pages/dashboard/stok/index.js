@@ -64,16 +64,12 @@ export default function Riwayat({ defaultOptions }) {
       .then((res) => res.json())
       .catch((err) => console.log(err));
 
-    console.log("response", response);
-
     if (response?.data) {
       setHistory(response);
       setFetchingHistory(false);
     } else {
       setHistory();
     }
-
-    console.log("response from fetchHistory", response);
   }
 
   async function fetchData(url, type) {
@@ -113,15 +109,11 @@ export default function Riwayat({ defaultOptions }) {
       .then((res) => res.json())
       .catch((err) => console.log(err));
 
-    console.log("response from fetchInventory", response);
-
     if (response?.data) {
       setData(response.data);
     } else {
       setData();
     }
-
-    console.log("response from fetchInventory", response);
   }
 
   useEffect(() => {
@@ -167,8 +159,6 @@ export default function Riwayat({ defaultOptions }) {
           })),
         });
       }
-
-      console.log("response from fetchOptions", response);
     }
 
     fetchProducts();
@@ -204,8 +194,6 @@ export default function Riwayat({ defaultOptions }) {
           })),
         });
       }
-
-      console.log("response from fetchOptions", response);
     }
 
     fetchLocations();
