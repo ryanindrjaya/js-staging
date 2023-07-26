@@ -313,6 +313,21 @@ function Retur({ props }) {
     setLoading(false);
   };
 
+  const clearData = () => {
+    dispatch({ type: "CLEAR_DATA" });
+    setProductTotalPrice({});
+    setProductSubTotal({});
+    setTotalPrice(0);
+    setGrandTotal(0);
+    setListId([]);
+    setSupplier();
+    setLocProduct([]);
+    setExpProduct([]);
+    setBatch([]);
+    setStokString({});
+    form.resetFields();
+  };
+
   const createDetailRetur = async () => {
     updateRetur(
       products,
@@ -323,7 +338,8 @@ function Retur({ props }) {
       dataValues,
       props.returs,
       returMasterId,
-      createInventoryRetur
+      createInventoryRetur,
+      clearData
     );
   };
 
@@ -549,6 +565,10 @@ function Retur({ props }) {
     setTimeout(() => {
       setIsFetchingData(false);
     }, 3000);
+
+    return () => {
+      dispatch({ type: "CLEAR_DATA" });
+    };
   }, []);
 
   const getPaymentRemaining = () => {

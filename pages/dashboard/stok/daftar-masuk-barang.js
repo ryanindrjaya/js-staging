@@ -765,7 +765,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
                     </Popconfirm>
                     <Popconfirm
                       placement="top"
-                      title="Apakah anda yakin ingin mengirim permintaan ini?"
+                      title="Apakah anda yakin sudah menerima semua barang?"
                       okButtonProps={{
                         type: "default",
                       }}

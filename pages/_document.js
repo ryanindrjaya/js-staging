@@ -9,8 +9,7 @@ export default class CustomDocument extends Document {
     try {
       ctx.renderPage = () =>
         originalRenderPage({
-          enhanceApp: (App) => (props) =>
-            sheet.collectStyles(<App {...props} />),
+          enhanceApp: (App) => (props) => sheet.collectStyles(<App {...props} />),
         });
 
       const initialProps = await Document.getInitialProps(ctx);
@@ -31,21 +30,9 @@ export default class CustomDocument extends Document {
     return (
       <Html>
         <Head>
-          <link
-            rel="icon"
-            href="/static/image/favicon.png"
-            type="image/png"
-            sizes="16x16"
-          />
-          <link
-            href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700"
-            rel="stylesheet"
-            async
-          />
-          <link
-            rel="stylesheet"
-            href="https://unpkg.com/react-instantsearch-theme-algolia@4.0.0/style.min.css"
-          />
+          <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+          <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700" rel="stylesheet" async />
+          <link rel="stylesheet" href="https://unpkg.com/react-instantsearch-theme-algolia@4.0.0/style.min.css" />
           <link
             rel="stylesheet"
             href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"

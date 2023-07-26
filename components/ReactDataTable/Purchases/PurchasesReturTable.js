@@ -218,10 +218,47 @@ export default function ReactDataTable({ data, onDelete, onPageChange, onChangeS
     },
   };
 
+  const onChangeStatusLpb = async (id) => {
+    const cookies = nookies.get(null);
+    try {
+      const endpoint = `${process.env.NEXT_PUBLIC_URL}/purchasings/${id}`;
+      const options = {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${cookies.token}`,
+        },
+        body: JSON.stringify({
+          data: {
+            status: "Diretur",
+          },
+        }),
+      };
+
+      const res = await fetch(endpoint, options);
+      const data = await res.json();
+
+      if (data?.data) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  };
+
   const changeStatus = async (row, status) => {
     const cookies = nookies.get(null);
     try {
+      message.loading({
+        content: "Loading...",
+        key: "updatable",
+      });
+
       if (status === "Selesai") {
+        const changeStatusLpb = await onChangeStatusLpb(row.attributes.purchasing.data.id);
         const success = await createInventoryRetur(row);
 
         if (!success) {
@@ -248,13 +285,23 @@ export default function ReactDataTable({ data, onDelete, onPageChange, onChangeS
       const data = await res.json();
 
       if (data?.data) {
-        message.success("Status berhasil diubah");
+        message.success({
+          content: "Status berhasil diubah",
+          key: "updatable",
+        });
         router.reload();
       } else {
-        message.error("Status gagal diubah");
+        message.error({
+          content: "Status gagal diubah",
+          key: "updatable",
+        });
       }
     } catch (error) {
       console.log(error);
+      message.error({
+        content: "Status gagal diubah",
+        key: "updatable",
+      });
     }
   };
 

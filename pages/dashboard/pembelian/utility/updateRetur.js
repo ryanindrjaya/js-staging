@@ -32,7 +32,8 @@ const updateRetur = (
   value,
   returData,
   returMasterId,
-  createInventoryRetur
+  createInventoryRetur,
+  clearData
 ) => {
   let detailTotalPrice = 0;
 
@@ -43,11 +44,9 @@ const updateRetur = (
     var qty = value.jumlah_qty?.[id] ?? products?.productInfo[id]?.qty ?? 1;
     var unit = products?.productInfo[id]?.unit ?? element.attributes.unit_1;
 
-    var unitPrice =
-      value.harga_satuan?.[id] ?? products?.productInfo[id]?.priceUnit;
+    var unitPrice = value.harga_satuan?.[id] ?? products?.productInfo[id]?.priceUnit;
 
-    var unitPriceAfterDisc =
-      productTotalPrice[id] ?? element.attributes.buy_price_1;
+    var unitPriceAfterDisc = productTotalPrice[id] ?? element.attributes.buy_price_1;
 
     var subTotal = unitPriceAfterDisc * qty;
     detailTotalPrice = detailTotalPrice + subTotal;
@@ -56,12 +55,9 @@ const updateRetur = (
     var expired_date = value?.expired_date?.[id] ?? null;
     var location = value?.product_location[id];
     var disc = value.disc_rp?.[id] ?? products?.productInfo[id]?.disc ?? 0;
-    var d1 =
-      products?.productInfo[id]?.d1 ?? element.attributes.unit_1_dp1 ?? 0;
-    var d2 =
-      products?.productInfo[id]?.d2 ?? element.attributes.unit_1_dp2 ?? 0;
-    var d3 =
-      products?.productInfo[id]?.d3 ?? element.attributes.unit_1_dp3 ?? 0;
+    var d1 = products?.productInfo[id]?.d1 ?? element.attributes.unit_1_dp1 ?? 0;
+    var d2 = products?.productInfo[id]?.d2 ?? element.attributes.unit_1_dp2 ?? 0;
+    var d3 = products?.productInfo[id]?.d3 ?? element.attributes.unit_1_dp3 ?? 0;
     //var location = null;
 
     var idDetail = returData?.data?.attributes.retur_details?.data[index].id;
@@ -93,16 +89,14 @@ const updateRetur = (
   console.log("update data retur ", returData.data);
 
   var idRetur = returData.data.id;
-  var dpp_ppn_active =
-    value.DPP_PPN_active ?? returData.data.attributes.DPP_PPN_active;
+  var dpp_ppn_active = value.DPP_PPN_active ?? returData.data.attributes.DPP_PPN_active;
   var no_retur = value?.no_retur ?? returData?.data?.attributes?.no_retur;
   var catatan = value?.catatan ?? returData?.data?.attributes?.catatan;
   var pajak = value?.pajak ?? returData?.data?.attributes?.pajak;
   var status = value?.status ?? returData?.data?.attributes?.status;
   //var status = "lol";
   var tanggal_pembelian = returData?.data?.attributes?.tanggal_pembelian;
-  var tanggal_retur =
-    value?.tanggal_retur ?? returData?.data?.attributes?.tanggal_retur;
+  var tanggal_retur = value?.tanggal_retur ?? returData?.data?.attributes?.tanggal_retur;
   var no_nota_supplier = returData?.data?.attributes?.no_nota_supplier;
 
   //var location = value?.location ?? returData?.data?.attributes?.location?.data?.attributes?.id;
@@ -155,7 +149,8 @@ const updateRetur = (
     supplier,
     retur_details,
     dpp_ppn_active,
-    detailTotalPrice
+    detailTotalPrice,
+    clearData
   );
 };
 
@@ -217,6 +212,30 @@ const PUTReturDetail = async (
   }
 };
 
+const changeStatusLPB = async (id) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings/" + id;
+  const data = {
+    data: {
+      status: "Diretur",
+    },
+  };
+
+  const JSONdata = JSON.stringify(data);
+  const options = {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+    body: JSONdata,
+  };
+
+  const req = await fetch(endpoint, options);
+  const res = await req.json();
+
+  console.log("response change status lpb", res);
+};
+
 const PUTRetur = async (
   returMasterId,
   idRetur,
@@ -232,7 +251,8 @@ const PUTRetur = async (
   supplier,
   retur_details,
   dpp_ppn_active,
-  detailTotalPrice
+  detailTotalPrice,
+  clearData
 ) => {
   console.log("TOTAL DETAIL", detailTotalPrice);
 
@@ -276,7 +296,10 @@ const PUTRetur = async (
     if (status === "Selesai") {
       console.log("=========UPDATE INVENTORY RETUR=========");
       await createInventoryRetur(res.data);
+      await changeStatusLPB(purchasing);
     }
+
+    clearData();
 
     router.replace("/dashboard/pembelian/retur");
   } else {
@@ -288,14 +311,12 @@ const openNotificationWithIcon = (type) => {
   if (type === "error") {
     notification[type]({
       message: "Gagal menambahkan data",
-      description:
-        "Retur pembelian gagal diupdate. Silahkan cek kelengkapan data lainnya",
+      description: "Retur pembelian gagal diupdate. Silahkan cek kelengkapan data lainnya",
     });
   } else if (type === "success") {
     notification[type]({
       message: "Berhasil menambahkan data",
-      description:
-        "Retur pembelian berhasil diupdate. Silahkan cek pada halaman Retur Pembelian",
+      description: "Retur pembelian berhasil diupdate. Silahkan cek pada halaman Retur Pembelian",
     });
   }
 };

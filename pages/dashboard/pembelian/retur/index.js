@@ -9,6 +9,7 @@ import TitlePage from "../../../../components/TitlePage/TitlePage";
 import PurchasesReturTable from "../../../../components/ReactDataTable/Purchases/PurchasesReturTable";
 import nookies from "nookies";
 import { PrinterOutlined } from "@ant-design/icons";
+import createInventoryRetur from "../utility/createInventoryRetur";
 
 Retur.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -25,7 +26,7 @@ Retur.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/returs?populate=*&sort[0]=id:desc";
   const options = {
     method: "GET",
     headers: {
@@ -133,7 +134,6 @@ function Retur({ props }) {
 
   const onChangeStatus = (status, row) => {
     row.attributes.status = status;
-    // handleChangeStatus(row, row.id);
   };
 
   const openNotificationWithIcon = (type, title, message) => {

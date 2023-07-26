@@ -4,12 +4,12 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import Head from "next/head";
-import { DatePicker, Empty, Select, Spin, Table, Tag } from "antd";
+import { Button, DatePicker, Empty, Select, Spin, Table, Tag } from "antd";
 import { useRouter } from "next/dist/client/router";
 import nookies from "nookies";
 import useDebounce from "../../../hooks/useDebounce";
 import moment from "moment";
-import { PrinterOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import { PrinterOutlined, ArrowLeftOutlined, SyncOutlined } from "@ant-design/icons";
 
 const { Column, ColumnGroup } = Table;
 
@@ -43,6 +43,8 @@ export default function Riwayat({ defaultOptions }) {
   const [locationData, setLocationData] = useState();
   const [productData, setProductData] = useState();
 
+  const [refetch, setRefetch] = useState(false);
+
   const printArea = useRef();
 
   async function fetchHistory(product, location, start, end) {
@@ -62,16 +64,12 @@ export default function Riwayat({ defaultOptions }) {
       .then((res) => res.json())
       .catch((err) => console.log(err));
 
-    console.log("response", response);
-
     if (response?.data) {
       setHistory(response);
       setFetchingHistory(false);
     } else {
       setHistory();
     }
-
-    console.log("response from fetchHistory", response);
   }
 
   async function fetchData(url, type) {
@@ -111,15 +109,11 @@ export default function Riwayat({ defaultOptions }) {
       .then((res) => res.json())
       .catch((err) => console.log(err));
 
-    console.log("response from fetchInventory", response);
-
     if (response?.data) {
       setData(response.data);
     } else {
       setData();
     }
-
-    console.log("response from fetchInventory", response);
   }
 
   useEffect(() => {
@@ -133,7 +127,7 @@ export default function Riwayat({ defaultOptions }) {
       setSelectedProduct(parseInt(router.query.product));
       setSelectedLocation(parseInt(router.query.location));
     }
-  }, [router.query, date]);
+  }, [router.query, date, refetch]);
 
   useEffect(() => {
     async function fetchProducts() {
@@ -165,8 +159,6 @@ export default function Riwayat({ defaultOptions }) {
           })),
         });
       }
-
-      console.log("response from fetchOptions", response);
     }
 
     fetchProducts();
@@ -202,8 +194,6 @@ export default function Riwayat({ defaultOptions }) {
           })),
         });
       }
-
-      console.log("response from fetchOptions", response);
     }
 
     fetchLocations();
@@ -543,7 +533,19 @@ export default function Riwayat({ defaultOptions }) {
                         </div>
                       </div>
                     </div>
-                    <p className="m-0">Keterangan Unit : {data.conversion}</p>
+
+                    <div className="w-full flex justify-between">
+                      <p className="m-0">Keterangan Unit : {data.conversion}</p>
+
+                      <Button
+                        type="text"
+                        onClick={() => setRefetch(!refetch)}
+                        className="text-gray-400 flex  items-center"
+                      >
+                        <SyncOutlined />
+                        Refresh data
+                      </Button>
+                    </div>
                     {history?.units?.length > 0 ? (
                       <>
                         <Table
