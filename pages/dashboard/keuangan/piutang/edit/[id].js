@@ -401,32 +401,20 @@ function Piutang({ props }) {
     // cek untuk akun hutang (cek coa)
     
     if(document == "Publish"){
+
+      var cekAkunMaster = false;
       akunPiutang.forEach((item) => {
+
         if(item.attributes.setting == true){
-          if(totalTunai != 0 && item.attributes.type == "Tunai"){
-            if(item.attributes.chart_of_account.data.attributes.saldo < totalTunai){
+          if(cekAkunMaster === false && item.attributes.type == "Master"){
+            if(item.attributes.chart_of_account.data.attributes.saldo < values.total_pembayaran){
               notification["error"]({
                 message: "Gagal menambahkan data",
-                description: "Data gagal ditambahkan, saldo untuk akun tunai kurang untuk melakukan pembayaran.",
+                description: "Data gagal ditambahkan, saldo untuk akun master kurang untuk melakukan pembayaran.",
               });
-              setInfo("gagal");
-            }
-          } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
-            if(item.attributes.chart_of_account.data.attributes.saldo < totalTransfer){
-              notification["error"]({
-                message: "Gagal menambahkan data",
-                description: "Data gagal ditambahkan, saldo untuk akun transfer kurang untuk melakukan pembayaran.",
-              });
-              setInfo("gagal");
-            }
-          } else if(totalGiro != 0 && item.attributes.type == "Giro"){
-            if(item.attributes.chart_of_account.data.attributes.saldo < totalGiro){
-              notification["error"]({
-                message: "Gagal menambahkan data",
-                description: "Data gagal ditambahkan, saldo untuk akun giro kurang untuk melakukan pembayaran.",
-              });
-              setInfo("gagal");
-            }
+              
+            } else cekAkunMaster = true;
+            
           }
         } else {
           if(totalTunai != 0 && item.attributes.type == "Tunai"){
@@ -447,8 +435,16 @@ function Piutang({ props }) {
                 description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
               });
               setInfo("gagal");
+          } else if(cekAkunMaster != true){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, silahkan pilih akun master untuk diaktifkan.",
+              });
+              setInfo("gagal");
           }
+
         }
+        
       });
 
     }

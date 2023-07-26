@@ -30,6 +30,8 @@ const Tambah = ({ props }) => {
   //Akun COA
   const [akunCOA, setAkunCOA] = useState();
 
+  const [selectedType, setSelectedType] = useState(null); 
+
   const onFinish = async (values) => {
     setLoading(true);
     values.setting = false;
@@ -193,7 +195,10 @@ const Tambah = ({ props }) => {
 
               <div className="flex flex-wrap -mx-3 mb-2">
                 <Form.Item name="type" className="w-1/4 mb-5 ml-1">
-                  <Select size="large" placeholder="Type">
+                  <Select size="large" placeholder="Type" onChange={setSelectedType}>
+                    <Select.Option value="Master" key="Master">
+                      Master
+                    </Select.Option>
                     <Select.Option value="Tunai" key="Tunai">
                       Tunai
                     </Select.Option>
@@ -207,7 +212,11 @@ const Tambah = ({ props }) => {
                 </Form.Item>
 
                 <Form.Item name="chart_of_account" className="w-1/4 mb-5 ml-5">
-                  <Coa page="piutang" onChange={setAkunCOA}/>
+                  {selectedType === "Master" ? (
+                    <Coa page="hutang" onChange={setAkunCOA} selectedAkun={akunCOA}/>
+                  ) : (
+                    <Coa page="piutang" onChange={setAkunCOA} selectedAkun={akunCOA}/>
+                  )}
                 </Form.Item>
               </div>
 
