@@ -57,7 +57,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     element.subtotal = returSubtotal;
     element.sisaPiutang = element.attributes?.total - element?.subtotal;
     sisaPiutang[index] = element.sisaPiutang;
-
+    console.log(sisaPiutang[index], element);
     index++;
   });
 
@@ -78,7 +78,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     } else return 0;
   };
 
-  const onChangePilih = async (value, data, index) => {
+  const onChangePilih = async (value, data, index) => { console.log("data", data);
     var pilihData = "tidak";
     if(value.target.checked == true) pilihData = "pilih";
     else pilihData = "tidak";

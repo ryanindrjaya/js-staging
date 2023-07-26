@@ -231,58 +231,62 @@ function Piutang({ props }) {
               // else editPenjualanDB("Dibayar Sebagian", item.attributes.purchasing.data.id);
 
               const saleTypes = ["non_panel_sale", "panel_sale", "sales_sale"];
-              for (const saleType of saleTypes) {
-                const sale = item.attributes[saleType].data;
-                if (sale != null) {
-                  let url = `/${saleType}s/${sale.id}`;
-                  url = url.replaceAll("_", "-");
-                  const data = sale;
-                  console.log("link url", url);
-                  const pembayaran =
-                    item.attributes.giro +
-                    item.attributes.transfer +
-                    item.attributes.tunai;
-                  const total =
-                    pembayaran +
-                    item.attributes.total_retur +
-                    item.attributes.sisa_piutang;
-                  const floatTotal = parseFloat(total.toFixed(2));
-                  const floatDataTotal = parseFloat(data.attributes.total.toFixed(2));
+                for (const saleType of saleTypes) {
+                  const sale = item.attributes[saleType].data;
+                  console.log(sale, "sale nih", item, saleType);
+                  // var saleStatus = null;
+                  // if (saleType === "sales_sale") saleStatus = data.attributes.status_pembayaran;
 
-                  if (
-                    floatTotal == floatDataTotal &&
-                    item.attributes.sisa_piutang == 0
-                  ) {
-                    data.attributes.status = "Dibayar";
-                  } else if (
-                    floatTotal == floatDataTotal &&
-                    item.attributes.sisa_piutang > 0
-                  ) {
-                    data.attributes.status = "Dibayar Sebagian";
-                  } else {
-                    console.log("error update status pembayaran di penjualan");
-                  }
+                  if (sale != null) {
+                    let url = `/${saleType}s/${sale.id}`;
+                    url = url.replaceAll("_", "-");
+                    const data = sale;
+                    console.log("link url", url);
+                    const pembayaran =
+                      item.attributes.giro +
+                      item.attributes.transfer +
+                      item.attributes.tunai;
+                    const total =
+                      pembayaran +
+                      item.attributes.total_retur +
+                      item.attributes.sisa_piutang;
+                    const floatTotal = parseFloat(total.toFixed(2));
+                    const floatDataTotal = parseFloat(data.attributes.total.toFixed(2));
 
-                  data.attributes[`${saleType}_details`] = data.attributes[
-                    `${saleType}_details`
-                  ].data.map((detail) => detail.id);
-                  data.attributes[`retur_${saleType}s`] = data.attributes[
-                    `retur_${saleType}s`
-                  ].data.map((retur) => retur.id);
+                    //console.log("item nih", item, floatTotal, floatDataTotal);
+                    if (
+                      
+                      item.attributes.sisa_piutang == 0
+                    ) {
+                      data.attributes.status = "Dibayar";
+                      if (saleType == "sales_sale") data.attributes.status_pembayaran = "Dibayar";
 
-                  data.attributes.area = data.attributes.area.data.id;
-                  data.attributes.customer = data.attributes.customer.data.id;
-                  data.attributes.location = data.attributes.location.data.id;
-                  data.attributes.wilayah = data.attributes.wilayah.data.id;
+                    } else if (
+                      
+                      item.attributes.sisa_piutang > 0
+                    ) {
+                      data.attributes.status = "Dibayar Sebagian";
+                      if (saleType == "sales_sale") data.attributes.status_pembayaran = "Dibayar Sebagian";
 
-                  //if (data && url) editPenjualanDB(data.attributes, url);
-                  if (data && url){
-                    //editPenjualanDB(data.attributes, url);
-                    if (sisa_piutang == 0) editPenjualanDB(data.attributes.status, url);
-                    else editPenjualanDB(data.attributes.status, url);
+                    } else {
+                      console.log("error update status pembayaran di penjualan");
+                    }
+
+                    data.attributes[`${saleType}_details`] = data.attributes[
+                      `${saleType}_details`
+                    ].data.map((detail) => detail.id);
+                    data.attributes[`retur_${saleType}s`] = data.attributes[
+                      `retur_${saleType}s`
+                    ]?.data?.map((retur) => retur?.id);
+
+                    data.attributes.area = data?.attributes?.area?.data?.id;
+                    data.attributes.customer = data?.attributes?.customer?.data?.id;
+                    data.attributes.location = data?.attributes?.location?.data?.id;
+                    data.attributes.wilayah = data?.attributes?.wilayah?.data?.id;
+
+                    if (data && url) editPenjualanDB(data.attributes, url, saleType);
                   }
                 }
-              }
               
             });
         } else console.log("Not update lpb, karena draft");
@@ -305,12 +309,12 @@ function Piutang({ props }) {
                 
                 putAkun(item.attributes.chart_of_account.data, row.attributes.transfer);
     
-                akunTransfer = true;;
+                akunTransfer = true;
               } else if(row.attributes.giro > 0 && item.attributes.type == "Giro"){
 
                 putAkun(item.attributes.chart_of_account.data, row.attributes.giro);
     
-                akunGiro = true;;
+                akunGiro = true;
               }
             }
           });
@@ -343,7 +347,7 @@ function Piutang({ props }) {
     } else console.log("Not update all, karena draft");
 };
 
-const putAkun = async (akun, pembayaran) => { console.log("put akun", akun, pembayaran);
+const putAkun = async (akun, pembayaran) => {
   try {
     var saldo = parseFloat((akun.attributes.saldo ?? 0) + pembayaran);
 
@@ -369,6 +373,7 @@ const putAkun = async (akun, pembayaran) => { console.log("put akun", akun, pemb
 
       if (req.status === 200) {
           console.log("akun sukses diupdate");
+          //updateJurnal(res.data, "piutang", noHutang, noPiutang, total, user);
       } else {
           console.log("akun error atau tidak ada");
       }
@@ -377,13 +382,23 @@ const putAkun = async (akun, pembayaran) => { console.log("put akun", akun, pemb
     }
 };
 
-const editPenjualanDB = async (value, url) => {
+const editPenjualanDB = async (value, url, type) => {
     try {
-      const data = {
-        data: {
-          status: value,
-        },
-      };
+      var tempData = null;
+      if (type === "sales_sale"){
+        tempData = {
+          data: {
+            status_pembayaran: value.status_pembayaran,
+          },
+        };  
+      } else {
+        tempData = {
+          data: {
+            status: value.status,
+          },
+        };  
+      }
+      const data = tempData;
 
       const JSONdata = JSON.stringify(data);
       const endpoint = process.env.NEXT_PUBLIC_URL + url;
@@ -400,9 +415,9 @@ const editPenjualanDB = async (value, url) => {
       const res = await req.json();
       console.log("res", res);
       if (req.status === 200) {
-        console.log("status di pembelian sukses diupdate");
+        console.log("status di penjualan sukses diupdate");
       } else {
-        console.log("status di pembelian error atau tidak ada");
+        console.log("status di penjualan error atau tidak ada");
       }
     } catch (error) {
       console.log("errorr", error);

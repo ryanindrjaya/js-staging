@@ -544,12 +544,16 @@ function Piutang({ props }) {
     res.data.attributes.credit_details.data.forEach((item) => {
       const saleTypes = ["non_panel_sale", "panel_sale", "sales_sale"];
       for (const saleType of saleTypes) {
-        const sale = item.attributes[saleType].data; console.log(sale, "sale nih baru editPenjualan", item.attributes[saleType]);
+        const sale = item.attributes[saleType].data;
+        console.log(sale, "sale nih", item, saleType);
+        // var saleStatus = null;
+        // if (saleType === "sales_sale") saleStatus = data.attributes.status_pembayaran;
+
         if (sale != null) {
           let url = `/${saleType}s/${sale.id}`;
           url = url.replaceAll("_", "-");
           const data = sale;
-          
+          console.log("link url", url);
           const pembayaran =
             item.attributes.giro +
             item.attributes.transfer +
@@ -561,16 +565,21 @@ function Piutang({ props }) {
           const floatTotal = parseFloat(total.toFixed(2));
           const floatDataTotal = parseFloat(data.attributes.total.toFixed(2));
 
+          //console.log("item nih", item, floatTotal, floatDataTotal);
           if (
-            floatTotal == floatDataTotal &&
+            
             item.attributes.sisa_piutang == 0
           ) {
             data.attributes.status = "Dibayar";
+            if (saleType == "sales_sale") data.attributes.status_pembayaran = "Dibayar";
+
           } else if (
-            floatTotal == floatDataTotal &&
+            
             item.attributes.sisa_piutang > 0
           ) {
             data.attributes.status = "Dibayar Sebagian";
+            if (saleType == "sales_sale") data.attributes.status_pembayaran = "Dibayar Sebagian";
+
           } else {
             console.log("error update status pembayaran di penjualan");
           }
@@ -580,14 +589,14 @@ function Piutang({ props }) {
           ].data.map((detail) => detail.id);
           data.attributes[`retur_${saleType}s`] = data.attributes[
             `retur_${saleType}s`
-          ].data.map((retur) => retur.id);
+          ]?.data?.map((retur) => retur?.id);
 
-          data.attributes.area = data.attributes.area.data.id;
-          data.attributes.customer = data.attributes.customer.data.id;
-          data.attributes.location = data.attributes.location.data.id;
-          data.attributes.wilayah = data.attributes.wilayah.data.id;
+          data.attributes.area = data?.attributes?.area?.data?.id;
+          data.attributes.customer = data?.attributes?.customer?.data?.id;
+          data.attributes.location = data?.attributes?.location?.data?.id;
+          data.attributes.wilayah = data?.attributes?.wilayah?.data?.id;
 
-          if (data && url) editPenjualanDB(data.attributes, url);
+          if (data && url) editPenjualanDB(data.attributes, url, saleType);
         }
       }
     });
@@ -797,6 +806,7 @@ function Piutang({ props }) {
 
     // piutang
     var keterangan = null;
+    var indexPiutang = 0;
     piutang.forEach((item) => {
       item.attributes.credit_details.data.forEach((detail, index) => {
         total = detail.attributes.giro + detail.attributes.transfer + detail.attributes.tunai;
@@ -813,7 +823,8 @@ function Piutang({ props }) {
           console.log("piutang data salah");
         }
         //idDetail = detail.attributes.non_panel_sale?.data?.id ?? detail.attributes.panel_sale?.data?.id ?? detail.attributes.sales_sale?.data?.id;
-        pembayaran[index] = { id: idDetail, total: total, keterangan: keterangan};
+        pembayaran[indexPiutang] = { id: idDetail, total: total, keterangan: keterangan};
+        indexPiutang++;
 
       });
     });
@@ -823,7 +834,7 @@ function Piutang({ props }) {
       element.sisaHutang = 0;
       element.dibayar = 0;
 
-      pembayaran.forEach((item) => { console.log("item id", item, element.id);
+      pembayaran.forEach((item) => { console.log("item id", item, element);
         //if(item.id == element.id) element.attributes.total -= item.total;
         if(item.id === element.id && item.keterangan === element.keterangan) element.dibayar += item.total;
       });
@@ -903,7 +914,7 @@ function Piutang({ props }) {
         }
       });
       
-      dataEdit.attributes.credit_details.data.forEach((item) => {
+      dataEdit.attributes.credit_details.data.forEach((item) => { console.log("element dan item dataedit", element, item);
         
         if(element.keterangan == "sales"){
           if(item.attributes.sales_sale?.data?.attributes?.no_sales_sale == element.attributes.no_sales_sale){
@@ -911,7 +922,8 @@ function Piutang({ props }) {
             dispatch({ type: "CHANGE_DATA_TUNAI", tunai: item.attributes.tunai, listData: element, index: index });
             dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: item.attributes.transfer, listData: element, index: index });
             dispatch({ type: "CHANGE_DATA_GIRO", giro: item.attributes.giro, listData: element, index: index });
-            dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: item.attributes.sisa_piutang, listData: element, index: index });
+            var totalJatuhTempo = item.attributes.sisa_piutang + item.attributes.tunai + item.attributes.transfer + item.attributes.giro;
+            dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: totalJatuhTempo, listData: element, index: index });
           } else {
             dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: element, index: index });
             dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
@@ -925,7 +937,8 @@ function Piutang({ props }) {
             dispatch({ type: "CHANGE_DATA_TUNAI", tunai: item.attributes.tunai, listData: element, index: index });
             dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: item.attributes.transfer, listData: element, index: index });
             dispatch({ type: "CHANGE_DATA_GIRO", giro: item.attributes.giro, listData: element, index: index });
-            dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: item.attributes.sisa_piutang, listData: element, index: index });
+            var totalJatuhTempo = item.attributes.sisa_piutang + item.attributes.tunai + item.attributes.transfer + item.attributes.giro;
+            dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: totalJatuhTempo, listData: element, index: index });
           } else {
             dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: element, index: index });
             dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
