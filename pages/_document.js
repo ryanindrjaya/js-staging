@@ -30,7 +30,7 @@ export default class CustomDocument extends Document {
     return (
       <Html>
         <Head>
-          <link rel="icon" type="image/x-icon" href="favicon.ico" />
+          <link rel="icon" type="image/x-icon" href="/favicon.ico" />
           <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700" rel="stylesheet" async />
           <link rel="stylesheet" href="https://unpkg.com/react-instantsearch-theme-algolia@4.0.0/style.min.css" />
           <link
