@@ -41,8 +41,8 @@ export default function PembayaranToko() {
     akun: [],
   });
   const [date, setDate] = useState([
-    moment().startOf("day").format("YYYY-MM-DDTHH:mm:ss"),
-    moment().endOf("day").format("YYYY-MM-DDTHH:mm:ss"),
+    moment().startOf("day").hour(0).minute(0).second(0),
+    moment().endOf("day").hour(23).minute(59).second(59),
   ]);
   const [selectedAdmin, setSelectedAdmin] = useState();
   const router = useRouter();
