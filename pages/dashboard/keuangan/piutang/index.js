@@ -384,45 +384,13 @@ function Piutang({ props }) {
     
                 akunGiro = true;
               } else if(akunMaster === false && item.attributes.type == "Master"){
-                if(item.attributes.chart_of_account.data.attributes.saldo < dataPiutang.attributes.total_pembayaran){
-                  notification["error"]({
-                    message: "Gagal menambahkan data",
-                    description: "Data gagal ditambahkan, saldo untuk akun master kurang untuk melakukan pembayaran.",
-                  });
-    
-                } else {
                   putAkun(item.attributes.chart_of_account.data, dataPiutang.attributes.total_pembayaran, dataPiutang.attributes.no_piutang, "Master");
 
                   akunMaster = true;
-                }
                 
               }
             }
           });
-          
-          if(row.attributes.tunai != 0 && akunTunai != true){
-              notification["error"]({
-                message: "Gagal menambahkan data",
-                description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
-              });
-              
-          } else if(row.attributes.transfer != 0 && akunTransfer != true){
-              notification["error"]({
-                message: "Gagal menambahkan data",
-                description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
-              });
-              
-          } else if(row.attributes.giro  != 0 && akunGiro != true){
-              notification["error"]({
-                message: "Gagal menambahkan data",
-                description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
-              });    
-          } else if(akunMaster != true){
-            notification["error"]({
-              message: "Gagal menambahkan data",
-              description: "Data gagal ditambahkan, silahkan pilih akun master untuk diaktifkan.",
-            });
-          }
 
         });
 
