@@ -7,7 +7,7 @@ import router, { useRouter } from "next/router";
 import { Input, notification, Select, DatePicker, Modal, Button, Descriptions } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import CreditTable from "@iso/components/ReactDataTable/Cost/CreditTable";
-import Supplier from "@iso/components/Form/AddCost/SupplierForm";
+import Sales from "@iso/components/Form/AddCost/SearchSales";
 import Customer from "@iso/components/Form/AddCost/CustomerForm";
 import Area from "@iso/components/Form/AddCost/AreaForm";
 import Wilayah from "@iso/components/Form/AddCost/WilayahForm";
@@ -21,8 +21,8 @@ Piutang.getInitialProps = async (context) => {
   const req = await fetchData(cookies);
   const user = await req.json();
 
-  const reqDataUserSales = await fetchUserSales(cookies);
-  const dataUserSales = await reqDataUserSales.json();
+  // const reqDataUserSales = await fetchUserSales(cookies);
+  // const dataUserSales = await reqDataUserSales.json();
 
   const reqLocation = await fetchLocation(cookies);
   const locations = await reqLocation.json();
@@ -36,7 +36,7 @@ Piutang.getInitialProps = async (context) => {
   return {
     props: {
       user,
-      dataUserSales,
+      //dataUserSales,
       locations,
       piutang,
       akunPiutang
@@ -58,21 +58,21 @@ const fetchData = async (cookies) => {
   return req;
 };
 
-const fetchUserSales = async (cookies) => {
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL +
-    "/users?populate=*&filters[role][name][$eq]=Sales&?filters[role][type][$eq]=Sales";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
+// const fetchUserSales = async (cookies) => {
+//   const endpoint =
+//     process.env.NEXT_PUBLIC_URL +
+//     "/users?populate=*&filters[role][name][$eq]=Sales&?filters[role][type][$eq]=Sales";
+//   const options = {
+//     method: "GET",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: "Bearer " + cookies.token,
+//     },
+//   };
 
-  const req = await fetch(endpoint, options);
-  return req;
-};
+//   const req = await fetch(endpoint, options);
+//   return req;
+// };
 
 const fetchLocation = async (cookies) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/locations";
@@ -120,12 +120,12 @@ function Piutang({ props }) {
   const user = props.user;
   const locations = props.locations.data;
   const data = props.piutang;
-  const dataUserSales = props.dataUserSales;
+  //const dataUserSales = props.dataUserSales;
   const akunPiutang = props.akunPiutang;
   const router = useRouter();
-  const [piutang, setPiutang] = useState(data); console.log("Piutang", piutang.data, akunPiutang);
+  const [piutang, setPiutang] = useState(data);
   const [supplier, setSupplier] = useState();
-  const [searchParameters, setSearchParameters] = useState({});
+  const [searchParameters, setSearchParameters] = useState({}); console.log("searchParameters", searchParameters);
   const cookies = nookies.get(null, "token");
 
   // Selected id
@@ -574,7 +574,7 @@ const changeStatusPiutang = async (status, id) => {
         }
 
         if (key === "sales" && searchParameters[key] !== undefined) {
-          query += `filters[credit_details][customer][sales_name]=${searchParameters[key]}&`;
+          query += `filters[credit_details][customer][sales_name]=${searchParameters[key].name}&`;
         } else {
           query += "";
         }
@@ -814,7 +814,7 @@ const print = () => {
 
             <div className="w-full flex justify-start -mt-6">
               <div className="w-full md:w-1/4 px-3">
-                <Select
+                {/* <Select
                   size="large"
                   style={{
                     width: "100%",
@@ -832,7 +832,12 @@ const print = () => {
                       </Select.Option>
                     );
                   })}
-                </Select>
+                </Select> */}
+                <Sales
+                   onChangeSales={(e) =>
+                     setSearchParameters({ ...searchParameters, sales: e })
+                   }
+                 />
               </div>
               <div className="w-full md:w-1/4 px-3">
                 <Area
