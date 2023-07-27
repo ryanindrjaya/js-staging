@@ -24,7 +24,7 @@ export default function Sales({ onChangeSales }) {
     if (req.status == 200) {
       const res = await req.json();
 
-      onChangeSales(res.data);
+      onChangeSales(res);
     }
     
   };

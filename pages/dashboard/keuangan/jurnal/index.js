@@ -196,12 +196,12 @@ function Jurnal({ props }) {
       let endDate = "";
 
       for (const key in searchParameters) {
-        // if (key === "user" && searchParameters[key] !== null) {
-        //   console.log("search", searchParameters);
-        //   //query += `filters[credit_details][customer][id]=${searchParameters[key].id}&`;
-        // } else {
-        //   query += "";
-        // }
+        if (key === "user" && searchParameters[key] !== undefined) {
+          console.log("search", searchParameters);
+          query += `filters[added_by]=${searchParameters[key]}&`;
+        } else {
+          query += "";
+        }
 
         // if (key === "status_pembayaran") {
         //   if (searchParameters[key] !== undefined) {
@@ -285,7 +285,7 @@ function Jurnal({ props }) {
                 >
                   {dataUser.map((element) => {
                     return (
-                      <Select.Option value={element.id} key={element.name}>
+                      <Select.Option value={element.name} key={element.name}>
                         {element.name}
                       </Select.Option>
                     );
