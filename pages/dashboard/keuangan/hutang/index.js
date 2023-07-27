@@ -9,6 +9,7 @@ import { Button, Descriptions, Input, notification, Select, DatePicker, Modal } 
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import DebtTable from "@iso/components/ReactDataTable/Cost/DebtTable";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
+import updateJurnal from "../utility/updateJurnal";
 import nookies from "nookies";
 import { PrinterOutlined } from "@ant-design/icons";
 import tokenVerify from "../../../../authentication/tokenVerify";
@@ -198,6 +199,73 @@ function Hutang({ props }) {
 
     const onChangeStatus = async (status, row) => {
         
+        //cek akun
+        var cekAkunMaster = false;
+        var data = row;
+        
+        var akunTunai = false;
+        var akunTransfer = false;
+        var akunGiro = false;
+        akunHutang.data.forEach((item) => {
+          if(item.attributes.setting == true){
+            if(row.attributes.bayar1 != 0 && item.attributes.type == "Tunai"){
+              if(item.attributes.chart_of_account.data.attributes.saldo < row.attributes.bayar1){
+                notification["error"]({
+                  message: "Gagal menambahkan data",
+                  description: "Data gagal ditambahkan, saldo untuk akun tunai kurang untuk melakukan pembayaran.",
+                });
+                status = "Draft";
+              }
+            } else if(row.attributes.bayar2 != 0 && item.attributes.type == "Transfer"){
+              if(item.attributes.chart_of_account.data.attributes.saldo < row.attributes.bayar2){
+                notification["error"]({
+                  message: "Gagal menambahkan data",
+                  description: "Data gagal ditambahkan, saldo untuk akun transfer kurang untuk melakukan pembayaran.",
+                });
+                status = "Draft";
+              }
+            } else if(row.attributes.bayar3 != 0 && item.attributes.type == "Giro"){
+              if(item.attributes.chart_of_account.data.attributes.saldo < row.attributes.bayar3){
+                notification["error"]({
+                  message: "Gagal menambahkan data",
+                  description: "Data gagal ditambahkan, saldo untuk akun giro kurang untuk melakukan pembayaran.",
+                });
+                status = "Draft";
+              } 
+            }
+            else if(cekAkunMaster === false && item.attributes.type == "Master"){
+              cekAkunMaster = true;
+            }
+          } else {
+            if(row.attributes.tunai != 0 && akunTunai != true){
+                notification["error"]({
+                  message: "Gagal menambahkan data",
+                  description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
+                });
+                status = "Draft";
+            } else if(row.attributes.transfer != 0 && akunTransfer != true){
+                notification["error"]({
+                  message: "Gagal menambahkan data",
+                  description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
+                });
+                status = "Draft";
+            } else if(row.attributes.giro  != 0 && akunGiro != true){
+                notification["error"]({
+                  message: "Gagal menambahkan data",
+                  description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
+                });
+                status = "Draft";
+            } else if(cekAkunMaster != true){
+                notification["error"]({
+                  message: "Gagal menambahkan data",
+                  description: "Data gagal ditambahkan, silahkan pilih akun master untuk diaktifkan.",
+                });
+                status = "Draft";
+            }
+          }
+        });
+
+        //Post for publish  
         if(status == "Publish"){
             const dataHutang = await changeStatusHutang(status, row.id);
 
@@ -206,64 +274,28 @@ function Hutang({ props }) {
                   const sisa_hutang = item.attributes.sisa_hutang;
         
                   if (sisa_hutang == 0) editPenjualanDB("Lunas", item.attributes.purchasing.data.id);
-                  //else editPenjualanDB("Dibayar Sebagian", item.attributes.purchasing.data.id);
+                  else editPenjualanDB("Dibayar Sebagian", item.attributes.purchasing.data.id);
                 });
             } else console.log("Not update lpb, karena draft");
 
             // untuk memotong ke akun coa
-            console.log("data", row, akunHutang);
+            console.log("data", row, akunHutang, dataHutang);
+            var akunMaster = false;
             akunHutang.data.forEach((item) => {
                 if(item.attributes.setting == true){
                     if(row.attributes.bayar1 != 0 && item.attributes.type == "Tunai"){
-                      if(item.attributes.chart_of_account.data.attributes.saldo < row.attributes.bayar1){
-                        notification["error"]({
-                          message: "Gagal menambahkan data",
-                          description: "Data gagal ditambahkan, saldo untuk akun tunai kurang untuk melakukan pembayaran.",
-                        });
-          
-                      } else {
-                        putAkun(item.attributes.chart_of_account.data, row.attributes.bayar1);
-                      }
+                        putAkun(item.attributes.chart_of_account.data, row.attributes.bayar1, dataHutang.attributes.no_hutang);
+
                     } else if(row.attributes.bayar2 != 0 && item.attributes.type == "Transfer"){
-                      if(item.attributes.chart_of_account.data.attributes.saldo < row.attributes.bayar2){
-                        notification["error"]({
-                          message: "Gagal menambahkan data",
-                          description: "Data gagal ditambahkan, saldo untuk akun transfer kurang untuk melakukan pembayaran.",
-                        });
-          
-                      } else {
-                        putAkun(item.attributes.chart_of_account.data, row.attributes.bayar2);
-                      }
+                        putAkun(item.attributes.chart_of_account.data, row.attributes.bayar2, dataHutang.attributes.no_hutang);
+                      
                     } else if(row.attributes.bayar3 != 0 && item.attributes.type == "Giro"){
-                      if(item.attributes.chart_of_account.data.attributes.saldo < row.attributes.bayar3){
-                        notification["error"]({
-                          message: "Gagal menambahkan data",
-                          description: "Data gagal ditambahkan, saldo untuk akun giro kurang untuk melakukan pembayaran.",
-                        });
-                        
-                      } else {
-                        putAkun(item.attributes.chart_of_account.data, row.attributes.bayar3);
-                      }
-                    }
-                  } else {
-                    if(item.attributes.type == "Tunai"){
-                        notification["error"]({
-                          message: "Gagal menambahkan data",
-                          description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
-                        });
-                        
-                    } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
-                        notification["error"]({
-                          message: "Gagal menambahkan data",
-                          description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
-                        });
-                        
-                    } else if(totalGiro != 0 && item.attributes.type == "Giro"){
-                        notification["error"]({
-                          message: "Gagal menambahkan data",
-                          description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
-                        });
-                        
+                        putAkun(item.attributes.chart_of_account.data, row.attributes.bayar3, dataHutang.attributes.no_hutang);
+                      
+                    } else if(akunMaster === false && item.attributes.type == "Master"){
+                      putAkun(item.attributes.chart_of_account.data, row.attributes.total_pembayaran, dataHutang.attributes.no_hutang,"Master");
+                    
+                      akunMaster = true;
                     }
                   }
             });
@@ -272,9 +304,10 @@ function Hutang({ props }) {
         } else console.log("Not update all, karena draft");
     };
 
-    const putAkun = async (akun, pembayaran) => { console.log("put akun", akun, pembayaran);
+    const putAkun = async (akun, pembayaran, noHutang, tipe) => {
       try {
         var saldo = parseFloat(akun.attributes.saldo - pembayaran);
+        if(tipe === "Master") saldo = parseFloat((akun.attributes.saldo ?? 0) + pembayaran);
 
           const data = {
             data: {
@@ -302,6 +335,8 @@ function Hutang({ props }) {
                 message: "Sukses menambahkan data",
                 description: "Pembayaran yang dilakukan sukses.",
               });
+              if(tipe === "Master") updateJurnal(res.data, "hutang", noHutang, null, pembayaran, user, tipe);
+              else updateJurnal(res.data, "hutang", noHutang, null, pembayaran, user);
           } else {
               console.log("akun error atau tidak ada");
               notification["error"]({

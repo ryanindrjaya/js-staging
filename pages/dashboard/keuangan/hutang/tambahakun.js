@@ -32,6 +32,8 @@ const Tambah = ({ props }) => {
   //Akun COA
   const [akunCOA, setAkunCOA] = useState();
 
+  const [selectedType, setSelectedType] = useState(null);
+
   const onFinish = async (values) => {
     setLoading(true);
     values.setting = false;
@@ -166,36 +168,15 @@ const Tambah = ({ props }) => {
                     />
                   </Form.Item>
                 </div>
-                <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
-                  {/* <Form.Item
-                      name="saldo"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Saldo tidak boleh kosong!",
-                        },
-                      ]}
-                    >
-                      <InputNumber
-                        style={{ height: "50px", width: "100%" }}
-                        prefix={
-                          <BankOutlined
-                            style={{ fontSize: "150%" }}
-                            className="site-form-item-icon mr-5"
-                          />
-                        }
-                        className="py-1"
-                        placeholder="Saldo"
-                        formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                        parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                      />
-                    </Form.Item> */}
-                </div>
+
               </div>
 
               <div className="flex flex-wrap -mx-3 mb-2">
                 <Form.Item name="type" className="w-1/4 mb-5 ml-4">
-                  <Select size="large" placeholder="Type" allowClear>
+                  <Select size="large" placeholder="Type" onChange={setSelectedType}>
+                    <Select.Option value="Master" key="Master">
+                      Master
+                    </Select.Option>
                     <Select.Option value="Tunai" key="Tunai">
                       Tunai
                     </Select.Option>
@@ -209,7 +190,11 @@ const Tambah = ({ props }) => {
                 </Form.Item>
 
                 <Form.Item name="chart_of_account" className="w-1/4 mb-5 ml-5">
-                  <Coa page="hutang" onChange={setAkunCOA}/>
+                  {selectedType === "Master" ? (
+                    <Coa page="piutang" onChange={setAkunCOA} selectedAkun={akunCOA}/>
+                  ) : (
+                    <Coa page="hutang" onChange={setAkunCOA} selectedAkun={akunCOA}/>
+                  )}
                 </Form.Item>
               </div>
 

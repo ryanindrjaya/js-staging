@@ -11,6 +11,7 @@ import Supplier from "@iso/components/Form/AddCost/SupplierForm";
 import Customer from "@iso/components/Form/AddCost/CustomerForm";
 import Area from "@iso/components/Form/AddCost/AreaForm";
 import Wilayah from "@iso/components/Form/AddCost/WilayahForm";
+import updateJurnal from "../utility/updateJurnal";
 import nookies from "nookies";
 import { PrinterOutlined } from "@ant-design/icons";
 
@@ -122,7 +123,7 @@ function Piutang({ props }) {
   const dataUserSales = props.dataUserSales;
   const akunPiutang = props.akunPiutang;
   const router = useRouter();
-  const [piutang, setPiutang] = useState(data); console.log("Piutang", piutang.data);
+  const [piutang, setPiutang] = useState(data); console.log("Piutang", piutang.data, akunPiutang);
   const [supplier, setSupplier] = useState();
   const [searchParameters, setSearchParameters] = useState({});
   const cookies = nookies.get(null, "token");
@@ -218,12 +219,74 @@ function Piutang({ props }) {
     return res;
   };
 
-  const onChangeStatus = async (status, row) => {
-        
+  const onChangeStatus = async (status, row) => { console.log(row, "row nih");
+
+    //cek akun
+    var cekAkunMaster = false;
+    var data = row;
+    data.attributes.credit_details.data.forEach((row) => {
+      var akunTunai = false;
+      var akunTransfer = false;
+      var akunGiro = false;
+
+      akunPiutang.data.forEach((item) => {
+
+        if(item.attributes.setting == true){
+          if(row.attributes.tunai > 0 && item.attributes.type == "Tunai") akunTunai = true;
+          else if(row.attributes.transfer > 0 && item.attributes.type == "Transfer") akunTransfer = true;
+          else if(row.attributes.giro > 0 && item.attributes.type == "Giro") akunGiro = true;
+          else if(cekAkunMaster === false && item.attributes.type == "Master"){
+            if(item.attributes.chart_of_account.data.attributes.saldo < data.attributes.total_pembayaran){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, saldo untuk akun master kurang untuk melakukan pembayaran.",
+              });
+              status = "Draft";
+            } else cekAkunMaster = true;
+            
+          }
+        }
+
+        if(row.attributes.tunai != 0 && akunTunai != true){
+          notification["error"]({
+            message: "Gagal menambahkan data",
+            description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
+          });
+          status = "Draft";
+
+        } else if(row.attributes.transfer != 0 && akunTransfer != true){
+            notification["error"]({
+              message: "Gagal menambahkan data",
+              description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
+            });
+            status = "Draft";
+            
+        } else if(row.attributes.giro  != 0 && akunGiro != true){
+            notification["error"]({
+              message: "Gagal menambahkan data",
+              description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
+            });
+            status = "Draft";
+
+        } else if(cekAkunMaster != true){
+          notification["error"]({
+            message: "Gagal menambahkan data",
+            description: "Data gagal ditambahkan, silahkan pilih akun master untuk diaktifkan.",
+          });
+          status = "Draft";
+          
+        }
+
+      });
+    });
+
+    //Post for publish  
     if(status == "Publish"){
         const dataPiutang = await changeStatusPiutang(status, row.id);
 
         if(dataPiutang.attributes.document == "Publish"){
+
+          // update penjualan
             dataPiutang.attributes.credit_details.data.forEach((item) => {
               const sisa_piutang = item.attributes.sisa_piutang;
     
@@ -233,7 +296,7 @@ function Piutang({ props }) {
               const saleTypes = ["non_panel_sale", "panel_sale", "sales_sale"];
                 for (const saleType of saleTypes) {
                   const sale = item.attributes[saleType].data;
-                  console.log(sale, "sale nih", item, saleType);
+                  //console.log(sale, "sale nih", item, saleType, dataPiutang.attributes.total_pembayaran);
                   // var saleStatus = null;
                   // if (saleType === "sales_sale") saleStatus = data.attributes.status_pembayaran;
 
@@ -296,13 +359,18 @@ function Piutang({ props }) {
         var akunTunai = false;
         var akunTransfer = false;
         var akunGiro = false;
+        var akunMaster = false;
 
         dataPiutang.attributes.credit_details.data.forEach((row) => {
+          akunTunai = false;
+          akunTransfer = false;
+          akunGiro = false;
+
           akunPiutang.data.forEach((item) => {
             if(item.attributes.setting == true){
               if(row.attributes.tunai > 0 && item.attributes.type == "Tunai"){
                 
-                putAkun(item.attributes.chart_of_account.data, row.attributes.tunai);
+                putAkun(item.attributes.chart_of_account.data, row.attributes.tunai, dataPiutang.attributes.no_piutang);
     
                 akunTunai = true;
               } else if(row.attributes.transfer > 0 && item.attributes.type == "Transfer"){
@@ -315,41 +383,25 @@ function Piutang({ props }) {
                 putAkun(item.attributes.chart_of_account.data, row.attributes.giro);
     
                 akunGiro = true;
+              } else if(akunMaster === false && item.attributes.type == "Master"){
+                  putAkun(item.attributes.chart_of_account.data, dataPiutang.attributes.total_pembayaran, dataPiutang.attributes.no_piutang, "Master");
+
+                  akunMaster = true;
+                
               }
             }
           });
-          
-          if(row.attributes.tunai != 0 && akunTunai != true){
-              notification["error"]({
-                message: "Gagal menambahkan data",
-                description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
-              });
-              
-          } else if(row.attributes.transfer != 0 && akunTunai != true){
-              notification["error"]({
-                message: "Gagal menambahkan data",
-                description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
-              });
-              
-          } else if(row.attributes.giro  != 0 && akunTunai != true){
-              notification["error"]({
-                message: "Gagal menambahkan data",
-                description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
-              });    
-          }
 
-          akunTunai = false;
-          akunTransfer = false;
-          akunGiro = false;
         });
-
 
     } else console.log("Not update all, karena draft");
 };
 
-const putAkun = async (akun, pembayaran) => {
+const putAkun = async (akun, pembayaran, noPiutang, tipe) => {
   try {
+    
     var saldo = parseFloat((akun.attributes.saldo ?? 0) + pembayaran);
+    if(tipe === "Master") saldo = parseFloat((akun.attributes.saldo ?? 0) - pembayaran);
 
       const data = {
         data: {
@@ -373,7 +425,8 @@ const putAkun = async (akun, pembayaran) => {
 
       if (req.status === 200) {
           console.log("akun sukses diupdate");
-          //updateJurnal(res.data, "piutang", noHutang, noPiutang, total, user);
+          if(tipe === "Master") updateJurnal(res.data, "piutang", null, noPiutang, pembayaran, user, tipe);
+          else updateJurnal(res.data, "piutang", null, noPiutang, pembayaran, user);
       } else {
           console.log("akun error atau tidak ada");
       }
@@ -460,14 +513,14 @@ const changeStatusPiutang = async (status, id) => {
 
         openNotificationWithIcon(
           "success",
-          "Status hutang berhasil dirubah",
-          "Status hutang berhasil dirubah. Silahkan cek hutang"
+          "Status piutang berhasil dirubah",
+          "Status piutang berhasil dirubah. Silahkan cek piutang"
         );
       } else {
         console.log("error", res);
         openNotificationWithIcon(
           "error",
-          "Status hutang gagal dirubah",
+          "Status piutang gagal dirubah",
           "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah"
         );
       }
@@ -475,7 +528,7 @@ const changeStatusPiutang = async (status, id) => {
       console.log("error", error);
       openNotificationWithIcon(
         "error",
-        "Status hutang gagal dirubah",
+        "Status piutang gagal dirubah",
         "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah"
       );
     }
