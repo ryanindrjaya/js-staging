@@ -9,6 +9,7 @@ import { Button, Descriptions, Input, notification, Select, DatePicker, Modal } 
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import DebtTable from "@iso/components/ReactDataTable/Cost/DebtTable";
 import Supplier from "@iso/components/Form/AddCost/SupplierForm";
+import updateJurnal from "../utility/updateJurnal";
 import nookies from "nookies";
 import { PrinterOutlined } from "@ant-design/icons";
 import tokenVerify from "../../../../authentication/tokenVerify";

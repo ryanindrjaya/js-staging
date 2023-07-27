@@ -43,7 +43,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchAkun = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?sort[0]=kode%3Aasc&sort[1]=jenis_akun%3Adesc";
   const options = {
     method: "GET",
     headers: {
@@ -134,7 +134,7 @@ function Setting({ props }) {
   };
 
   const fetchData = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?populate";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?chart-of-accounts?sort[0]=kode%3Aasc&sort[1]=jenis_akun%3Adesc&populate";
     const options = {
       method: "GET",
       headers: {

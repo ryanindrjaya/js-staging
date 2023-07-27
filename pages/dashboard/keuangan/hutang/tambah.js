@@ -255,6 +255,8 @@ function Hutang({ props }) {
     // cek untuk akun hutang (cek coa)
     console.log("total tunai, tranfer, giro", totalTunai, totalTransfer, totalGiro);
     if(document == "Publish"){
+
+      var cekAkunMaster = false;
       akunHutang.forEach((item) => { console.log("item", item);
         if(item.attributes.setting == true){
           if(totalTunai != 0 && item.attributes.type == "Tunai"){
@@ -281,6 +283,9 @@ function Hutang({ props }) {
               });
               setInfo("gagal");
             }
+          } else if(cekAkunMaster === false && item.attributes.type == "Master"){
+              cekAkunMaster = true;
+            
           }
         } else {
           if(totalTunai != 0 && item.attributes.type == "Tunai"){
@@ -301,6 +306,12 @@ function Hutang({ props }) {
                 description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
               });
               setInfo("gagal");
+          } else if(cekAkunMaster != true){
+            notification["error"]({
+              message: "Gagal menambahkan data",
+              description: "Data gagal ditambahkan, silahkan pilih akun master untuk diaktifkan.",
+            });
+            setInfo("gagal");
           }
         }
       });
