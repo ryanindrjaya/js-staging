@@ -110,6 +110,7 @@ function Laporan({ props }) {
   const router = useRouter();
   const [supplier, setSupplier] = useState();
   const [searchParameters, setSearchParameters] = useState({customer: null});
+  const defaultRange = [moment().startOf('month'), moment().endOf('month')];
   const dispatch = useDispatch();
 
   const tableRef = useRef(null);
@@ -265,6 +266,13 @@ function Laporan({ props }) {
         //   query += "";
         // }
 
+        if (key === "sales") {
+          console.log("search", searchParameters);
+          query += `filters[credit_details][customer][sales_name]=${searchParameters[key].name}&`;
+        } else {
+          query += "";
+        }
+
         if (key === "status_pembayaran") {
           if (searchParameters[key] !== undefined) {
             query += `filters[${key}]=${searchParameters[key]}&`;
@@ -286,7 +294,7 @@ function Laporan({ props }) {
           query += "";
         }
 
-        if (key == "range" && searchParameters[key] !== null) {
+        if (key === "range") {
           startDate = searchParameters?.range[0]?.format("YYYY-MM-DD");
           endDate = searchParameters?.range[1]?.format("YYYY-MM-DD");
           query += `filters[tanggal][$gte]=${startDate}&filters[tanggal][$lte]=${endDate}&`;
@@ -295,7 +303,7 @@ function Laporan({ props }) {
         }
 
         if (key === "area" || key === "wilayah") {
-          if (searchParameters[key] !== null) { console.log("key nich", key, searchParameters[key]);
+          if (searchParameters[key] !== null) {
             query += `filters[credit_details][customer][${key}][id]=${searchParameters[key].id}&`;
           } else {
             query += "";
@@ -309,7 +317,7 @@ function Laporan({ props }) {
       "/credits?populate[0]=supplier&populate[1]=credit_details.sales_sale&"+
       "populate[2]=credit_details.customer&"+
       "populate[3]=credit_details.panel_sale.retur_panel_sales&"+
-      "populate[4]=credit_details.non_panel_sale.retur_non_panel_sales"+
+      "populate[4]=credit_details.non_panel_sale.retur_non_panel_sales&"+
       query;
 
       const cookies = nookies.get(null, "token");
@@ -333,7 +341,7 @@ function Laporan({ props }) {
 
   useEffect(() => {
     //setSearchParameters({tipeLaporan : "Detail", customer: null, range: moment()});
-    setSearchParameters({tipeLaporan : "Detail", customer: null});
+    setSearchParameters({tipeLaporan : "Detail", customer: null, status_pembayaran: undefined, range: defaultRange});
   }, []);
 
   function formatMyDate(value, locale = "id-ID") {
@@ -363,7 +371,7 @@ function Laporan({ props }) {
                    }
                  />
               </div>
-              <div className="w-full md:w-1/4 px-3">
+              {/* <div className="w-full md:w-1/4 px-3">
                 <Select
                   placeholder="Status Pembayaran"
                   size="large"
@@ -378,9 +386,8 @@ function Laporan({ props }) {
                 >
                   <Select.Option value="Dibayar">Dibayar</Select.Option>
                   <Select.Option value="Dibayar Sebagian">Dibayar Sebagian</Select.Option>
-                  <Select.Option value="Belum Dibayar">Belum Dibayar</Select.Option>
                 </Select>
-              </div>
+              </div> */}
               <div className="w-full md:w-1/4 px-3">
                 <Select
                   placeholder="Tipe Laporan"
@@ -402,9 +409,11 @@ function Laporan({ props }) {
               <div className="w-full md:w-1/4 px-3">
                 <RangePicker
                   size="large"
+                  defaultValue={defaultRange}
                   onChange={(e) =>
                     setSearchParameters({ ...searchParameters, range: e })
                   }
+                  allowClear={false}
                 />
               </div>
             </div>
