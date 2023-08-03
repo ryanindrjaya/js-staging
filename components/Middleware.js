@@ -31,10 +31,6 @@ function Middleware({ children }) {
       const req = await fetch(endpoint, options);
 
       if (req.status === 401) {
-        notification.error({
-          message: "Akses Ditolak",
-          description: "Sesi anda telah berakhir, silahkan login kembali",
-        });
         router.push("/");
       }
     };
