@@ -47,7 +47,7 @@ function Middleware({ children }) {
         if (!usersModuls.includes(modulUri)) {
           notification.error({
             message: "Akses Ditolak",
-            description: "Anda tidak memiliki akses ke halaman ini, mengalihkan anda",
+            description: "Anda tidak memiliki akses ke halaman ini, mengalihkan anda ke halaman dashboard",
           });
 
           router.replace(`/dashboard`);
