@@ -12,6 +12,14 @@ import { Spin } from "antd";
 import { useRouter } from "next/router";
 import Locations from "../../../../components/Form/Locations";
 
+const formatInitialValue = (arr) => {
+  if (arr?.length > 0) {
+    return arr?.map((item) => {
+      return item.id;
+    });
+  }
+};
+
 const Edit = ({ props }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -19,16 +27,20 @@ const Edit = ({ props }) => {
   const cookies = nookies.get(null, "token");
   const router = useRouter();
 
+  console.log(props);
+
   const role = props?.role?.roles;
+  const modules = props?.modules?.data || [];
   const user = props?.user;
   const userRole = props?.user.role;
   const userLocation = props?.user.locations;
+  const userModuls = formatInitialValue(props?.user.moduls);
   const locations = props?.locations;
 
   const onFinish = async (values) => {
     setLoading(true);
     const role = await getRole(values.role_id);
-    const data = { ...values, role, deleteAble: true };
+    const data = { ...values, role: role.id, deleteAble: true };
 
     let newLocation = [];
     try {
@@ -88,6 +100,8 @@ const Edit = ({ props }) => {
 
     const req = await fetch(endpoint, options);
     const res = await req.json();
+
+    console.log("res role", res.role);
 
     return res.role;
   };
@@ -175,19 +189,29 @@ const Edit = ({ props }) => {
                 required
               />
 
-              <Form.Item name="role_id" className="w-1/4 mb-5 ml-1" initialValue={userRole.id}>
-                <Select placeholder="Role">
-                  {role.map((role) =>
-                    role.name === "Authenticated" || role.name === "Public" ? (
-                      <Select.Option hidden disabled={true} value={role.id}>
-                        {role.name}
-                      </Select.Option>
-                    ) : (
-                      <Select.Option value={role.id}>{role.name}</Select.Option>
-                    )
-                  )}
-                </Select>
-              </Form.Item>
+              <div className="w-full md:w-1/2 flex gap-x-3">
+                <Form.Item name="role_id" className="w-full" initialValue={userRole.id}>
+                  <Select size="large" placeholder="Role">
+                    {role.map((role) =>
+                      role.name === "Authenticated" || role.name === "Public" ? (
+                        <Select.Option hidden disabled={true} value={role.id}>
+                          {role.name}
+                        </Select.Option>
+                      ) : (
+                        <Select.Option value={role.id}>{role.name}</Select.Option>
+                      )
+                    )}
+                  </Select>
+                </Form.Item>
+
+                <Form.Item name="moduls" className="w-full" initialValue={userModuls}>
+                  <Select mode="multiple" size="large" placeholder="Modul">
+                    {modules.map((module) => (
+                      <Select.Option value={module.id}>{module.attributes.name}</Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </div>
 
               <Form.Item>
                 {loading ? (
@@ -230,6 +254,9 @@ Edit.getInitialProps = async (context) => {
   const reqLocations = await fetchDataLocation(cookies, "/locations");
   const resLocations = await reqLocations.json();
 
+  const reqModules = await fetchDataLocation(cookies, "/moduls");
+  const resModules = await reqModules.json();
+
   if (res.status !== 200) {
   }
 
@@ -238,6 +265,7 @@ Edit.getInitialProps = async (context) => {
       user,
       role,
       locations: resLocations,
+      modules: resModules,
     },
   };
 };

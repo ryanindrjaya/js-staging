@@ -1,7 +1,8 @@
 const actions = {
-  setSession: (message) => ({
+  setSession: (message, moduls) => ({
     type: "SET_SESSION",
     message,
+    moduls,
   }),
 
   clearSession: () => ({

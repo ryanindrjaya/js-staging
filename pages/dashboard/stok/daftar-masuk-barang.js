@@ -21,7 +21,7 @@ import moment from "moment";
 import nookies from "nookies";
 import { useRouter } from "next/router";
 import DataTable from "react-data-table-component";
-import { CloseCircleFilled, CheckCircleFilled, PrinterOutlined } from "@ant-design/icons";
+import { CloseCircleFilled, CheckCircleFilled, PrinterOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 
 export default function daftarKeluarBarang({ companyOptions }) {
   const { token } = nookies.get();
@@ -48,6 +48,8 @@ export default function daftarKeluarBarang({ companyOptions }) {
   const [queryProduct, setQueryProduct] = useState("");
   const [filtered, setFiltered] = useState(null);
   const [loadingSend, setLoadingSend] = useState(false);
+  const [printState, setPrintState] = useState(false);
+  const [master, setMaster] = useState(null);
 
   const handleFilterProducts = (e) => {
     setQueryProduct(e.target.value);
@@ -66,9 +68,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
   }, [queryProduct]);
 
   const printPdf = () => {
-    notification.info({
-      message: "Fitur ini belum tersedia",
-    });
+    setPrintState(true);
   };
 
   useEffect(() => {
@@ -127,6 +127,9 @@ export default function daftarKeluarBarang({ companyOptions }) {
       const response = await req.json();
       console.log("response fetch barang keluar", response);
       setPrintable(response?.isDone);
+      setMaster(response?.master);
+
+      console.log("response master", response?.master);
 
       if (response?.data) {
         setData(response.data);
@@ -147,11 +150,72 @@ export default function daftarKeluarBarang({ companyOptions }) {
     },
   };
 
+  const printColumns = [
+    {
+      name: "No",
+      width: "5%",
+      align: "center",
+      selector: (row, index) => index + 1,
+    },
+    {
+      name: "ITEM",
+      width: "25%",
+      wrap: true,
+      selector: (row) => row.product.name,
+    },
+    {
+      name: "UNIT",
+      width: "10%",
+      selector: (row) => row.accepted_unit,
+    },
+    {
+      name: "JML",
+      width: "10%",
+      selector: (row) => row.accepted ?? 0,
+    },
+    {
+      name: "STATUS",
+      width: "20%",
+      selector: (row) => {
+        if (row.accepted === row.qty) {
+          return "Diterima";
+        } else if (row.accepted < row.qty && row.accepted > 0) {
+          return "Diterima Sebagian";
+        } else {
+          return "Belum Diterima";
+        }
+      },
+    },
+    {
+      name: "KET",
+      width: "30%",
+      selector: (row) => row.cancel_reason_recipient,
+    },
+  ];
+
   const activeBtn =
     "bg-cyan-700 text-xs font-bold text-white w-full rounded h-10 hover:bg-cyan-800  shadow-sm flex items-center justify-center float-right";
 
   const inactiveBtn =
     "bg-gray-400 cursor-not-allowed text-xs font-bold text-gray-200 w-full rounded h-10 shadow-sm flex items-center justify-center float-right";
+
+  const printStyles = {
+    headCells: {
+      style: {
+        color: "black",
+        background: "white",
+        border: "1px solid black",
+        fontWeight: "bold",
+      },
+    },
+    cells: {
+      style: {
+        color: "black",
+        background: "white",
+        border: "1px solid black",
+      },
+    },
+  };
 
   const handleCancelData = async (id) => {
     setCancelModal({
@@ -162,8 +226,8 @@ export default function daftarKeluarBarang({ companyOptions }) {
     try {
       const postData = {
         data: {
-          status: "Dibatalkan",
-          cancel_reason: cancelModal?.reason,
+          accepted_status: "Dibatalkan",
+          cancel_reason_recipient: cancelModal?.reason,
           cancel_author: cancelModal?.author,
         },
       };
@@ -310,6 +374,10 @@ export default function daftarKeluarBarang({ companyOptions }) {
     setRefetch(!refetch);
     setLoadingSend(false);
   }
+
+  const handlePrint = () => {
+    window.print();
+  };
 
   const columns = [
     {
@@ -527,12 +595,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
     {
       name: "Alasan",
       omit: statusFilter !== "Dibatalkan",
-      selector: (row) => row?.cancel_reason || "-",
-    },
-    {
-      name: "Dibatalkan Oleh",
-      omit: statusFilter !== "Dibatalkan",
-      selector: (row) => row?.cancel_author || "-",
+      selector: (row) => row?.cancel_reason_recipient || "-",
     },
   ];
 
@@ -588,211 +651,276 @@ export default function daftarKeluarBarang({ companyOptions }) {
 
   return (
     <>
-      <Head>
-        <title>Daftar Masuk Barang</title>
-      </Head>
-      <DashboardLayout>
-        <LayoutWrapper>
-          <TitlePage
-            titleText={
-              <div className="flex gap-x-4 items-center">
-                <span>DAFTAR MASUK BARANG</span>
-                <Select
-                  value={selectedLocation}
-                  onSelect={(value) => {
-                    router.replace(
-                      {
-                        pathname: "/dashboard/stok/daftar-masuk-barang",
-                        query: { location: value },
-                      },
-                      undefined,
-                      { shallow: true }
-                    );
-                  }}
-                  options={companyOptions}
-                  placeholder="Pilih Gudang"
-                  className="lg:w-80 w-40 focus:border-none text-black hover:border-none"
-                  bordered={false}
-                />
+      {printState ? (
+        <div className="px-6 py-3">
+          <div className="flex justify-between items-center mb-5">
+            <ArrowLeftOutlined
+              title="Kembali"
+              className="print:hidden cursor-pointer"
+              onClick={() => {
+                setPrintState(false);
+              }}
+            />
+            <button onClick={handlePrint} class="print:hidden rounded-full bg-sky-400 px-4 py-2 font-bold text-white">
+              <span>
+                <PrinterOutlined className="mr-1 text-lg" />
+              </span>{" "}
+              Cetak Dokumen
+            </button>
+          </div>
+          <h1 className="text-[#036B82] text-2xl">Lembar Penerimaan Barang</h1>
+
+          <div className="w-full flex justify-between">
+            <div className="w-2/4 grid grid-cols-2 mb-3">
+              <div>
+                <p className="text-sm mb-0 uppercase">No. Referensi</p>
+                <p className="text-sm mb-0 uppercase">Tanggal Transfer</p>
+                <p className="text-sm mb-0 uppercase">Dari Gudang</p>
+                <p className="text-sm mb-0 uppercase">Lokasi Selesai</p>
               </div>
-            }
+              <div className="text-right">
+                <p className="text-sm mb-0 font-bold uppercase">{selectedNoReferensi}</p>
+                <p className="text-sm mb-0 font-bold uppercase">{moment().format("DD/MM/YYYY")}</p>
+
+                <p className="text-sm mb-0 font-bold uppercase">{master?.location_sender?.name}</p>
+                <p className="text-sm mb-0 font-bold uppercase">{master?.location_recipient?.name}</p>
+              </div>
+            </div>
+          </div>
+
+          <DataTable
+            dense
+            columns={printColumns}
+            data={master?.data || []}
+            customStyles={printStyles}
+            noDataComponent={`--Tidak ada data--`}
           />
-          <LayoutContent>
-            {selectedLocation ? (
-              <>
-                <div className="w-full lg:w-3/4 grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-                  <Modal
-                    title="Batalkan Permintaan?"
-                    open={cancelModal.visible}
-                    confirmLoading={cancelModal.loading}
-                    okButtonProps={{
-                      danger: true,
-                      disabled: cancelModal.reason === "",
-                    }}
-                    onOk={() => {
-                      if (cancelModal?.bulk) {
-                        handleBulkCancel();
-                      } else {
-                        handleCancelData(cancelModal.id).then((res) => {
-                          if (res.success) {
-                            notification.success({
-                              message: res.message,
-                              description: res.description,
-                            });
-                            setRefetch(!refetch);
+        </div>
+      ) : (
+        <>
+          <Head>
+            <title>Daftar Masuk Barang</title>
+          </Head>
+          <DashboardLayout>
+            <LayoutWrapper>
+              <TitlePage
+                titleText={
+                  <div className="flex gap-x-4 items-center">
+                    <span>DAFTAR MASUK BARANG</span>
+                    <Select
+                      value={selectedLocation}
+                      onSelect={(value) => {
+                        router.replace(
+                          {
+                            pathname: "/dashboard/stok/daftar-masuk-barang",
+                            query: { location: value },
+                          },
+                          undefined,
+                          { shallow: true }
+                        );
+                      }}
+                      options={companyOptions}
+                      placeholder="Pilih Gudang"
+                      className="lg:w-80 w-40 focus:border-none text-black hover:border-none"
+                      bordered={false}
+                    />
+                  </div>
+                }
+              />
+              <LayoutContent>
+                {selectedLocation ? (
+                  <>
+                    <div className="w-full lg:w-3/4 grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                      <Modal
+                        title="Batalkan Permintaan?"
+                        open={cancelModal.visible}
+                        confirmLoading={cancelModal.loading}
+                        okButtonProps={{
+                          danger: true,
+                          disabled: cancelModal.reason === "",
+                        }}
+                        onOk={() => {
+                          if (cancelModal?.bulk) {
+                            handleBulkCancel();
                           } else {
-                            notification.error({
-                              message: res?.message || "Gagal membatalkan data",
+                            handleCancelData(cancelModal.id).then((res) => {
+                              if (res.success) {
+                                notification.success({
+                                  message: res.message,
+                                  description: res.description,
+                                });
+                                setRefetch(!refetch);
+                                setCancelModal({
+                                  ...cancelModal,
+                                  visible: false,
+                                  id: null,
+                                  reason: "",
+                                  loading: false,
+                                });
+                              } else {
+                                notification.error({
+                                  message: res?.message || "Gagal membatalkan data",
+                                });
+                                setCancelModal({
+                                  ...cancelModal,
+                                  visible: false,
+                                  id: null,
+                                  reason: "",
+                                  loading: false,
+                                });
+                              }
                             });
                           }
-                        });
-                      }
-                    }}
-                    onCancel={() => {
-                      setCancelModal({
-                        ...cancelModal,
-                        visible: false,
-                        id: null,
-                        reason: "",
-                        loading: false,
-                      });
-                    }}
-                  >
-                    <p>Apakah anda yakin akan membatalkan permintaan ini? Harap isi alasan pembatalan dibawah ini:</p>
-                    <Input.TextArea
-                      onInput={(e) => setCancelModal({ ...cancelModal, reason: e.target.value })}
-                      value={cancelModal.reason}
-                      placeholder="Alasan Pembatalan"
-                      className="mt-2"
-                    />
-                  </Modal>
-                  <DatePicker.RangePicker
-                    defaultValue={[moment().startOf("month"), moment().endOf("month")]}
-                    className="w-full"
-                    placeholder="Tanggal"
-                    onChange={(_, value) => {
-                      if (value?.[0] !== "" && value?.[1] !== "") {
-                        setDate(value);
-                      } else {
-                        setDate();
-                      }
-                    }}
-                  />
-                  <Select
-                    value={selectedNoReferensi}
-                    onSelect={(value) => {
-                      router.replace(
-                        {
-                          pathname: "/dashboard/stok/daftar-masuk-barang",
-                          query: {
-                            ...router.query,
-                            no_referensi: value,
-                          },
-                        },
-                        undefined,
-                        { shallow: true }
-                      );
-                    }}
-                    allowClear
-                    options={noRefOptions}
-                    placeholder="No Referensi"
-                    className="w-full"
-                  />
-                  <Select
-                    defaultValue={statusFilter}
-                    onChange={(value) => {
-                      setStatusFilter(value);
-                    }}
-                    options={[
-                      { label: "Proses", value: "Proses" },
-                      { label: "Sebagian", value: "Sebagian" },
-                      { label: "Selesai", value: "Selesai" },
-                      { label: "Dibatalkan", value: "Dibatalkan" },
-                    ]}
-                    placeholder="Status"
-                    className="w-full"
-                  />
-                </div>
-
-                <p className="uppercase text-[#036B82] font-bold text-xl mb-1">Produk Transfer</p>
-                <div className="w-full lg:w-4/5 grid grid-cols-1 items-end md:grid-cols-4 gap-3 mb-3">
-                  <Input.Search
-                    onChange={handleFilterProducts}
-                    size="large"
-                    placeholder="Nama Produk"
-                    className="w-full"
-                  />
-                  <button
-                    title={!printable ? "Harap selesaikan semua permintaan terlebih dahulu" : ""}
-                    onClick={printPdf}
-                    disabled={!printable}
-                    className={printable ? activeBtn : inactiveBtn}
-                  >
-                    CETAK BUKTI KELUAR BARANG
-                  </button>
-                </div>
-
-                <DataTable
-                  columns={columns}
-                  data={filtered !== null ? filtered : data}
-                  customStyles={customStyles}
-                  noDataComponent={`--Tidak ada data--`}
-                />
-
-                {statusFilter !== "Selesai" && statusFilter !== "Dibatalkan" ? (
-                  <div className="mt-4 flex gap-x-4">
-                    <Popconfirm
-                      title="Apakah anda yakin ingin membatalkan permintaan ini?"
-                      okButtonProps={{
-                        danger: true,
-                      }}
-                      okText="Ya"
-                      cancelText="Tidak"
-                      onConfirm={() => {
-                        if (data.length === 0) return;
-
-                        setCancelModal({
-                          ...cancelModal,
-                          visible: true,
-                          bulk: true,
-                        });
-                      }}
-                      placement="top"
-                    >
-                      <Button className="flex gap-x-2 items-center font-bold" type="default" danger>
-                        Batalkan Semua
-                      </Button>
-                    </Popconfirm>
-                    <Popconfirm
-                      placement="top"
-                      title="Apakah anda yakin sudah menerima semua barang?"
-                      okButtonProps={{
-                        type: "default",
-                      }}
-                      okText="Ya"
-                      cancelText="Tidak"
-                      onConfirm={handleBulkSend}
-                    >
-                      <Button
-                        loading={loadingSend}
-                        icon={<CheckCircleFilled title="Kirim Barang" className="text-xl" />}
-                        className="flex gap-x-2 items-center font-bold"
-                        type="primary"
+                        }}
+                        onCancel={() => {
+                          setCancelModal({
+                            ...cancelModal,
+                            visible: false,
+                            id: null,
+                            reason: "",
+                            loading: false,
+                          });
+                        }}
                       >
-                        Terima Semua
-                      </Button>
-                    </Popconfirm>
-                  </div>
+                        <p>
+                          Apakah anda yakin akan membatalkan permintaan ini? Harap isi alasan pembatalan dibawah ini:
+                        </p>
+                        <Input.TextArea
+                          onInput={(e) => setCancelModal({ ...cancelModal, reason: e.target.value })}
+                          value={cancelModal.reason}
+                          placeholder="Alasan Pembatalan"
+                          className="mt-2"
+                        />
+                      </Modal>
+                      <DatePicker.RangePicker
+                        defaultValue={[moment().startOf("month"), moment().endOf("month")]}
+                        className="w-full"
+                        placeholder="Tanggal"
+                        onChange={(_, value) => {
+                          if (value?.[0] !== "" && value?.[1] !== "") {
+                            setDate(value);
+                          } else {
+                            setDate();
+                          }
+                        }}
+                      />
+                      <Select
+                        value={selectedNoReferensi}
+                        onSelect={(value) => {
+                          router.replace(
+                            {
+                              pathname: "/dashboard/stok/daftar-masuk-barang",
+                              query: {
+                                ...router.query,
+                                no_referensi: value,
+                              },
+                            },
+                            undefined,
+                            { shallow: true }
+                          );
+                        }}
+                        allowClear
+                        options={noRefOptions}
+                        placeholder="No Referensi"
+                        className="w-full"
+                      />
+                      <Select
+                        defaultValue={statusFilter}
+                        onChange={(value) => {
+                          setStatusFilter(value);
+                        }}
+                        options={[
+                          { label: "Proses", value: "Proses" },
+                          { label: "Sebagian", value: "Sebagian" },
+                          { label: "Selesai", value: "Selesai" },
+                          { label: "Dibatalkan", value: "Dibatalkan" },
+                        ]}
+                        placeholder="Status"
+                        className="w-full"
+                      />
+                    </div>
+
+                    <p className="uppercase text-[#036B82] font-bold text-xl mb-1">Produk Transfer</p>
+                    <div className="w-full lg:w-4/5 grid grid-cols-1 items-end md:grid-cols-4 gap-3 mb-3">
+                      <Input.Search
+                        onChange={handleFilterProducts}
+                        size="large"
+                        placeholder="Nama Produk"
+                        className="w-full"
+                      />
+                      <button
+                        title={!printable ? "Harap selesaikan semua permintaan terlebih dahulu" : ""}
+                        onClick={printPdf}
+                        disabled={!printable}
+                        className={printable ? activeBtn : inactiveBtn}
+                      >
+                        CETAK BUKTI MASUK BARANG
+                      </button>
+                    </div>
+
+                    <DataTable
+                      columns={columns}
+                      data={filtered !== null ? filtered : data}
+                      customStyles={customStyles}
+                      noDataComponent={`--Tidak ada data--`}
+                    />
+
+                    {statusFilter !== "Selesai" && statusFilter !== "Dibatalkan" ? (
+                      <div className="mt-4 flex gap-x-4">
+                        <Popconfirm
+                          title="Apakah anda yakin ingin membatalkan permintaan ini?"
+                          okButtonProps={{
+                            danger: true,
+                          }}
+                          okText="Ya"
+                          cancelText="Tidak"
+                          onConfirm={() => {
+                            if (data.length === 0) return;
+
+                            setCancelModal({
+                              ...cancelModal,
+                              visible: true,
+                              bulk: true,
+                            });
+                          }}
+                          placement="top"
+                        >
+                          <Button className="flex gap-x-2 items-center font-bold" type="default" danger>
+                            Batalkan Semua
+                          </Button>
+                        </Popconfirm>
+                        <Popconfirm
+                          placement="top"
+                          title="Apakah anda yakin sudah menerima semua barang?"
+                          okButtonProps={{
+                            type: "default",
+                          }}
+                          okText="Ya"
+                          cancelText="Tidak"
+                          onConfirm={handleBulkSend}
+                        >
+                          <Button
+                            loading={loadingSend}
+                            icon={<CheckCircleFilled title="Kirim Barang" className="text-xl" />}
+                            className="flex gap-x-2 items-center font-bold"
+                            type="primary"
+                          >
+                            Terima Semua
+                          </Button>
+                        </Popconfirm>
+                      </div>
+                    ) : (
+                      ""
+                    )}
+                  </>
                 ) : (
-                  ""
+                  <Empty description="Pilih Gudang Terlebih Dahulu" image={Empty.PRESENTED_IMAGE_SIMPLE} />
                 )}
-              </>
-            ) : (
-              <Empty description="Pilih Gudang Terlebih Dahulu" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-            )}
-          </LayoutContent>
-        </LayoutWrapper>
-      </DashboardLayout>
+              </LayoutContent>
+            </LayoutWrapper>
+          </DashboardLayout>
+        </>
+      )}
     </>
   );
 }

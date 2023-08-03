@@ -1,5 +1,6 @@
 const initState = {
   sessionMessage: "",
+  moduls: [],
 };
 
 export default function Reducer(state = initState, action) {
@@ -8,11 +9,13 @@ export default function Reducer(state = initState, action) {
       return {
         ...state,
         sessionMessage: action.message,
+        moduls: action.moduls,
       };
     case "CLEAR_SESSION":
       return {
         ...state,
         sessionMessage: "",
+        moduls: [],
       };
     default:
       return state;

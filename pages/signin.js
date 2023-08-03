@@ -57,14 +57,16 @@ export default function SignInPage(props) {
           sameSite: "strict",
         });
 
-        const role = await getUserInformation(res.jwt);
+        const user = await getUserInformation(res.jwt);
         // set role token
-        nookies.set(null, "role", role, {
+        nookies.set(null, "role", user.role.name, {
           maxAge: 30 * 24 * 60 * 60,
           path: "/",
           secure: process.env.NODE_ENV !== "development",
           sameSite: "strict",
         });
+
+        dispatch({ type: "SET_SESSION", message: "success", moduls: user.moduls });
 
         // redirect
         router.replace("/dashboard");
@@ -80,7 +82,7 @@ export default function SignInPage(props) {
   };
 
   const getUserInformation = async (jwt) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=role";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate[0]=role&populate[1]=moduls";
 
     const options = {
       method: "GET",
@@ -93,7 +95,7 @@ export default function SignInPage(props) {
     const req = await fetch(endpoint, options);
     const res = await req.json();
     console.log(res);
-    return res.role.name;
+    return res;
   };
 
   const onClose = (e) => {
@@ -129,7 +131,14 @@ export default function SignInPage(props) {
               </div>
 
               <div className="isoInputWrapper">
-                <Input onChange={setValue} id="inpuPassword" size="large" name="password" type="password" placeholder="Password" />
+                <Input
+                  onChange={setValue}
+                  id="inpuPassword"
+                  size="large"
+                  name="password"
+                  type="password"
+                  placeholder="Password"
+                />
               </div>
 
               <div className="isoInputWrapper isoLeftRightComponent">
@@ -139,7 +148,11 @@ export default function SignInPage(props) {
                   </div>
                 ) : (
                   <div className="flex flex-col">
-                    {isExpired !== true ? <p className="text-sm text-red-500">Sesi anda telah berakhir, harap login kembali</p> : ""}
+                    {isExpired !== true ? (
+                      <p className="text-sm text-red-500">Sesi anda telah berakhir, harap login kembali</p>
+                    ) : (
+                      ""
+                    )}
                     <Button block type="primary" onClick={handleLogin}>
                       <IntlMessages id="page.signInButton" />
                     </Button>
@@ -147,7 +160,13 @@ export default function SignInPage(props) {
                 )}
               </div>
               {failedLogin ? (
-                <Alert message="Login Error" description="Username atau Password salah" type="error" closable onClose={onClose} />
+                <Alert
+                  message="Login Error"
+                  description="Username atau Password salah"
+                  type="error"
+                  closable
+                  onClose={onClose}
+                />
               ) : (
                 <div></div>
               )}

@@ -17,16 +17,20 @@ const Tambah = ({ props }) => {
   const [selectLocations, setSelectLocation] = useState({});
   const cookies = nookies.get(null, "token");
   const role = props?.data?.roles;
+
+  const modules = props?.modules?.data || [];
   const locations = props?.locations;
 
   const onFinish = async (values) => {
     setLoading(true);
+
+    console.log("values ==> \n", values);
     const role = await getRole(values.role_id);
     const locationsID = [];
     for (let index = 0; index < values.locations.length; index++) {
       locationsID.push({ id: values.locations[index] });
     }
-    const data = { ...values, role, locations: locationsID, deleteAble: true };
+    const data = { ...values, role: role.id, locations: locationsID, deleteAble: true };
 
     const endpoint = process.env.NEXT_PUBLIC_URL + "/auth/local/register";
     const JSONdata = JSON.stringify(data);
@@ -41,9 +45,27 @@ const Tambah = ({ props }) => {
     };
 
     const req = await fetch(endpoint, options);
-    const res = await req.json();
+    const resPost = await req.json();
 
     if (req.status === 200) {
+      // update role
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/users/" + resPost?.user?.id;
+      const JSONdata = JSON.stringify({ role: role.id });
+
+      const options = {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+        body: JSONdata,
+      };
+
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
+
+      console.log("respon update role", res);
+
       form.resetFields();
       toast.success("Data Pengguna berhasil ditambahkan!", {
         position: toast.POSITION.TOP_RIGHT,
@@ -213,19 +235,29 @@ const Tambah = ({ props }) => {
 
               <Locations data={locations} onSelect={setSelectLocation} errMsg={"Harap pilih lokasi user"} required />
 
-              <Form.Item name="role_id" className="w-1/4 mb-5 ml-1">
-                <Select size="large" placeholder="Role">
-                  {role.map((role) =>
-                    role.name === "Authenticated" || role.name === "Public" ? (
-                      <Select.Option hidden disabled={true} value={role.id}>
-                        {role.name}
-                      </Select.Option>
-                    ) : (
-                      <Select.Option value={role.id}>{role.name}</Select.Option>
-                    )
-                  )}
-                </Select>
-              </Form.Item>
+              <div className="w-full md:w-1/2 flex gap-x-3">
+                <Form.Item name="role_id" className="w-full">
+                  <Select size="large" placeholder="Role">
+                    {role.map((role) =>
+                      role.name === "Authenticated" || role.name === "Public" ? (
+                        <Select.Option hidden disabled={true} value={role.id}>
+                          {role.name}
+                        </Select.Option>
+                      ) : (
+                        <Select.Option value={role.id}>{role.name}</Select.Option>
+                      )
+                    )}
+                  </Select>
+                </Form.Item>
+
+                <Form.Item name="moduls" className="w-full">
+                  <Select mode="multiple" size="large" placeholder="Modul">
+                    {modules.map((module) => (
+                      <Select.Option value={module.id}>{module.attributes.name}</Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </div>
 
               <Form.Item>
                 {loading ? (
@@ -256,10 +288,14 @@ Tambah.getInitialProps = async (context) => {
   const reqLocations = await fetchData(cookies, "/locations");
   const resLocations = await reqLocations.json();
 
+  const reqModules = await fetchData(cookies, "/moduls");
+  const resModules = await reqModules.json();
+
   return {
     props: {
       data,
       locations: resLocations,
+      modules: resModules,
     },
   };
 };

@@ -21,7 +21,6 @@ const Dashboard = () => {
             </center>
           </div>
         </LayoutWrapper>
-        z
       </DashboardLayout>
     </>
   );
