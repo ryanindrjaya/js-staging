@@ -100,7 +100,7 @@ const UpdateJurnal = async (
         values.kredit = ppn;
         putAkun(item, ppn);
       }
-      else if(item.attributes.jenis_akun === true && item.attributes.kode === "211.01.02"){
+      else if(item.attributes.jenis_akun === false && item.attributes.kode === "211.01.02"){
         values.debit = totalPrice;
         putAkun(item, totalPrice);
       }
