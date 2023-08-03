@@ -33,7 +33,7 @@ const UpdateJurnal = async (
   values.added_by = user.name;
   values.tanggal = moment();
   
-  if(page == "lpb"){
+  if(page === "lpb"){
     
     const reqCOA = await fetchAkunCOA(cookies, "115.10.00", "116.20.07", "211.01.01");
     const akunCOA = await reqCOA.json();
@@ -61,6 +61,48 @@ const UpdateJurnal = async (
           values.kredit = values.attributes.price_after_disc;
           putAkun(item, values.attributes.price_after_disc);
         }
+      }
+      values.chart_of_account = item.id;
+
+      var data = {
+        data: values,
+      };
+
+      postJurnal(data);
+    });
+
+  } else if(page === "retur"){
+    
+    const reqCOA = await fetchAkunCOA(cookies, "115.10.00", "116.20.07", "211.01.02");
+    const akunCOA = await reqCOA.json();
+
+    console.log("get akunCOA", akunCOA);
+
+    var totalPrice = values.attributes.total_price; console.log(values, "retur values");
+    var dpp = 0;
+    var ppn = 0;
+
+    if(values.attributes.DPP_PPN_active === true){
+      dpp = totalPrice / 1.11;
+      ppn = dpp * 0.11;
+    }
+
+    akunCOA.data.map((item) => {
+      values.debit = 0;
+      values.kredit = 0;
+      values.no_jurnal = `JRPB/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+      values.catatan = "Transaksi retur lpb dengan kode " + values?.attributes?.no_retur;
+      if(item.attributes.jenis_akun === true && item.attributes.kode === "115.10.00") {
+        values.kredit = dpp;
+        putAkun(item, dpp);
+      }
+      else if(item.attributes.jenis_akun === true && item.attributes.kode === "116.20.07"){
+        values.kredit = ppn;
+        putAkun(item, ppn);
+      }
+      else if(item.attributes.jenis_akun === true && item.attributes.kode === "211.01.02"){
+        values.debit = totalPrice;
+        putAkun(item, totalPrice);
       }
       values.chart_of_account = item.id;
 
@@ -144,10 +186,15 @@ const fetchAkunCOA = async (cookies, kode1, kode2, kode3) => {
   return req;
 };
 
-const putAkun = async (akun, pembayaran) => {
+const putAkun = async (akun, pembayaran, page) => {
   try {
     var saldo = parseFloat(akun.attributes.saldo - pembayaran);
     if(akun.attributes.jenis_akun === false) saldo = parseFloat((akun.attributes.saldo ?? 0) + pembayaran);
+
+    if(page === "retur"){
+      if(akun.attributes.kode === false) saldo = parseFloat(akun.attributes.saldo + pembayaran);
+      else saldo = parseFloat(akun.attributes.saldo - pembayaran);
+    }
 
       const data = {
         data: {

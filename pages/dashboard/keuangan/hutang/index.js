@@ -234,7 +234,13 @@ function Hutang({ props }) {
               } 
             }
             else if(cekAkunMaster === false && item.attributes.type == "Master"){
-              cekAkunMaster = true;
+              if(item.attributes.chart_of_account.data.attributes.saldo < data.attributes.total_pembayaran){
+                notification["error"]({
+                  message: "Gagal menambahkan data",
+                  description: "Data gagal ditambahkan, saldo untuk akun master kurang untuk melakukan pembayaran.",
+                });
+                status = "Draft";
+              } else cekAkunMaster = true;
             }
           } else {
             if(row.attributes.tunai != 0 && akunTunai != true){
@@ -307,7 +313,7 @@ function Hutang({ props }) {
     const putAkun = async (akun, pembayaran, noHutang, tipe) => {
       try {
         var saldo = parseFloat(akun.attributes.saldo - pembayaran);
-        if(tipe === "Master") saldo = parseFloat((akun.attributes.saldo ?? 0) + pembayaran);
+        if(tipe === "Master") saldo = parseFloat((akun.attributes.saldo ?? 0) - pembayaran);
 
           const data = {
             data: {

@@ -202,7 +202,7 @@ const Tambah = ({ props }) => {
                     {selectedType === "Master" ? (
                       <Coa page="hutang" onChange={setAkunCOA} selectedAkun={akunCOA}/>
                     ) : (
-                      <Coa page="piutang" onChange={setAkunCOA} selectedAkun={akunCOA}/>
+                      <Coa page="hutang" onChange={setAkunCOA} selectedAkun={akunCOA}/>
                     )}
                   </Form.Item>
                 </div>

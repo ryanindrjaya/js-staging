@@ -243,7 +243,6 @@ function Piutang({ props }) {
               });
               status = "Draft";
             } else cekAkunMaster = true;
-            
           }
         } else {
           if(row.attributes.tunai != 0 && akunTunai != true){
@@ -410,8 +409,8 @@ function Piutang({ props }) {
 const putAkun = async (akun, pembayaran, noPiutang, tipe) => {
   try {
     
-    var saldo = parseFloat(akun.attributes.saldo) + pembayaran;
-    if(tipe === "Master") saldo = parseFloat(akun.attributes.saldo) - pembayaran;
+    var saldo = parseFloat(akun.attributes.saldo + pembayaran);
+    if(tipe === "Master") saldo = parseFloat(akun.attributes.saldo - pembayaran);
 
       const data = {
         data: {

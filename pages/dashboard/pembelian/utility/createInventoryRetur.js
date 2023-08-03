@@ -34,7 +34,7 @@ async function createInventoryRetur(row) {
   const retur = await getReturDetails(row.id);
   const returDetails = retur.data.attributes.retur_details.data;
   const noRetur = retur.data.attributes.no_retur;
-  const supplier = retur.data.attributes.supplier.data.attributes.name;
+  const supplier = retur.data?.attributes?.supplier?.data?.attributes?.name;
 
   console.log("details retur", returDetails);
 
