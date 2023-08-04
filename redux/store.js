@@ -1,10 +1,11 @@
-import { createStore, applyMiddleware } from "redux";
+import { applyMiddleware } from "redux";
 import createSagaMiddleware, { END } from "redux-saga";
-
 import thunk from "redux-thunk";
-
 import rootReducer from "./root-reducer";
 import rootSaga from "./root-saga";
+import { configureStore, getDefaultMiddleware } from "@reduxjs/toolkit";
+import { persistStore, persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage";
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -16,12 +17,19 @@ const bindMiddleware = (middleware) => {
   return applyMiddleware(...middleware);
 };
 
-function configureStore(initialState = {}) {
-  const store = createStore(
-    rootReducer,
-    initialState,
-    bindMiddleware([thunk, sagaMiddleware])
-  );
+function storeSetting(initialState = {}) {
+  const persistConfig = {
+    key: "root", // Key to store the data in storage
+    storage,
+  };
+
+  const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+  const store = configureStore({
+    reducer: persistedReducer,
+    middleware: [...getDefaultMiddleware({ thunk: false }), thunk, sagaMiddleware],
+    preloadedState: initialState,
+  });
 
   store.runSaga = () => {
     // Avoid running twice
@@ -44,7 +52,7 @@ function configureStore(initialState = {}) {
     tasks(store.dispatch);
     // Stop running and wait for the tasks to be done
     await store.stopSaga();
-    // Re-run on client side
+    // Re-run on the client side
     if (!isServer) {
       store.runSaga();
     }
@@ -53,7 +61,10 @@ function configureStore(initialState = {}) {
   // Initial run
   store.runSaga();
 
-  return store;
+  // Create the persistor and rehydrate the state
+  const persistor = persistStore(store);
+
+  return { store, persistor };
 }
 
-export default configureStore;
+export { storeSetting };

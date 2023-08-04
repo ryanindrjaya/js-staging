@@ -16,8 +16,6 @@ function Middleware({ children }) {
     const firstPath = pathnames[1];
     const modulUri = pathnames[2];
 
-    console.log("modulUri", modulUri);
-
     const istokenValid = async () => {
       const endpoint = process.env.NEXT_PUBLIC_URL + `/products?pagination[limit]=1`;
       const options = {
@@ -31,6 +29,9 @@ function Middleware({ children }) {
       const req = await fetch(endpoint, options);
 
       if (req.status === 401) {
+        nookies.destroy(null, "token");
+        nookies.destroy(null, "role");
+
         router.push("/");
       }
     };

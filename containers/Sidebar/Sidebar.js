@@ -20,6 +20,7 @@ import {
   SidebarStockIcon,
 } from "../../config/icon.config";
 import { IoIosArrowRoundUp } from "react-icons/io";
+import { FaFileInvoiceDollar } from "react-icons/fa";
 
 const SubMenu = Menu.SubMenu;
 const MenuItemGroup = Menu.ItemGroup;
@@ -124,7 +125,7 @@ export default function Sidebar(props) {
           </Link>
         </Menu.Item>
         <Menu.Item style={submenuStyle} key="wewenang">
-          <Link href="/dashboard/role">
+          <Link href="/dashboard/pengguna/role">
             <a>Role</a>
           </Link>
         </Menu.Item>
@@ -372,9 +373,31 @@ export default function Sidebar(props) {
             <a>Pembayaran Toko</a>
           </Link>
         </Menu.Item>
-        <Menu.Item style={submenuStyle} key="piutang">
+        <Menu.Item style={submenuStyle} key="laporanpiutang">
           <Link href="/dashboard/laporan/piutang">
             <a>Piutang Penjualan</a>
+          </Link>
+        </Menu.Item>
+      </SubMenu>
+    ),
+    Pajak: (
+      <SubMenu
+        key="laporan"
+        title={
+          <span className="isoMenuHolder" style={submenuColor}>
+            <FaFileInvoiceDollar size={18} />
+            <span className="nav-text">Pajak</span>
+          </span>
+        }
+      >
+        <Menu.Item style={submenuStyle} key="pembeliandanretur">
+          <Link href="/dashboard/pajak/no_faktur_list">
+            <a>Daftar Nomor Faktur</a>
+          </Link>
+        </Menu.Item>
+        <Menu.Item style={submenuStyle} key="pembayaranhutang">
+          <Link href="/dashboard/pajak/generate">
+            <a>Generate Faktur</a>
           </Link>
         </Menu.Item>
       </SubMenu>
