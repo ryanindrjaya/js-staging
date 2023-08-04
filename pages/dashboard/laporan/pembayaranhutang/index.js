@@ -10,9 +10,11 @@ import TitlePage from "@iso/components/TitlePage/TitlePage";
 import Table from "@iso/components/ReactDataTable/Report/PurchaseDebtTable";
 import SearchSupplier from "@iso/components/Form/AddReport/SearchSupplier";
 import SearchLocations from "@iso/components/Form/AddReport/SearchLocations";
+//import TableExportToExcel from "../utility/TableExportToExcel"; 
 import nookies from "nookies";
 import tokenVerify from "../../../../authentication/tokenVerify";
 import moment from "moment";
+import * as XLSX from 'xlsx';
 
 Laporan.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -113,6 +115,42 @@ const fetchSupplier = async (cookies) => {
   return req;
 };
 
+// Function to export the table to XLSX
+const exportTableToXLSX = (tableData) => {
+  const data = [];
+  const headers = [];
+
+  // Extract headers from the first row of the table
+  const headerRow = tableData.querySelector('thead tr');
+  headerRow.querySelectorAll('th').forEach((th) => {
+    headers.push(th.innerText);
+  });
+
+  // Extract data from the table rows
+  const bodyRows = tableData.querySelectorAll('tbody tr');
+  bodyRows.forEach((row) => {
+    const rowData = [];
+    row.querySelectorAll('td').forEach((td) => {
+      rowData.push(td.innerText);
+    });
+    if (rowData.length !== 0) data.push(rowData);
+    if (rowData[1] === "Subtotal :") {
+      const space = "";
+    
+      // Insert the three values before index 1 in the rowData array
+      rowData.splice(1, 0, space, space, space);
+    }
+  });
+
+  // Create the Excel workbook and worksheet
+  const workbook = XLSX.utils.book_new();
+  const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+  // Generate the Excel file
+  XLSX.writeFile(workbook, 'Laporan Hutang.xlsx');
+};
+
 function Laporan({ props }) {
   const user = props.user;
   const dataUser = props?.dataUser;
@@ -173,6 +211,14 @@ function Laporan({ props }) {
       "Work In Progress",
       "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
     );
+  };
+
+  const tableRef = React.useRef(null);
+  const handlePrintXLS = () => {
+    console.log("handlePrintXLS", tableRef, tableRef.current);
+    if (tableRef.current) {
+      exportTableToXLSX(tableRef.current);
+    }
   };
 
   // const handleDelete = async (data) => {
@@ -443,7 +489,7 @@ function Laporan({ props }) {
                 </div>
               </button>
               <button
-                onClick={handleUpdate}
+                onClick={handlePrintXLS}
                 type="button"
                 className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
               >
@@ -474,7 +520,7 @@ function Laporan({ props }) {
 
           <div className="justify-between">
             {searchParameters.tipeLaporan === "Detail" ? (
-            <div> Detail
+            <div ref={tableRef}> Detail
               <table name="pembelian" className="w-full text-xs" >
               <thead>
                 <tr className="p-2">
@@ -651,8 +697,8 @@ function Laporan({ props }) {
                               </tr>
                             </React.Fragment>
                           );
-                        }
-                        return null;
+                        } 
+                        //return null;
                       })}
   
                       <tr>
@@ -679,6 +725,8 @@ function Laporan({ props }) {
   
                       </React.Fragment>
                     );
+                  } else {
+                    return false;
                   }
                 })}
               </tbody>
@@ -689,7 +737,7 @@ function Laporan({ props }) {
             )}    
 
             {searchParameters.tipeLaporan === "Rekap" ? (
-            <div> Rekap
+            <div ref={tableRef}> Rekap
               <table name="pembelian" className="w-full text-xs" >
               <thead>
                 <tr className="p-2">

@@ -345,7 +345,14 @@ function Hutang({ props }) {
               setInfo("gagal");
             }
           } else if(cekAkunMaster === false && item.attributes.type == "Master"){
-            cekAkunMaster = true;
+            if(item.attributes.chart_of_account.data.attributes.saldo < values.total_pembayaran){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, saldo untuk akun master kurang untuk melakukan pembayaran.",
+              });
+              setInfo("gagal");
+              
+            } else cekAkunMaster = true;
           
           }
         } else {

@@ -7,7 +7,7 @@ import { useState } from "react";
 import createInventoryRetur from "../../../pages/dashboard/pembelian/utility/createInventoryRetur";
 import nookies from "nookies";
 
-export default function ReactDataTable({ data, onDelete, onPageChange, onChangeStatusPengiriman, onChangeStatus }) {
+export default function ReactDataTable({ data, onDelete, onPageChange, onChangeStatusPengiriman, onChangeStatus, updateJurnal, user}) {
   const router = useRouter();
   console.log("data index", data);
   const { Option } = Select;
@@ -265,6 +265,9 @@ export default function ReactDataTable({ data, onDelete, onPageChange, onChangeS
           message.error("Gagal membuat retur");
           return;
         }
+
+        //jurnal handle and coa
+        updateJurnal(row, user, "retur");
       }
 
       const endpoint = `${process.env.NEXT_PUBLIC_URL}/returs/${row.id}`;
@@ -335,7 +338,7 @@ export default function ReactDataTable({ data, onDelete, onPageChange, onChangeS
             className="p-0"
             disabled={row.attributes.status === "Selesai"}
             onChange={(value) => {
-              changeStatus(row, value);
+              changeStatus(row, value, updateJurnal);
             }}
             value={row.attributes.status}
           >

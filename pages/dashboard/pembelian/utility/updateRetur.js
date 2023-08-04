@@ -6,6 +6,7 @@ import * as moment from "moment";
 import router from "next/router";
 import { notification } from "antd";
 import createInventoryRetur from "./createInventoryRetur";
+import updateJurnal from "./updateJurnal";
 
 var tempListId = [];
 const cookies = nookies.get(null, "token");
@@ -33,7 +34,8 @@ const updateRetur = (
   returData,
   returMasterId,
   createInventoryRetur,
-  clearData
+  clearData,
+  user
 ) => {
   let detailTotalPrice = 0;
 
@@ -150,7 +152,8 @@ const updateRetur = (
     retur_details,
     dpp_ppn_active,
     detailTotalPrice,
-    clearData
+    clearData,
+    user
   );
 };
 
@@ -252,7 +255,8 @@ const PUTRetur = async (
   retur_details,
   dpp_ppn_active,
   detailTotalPrice,
-  clearData
+  clearData,
+  user
 ) => {
   console.log("TOTAL DETAIL", detailTotalPrice);
 
@@ -297,6 +301,9 @@ const PUTRetur = async (
       console.log("=========UPDATE INVENTORY RETUR=========");
       await createInventoryRetur(res.data);
       await changeStatusLPB(purchasing);
+
+      //jurnal handle and coa
+      updateJurnal(res.data, user, "retur");
     }
 
     clearData();
