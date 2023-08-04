@@ -19,6 +19,7 @@ import createPurchasing from "../../utility/createPurchasing";
 import updateOrder from "../../utility/updateOrder";
 import updateProduct from "../../utility/updateProduct";
 import calculatePrice from "../../utility/calculatePrice";
+import updateJurnal from "../../utility/updateJurnal";
 import SearchPO from "../../../../../components/Form/AddOrder/SearchPO";
 
 function getUnitIndex(data, selected) {
@@ -333,6 +334,8 @@ function EditLPB({ props }) {
           message: "Berhasil mengubah data",
           description: "Data LPB berhasil diubah. Silahkan cek pada halaman LPB",
         });
+        //jurnal handle and coa
+        updateJurnal(res.data, user, "lpb");
         router.replace("/dashboard/pembelian/pembelian_barang");
       } else {
         notification.error({

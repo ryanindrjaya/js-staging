@@ -10,6 +10,7 @@ import PurchasesReturTable from "../../../../components/ReactDataTable/Purchases
 import nookies from "nookies";
 import { PrinterOutlined } from "@ant-design/icons";
 import createInventoryRetur from "../utility/createInventoryRetur";
+import updateJurnal from "../utility/updateJurnal";
 
 Retur.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -18,9 +19,13 @@ Retur.getInitialProps = async (context) => {
   const req = await fetchData(cookies);
   data = await req.json();
 
+  const reqUser = await fetchUser(cookies);
+  const user = await reqUser.json();
+
   return {
     props: {
       data,
+      user,
     },
   };
 };
@@ -40,8 +45,23 @@ const fetchData = async (cookies) => {
   return req;
 };
 
+const fetchUser = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=*";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
 function Retur({ props }) {
   const data = props.data;
+  const user = props.user;
   const [retur, setRetur] = useState(data);
   const [selectedRetur, setSelectedRetur] = useState();
   const [openModal, setOpenModal] = useState(false);
@@ -393,6 +413,8 @@ function Retur({ props }) {
               onDelete={handleDelete}
               onPageChange={handlePageChange}
               onChangeStatus={onChangeStatus}
+              updateJurnal={updateJurnal}
+              user={user}
             />
           </LayoutContent>
         </LayoutWrapper>

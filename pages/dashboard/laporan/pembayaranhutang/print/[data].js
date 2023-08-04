@@ -110,7 +110,7 @@ const Print = ({ props }) => {
       <div className="justify-between" style={{ margin: '5pt' }}>
       {tipeLaporan === "Detail" ? (
         <div> Detail
-          <table name="pembelian" className="w-full text-xs" >
+          <table name="detail" className="w-full text-xs" >
           <thead>
             <tr className="p-2">
               <th className="border-2 p-1">No Pembayaran</th>

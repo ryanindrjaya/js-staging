@@ -1,6 +1,7 @@
 import React from "react";
 import nookies from "nookies";
 import { notification } from "antd";
+import updateJurnal from "../utility/updateJurnal";
 
 const cookies = nookies.get(null, "token");
 var tempProductListId = [];
@@ -69,6 +70,7 @@ const CreateRetur = async (
 };
 
 const createData = async (data, form, router, lpbId, createInventoryRetur, clearData) => {
+  const user = await getUserMe();
   const endpoint = process.env.NEXT_PUBLIC_URL + "/returs";
   const JSONdata = JSON.stringify(data);
   const options = {
@@ -90,6 +92,9 @@ const createData = async (data, form, router, lpbId, createInventoryRetur, clear
     if (data.data.status === "Selesai") {
       createInventoryRetur(res.data);
       changeStatusLPB(lpbId);
+
+      //jurnal handle and coa
+      updateJurnal(res.data, user, "retur");
     }
 
     putRelationRetur(res.data.id, res.data.attributes, form, router, lpbId, clearData);
@@ -142,7 +147,7 @@ const putRelationRetur = async (id, value, form, router, lpbId, clearData) => {
 };
 
 const getUserMe = async () => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=*";
   const options = {
     method: "GET",
     headers: {

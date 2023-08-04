@@ -11,6 +11,7 @@ import nookies from "nookies";
 import { PrinterOutlined } from "@ant-design/icons";
 import createInventory from "../utility/createInventory";
 import updateProductFromTable from "../utility/updateProductFromTable";
+import updateJurnal from "../utility/updateJurnal";
 
 Pembelian.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -19,9 +20,13 @@ Pembelian.getInitialProps = async (context) => {
   const req = await fetchData(cookies);
   data = await req.json();
 
+  const reqUser = await fetchUser(cookies);
+  const user = await reqUser.json();
+
   return {
     props: {
       data,
+      user,
     },
   };
 };
@@ -41,8 +46,23 @@ const fetchData = async (cookies) => {
   return req;
 };
 
+const fetchUser = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=*";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
 function Pembelian({ props }) {
   const data = props.data;
+  const user = props.user;
   const [selectedLPB, setSelectedLPB] = useState();
   const [purchase, setPurchase] = useState(data);
   const [openModal, setOpenModal] = useState(false);
@@ -159,6 +179,9 @@ function Pembelian({ props }) {
       await createInventory(row);
 
       await updateProductFromTable(row);
+
+      //jurnal handle and coa
+      updateJurnal(row, user, "lpb");
     }
 
     const poData = row?.attributes?.purchase?.data;

@@ -37,19 +37,19 @@ const UpdateJurnal = async (
   values.tanggal = moment();
 
   if(page == "hutang" && tipe !== "Master"){
-    values.debit = saldo;
+    values.kredit = saldo;
     values.catatan = "Transaksi hutang dengan kode " + noHutang;
     values.no_jurnal = `JH/${user.id}/${noJurnal}/${mm}/${yyyy}`;
   } else if (page == "piutang" && tipe !== "Master") { 
-    values.kredit = saldo;
+    values.debit = saldo;
     values.catatan = "Transaksi piutang dengan kode " + noPiutang;
     values.no_jurnal = `JP/${user.id}/${noJurnal}/${mm}/${yyyy}`;
   } else if(page == "hutang" && tipe === "Master"){
-    values.kredit = saldo;
+    values.debit = saldo;
     values.catatan = "Transaksi hutang dengan kode " + noHutang;
     values.no_jurnal = `JH/${user.id}/${noJurnal}/${mm}/${yyyy}`;
   } else if (page == "piutang" && tipe === "Master") { 
-    values.debit = saldo;
+    values.kredit = saldo;
     values.catatan = "Transaksi piutang dengan kode " + noPiutang;
     values.no_jurnal = `JP/${user.id}/${noJurnal}/${mm}/${yyyy}`;
   }

@@ -219,7 +219,7 @@ function Piutang({ props }) {
     return res;
   };
 
-  const onChangeStatus = async (status, row) => { console.log(row, "row nih");
+  const onChangeStatus = async (status, row) => {
 
     //cek akun
     var cekAkunMaster = false;
@@ -243,39 +243,40 @@ function Piutang({ props }) {
               });
               status = "Draft";
             } else cekAkunMaster = true;
+          }
+        } else {
+          if(row.attributes.tunai != 0 && akunTunai != true){
+            notification["error"]({
+              message: "Gagal menambahkan data",
+              description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
+            });
+            status = "Draft";
+  
+          } else if(row.attributes.transfer != 0 && akunTransfer != true){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
+              });
+              status = "Draft";
+              
+          } else if(row.attributes.giro  != 0 && akunGiro != true){
+              notification["error"]({
+                message: "Gagal menambahkan data",
+                description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
+              });
+              status = "Draft";
+  
+          } else if(cekAkunMaster != true){
+            notification["error"]({
+              message: "Gagal menambahkan data",
+              description: "Data gagal ditambahkan, silahkan pilih akun master untuk diaktifkan.",
+            });
+            status = "Draft";
             
           }
+
         }
 
-        if(row.attributes.tunai != 0 && akunTunai != true){
-          notification["error"]({
-            message: "Gagal menambahkan data",
-            description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
-          });
-          status = "Draft";
-
-        } else if(row.attributes.transfer != 0 && akunTransfer != true){
-            notification["error"]({
-              message: "Gagal menambahkan data",
-              description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
-            });
-            status = "Draft";
-            
-        } else if(row.attributes.giro  != 0 && akunGiro != true){
-            notification["error"]({
-              message: "Gagal menambahkan data",
-              description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
-            });
-            status = "Draft";
-
-        } else if(cekAkunMaster != true){
-          notification["error"]({
-            message: "Gagal menambahkan data",
-            description: "Data gagal ditambahkan, silahkan pilih akun master untuk diaktifkan.",
-          });
-          status = "Draft";
-          
-        }
 
       });
     });
@@ -361,6 +362,10 @@ function Piutang({ props }) {
         var akunGiro = false;
         var akunMaster = false;
 
+        var totalTunai = 0;
+        var totalTransfer = 0;
+        var totalGiro = 0;
+
         dataPiutang.attributes.credit_details.data.forEach((row) => {
           akunTunai = false;
           akunTransfer = false;
@@ -369,18 +374,18 @@ function Piutang({ props }) {
           akunPiutang.data.forEach((item) => {
             if(item.attributes.setting == true){
               if(row.attributes.tunai > 0 && item.attributes.type == "Tunai"){
-                
-                putAkun(item.attributes.chart_of_account.data, row.attributes.tunai, dataPiutang.attributes.no_piutang);
+                totalTunai += row.attributes.tunai;
+                putAkun(item.attributes.chart_of_account.data, totalTunai, dataPiutang.attributes.no_piutang);
     
                 akunTunai = true;
               } else if(row.attributes.transfer > 0 && item.attributes.type == "Transfer"){
-                
-                putAkun(item.attributes.chart_of_account.data, row.attributes.transfer);
+                totalTransfer += row.attributes.transfer;
+                putAkun(item.attributes.chart_of_account.data, totalTransfer, dataPiutang.attributes.no_piutang);
     
                 akunTransfer = true;
               } else if(row.attributes.giro > 0 && item.attributes.type == "Giro"){
-
-                putAkun(item.attributes.chart_of_account.data, row.attributes.giro);
+                totalGiro += row.attributes.giro;
+                putAkun(item.attributes.chart_of_account.data, totalGiro, dataPiutang.attributes.no_piutang);
     
                 akunGiro = true;
               } else if(akunMaster === false && item.attributes.type == "Master"){
@@ -394,14 +399,18 @@ function Piutang({ props }) {
 
         });
 
+        totalTunai = 0;
+        totalTransfer = 0;
+        totalGiro = 0;
+
     } else console.log("Not update all, karena draft");
 };
 
 const putAkun = async (akun, pembayaran, noPiutang, tipe) => {
   try {
     
-    var saldo = parseFloat((akun.attributes.saldo ?? 0) + pembayaran);
-    if(tipe === "Master") saldo = parseFloat((akun.attributes.saldo ?? 0) - pembayaran);
+    var saldo = parseFloat(akun.attributes.saldo + pembayaran);
+    if(tipe === "Master") saldo = parseFloat(akun.attributes.saldo - pembayaran);
 
       const data = {
         data: {
@@ -424,11 +433,19 @@ const putAkun = async (akun, pembayaran, noPiutang, tipe) => {
       const res = await req.json();
 
       if (req.status === 200) {
-          console.log("akun sukses diupdate");
+          console.log("akun sukses diupdate", res);
+          notification["success"]({
+            message: "Sukses menambahkan data",
+            description: "Pembayaran yang dilakukan sukses.",
+          });
           if(tipe === "Master") updateJurnal(res.data, "piutang", null, noPiutang, pembayaran, user, tipe);
           else updateJurnal(res.data, "piutang", null, noPiutang, pembayaran, user);
       } else {
           console.log("akun error atau tidak ada");
+          notification["error"]({
+            message: "Gagal menambahkan data",
+            description: "Pembayaran yang dilakukan gagal.",
+          });
       }
     } catch (error) {
        console.log("errorr", error);

@@ -107,7 +107,7 @@ const putAkun = async (id, value, form, total, page, noHutang, noPiutang, tipe) 
     } else if (page === "hutang" && tipe === "Master") {
       //url = "/debt-accounts/";
       url = "/chart-of-accounts/";
-      saldo = saldo + total;
+      saldo = saldo - total;
     }
     if (page === "piutang" && tipe !== "Master") {
       //url = "/credit-accounts/";

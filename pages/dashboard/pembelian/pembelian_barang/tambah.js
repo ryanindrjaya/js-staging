@@ -22,6 +22,7 @@ import calculatePrice from "../utility/calculatePrice";
 import SearchPO from "../../../../components/Form/AddOrder/SearchPO";
 import createInventory from "../utility/createInventory";
 import updateProductFromTable from "../utility/updateProductFromTable";
+import updateJurnal from "../utility/updateJurnal";
 
 Tambah.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -179,6 +180,9 @@ function Tambah({ props }) {
       return;
     }
 
+    values.dpp_value = dppPrice - discValue;
+    values.ppn_value = ppnPrice - discValue;
+
     setDataValues(values);
     setLoading(false);
   };
@@ -292,6 +296,9 @@ function Tambah({ props }) {
       // invetory handle
       createInventory(row);
       await updateProductFromTable(row);
+
+      //jurnal handle and coa
+      updateJurnal(row, user, "lpb");
     }
 
     const poData = row.attributes?.purchase?.data;
