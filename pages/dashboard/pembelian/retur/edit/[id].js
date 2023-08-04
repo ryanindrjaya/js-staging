@@ -339,7 +339,8 @@ function Retur({ props }) {
       props.returs,
       returMasterId,
       createInventoryRetur,
-      clearData
+      clearData,
+      user
     );
   };
 
