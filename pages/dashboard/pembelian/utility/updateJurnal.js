@@ -34,7 +34,8 @@ const UpdateJurnal = async (
   values.tanggal = moment();
   
   if(page === "lpb"){
-    
+
+    //JURNAL LEMBAR PENERIMAAN BARANG
     const reqCOA = await fetchAkunCOA(cookies, "115.10.00", "116.20.07", "211.01.01");
     const akunCOA = await reqCOA.json();
 
@@ -73,6 +74,7 @@ const UpdateJurnal = async (
 
   } else if(page === "retur"){
     
+    //JURNAL RETUR BELI POTONG UTANG
     const reqCOA = await fetchAkunCOA(cookies, "115.10.00", "116.20.07", "211.01.02");
     const akunCOA = await reqCOA.json();
 
@@ -94,14 +96,39 @@ const UpdateJurnal = async (
       values.catatan = "Transaksi retur lpb dengan kode " + values?.attributes?.no_retur;
       if(item.attributes.jenis_akun === true && item.attributes.kode === "115.10.00") {
         values.kredit = dpp;
-        putAkun(item, dpp);
+        putAkun(item, dpp, page);
       }
       else if(item.attributes.jenis_akun === true && item.attributes.kode === "116.20.07"){
         values.kredit = ppn;
-        putAkun(item, ppn);
+        putAkun(item, ppn, page);
       }
       else if(item.attributes.jenis_akun === false && item.attributes.kode === "211.01.02"){
         values.debit = totalPrice;
+        putAkun(item, totalPrice, page);
+      }
+      values.chart_of_account = item.id;
+
+      var data = {
+        data: values,
+      };
+
+      postJurnal(data);
+    });
+
+    //JURNAL PEMBAYARAN A/P
+    const reqCOABayar = await fetchAkunCOA(cookies, "211.01.01", "211.01.02");
+    const akunCOABayar = await reqCOABayar.json();
+
+    akunCOABayar.data.map((item) => {
+      values.debit = 0;
+      values.kredit = 0;
+      values.no_jurnal = `JRPB/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+      if(item.attributes.jenis_akun === false && item.attributes.kode === "211.01.01"){
+        values.debit = totalPrice;
+        putAkun(item, totalPrice, "retur");
+
+      } else if(item.attributes.jenis_akun === false && item.attributes.kode === "211.01.02"){
+        values.kredit = totalPrice;
         putAkun(item, totalPrice);
       }
       values.chart_of_account = item.id;
@@ -112,6 +139,7 @@ const UpdateJurnal = async (
 
       postJurnal(data);
     });
+
   }
   
 };
@@ -188,12 +216,10 @@ const fetchAkunCOA = async (cookies, kode1, kode2, kode3) => {
 
 const putAkun = async (akun, pembayaran, page) => {
   try {
-    var saldo = parseFloat(akun.attributes.saldo - pembayaran);
-    if(akun.attributes.jenis_akun === false) saldo = parseFloat((akun.attributes.saldo ?? 0) + pembayaran);
+    var saldo = parseFloat(akun.attributes.saldo + pembayaran);
 
     if(page === "retur"){
-      if(akun.attributes.kode === false) saldo = parseFloat(akun.attributes.saldo + pembayaran);
-      else saldo = parseFloat(akun.attributes.saldo - pembayaran);
+      saldo = parseFloat(akun.attributes.saldo - pembayaran);
     }
 
       const data = {
