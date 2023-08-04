@@ -9,6 +9,7 @@ import SignInStyleWrapper from "../styled/SignIn.styles";
 import { Spin, Alert } from "antd";
 import nookies from "nookies";
 import Head from "next/head";
+import { saveState } from "../library/helpers/localStorage";
 
 const { login } = authActions;
 
@@ -66,7 +67,7 @@ export default function SignInPage(props) {
           sameSite: "strict",
         });
 
-        dispatch({ type: "SET_SESSION", message: "success", moduls: user.moduls });
+        saveState("_mod", user.moduls);
 
         // redirect
         router.replace("/dashboard");

@@ -1,5 +1,5 @@
 // localStorage.js
-export const loadState = key => {
+export const loadState = (key) => {
   try {
     const serializedState = localStorage.getItem(key);
     if (serializedState === null) {

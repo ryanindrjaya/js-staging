@@ -3,6 +3,7 @@ import App from "next/app";
 import { Provider } from "react-redux";
 import withRedux from "next-redux-wrapper";
 import ThemeProvider from "../containers/ThemeProvider";
+import initStore from "../redux/store";
 import "antd/dist/antd.css";
 import "@glidejs/glide/dist/css/glide.core.min.css";
 import "react-quill/dist/quill.snow.css";
@@ -15,24 +16,17 @@ import { useSelector, useDispatch } from "react-redux";
 import Router from "next/router";
 import Middleware from "../components/Middleware";
 import ErrorBoundary from "../components/ErrorBoundary";
-import { PersistGate } from "redux-persist/integration/react";
-import { Spin } from "antd";
-import { storeSetting } from "../redux/store";
-
-const { store, persistor } = storeSetting();
 
 class CustomApp extends App {
   render() {
-    const { Component, pageProps } = this.props;
+    const { Component, pageProps, store } = this.props;
 
     return (
       <Provider store={store}>
         <ThemeProvider>
           <Middleware>
             <ErrorBoundary>
-              <PersistGate loading={<Spin />} persistor={persistor}>
-                <Component {...pageProps} />
-              </PersistGate>
+              <Component {...pageProps} />
             </ErrorBoundary>
           </Middleware>
           <ToastContainer toastStyle={{ backgroundColor: "black", color: "white" }} />
@@ -42,4 +36,4 @@ class CustomApp extends App {
   }
 }
 
-export default CustomApp;
+export default withRedux(initStore)(CustomApp);

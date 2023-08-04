@@ -21,6 +21,7 @@ import {
 } from "../../config/icon.config";
 import { IoIosArrowRoundUp } from "react-icons/io";
 import { FaFileInvoiceDollar } from "react-icons/fa";
+import { loadState } from "../../library/helpers/localStorage";
 
 const SubMenu = Menu.SubMenu;
 const MenuItemGroup = Menu.ItemGroup;
@@ -29,7 +30,10 @@ const { toggleOpenDrawer, changeOpenKeys, changeCurrent, toggleCollapsed } = app
 
 export default function Sidebar(props) {
   const { view, openKeys, collapsed, openDrawer, height, current } = useSelector((state) => state.App);
-  const moduls = useSelector((state) => state.session.moduls);
+  const moduls = loadState("_mod") || [];
+
+  console.log("moduls", moduls);
+
   const { sidebarTheme } = useSelector((state) => state.ThemeSwitcher);
   const dispatch = useDispatch();
   function handleClick(e) {

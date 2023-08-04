@@ -3,9 +3,10 @@ import { useRouter } from "next/router";
 import nookies from "nookies";
 import { useDispatch, useSelector } from "react-redux";
 import { notification } from "antd";
+import { loadState } from "../library/helpers/localStorage";
 
 function Middleware({ children }) {
-  const moduls = useSelector((state) => state.session.moduls);
+  const moduls = loadState("_mod") || [];
   const cookies = nookies.get(null);
   const token = cookies.token;
   const router = useRouter();
