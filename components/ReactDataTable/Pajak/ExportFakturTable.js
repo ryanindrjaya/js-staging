@@ -3,7 +3,7 @@ import React from "react";
 import { Spin, Tag } from "antd";
 import moment from "moment";
 
-export default function ReactDataTable({ data, refetch, loading }) {
+export default function ExportFakturTable({ data, refetch, loading }) {
   const customStyles = {
     headerStyle: { textAlign: "center" },
     headCells: {
@@ -14,22 +14,27 @@ export default function ReactDataTable({ data, refetch, loading }) {
     },
   };
 
+  const formatter = new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+  });
+
   const columns = [
     {
       name: "No Faktur",
-      width: "w-1/3",
+      width: "w-min-content",
       sortable: true,
       selector: (row) => row.attributes.no_faktur,
     },
     {
       name: "No Referensi",
-      width: "w-1/3",
+      width: "200px",
       sortable: true,
       selector: (row) => row.attributes?.no_referensi || "",
     },
     {
       name: "Jenis Nomor",
-      width: "w-1/3",
+      width: "w-min-content",
       sortable: true,
       selector: (row) => {
         switch (row.attributes.jenis) {
@@ -47,23 +52,35 @@ export default function ReactDataTable({ data, refetch, loading }) {
       },
     },
     {
-      name: "Status",
-      width: "w-1/3",
+      name: "Total Faktur",
+      width: "170px",
       sortable: true,
       selector: (row) => {
-        if (row.attributes.is_used) {
-          return <Tag color="error">Sudah Dipakai</Tag>;
-        } else {
-          return <Tag color="processing">Belum Dipakai</Tag>;
-        }
+        return formatter.format(row.attributes?.detail_dokumen?.total || 0);
       },
     },
     {
-      name: "Waktu Pembuatan",
-      width: "w-1/3",
+      name: "Tanggal Faktur",
+      width: "w-min-content",
       sortable: true,
       selector: (row) => {
-        return moment(row.attributes.createdAt).format("DD/MM/YYYY HH:mm:ss");
+        return moment(row.attributes?.detail_dokumen?.sale_date ?? null).format("DD/MM/YYYY");
+      },
+    },
+    {
+      name: "DPP",
+      width: "170px",
+      sortable: true,
+      selector: (row) => {
+        return formatter.format(row.attributes?.detail_dokumen?.dpp || 0);
+      },
+    },
+    {
+      name: "PPN",
+      width: "170px",
+      sortable: true,
+      selector: (row) => {
+        return formatter.format(row.attributes?.detail_dokumen?.ppn || 0);
       },
     },
   ];
@@ -75,7 +92,6 @@ export default function ReactDataTable({ data, refetch, loading }) {
       pagination
       progressComponent={<Spin />}
       progressPending={loading}
-      paginationTotalRows={data?.meta?.pagination.total}
       data={data?.data || []}
       noDataComponent={"Tidak ada data"}
     />

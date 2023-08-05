@@ -35,7 +35,7 @@ function FakturModal({ setOpen, checkFacture, fetchData, setData }) {
           var appendNomor = nomorAwal + stringNomorBelakang;
           listNomorFaktur.push({
             no_faktur: appendNomor,
-            isUsed: false,
+            is_used: false,
             jenis: jenisNomor,
           });
         }
@@ -51,16 +51,11 @@ function FakturModal({ setOpen, checkFacture, fetchData, setData }) {
 
         bar.then(async () => {
           setOpen(false);
-          const resData = await fetchData(cookies);
-          const data = await resData.json();
-
-          setData(data);
+          await fetchData(cookies);
           notification["success"]({
             message: "Berhasil",
-            description: `Data kamu sudah diupload. Silahkan cek kembali apakah sudah benar.`,
+            description: `Berhasil membuat nomor faktur. Silahkan cek kembali apakah sudah benar.`,
           });
-
-          checkFacture(jenisNomor);
         });
       }
     } catch (error) {
@@ -118,7 +113,7 @@ function FakturModal({ setOpen, checkFacture, fetchData, setData }) {
         }}
         onFinish={onFinish}
       >
-        <div className="text-lg font-bold text-blue-400 ">
+        <div className="text-lg font-bold text-[#036B82] ">
           <div>TAMBAHKAN MANUAL</div>
         </div>
 
@@ -211,9 +206,9 @@ function FakturModal({ setOpen, checkFacture, fetchData, setData }) {
               <Spin size="large" />
             </div>
           ) : (
-            <button type="submit" className="rounded px-5 py-2 border-blue-400 border shadow-sm flex mb-2 ml-4">
-              <div className="text-blue-400 text-center text-sm font-bold">
-                <a className="text-blue-400 no-underline text-xs sm:text-xs">Buat Nomor</a>
+            <button type="submit" className="rounded px-5 py-2 border-[#036B82] border shadow-sm flex mb-2 ml-4">
+              <div className="text-[#036B82] text-center text-sm font-bold">
+                <a className="text-[#036B82] no-underline text-xs sm:text-xs">Buat Nomor</a>
               </div>
             </button>
           )}

@@ -48,6 +48,8 @@ function Pembayaran({ props }) {
   const [changePrice, setChangePrice] = useState(0);
   const router = useRouter();
 
+  console.log("props", props.purchases.data.attributes.sales_sale_details);
+
   const data = props.purchases;
   const dataTable = props.purchases.data.attributes.sales_sale_details;
   const noLPB = props.purchases.data.attributes.no_sales_sale;
@@ -62,7 +64,7 @@ function Pembayaran({ props }) {
   // PURCHASING INFO
   var purchasingDate = props.purchases.data.attributes.sale_date;
   var statusPembelian = props.purchases.data.attributes.status;
-  var lokasi = props.purchases.data.attributes?.location.data?.attributes.name;
+  var lokasi = props.purchases.data.attributes?.locations?.data?.map((item) => item.attributes.name)?.join(", ") ?? "-";
   var totalItem = props.purchases.data.attributes.sales_sale_details.data?.length ?? 0;
   var deliveryFee = props.purchases.data.attributes.delivery_fee ?? 0;
   var priceAfterDisc = props.purchases.data.attributes.price_after_disc ?? 0;
@@ -311,7 +313,6 @@ function Pembayaran({ props }) {
 
     data.status_pembayaran = "Lunas";
     data.customer = { id: data.customer.data.id };
-    data.location = { id: data.location.data.id };
     data.sales_sell = { id: data.sales_sell?.data?.id };
     data.sales_sale_details = list;
     data.purchasing_payments = [...data?.purchasing_payments?.data?.map(({ id }) => id), paymentId];

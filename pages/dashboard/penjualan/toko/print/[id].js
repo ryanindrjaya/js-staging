@@ -1,6 +1,7 @@
 import React from "react";
 import nookies from "nookies";
 import { PrinterOutlined } from "@ant-design/icons";
+import moment from "moment";
 
 CetakPenjualan.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -46,8 +47,8 @@ function CetakPenjualan({ props }) {
   // header left
   const address = stakeholderAddress;
   const phone = stakeholderPhone;
-  const date = data.sale_date; // "2023-04-08"
-  const formattedDate = new Date(date).toLocaleDateString("en-GB");
+  const date = data.createdAt; // "2023-04-08"
+  const formattedDate = moment(date).format("DD/MM/YYYY HH:mm:ss");
   console.log(formattedDate); // "08/04/2023"
 
   // header right

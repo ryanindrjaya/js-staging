@@ -1,9 +1,9 @@
 import { useState } from "react";
 import Head from "next/head";
 import LayoutContent from "@iso/components/utility/layoutContent";
-import DashboardLayout from "../../../containers/DashboardLayout/DashboardLayout";
+import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
-import TitlePage from "../../../components/TitlePage/TitlePage";
+import TitlePage from "@iso/components/TitlePage/TitlePage";
 import { Button, Form, Input } from "antd";
 import nookies from "nookies";
 import { toast } from "react-toastify";
@@ -98,10 +98,7 @@ const Tambah = () => {
                     <Spin />
                   </div>
                 ) : (
-                 <Button
-                    htmlType="submit"
-                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
-                  >
+                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
                     Submit
                   </Button>
                 )}
