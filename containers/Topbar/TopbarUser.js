@@ -19,6 +19,7 @@ export default function TopbarUser() {
   const logoutUser = () => {
     destroyCookie(null, "token", { path: "/" });
     destroyCookie(null, "role", { path: "/" });
+    dispatch({ type: "CLEAR_SESSION" });
 
     dispatch(logout());
   };

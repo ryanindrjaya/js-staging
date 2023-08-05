@@ -123,6 +123,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
       fetchBarangKeluar();
     }
   }, [selectedNoReferensi, statusFilter, refetch]);
+
   const customStyles = {
     headCells: {
       style: {
@@ -521,33 +522,48 @@ export default function daftarKeluarBarang({ companyOptions }) {
       omit: statusFilter !== "Dibatalkan",
       selector: (row) => row?.cancel_reason || "-",
     },
-    {
-      name: "Dibatalkan Oleh",
-      omit: statusFilter !== "Dibatalkan",
-      selector: (row) => row?.cancel_author || "-",
-    },
   ];
 
   const printColumns = [
     {
       name: "No",
-      width: "10%",
+      width: "5%",
+      align: "center",
       selector: (row, index) => index + 1,
     },
     {
       name: "ITEM",
-      width: "50%",
+      width: "25%",
+      wrap: true,
       selector: (row) => row.product.name,
     },
     {
       name: "UNIT",
-      width: "20%",
+      width: "10%",
       selector: (row) => row.sended_unit,
     },
     {
       name: "JML",
-      width: "20%",
+      width: "10%",
       selector: (row) => row.sended,
+    },
+    {
+      name: "STATUS",
+      width: "20%",
+      selector: (row) => {
+        if (row.sended === row.qty) {
+          return "Terkirim";
+        } else if (row.sended < row.qty && row.sended > 0) {
+          return "Dikirim Sebagian";
+        } else {
+          return "Belum Dikirim";
+        }
+      },
+    },
+    {
+      name: "KET",
+      width: "30%",
+      selector: (row) => row.cancel_reason,
     },
   ];
 
@@ -658,7 +674,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
               Cetak Dokumen
             </button>
           </div>
-          <h1 className="text-[#036B82] text-2xl">Lembar Penerimaan Barang</h1>
+          <h1 className="text-[#036B82] text-2xl">Lembar Pengiriman Barang</h1>
 
           <div className="w-full flex justify-between">
             <div className="w-2/4 grid grid-cols-2 mb-3">

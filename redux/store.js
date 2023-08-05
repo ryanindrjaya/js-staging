@@ -17,11 +17,7 @@ const bindMiddleware = (middleware) => {
 };
 
 function configureStore(initialState = {}) {
-  const store = createStore(
-    rootReducer,
-    initialState,
-    bindMiddleware([thunk, sagaMiddleware])
-  );
+  const store = createStore(rootReducer, initialState, bindMiddleware([thunk, sagaMiddleware]));
 
   store.runSaga = () => {
     // Avoid running twice

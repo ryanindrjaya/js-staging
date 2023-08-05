@@ -1,16 +1,21 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
 import nookies from "nookies";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { notification } from "antd";
+import { loadState } from "../library/helpers/localStorage";
 
 function Middleware({ children }) {
+  const moduls = loadState("_mod") || [];
   const cookies = nookies.get(null);
   const token = cookies.token;
   const router = useRouter();
-  const dispatch = useDispatch();
 
   useEffect(() => {
-    const firstPath = router.pathname.split("/")[1];
+    const pathnames = router.pathname.split("/");
+    const usersModuls = moduls.map((modul) => modul.uri);
+    const firstPath = pathnames[1];
+    const modulUri = pathnames[2];
 
     const istokenValid = async () => {
       const endpoint = process.env.NEXT_PUBLIC_URL + `/products?pagination[limit]=1`;
@@ -25,13 +30,14 @@ function Middleware({ children }) {
       const req = await fetch(endpoint, options);
 
       if (req.status === 401) {
-        dispatch({ type: "SET_SESSION", message: "Sesi anda telah berakhir, harap login kembali" });
+        nookies.destroy(null, "token");
+        nookies.destroy(null, "role");
+
         router.push("/");
       }
     };
 
     if (firstPath === "dashboard" && !token) {
-      dispatch({ type: "SET_SESSION", message: "Sesi anda telah berakhir, harap login kembali" });
       router.push("/");
     } else {
       if (token && firstPath === "") {
@@ -39,9 +45,21 @@ function Middleware({ children }) {
         return;
       }
 
+      if (modulUri) {
+        if (!usersModuls.includes(modulUri)) {
+          notification.error({
+            message: "Akses Ditolak",
+            description: "Anda tidak memiliki akses ke halaman ini, mengalihkan anda ke halaman dashboard",
+          });
+
+          router.replace(`/dashboard`);
+          return;
+        }
+      }
+
       istokenValid();
     }
-  }, []);
+  }, [router.pathname]);
 
   return <>{children}</>;
 }
