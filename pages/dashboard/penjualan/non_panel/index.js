@@ -9,6 +9,7 @@ import TitlePage from "../../../../components/TitlePage/TitlePage";
 import SellingTable from "../../../../components/ReactDataTable/Selling/SellingTable";
 import Customer from "@iso/components/Form/AddCost/CustomerForm";
 import createInventory from "../utility/createInventory";
+import updateJurnal from "../utility/updateJurnal";
 import { PrinterOutlined } from "@ant-design/icons";
 import DataTable from "react-data-table-component";
 import nookies from "nookies";
@@ -31,12 +32,16 @@ NonPanelSale.getInitialProps = async (context) => {
   const reqNonPanelSales = await fetchNonPanelSales(cookies);
   const nonpanelsales = await reqNonPanelSales.json();
 
+  const reqUserMe = await fetchUser(cookies);
+  const userMe = await reqUserMe.json();
+
   return {
     props: {
       user,
       locations,
       nonpanelsales,
       dataUserSales,
+      userMe,
     },
   };
 };
@@ -98,11 +103,26 @@ const fetchNonPanelSales = async (cookies) => {
   return req;
 };
 
+const fetchUser = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=*";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
 function NonPanelSale({ props }) {
   const user = props.user;
   const locations = props.locations.data;
   const data = props.nonpanelsales;
   const dataUserSales = props.dataUserSales;
+  const userMe = props.userMe;
   const router = useRouter();
   const [sell, setSell] = useState(data);
   const [searchParameters, setSearchParameters] = useState({});
@@ -786,6 +806,8 @@ function NonPanelSale({ props }) {
                   returPage="nonpanel"
                   page="nonpanel"
                   updateStock={updateStock}
+                  user={userMe}
+                  updateJurnal={updateJurnal}
                 />
               </div>
             )}

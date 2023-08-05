@@ -49,18 +49,26 @@ const UpdateJurnal = async (
       if(item.attributes.jenis_akun === true && item.attributes.kode === "115.10.00") {
         values.debit = values.attributes.dpp_value;
         putAkun(item, values.attributes.dpp_value);
+        noJurnal++;
+        noJurnal = String(noJurnal).padStart(3, "0");
       }
       else if(item.attributes.jenis_akun === true && item.attributes.kode === "116.20.07"){
         values.debit = values.attributes.ppn_value;
         putAkun(item, values.attributes.ppn_value);
+        noJurnal++;
+        noJurnal = String(noJurnal).padStart(3, "0");
       }
       else if(item.attributes.jenis_akun === false && item.attributes.kode === "211.01.01"){
         if(values.attributes.price_after_disc === 0){
           values.kredit = values.attributes.total_purchasing;
           putAkun(item, values.attributes.total_purchasing);
+          noJurnal++;
+          noJurnal = String(noJurnal).padStart(3, "0");
         } else {
           values.kredit = values.attributes.price_after_disc;
           putAkun(item, values.attributes.price_after_disc);
+          noJurnal++;
+          noJurnal = String(noJurnal).padStart(3, "0");
         }
       }
       values.chart_of_account = item.id;
@@ -97,14 +105,20 @@ const UpdateJurnal = async (
       if(item.attributes.jenis_akun === true && item.attributes.kode === "115.10.00") {
         values.kredit = dpp;
         putAkun(item, dpp, page);
+        noJurnal++;
+        noJurnal = String(noJurnal).padStart(3, "0");
       }
       else if(item.attributes.jenis_akun === true && item.attributes.kode === "116.20.07"){
         values.kredit = ppn;
         putAkun(item, ppn, page);
+        noJurnal++;
+        noJurnal = String(noJurnal).padStart(3, "0");
       }
       else if(item.attributes.jenis_akun === false && item.attributes.kode === "211.01.02"){
         values.debit = totalPrice;
         putAkun(item, totalPrice, page);
+        noJurnal++;
+        noJurnal = String(noJurnal).padStart(3, "0");
       }
       values.chart_of_account = item.id;
 
@@ -126,10 +140,13 @@ const UpdateJurnal = async (
       if(item.attributes.jenis_akun === false && item.attributes.kode === "211.01.01"){
         values.debit = totalPrice;
         putAkun(item, totalPrice, "retur");
-
+        noJurnal++;
+        noJurnal = String(noJurnal).padStart(3, "0");
       } else if(item.attributes.jenis_akun === false && item.attributes.kode === "211.01.02"){
         values.kredit = totalPrice;
         putAkun(item, totalPrice);
+        noJurnal++;
+        noJurnal = String(noJurnal).padStart(3, "0");
       }
       values.chart_of_account = item.id;
 
