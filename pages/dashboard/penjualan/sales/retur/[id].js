@@ -152,7 +152,7 @@ function ReturSales({ props }) {
   //const [faktur, setFaktur] = useState(sales.data.attributes.faktur);
   const [customer, setCustomer] = useState(sales.data.attributes.customer?.data?.attributes.name);
   const [saleDate, setSaleDate] = useState(sales.data.attributes.sale_date);
-  const [locationStore, setLocationStore] = useState(sales.data.attributes.location.data.attributes.name);
+  //const [locationStore, setLocationStore] = useState(sales.data.attributes.location.data.attributes.name);
   const [addFee1Desc, setaddFee1Desc] = useState(sales.data.attributes.additional_fee_1_desc);
   const [addFee2Desc, setaddFee2Desc] = useState(sales.data.attributes.additional_fee_2_desc);
   const [addFee3Desc, setaddFee3Desc] = useState(sales.data.attributes.additional_fee_3_desc);
@@ -548,9 +548,9 @@ function ReturSales({ props }) {
                 <div className="w-full md:w-1/3 px-3 md:mb-0">
                   <p className="text-sm text-start ml-9">Tanggal : {saleDate}</p>
                 </div>
-                <div className="w-full md:w-1/3 px-3 md:mb-0">
+                {/* <div className="w-full md:w-1/3 px-3 md:mb-0">
                   <p className="text-sm text-start">Lokasi : {locationStore}</p>
-                </div>
+                </div> */}
               </div>
 
               <div className="w-full flex justify-start -mx-3 gap-3 mb-3 mt-2">

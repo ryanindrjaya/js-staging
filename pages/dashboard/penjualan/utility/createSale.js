@@ -172,6 +172,26 @@ const putRelationSaleDetail = async (id, value, form, router, url, page, locatio
         });
 
         break;
+      case "retur panel sale":
+        console.log("retur panel sale");
+        const inventoryInReturPanel = await createInventoryFromReturPenjualan(res.data, customer, "retur panel sale");
+
+        const putStatusPanel = {
+          data: {
+            status: "Diretur",
+          },
+        };
+
+        const putStatusPanelReq = await fetch(endpoint, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+          body: JSON.stringify(putStatusPanel),
+        });
+
+        break;
     }
   }
 
@@ -199,9 +219,11 @@ const putRelationSaleDetail = async (id, value, form, router, url, page, locatio
 
       } else router.replace(`/dashboard/penjualan/panel`);
     }
+    if (page == "retur store sale") router.replace(`/dashboard/penjualan/panel/retur/print/${id}`);
       // simpanData === "Publish"
       //   ? router.replace(`/dashboard/penjualan/panel/print/${id}`)
       //   : router.replace(`/dashboard/penjualan/panel`);
+      
     openNotificationWithIcon("success");
   } else {
     openNotificationWithIcon("error");
