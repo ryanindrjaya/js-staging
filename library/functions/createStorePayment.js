@@ -20,7 +20,7 @@ export const CreateStorePayment = async (
     const data = {
       data: {
         nominal: nominal,
-        charge: charge - oth,
+        charge: charge,
         payment: payment,
         payment_method: paymentMethod,
         type: paymentType,

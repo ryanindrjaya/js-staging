@@ -22,7 +22,14 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
         if (option && nominal) {
           const {
             data: { id },
-          } = await CreateStorePaymenWithoutUpdate(total, totalCharge, nominal, option, "Pembayaran", oth);
+          } = await CreateStorePaymenWithoutUpdate(
+            total,
+            totalCharge ?? totalChargeAuto ?? 0,
+            nominal,
+            option,
+            "Pembayaran",
+            oth
+          );
           console.log("response api", id);
           listPaymentId.push(id);
         }
@@ -63,7 +70,8 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
   ]);
 
   const [oth, setOth] = useState(0);
-  const [totalCharge, setTotalCharge] = useState(0); // total charge [totalInputValue - oth
+  const [totalCharge, setTotalCharge] = useState(); // total charge [totalInputValue - oth
+  const [totalChargeAuto, setTotalChargeAuto] = useState();
   const [totalInputValue, setTotalInputValue] = useState(0); // total after input [data?.total - totalInputValue + oth
   const [totalAfterInput, setTotalAfterInput] = useState(0); // total after input [data?.total - totalInputValue + oth
 
@@ -99,20 +107,30 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
 
   useEffect(() => {
     console.log("total after input", totalAfterInput);
-    setTotalCharge(totalAfterInput <= 0 ? parseFloat(Math.abs(data?.total - totalInputValue + oth)).toFixed(2) : 0);
-  }, [totalAfterInput, oth]);
+    setTotalChargeAuto(totalAfterInput <= 0 ? parseFloat(Math.abs(data?.total - totalInputValue)).toFixed(2) : 0);
+    setTotalCharge();
+    setOth();
+  }, [totalAfterInput]);
 
   useEffect(() => {
     setTotalInputValue(values.reduce((acc, { nominal }) => acc + nominal, 0));
   }, [values]);
 
   useEffect(() => {
-    setTotalAfterInput(data?.total - totalInputValue + oth);
-  }, [totalInputValue, oth]);
+    setTotalAfterInput(data?.total - totalInputValue);
+  }, [totalInputValue]);
 
   useEffect(() => {
-    console.log("kembalian", totalCharge);
-  }, [totalCharge]);
+    if (totalCharge !== undefined || totalCharge !== null) {
+      setOth(parseFloat(totalCharge - totalChargeAuto ?? 0).toFixed(2));
+    }
+  }, [totalCharge, totalChargeAuto]);
+
+  console.log({
+    totalCharge,
+    totalChargeAuto,
+    oth,
+  });
 
   return (
     <Drawer title={`Pembayaran Lainnya`} placement="right" size="default" onClose={handleDrawerClose} open={openDrawer}>
@@ -179,7 +197,7 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
         <InputNumber
           onFocus={(e) => e.target.select()}
           className={`w-full ${oth < 0 ? "text-red-500" : ""}`}
-          value={oth}
+          value={isNaN(oth) ? 0 : oth}
           formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
           parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
           onChange={(v) => setOth(v)}
@@ -191,7 +209,7 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
         <InputNumber
           onFocus={(e) => e.target.select()}
           className="w-full"
-          value={totalCharge}
+          value={totalCharge ?? totalChargeAuto ?? 0}
           min={0}
           formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
           parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
@@ -205,7 +223,7 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
       <div className="grid items-center grid-cols-2 mt-4">
         <p className="m-0">Sisa Pembayaran</p>
 
-        <p className="m-0">{formatter.format(totalAfterInput < 0 ? 0 : totalAfterInput)}</p>
+        <p className="m-0">{formatter.format(totalAfterInput < 0 ? 0 : totalAfterInput || 0)}</p>
       </div>
 
       <Popconfirm
