@@ -18,6 +18,7 @@ import LoadingAnimations from "@iso/components/Animations/Loading";
 import Customer from "@iso/components/Form/AddSale/CustomerForm";
 import ConfirmDialog from "@iso/components/Alert/ConfirmDialog";
 import createInventory from "../../utility/createInventory";
+import updateJurnal from "../../utility/updateJurnal";
 import moment from "moment";
 import { InventoryOutFromNonPanel } from "../../../../../library/functions/createInventory";
 
@@ -490,8 +491,11 @@ function Edit({ props }) {
             await InventoryOutFromNonPanel(
               res.data.id,
               customer.attributes.name,
-              editData.attributes.location.data.attributes.name
+              //editData.attributes.location.data.attributes.name
             );
+
+            //update jurnal dan coa
+            updateJurnal(res.data, user, "penjualan", "non panel");
           }
           notification.success({
             message: "Berhasil mengubah data",
@@ -727,7 +731,7 @@ function Edit({ props }) {
         label: editData.attributes?.customer?.data.attributes.name,
         value: editData.attributes?.customer?.data.id,
       },
-      location: editData.attributes?.location?.data.id,
+      //location: editData.attributes?.location?.data.id,
 
       disc_type: editData.attributes?.disc_type,
       disc_value: editData.attributes?.disc_value,
@@ -747,7 +751,7 @@ function Edit({ props }) {
     });
 
     setCustomer(editData.attributes?.customer?.data);
-    getProductAtLocation(editData.attributes?.location?.data.id);
+    //getProductAtLocation(editData.attributes?.location?.data.id);
     setDiscType(editData.attributes?.disc_type);
     handleBiayaPengiriman(editData.attributes?.delivery_fee);
     //setTotalWithDisc(editData.attributes?.disc_value);

@@ -6,6 +6,7 @@ import {
   InventoryOutFromPanel,
   createInventoryFromReturPenjualan,
 } from "../../../../library/functions/createInventory";
+import updateJurnal from "./updateJurnal";
 
 const cookies = nookies.get(null, "token");
 var tempProductListId = [];
@@ -171,6 +172,26 @@ const putRelationSaleDetail = async (id, value, form, router, url, page, locatio
         });
 
         break;
+      case "retur panel sale":
+        console.log("retur panel sale");
+        const inventoryInReturPanel = await createInventoryFromReturPenjualan(res.data, customer, "retur panel sale");
+
+        const putStatusPanel = {
+          data: {
+            status: "Diretur",
+          },
+        };
+
+        const putStatusPanelReq = await fetch(endpoint, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+          body: JSON.stringify(putStatusPanel),
+        });
+
+        break;
     }
   }
 
@@ -179,14 +200,30 @@ const putRelationSaleDetail = async (id, value, form, router, url, page, locatio
     if (page == "store sale") router.replace(`/dashboard/penjualan/toko/print/${id}`);
     if (page == "retur store sale") router.replace(`/dashboard/penjualan/toko/retur/print/${id}`);
     if (page == "sales sale") router.replace(`/dashboard/penjualan/sales/print/${id}`);
-    if (page == "non panel sale")
-      simpanData === "Publish"
-        ? router.replace(`/dashboard/penjualan/non_panel/print/${id}`)
-        : router.replace(`/dashboard/penjualan/non_panel`);
-    if (page == "panel sale")
-      simpanData === "Publish"
-        ? router.replace(`/dashboard/penjualan/panel/print/${id}`)
-        : router.replace(`/dashboard/penjualan/panel`);
+    if (page == "non panel sale"){
+      if(simpanData === "Publish"){
+        //update jurnal dan coa
+        updateJurnal(res.data, user, "penjualan", "non panel");
+        router.replace(`/dashboard/penjualan/non_panel/print/${id}`);
+
+      } else router.replace(`/dashboard/penjualan/non_panel`);
+    }
+      // simpanData === "Publish"
+      //   ? router.replace(`/dashboard/penjualan/non_panel/print/${id}`)
+      //   : router.replace(`/dashboard/penjualan/non_panel`);
+    if (page == "panel sale"){
+      if(simpanData === "Publish"){
+        //update jurnal dan coa
+        updateJurnal(res.data, user, "penjualan", "panel");
+        router.replace(`/dashboard/penjualan/panel/print/${id}`);
+
+      } else router.replace(`/dashboard/penjualan/panel`);
+    }
+    if (page == "retur store sale") router.replace(`/dashboard/penjualan/panel/retur/print/${id}`);
+      // simpanData === "Publish"
+      //   ? router.replace(`/dashboard/penjualan/panel/print/${id}`)
+      //   : router.replace(`/dashboard/penjualan/panel`);
+      
     openNotificationWithIcon("success");
   } else {
     openNotificationWithIcon("error");

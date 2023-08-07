@@ -27,6 +27,8 @@ export default function ReactDataTable({
   returPage,
   page,
   updateStock,
+  user,
+  updateJurnal
 }) {
   const [loadingPiutang, setLoadingPiutang] = useState(false);
   const router = useRouter();
@@ -85,6 +87,8 @@ export default function ReactDataTable({
     console.log("change status", res);
 
     if (res?.data?.id) {
+      if(res.data.attributes.status_data === "Publish" && page === "nonpanel") updateJurnal(res.data, user, "penjualan", "non panel");
+      else if(res.data.attributes.status_data === "Publish" && page === "panel") updateJurnal(res.data, user, "penjualan", "panel");
       return true;
     } else {
       return false;

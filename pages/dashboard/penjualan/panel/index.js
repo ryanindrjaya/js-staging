@@ -9,6 +9,7 @@ import TitlePage from "../../../../components/TitlePage/TitlePage";
 import SellingTable from "../../../../components/ReactDataTable/Selling/SellingTable";
 import Customer from "@iso/components/Form/AddCost/CustomerForm";
 import createInventory from "../utility/createInventory";
+import updateJurnal from "../utility/updateJurnal";
 import LoadingAnimations from "@iso/components/Animations/Loading";
 import { PrinterOutlined } from "@ant-design/icons";
 import DataTable from "react-data-table-component";
@@ -31,12 +32,16 @@ PanelSale.getInitialProps = async (context) => {
   const reqPanelSales = await fetchPanelSales(cookies);
   const panel = await reqPanelSales.json();
 
+  const reqUserMe = await fetchUser(cookies);
+  const userMe = await reqUserMe.json();
+
   return {
     props: {
       user,
       dataUserSales,
       locations,
       panel,
+      userMe,
     },
   };
 };
@@ -98,11 +103,26 @@ const fetchPanelSales = async (cookies) => {
   return req;
 };
 
+const fetchUser = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=*";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
 function PanelSale({ props }) {
   const user = props.user;
   const locations = props.locations.data;
   const data = props.panel;
   const dataUserSales = props.dataUserSales;
+  const userMe = props.userMe;
   const router = useRouter();
   const [sell, setSell] = useState(data);
   const [searchParameters, setSearchParameters] = useState({});
@@ -790,6 +810,8 @@ function PanelSale({ props }) {
                   returPage="panel"
                   page="panel"
                   updateStock={updateStock}
+                  user={userMe}
+                  updateJurnal={updateJurnal}
                 />
               </div>
             )}
