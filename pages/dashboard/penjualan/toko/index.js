@@ -4,7 +4,7 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import router, { useRouter } from "next/router";
-import { Input, notification, Select, DatePicker, Modal, Descriptions, message, Button } from "antd";
+import { Input, notification, Select, DatePicker, Modal, Descriptions, message, Button, Tag } from "antd";
 import { BarcodeOutlined, PrinterOutlined } from "@ant-design/icons";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
 import SellingTable from "../../../../components/ReactDataTable/Selling/SellingTable";
@@ -242,7 +242,7 @@ function Toko({ props }) {
     async function fetchOne(id) {
       message.loading({ content: "Mengambil data", duration: 8000, key: "fetch" });
       const cookies = nookies.get();
-      const endpoint = process.env.NEXT_PUBLIC_URL + `/store-sales/${id}?populate=deep,4`;
+      const endpoint = process.env.NEXT_PUBLIC_URL + `/store-sales/${id}?populate=deep,3`;
       const options = {
         method: "GET",
         headers: {
@@ -335,11 +335,19 @@ function Toko({ props }) {
     },
     {
       name: "Stok Keluar",
+      center: true,
       selector: ({ stok_keluar = [] }) =>
         stok_keluar?.length > 0 ? stok_keluar?.map(({ qty, unit }) => `${qty} ${unit}`)?.join(", ") : "",
     },
     {
+      name: "Retur",
+      center: true,
+      selector: ({ stok_masuk = [] }) =>
+        stok_masuk?.length > 0 ? stok_masuk?.map(({ qty, unit }) => `${qty} ${unit}`)?.join(", ") : "",
+    },
+    {
       name: "Lokasi",
+      wrap: true,
       selector: ({ location }) => {
         const selectedLocation = locations.find((item) => item.id === location);
         return selectedLocation?.attributes?.name || "-";
@@ -347,7 +355,7 @@ function Toko({ props }) {
     },
     {
       name: "Detail",
-      align: "center",
+      center: true,
       selector: ({ product, location }) => (
         <Link href={`/dashboard/stok?product=${product}&location=${location}`}>Lihat Kartu Stok</Link>
       ),
@@ -374,6 +382,24 @@ function Toko({ props }) {
     );
   };
 
+  const getTagColor = (type) => {
+    switch (type) {
+      case "Dibayar":
+        return "green";
+      case "Diterima":
+        return "green";
+      case "Diterima":
+        return "GREEN";
+      case "Belum Dibayar":
+        return "red";
+      case "Diretur":
+        return "orange";
+      case "Diproses":
+        return "default";
+      default:
+        return "default";
+    }
+  };
   return (
     <>
       <Head>
@@ -429,6 +455,19 @@ function Toko({ props }) {
                   >
                     <Descriptions.Item label="Tanggal Penjualan" span={4}>
                       {selectedData?.attributes?.sale_date}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Status" span={2}>
+                      <Tag
+                        color={getTagColor(
+                          selectedData?.attributes?.retur_store_sale?.data
+                            ? "Diretur"
+                            : selectedData?.attributes?.status || "Diproses"
+                        )}
+                      >
+                        {selectedData?.attributes?.retur_store_sale?.data
+                          ? "Diretur"
+                          : selectedData?.attributes?.status || "Diproses"}
+                      </Tag>
                     </Descriptions.Item>
                     <Descriptions.Item label="No Penjualan Toko" span={4}>
                       {selectedData?.attributes?.no_store_sale}

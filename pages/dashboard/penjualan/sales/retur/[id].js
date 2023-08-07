@@ -18,6 +18,7 @@ import moment from "moment";
 import LoadingAnimations from "@iso/components/Animations/Loading";
 import SalesTable from "../../../../../components/ReactDataTable/Selling/SalesTable";
 import ConfirmDialog from "../../../../../components/Alert/ConfirmDialog";
+import { updateLocations } from "../../../../../library/functions/createInventory";
 
 ReturSales.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -152,7 +153,9 @@ function ReturSales({ props }) {
   //const [faktur, setFaktur] = useState(sales.data.attributes.faktur);
   const [customer, setCustomer] = useState(sales.data.attributes.customer?.data?.attributes.name);
   const [saleDate, setSaleDate] = useState(sales.data.attributes.sale_date);
-  const [locationStore, setLocationStore] = useState(sales.data.attributes.location.data.attributes.name);
+  const [locationStore, setLocationStore] = useState(
+    sales.data.attributes.locations?.data?.map((item) => item?.attributes?.name).join(", ") ?? ""
+  );
   const [addFee1Desc, setaddFee1Desc] = useState(sales.data.attributes.additional_fee_1_desc);
   const [addFee2Desc, setaddFee2Desc] = useState(sales.data.attributes.additional_fee_2_desc);
   const [addFee3Desc, setaddFee3Desc] = useState(sales.data.attributes.additional_fee_3_desc);
@@ -164,6 +167,8 @@ function ReturSales({ props }) {
   const [btnAddFee1, setBtnAddFee1] = useState("Uninclude");
   const [btnAddFee2, setBtnAddFee2] = useState("Uninclude");
   const [btnAddFee3, setBtnAddFee3] = useState("Uninclude");
+
+  const [stokString, setStokString] = useState({});
 
   // NO Sales
   var noSales = String(returSales?.meta?.pagination.total + 1).padStart(3, "0");
@@ -237,22 +242,72 @@ function ReturSales({ props }) {
 
     await fetch(endpoint, options);
 
+    const newData = await fetch(`${process.env.NEXT_PUBLIC_URL}/sales-sales/${sales.data.id}?populate=deep`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    })
+      .then((res) => res.json())
+      .catch((err) => console.log(err));
+
+    const initialLocations = newData.data.attributes.locations?.data?.map((item) => item.id);
+    const mutasiStok = newData.data.attributes?.detail_mutasi_stok ?? [];
+
     const formValues = form.getFieldsValue();
     const updatedProduct = products.productInfo;
 
     // update stock
-    const items = products.productList?.map((item, idx) => ({
-      product: item.id,
-      location: formValues.product_location[idx],
-      qty: updatedProduct[idx]?.qty || 1,
-      unit: updatedProduct[idx]?.unit || item.unit_1,
-      exp_date: formValues.expired_date[idx],
-    }));
+    const items = products.productList?.map((item, idx) => {
+      const uid = `${item.id}${formValues.product_location[idx]}-retur`;
+      if (!mutasiStok.some((loc) => loc.uid === uid)) {
+        mutasiStok.push({
+          uid,
+          location: formValues.product_location[idx],
+          stok_masuk: [
+            {
+              qty: updatedProduct[idx]?.qty || 1,
+              unit: updatedProduct[idx]?.unit || item.unit_1,
+            },
+          ],
+          product: item.id,
+          product_name: item.attributes.name,
+        });
+      } else {
+        const index = mutasiStok.findIndex((loc) => loc.uid === uid);
+        if (index >= 0) {
+          mutasiStok[index].stok_masuk.push({
+            qty: updatedProduct[idx]?.qty || 1,
+            unit: updatedProduct[idx]?.unit || item.unit_1,
+          });
+        }
+      }
+
+      return {
+        product: item.id,
+        location: formValues.product_location[idx],
+        qty: updatedProduct[idx]?.qty || 1,
+        unit: updatedProduct[idx]?.unit || item.unit_1,
+        exp_date: formValues.expired_date?.[idx],
+      };
+    });
+
+    await updateLocations({
+      id: newData.data.id,
+      body: {
+        data: {
+          locations: [...initialLocations, ...mutasiStok.map((loc) => loc.location)],
+          detail_mutasi_stok: mutasiStok,
+        },
+      },
+      url: "sales-sales",
+    });
 
     const dataStock = {
       data: items,
       type: "Retur Penjualan",
-      keterangan: `Retur Penjualan ${sales.data.attributes.no_sales_sale}`,
+      keterangan: `Retur Penjualan dari ${sales.data.attributes.customer?.data?.attributes?.name}`,
       no_referensi: formValues.no_retur_sales_sale,
     };
 
@@ -276,7 +331,7 @@ function ReturSales({ props }) {
       form,
       router,
       "/retur-sales-sales/",
-      "sales sale",
+      "retur sales sale",
       locations
     );
     setLoading(false);
@@ -515,7 +570,49 @@ function ReturSales({ props }) {
     }
   };
 
-  console.log("redux ==>", products);
+  const onSelectLocation = async (locationId, dataProduct, idx) => {
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/inventories?populate=location&filters[location][id]=${locationId}&filters[product][id]=${dataProduct.id}`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    if (res.data.length > 0) {
+      const product = dataProduct.attributes;
+      const stok = res.data[0].attributes;
+      let stokGudang = [];
+      [1, 2, 3, 4, 5].forEach((item) => {
+        if (product?.[`unit_${item}`]) {
+          stokGudang.push(stok[`stock_unit_${item}`] + " " + product[`unit_${item}`]);
+        }
+      });
+
+      setStokString({
+        ...stokString,
+        [idx]: stokGudang.join(", "),
+      });
+    } else {
+      const product = dataProduct.attributes;
+      let stokGudang = [];
+
+      [1, 2, 3, 4, 5].forEach((item) => {
+        if (product?.[`unit_${item}`]) {
+          stokGudang.push(0 + " " + product[`unit_${item}`]);
+        }
+      });
+
+      setStokString({
+        ...stokString,
+        [idx]: stokGudang.join(", "),
+      });
+    }
+  };
 
   return (
     <>
@@ -627,8 +724,10 @@ function ReturSales({ props }) {
                     productSubTotal={productSubTotal}
                     setProductSubTotal={setProductSubTotal}
                     dataLocationStock={dataLocationStock}
+                    onSelectLocation={onSelectLocation}
                     locations={locations}
                     formObj={form}
+                    stokString={stokString}
                   />
                 </div>
               )}

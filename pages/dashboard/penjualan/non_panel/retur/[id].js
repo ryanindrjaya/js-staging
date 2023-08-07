@@ -194,7 +194,9 @@ function ReturNonPanel({ props }) {
   const [faktur, setFaktur] = useState(nonPanel.data.attributes.faktur);
   const [customer, setCustomer] = useState(nonPanel.data.attributes.customer?.data?.attributes.name);
   const [saleDate, setSaleDate] = useState(nonPanel.data.attributes.sale_date);
-  const [locationStore, setLocationStore] = useState(nonPanel.data.attributes.location.data.attributes.name);
+  const [locationStore, setLocationStore] = useState(
+    nonPanel.data.attributes.locations?.data?.map((item) => item.attributes?.name)?.join(", ") ?? ""
+  );
   const [addFee1Desc, setaddFee1Desc] = useState(nonPanel.data.attributes.additional_fee_1_desc);
   const [addFee2Desc, setaddFee2Desc] = useState(nonPanel.data.attributes.additional_fee_2_desc);
   const [addFee3Desc, setaddFee3Desc] = useState(nonPanel.data.attributes.additional_fee_3_desc);

@@ -193,7 +193,9 @@ function ReturPanel({ props }) {
   const [faktur, setFaktur] = useState(panel.data.attributes.faktur);
   const [customer, setCustomer] = useState(panel.data.attributes.customer?.data?.attributes.name);
   const [saleDate, setSaleDate] = useState(panel.data.attributes.sale_date);
-  const [locationStore, setLocationStore] = useState(panel.data.attributes.location.data.attributes.name);
+  const [locationStore, setLocationStore] = useState(
+    panel.data.attributes.locations?.data?.map((item) => item.attributes?.name)?.join(", ") ?? ""
+  );
   const [addFee1Desc, setaddFee1Desc] = useState(panel.data.attributes.additional_fee_1_desc);
   const [addFee2Desc, setaddFee2Desc] = useState(panel.data.attributes.additional_fee_2_desc);
   const [addFee3Desc, setaddFee3Desc] = useState(panel.data.attributes.additional_fee_3_desc);

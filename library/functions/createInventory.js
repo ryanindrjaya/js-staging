@@ -66,7 +66,7 @@ const getStoreRetur = async (id) => {
   return data;
 };
 
-const updateLocations = async ({ id, body, url }) => {
+export const updateLocations = async ({ id, body, url }) => {
   const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/${url}/${id}`, {
     method: "PUT",
     headers: {
@@ -559,6 +559,9 @@ export async function createInventoryFromReturPenjualan(row, customer) {
   console.log("returStoreSale", returStoreSale);
   const retur_store_sale_details = returStoreSale.data.attributes.retur_store_sale_details.data;
   const no_retur_store_sale = returStoreSale.data.attributes.no_retur_store_sale;
+  const locations = returStoreSale.data.attributes.store_sale?.data?.attributes?.detail_mutasi_stok ?? [];
+  const initialLocations =
+    returStoreSale.data.attributes.store_sale?.data?.attributes?.locations?.data?.map((item) => item.id) ?? [];
 
   retur_store_sale_details.forEach((element) => {
     console.log("element store detail (penjualan)", element);
@@ -570,6 +573,30 @@ export async function createInventoryFromReturPenjualan(row, customer) {
     const batch = element.attributes?.batch ?? "";
 
     if (unitOrder && totalOrder && product && location) {
+      const uid = `${product.id}${location.id}-retur`;
+      if (!locations.some((loc) => loc.uid === uid)) {
+        locations.push({
+          uid,
+          location: location.id,
+          stok_masuk: [
+            {
+              qty: totalOrder,
+              unit: unitOrder,
+            },
+          ],
+          product: product.id,
+          product_name: product.attributes.name,
+        });
+      } else {
+        const index = locations.findIndex((loc) => loc.uid === uid);
+        if (index >= 0) {
+          locations[index].stok_masuk.push({
+            qty: totalOrder,
+            unit: unitOrder,
+          });
+        }
+      }
+
       const item = {
         location: location.id,
         product: product.id,
@@ -584,6 +611,17 @@ export async function createInventoryFromReturPenjualan(row, customer) {
   });
 
   if (data.length > 0) {
+    updateLocations({
+      id: returStoreSale.data.attributes?.store_sale?.data?.id,
+      body: {
+        data: {
+          locations: [...initialLocations, ...locations.map((loc) => loc.location)],
+          detail_mutasi_stok: locations,
+        },
+      },
+      url: "store-sales",
+    });
+
     const body = {
       data,
       no_referensi: no_retur_store_sale,

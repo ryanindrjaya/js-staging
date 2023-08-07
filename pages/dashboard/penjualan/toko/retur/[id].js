@@ -127,7 +127,6 @@ function ReturToko({ props }) {
   const [ppnActive, setPPNActive] = useState(false);
   const [simpanData, setSimpanData] = useState("Bayar");
   const [dataLocationStock, setDataLocationStock] = useState();
-  const [dataGudang, setDataGudang] = useState();
   const [stokString, setStokString] = useState({});
 
   const router = useRouter();
@@ -151,11 +150,12 @@ function ReturToko({ props }) {
   const [info, setInfo] = useState();
 
   //set data retur
-  const locationStoreId = store.data.attributes.location.data.id;
   const [faktur, setFaktur] = useState(store.data.attributes.faktur);
   const [customer, setCustomer] = useState(store.data.attributes.customer_name);
   const [saleDate, setSaleDate] = useState(store.data.attributes.sale_date);
-  const [locationStore, setLocationStore] = useState(store.data.attributes.location.data.attributes.name);
+  const [locationStore, setLocationStore] = useState(
+    store.data.attributes.locations?.data?.map((item) => item?.attributes?.name).join(", ") ?? ""
+  );
   const [addFee1Desc, setaddFee1Desc] = useState(store.data.attributes.additional_fee_1_desc);
   const [addFee2Desc, setaddFee2Desc] = useState(store.data.attributes.additional_fee_2_desc);
   const [addFee3Desc, setaddFee3Desc] = useState(store.data.attributes.additional_fee_3_desc);
@@ -199,10 +199,6 @@ function ReturToko({ props }) {
       const product = dataProduct.attributes;
       const stok = res.data[0].attributes;
       let stokGudang = [];
-      setDataGudang({
-        ...dataGudang,
-        [idx]: res.data[0].attributes,
-      });
 
       [1, 2, 3, 4, 5].forEach((item) => {
         if (product?.[`unit_${item}`]) {
@@ -217,16 +213,6 @@ function ReturToko({ props }) {
     } else {
       const product = dataProduct.attributes;
       let stokGudang = [];
-      setDataGudang({
-        ...dataGudang,
-        [idx]: {
-          location: {
-            data: {
-              id: locationId,
-            },
-          },
-        },
-      });
 
       [1, 2, 3, 4, 5].forEach((item) => {
         if (product?.[`unit_${item}`]) {
@@ -239,69 +225,6 @@ function ReturToko({ props }) {
         [idx]: stokGudang.join(", "),
       });
     }
-  };
-
-  const checkReturQty = async (values) => {
-    let popUpDialog = false;
-    let cannotBeReturnedProducts = [];
-
-    for (let index in dataGudang) {
-      const qty = values?.jumlah_qty?.[index] ?? 1;
-      const productId = products.productList[index]?.id;
-      const productName = products.productList[index]?.attributes?.name;
-      const unitIndex = values?.jumlah_option?.[index] ?? 1;
-      const productUnit = products.productList[index]?.attributes?.["unit_" + unitIndex];
-
-      if (typeof unitIndex === "string") {
-        productUnit = unitIndex;
-      }
-
-      const gudangLocatioId = dataGudang?.[index].location?.data?.id ?? 0;
-
-      const returData = {
-        location: gudangLocatioId,
-        product: productId,
-        unit: productUnit,
-        qty: qty,
-      };
-
-      // fetch to api check
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/product/check";
-      const options = {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + cookies.token,
-        },
-        body: JSON.stringify(returData),
-      };
-
-      const req = await fetch(endpoint, options);
-      const res = await req.json();
-      console.log(res);
-      if (!res?.available) {
-        popUpDialog = true;
-        cannotBeReturnedProducts.push(productName);
-      }
-    }
-
-    if (popUpDialog) {
-      Modal.error({
-        title: "Retur Gagal",
-        content: (
-          <div>
-            <p>Item ini tidak bisa dilakukan retur. Silahkan cek kembali stok gudang yang tersedia:</p>
-            <ul>
-              {cannotBeReturnedProducts.map((product) => (
-                <li>{product === undefined ? "" : `- ${product}`} </li>
-              ))}
-            </ul>
-          </div>
-        ),
-      });
-    }
-
-    return popUpDialog;
   };
 
   const onFinish = async (values) => {
@@ -382,7 +305,7 @@ function ReturToko({ props }) {
       "retur store sale",
       locations,
       null,
-      simpanData
+      "Publish" // langsung publish
     );
   };
 
@@ -691,8 +614,8 @@ function ReturToko({ props }) {
           <TitlePage titleText={"Retur Penjualan Toko dan Resep"} />
           <LayoutContent>
             <Form
-              form={form}
               name="add"
+              form={form}
               initialValues={{
                 remember: true,
               }}

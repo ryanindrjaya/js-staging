@@ -487,11 +487,7 @@ function Edit({ props }) {
 
         if (res?.data?.id) {
           if (simpanData === "Publish") {
-            await InventoryOutFromNonPanel(
-              res.data.id,
-              customer.attributes.name,
-              editData.attributes.location.data.attributes.name
-            );
+            await InventoryOutFromNonPanel(res.data.id, customer.attributes.name);
           }
           notification.success({
             message: "Berhasil mengubah data",
@@ -727,7 +723,6 @@ function Edit({ props }) {
         label: editData.attributes?.customer?.data.attributes.name,
         value: editData.attributes?.customer?.data.id,
       },
-      location: editData.attributes?.location?.data.id,
 
       disc_type: editData.attributes?.disc_type,
       disc_value: editData.attributes?.disc_value,
@@ -747,7 +742,6 @@ function Edit({ props }) {
     });
 
     setCustomer(editData.attributes?.customer?.data);
-    getProductAtLocation(editData.attributes?.location?.data.id);
     setDiscType(editData.attributes?.disc_type);
     handleBiayaPengiriman(editData.attributes?.delivery_fee);
     //setTotalWithDisc(editData.attributes?.disc_value);

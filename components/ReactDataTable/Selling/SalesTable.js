@@ -17,6 +17,7 @@ export default function SalesTable({
   retur = false,
   locations = [],
   getProduct,
+  onSelectLocation,
 }) {
   const dispatch = useDispatch();
   var defaultDp1 = 0;
@@ -45,7 +46,9 @@ export default function SalesTable({
       index,
     });
 
-    getProduct(data, index);
+    if (!retur) {
+      getProduct(data, index);
+    }
   };
 
   const onChangeQty = (value, data, index) => {
@@ -147,11 +150,15 @@ export default function SalesTable({
     {
       name: "Stok Gudang",
       selector: (row, idx) => {
-        return (
-          <div className={`disabled:bg-white italic ${dataLocationStock?.[idx] ? "text-green-500" : "text-red-500"}`}>
-            {`${dataLocationStock?.[idx] || "Tidak Tersedia"}` ?? "Pilih Gudang"}
-          </div>
-        );
+        if (retur) {
+          return <div className="disabled:bg-white italic text-gray-500">{stokString?.[idx] ?? "Pilih Gudang"}</div>;
+        } else {
+          return (
+            <div className={`disabled:bg-white italic ${dataLocationStock?.[idx] ? "text-green-500" : "text-red-500"}`}>
+              {`${dataLocationStock?.[idx] || "Tidak Tersedia"}` ?? "Pilih Gudang"}
+            </div>
+          );
+        }
       },
     },
     {
@@ -166,6 +173,47 @@ export default function SalesTable({
         }
 
         return formatter.format(priceUnit);
+      },
+    },
+    {
+      name: "Lokasi Retur",
+      width: "250px",
+      omit: !retur,
+      sortable: true,
+      selector: (row, idx) => {
+        return (
+          <>
+            <Form.Item
+              label={"product_location"}
+              name={["product_location", `${idx}`]}
+              rules={[
+                {
+                  required: true,
+                  message: "Lokasi Produk tidak boleh kosong!",
+                },
+              ]}
+              noStyle
+            >
+              <Select
+                onSelect={(e) => onSelectLocation(e, row, idx)}
+                placeholder="Pilih Lokasi Produk"
+                size="normal"
+                style={{
+                  width: "200px",
+                  marginRight: "10px",
+                }}
+              >
+                {locations.map((element) => {
+                  return (
+                    <Select.Option value={element.id} key={element.attributes.name}>
+                      {element.attributes.name}
+                    </Select.Option>
+                  );
+                })}
+              </Select>
+            </Form.Item>
+          </>
+        );
       },
     },
     {
@@ -197,7 +245,7 @@ export default function SalesTable({
                   defaultValue={defaultQty}
                   onChange={(e) => onChangeQty(e, row, idx)}
                   min={1}
-                  max={maxStock}
+                  max={!retur ? maxStock : null}
                   rules={[
                     {
                       required: true,
@@ -402,46 +450,7 @@ export default function SalesTable({
     //     );
     //   },
     // },
-    {
-      name: "Lokasi Retur",
-      width: "250px",
-      omit: !retur,
-      sortable: true,
-      selector: (row, idx) => {
-        return (
-          <>
-            <Form.Item
-              label={"product_location"}
-              name={["product_location", `${idx}`]}
-              rules={[
-                {
-                  required: true,
-                  message: "Lokasi Produk tidak boleh kosong!",
-                },
-              ]}
-              noStyle
-            >
-              <Select
-                placeholder="Pilih Lokasi Produk"
-                size="normal"
-                style={{
-                  width: "200px",
-                  marginRight: "10px",
-                }}
-              >
-                {locations.map((element) => {
-                  return (
-                    <Select.Option value={element.id} key={element.attributes.name}>
-                      {element.attributes.name}
-                    </Select.Option>
-                  );
-                })}
-              </Select>
-            </Form.Item>
-          </>
-        );
-      },
-    },
+
     {
       name: "Subtotal Setelah Diskon",
       width: "200px",

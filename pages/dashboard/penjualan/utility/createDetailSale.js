@@ -39,7 +39,7 @@ const createDetailSale = (values, products, productTotalPrice, productSubTotal, 
     var d2 = products.productInfo[index]?.d2 ?? 0;
     margin = products.productInfo[index]?.margin ?? 0;
     var productLocationId = productLoc?.[index];
-    const dataGudang = lokasiGudang[index];
+    const dataGudang = lokasiGudang?.[index];
 
     console.log("data gudang", dataGudang);
 

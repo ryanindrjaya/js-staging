@@ -784,7 +784,6 @@ function Edit({ props }) {
         label: editData.attributes?.customer?.data.attributes.name,
         value: editData.attributes?.customer?.data.id,
       },
-      location: editData.attributes?.location?.data.id,
 
       disc_type: editData.attributes?.disc_type,
       disc_value: editData.attributes?.disc_value,
@@ -804,7 +803,6 @@ function Edit({ props }) {
     });
 
     setCustomer(editData.attributes?.customer?.data);
-    getProductAtLocation(editData.attributes?.location?.data.id);
     setDiscType(editData.attributes?.disc_type);
     handleBiayaPengiriman(editData.attributes?.delivery_fee);
     //setTotalWithDisc(editData.attributes?.disc_value);

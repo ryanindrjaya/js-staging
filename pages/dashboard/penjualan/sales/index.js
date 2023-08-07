@@ -503,11 +503,19 @@ function SalesSale({ props }) {
     },
     {
       name: "Stok Keluar",
+      center: true,
       selector: ({ stok_keluar = [] }) =>
         stok_keluar?.length > 0 ? stok_keluar?.map(({ qty, unit }) => `${qty} ${unit}`)?.join(", ") : "",
     },
     {
+      name: "Retur",
+      center: true,
+      selector: ({ stok_masuk = [] }) =>
+        stok_masuk?.length > 0 ? stok_masuk?.map(({ qty, unit }) => `${qty} ${unit}`)?.join(", ") : "",
+    },
+    {
       name: "Lokasi",
+      wrap: true,
       selector: ({ location }) => {
         const selectedLocation = locations.find((item) => item.id === location);
         return selectedLocation?.attributes?.name || "-";
