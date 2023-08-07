@@ -290,12 +290,12 @@ export default function SalesSellingTable({
         //   return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
         // }
 
-        if (row.attributes.status_pembayaran === "Belum Lunas"){
+        if (row.attributes.status_pembayaran === "Belum Lunas") {
           return <Tag color={tagRed}>Belum Lunas</Tag>;
         } else if (row.attributes.status_pembayaran === "Dibayar Sebagian") {
           return <Tag color={tagOrange}>Dibayar Sebagian</Tag>;
-        } else if (row.attributes.status_pembayaran === "Dibayar") {
-          return <Tag color={tagGreen}>Dibayar</Tag>;
+        } else if (row.attributes.status_pembayaran === "Lunas") {
+          return <Tag color={tagGreen}>Lunas</Tag>;
         }
       },
     },

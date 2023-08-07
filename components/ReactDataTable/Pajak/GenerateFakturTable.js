@@ -3,7 +3,7 @@ import React from "react";
 import { Spin, Tag } from "antd";
 import moment from "moment";
 
-export default function ReactDataTable({ data, refetch, loading }) {
+export default function GenerateFakturTable({ data, loading }) {
   const customStyles = {
     headerStyle: { textAlign: "center" },
     headCells: {
@@ -34,13 +34,13 @@ export default function ReactDataTable({ data, refetch, loading }) {
       selector: (row) => {
         switch (row.attributes.jenis) {
           case "Penjualan":
-            return <Tag color="yellow">Penjualan</Tag>;
+            return <Tag color="success">Penjualan</Tag>;
           case "Retur Penjualan":
-            return <Tag color="orange">Retur Penjualan</Tag>;
+            return <Tag color="success">Retur Penjualan</Tag>;
           case "Pembelian":
-            return <Tag color="green">Pembelian</Tag>;
+            return <Tag color="processing">Pembelian</Tag>;
           case "Retur Pembelian":
-            return <Tag color="cyan">Retur Pembelian</Tag>;
+            return <Tag color="processing">Retur Pembelian</Tag>;
           default:
             return row.attributes.jenis;
         }
@@ -51,19 +51,21 @@ export default function ReactDataTable({ data, refetch, loading }) {
       width: "w-1/3",
       sortable: true,
       selector: (row) => {
-        if (row.attributes.is_used) {
-          return <Tag color="error">Sudah Dipakai</Tag>;
+        if (row.attributes.no_referensi) {
+          return <Tag color="green">Approved</Tag>;
         } else {
-          return <Tag color="processing">Belum Dipakai</Tag>;
+          return <Tag color="process">Unapproved</Tag>;
         }
       },
     },
     {
-      name: "Waktu Pembuatan",
+      name: "Waktu Generate",
       width: "w-1/3",
       sortable: true,
       selector: (row) => {
-        return moment(row.attributes.createdAt).format("DD/MM/YYYY HH:mm:ss");
+        return row.attributes.createdAt === row.attributes.updatedAt
+          ? ""
+          : moment(row.attributes.updatedAt).format("DD/MM/YYYY HH:mm:ss");
       },
     },
   ];
@@ -73,6 +75,7 @@ export default function ReactDataTable({ data, refetch, loading }) {
       columns={columns}
       customStyles={customStyles}
       pagination
+      selectableRows
       progressComponent={<Spin />}
       progressPending={loading}
       paginationTotalRows={data?.meta?.pagination.total}

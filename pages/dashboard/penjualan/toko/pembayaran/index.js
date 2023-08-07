@@ -75,12 +75,14 @@ const fetchData = async (cookies) => {
   return req;
 };
 
-const fethcPaymentSales = async (cookies, start = startDate, end = endDate) => {
+const fethcPaymentSales = async (cookies, start = startDate, end = endDate, noFaktur) => {
   // get today data
 
   const endpoint =
     process.env.NEXT_PUBLIC_URL +
-    `/store-sales?sort[0]=createdAt:desc&populate=*&filters[createdAt][$gte]=${start}&filters[createdAt][$lte]=${end}&filters[status][$eq]=Belum Dibayar`;
+    `/store-sales?sort[0]=createdAt:desc&populate=*&filters[createdAt][$gte]=${start}&filters[createdAt][$lte]=${end}&filters[status][$eq]=Belum Dibayar${
+      noFaktur ? `&filters[no_store_sale][$containsi]=${noFaktur}` : ""
+    }`;
   const options = {
     method: "GET",
     headers: {
@@ -161,6 +163,7 @@ function PembayaranToko({ props }) {
     currency: "IDR",
     minimumFractionDigits: 2,
   });
+  const [noFaktur, setNoFaktur] = useState("");
 
   const reloadPage = () => {
     setRefetch(!refetch);
@@ -295,8 +298,9 @@ function PembayaranToko({ props }) {
       setLoadingTable(true);
       const start_date = router.query?.start_date ?? startDate;
       const end_date = router.query?.end_date ?? endDate;
+      const noFaktur = router.query?.no_faktur;
 
-      fethcPaymentSales(cookies, start_date, end_date)
+      fethcPaymentSales(cookies, start_date, end_date, noFaktur)
         .then((res) => res.json())
         .then((data) => {
           setDataSales(data?.data ?? []);
@@ -374,13 +378,28 @@ function PembayaranToko({ props }) {
                 <div className="flex items-center">
                   <div className="w-full md:w-1/5 mb-2 md:mb-0 mr-2">
                     <Input.Search
+                      value={noFaktur}
                       size="large"
                       className=""
                       placeholder="Cari Nomor Faktur / Nama"
                       style={{
                         width: "100%",
                       }}
+                      onChange={(e) => {
+                        if (e.target.value === "") {
+                          redirectQuery({}, ["no_faktur"]);
+                          setNoFaktur("");
+                        } else {
+                          setNoFaktur(e.target.value);
+                        }
+                      }}
+                      onSearch={(e) => {
+                        setTimeout(() => {
+                          redirectQuery({ no_faktur: e });
+                        }, 500);
+                      }}
                     />
+                    <p className="m-0 text-xs text-gray-400">*Tekan 'Enter' atau tekan ikon untuk mencari data</p>
                   </div>
                   <div className="w-full md:w-2/5 mb-2 md:mb-0"></div>
                   <div className="w-full md:w-1/5 mb-2 md:mb-0">

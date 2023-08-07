@@ -98,7 +98,7 @@ export default function SalesPaymentTable({ data }) {
       customStyles={customStyles}
       paginationRowsPerPageOptions={[50]}
       columns={columns}
-      data={data.data}
+      data={data?.data || []}
       pagination
       noDataComponent={"Belum ada data Penjualan"}
     />

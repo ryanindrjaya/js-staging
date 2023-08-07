@@ -1,22 +1,27 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Head from "next/head";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import FakturTable from "@iso/components/ReactDataTable/Pajak/FakturTable";
-import { Input, Modal, Select } from "antd";
+import { Button, DatePicker, Input, Select, notification } from "antd";
 import nookies from "nookies";
-import FakturModal from "../../../components/Modal/FakturModal";
 import QueryString from "qs";
-
+import { ArrowUpOutlined } from "@ant-design/icons";
+import ExportFakturTable from "../../../components/ReactDataTable/Pajak/ExportFakturTable";
+import { CSVLink } from "react-csv";
+import moment from "moment";
+import { createData, boilerPlateData1, boilerPlateData2, headers } from "../../../library/helpers/ExportCSV/utils";
 const cookies = nookies.get(null);
 
 export default function no_faktur_list() {
   const [data, setData] = useState();
   const [loading, setLoading] = useState(false);
-  const [refetch, setRefetch] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [csvData, setCsvData] = useState([]);
+  const [loadingDownload, setLoadingDownload] = useState(false);
+
+  const downloadCsv = useRef();
 
   const [query, setQuery] = useState({
     no_faktur: null,
@@ -27,7 +32,7 @@ export default function no_faktur_list() {
   const fetchData = async (params) => {
     setLoading(true);
 
-    const endpoint = `${process.env.NEXT_PUBLIC_URL}/no-faktur-lists${params ? `?${params}` : ""}`;
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/no-faktur-lists?${params ? `${params}` : ""}`;
     const options = {
       method: "GET",
       headers: {
@@ -41,6 +46,19 @@ export default function no_faktur_list() {
 
     if (res?.data) {
       setData(res);
+
+      const getData = createData(res?.data);
+
+      if (getData?.status) {
+        const exportData = [boilerPlateData1, boilerPlateData2, ...getData.data];
+        setCsvData(exportData);
+      } else {
+        notification["error"]({
+          message: "Gagal",
+          description: `Data gagal diexport. ${getData?.message || ""}`,
+        });
+      }
+
       setLoading(false);
     } else {
       setLoading(false);
@@ -48,17 +66,17 @@ export default function no_faktur_list() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, [refetch]);
-
-  useEffect(() => {
-    let params = {};
+    let params = {
+      filters: {
+        is_used: true,
+      },
+      populate: "*",
+    };
 
     Object.keys(query).forEach((key) => {
-      if (!query[key]) return;
-
-      if (key !== "is_used") {
+      if (query[key] && key !== "tanggal_faktur") {
         params = {
+          ...params,
           filters: {
             ...params.filters,
             [key]: {
@@ -67,12 +85,28 @@ export default function no_faktur_list() {
           },
         };
       } else {
-        params = {
-          filters: {
-            ...params.filters,
-            [key]: query[key],
-          },
-        };
+        if (query[key]) {
+          if (query[key][0] === query[key][1]) {
+            params = {
+              ...params,
+              filters: {
+                ...params.filters,
+                tanggal_faktur: query[key][0],
+              },
+            };
+          } else {
+            params = {
+              ...params,
+              filters: {
+                ...params.filters,
+                tanggal_faktur: {
+                  $gte: moment(query[key][0]).format("YYYY-MM-DD"),
+                  $lte: moment(query[key][1]).format("YYYY-MM-DD"),
+                },
+              },
+            };
+          }
+        }
       }
     });
 
@@ -85,35 +119,15 @@ export default function no_faktur_list() {
     }
   }, [query]);
 
-  const handleAdd = () => {
-    setOpen(true);
-  };
-
   return (
     <>
       <Head>
-        <title>Daftar Nomor Faktur</title>
+        <title>Export Faktur</title>
       </Head>
       <DashboardLayout>
         <LayoutWrapper style={{}}>
-          <TitlePage titleText={"Daftar Nomor Faktur"} />
+          <TitlePage titleText={"Export Faktur"} />
           <LayoutContent>
-            <Modal
-              centered
-              open={open}
-              onOk={() => setOpen(false)}
-              onCancel={() => setOpen(false)}
-              width={1000}
-              style={{
-                borderRadius: "25px",
-                backgroundColor: "#036B82",
-                margin: "20px",
-              }}
-              footer={null}
-            >
-              <FakturModal setOpen={setOpen} fetchData={fetchData} setData={setData} />
-            </Modal>
-
             <div className="w-full flex justify-between items-center gap-8 mb-5">
               <div className="grid grid-cols-3 gap-3">
                 <Input.Search
@@ -141,27 +155,58 @@ export default function no_faktur_list() {
                 <Select
                   className="max-w-xs w-full"
                   placeholder="Status"
-                  onChange={(e) => setQuery({ ...query, is_used: e })}
+                  onChange={(e) => setQuery({ ...query, is_used: e === "true" ? true : false })}
                   allowClear
                   onClear={() => setQuery({ ...query, is_used: null })}
                 >
                   <Select.Option value="true">Dipakai</Select.Option>
                   <Select.Option value="false">Belum Dipakai</Select.Option>
                 </Select>
+
+                <DatePicker.RangePicker
+                  className="max-w-xs w-full"
+                  placeholder={["Tanggal Awal", "Tanggal Akhir"]}
+                  onChange={(e) => {
+                    if (e[0] && e[1]) {
+                      setQuery({
+                        ...query,
+                        tanggal_faktur: [moment(e[0]).format("YYYY-MM-DD"), moment(e[1]).format("YYYY-MM-DD")],
+                      });
+                    } else {
+                      setQuery({
+                        ...query,
+                        tanggal_faktur: null,
+                      });
+                    }
+                  }}
+                />
               </div>
 
-              <button
-                onClick={handleAdd}
-                type="button"
-                className="bg-cyan-700 mx-2 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right"
+              <CSVLink
+                ref={downloadCsv}
+                enclosingCharacter=""
+                filename={`Faktur Pajak JS_${moment().format("DD/MM/YYYY")}.csv`}
+                data={csvData}
+                onClick={() => {
+                  setLoadingDownload(true);
+                  setTimeout(() => {
+                    setLoadingDownload(false);
+                  }, 1500);
+                }}
               >
-                <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
-                </div>
-              </button>
+                <Button
+                  disabled={loadingDownload}
+                  className="px-5 py-1 rounded-lg"
+                  type="primary"
+                  icon={<ArrowUpOutlined />}
+                  loading={loadingDownload}
+                >
+                  Export
+                </Button>
+              </CSVLink>
             </div>
 
-            <FakturTable data={data} loading={loading} refetch={setRefetch} />
+            <ExportFakturTable data={data} loading={loading} />
           </LayoutContent>
         </LayoutWrapper>
       </DashboardLayout>

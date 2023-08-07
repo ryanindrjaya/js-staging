@@ -451,7 +451,6 @@ function Toko({ props }) {
 
     form.setFieldsValue({
       sale_date: moment(momentString),
-      location: dataSalesSell.location.data.attributes.name,
       tempo_days: dataSalesSell.tempo_days,
       tempo_time: dataSalesSell.tempo_time,
       sale_note: dataSalesSell.sale_note,
@@ -598,10 +597,6 @@ function Toko({ props }) {
         no_sales_sale: initialValues.attributes?.no_sales_sale,
         no_sales_sell: initialValues.attributes?.sales_sell?.data?.attributes?.no_sales_sell,
         customer_id: initialValues.attributes?.customer?.data?.id,
-        location: {
-          label: initialValues.attributes?.location?.data?.attributes?.name,
-          value: initialValues.attributes?.location?.data?.id,
-        },
         customer: {
           label: initialValues.attributes?.customer?.data?.attributes?.name,
           value: initialValues.attributes?.customer?.data?.id,

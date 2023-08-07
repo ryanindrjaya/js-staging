@@ -32,8 +32,6 @@ export default function Sidebar(props) {
   const { view, openKeys, collapsed, openDrawer, height, current } = useSelector((state) => state.App);
   const moduls = loadState("_mod") || [];
 
-  console.log("moduls", moduls);
-
   const { sidebarTheme } = useSelector((state) => state.ThemeSwitcher);
   const dispatch = useDispatch();
   function handleClick(e) {
@@ -386,7 +384,7 @@ export default function Sidebar(props) {
     ),
     Pajak: (
       <SubMenu
-        key="laporan"
+        key="pajak"
         title={
           <span className="isoMenuHolder" style={submenuColor}>
             <FaFileInvoiceDollar size={18} />
@@ -394,21 +392,24 @@ export default function Sidebar(props) {
           </span>
         }
       >
-        <Menu.Item style={submenuStyle} key="pembeliandanretur">
+        <Menu.Item style={submenuStyle} key="daftarnofaktur">
           <Link href="/dashboard/pajak/no_faktur_list">
             <a>Daftar Nomor Faktur</a>
           </Link>
         </Menu.Item>
-        <Menu.Item style={submenuStyle} key="pembayaranhutang">
+        <Menu.Item style={submenuStyle} key="generatefaktur">
           <Link href="/dashboard/pajak/generate">
             <a>Generate Faktur</a>
+          </Link>
+        </Menu.Item>
+        <Menu.Item style={submenuStyle} key="exportfaktur">
+          <Link href="/dashboard/pajak/export">
+            <a>Export Data</a>
           </Link>
         </Menu.Item>
       </SubMenu>
     ),
   };
-
-  console.log("moduls", moduls);
 
   return (
     <SidebarWrapper>

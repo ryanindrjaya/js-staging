@@ -1,11 +1,11 @@
 import Head from "next/head";
 import React, { useState } from "react";
 import LayoutContent from "@iso/components/utility/layoutContent";
-import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLayout";
+import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
-import RoleTable from "../../../../components/ReactDataTable/RoleTable";
+import RoleTable from "@iso/components/ReactDataTable/RoleTable";
 import { useRouter } from "next/router";
-import TitlePage from "../../../../components/TitlePage/TitlePage";
+import TitlePage from "@iso/components/TitlePage/TitlePage";
 import { toast } from "react-toastify";
 import nookies from "nookies";
 

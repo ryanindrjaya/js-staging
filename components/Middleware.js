@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
-import nookies from "nookies";
+import nookies, { destroyCookie } from "nookies";
 import { useDispatch, useSelector } from "react-redux";
 import { notification } from "antd";
 import { loadState } from "../library/helpers/localStorage";
@@ -30,8 +30,8 @@ function Middleware({ children }) {
       const req = await fetch(endpoint, options);
 
       if (req.status === 401) {
-        nookies.destroy(null, "token");
-        nookies.destroy(null, "role");
+        destroyCookie(null, "token", { path: "/" });
+        destroyCookie(null, "role", { path: "/" });
 
         router.push("/");
       }
