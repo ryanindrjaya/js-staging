@@ -40,18 +40,26 @@ const UpdateJurnal = async (
     values.kredit = saldo;
     values.catatan = "Transaksi hutang dengan kode " + noHutang;
     values.no_jurnal = `JH/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+    noJurnal++;
+    noJurnal = String(noJurnal).padStart(3, "0");
   } else if (page == "piutang" && tipe !== "Master") { 
     values.debit = saldo;
     values.catatan = "Transaksi piutang dengan kode " + noPiutang;
     values.no_jurnal = `JP/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+    noJurnal++;
+    noJurnal = String(noJurnal).padStart(3, "0");
   } else if(page == "hutang" && tipe === "Master"){
     values.debit = saldo;
     values.catatan = "Transaksi hutang dengan kode " + noHutang;
     values.no_jurnal = `JH/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+    noJurnal++;
+    noJurnal = String(noJurnal).padStart(3, "0");
   } else if (page == "piutang" && tipe === "Master") { 
     values.kredit = saldo;
     values.catatan = "Transaksi piutang dengan kode " + noPiutang;
     values.no_jurnal = `JP/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+    noJurnal++;
+    noJurnal = String(noJurnal).padStart(3, "0");
   }
 
   var data = {

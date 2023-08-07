@@ -552,84 +552,129 @@ export async function createInventoryFromPenjualan(row) {
   }
 }
 
-export async function createInventoryFromReturPenjualan(row, customer) {
-  const data = [];
+export async function createInventoryFromReturPenjualan(row, customer, returPage) {
+  var data = [];
 
-  const returStoreSale = await getStoreRetur(row.id);
-  console.log("returStoreSale", returStoreSale);
-  const retur_store_sale_details = returStoreSale.data.attributes.retur_store_sale_details.data;
-  const no_retur_store_sale = returStoreSale.data.attributes.no_retur_store_sale;
-  const locations = returStoreSale.data.attributes.store_sale?.data?.attributes?.detail_mutasi_stok ?? [];
-  const initialLocations =
-    returStoreSale.data.attributes.store_sale?.data?.attributes?.locations?.data?.map((item) => item.id) ?? [];
+  if (returPage === "retur panel sale") {
+    data = [];
 
-  retur_store_sale_details.forEach((element) => {
-    console.log("element store detail (penjualan)", element);
-    const unitOrder = element.attributes.unit;
-    const totalOrder = parseInt(element.attributes.qty);
-    const location = element.attributes.location.data;
-    const product = element.attributes.product.data;
-    const expDate = element.attributes.expired_date;
-    const batch = element.attributes?.batch ?? "";
+    const returPanelSale = await getPanelRetur(row.id);
+    console.log("returPanelSale", returPanelSale);
+    const retur_panel_sale_details = returPanelSale.data.attributes.retur_panel_sale_details.data;
+    const no_retur_panel_sale = returPanelSale.data.attributes.no_retur_panel_sale;
 
-    if (unitOrder && totalOrder && product && location) {
-      const uid = `${product.id}${location.id}-retur`;
-      if (!locations.some((loc) => loc.uid === uid)) {
-        locations.push({
-          uid,
+    retur_panel_sale_details.forEach((element) => {
+      console.log("element panel detail (penjualan)", element);
+      const unitOrder = element.attributes.unit;
+      const totalOrder = parseInt(element.attributes.qty);
+      const location = element.attributes.location.data.id;
+      const product = element.attributes.product.data;
+      const expDate = element.attributes.expired_date;
+      const batch = element.attributes?.batch ?? "";
+
+      if (unitOrder && totalOrder && product && location) {
+        const item = {
           location: location.id,
-          stok_masuk: [
-            {
-              qty: totalOrder,
-              unit: unitOrder,
-            },
-          ],
           product: product.id,
-          product_name: product.attributes.name,
-        });
-      } else {
-        const index = locations.findIndex((loc) => loc.uid === uid);
-        if (index >= 0) {
-          locations[index].stok_masuk.push({
-            qty: totalOrder,
-            unit: unitOrder,
-          });
-        }
+          unit: unitOrder,
+          qty: totalOrder,
+          exp_date: expDate,
+          batch,
+        };
+
+        data.push(item);
       }
-
-      const item = {
-        location: location.id,
-        product: product.id,
-        unit: unitOrder,
-        qty: totalOrder,
-        exp_date: expDate,
-        batch,
-      };
-
-      data.push(item);
-    }
-  });
-
-  if (data.length > 0) {
-    updateLocations({
-      id: returStoreSale.data.attributes?.store_sale?.data?.id,
-      body: {
-        data: {
-          locations: [...initialLocations, ...locations.map((loc) => loc.location)],
-          detail_mutasi_stok: locations,
-        },
-      },
-      url: "store-sales",
     });
 
-    const body = {
-      data,
-      no_referensi: no_retur_store_sale,
-      type: "Retur Penjualan",
-      keterangan: `Retur Penjualan dari ${customer}`,
-    };
+    if (data.length > 0) {
+      const body = {
+        data,
+        no_referensi: no_retur_panel_sale,
+        type: "Retur Penjualan",
+        keterangan: `Retur Penjualan dari ${customer}`,
+      };
 
-    await addToGudang(body, "add");
+      await addToGudang(body, "add");
+    }
+  } else {
+    data = [];
+
+    const returStoreSale = await getStoreRetur(row.id);
+    console.log("returStoreSale", returStoreSale);
+    const retur_store_sale_details = returStoreSale.data.attributes.retur_store_sale_details.data;
+    const no_retur_store_sale = returStoreSale.data.attributes.no_retur_store_sale;
+    const locations = returStoreSale.data.attributes.store_sale?.data?.attributes?.detail_mutasi_stok ?? [];
+    const initialLocations =
+      returStoreSale.data.attributes.store_sale?.data?.attributes?.locations?.data?.map((item) => item.id) ?? [];
+
+    retur_store_sale_details.forEach((element) => {
+      console.log("element store detail (penjualan)", element);
+      const unitOrder = element.attributes.unit;
+      const totalOrder = parseInt(element.attributes.qty);
+      const location = element.attributes.location.data;
+      const product = element.attributes.product.data;
+      const expDate = element.attributes.expired_date;
+      const batch = element.attributes?.batch ?? "";
+
+      if (unitOrder && totalOrder && product && location) {
+        const uid = `${product.id}${location.id}-retur`;
+        if (!locations.some((loc) => loc.uid === uid)) {
+          locations.push({
+            uid,
+            location: location.id,
+            stok_masuk: [
+              {
+                qty: totalOrder,
+                unit: unitOrder,
+              },
+            ],
+            product: product.id,
+            product_name: product.attributes.name,
+          });
+        } else {
+          const index = locations.findIndex((loc) => loc.uid === uid);
+          if (index >= 0) {
+            locations[index].stok_masuk.push({
+              qty: totalOrder,
+              unit: unitOrder,
+            });
+          }
+        }
+
+        const item = {
+          location: location.id,
+          product: product.id,
+          unit: unitOrder,
+          qty: totalOrder,
+          exp_date: expDate,
+          batch,
+        };
+
+        data.push(item);
+      }
+    });
+
+    if (data.length > 0) {
+      updateLocations({
+        id: returStoreSale.data.attributes?.store_sale?.data?.id,
+        body: {
+          data: {
+            locations: [...initialLocations, ...locations.map((loc) => loc.location)],
+            detail_mutasi_stok: locations,
+          },
+        },
+        url: "store-sales",
+      });
+
+      const body = {
+        data,
+        no_referensi: no_retur_store_sale,
+        type: "Retur Penjualan",
+        keterangan: `Retur Penjualan dari ${customer}`,
+      };
+
+      await addToGudang(body, "add");
+    }
   }
 }
 
@@ -663,4 +708,3 @@ async function addToGudang(body, operation = "subtract") {
     return false;
   }
 }
-// export default createInventoryRetur;

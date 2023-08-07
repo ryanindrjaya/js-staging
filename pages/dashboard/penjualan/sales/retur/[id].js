@@ -645,9 +645,9 @@ function ReturSales({ props }) {
                 <div className="w-full md:w-1/3 px-3 md:mb-0">
                   <p className="text-sm text-start ml-9">Tanggal : {saleDate}</p>
                 </div>
-                <div className="w-full md:w-1/3 px-3 md:mb-0">
+                {/* <div className="w-full md:w-1/3 px-3 md:mb-0">
                   <p className="text-sm text-start">Lokasi : {locationStore}</p>
-                </div>
+                </div> */}
               </div>
 
               <div className="w-full flex justify-start -mx-3 gap-3 mb-3 mt-2">

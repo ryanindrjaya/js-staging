@@ -9,7 +9,7 @@ var id = 0;
 
 const createDetailSale = (values, products, productTotalPrice, productSubTotal, setListId, url, form, lokasiGudang) => {
   console.log("create detail function", products);
-  console.log("tempList ni ===============", tempListId);
+  console.log("tempList ni ===============", tempListId, form.getFieldValue("product_location"));
   products.productList.forEach((element, index) => {
     // default value
     var qty = 1;
@@ -19,7 +19,8 @@ const createDetailSale = (values, products, productTotalPrice, productSubTotal, 
     var unitPrice = element.attributes.sold_price_1;
     var unitPriceAfterDisc = element.attributes.sold_price_1;
     var subTotal = 0;
-    const productLoc = form.getFieldValue("product_location");
+    const productLoc = form.getFieldValue("product_location") ?? values?.location;
+    console.log("productLoc", productLoc);
     tempListId = [];
 
     var expDate = values.expired_date?.[id];
@@ -38,7 +39,7 @@ const createDetailSale = (values, products, productTotalPrice, productSubTotal, 
     var d1 = products.productInfo[index]?.d1 ?? element.attributes.disc_1_1;
     var d2 = products.productInfo[index]?.d2 ?? 0;
     margin = products.productInfo[index]?.margin ?? 0;
-    var productLocationId = productLoc?.[index];
+    var productLocationId = productLoc?.[index] ?? productLoc;
     const dataGudang = lokasiGudang?.[index];
 
     console.log("data gudang", dataGudang);
@@ -102,6 +103,7 @@ const POSTSaleDetail = async (
       inventory: dataGudang,
     },
   };
+  console.log("data", data);
 
   const endpoint = process.env.NEXT_PUBLIC_URL + url;
   const JSONdata = JSON.stringify(data);

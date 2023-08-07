@@ -18,6 +18,7 @@ import LoadingAnimations from "@iso/components/Animations/Loading";
 import Customer from "@iso/components/Form/AddSale/CustomerForm";
 import ConfirmDialog from "@iso/components/Alert/ConfirmDialog";
 import createInventory from "../../utility/createInventory";
+import updateJurnal from "../../utility/updateJurnal";
 import moment from "moment";
 import { InventoryOutFromPanel } from "../../../../../library/functions/createInventory";
 
@@ -508,9 +509,12 @@ function Edit({ props }) {
           if (simpanData === "Publish") {
             await InventoryOutFromPanel(
               res.data.id,
-              customer.attributes.name,
-              editData.attributes.location.data.attributes.name
+              customer.attributes.name
+              //editData.attributes.location.data.attributes.name
             );
+
+            //update jurnal dan coa
+            updateJurnal(res.data, user, "penjualan", "panel");
           }
           notification.success({
             message: "Berhasil mengubah data",

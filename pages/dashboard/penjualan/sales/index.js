@@ -13,6 +13,7 @@ import DataTable from "react-data-table-component";
 import moment from "moment";
 import Link from "next/link";
 import createInventorySelling from "../utility/createInventorySelling";
+import updateJurnal from "../utility/updateJurnal";
 import { createInventoryFromPenjualanSales } from "../../../../library/functions/createInventory";
 
 SalesSale.getInitialProps = async (context) => {
@@ -30,12 +31,16 @@ SalesSale.getInitialProps = async (context) => {
   const reqCustomer = await fetchCustomer(cookies);
   const customers = await reqCustomer.json();
 
+  const reqUserMe = await fetchUser(cookies);
+  const userMe = await reqUserMe.json();
+
   return {
     props: {
       user,
       locations,
       sales,
       customers,
+      userMe
     },
   };
 };
@@ -96,11 +101,26 @@ const fetchSales = async (cookies) => {
   return req;
 };
 
+const fetchUser = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=*";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
 function SalesSale({ props }) {
   const [user, setUser] = useState(props.user || []);
   const [locations, setLocations] = useState(props.locations?.data || []);
   const [customers, setCustomers] = useState(props.customers?.data || []);
   const data = props.sales;
+  const userMe = props.userMe;
   const router = useRouter();
   const [sell, setSell] = useState(data);
   const [returPage, setReturPage] = useState("sales");
@@ -220,9 +240,9 @@ function SalesSale({ props }) {
   };
 
   const onChangeStatus = async (status, row) => {
-    if (status === "Diterima") {
+    if (status === "Diterima") { console.log(row, "row nich");
       if (row?.attributes?.sales_sell?.data) {
-        const inventoryOut = await createInventoryFromPenjualanSales(row);
+        const inventoryOut = await createInventoryFromPenjualanSales(row); console.log(inventoryOut, "inventoryOut nich");
 
         if (inventoryOut) {
           await changeStatusOrder(row);
@@ -370,6 +390,9 @@ function SalesSale({ props }) {
       const data = await response.json();
 
       setSell(data);
+
+      //update jurnal dan coa
+      if (status === "Diterima") updateJurnal(res.data, userMe, "penjualan", "sales");
 
       openNotificationWithIcon(
         "success",

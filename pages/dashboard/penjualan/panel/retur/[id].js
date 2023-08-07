@@ -15,6 +15,7 @@ import createSaleFunc from "../../utility/createSale";
 import { useRouter } from "next/router";
 import LoadingAnimations from "@iso/components/Animations/Loading";
 import createReturInventory from "../../utility/createReturInventory";
+import moment from "moment";
 
 ReturPanel.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -189,6 +190,8 @@ function ReturPanel({ props }) {
   const tempList = [];
   const [info, setInfo] = useState();
 
+  const [lokasiGudang, setLokasiGudang] = useState();
+
   //set data retur
   const [faktur, setFaktur] = useState(panel.data.attributes.faktur);
   const [customer, setCustomer] = useState(panel.data.attributes.customer?.data?.attributes.name);
@@ -232,21 +235,22 @@ function ReturPanel({ props }) {
     }
   };
 
-  const getProductAtLocation = async () => {
-    const locationId = form.getFieldValue("location");
-    let tempData = {};
+  const getProductAtLocation = async (unit = 1, changedIdx = products?.productList?.length - 1 ?? 0) => {
+    let tempData = dataLocationStock;
 
     // create an array of promises by mapping over the productList
-    const promises = products.productList.map(async (product) => {
-      const stock = await getStockAtLocation(product.id, locationId);
-      console.log("stock ", product.id, stock);
+    const promises = products.productList.map(async (product, idx) => {
+      if (idx === changedIdx) {
+        const stock = await getStockAtLocation(product.id, unit, idx);
+        console.log("stock ", product.id, stock);
 
-      tempData = {
-        ...tempData,
-        [product.id]: stock,
-      };
+        tempData = {
+          ...tempData,
+          [idx]: stock,
+        };
 
-      return stock; // return a promise from each iteration
+        return stock; // return a promise from each iteration
+      }
     });
 
     try {
@@ -259,46 +263,41 @@ function ReturPanel({ props }) {
     }
   };
 
-  const getStockAtLocation = async (productId, locationId) => {
-    let stockString = "Stok Kosong";
+  const getStockAtLocation = async (productId, unit, idx) => {
     try {
-      console.log("get stock", productId, locationId);
-      const response = await getStock(productId, locationId);
+      const response = await getStock(productId, unit);
       console.log("response", response);
 
-      if (response.data.length > 0) {
-        const stock = response.data[0].attributes;
-        const product = stock.product?.data?.attributes; // use optional chaining to check if product exists
-
-        const stockUnit1 = stock.stock_unit_1;
-        const stockUnit2 = stock.stock_unit_2;
-        const stockUnit3 = stock.stock_unit_3;
-        const stockUnit4 = stock.stock_unit_4;
-        const stockUnit5 = stock.stock_unit_5;
-
-        const satuanUnit1 = product.unit_1;
-        const satuanUnit2 = product.unit_2;
-        const satuanUnit3 = product.unit_3;
-        const satuanUnit4 = product.unit_4;
-        const satuanUnit5 = product.unit_5;
-
-        stockString = `${stockUnit1} ${satuanUnit1}, ${stockUnit2} ${satuanUnit2}, ${stockUnit3} ${satuanUnit3}, ${stockUnit4} ${satuanUnit4}, ${stockUnit5} ${satuanUnit5}`;
+      if (response?.data) {
+        // sort based on qty desc
+        const sortedBasedOnQty = response.data.sort((a, b) => b.availableStock - a.availableStock);
+        setLokasiGudang({
+          ...lokasiGudang,
+          [idx]: sortedBasedOnQty,
+        });
       }
+
+      console.log(`response ${unit}`, response?.stock?.[unit]);
+
+      const stringArr = [];
+
+      for (const [key, value] of Object.entries(response?.stock)) {
+        stringArr.push(`${value} ${key}`);
+      }
+
+      return response.available ? stringArr.join(", ") : "Stok kosong";
     } catch (error) {
-      console.error("error", error);
+      console.log("error", error);
       setDataLocationStock({
         ...dataLocationStock,
         [productId]: "Error fetching stock data",
       });
     }
-    return stockString;
   };
 
-  async function getStock(productId, locationId) {
+  async function getStock(productId, unit) {
     const cookies = nookies.get(null, "token");
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL +
-      `/inventories?filters[location][id][$eq]=${locationId}&filters[product][id][$eq]=${productId}&populate=*`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/inventories/user/location?product=${productId}&unit=${unit}`;
     const options = {
       method: "GET",
       headers: {
@@ -309,6 +308,8 @@ function ReturPanel({ props }) {
 
     const req = await fetch(endpoint, options);
     const res = await req.json();
+
+    console.log("res get stock at location", res);
 
     return res;
   }
@@ -336,7 +337,7 @@ function ReturPanel({ props }) {
     const remainingPayment = parseFloat((paymentFloat - paidCredit).toFixed(2));
 
     console.log(grandTotalFloat, remainingPayment);
-    console.log("overprice? ", grandTotalFloat > remainingPayment);
+    console.log("overprice? ", grandTotalFloat > remainingPayment, lokasiGudang, values);
     if (grandTotalFloat > remainingPayment) {
       notification["error"]({
         message: "Overprice",
@@ -367,7 +368,8 @@ function ReturPanel({ props }) {
       productSubTotal,
       setListId,
       "/retur-panel-sale-details",
-      form
+      form,
+      lokasiGudang
     );
   };
 
@@ -389,7 +391,7 @@ function ReturPanel({ props }) {
       form,
       router,
       "/retur-panel-sales/",
-      "panel sale",
+      "retur panel sale",
       locations,
       updateStock
     );
@@ -600,9 +602,9 @@ function ReturPanel({ props }) {
                 <div className="w-full md:w-1/3 px-3 mt-2 md:mb-0">
                   {/*<p className="text-sm text-start ml-9">No Faktur : {faktur}</p>*/}
                 </div>
-                <div className="w-full md:w-1/3 px-3 mt-2 md:mb-0">
+                {/* <div className="w-full md:w-1/3 px-3 mt-2 md:mb-0">
                   <p className="text-sm text-start">Customer : {customer}</p>
-                </div>
+                </div> */}
               </div>
 
               <div className="w-full flex flex-wrap justify-start -mx-3">
@@ -610,8 +612,11 @@ function ReturPanel({ props }) {
                   <p className="text-sm text-start ml-9">Tanggal : {saleDate}</p>
                 </div>
                 <div className="w-full md:w-1/3 px-3 md:mb-0">
-                  <p className="text-sm text-start">Lokasi : {locationStore}</p>
+                  <p className="text-sm text-start ml-9">Customer : {customer}</p>
                 </div>
+                {/* <div className="w-full md:w-1/3 px-3 md:mb-0">
+                  <p className="text-sm text-start">Lokasi : {locationStore}</p>
+                </div> */}
               </div>
 
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-3 mt-2">
@@ -645,10 +650,6 @@ function ReturPanel({ props }) {
                     ]}
                   >
                     <Select
-                      onChange={(e) => {
-                        setSelectedLocationId(e);
-                        getProductAtLocation(e);
-                      }}
                       placeholder="Lokasi Gudang Penerima"
                       size="large"
                       style={{
@@ -666,20 +667,13 @@ function ReturPanel({ props }) {
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="retur_date"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Tanggal tidak boleh kosong!",
-                      },
-                    ]}
-                  >
+                  <Form.Item name="retur_date">
                     <DatePicker
                       placeholder="Tanggal Retur"
                       size="large"
                       format={"DD/MM/YYYY"}
                       style={{ width: "100%" }}
+                      defaultValue={moment()}
                     />
                   </Form.Item>
                 </div>
