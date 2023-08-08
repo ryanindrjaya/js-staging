@@ -56,7 +56,7 @@ const UpdateJurnal = async (
         noJurnal = String(noJurnal).padStart(3, "0");
       } else if (insidePage === "sales"){
         values.catatan = "Transaksi non panel dengan kode " + values?.attributes?.no_sales_sale;
-        values.no_jurnal = `JPP/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+        values.no_jurnal = `JPS/${user.id}/${noJurnal}/${mm}/${yyyy}`;
         noJurnal++;
         noJurnal = String(noJurnal).padStart(3, "0");
       }
@@ -88,6 +88,87 @@ const UpdateJurnal = async (
       var data = {
         data: values,
       };
+
+      postJurnal(data);
+    });
+
+  } else if (page === "retur") {
+    var akunReturPiutang = null;
+    if(insidePage === "retur non panel" || insidePage === "retur panel") akunReturPiutang = "114.01.01";
+    else if (insidePage === "retur sales") akunReturPiutang = "114.01.03";
+
+    const reqCOA = await fetchAkunCOA(cookies, akunReturPiutang, "212.01.07", "401.01.00", "500.00.01", "115.10.00");
+    var akunCOA = await reqCOA.json();
+
+    akunCOA.data[5] = akunCOA.data[4];
+    akunCOA.data[6] = akunCOA.data[0];
+
+    console.log("get akunCOA", akunCOA);
+    var cekRetur = 0;
+    var cekPiutang = 0;
+
+    akunCOA.data.map((item) => {
+      values.debit = 0;
+      values.kredit = 0;
+
+      if (insidePage === "retur non panel"){
+        values.catatan = "Transaksi retur non panel dengan kode " + values?.attributes?.no_retur_non_panel_sale;
+        values.no_jurnal = `JRPNP/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+        noJurnal++;
+        noJurnal = String(noJurnal).padStart(3, "0");
+      } else if (insidePage === "retur panel"){
+        values.catatan = "Transaksi retur panel dengan kode " + values?.attributes?.no_retur_panel_sale;
+        values.no_jurnal = `JRPP/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+        noJurnal++;
+        noJurnal = String(noJurnal).padStart(3, "0");
+      } else if (insidePage === "retur sales"){
+        values.catatan = "Transaksi retur sales dengan kode " + values?.attributes?.no_retur_sales_sale;
+        values.no_jurnal = `JRPS/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+        noJurnal++;
+        noJurnal = String(noJurnal).padStart(3, "0");
+      }
+
+
+      if(item.attributes.kode === "114.01.01" || item.attributes.kode === "114.01.03") {
+        //true
+        if (cekRetur === 0) {
+          values.kredit = values.attributes.total;
+          putAkun(item, values.attributes.total);
+        }
+        else{
+          values.kredit = 0;
+          values.kredit = values.attributes.total;
+          putAkun(item, values.attributes.total);
+        }
+      } else if (item.attributes.kode === "212.01.07") {
+        //false
+        values.debit = values.attributes.ppn;
+        putAkun(item, values.attributes.ppn);
+      } else if (item.attributes.kode === "401.01.00") {
+        //false
+        if (cekPiutang === 0) {
+          values.debit = values.attributes.dpp;
+          putAkun(item, values.attributes.dpp, page);
+        }
+        else{
+          values.debit = 0;
+          values.debit = values.attributes.total;
+          putAkun(item, values.attributes.total);
+        }
+      } else if (item.attributes.kode === "500.00.01") {
+        //true
+        values.kredit = values.attributes.total;
+        putAkun(item, values.attributes.total);
+      } else if (item.attributes.kode === "115.10.00") {
+        //true
+        values.debit = values.attributes.total;
+        putAkun(item, values.attributes.total, page);
+      }
+      values.chart_of_account = item.id;
+
+      var data = {
+        data: values,
+      }; console.log("get data post", data, akunReturPiutang, insidePage, page);
 
       postJurnal(data);
     });
@@ -153,11 +234,11 @@ const postJurnal = async (data) => {
 }
 
 const fetchAkunCOA = async (cookies, kode1, kode2, kode3, kode4, kode5) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?populate=*&filters[kode][$in][0]="+ kode1 +
-  "&filters[kode][$in][1]="+ kode2 +
-  "&filters[kode][$in][2]="+ kode3 +
-  "&filters[kode][$in][3]="+ kode4 +
-  "&filters[kode][$in][4]="+ kode5;
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?populate=*&filters[kode][$eq][0]="+ kode1 +
+  "&filters[kode][$eq][1]="+ kode2 +
+  "&filters[kode][$eq][2]="+ kode3 +
+  "&filters[kode][$eq][3]="+ kode4 +
+  "&filters[kode][$eq][4]="+ kode5;
   const options = {
     method: "GET",
     headers: {
@@ -173,7 +254,7 @@ const fetchAkunCOA = async (cookies, kode1, kode2, kode3, kode4, kode5) => {
 const putAkun = async (akun, pembayaran, page, insidePage) => {
   try {
     var saldo = parseFloat(akun.attributes.saldo - pembayaran);
-    if(page === "penjualan") saldo = parseFloat(akun.attributes.saldo + pembayaran);
+    if(page === "penjualan" || page === "retur") saldo = parseFloat(akun.attributes.saldo + pembayaran);
 
       const data = {
         data: {
