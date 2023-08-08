@@ -200,7 +200,10 @@ const putRelationSaleDetail = async (id, value, form, router, url, page, locatio
     if (page == "store sale") router.replace(`/dashboard/penjualan/toko/print/${id}`);
     if (page == "retur store sale") router.replace(`/dashboard/penjualan/toko/retur/print/${id}`);
     if (page == "sales sale") router.replace(`/dashboard/penjualan/sales/print/${id}`);
-    if (page == "retur sales sale") router.replace(`/dashboard/penjualan/sales`);
+    if (page == "retur sales sale"){
+      updateJurnal(res.data, user, "retur", "retur sales");
+      router.replace(`/dashboard/penjualan/sales`);
+    }
     if (page == "non panel sale") {
       if (simpanData === "Publish") {
         //update jurnal dan coa
