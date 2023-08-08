@@ -125,8 +125,8 @@ function ReturSales({ props }) {
   const [totalPrice, setTotalPrice] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
 
-  const [dppActive, setDPPActive] = useState("Active");
-  const [ppnActive, setPPNActive] = useState("Active");
+  const [dppActive, setDPPActive] = useState("DPP");
+  const [ppnActive, setPPNActive] = useState("PPN");
   const [simpanData, setSimpanData] = useState("Bayar");
 
   const router = useRouter();
@@ -432,7 +432,7 @@ function ReturSales({ props }) {
     } else {
       setDPP(0);
     }
-  }, [dppActive]);
+  }, [dppActive, grandTotal]);
 
   useEffect(() => {
     // set ppn
@@ -441,7 +441,7 @@ function ReturSales({ props }) {
     } else {
       setPPN(0);
     }
-  }, [ppnActive]);
+  }, [ppnActive, grandTotal]);
 
   useEffect(() => {
     // used to reset redux from value before
@@ -462,6 +462,9 @@ function ReturSales({ props }) {
       type: "SET_PREORDER_DATA",
       data: sales,
     });
+
+    setDPPActive("DPP");
+    setPPNActive("PPN");
   }, []);
 
   useEffect(() => {
@@ -633,17 +636,20 @@ function ReturSales({ props }) {
               onFinishFailed={validateError}
             >
               <div className="w-full flex flex-wrap justify-start -mx-3 mt-1">
-                <div className="w-full md:w-1/3 px-3 mt-2 md:mb-0">
-                  {/*<p className="text-sm text-start ml-9">No Faktur : {faktur}</p>*/}
+                {/* <div className="w-full md:w-1/3 px-3 mt-2 md:mb-0">
+                  <p className="text-sm text-start ml-9">No Faktur : {faktur}</p>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mt-2 md:mb-0">
                   <p className="text-sm text-start">Customer : {customer}</p>
-                </div>
+                </div> */}
               </div>
 
               <div className="w-full flex flex-wrap justify-start -mx-3">
                 <div className="w-full md:w-1/3 px-3 md:mb-0">
                   <p className="text-sm text-start ml-9">Tanggal : {saleDate}</p>
+                </div>
+                <div className="w-full md:w-1/3 px-3 md:mb-0">
+                  <p className="text-sm text-start">Customer : {customer}</p>
                 </div>
                 {/* <div className="w-full md:w-1/3 px-3 md:mb-0">
                   <p className="text-sm text-start">Lokasi : {locationStore}</p>
@@ -801,6 +807,7 @@ function ReturSales({ props }) {
                       style={{
                         width: "100%",
                       }}
+                      defaultValue={"DPP"}
                     >
                       <Select.Option value="DPP" key={"DPP"}>
                         DPP
@@ -817,6 +824,7 @@ function ReturSales({ props }) {
                       style={{
                         width: "100%",
                       }}
+                      defaultValue={"PPN"}
                     >
                       <Select.Option value="PPN" key={"PPN"}>
                         PPN

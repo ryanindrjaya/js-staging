@@ -591,17 +591,20 @@ function ReturNonPanel({ props }) {
                 <div className="w-full md:w-1/3 px-3 mt-2 md:mb-0">
                   {/*<p className="text-sm text-start ml-9">No Faktur : {faktur}</p>*/}
                 </div>
-                <div className="w-full md:w-1/3 px-3 mt-2 md:mb-0">
+                {/* <div className="w-full md:w-1/3 px-3 mt-2 md:mb-0">
                   <p className="text-sm text-start">Customer : {customer}</p>
-                </div>
+                </div> */}
               </div>
 
               <div className="w-full flex flex-wrap justify-start -mx-3">
                 <div className="w-full md:w-1/3 px-3 md:mb-0">
                   <p className="text-sm text-start ml-9">Tanggal : {saleDate}</p>
                 </div>
-                <div className="w-full md:w-1/3 px-3 md:mb-0">
+                {/* <div className="w-full md:w-1/3 px-3 md:mb-0">
                   <p className="text-sm text-start">Lokasi : {locationStore}</p>
+                </div> */}
+                <div className="w-full md:w-1/3 px-3 md:mb-0">
+                  <p className="text-sm text-start">Customer : {customer}</p>
                 </div>
               </div>
 
@@ -660,18 +663,19 @@ function ReturNonPanel({ props }) {
                   <Form.Item
                     initialValue={moment()}
                     name="retur_date"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Tanggal tidak boleh kosong!",
-                      },
-                    ]}
+                    // rules={[
+                    //   {
+                    //     required: true,
+                    //     message: "Tanggal tidak boleh kosong!",
+                    //   },
+                    // ]}
                   >
                     <DatePicker
                       placeholder="Tanggal Retur"
                       size="large"
                       format={"DD/MM/YYYY"}
                       style={{ width: "100%" }}
+                      defaultValue={moment()}
                     />
                   </Form.Item>
                 </div>
