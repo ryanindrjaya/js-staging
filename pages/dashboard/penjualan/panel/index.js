@@ -376,7 +376,8 @@ function PanelSale({ props }) {
     async function fetchOne(id) {
       message.loading({ content: "Mengambil data", duration: 8000, key: "fetch" });
       const cookies = nookies.get();
-      const endpoint = process.env.NEXT_PUBLIC_URL + `/panel-sales/${id}?populate=deep`;
+      const endpoint =
+        process.env.NEXT_PUBLIC_URL + `/panel-sales/${id}?populate[panel_sale_details][populate][0]=product`;
       const options = {
         method: "GET",
         headers: {
@@ -388,6 +389,8 @@ function PanelSale({ props }) {
       const res = await fetch(endpoint, options)
         .then((r) => r.json())
         .catch((e) => console.log(e));
+
+      console.log(res);
 
       if (res.data) {
         message.destroy("fetch");
@@ -408,11 +411,11 @@ function PanelSale({ props }) {
       wrap: true,
       width: "120px",
       selector: ({ attributes }) => (
-        <Link href={`/dashboard/produk?id=${attributes?.product?.data?.id}`}>
+        <a target="_blank" href={`/dashboard/produk?id=${attributes?.product?.data?.id}`}>
           <span className="text-blue-500 cursor-pointer hover:text-blue-700">
             {attributes?.product?.data?.attributes?.name || ""}
           </span>
-        </Link>
+        </a>
       ),
     },
     {
@@ -476,8 +479,15 @@ function PanelSale({ props }) {
     },
     {
       name: "Stok Keluar",
+      center: true,
       selector: ({ stok_keluar = [] }) =>
         stok_keluar?.length > 0 ? stok_keluar?.map(({ qty, unit }) => `${qty} ${unit}`)?.join(", ") : "",
+    },
+    {
+      name: "Retur",
+      center: true,
+      selector: ({ stok_masuk = [] }) =>
+        stok_masuk?.length > 0 ? stok_masuk?.map(({ qty, unit }) => `${qty} ${unit}`)?.join(", ") : "",
     },
     {
       name: "Lokasi",

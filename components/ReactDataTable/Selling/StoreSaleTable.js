@@ -16,6 +16,7 @@ export default function ReactDataTable({
   formObj,
   getProduct,
   editPriceDisc = false,
+  noMaxInput = false,
 }) {
   const dispatch = useDispatch();
   var defaultDp1 = 0;
@@ -266,7 +267,7 @@ export default function ReactDataTable({
                   defaultValue={defaultQty}
                   onChange={(e) => onChangeQty(e, row, idx)}
                   min={1}
-                  max={max ?? dataDetailTrx?.data?.[idx]?.attributes?.qty} // added max qty for retur penjualan
+                  max={noMaxInput ? null : max ?? dataDetailTrx?.data?.[idx]?.attributes?.qty} // added max qty for retur penjualan
                   rules={[
                     {
                       required: true,

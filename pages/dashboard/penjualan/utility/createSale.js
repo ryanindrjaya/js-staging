@@ -155,42 +155,18 @@ const putRelationSaleDetail = async (id, value, form, router, url, page, locatio
       case "retur store sale":
         console.log("retur store sale");
         const inventoryInReturStore = await createInventoryFromReturPenjualan(res.data, customer);
-
-        const putStatus = {
-          data: {
-            status: "Diretur",
-          },
-        };
-
-        const putStatusReq = await fetch(endpoint, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-          },
-          body: JSON.stringify(putStatus),
-        });
-
         break;
       case "retur panel sale":
         console.log("retur panel sale");
         const inventoryInReturPanel = await createInventoryFromReturPenjualan(res.data, customer, "retur panel sale");
-
-        const putStatusPanel = {
-          data: {
-            status: "Diretur",
-          },
-        };
-
-        const putStatusPanelReq = await fetch(endpoint, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-          },
-          body: JSON.stringify(putStatusPanel),
-        });
-
+        break;
+      case "retur non panel sale":
+        console.log("retur panel sale");
+        const inventoryInReturNonPanel = await createInventoryFromReturPenjualan(
+          res.data,
+          customer,
+          "retur non panel sale"
+        );
         break;
     }
   }
@@ -201,6 +177,7 @@ const putRelationSaleDetail = async (id, value, form, router, url, page, locatio
     if (page == "retur store sale") router.replace(`/dashboard/penjualan/toko/retur/print/${id}`);
     if (page == "sales sale") router.replace(`/dashboard/penjualan/sales/print/${id}`);
     if (page == "retur sales sale") router.replace(`/dashboard/penjualan/sales`);
+    if (page == "retur non panel sale") router.replace(`/dashboard/penjualan/non_panel/retur/print/${id}`);
     if (page == "non panel sale") {
       if (simpanData === "Publish") {
         //update jurnal dan coa
@@ -218,7 +195,7 @@ const putRelationSaleDetail = async (id, value, form, router, url, page, locatio
         router.replace(`/dashboard/penjualan/panel/print/${id}`);
       } else router.replace(`/dashboard/penjualan/panel`);
     }
-    if (page == "retur store sale") router.replace(`/dashboard/penjualan/panel/retur/print/${id}`);
+    if (page == "retur panel sale") router.replace(`/dashboard/penjualan/panel/retur/print/${id}`);
     // simpanData === "Publish"
     //   ? router.replace(`/dashboard/penjualan/panel/print/${id}`)
     //   : router.replace(`/dashboard/penjualan/panel`);

@@ -28,7 +28,7 @@ export default function ReactDataTable({
   page,
   updateStock,
   user,
-  updateJurnal
+  updateJurnal,
 }) {
   const [loadingPiutang, setLoadingPiutang] = useState(false);
   const router = useRouter();
@@ -87,8 +87,10 @@ export default function ReactDataTable({
     console.log("change status", res);
 
     if (res?.data?.id) {
-      if(res.data.attributes.status_data === "Publish" && page === "nonpanel") updateJurnal(res.data, user, "penjualan", "non panel");
-      else if(res.data.attributes.status_data === "Publish" && page === "panel") updateJurnal(res.data, user, "penjualan", "panel");
+      if (res.data.attributes.status_data === "Publish" && page === "nonpanel")
+        updateJurnal(res.data, user, "penjualan", "non panel");
+      else if (res.data.attributes.status_data === "Publish" && page === "panel")
+        updateJurnal(res.data, user, "penjualan", "panel");
       return true;
     } else {
       return false;
@@ -459,7 +461,15 @@ export default function ReactDataTable({
       name: <div className="">Status</div>,
       width: "150px",
       selector: (row) => {
-        // return tag if status == belum dibayar, give it a red color. else give it a green color
+        console.log("row", row);
+        if (
+          row.attributes?.retur_panel_sales?.data?.length > 0 ||
+          row.attributes?.retur_non_panel_sales?.data?.length > 0 ||
+          row.attributes?.retur_store_sale?.data?.length > 0
+        ) {
+          return <Tag color="orange">Diretur</Tag>;
+        }
+
         if (row.attributes?.status == "Belum Dibayar") {
           return <Tag color="red">{row.attributes?.status}</Tag>;
         } else if (row.attributes?.status == "Diretur") {

@@ -242,7 +242,8 @@ function Toko({ props }) {
     async function fetchOne(id) {
       message.loading({ content: "Mengambil data", duration: 8000, key: "fetch" });
       const cookies = nookies.get();
-      const endpoint = process.env.NEXT_PUBLIC_URL + `/store-sales/${id}?populate=deep,3`;
+      const endpoint =
+        process.env.NEXT_PUBLIC_URL + `/store-sales/${id}?populate[store_sale_details][populate][0]=product`;
       const options = {
         method: "GET",
         headers: {
@@ -277,11 +278,11 @@ function Toko({ props }) {
       wrap: true,
       width: "120px",
       selector: ({ attributes }) => (
-        <Link href={`/dashboard/produk?id=${attributes?.product?.data?.id}`}>
+        <a target="_blank" href={`/dashboard/produk?id=${attributes?.product?.data?.id}`}>
           <span className="text-blue-500 cursor-pointer hover:text-blue-700">
             {attributes?.product?.data?.attributes?.name || ""}
           </span>
-        </Link>
+        </a>
       ),
     },
     {

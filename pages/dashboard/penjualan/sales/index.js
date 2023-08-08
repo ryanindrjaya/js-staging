@@ -40,7 +40,7 @@ SalesSale.getInitialProps = async (context) => {
       locations,
       sales,
       customers,
-      userMe
+      userMe,
     },
   };
 };
@@ -240,9 +240,11 @@ function SalesSale({ props }) {
   };
 
   const onChangeStatus = async (status, row) => {
-    if (status === "Diterima") { console.log(row, "row nich");
+    if (status === "Diterima") {
+      console.log(row, "row nich");
       if (row?.attributes?.sales_sell?.data) {
-        const inventoryOut = await createInventoryFromPenjualanSales(row); console.log(inventoryOut, "inventoryOut nich");
+        const inventoryOut = await createInventoryFromPenjualanSales(row);
+        console.log(inventoryOut, "inventoryOut nich");
 
         if (inventoryOut) {
           await changeStatusOrder(row);
@@ -272,7 +274,8 @@ function SalesSale({ props }) {
     async function fetchOne(id) {
       message.loading({ content: "Mengambil data", duration: 8000, key: "fetch" });
       const cookies = nookies.get();
-      const endpoint = process.env.NEXT_PUBLIC_URL + `/sales-sales/${id}?populate=deep`;
+      const endpoint =
+        process.env.NEXT_PUBLIC_URL + `/sales-sales/${id}?populate[sales_sale_details][populate][0]=product`;
       const options = {
         method: "GET",
         headers: {
@@ -304,11 +307,11 @@ function SalesSale({ props }) {
       wrap: true,
       width: "120px",
       selector: ({ attributes }) => (
-        <Link href={`/dashboard/produk?id=${attributes?.product?.data?.id}`}>
+        <a target="_blank" href={`/dashboard/produk?id=${attributes?.product?.data?.id}`}>
           <span className="text-blue-500 cursor-pointer hover:text-blue-700">
             {attributes?.product?.data?.attributes?.name || ""}
           </span>
-        </Link>
+        </a>
       ),
     },
     {

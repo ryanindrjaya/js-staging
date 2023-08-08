@@ -7,12 +7,25 @@ import { PrinterOutlined } from "@ant-design/icons";
 import router from "next/router";
 import Item from "antd/lib/list/Item";
 
-export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal, form, customer, statusPembayaran, rangePicker, sales, area, wilayah, tipePenjualan }) {
+export default function ReactDataTable({
+  data,
+  retur,
+  biaya,
+  calculatePriceTotal,
+  form,
+  customer,
+  statusPembayaran,
+  rangePicker,
+  sales,
+  area,
+  wilayah,
+  tipePenjualan,
+}) {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [loading, setLoading] = useState(false);
-  console.log("biaya nich", biaya)
+  console.log("biaya nich", biaya);
 
   var unit = 1;
   var priceUnit = 1;
@@ -30,26 +43,23 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   var min = null;
   var max = null;
 
-  if(rangePicker){
+  if (rangePicker) {
     min = new Date(rangePicker[0]);
     max = new Date(rangePicker[1]);
   }
 
   var index = 0;
   data?.forEach((element) => {
-  returSubtotal = 0;
-  
+    returSubtotal = 0;
+
     retur?.forEach((row) => {
-      if(element?.attributes?.no_sales_sale == row?.id)
-      {
+      if (element?.attributes?.no_sales_sale == row?.id) {
         returSubtotal += row.subtotal;
       }
-      if(element?.attributes?.no_panel_sale == row?.id)
-      {
+      if (element?.attributes?.no_panel_sale == row?.id) {
         returSubtotal += row.subtotal;
       }
-      if(element?.attributes?.no_non_panel_sale == row?.id)
-      {
+      if (element?.attributes?.no_non_panel_sale == row?.id) {
         returSubtotal += row.subtotal;
       }
     });
@@ -57,13 +67,13 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     element.subtotal = returSubtotal;
     element.sisaPiutang = element.attributes?.total - element?.subtotal;
     sisaPiutang[index] = element.sisaPiutang;
-    
+
     index++;
   });
 
   const cekData = (data) => {
     for (const key in biaya.list) {
-      if(biaya.list[key].id === data.id && biaya.list[key].keterangan === data.keterangan) return key;
+      if (biaya.list[key].id === data.id && biaya.list[key].keterangan === data.keterangan) return key;
     }
   };
 
@@ -74,21 +84,26 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
 
   const calculateTotalPembayaran = (data, id) => {
     if (biaya.info[id] != undefined) {
-      return (biaya.info[id]?.tunai + biaya.info[id]?.giro + biaya.info[id]?.transfer );
+      return biaya.info[id]?.tunai + biaya.info[id]?.giro + biaya.info[id]?.transfer;
     } else return 0;
   };
 
   const onChangePilih = async (value, data, index) => {
     var pilihData = "tidak";
-    if(value.target.checked == true) pilihData = "pilih";
+    if (value.target.checked == true) pilihData = "pilih";
     else pilihData = "tidak";
 
     index = cekData(data);
 
     dispatch({ type: "CHANGE_PILIH_DATA", pilihData: pilihData, listData: data, index: index });
-    dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: data.sisaHutang, listData: data, index: index });
+    dispatch({
+      type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO",
+      totalHutangJatuhTempo: data.sisaHutang,
+      listData: data,
+      index: index,
+    });
 
-    if(pilihData){
+    if (pilihData) {
       onChangeTunai(0, data, index);
       onChangeTransfer(0, data, index);
       onChangeGiro(0, data, index);
@@ -96,7 +111,6 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       onChangeOth(null, data, index);
       onChangeId(data.id, data, index);
     }
-    
   };
 
   const onChangeId = (value, data, index) => {
@@ -137,8 +151,8 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     //if(pembayaran[idx] == undefined || pembayaran[idx] == 0) pembayaran[idx] = parseInt(row?.attributes?.total) - row?.subtotal - row?.sisaPiutang ;
     //if(0 pembayaran[idx] ) pembayaran[idx] = parseInt(row?.attributes?.total) - row?.subtotal - row?.sisaPiutang ;
     //biaya.list[idx].sisaPiutang = row.sisaPiutang ;
-    
-    if(biaya.list.length > 0) return formatter.format(biaya.list[idx].sisaPiutang);
+
+    if (biaya.list.length > 0) return formatter.format(biaya.list[idx].sisaPiutang);
   };
 
   const [tunai, setTunai] = useState(0);
@@ -154,18 +168,27 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   var tempOth = null;
   var tempIndex = null;
   const onChangeBayar = (value, metode, row, idx) => {
-
     //setBiayaData(value);
     //if(idx != tempIndex){
-        if (metode == "tunai") { setTunai(value); tempTunai = value; }
-        if (metode == "transfer") { setTransfer(value); tempTransfer = value; }
-        if (metode == "giro") { setGiro(value); tempGiro = value; }
-        //if (metode == "cn") { setCn(value); tempCn = value; }
-        //if (metode == "oth") { setOth(value); tempOth = value; }
+    if (metode == "tunai") {
+      setTunai(value);
+      tempTunai = value;
+    }
+    if (metode == "transfer") {
+      setTransfer(value);
+      tempTransfer = value;
+    }
+    if (metode == "giro") {
+      setGiro(value);
+      tempGiro = value;
+    }
+    //if (metode == "cn") { setCn(value); tempCn = value; }
+    //if (metode == "oth") { setOth(value); tempOth = value; }
 
-        // cek pembayaran
-        if ((row.attributes.total - row.subtotal) >= (tempTunai + tempTransfer + tempGiro)) setModalSisa(tunai + transfer + giro);
-        else handleCek("info");
+    // cek pembayaran
+    if (row.attributes.total - row.subtotal >= tempTunai + tempTransfer + tempGiro)
+      setModalSisa(tunai + transfer + giro);
+    else handleCek("info");
     //}
 
     tempIndex = idx;
@@ -192,7 +215,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     onChangeCn(cn, row, idx);
     onChangeOth(oth, row, idx);
 
-    if ((row.attributes.total - row.subtotal) >= (tunai + transfer + giro)) setModalSisa(tunai + transfer + giro);
+    if (row.attributes.total - row.subtotal >= tunai + transfer + giro) setModalSisa(tunai + transfer + giro);
     else {
       handleCek("error");
       onChangeTunai(0, row, idx);
@@ -207,17 +230,17 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       setConfirmLoading(false);
 
       form.setFieldsValue({
-          metode_bayar1: null,
-          metode_bayar2: null,
-          metode_bayar3: null,
-          metode_bayar4: null,
-          metode_bayar5: null,
-          bayar1: null,
-          bayar2: null,
-          bayar3: null,
-          bayar4: null,
-          bayar5: null,
-          noGiro: null,
+        metode_bayar1: null,
+        metode_bayar2: null,
+        metode_bayar3: null,
+        metode_bayar4: null,
+        metode_bayar5: null,
+        bayar1: null,
+        bayar2: null,
+        bayar3: null,
+        bayar4: null,
+        bayar5: null,
+        noGiro: null,
       });
 
       setTunai(0);
@@ -229,7 +252,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
   };
 
   const handleCancel = () => {
-    console.log('Clicked cancel button');
+    console.log("Clicked cancel button");
     setOpen(false);
 
     form.setFieldsValue({
@@ -268,213 +291,214 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     else defaultCek = false;
 
     return (
-    <div>
+      <div>
         {/* <div>
             <Checkbox className="text-xs font-normal py-2 px-2 rounded-md" defaultChecked={defaultCek} onChange={(value) => onChangePilih(value, row, idx)}> Pilih </Checkbox>
         </div> */}
         <div>
-            <button
-                //onClick={() => metodePembayaran(row)}
-                onClick={showModal}
-                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-            >
-                <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
-                Metode Pembayaran
-            </button>
+          <button
+            //onClick={() => metodePembayaran(row)}
+            onClick={showModal}
+            className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+          >
+            <PrinterOutlined className="mr-2 mt-0.5 float float-left" />
+            Metode Pembayaran
+          </button>
 
-            <Modal
-                title="Title"
-                open={open}
-                onOk={handleOk}
-                confirmLoading={confirmLoading}
-                onCancel={handleCancel}
-                //ref={(modal) => this.myFormRef = modal}
-                footer={[
-                  <button className="border border-cyan-700 rounded-md m-1 text-sm px-6 py-2" key="back" onClick={handleCancel}>
-                    Cancel
-                  </button>,
-                  <button className="bg-cyan-700 rounded-md m-1 text-sm px-4" key="submit" loading={loading} onClick={(value) => handleOk(row, idx, value)}>
-                    <p className="px-4 py-2 m-0 text-white">
-                        SIMPAN
-                    </p>
-                  </button>
-                ]}
-            >
-                  <div className="w-full flex justify-start">
-                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0 text-center">
-                          <span className="font-bold">TOTAL PIUTANG</span>
-                      </div>
-                  </div>
+          <Modal
+            title="Title"
+            open={open}
+            onOk={handleOk}
+            confirmLoading={confirmLoading}
+            onCancel={handleCancel}
+            //ref={(modal) => this.myFormRef = modal}
+            footer={[
+              <button
+                className="border border-cyan-700 rounded-md m-1 text-sm px-6 py-2"
+                key="back"
+                onClick={handleCancel}
+              >
+                Cancel
+              </button>,
+              <button
+                className="bg-cyan-700 rounded-md m-1 text-sm px-4"
+                key="submit"
+                loading={loading}
+                onClick={(value) => handleOk(row, idx, value)}
+              >
+                <p className="px-4 py-2 m-0 text-white">SIMPAN</p>
+              </button>,
+            ]}
+          >
+            <div className="w-full flex justify-start">
+              <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0 text-center">
+                <span className="font-bold">TOTAL PIUTANG</span>
+              </div>
+            </div>
 
-                  <div className="w-full flex justify-start mb-4">
-                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0 text-center">
-                          <span className="font-bold">{formatter.format(row.attributes?.total - row.subtotal)}</span>
-                      </div>
-                  </div>
+            <div className="w-full flex justify-start mb-4">
+              <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0 text-center">
+                <span className="font-bold">{formatter.format(row.attributes?.total - row.subtotal)}</span>
+              </div>
+            </div>
 
-                  <div className="w-full flex justify-start">
-                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
-                          <Form.Item name="metode_bayar1" noStyle>
-                              <Select
-                                  size="large"
-                                  style={{
-                                      width: "100%",
-                                  }}
-                                  placeholder="Akun Pembayaran"
-                                  onChange={(value) => onChangeMetode(value)}
-                              >
-                                  <Select.Option value="tunai" key="tunai">
-                                      Tunai
-                                  </Select.Option>
-                                  <Select.Option value="transfer" key="transfer">
-                                      Bank Transfer
-                                  </Select.Option>
-                                  <Select.Option value="giro" key="giro">
-                                      Bank Giro
-                                  </Select.Option>
-                                  {/* <Select.Option value="cn" key="cn">
+            <div className="w-full flex justify-start">
+              <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
+                <Form.Item name="metode_bayar1" noStyle>
+                  <Select
+                    size="large"
+                    style={{
+                      width: "100%",
+                    }}
+                    placeholder="Akun Pembayaran"
+                    onChange={(value) => onChangeMetode(value)}
+                  >
+                    <Select.Option value="tunai" key="tunai">
+                      Tunai
+                    </Select.Option>
+                    <Select.Option value="transfer" key="transfer">
+                      Bank Transfer
+                    </Select.Option>
+                    <Select.Option value="giro" key="giro">
+                      Bank Giro
+                    </Select.Option>
+                    {/* <Select.Option value="cn" key="cn">
                                       CN
                                   </Select.Option>
                                   <Select.Option value="oth" key="oth">
                                       OTH
                                   </Select.Option> */}
-                              </Select>
-                          </Form.Item>
-                      </div>
-                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
-                          <Form.Item name="bayar1" noStyle>
-                              <InputNumber
-                                  size="large"
-                                  max={data.total}
-                                  min={0}
-                                  style={{
-                                      width: "100%",
-                                      marginRight: "10px",
-                                  }}
-                                  onChange={(value) => onChangeBayar(value, metode, row, idx)}
-                                  formatter={(value) =>
-                                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                                  }
-                                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                              />
-                          </Form.Item>
-                      </div>
-                  </div>
+                  </Select>
+                </Form.Item>
+              </div>
+              <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
+                <Form.Item name="bayar1" noStyle>
+                  <InputNumber
+                    size="large"
+                    max={data.total}
+                    min={0}
+                    style={{
+                      width: "100%",
+                      marginRight: "10px",
+                    }}
+                    onChange={(value) => onChangeBayar(value, metode, row, idx)}
+                    formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                    parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                  />
+                </Form.Item>
+              </div>
+            </div>
 
-                  <div className="w-full flex justify-start">
-                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
-                          <Form.Item name="metode_bayar2" noStyle>
-                              <Select
-                                  size="large"
-                                  style={{
-                                      width: "100%",
-                                  }}
-                                  placeholder="Akun Pembayaran"
-                                  onChange={(value) => onChangeMetode(value)}
-                              >
-                                  <Select.Option value="tunai" key="tunai">
-                                      Tunai
-                                  </Select.Option>
-                                  <Select.Option value="transfer" key="transfer">
-                                      Bank Transfer
-                                  </Select.Option>
-                                  <Select.Option value="giro" key="giro">
-                                      Bank Giro
-                                  </Select.Option>
-                                  {/* <Select.Option value="cn" key="cn">
+            <div className="w-full flex justify-start">
+              <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
+                <Form.Item name="metode_bayar2" noStyle>
+                  <Select
+                    size="large"
+                    style={{
+                      width: "100%",
+                    }}
+                    placeholder="Akun Pembayaran"
+                    onChange={(value) => onChangeMetode(value)}
+                  >
+                    <Select.Option value="tunai" key="tunai">
+                      Tunai
+                    </Select.Option>
+                    <Select.Option value="transfer" key="transfer">
+                      Bank Transfer
+                    </Select.Option>
+                    <Select.Option value="giro" key="giro">
+                      Bank Giro
+                    </Select.Option>
+                    {/* <Select.Option value="cn" key="cn">
                                       CN
                                   </Select.Option>
                                   <Select.Option value="oth" key="oth">
                                       OTH
                                   </Select.Option> */}
-                              </Select>
-                          </Form.Item>
-                      </div>
-                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
-                          <Form.Item name="bayar2" noStyle>
-                              <InputNumber
-                                  size="large"
-                                  min={0}
-                                  style={{
-                                      width: "100%",
-                                      marginRight: "10px",
-                                  }}
-                                  onChange={(value) => onChangeBayar(value, metode, row, idx)}
-                                  formatter={(value) =>
-                                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                                  }
-                                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                              />
-                          </Form.Item>
-                      </div>
-                  </div>
+                  </Select>
+                </Form.Item>
+              </div>
+              <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
+                <Form.Item name="bayar2" noStyle>
+                  <InputNumber
+                    size="large"
+                    min={0}
+                    style={{
+                      width: "100%",
+                      marginRight: "10px",
+                    }}
+                    onChange={(value) => onChangeBayar(value, metode, row, idx)}
+                    formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                    parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                  />
+                </Form.Item>
+              </div>
+            </div>
 
-                  <div className="w-full flex justify-start">
-                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
-                          <Form.Item name="metode_bayar3" noStyle>
-                              <Select
-                                  size="large"
-                                  style={{
-                                      width: "100%",
-                                  }}
-                                  placeholder="Akun Pembayaran"
-                                  onChange={(value) => onChangeMetode(value)}
-                              >
-                                  <Select.Option value="tunai" key="tunai">
-                                      Tunai
-                                  </Select.Option>
-                                  <Select.Option value="transfer" key="transfer">
-                                      Bank Transfer
-                                  </Select.Option>
-                                  <Select.Option value="giro" key="giro">
-                                      Bank Giro
-                                  </Select.Option>
-                                  {/* <Select.Option value="cn" key="cn">
+            <div className="w-full flex justify-start">
+              <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
+                <Form.Item name="metode_bayar3" noStyle>
+                  <Select
+                    size="large"
+                    style={{
+                      width: "100%",
+                    }}
+                    placeholder="Akun Pembayaran"
+                    onChange={(value) => onChangeMetode(value)}
+                  >
+                    <Select.Option value="tunai" key="tunai">
+                      Tunai
+                    </Select.Option>
+                    <Select.Option value="transfer" key="transfer">
+                      Bank Transfer
+                    </Select.Option>
+                    <Select.Option value="giro" key="giro">
+                      Bank Giro
+                    </Select.Option>
+                    {/* <Select.Option value="cn" key="cn">
                                       CN
                                   </Select.Option>
                                   <Select.Option value="oth" key="oth">
                                       OTH
                                   </Select.Option> */}
-                              </Select>
-                          </Form.Item>
-                      </div>
-                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
-                          <Form.Item name="bayar3" noStyle>
-                              <InputNumber
-                                  size="large"
-                                  min={0}
-                                  style={{
-                                      width: "100%",
-                                      marginRight: "10px",
-                                  }}
-                                  onChange={(value) => onChangeBayar(value, metode, row)}
-                                  formatter={(value) =>
-                                    value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                                  }
-                                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                              />
-                          </Form.Item>
-                      </div>
-                  </div>
+                  </Select>
+                </Form.Item>
+              </div>
+              <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
+                <Form.Item name="bayar3" noStyle>
+                  <InputNumber
+                    size="large"
+                    min={0}
+                    style={{
+                      width: "100%",
+                      marginRight: "10px",
+                    }}
+                    onChange={(value) => onChangeBayar(value, metode, row)}
+                    formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                    parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                  />
+                </Form.Item>
+              </div>
+            </div>
 
-                  <div className="w-full flex justify-start">
-                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0"/>
-                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
-                          <Form.Item name="noGiro" noStyle>
-                              <Input
-                                  placeholder="No Giro"
-                                  size="large"
-                                  style={{
-                                      width: "100%",
-                                      marginRight: "10px",
-                                  }}
-                                  onChange={(values) => onChangeNoGiro(values)}
-                              />
-                          </Form.Item>
-                      </div>
-                  </div>
+            <div className="w-full flex justify-start">
+              <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0" />
+              <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
+                <Form.Item name="noGiro" noStyle>
+                  <Input
+                    placeholder="No Giro"
+                    size="large"
+                    style={{
+                      width: "100%",
+                      marginRight: "10px",
+                    }}
+                    onChange={(values) => onChangeNoGiro(values)}
+                  />
+                </Form.Item>
+              </div>
+            </div>
 
-                  {/* <div className="w-full flex justify-start">
+            {/* <div className="w-full flex justify-start">
                       <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
                           <Form.Item name="metode_bayar4" noStyle>
                               <Select
@@ -570,27 +594,24 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
                       </div>
                   </div> */}
 
-                  <div className="w-full flex justify-start mt-4">
-                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0 text-center">
-                          <span className="font-bold">SISA PIUTANG</span>
-                      </div>
-                  </div>
+            <div className="w-full flex justify-start mt-4">
+              <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0 text-center">
+                <span className="font-bold">SISA PIUTANG</span>
+              </div>
+            </div>
 
-                  <div className="w-full flex justify-start mb-4">
-                      <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0 text-center">
-                          <span className="font-bold">
-                              {formatter.format(
-                                row.attributes?.total - (tunai + transfer + giro + row.subtotal + row.dibayar)
-                              )}
-                          </span>
-                      </div>
-                  </div>
-
-            </Modal>
+            <div className="w-full flex justify-start mb-4">
+              <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0 text-center">
+                <span className="font-bold">
+                  {formatter.format(row.attributes?.total - (tunai + transfer + giro + row.subtotal + row.dibayar))}
+                </span>
+              </div>
+            </div>
+          </Modal>
         </div>
-    </div>
-   );
-  }
+      </div>
+    );
+  };
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -621,26 +642,34 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       width: "180px",
       selector: (row, idx) => {
         var defaultCek = false;
-        if(biaya.info[idx]){
-          if(biaya.info[idx].pilihData == "pilih") defaultCek = true;
+        if (biaya.info[idx]) {
+          if (biaya.info[idx].pilihData == "pilih") defaultCek = true;
           else defaultCek = false;
-        } 
-        return(
-        <>
-          <Checkbox className="text-xs font-normal py-2 px-2 rounded-md" checked={defaultCek} onChange={(value) => onChangePilih(value, row, idx)}> Pilih </Checkbox>
-          <Popover content={content(row, idx)} placement="bottom" trigger="click">
+        }
+        return (
+          <>
+            <Checkbox
+              className="text-xs font-normal py-2 px-2 rounded-md"
+              checked={defaultCek}
+              onChange={(value) => onChangePilih(value, row, idx)}
+            >
+              {" "}
+              Pilih{" "}
+            </Checkbox>
+            <Popover content={content(row, idx)} placement="bottom" trigger="click">
               <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
-                  Tindakan
+                Tindakan
               </button>
-          </Popover>
-        </>
+            </Popover>
+          </>
         );
       },
     },
     {
       name: "No Invoice",
       width: "200px",
-      selector: (row) => row.attributes?.no_sales_sale ?? row.attributes?.no_non_panel_sale ?? row.attributes?.no_panel_sale,
+      selector: (row) =>
+        row.attributes?.no_sales_sale ?? row.attributes?.no_non_panel_sale ?? row.attributes?.no_panel_sale,
     },
     {
       name: "Tanggal",
@@ -692,1105 +721,2065 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
         //filter
         let man = new Date(item.attributes.sale_date); //date from data
         let customerNama = item.attributes.customer.data.id;
-        let areaFilter = item.attributes.customer.data.attributes.area.data.id;
-        let wilayahFilter = item.attributes.customer.data.attributes.wilayah.data.id;
-        let salesFilter = item.attributes.customer.data.attributes.sales_name;
+        let areaFilter = item.attributes.customer.data.attributes.area?.data?.id;
+        let wilayahFilter = item.attributes.customer.data.attributes.wilayah.data?.id;
+        let salesFilter = item.attributes.customer.data.attributes?.sales_name;
 
         //show pilih data
         // if(biaya.info[id]?.pilihData == "pilih"){
         //   return item;
         // } else {}
 
-        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
-            sales == undefined && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == undefined
-        ){
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
+        ) {
           return item;
         }
 
-        if( statusPembayaran == item.status && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
         ) {
           return item;
         }
-        if( statusPembayaran == item.status && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
         ) {
           return item;
         }
-        if( statusPembayaran == item.status && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == areaFilter && wilayah?.id == undefined
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
         ) {
           return item;
         }
-        if( statusPembayaran == item.status && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == areaFilter && wilayah?.id == undefined
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
         ) {
           return item;
         }
-        if( statusPembayaran == item.status && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
         ) {
           return item;
         }
-        if( statusPembayaran == item.status && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
         ) {
           return item;
         }
-        if( statusPembayaran == item.status && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == undefined && wilayah?.id == undefined
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
         ) {
           return item;
         }
-        if( statusPembayaran == item.status && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == undefined && wilayah?.id == undefined
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
         ) {
           return item;
         }
-        if( statusPembayaran == item.status && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == item.status && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == item.status && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == item.status && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == item.status && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == item.status && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == item.status && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == item.status && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == item.status && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
         ) {
           return item;
         }
-        if( statusPembayaran == item.status && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
         ) {
           return item;
         }
-        if( statusPembayaran == item.status && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == areaFilter && wilayah?.id == undefined
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
         ) {
           return item;
         }
-        if( statusPembayaran == item.status && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == areaFilter && wilayah?.id == undefined
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
         ) {
           return item;
         }
-        if( statusPembayaran == item.status && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
         ) {
           return item;
         }
-        if( statusPembayaran == item.status && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
         ) {
           return item;
         }
-        if( statusPembayaran == item.status && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == undefined && wilayah?.id == undefined
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
         ) {
           return item;
         }
-        if( statusPembayaran == item.status && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == undefined && wilayah?.id == undefined
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
         ) {
           return item;
         }
-        if( statusPembayaran == item.status && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == item.status && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == item.status && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == item.status && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == item.status && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == item.status && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == item.status && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == item.status && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == item.status &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == undefined && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
         ) {
           return item;
         }
-        if( statusPembayaran == undefined && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
         ) {
           return item;
         }
-        if( statusPembayaran == undefined && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == areaFilter && wilayah?.id == undefined
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
         ) {
           return item;
         }
-        if( statusPembayaran == undefined && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == areaFilter && wilayah?.id == undefined
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
         ) {
           return item;
         }
-        if( statusPembayaran == undefined && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
         ) {
           return item;
         }
-        if( statusPembayaran == undefined && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
         ) {
           return item;
         }
-        if( statusPembayaran == undefined && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == undefined && wilayah?.id == undefined
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
         ) {
           return item;
         }
-        if( statusPembayaran == undefined && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == undefined && wilayah?.id == undefined
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
         ) {
           return item;
         }
-        if( statusPembayaran == undefined && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == undefined && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == undefined && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == undefined && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == undefined && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == undefined && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == undefined && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == undefined && customer?.id == customerNama &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == customerNama &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == undefined && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
         ) {
           return item;
         }
-        if( statusPembayaran == undefined && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
         ) {
           return item;
         }
-        if( statusPembayaran == undefined && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == areaFilter && wilayah?.id == undefined
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
         ) {
           return item;
         }
-        if( statusPembayaran == undefined && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == areaFilter && wilayah?.id == undefined
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
         ) {
           return item;
         }
-        if( statusPembayaran == undefined && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
         ) {
           return item;
         }
-        if( statusPembayaran == undefined && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
         ) {
           return item;
         }
-        if( statusPembayaran == undefined && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == undefined && wilayah?.id == undefined
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
         ) {
           return item;
         }
-        if( statusPembayaran == undefined && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == undefined && area?.id == undefined && wilayah?.id == undefined
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
         ) {
           return item;
         }
-        if( statusPembayaran == undefined && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == undefined && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == undefined && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == undefined && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == undefined && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == undefined && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == undefined && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
-            && tipePenjualan == item.keterangan
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
-        if( statusPembayaran == undefined && customer?.id == undefined &&
-            min?.getFullYear() <= man.getFullYear() && man.getFullYear() <= max?.getFullYear() &&
-            min?.getMonth()+1 <= man.getMonth()+1 && man.getMonth()+1 <= max?.getMonth()+1 &&
-            min?.getDate() <= man.getDate() && man.getDate() <= max?.getDate() &&
-            sales == salesFilter && area?.id == undefined && wilayah?.id == undefined
-            && tipePenjualan == undefined
+        if (
+          statusPembayaran == undefined &&
+          customer?.id == undefined &&
+          min?.getFullYear() <= man.getFullYear() &&
+          man.getFullYear() <= max?.getFullYear() &&
+          min?.getMonth() + 1 <= man.getMonth() + 1 &&
+          man.getMonth() + 1 <= max?.getMonth() + 1 &&
+          min?.getDate() <= man.getDate() &&
+          man.getDate() <= max?.getDate() &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
         ) {
           if (item.keterangan == "sales") return item;
           else if (item.keterangan == "panel") return item;
           else if (item.keterangan == "nonpanel") return item;
-          else { };
+          else {
+          }
         }
 
-        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
-          sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
-        ){
-          return item;
-        }if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
-          sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == undefined
-        ){
-          return item;
-        }
-        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
-          sales == undefined && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == item.keterangan
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
+        ) {
           return item;
         }
-        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
-          sales == undefined && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == undefined
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
+        ) {
           return item;
         }
-        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
-          sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
+        ) {
           return item;
         }
-        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
-          sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == undefined
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
+        ) {
           return item;
         }
-        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
-          sales == undefined && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == item.keterangan
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
+        ) {
           return item;
         }
-        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
-          sales == undefined && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == undefined
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
+        ) {
           return item;
         }
-        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
-          sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
-          sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == undefined
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
-          sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == item.keterangan
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
-          sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == undefined
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
-          sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
-          sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == undefined
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
-          sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == item.keterangan
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == customerNama && statusPembayaran == undefined && min == null && max == null &&
-          sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == undefined
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
-          sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
+        ) {
           return item;
         }
-        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
-          sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == undefined
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
+        ) {
           return item;
         }
-        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
-          sales == undefined && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == item.keterangan
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
+        ) {
           return item;
         }
-        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
-          sales == undefined && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == undefined
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
+        ) {
           return item;
         }
-        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
-          sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
+        ) {
           return item;
         }
-        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
-          sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == undefined
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
+        ) {
           return item;
         }
-        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
-          sales == undefined && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == item.keterangan
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
+        ) {
           return item;
         }
-        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
-          sales == undefined && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == undefined
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
+        ) {
           return item;
         }
-        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
-          sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
-          sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == undefined
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
-          sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == item.keterangan
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
-          sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == undefined
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
-          sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
-          sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == undefined
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
-          sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == item.keterangan
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == customerNama && statusPembayaran == item.status && min == null && max == null &&
-          sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == undefined
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
-          sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
-          sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == undefined
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
-          sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == item.keterangan
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
-          sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == undefined
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
-          sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
-          sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == undefined
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
-          sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == item.keterangan
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
-          sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == undefined
-        ){
-          if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
-        }
-        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
-          sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
+        ) {
           return item;
         }
-        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
-          sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == undefined
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
+        ) {
           return item;
         }
-        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
-          sales == undefined && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == item.keterangan
-        ){
-          return item;
-        }
-        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
-          sales == undefined && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == undefined
-        ){
-          return item;
-        }
-        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
-          sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
-        ){
-          return item;
-        }
-        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
-          sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == undefined
-        ){
-          return item;
-        }
-        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
-          sales == undefined && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == item.keterangan
-        ){
-          return item;
-        }
-        if( customer?.id == undefined && statusPembayaran == item.status && min == null && max == null &&
-          sales == undefined && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == undefined
-        ){
-          return item;
-        }
-        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
-          sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
+        ) {
           if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
         }
-        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
-          sales == salesFilter && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == undefined
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
+        ) {
           if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
         }
-        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
-          sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == item.keterangan
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
+        ) {
           if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
         }
-        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
-          sales == salesFilter && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == undefined
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
+        ) {
           if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
         }
-        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
-          sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
+        ) {
           if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
         }
-        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
-          sales == salesFilter && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == undefined
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
+        ) {
           if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
         }
-        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
-          sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == item.keterangan
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
+        ) {
           if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
         }
-        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
-          sales == salesFilter && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == undefined
-        ){
+        if (
+          customer?.id == customerNama &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
+        ) {
           if (item.keterangan == "sales") return item;
-            else if (item.keterangan == "panel") return item;
-            else if (item.keterangan == "nonpanel") return item;
-            else { };
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
         }
-        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
-          sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
-        ){
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
+        ) {
           return item;
         }
-        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
-          sales == undefined && area?.id == areaFilter && wilayah?.id == wilayahFilter && tipePenjualan == undefined
-        ){
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
+        ) {
           return item;
         }
-        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
-          sales == undefined && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == item.keterangan
-        ){
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
+        ) {
           return item;
         }
-        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
-          sales == undefined && area?.id == areaFilter && wilayah?.id == undefined && tipePenjualan == undefined
-        ){
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
+        ) {
           return item;
         }
-        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
-          sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == item.keterangan
-        ){
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
+        ) {
           return item;
         }
-        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
-          sales == undefined && area?.id == undefined && wilayah?.id == wilayahFilter && tipePenjualan == undefined
-        ){
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
+        ) {
           return item;
         }
-        if( customer?.id == undefined && statusPembayaran == undefined && min == null && max == null &&
-          sales == undefined && area?.id == undefined && wilayah?.id == undefined && tipePenjualan == item.keterangan
-        ){
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
+        ) {
           return item;
         }
-
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == item.status &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
+        ) {
+          return item;
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == salesFilter &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
+        ) {
+          if (item.keterangan == "sales") return item;
+          else if (item.keterangan == "panel") return item;
+          else if (item.keterangan == "nonpanel") return item;
+          else {
+          }
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
+        ) {
+          return item;
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
+        ) {
+          return item;
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
+        ) {
+          return item;
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == areaFilter &&
+          wilayah?.id == undefined &&
+          tipePenjualan == undefined
+        ) {
+          return item;
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == item.keterangan
+        ) {
+          return item;
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == wilayahFilter &&
+          tipePenjualan == undefined
+        ) {
+          return item;
+        }
+        if (
+          customer?.id == undefined &&
+          statusPembayaran == undefined &&
+          min == null &&
+          max == null &&
+          sales == undefined &&
+          area?.id == undefined &&
+          wilayah?.id == undefined &&
+          tipePenjualan == item.keterangan
+        ) {
+          return item;
+        }
       })}
       noDataComponent={`--Belum ada data penjualan--`}
     />

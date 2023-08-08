@@ -357,7 +357,6 @@ function ReturPanel({ props }) {
       }
     });
     setDataValues(values);
-    setLoading(false);
   };
 
   const createDetailSale = async () => {
@@ -393,8 +392,11 @@ function ReturPanel({ props }) {
       "/retur-panel-sales/",
       "retur panel sale",
       locations,
-      updateStock
+      updateStock,
+      "Publish"
     );
+
+    setLoading(false);
   };
 
   const calculatePriceAfterDisc = (row, index) => {
@@ -703,6 +705,7 @@ function ReturPanel({ props }) {
               ) : (
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
                   <StoreSaleTable
+                    noMaxInput={true}
                     products={products}
                     productTotalPrice={productTotalPrice}
                     setTotalPrice={setTotalPrice}
@@ -711,6 +714,7 @@ function ReturPanel({ props }) {
                     productSubTotal={productSubTotal}
                     setProductSubTotal={setProductSubTotal}
                     dataLocationStock={dataLocationStock}
+                    getProduct={getProductAtLocation}
                     locations={locations}
                     formObj={form}
                   />

@@ -11,7 +11,7 @@ export default function PrintRetur({ id, data }) {
   const stakeholderNPWP = "75.777.135.7.623.000";
 
   const { attributes } = data?.data;
-  const details = attributes?.retur_panel_sale_details?.data ?? [];
+  const details = attributes?.retur_non_panel_sale_details?.data ?? [];
 
   const [totalPembelian, setTotalPembelian] = useState(0);
 
@@ -74,7 +74,7 @@ export default function PrintRetur({ id, data }) {
       <div className="font-bold grid grid-cols-8 mb-2">
         {/* NO */}
         <p className="m-0 col-span-2">NO</p>
-        <p className="m-0 col-span-6">: {attributes?.no_retur_panel_sale}</p>
+        <p className="m-0 col-span-6">: {attributes?.no_retur_non_panel_sale}</p>
 
         <p className="m-0 col-span-2">TANGGAL</p>
         <p className="m-0 col-span-6">
@@ -152,7 +152,7 @@ PrintRetur.getInitialProps = async (ctx) => {
   const { id } = ctx.query;
   const cookies = nookies.get(ctx);
 
-  const endpoint = `${process.env.NEXT_PUBLIC_URL}/retur-panel-sales/${id}?populate=deep`;
+  const endpoint = `${process.env.NEXT_PUBLIC_URL}/retur-non-panel-sales/${id}?populate=deep`;
   const options = {
     method: "GET",
     headers: {

@@ -361,6 +361,10 @@ function NonPanelSale({ props }) {
     const tagGreen = process.env.TAG_GREEN;
     const tagOrange = process.env.TAG_ORANGE;
 
+    if (row.attributes?.retur_non_panel_sales?.data?.length > 0) {
+      return <Tag color="orange">Diretur</Tag>;
+    }
+
     if (row.attributes.status == "Belum Dibayar") {
       return <Tag color={tagRed}>{row.attributes.status}</Tag>;
     } else if (row.attributes.status == "Dibayar Sebagian") {
@@ -376,7 +380,8 @@ function NonPanelSale({ props }) {
     async function fetchOne(id) {
       message.loading({ content: "Mengambil data", duration: 8000, key: "fetch" });
       const cookies = nookies.get();
-      const endpoint = process.env.NEXT_PUBLIC_URL + `/non-panel-sales/${id}?populate=deep`;
+      const endpoint =
+        process.env.NEXT_PUBLIC_URL + `/non-panel-sales/${id}?populate[non_panel_sale_details][populate][0]=product`;
       const options = {
         method: "GET",
         headers: {
@@ -408,11 +413,11 @@ function NonPanelSale({ props }) {
       wrap: true,
       width: "120px",
       selector: ({ attributes }) => (
-        <Link href={`/dashboard/produk?id=${attributes?.product?.data?.id}`}>
+        <a target="_blank" href={`/dashboard/produk?id=${attributes?.product?.data?.id}`}>
           <span className="text-blue-500 cursor-pointer hover:text-blue-700">
             {attributes?.product?.data?.attributes?.name || ""}
           </span>
-        </Link>
+        </a>
       ),
     },
     {
@@ -480,6 +485,12 @@ function NonPanelSale({ props }) {
         stok_keluar?.length > 0 ? stok_keluar?.map(({ qty, unit }) => `${qty} ${unit}`)?.join(", ") : "",
     },
     {
+      name: "Retur",
+      center: true,
+      selector: ({ stok_masuk = [] }) =>
+        stok_masuk?.length > 0 ? stok_masuk?.map(({ qty, unit }) => `${qty} ${unit}`)?.join(", ") : "",
+    },
+    {
       name: "Lokasi",
       selector: ({ location }) => {
         const selectedLocation = locations.find((item) => item.id === location);
@@ -494,6 +505,25 @@ function NonPanelSale({ props }) {
       ),
     },
   ];
+
+  const getTagColor = (type) => {
+    switch (type) {
+      case "Terkirim":
+        return "green";
+      case "Diterima":
+        return "green";
+      case "Diterima":
+        return "GREEN";
+      case "Dibatalkan":
+        return "red";
+      case "Diretur":
+        return "blue";
+      case "Diproses":
+        return "default";
+      default:
+        return "default";
+    }
+  };
 
   return (
     <>

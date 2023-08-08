@@ -15,6 +15,7 @@ import createSaleFunc from "../../utility/createSale";
 import { useRouter } from "next/router";
 import LoadingAnimations from "@iso/components/Animations/Loading";
 import createReturInventory from "../../utility/createReturInventory";
+import moment from "moment";
 
 ReturNonPanel.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -232,13 +233,13 @@ function ReturNonPanel({ props }) {
     let tempData = {};
 
     // create an array of promises by mapping over the productList
-    const promises = products.productList.map(async (product) => {
+    const promises = products.productList.map(async (product, index) => {
       const stock = await getStockAtLocation(product.id, locationId);
       console.log("stock ", product.id, stock);
 
       tempData = {
         ...tempData,
-        [product.id]: stock,
+        [index]: stock,
       };
 
       return stock; // return a promise from each iteration
@@ -283,7 +284,7 @@ function ReturNonPanel({ props }) {
       console.error("error", error);
       setDataLocationStock({
         ...dataLocationStock,
-        [productId]: "Error fetching stock data",
+        [index]: "Error fetching stock data",
       });
     }
     return stockString;
@@ -324,7 +325,7 @@ function ReturNonPanel({ props }) {
       totalPiutang = totalPiutang + totalPembayaran;
     });
 
-    const payment = panel.data.attributes.total;
+    const payment = nonPanel.data.attributes.total;
     const grandTotalFloat = parseFloat(grandTotal.toFixed(2));
     const paymentFloat = parseFloat(payment.toFixed(2));
     const paidCredit = parseFloat(totalPiutang.toFixed(2));
@@ -352,7 +353,6 @@ function ReturNonPanel({ props }) {
       }
     });
     setDataValues(values);
-    setLoading(false);
   };
 
   const createDetailSale = async () => {
@@ -377,18 +377,28 @@ function ReturNonPanel({ props }) {
     values.additional_fee_2_desc = addFee2Desc;
     values.additional_fee_3_desc = addFee3Desc;
     values.non_panel_sale = nonPanel.data.id;
-    await createSaleFunc(
-      grandTotal,
-      totalPrice,
-      values,
-      listId,
-      form,
-      router,
-      "/retur-non-panel-sales/",
-      "non panel sale",
-      locations,
-      updateStock
-    );
+
+    try {
+      await createSaleFunc(
+        grandTotal,
+        totalPrice,
+        values,
+        listId,
+        form,
+        router,
+        "/retur-non-panel-sales/",
+        "retur non panel sale",
+        locations,
+        null,
+        "Publish"
+      );
+      setLoading(false);
+    } catch (err) {
+      notification["error"]({
+        message: "Gagal menambahkan data",
+        description: "Data gagal ditambahkan, silahkan coba lagi",
+      });
+    }
   };
 
   const calculatePriceAfterDisc = (row, index) => {
@@ -403,32 +413,6 @@ function ReturNonPanel({ props }) {
     );
 
     return formatter.format(total);
-  };
-
-  const updateStock = async (id, locations) => {
-    const panelId = panel.data.id;
-
-    // fetching data to update
-    const options = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-    };
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/panel-sales/${panelId}?populate=deep`;
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
-    const row = res.data;
-    console.log("endpoint", endpoint);
-    console.log("row stock", row);
-
-    const trxStatus = row.attributes?.status_data;
-
-    if (trxStatus == "Publish") {
-      const productInfo = products?.productInfo;
-      createReturInventory(row, selectedLocationId, productInfo);
-    }
   };
 
   const sumAdditionalPrice = () => {
@@ -674,6 +658,7 @@ function ReturNonPanel({ props }) {
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
+                    initialValue={moment()}
                     name="retur_date"
                     rules={[
                       {
@@ -716,6 +701,7 @@ function ReturNonPanel({ props }) {
               ) : (
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
                   <StoreSaleTable
+                    noMaxInput={true}
                     products={products}
                     productTotalPrice={productTotalPrice}
                     setTotalPrice={setTotalPrice}
@@ -723,6 +709,7 @@ function ReturNonPanel({ props }) {
                     calculatePriceAfterDisc={calculatePriceAfterDisc}
                     productSubTotal={productSubTotal}
                     setProductSubTotal={setProductSubTotal}
+                    getProduct={getProductAtLocation}
                     locations={locations}
                     dataLocationStock={dataLocationStock}
                     formObj={form}
