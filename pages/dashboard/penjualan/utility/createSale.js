@@ -187,9 +187,10 @@ const putRelationSaleDetail = async (id, value, form, router, url, page, locatio
         router.replace(`/dashboard/penjualan/non_panel/print/${id}`);
       } else router.replace(`/dashboard/penjualan/non_panel`);
     }
-    // simpanData === "Publish"
-    //   ? router.replace(`/dashboard/penjualan/non_panel/print/${id}`)
-    //   : router.replace(`/dashboard/penjualan/non_panel`);
+    if (page == "retur non panel sale") {
+      updateJurnal(res.data, user, "retur", "retur non panel");
+      router.replace(`/dashboard/penjualan/non_panel`);
+    }
     if (page == "panel sale") {
       if (simpanData === "Publish") {
         //update jurnal dan coa
@@ -197,7 +198,10 @@ const putRelationSaleDetail = async (id, value, form, router, url, page, locatio
         router.replace(`/dashboard/penjualan/panel/print/${id}`);
       } else router.replace(`/dashboard/penjualan/panel`);
     }
-    if (page == "retur panel sale") router.replace(`/dashboard/penjualan/panel/retur/print/${id}`);
+    if (page == "retur panel sale") {
+      updateJurnal(res.data, user, "retur", "retur panel");
+      router.replace(`/dashboard/penjualan/panel`);
+    }
     // simpanData === "Publish"
     //   ? router.replace(`/dashboard/penjualan/panel/print/${id}`)
     //   : router.replace(`/dashboard/penjualan/panel`);
