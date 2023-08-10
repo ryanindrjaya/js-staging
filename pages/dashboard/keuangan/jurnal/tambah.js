@@ -15,6 +15,8 @@ import AddJurnalTable from "@iso/components/ReactDataTable/Cost/AddJurnalTable";
 import Customer from "@iso/components/Form/AddSale/CustomerForm";
 import nookies from "nookies";
 import moment from "moment";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
+import confirm from "antd/lib/modal/confirm";
 
 Jurnal.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -135,7 +137,6 @@ const fetchCustomer = async (cookies) => {
 
 function Jurnal({ props }) {
   const akuns = useSelector((state) => state.Cost);
-  console.log("Akuns.", akuns);
   const dispatch = useDispatch();
 
   var selectedAkun = akuns?.akun;
@@ -194,40 +195,75 @@ function Jurnal({ props }) {
     maximumFractionDigits: 2,
   });
 
-  const onFinish = (values) => {
-    setLoading(true);
-    setInfo("sukses");
-    var totalDebit = 0;
-    var totalKredit = 0;
-    for (var index = 0; index < akuns.akun.length; index++) {
-      if (values.debitData[index] == undefined) values.debitData[index] = 0;
-      if (values.kreditData[index] == undefined) values.kreditData[index] = 0;
-      totalDebit += values.debitData[index];
-      totalKredit += values.kreditData[index];
-    }
-
-    if (totalDebit != totalKredit) {
-      notification["error"]({
-        message: "Gagal menambahkan data",
-        description: "Data gagal ditambahkan, karena total kredit dan debit harus sama.",
-      });
-      setInfo("gagal");
-    } else console.log("Debit dan kredit sudah sesuai.");
-
-    var checkData = 1;
-    jurnal.data.forEach((element) => {
-      if (values.no_jurnal == element.attributes.no_jurnal && checkData == 1) {
+  const onFinish = (values, accept) => {
+    if (accept) {
+      setLoading(true);
+      setInfo("sukses");
+      var totalDebit = 0;
+      var totalKredit = 0;
+      for (var index = 0; index < akuns.akun.length; index++) {
+        if (values.debitData[index] == undefined) values.debitData[index] = 0;
+        if (values.kreditData[index] == undefined) values.kreditData[index] = 0;
+        totalDebit += values.debitData[index];
+        totalKredit += values.kreditData[index];
+      }
+  
+      if (akuns.akun.length === 0 || akuns.akun.length === 1) {
+        if(akuns.akun.length === 0){
+          notification["error"]({
+            message: "Gagal menambahkan data",
+            description: "Data gagal ditambahkan, karena belum ada data yang dimasukkan.",
+          });
+        } else {
+          notification["error"]({
+            message: "Gagal menambahkan data",
+            description: "Data gagal ditambahkan, karena belum memasukkan akun yang dipilih atau saldo.",
+          });
+        }
+        setInfo("gagal");
+      } else console.log("Blum ada data akun.");
+  
+      if (totalDebit != totalKredit) {
         notification["error"]({
           message: "Gagal menambahkan data",
-          description: "Data gagal ditambahkan, karena no jurnal sama",
+          description: "Data gagal ditambahkan, karena total kredit dan debit harus sama.",
         });
         setInfo("gagal");
-        checkData++;
-      }
-    });
+      } else console.log("Debit dan kredit sudah sesuai.");
+  
+      var checkData = 1;
+      jurnal.data.forEach((element) => {
+        if (values.no_jurnal == element.attributes.no_jurnal && checkData == 1) {
+          notification["error"]({
+            message: "Gagal menambahkan data",
+            description: "Data gagal ditambahkan, karena no jurnal sama",
+          });
+          setInfo("gagal");
+          checkData++;
+        }
+      });
+  
+      console.log("data values", values, akuns, accept);
+      //setDataValues(values);
+      setLoading(false);
 
-    setDataValues(values);
-    setLoading(false);
+    } else {
+      confirm({
+        title: "Apakah anda yakin?",
+        icon: <ExclamationCircleOutlined />,
+        content: "Harap periksa kembali data yang telah diinput.",
+        okText: "Ya",
+        okType: "danger",
+        cancelText: "Tidak",
+        centered: true,
+        onOk() {
+          onFinish(values, true);
+        },
+        onCancel() {
+          console.log("Cancel");
+        },
+      });
+    }
   };
 
   const create = async (values) => {
@@ -310,7 +346,7 @@ function Jurnal({ props }) {
     }
   };
 
-  const putAkun = (item, saldo) => {
+  const putAkun = async (item, saldo) => {
 
       const data = {
         data: {
@@ -329,8 +365,8 @@ function Jurnal({ props }) {
           body: JSONdata,
       };
   
-      const req = fetch(endpoint, options);
-      //const res = req.json();
+      const req = await fetch(endpoint, options);
+      const res = req.json();
   
       if (req.status === 200) {
           notification["success"]({
@@ -362,7 +398,7 @@ function Jurnal({ props }) {
       setAkunList((list) => [...list, tempList[0]]);
     }
 
-  }; console.log("tempList",tempList,akunList);
+  };
 
   const clearData = () => {
     dispatch({ type: "CLEAR_DATA" });
@@ -432,7 +468,7 @@ function Jurnal({ props }) {
               initialValues={{
                 remember: true,
               }}
-              onFinish={onFinish}
+              onFinish={(values) => onFinish(values, false)}
               onFinishFailed={validateError}
             >
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-4">
@@ -461,6 +497,7 @@ function Jurnal({ props }) {
                         width: "100%",
                       }}
                       placeholder="User"
+                      defaultValue={{ label: user.name, value: user.id }}
                     >
                       {dataUser.map((element) => {
                         return (

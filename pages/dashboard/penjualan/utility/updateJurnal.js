@@ -106,6 +106,8 @@ const UpdateJurnal = async (
     console.log("get akunCOA", akunCOA);
     var cekRetur = 0;
     var cekPiutang = 0;
+    var saldoRetur = 0;
+    var saldoPiutang = 0;
 
     akunCOA.data.map((item) => {
       values.debit = 0;
@@ -128,15 +130,15 @@ const UpdateJurnal = async (
         noJurnal = String(noJurnal).padStart(3, "0");
       }
 
-
       if(item.attributes.kode === "114.01.01" || item.attributes.kode === "114.01.03") {
         //true
         if (cekRetur === 0) {
           values.kredit = values.attributes.total;
           putAkun(item, values.attributes.total);
-        }
-        else{
-          values.kredit = 0;
+          saldoPiutang = item.attributes.saldo - values.attributes.total;
+          cekRetur++;
+        } else {
+          item.attributes.saldo = saldoPiutang;
           values.kredit = values.attributes.total;
           putAkun(item, values.attributes.total);
         }
@@ -145,15 +147,17 @@ const UpdateJurnal = async (
         values.debit = values.attributes.ppn;
         putAkun(item, values.attributes.ppn);
       } else if (item.attributes.kode === "401.01.00") {
-        //false
+        //true
         if (cekPiutang === 0) {
           values.debit = values.attributes.dpp;
           putAkun(item, values.attributes.dpp, page);
+          saldoRetur = item.attributes.saldo + values.attributes.dpp;
+          cekPiutang++;
         }
         else{
-          values.debit = 0;
+          item.attributes.saldo = saldoRetur;
           values.debit = values.attributes.total;
-          putAkun(item, values.attributes.total);
+          putAkun(item, values.attributes.total, page);
         }
       } else if (item.attributes.kode === "500.00.01") {
         //true

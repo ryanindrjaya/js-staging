@@ -19,7 +19,7 @@ const Role = ({ props }) => {
   const router = useRouter();
 
   const handleAddUser = () => {
-    router.push("/dashboard/role/tambah");
+    router.push("/dashboard/pengguna/role/tambah");
   };
 
   const handleDelete = async (id) => {
