@@ -55,12 +55,15 @@ async function createInventory(row) {
     }
   });
 
+  const user = await getUserMe();
+
   if (data.length > 0) {
     const body = {
       data,
       no_referensi: noLPB,
       type: "Pembelian",
       keterangan: `Pembelian dari ${supplierName}`,
+      author: user,
     };
 
     await addToGudang(body);
@@ -93,5 +96,21 @@ async function addToGudang(body) {
     });
   }
 }
+
+const getUserMe = async () => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  const res = await req.json();
+
+  return res;
+};
 
 export default createInventory;

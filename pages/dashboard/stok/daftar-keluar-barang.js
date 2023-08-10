@@ -181,6 +181,24 @@ export default function daftarKeluarBarang({ companyOptions }) {
     }
   };
 
+  const getUserMe = async () => {
+    const cookies = nookies.get();
+
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me";
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    return res;
+  };
+
   const handleAddToStock = async (row, index) => {
     if (row.send_qty === 0) {
       notification.error({
@@ -190,6 +208,8 @@ export default function daftarKeluarBarang({ companyOptions }) {
       return;
     }
     try {
+      const user = await getUserMe();
+
       const data = {
         id: row.id,
         location_sender: row.location_sender.id,
@@ -202,6 +222,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
         sended: row?.sended || 0,
         no_referensi: row.no_referensi,
         keterangan: `Pengiriman stok ke ${row.location_recipient.name}`,
+        author: user,
       };
 
       const endpoint = `${process.env.NEXT_PUBLIC_URL}/product-request/transfer`;

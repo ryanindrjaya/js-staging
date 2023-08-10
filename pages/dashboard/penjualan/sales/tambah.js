@@ -298,7 +298,7 @@ function Toko({ props }) {
           unit_price: editedProduct?.[idx]?.priceUnit || attributes?.sold_price_1,
           disc: editedProduct?.[idx]?.disc || 0,
           disc1: editedProduct?.[idx]?.d1 || attributes?.disc_1_1,
-          disc2: editedProduct?.[idx]?.d2 || attributes?.unit_1_dp2,
+          disc2: editedProduct?.[idx]?.d2 || 0,
           // expired_date: values?.expired_date?.[idx]?.format("YYYY-MM-DD") || null,
           product: id,
           relation_id: editedProduct?.[idx]?.relation_id,

@@ -362,9 +362,10 @@ export default function permintaanBarang() {
 
     try {
       const response = [];
+      const reversedProducts = [...products].reverse();
 
-      for (let i = 0; i < products.length; i++) {
-        const product = products[i];
+      for (let i = 0; i < reversedProducts.length; i++) {
+        const product = reversedProducts[i];
         const endpoint = `${process.env.NEXT_PUBLIC_URL}/product-requests`;
         const data = {
           ...values,

@@ -658,10 +658,10 @@ function Edit({ props }) {
                   </Form.Item>
                 </div>
               </div>
-              <div className="flex justify-end font-bold w-full mb-3 md:w-3/4">
+              {/* <div className="flex justify-end font-bold w-full mb-3 md:w-3/4">
                 <p>Biaya Tambahan Lain-lain</p>
-              </div>
-              <div className="flex justify-end">
+              </div> */}
+              {/* <div className="flex justify-end">
                 <div className="w-full md:w-1/3 px-3 mb-2 text-center md:mb-0">
                   <p className="mb-4 font-bold">Keterangan</p>
                   <Form.Item name="additional_fee_1_desc">
@@ -743,7 +743,7 @@ function Edit({ props }) {
                     />
                   </Form.Item>
                 </div>
-              </div>
+              </div> */}
               <div>
                 <p className="font-bold flex justify-end">
                   Total Order Pembelian :{" "}

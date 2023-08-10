@@ -34,8 +34,7 @@ PembayaranToko.getInitialProps = async (context) => {
     const req = await fetchData(cookies);
     const user = await req.json();
 
-    const reqRetur = await fethcRetur(cookies);
-    const paymentRetur = await reqRetur.json();
+    const paymentRetur = await fethcRetur(cookies);
 
     const data = {
       props: {
@@ -78,7 +77,8 @@ const fethcRetur = async (cookies) => {
   };
 
   const req = await fetch(endpoint, options);
-  return req;
+  const res = await req.json();
+  return res;
 };
 
 const getCheckInUser = async (cookies, user) => {
@@ -111,9 +111,10 @@ function PembayaranToko({ props }) {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState();
   const [paymentValue, setPaymentValue] = useState({});
-  const dataRetur = props?.paymentRetur?.data;
+  const [dataRetur, setDataRetur] = useState(props?.paymentRetur?.data ?? []);
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedDrawerData, setSelectedDrawerData] = useState({});
+  const [refetch, setRefetch] = useState(false);
   const router = useRouter();
   const formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -122,7 +123,7 @@ function PembayaranToko({ props }) {
   });
 
   const reloadPage = () => {
-    router.reload();
+    setRefetch(!refetch);
   };
 
   const confirm = async (record) => {

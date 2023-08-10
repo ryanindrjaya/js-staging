@@ -282,7 +282,7 @@ function Retur({ props }) {
     setLoading(true);
 
     console.log("values", values);
-    console.log("products", products);  
+    console.log("products", products);
 
     const isShowingPopup = await checkReturQty(values);
     console.log("isShowingPopup", isShowingPopup);
@@ -607,6 +607,8 @@ function Retur({ props }) {
                     ]}
                   >
                     <Select
+                      className="hidden"
+                      value={"Draft"}
                       placeholder="Pilih Status"
                       size="large"
                       style={{
@@ -615,9 +617,6 @@ function Retur({ props }) {
                     >
                       <Select.Option value="Draft" key="Draft">
                         Draft
-                      </Select.Option>
-                      <Select.Option value="Selesai" key="Selesai">
-                        Selesai
                       </Select.Option>
                     </Select>
                   </Form.Item>

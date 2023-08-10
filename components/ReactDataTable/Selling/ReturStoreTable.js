@@ -376,7 +376,7 @@ export default function ReactDataTable({
         return (
           <div className="disabled:bg-white">
             <InputNumber
-              disabled
+              // disabled
               controls={false}
               formatter={(value) => `${value}%`}
               max={100}
