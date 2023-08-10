@@ -85,6 +85,15 @@ export default function PembayaranToko() {
     }
   }, [router.query]);
 
+  useEffect(() => {
+    if (date) {
+      redirectQuery({
+        start_date: moment(date?.[0])?.startOf("day").format("YYYY-MM-DDTHH:mm:ss"),
+        end_date: moment(date?.[1])?.endOf("day").format("YYYY-MM-DDTHH:mm:ss"),
+      });
+    }
+  }, []);
+
   async function getListUserPembayaran() {
     if (dataFilter.admin.length > 0) return;
 

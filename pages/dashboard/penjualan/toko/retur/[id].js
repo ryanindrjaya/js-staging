@@ -463,9 +463,6 @@ function ReturToko({ props }) {
       var momentString = momentObj.format("MM-DD-YYYY");
 
       form.setFieldsValue({
-        jumlah_qty: {
-          [productId]: element.attributes.qty,
-        },
         jumlah_option: {
           [productId]: element.attributes.unit,
         },
@@ -492,7 +489,7 @@ function ReturToko({ props }) {
       dispatch({
         type: "SET_SALE_INITIAL_PRODUCT",
         product: element.attributes.product.data,
-        qty: element.attributes.qty,
+        qty: 0,
         unit: element.attributes.unit,
         unitIndex: indexUnit,
         disc: element.attributes.disc,
