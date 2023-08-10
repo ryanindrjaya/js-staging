@@ -8,7 +8,7 @@ const cookies = nookies.get(null, "token");
 var id = 0;
 
 const createDetailOrderSale = (values, products, setListId, url, lokasiGudang) => {
-  products.productList.forEach((element, idx) => {
+  products.productList.reverse().forEach((element, idx) => {
     console.log("element", element, products);
     //default value
     var qty = 1;

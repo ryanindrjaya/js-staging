@@ -719,6 +719,8 @@ function Retur({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="status">
                     <Select
+                      className="hidden"
+                      value={"Draft"}
                       placeholder="Pilih Status"
                       size="large"
                       style={{
@@ -727,9 +729,6 @@ function Retur({ props }) {
                     >
                       <Select.Option value="Draft" key="Draft">
                         Draft
-                      </Select.Option>
-                      <Select.Option value="Selesai" key="Selesai">
-                        Selesai
                       </Select.Option>
                     </Select>
                   </Form.Item>
