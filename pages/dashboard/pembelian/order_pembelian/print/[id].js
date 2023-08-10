@@ -189,10 +189,10 @@ const Print = ({ props }) => {
         </table>
       </div>
       <div className="flex justify-between">
-        <div>
+        {/* <div>
           <div className="font-bold  text-sm uppercase mt-4 flex justify-start">TAMBAHAN :</div>
           <div className=" text-sm uppercase mt-2 flex flex-col justify-start">{getAdditionalFee()}</div>
-        </div>
+        </div> */}
         <div>
           <div className="font-bold  text-sm uppercase mt-3 flex justify-end">TOTAL HARGA : {getTotalProduct()}</div>
           <div className="font-bold  text-sm uppercase mt-4 flex justify-end">

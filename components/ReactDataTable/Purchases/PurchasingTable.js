@@ -141,7 +141,7 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange,
         id={row.id}
       />
 
-      <div className="mt-4">
+      {/* <div className="mt-4">
         <button
           onClick={() => pembayaran(row)}
           className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
@@ -149,7 +149,7 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange,
           <CalculatorOutlined className="mr-2 mt-0.5 float float-left" />
           Pembayaran
         </button>
-      </div>
+      </div> */}
     </div>
   );
 

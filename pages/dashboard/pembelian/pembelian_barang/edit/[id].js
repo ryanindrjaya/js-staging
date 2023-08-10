@@ -1084,7 +1084,7 @@ function EditLPB({ props }) {
                   </Form.Item>
                 </div>
               </div>
-              <div className="flex justify-end font-bold w-full mb-3 md:w-3/4">
+              {/* <div className="flex justify-end font-bold w-full mb-3 md:w-3/4">
                 <p>Biaya Tambahan Lain-lain</p>
               </div>
               <div className="flex justify-end">
@@ -1169,7 +1169,7 @@ function EditLPB({ props }) {
                     />
                   </Form.Item>
                 </div>
-              </div>
+              </div> */}
               <div>
                 <p className="font-bold flex justify-end">
                   Total Pembelian : {grandTotal === 0 ? formatter.format(totalPrice) : formatter.format(grandTotal)}

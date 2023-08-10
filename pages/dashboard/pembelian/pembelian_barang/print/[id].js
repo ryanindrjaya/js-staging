@@ -211,9 +211,8 @@ const Print = ({ props }) => {
 
       <div className="flex w-full justify-between ">
         <div>
-          <div className="font-bold  text-sm uppercase mt-3 flex justify-start">TAMBAHAN :</div>
-          <div className=" text-sm uppercase mt-2 flex flex-col justify-start">{getAdditionalFee()}</div>
-
+          {/* <div className="font-bold  text-sm uppercase mt-3 flex justify-start">TAMBAHAN :</div>
+          <div className=" text-sm uppercase mt-2 flex flex-col justify-start">{getAdditionalFee()}</div> */}
           <div className="font-bold  text-sm uppercase mt-3 flex justify-start">CATATAN :</div>
           <div className=" text-sm mt-1 flex flex-col justify-start">{catatan}</div>
         </div>
