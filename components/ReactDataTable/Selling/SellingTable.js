@@ -461,7 +461,6 @@ export default function ReactDataTable({
       name: <div className="">Status</div>,
       width: "150px",
       selector: (row) => {
-        console.log("row", row);
         if (
           row.attributes?.retur_panel_sales?.data?.length > 0 ||
           row.attributes?.retur_non_panel_sales?.data?.length > 0 ||

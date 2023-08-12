@@ -126,12 +126,13 @@ function Toko({ props }) {
     const res = await req.json();
     if (res) {
       const res = await fetchStore(cookies);
+      const newData = await res.json();
       openNotificationWithIcon(
         "success",
         "Berhasil menghapus data",
         "Penjualan Toko dan Resep yang dipilih telah berhasil dihapus. Silahkan cek kembali Penjualan Toko dan Resep"
       );
-      setSell(res);
+      setSell(newData);
     }
   };
 

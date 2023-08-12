@@ -349,17 +349,33 @@ function Toko({ props }) {
     }
   };
 
+  const checkStokGudang = () => {
+    console.log("dataLocationStock", dataLocationStock);
+    const availableStock = Object.values(dataLocationStock).every((stock) => stock);
+
+    return availableStock;
+  };
+
   const createDetailSale = async () => {
-    await createDetailSaleFunc(
-      dataValues,
-      products,
-      productTotalPrice,
-      productSubTotal,
-      setListId,
-      "/store-sale-details",
-      form,
-      lokasiGudang
-    );
+    const stokAda = checkStokGudang();
+
+    if (stokAda) {
+      await createDetailSaleFunc(
+        dataValues,
+        products,
+        productTotalPrice,
+        productSubTotal,
+        setListId,
+        "/store-sale-details",
+        form,
+        lokasiGudang
+      );
+    } else {
+      notification["error"]({
+        message: "Gagal menambahkan data",
+        description: "Stok di gudang tidak mencukupi",
+      });
+    }
   };
 
   const createSale = async (values) => {
@@ -696,6 +712,7 @@ function Toko({ props }) {
                     productSubTotal={productSubTotal}
                     setProductSubTotal={setProductSubTotal}
                     dataLocationStock={dataLocationStock}
+                    setDataLocationStock={setDataLocationStock}
                     formObj={form}
                     getProduct={getProductAtLocation}
                   />

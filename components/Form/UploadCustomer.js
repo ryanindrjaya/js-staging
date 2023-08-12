@@ -183,11 +183,8 @@ export default function UploadProduk({ setCustomer }) {
               result["credit_limit"] = parseInt(row?.[key] || 0);
               break;
             case "TERMIN PEMBAYARAN":
-              result["credit_limit_duration"] = row[key]?.split(" ")?.[0] || 0;
-              result["credit_limit_duration_type"] = row[key]?.split(" ")?.[1]
-                ? row[key]?.split(" ")?.[1]?.charAt(0)?.toUpperCase() +
-                  row[key]?.split(" ")?.[1]?.slice(1)
-                : "Hari";
+              result["credit_limit_duration"] = row[key] || 0;
+              result["credit_limit_duration_type"] = "Hari";
               break;
             case "SALDO AWAL":
               result["saldo_awal"] = parseInt(row?.[key] || 0);

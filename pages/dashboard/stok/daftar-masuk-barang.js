@@ -22,6 +22,7 @@ import nookies from "nookies";
 import { useRouter } from "next/router";
 import DataTable from "react-data-table-component";
 import { CloseCircleFilled, CheckCircleFilled, PrinterOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import ConfirmDialog from "../../../components/Alert/ConfirmDialog";
 
 export default function daftarKeluarBarang({ companyOptions }) {
   const { token } = nookies.get();
@@ -50,6 +51,9 @@ export default function daftarKeluarBarang({ companyOptions }) {
   const [loadingSend, setLoadingSend] = useState(false);
   const [printState, setPrintState] = useState(false);
   const [master, setMaster] = useState(null);
+  const [confirmDialog, setConfirmDialog] = useState({
+    open: false,
+  });
 
   const handleFilterProducts = (e) => {
     setQueryProduct(e.target.value);
@@ -345,8 +349,16 @@ export default function daftarKeluarBarang({ companyOptions }) {
     }
   };
 
-  async function handleBulkSend() {
+  async function handleBulkSend(accept = false) {
     if (data.length === 0) return;
+
+    if (data.some((item) => item.send_qty !== item.sended) && !accept) {
+      setConfirmDialog({
+        ...confirmDialog,
+        open: true,
+      });
+      return;
+    }
 
     setLoadingSend(true);
 
@@ -475,7 +487,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
       width: "260px",
       selector: (row, index) => {
         let maxQty = row?.qty;
-        let defValue = row.accepted_status === "Selesai" ? row.sended : row.qty;
+        let defValue = row?.sended > 0 ? row.sended : row.qty;
         const units = row.product_units;
 
         if (row.accepted_status === "Selesai") {
@@ -620,7 +632,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
     },
   ];
 
-  async function handleBulkCancel() {
+  async function handleBulkCancel(accepted = false) {
     setCancelModal({
       ...cancelModal,
       loading: true,
@@ -749,6 +761,26 @@ export default function daftarKeluarBarang({ companyOptions }) {
                 }
               />
               <LayoutContent>
+                <ConfirmDialog
+                  visible={confirmDialog.open}
+                  title="Jumlah produk tidak sama"
+                  message="Jumlah produk yang diterima tidak sama dengan jumlah produk yang dikirim, apakah anda yakin ingin menerima produk ini?"
+                  confirmLabel="Ya"
+                  cancelLabel="Tidak"
+                  onCancel={() => {
+                    setConfirmDialog({
+                      ...confirmDialog,
+                      open: false,
+                    });
+                  }}
+                  onConfirm={() => {
+                    setConfirmDialog({
+                      ...confirmDialog,
+                      open: false,
+                    });
+                    handleBulkSend(true);
+                  }}
+                />
                 {selectedLocation ? (
                   <>
                     <div className="w-full lg:w-3/4 grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
@@ -918,7 +950,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
                           }}
                           okText="Ya"
                           cancelText="Tidak"
-                          onConfirm={handleBulkSend}
+                          onConfirm={() => handleBulkSend(false)}
                         >
                           <Button
                             loading={loadingSend}

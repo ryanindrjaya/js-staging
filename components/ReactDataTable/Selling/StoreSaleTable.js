@@ -11,6 +11,7 @@ export default function ReactDataTable({
   products,
   setTotalPrice,
   dataLocationStock,
+  setDataLocationStock,
   dataDetailTrx,
   stokString,
   formObj,
@@ -161,6 +162,12 @@ export default function ReactDataTable({
     subtotal[id + 1] = 0;
     setProductSubTotal(subtotal);
     sumProductSubTotal(productSubTotal);
+
+    // hapus data stok
+    const newDataLocationStock = Object.values(dataLocationStock);
+    newDataLocationStock.splice(id, 1);
+
+    setDataLocationStock(newDataLocationStock.reduce((obj, item, index) => ((obj[index] = item), obj), {}));
 
     if (products.productList.length == 0) {
       setTotalPrice(0);
