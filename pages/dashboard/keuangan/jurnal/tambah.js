@@ -244,7 +244,7 @@ function Jurnal({ props }) {
       });
   
       console.log("data values", values, akuns, accept);
-      //setDataValues(values);
+      setDataValues(values);
       setLoading(false);
 
     } else {
