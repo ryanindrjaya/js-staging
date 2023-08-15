@@ -333,7 +333,6 @@ function Piutang({ props }) {
   const onFinish = (values) => {
     // save no giro to oth
     var biayaInfo = biaya.info;
-    console.log(values,"value");
     setLoading(true);
     setInfo("sukses");
 
@@ -746,25 +745,28 @@ function Piutang({ props }) {
     var keterangan = null;
     var indexPiutang = 0;
     piutang.forEach((item) => {
-      item.attributes.credit_details.data.forEach((detail) => {
-        total = detail.attributes.giro + detail.attributes.transfer + detail.attributes.tunai;
-        if(detail.attributes.sales_sale?.data !== null){
-          idDetail = detail.attributes.sales_sale?.data?.id;
-          keterangan = "sales";
-        } else if (detail.attributes.panel_sale?.data !== null) {
-          idDetail = detail.attributes.panel_sale?.data?.id;
-          keterangan = "panel";
-        } else if (detail.attributes.non_panel_sale?.data !== null) {
-          idDetail = detail.attributes.non_panel_sale?.data?.id;
-          keterangan = "nonpanel";
-        } else { 
-          console.log("piutang data salah");
-        }
-        //idDetail = detail.attributes.non_panel_sale?.data?.id ?? detail.attributes.panel_sale?.data?.id ?? detail.attributes.sales_sale?.data?.id;
-        pembayaran[indexPiutang] = { id: idDetail, total: total, keterangan: keterangan};
-        indexPiutang++;
+      if(item.attributes.document === "Publish"){
+        item.attributes.credit_details.data.forEach((detail) => {
+          total = detail.attributes.giro + detail.attributes.transfer + detail.attributes.tunai;
+          if(detail.attributes.sales_sale?.data !== null){
+            idDetail = detail.attributes.sales_sale?.data?.id;
+            keterangan = "sales";
+          } else if (detail.attributes.panel_sale?.data !== null) {
+            idDetail = detail.attributes.panel_sale?.data?.id;
+            keterangan = "panel";
+          } else if (detail.attributes.non_panel_sale?.data !== null) {
+            idDetail = detail.attributes.non_panel_sale?.data?.id;
+            keterangan = "nonpanel";
+          } else { 
+            console.log("piutang data salah");
+          }
+          //idDetail = detail.attributes.non_panel_sale?.data?.id ?? detail.attributes.panel_sale?.data?.id ?? detail.attributes.sales_sale?.data?.id;
+          pembayaran[indexPiutang] = { id: idDetail, total: total, keterangan: keterangan};
+          indexPiutang++;
+  
+        });
 
-      });
+      }
 
     });
 
@@ -773,7 +775,7 @@ function Piutang({ props }) {
       element.sisaHutang = 0;
       element.dibayar = 0;
 
-      pembayaran.forEach((item) => {
+      pembayaran.forEach((item) => { console.log(pembayaran, "pembayaran");
         //if(item.id == element.id) element.attributes.total -= item.total;
         if(item.id === element.id && item.keterangan === element.keterangan) element.dibayar += item.total;
       });
@@ -1106,21 +1108,6 @@ function Piutang({ props }) {
                       onClick={() => setDocument("Draft")}
                     >
                       <p className="px-4 py-2 m-0 text-white">SIMPAN</p>
-                    </button>
-                  )}
-                </Form.Item>
-                <Form.Item>
-                  {loading ? (
-                    <div className=" flex float-left ml-3 ">
-                      <Spin />
-                    </div>
-                  ) : (
-                    <button
-                      htmlType="submit"
-                      className="bg-cyan-700 rounded-md m-1 text-sm px-4"
-                      onClick={() => setDocument("Draft")}
-                    >
-                      <p className="px-4 py-2 m-0 text-white">CETAK</p>
                     </button>
                   )}
                 </Form.Item>

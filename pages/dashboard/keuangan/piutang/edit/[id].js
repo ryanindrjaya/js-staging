@@ -276,7 +276,7 @@ const fetchAkunCOA = async (cookies) => {
 };
 
 function Piutang({ props }) {
-  const biaya = useSelector((state) => state.Cost);
+  const biaya = useSelector((state) => state.Cost); console.log("biaya nich", biaya);
   const dispatch = useDispatch();
 
   //var selectedProduct = products?.productList;
@@ -298,10 +298,11 @@ function Piutang({ props }) {
   const [dataEditId, setDataEditId] = useState({});
   //const customerData = props.customer.data[0];
   const [supplier, setSupplier] = useState();
-  const [dataTabel, setDataTabel] = useState([]);
+  const [dataTabel, setDataTabel] = useState([]); console.log("data dataEdit", dataEdit);
   const [dataRetur, setDataRetur] = useState([]);
-  const [sisaHutang, setSisaHutang] = useState([]);
+  const [sisaHutang, setSisaHutang] = useState([]); 
   const [sisaHutangTotal, setSisaHutangTotal] = useState({});
+  // console.log("sisa hutang", sisaHutang, sisaHutangTotal);
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -364,12 +365,18 @@ function Piutang({ props }) {
     maximumFractionDigits: 2,
   });
 
-  const onFinish = (values) => {
-    // save no giro to oth
-    var biayaInfo = biaya.info;
-    
+  const onFinish = (values) => { console.log(values, "values");
+
     setLoading(true);
     setInfo("sukses");
+
+    // if(values.total_item === undefined){
+    //   notification["error"]({
+    //     message: "Gagal menambahkan data",
+    //     description: "Data gagal ditambahkan, silahkan pilih data yang akan dibayar.",
+    //   });
+    //   setInfo("gagal");
+    // }
 
     var totalTunai = 0;
     var totalTransfer = 0;
@@ -513,7 +520,6 @@ function Piutang({ props }) {
       setCreateId,
       akunPiutang,
     );
-    //console.log("Create master data", createId);
     //editPenjualan(createId);
     await deleteDetail(dataEditId);
   };
@@ -561,7 +567,6 @@ function Piutang({ props }) {
           const floatTotal = parseFloat(total.toFixed(2));
           const floatDataTotal = parseFloat(data.attributes.total.toFixed(2));
 
-          //console.log("item nih", item, floatTotal, floatDataTotal);
           if (
             
             item.attributes.sisa_piutang == 0
@@ -635,7 +640,7 @@ function Piutang({ props }) {
   };
 
   const calculatePriceTotal = (row, index) => {
-    const total = calculatePrice(row, biaya, sisaHutangTotal, index);
+    const total = calculatePrice(row, biaya, sisaHutangTotal, index); console.log(total, "total");
     sisaHutang[index] = total - row?.dibayar;
     row.sisaPiutang = total - row?.dibayar;
     var priceTotal = total - row?.dibayar;
@@ -716,8 +721,8 @@ function Piutang({ props }) {
   }, [biaya.info]);
 
   useEffect(() => {
-    //if (dataValues && info == "sukses") createDetailSale();
-    if (dataValues) createDetail();
+    if (dataValues && info === "sukses") createDetail();
+    //if (dataValues) createDetail();
   }, [dataValues]);
 
   useEffect(() => {
@@ -744,15 +749,19 @@ function Piutang({ props }) {
       }
 
       if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian") {
-        if (dataTabel.length > 0) {
-          //row.sisaPiutang = row.attributes.total;
-          dataTabel[dataTabel.length] = row;
-        }
-        else{
-          dataTabel[0] = row;
-        }
-        //biaya.list.push(row);
-        dispatch({ type: "ADD_LIST", list: row });
+        dataEdit.attributes.credit_details.data.forEach((item) => {
+          if(item.attributes.sales_sale.data !== null && item.attributes.sales_sale.data?.attributes?.no_sales_sale === row.attributes.no_sales_sale){
+            if (dataTabel.length > 0) {
+              //row.sisaPiutang = row.attributes.total;
+              dataTabel[dataTabel.length] = row;
+            }
+            else{
+              dataTabel[0] = row;
+            }
+            
+            dispatch({ type: "ADD_LIST", list: row });
+          }
+        });
       }
 
       row.keterangan = "sales";
@@ -769,10 +778,14 @@ function Piutang({ props }) {
 
       if(row.attributes.status_data == "Publish"){
         if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian") {
-          if (dataTabel.length > 0) dataTabel[dataTabel.length] = row;
-          else dataTabel[0] = row;
-          //biaya.list.push(row);
-          dispatch({ type: "ADD_LIST", list: row });
+          dataEdit.attributes.credit_details.data.forEach((item) => {
+            if(item.attributes.panel_sale.data !== null && item.attributes.panel_sale.data?.attributes?.no_panel_sale === row.attributes.no_panel_sale){
+              if (dataTabel.length > 0) dataTabel[dataTabel.length] = row;
+              else dataTabel[0] = row;
+              
+              dispatch({ type: "ADD_LIST", list: row });
+            }
+          });
         }
       }
 
@@ -790,10 +803,14 @@ function Piutang({ props }) {
 
       if(row.attributes.status_data == "Publish"){
         if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian") {
-          if (dataTabel.length > 0) dataTabel[dataTabel.length] = row;
-          else dataTabel[0] = row;
-          //biaya.list.push(row);
-          dispatch({ type: "ADD_LIST", list: row });
+          dataEdit.attributes.credit_details.data.forEach((item) => {
+            if(item.attributes.non_panel_sale.data !== null && item.attributes.non_panel_sale.data?.attributes?.no_non_panel_sale === row.attributes.no_non_panel_sale){
+              if (dataTabel.length > 0) dataTabel[dataTabel.length] = row;
+              else dataTabel[0] = row;
+              
+              dispatch({ type: "ADD_LIST", list: row });
+            }
+          });
         }
       }
 
@@ -804,25 +821,29 @@ function Piutang({ props }) {
     var keterangan = null;
     var indexPiutang = 0;
     piutang.forEach((item) => {
-      item.attributes.credit_details.data.forEach((detail, index) => {
-        total = detail.attributes.giro + detail.attributes.transfer + detail.attributes.tunai;
-        if(detail.attributes.sales_sale?.data != null){
-          idDetail = detail.attributes.sales_sale?.data?.id;
-          keterangan = "sales";
-        } else if (detail.attributes.panel_sale?.data != null) {
-          idDetail = detail.attributes.panel_sale?.data?.id;
-          keterangan = "panel";
-        } else if (detail.attributes.non_panel_sale?.data != null) {
-          idDetail = detail.attributes.non_panel_sale?.data?.id;
-          keterangan = "nonpanel";
-        } else { 
-          console.log("piutang data salah");
-        }
-        //idDetail = detail.attributes.non_panel_sale?.data?.id ?? detail.attributes.panel_sale?.data?.id ?? detail.attributes.sales_sale?.data?.id;
-        pembayaran[indexPiutang] = { id: idDetail, total: total, keterangan: keterangan};
-        indexPiutang++;
+      if(item.attributes.document === "Publish"){
+        item.attributes.credit_details.data.forEach((detail, index) => {
+          total = detail.attributes.giro + detail.attributes.transfer + detail.attributes.tunai;
+          if(detail.attributes.sales_sale?.data != null){
+            idDetail = detail.attributes.sales_sale?.data?.id;
+            keterangan = "sales";
+          } else if (detail.attributes.panel_sale?.data != null) {
+            idDetail = detail.attributes.panel_sale?.data?.id;
+            keterangan = "panel";
+          } else if (detail.attributes.non_panel_sale?.data != null) {
+            idDetail = detail.attributes.non_panel_sale?.data?.id;
+            keterangan = "nonpanel";
+          } else { 
+            console.log("piutang data salah");
+          }
+          //idDetail = detail.attributes.non_panel_sale?.data?.id ?? detail.attributes.panel_sale?.data?.id ?? detail.attributes.sales_sale?.data?.id;
+          pembayaran[indexPiutang] = { id: idDetail, total: total, keterangan: keterangan};
+          indexPiutang++;
+  
+        });
 
-      });
+      }
+
     });
 
     dataTabel.forEach((element, index) => {
@@ -830,7 +851,7 @@ function Piutang({ props }) {
       element.sisaHutang = 0;
       element.dibayar = 0;
 
-      pembayaran.forEach((item) => { console.log("item id", item, element);
+      pembayaran.forEach((item) => {
         //if(item.id == element.id) element.attributes.total -= item.total;
         if(item.id === element.id && item.keterangan === element.keterangan) element.dibayar += item.total;
       });
@@ -914,46 +935,46 @@ function Piutang({ props }) {
         
         if(element.keterangan == "sales"){
           if(item.attributes.sales_sale?.data?.attributes?.no_sales_sale == element.attributes.no_sales_sale){
-            dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "pilih", listData: element, index: index });
-            dispatch({ type: "CHANGE_DATA_TUNAI", tunai: item.attributes.tunai, listData: element, index: index });
-            dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: item.attributes.transfer, listData: element, index: index });
-            dispatch({ type: "CHANGE_DATA_GIRO", giro: item.attributes.giro, listData: element, index: index });
-            var totalJatuhTempo = item.attributes.sisa_piutang + item.attributes.tunai + item.attributes.transfer + item.attributes.giro;
-            dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: totalJatuhTempo, listData: element, index: index });
-          } else {
+          //   dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "pilih", listData: element, index: index });
+          //   dispatch({ type: "CHANGE_DATA_TUNAI", tunai: item.attributes.tunai, listData: element, index: index });
+          //   dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: item.attributes.transfer, listData: element, index: index });
+          //   dispatch({ type: "CHANGE_DATA_GIRO", giro: item.attributes.giro, listData: element, index: index });
+          //   var totalJatuhTempo = item.attributes.sisa_piutang + item.attributes.tunai + item.attributes.transfer + item.attributes.giro;
+          //   dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: totalJatuhTempo, listData: element, index: index });
+          // } else {
             dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: element, index: index });
-            dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
-            dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: 0, listData: element, index: index });
-            dispatch({ type: "CHANGE_DATA_GIRO", giro: 0, listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_TUNAI", tunai: item.attributes.tunai ?? 0, listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: item.attributes.transfer ?? 0, listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_GIRO", giro: item.attributes.giro ?? 0, listData: element, index: index });
             dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: element.sisaHutang, listData: element, index: index });
           }
         } else if(element.keterangan == "panel"){
           if(item.attributes.panel_sale?.data?.attributes?.no_panel_sale == element.attributes.no_panel_sale){
-            dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "pilih", listData: element, index: index });
-            dispatch({ type: "CHANGE_DATA_TUNAI", tunai: item.attributes.tunai, listData: element, index: index });
-            dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: item.attributes.transfer, listData: element, index: index });
-            dispatch({ type: "CHANGE_DATA_GIRO", giro: item.attributes.giro, listData: element, index: index });
-            var totalJatuhTempo = item.attributes.sisa_piutang + item.attributes.tunai + item.attributes.transfer + item.attributes.giro;
-            dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: totalJatuhTempo, listData: element, index: index });
-          } else {
+          //   dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "pilih", listData: element, index: index });
+          //   dispatch({ type: "CHANGE_DATA_TUNAI", tunai: item.attributes.tunai, listData: element, index: index });
+          //   dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: item.attributes.transfer, listData: element, index: index });
+          //   dispatch({ type: "CHANGE_DATA_GIRO", giro: item.attributes.giro, listData: element, index: index });
+          //   var totalJatuhTempo = item.attributes.sisa_piutang + item.attributes.tunai + item.attributes.transfer + item.attributes.giro;
+          //   dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: totalJatuhTempo, listData: element, index: index });
+          // } else {
             dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: element, index: index });
-            dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
-            dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: 0, listData: element, index: index });
-            dispatch({ type: "CHANGE_DATA_GIRO", giro: 0, listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_TUNAI", tunai: item.attributes.tunai ?? 0, listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: item.attributes.transfer ?? 0, listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_GIRO", giro: item.attributes.giro ?? 0, listData: element, index: index });
             dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: element.sisaHutang, listData: element, index: index });
           }
         } else if(element.keterangan == "nonpanel"){
           if(item.attributes.non_panel_sale?.data?.attributes?.no_non_panel_sale == element.attributes.no_non_panel_sale){
-            dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "pilih", listData: element, index: index });
-            dispatch({ type: "CHANGE_DATA_TUNAI", tunai: item.attributes.tunai, listData: element, index: index });
-            dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: item.attributes.transfer, listData: element, index: index });
-            dispatch({ type: "CHANGE_DATA_GIRO", giro: item.attributes.giro, listData: element, index: index });
-            dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: item.attributes.sisa_piutang, listData: element, index: index });
-          } else {
+          //   dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "pilih", listData: element, index: index });
+          //   dispatch({ type: "CHANGE_DATA_TUNAI", tunai: item.attributes.tunai, listData: element, index: index });
+          //   dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: item.attributes.transfer, listData: element, index: index });
+          //   dispatch({ type: "CHANGE_DATA_GIRO", giro: item.attributes.giro, listData: element, index: index });
+          //   dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: item.attributes.sisa_piutang, listData: element, index: index });
+          // } else {
             dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: element, index: index });
-            dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
-            dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: 0, listData: element, index: index });
-            dispatch({ type: "CHANGE_DATA_GIRO", giro: 0, listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_TUNAI", tunai: item.attributes.tunai ?? 0, listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: item.attributes.transfer ?? 0, listData: element, index: index });
+            dispatch({ type: "CHANGE_DATA_GIRO", giro: item.attributes.giro ?? 0, listData: element, index: index });
             dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: element.sisaHutang, listData: element, index: index });
           }
         } else {
@@ -1205,21 +1226,6 @@ function Piutang({ props }) {
                       onClick={() => setDocument("Draft")}
                     >
                       <p className="px-4 py-2 m-0 text-white">SIMPAN</p>
-                    </button>
-                  )}
-                </Form.Item>
-                <Form.Item>
-                  {loading ? (
-                    <div className=" flex float-left ml-3 ">
-                      <Spin />
-                    </div>
-                  ) : (
-                    <button
-                      htmlType="submit"
-                      className="bg-cyan-700 rounded-md m-1 text-sm px-4"
-                      onClick={() => setDocument("Draft")}
-                    >
-                      <p className="px-4 py-2 m-0 text-white">CETAK</p>
                     </button>
                   )}
                 </Form.Item>
