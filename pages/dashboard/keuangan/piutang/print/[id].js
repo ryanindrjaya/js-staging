@@ -12,6 +12,9 @@ const Print = ({ props }) => {
   //const sisa_hutang_jatuh_tempo = data.attributes.sisa_hutang_jatuh_tempo;
   //const total_hutang_jatuh_tempo = data.attributes.total_hutang_jatuh_tempo;
   //const total_pembayaran = data.attributes.total_pembayaran;
+  var salesName = null;
+  var areaName = null;
+  var wilayahName = null;
 
   var index = 0; console.log("data", data);
 
@@ -44,9 +47,33 @@ const Print = ({ props }) => {
       <div className="font-bold text-lg flex justify-center mb-5">DAFTAR PENAGIHAN PIUTANG</div>
       <div className="flex justify-between mb-5">
         <div>
-          <div className="font-bold text-sm uppercase">Nama Sales : {data?.attributes?.users_permissions_user?.data?.attributes?.name}</div>
-          <div className="font-bold text-sm uppercase">Area : {data?.attributes?.area?.data?.attributes?.name}</div>
-          <div className="font-bold text-sm uppercase">Wilayah : {data?.attributes?.wilayah?.data?.attributes?.name}</div>
+          <div className="font-bold text-sm uppercase">Nama Sales : 
+            {details.map((detail, index) => {
+              if(salesName === null) salesName = " " + detail.attributes.customer.data.attributes.sales_name;
+              else salesName += ", "+ detail.attributes.customer.data.attributes.sales_name;
+              
+              if ((details.length - 1) === index) return salesName;
+            })
+            }
+          </div>
+          <div className="font-bold text-sm uppercase">Area :
+            {details.map((detail, index) => {
+              if(areaName === null) areaName = " " + detail.attributes.customer.data.attributes.area.data.attributes.name;
+              else areaName += ", "+ detail.attributes.customer.data.attributes.area.data.attributes.name;
+              
+              if ((details.length - 1) === index) return areaName;
+            })
+            }
+          </div>
+          <div className="font-bold text-sm uppercase">Wilayah : 
+            {details.map((detail, index) => {
+              if(wilayahName === null) wilayahName = " " + detail.attributes.customer.data.attributes.wilayah.data.attributes.name;
+              else wilayahName += ", "+ detail.attributes.customer.data.attributes.wilayah.data.attributes.name;
+              
+              if ((details.length - 1) === index) return wilayahName;
+            })
+            }
+          </div>
           <div>{/*{supplierAddress}*/}</div>
         </div>
         <div>
@@ -122,7 +149,7 @@ const Print = ({ props }) => {
       <div className=" text-sm uppercase mt-2 flex justify-end"></div>
 
       <div className="font-bold text-lg uppercase mt-4 flex justify-start">CATATAN : </div>
-      <div className="text-sm mt-1 flex justify-start">Mohon untuk menghubungi kami kembali jika ada perubahan harga</div>
+      {/* <div className="text-sm mt-1 flex justify-start">Mohon untuk menghubungi kami kembali jika ada perubahan harga</div> */}
 
       {/*<div className="font-bold  text-sm uppercase mt-10 flex justify-end">HORMAT KAMI</div>*/}
       {/*<div className="font-bold  text-sm uppercase mt-10 flex justify-end">_____________________________</div>*/}

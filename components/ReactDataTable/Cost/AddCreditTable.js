@@ -720,10 +720,10 @@ export default function ReactDataTable({
       data={data.filter((item, id) => {
         //filter
         let man = new Date(item.attributes.sale_date); //date from data
-        let customerNama = item.attributes.customer.data.id;
-        let areaFilter = item.attributes.customer.data.attributes.area?.data?.id;
-        let wilayahFilter = item.attributes.customer.data.attributes.wilayah.data?.id;
-        let salesFilter = item.attributes.customer.data.attributes?.sales_name;
+        let customerNama = item?.attributes?.customer?.data?.id;
+        let areaFilter = item?.attributes?.customer?.data?.attributes?.area?.data?.id;
+        let wilayahFilter = item?.attributes?.customer?.data?.attributes?.wilayah?.data?.id;
+        let salesFilter = item?.attributes?.customer?.data?.attributes?.sales_name;
 
         //show pilih data
         // if(biaya.info[id]?.pilihData == "pilih"){
