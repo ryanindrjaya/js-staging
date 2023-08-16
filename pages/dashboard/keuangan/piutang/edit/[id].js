@@ -278,7 +278,7 @@ const fetchAkunCOA = async (cookies) => {
 };
 
 function Piutang({ props }) {
-  const biaya = useSelector((state) => state.Cost); console.log("biaya nich", biaya);
+  const biaya = useSelector((state) => state.Cost);
   const dispatch = useDispatch();
 
   //var selectedProduct = products?.productList;
@@ -300,11 +300,10 @@ function Piutang({ props }) {
   const [dataEditId, setDataEditId] = useState({});
   //const customerData = props.customer.data[0];
   const [supplier, setSupplier] = useState();
-  const [dataTabel, setDataTabel] = useState([]); console.log("data dataEdit", dataEdit);
+  const [dataTabel, setDataTabel] = useState([]);
   const [dataRetur, setDataRetur] = useState([]);
   const [sisaHutang, setSisaHutang] = useState([]); 
   const [sisaHutangTotal, setSisaHutangTotal] = useState({});
-  // console.log("sisa hutang", sisaHutang, sisaHutangTotal);
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -650,7 +649,7 @@ function Piutang({ props }) {
   };
 
   const calculatePriceTotal = (row, index) => {
-    const total = calculatePrice(row, biaya, sisaHutangTotal, index); console.log(total, "total");
+    const total = calculatePrice(row, biaya, sisaHutangTotal, index);
     sisaHutang[index] = total - row?.dibayar;
     row.sisaPiutang = total - row?.dibayar;
     var priceTotal = total - row?.dibayar;
@@ -941,7 +940,7 @@ function Piutang({ props }) {
         }
       });
       
-      dataEdit.attributes.credit_details.data.forEach((item) => { console.log("element dan item dataedit", element, item);
+      dataEdit.attributes.credit_details.data.forEach((item) => {
         
         if(element.keterangan == "sales"){
           if(item.attributes.sales_sale?.data?.attributes?.no_sales_sale == element.attributes.no_sales_sale){
