@@ -61,7 +61,7 @@ export default function SalesSellingTable({
 
     // return;
 
-    if (row.attributes.status === "Diterima") {
+    if (row.attributes.status === "Diterima" && row.attributes.status_pembayaran === "Belum Lunas") {
       if (returPage == "toko") router.push("toko/retur/" + row.id);
       if (returPage == "sales") router.push("sales/retur/" + row.id);
       if (returPage == "nonpanel") router.push("non_panel/retur/" + row.id);
@@ -74,6 +74,8 @@ export default function SalesSellingTable({
           ? "Karena status retur harus sudah dibayar."
           : row.attributes.status === "Diproses"
           ? "Karena status penjualan sales masih di proses."
+          : row.attributes.status_pembayaran !== "Belum Lunas"
+          ? "Karena status pembayaran harus belum lunas."
           : "Tidak bisa diretur.";
 
       openNotificationWithIcon("error", "Maaf tidak bisa diretur", message);
