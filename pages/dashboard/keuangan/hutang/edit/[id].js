@@ -31,6 +31,8 @@ import nookies from "nookies";
 import LoadingAnimations from "@iso/components/Animations/Loading";
 import DataTable from "react-data-table-component";
 import * as moment from "moment";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
+import confirm from "antd/lib/modal/confirm";
 
 Hutang.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -280,114 +282,134 @@ function Hutang({ props }) {
     }
   };
 
-  const onFinish = (values) => {
-    var totalTunai = 0;
-    var totalTransfer = 0;
-    var totalGiro = 0;
-
-    setLoading(true);
-    setInfo("sukses"); console.log(values, "values");
-
-    for (const key in biaya.info) {
-      totalTunai += biaya.info[key].tunai;
-      totalTransfer += biaya.info[key].transfer;
-      totalGiro += biaya.info[key].giro;
-    }
-
-    var totalBayar =
-      values.bayar1 +
-      values.bayar2 +
-      values.bayar3;
-    var totalBayarProduk =
-      totalTunai + totalTransfer + totalGiro;
-    if (
-      (totalTunai != values.bayar1 ||
-        totalTransfer != values.bayar2 ||
-        totalGiro != values.bayar3) &&
-      totalBayar != totalBayarProduk
-    ) {
-      notification["error"]({
-        message: "Gagal menambahkan data",
-        description: "Total pembayaran dan yang dibayar tidak sesuai.",
-      });
-      setInfo("gagal");
-    }
-
-    // cek untuk akun hutang (cek coa)
-    console.log("total tunai, tranfer, giro", totalTunai, totalTransfer, totalGiro);
-    if(document == "Publish"){
-
-      var cekAkunMaster = false;
-      akunHutang.forEach((item) => {
-        if(item.attributes.setting == true){
-          if(totalTunai != 0 && item.attributes.type == "Tunai"){
-            if(item.attributes.chart_of_account.data.attributes.saldo < totalTunai){
+  const onFinish = (values, accept) => {
+    if (accept) {
+      var totalTunai = 0;
+      var totalTransfer = 0;
+      var totalGiro = 0;
+  
+      setLoading(true);
+      setInfo("sukses"); console.log(values, "values");
+  
+      for (const key in biaya.info) {
+        totalTunai += biaya.info[key].tunai;
+        totalTransfer += biaya.info[key].transfer;
+        totalGiro += biaya.info[key].giro;
+      }
+  
+      var totalBayar =
+        values.bayar1 +
+        values.bayar2 +
+        values.bayar3;
+      var totalBayarProduk =
+        totalTunai + totalTransfer + totalGiro;
+      if (
+        (totalTunai != values.bayar1 ||
+          totalTransfer != values.bayar2 ||
+          totalGiro != values.bayar3) &&
+        totalBayar != totalBayarProduk
+      ) {
+        notification["error"]({
+          message: "Gagal menambahkan data",
+          description: "Total pembayaran dan yang dibayar tidak sesuai.",
+        });
+        setInfo("gagal");
+      }
+  
+      // cek untuk akun hutang (cek coa)
+      console.log("total tunai, tranfer, giro", totalTunai, totalTransfer, totalGiro);
+      if(document == "Publish"){
+  
+        var cekAkunMaster = false;
+        akunHutang.forEach((item) => {
+          if(item.attributes.setting == true){
+            if(totalTunai != 0 && item.attributes.type == "Tunai"){
+              if(item.attributes.chart_of_account.data.attributes.saldo < totalTunai){
+                notification["error"]({
+                  message: "Gagal menambahkan data",
+                  description: "Data gagal ditambahkan, saldo untuk akun tunai kurang untuk melakukan pembayaran.",
+                });
+                setInfo("gagal");
+              }
+            } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
+              if(item.attributes.chart_of_account.data.attributes.saldo < totalTransfer){
+                notification["error"]({
+                  message: "Gagal menambahkan data",
+                  description: "Data gagal ditambahkan, saldo untuk akun transfer kurang untuk melakukan pembayaran.",
+                });
+                setInfo("gagal");
+              }
+            } else if(totalGiro != 0 && item.attributes.type == "Giro"){
+              if(item.attributes.chart_of_account.data.attributes.saldo < totalGiro){
+                notification["error"]({
+                  message: "Gagal menambahkan data",
+                  description: "Data gagal ditambahkan, saldo untuk akun giro kurang untuk melakukan pembayaran.",
+                });
+                setInfo("gagal");
+              }
+            } else if(cekAkunMaster === false && item.attributes.type == "Master"){
+              if(item.attributes.chart_of_account.data.attributes.saldo < values.total_pembayaran){
+                notification["error"]({
+                  message: "Gagal menambahkan data",
+                  description: "Data gagal ditambahkan, saldo untuk akun master kurang untuk melakukan pembayaran.",
+                });
+                setInfo("gagal");
+                
+              } else cekAkunMaster = true;
+            
+            }
+          } else {
+            if(totalTunai != 0 && item.attributes.type == "Tunai"){
+                notification["error"]({
+                  message: "Gagal menambahkan data",
+                  description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
+                });
+                setInfo("gagal");
+            } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
+                notification["error"]({
+                  message: "Gagal menambahkan data",
+                  description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
+                });
+                setInfo("gagal");
+            } else if(totalGiro != 0 && item.attributes.type == "Giro"){
+                notification["error"]({
+                  message: "Gagal menambahkan data",
+                  description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
+                });
+                setInfo("gagal");
+            } else if(cekAkunMaster != true){
               notification["error"]({
                 message: "Gagal menambahkan data",
-                description: "Data gagal ditambahkan, saldo untuk akun tunai kurang untuk melakukan pembayaran.",
+                description: "Data gagal ditambahkan, silahkan pilih akun master untuk diaktifkan.",
               });
               setInfo("gagal");
             }
-          } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
-            if(item.attributes.chart_of_account.data.attributes.saldo < totalTransfer){
-              notification["error"]({
-                message: "Gagal menambahkan data",
-                description: "Data gagal ditambahkan, saldo untuk akun transfer kurang untuk melakukan pembayaran.",
-              });
-              setInfo("gagal");
-            }
-          } else if(totalGiro != 0 && item.attributes.type == "Giro"){
-            if(item.attributes.chart_of_account.data.attributes.saldo < totalGiro){
-              notification["error"]({
-                message: "Gagal menambahkan data",
-                description: "Data gagal ditambahkan, saldo untuk akun giro kurang untuk melakukan pembayaran.",
-              });
-              setInfo("gagal");
-            }
-          } else if(cekAkunMaster === false && item.attributes.type == "Master"){
-            if(item.attributes.chart_of_account.data.attributes.saldo < values.total_pembayaran){
-              notification["error"]({
-                message: "Gagal menambahkan data",
-                description: "Data gagal ditambahkan, saldo untuk akun master kurang untuk melakukan pembayaran.",
-              });
-              setInfo("gagal");
-              
-            } else cekAkunMaster = true;
-          
           }
-        } else {
-          if(totalTunai != 0 && item.attributes.type == "Tunai"){
-              notification["error"]({
-                message: "Gagal menambahkan data",
-                description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
-              });
-              setInfo("gagal");
-          } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
-              notification["error"]({
-                message: "Gagal menambahkan data",
-                description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
-              });
-              setInfo("gagal");
-          } else if(totalGiro != 0 && item.attributes.type == "Giro"){
-              notification["error"]({
-                message: "Gagal menambahkan data",
-                description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
-              });
-              setInfo("gagal");
-          } else if(cekAkunMaster != true){
-            notification["error"]({
-              message: "Gagal menambahkan data",
-              description: "Data gagal ditambahkan, silahkan pilih akun master untuk diaktifkan.",
-            });
-            setInfo("gagal");
-          }
-        }
-      });
+        });
+  
+      }
+  
+      setDataValues(values);
+      setLoading(false);
 
+    } else {
+      confirm({
+        title: "Apakah anda yakin?",
+        icon: <ExclamationCircleOutlined />,
+        content: "Harap periksa kembali data yang telah diinput.",
+        okText: "Ya",
+        okType: "danger",
+        cancelText: "Tidak",
+        centered: true,
+        onOk() {
+          onFinish(values, true);
+        },
+        onCancel() {
+          console.log("Cancel");
+        },
+      });
     }
 
-    setDataValues(values);
-    setLoading(false);
   };
 
   const createDetail = async () => {
@@ -897,7 +919,7 @@ function Hutang({ props }) {
               initialValues={{
                 remember: true,
               }}
-              onFinish={onFinish}
+              onFinish={(values) => onFinish(values, false)}
               onFinishFailed={validateError}
             >
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-4">

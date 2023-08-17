@@ -102,6 +102,34 @@ function Setting({ props }) {
         Authorization: "Bearer " + cookies.token,
       },
     };
+
+    try {
+      const req = await fetch(endpoint, options);
+      const res = await req.json(); console.log(page, req);
+      if (res) {
+        setAkun((prevData) => ({
+          data: filterDuplicateData(prevData.data.concat(res.data)),
+          meta: prevData.meta,
+        }));
+      } else {
+        console.log("something is wrong");
+      }
+      
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const filterDuplicateData = (arr) => {
+    const seen = new Set();
+
+    const filteredArr = arr.filter((el) => {
+      const duplicate = seen.has(el.id);
+      seen.add(el.id);
+      return !duplicate;
+    });
+
+    return filteredArr;
   };
 
   const handleTambahAkun = () => {
