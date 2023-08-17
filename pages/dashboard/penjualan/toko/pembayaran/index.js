@@ -32,6 +32,7 @@ import { createInventoryFromPenjualan } from "../../../../../library/functions/c
 import { MenuOutlined, AuditOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import confirm from "antd/lib/modal/confirm";
 import moment from "moment";
+import ConfirmDialog from "../../../../../components/Alert/ConfirmDialog";
 
 const startDate = moment()?.startOf("day").format("YYYY-MM-DDTHH:mm:ss");
 const endDate = moment()?.endOf("day").format("YYYY-MM-DDTHH:mm:ss");
@@ -479,7 +480,7 @@ function PembayaranToko({ props }) {
                       dataIndex={["attributes", "customer_name"]}
                       key="customer_name"
                     />
-                    <Column
+                    {/* <Column
                       title="Status"
                       dataIndex={["attributes", "status"]}
                       key="status"
@@ -505,7 +506,7 @@ function PembayaranToko({ props }) {
                           )}
                         </>
                       )}
-                    />
+                    /> */}
                     <Column
                       title="Metode Pembayaran"
                       key="metode_pembayaran"
@@ -716,54 +717,43 @@ function PembayaranToko({ props }) {
                     <Column
                       title="Action"
                       key="action"
+                      align="center"
                       render={(_, record) => {
                         if (record.attributes.status === "Dibayar" || record.attributes.status === "Diretur") {
                           return <></>;
                         }
 
                         return (
-                          <Popover
-                            showArrow={false}
-                            trigger="click"
-                            content={
-                              <div className="flex flex-col justify-start gap-2">
-                                <Popconfirm
-                                  placement="topLeft"
-                                  title={
-                                    "Pembayaran akan dilakukan sebesar " +
-                                    formatter.format(paymentValue?.[record.id] ?? 0) +
-                                    ". Lanjutkan?"
-                                  }
-                                  description={
-                                    "Pembayaran akan dilakukan sebesar " +
-                                    formatter.format(paymentValue?.[record.id] ?? 0) +
-                                    ". Lanjutkan?"
-                                  }
-                                  onConfirm={() => confirmPembayaran(record)}
-                                  onCancel={cancel}
-                                  okButtonProps={{
-                                    style: { backgroundColor: "#00b894" },
-                                  }}
-                                  okText="Bayar"
-                                  cancelText="Batalkan"
-                                >
-                                  <Button className="rounded-md mr-2 hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
-                                    Bayar
-                                  </Button>
-                                </Popconfirm>
-
-                                <Button
-                                  className="rounded-md mr-2 hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
-                                  onClick={() => onOpenDrawer(record)}
-                                >
-                                  Pemb. Lain
+                          <>
+                            <ConfirmDialog
+                              title={
+                                "Pembayaran akan dilakukan sebesar " +
+                                formatter.format(paymentValue?.[record.id] ?? 0) +
+                                ". Lanjutkan?"
+                              }
+                              message={
+                                "Pembayaran akan dilakukan sebesar " +
+                                formatter.format(paymentValue?.[record.id] ?? 0) +
+                                ". Lanjutkan?"
+                              }
+                              onConfirm={() => confirmPembayaran(record)}
+                              onCancel={() => {}}
+                              okText="Bayar"
+                              cancelText="Batalkan"
+                              component={
+                                <Button className="rounded-md mr-2 hover:text-white focus:text-white hover:bg-cyan-700 border border-cyan-700 focus:bg-cyan-700 ml-1">
+                                  Bayar
                                 </Button>
-                              </div>
-                            }
-                            placement="bottomLeft"
-                          >
-                            <MenuOutlined className="text-xl cursor-pointer hover:text-primary transition-colors duration-75" />
-                          </Popover>
+                              }
+                            />
+
+                            <Button
+                              className="rounded-md mr-2 hover:text-white focus:text-white hover:bg-cyan-700 border border-cyan-700 focus:bg-cyan-700 ml-1"
+                              onClick={() => onOpenDrawer(record)}
+                            >
+                              Pemb. Lain
+                            </Button>
+                          </>
                         );
                       }}
                     />

@@ -23,6 +23,7 @@ import { useRouter } from "next/router";
 import DataTable from "react-data-table-component";
 import { CloseCircleFilled, CheckCircleFilled, PrinterOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import ConfirmDialog from "../../../components/Alert/ConfirmDialog";
+import confirm from "antd/lib/modal/confirm";
 
 export default function daftarKeluarBarang({ companyOptions }) {
   const { token } = nookies.get();
@@ -353,9 +354,16 @@ export default function daftarKeluarBarang({ companyOptions }) {
     if (data.length === 0) return;
 
     if (data.some((item) => item.send_qty !== item.sended) && !accept) {
-      setConfirmDialog({
-        ...confirmDialog,
-        open: true,
+      confirm({
+        title: "Jumlah produk tidak sama",
+        content:
+          "Jumlah produk yang diterima tidak sama dengan jumlah produk yang dikirim, apakah anda yakin ingin menerima produk ini?",
+        okText: "Ya",
+        cancelText: "Tidak",
+        onOk() {
+          handleBulkSend(true);
+        },
+        onCancel() {},
       });
       return;
     }
@@ -761,26 +769,6 @@ export default function daftarKeluarBarang({ companyOptions }) {
                 }
               />
               <LayoutContent>
-                <ConfirmDialog
-                  visible={confirmDialog.open}
-                  title="Jumlah produk tidak sama"
-                  message="Jumlah produk yang diterima tidak sama dengan jumlah produk yang dikirim, apakah anda yakin ingin menerima produk ini?"
-                  confirmLabel="Ya"
-                  cancelLabel="Tidak"
-                  onCancel={() => {
-                    setConfirmDialog({
-                      ...confirmDialog,
-                      open: false,
-                    });
-                  }}
-                  onConfirm={() => {
-                    setConfirmDialog({
-                      ...confirmDialog,
-                      open: false,
-                    });
-                    handleBulkSend(true);
-                  }}
-                />
                 {selectedLocation ? (
                   <>
                     <div className="w-full lg:w-3/4 grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">

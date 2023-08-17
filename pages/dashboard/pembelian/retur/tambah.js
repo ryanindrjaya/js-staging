@@ -284,6 +284,8 @@ function Retur({ props }) {
     console.log("values", values);
     console.log("products", products);
 
+    values.status = "Draft";
+
     const isShowingPopup = await checkReturQty(values);
     console.log("isShowingPopup", isShowingPopup);
     if (isShowingPopup) {
@@ -597,16 +599,9 @@ function Retur({ props }) {
                   <SearchLPB supplier={supplier} handleSelect={setLpbData} />
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="status"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Status tidak boleh kosong!",
-                      },
-                    ]}
-                  >
+                  <Form.Item name="status">
                     <Select
+                      defaultValue={"Draft"}
                       className="hidden"
                       value={"Draft"}
                       placeholder="Pilih Status"

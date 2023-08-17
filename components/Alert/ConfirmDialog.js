@@ -7,7 +7,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { CloseOutlined } from "@ant-design/icons";
 
-export default function ConfirmDialog({ visible, onConfirm, onCancel, title, component, message, id }) {
+export default function ConfirmDialog({ visible, onConfirm, onCancel, title, component, message, okText, cancelText }) {
   const [open, setOpen] = React.useState(false);
 
   const handleClickOpen = () => {
@@ -32,7 +32,7 @@ export default function ConfirmDialog({ visible, onConfirm, onCancel, title, com
     <div>
       <span onClick={handleClickOpen}>{component}</span>
       <Dialog
-        open={visible !== undefined || visible !== null ? visible : open}
+        open={open}
         onClose={handleCancel}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
@@ -45,8 +45,8 @@ export default function ConfirmDialog({ visible, onConfirm, onCancel, title, com
           <DialogContentText id="alert-dialog-description">{message}</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancel}>Tidak</Button>
-          <Button onClick={handleConfirm}>Ya</Button>
+          <Button onClick={handleCancel}>{cancelText ?? "Tidak"}</Button>
+          <Button onClick={handleConfirm}>{okText ?? "Ya"}</Button>
         </DialogActions>
       </Dialog>
     </div>

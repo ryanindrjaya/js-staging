@@ -12,6 +12,7 @@ import nookies from "nookies";
 import DataTable from "react-data-table-component";
 import moment from "moment";
 import Link from "next/link";
+import SellingTokoTable from "../../../../components/ReactDataTable/Selling/SellingTokoTable";
 
 Toko.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -741,7 +742,7 @@ function Toko({ props }) {
               </button>
             </div>
 
-            <SellingTable
+            <SellingTokoTable
               data={sell}
               onUpdate={handleUpdate}
               onDelete={handleDelete}

@@ -10,7 +10,7 @@ var id = 0;
 const createDetailSale = (values, products, productTotalPrice, productSubTotal, setListId, url, form, lokasiGudang) => {
   console.log("create detail function", products);
   console.log("tempList ni ===============", tempListId, form.getFieldValue("product_location"));
-  products.productList.forEach((element, index) => {
+  products.productList.reverse().forEach((element, index) => {
     // default value
     var qty = 1;
     var disc = 0;

@@ -155,7 +155,7 @@ export default function ReactDataTable({
   };
 
   const returPenjualan = (row) => {
-    if (row.attributes.status == "Dibayar" || row.attributes.status == "Dibayar Sebagian") {
+    if (row.attributes.status !== "Dibayar" && row.attributes.status !== "Diretur") {
       if (returPage == "toko") router.push("toko/retur/" + row.id);
       if (returPage == "sales") router.push("sales/retur/" + row.id);
       if (returPage == "nonpanel") router.push("non_panel/retur/" + row.id);
@@ -164,8 +164,8 @@ export default function ReactDataTable({
       const message =
         row.attributes.status === "Diretur"
           ? "Karena status lembar pembelian barang sudah diretur."
-          : row.attributes.status === "Belum Dibayar"
-          ? "Karena status retur harus sudah dibayar."
+          : row.attributes.status === "Dibayar"
+          ? "Karena dokumen sudah dibayar."
           : "Tidak bisa melakukan retur";
 
       openNotificationWithIcon("error", "Maaf tidak bisa diretur", message);

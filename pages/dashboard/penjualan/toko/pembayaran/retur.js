@@ -1,5 +1,6 @@
 import {
   Button,
+  DatePicker,
   Drawer,
   Form,
   Input,
@@ -27,6 +28,11 @@ import ReturDrawer from "../../../../../components/Drawer/ReturDrawer";
 import { CreateStorePayment } from "../../../../../library/functions/createStorePayment";
 import { createInventoryFromReturPenjualan } from "../../../../../library/functions/createInventory";
 import { MenuOutlined } from "@ant-design/icons";
+import moment from "moment";
+import ConfirmDialog from "../../../../../components/Alert/ConfirmDialog";
+
+const startDate = moment()?.startOf("day").format("YYYY-MM-DDTHH:mm:ss");
+const endDate = moment()?.endOf("day").format("YYYY-MM-DDTHH:mm:ss");
 
 PembayaranToko.getInitialProps = async (context) => {
   try {
@@ -34,7 +40,7 @@ PembayaranToko.getInitialProps = async (context) => {
     const req = await fetchData(cookies);
     const user = await req.json();
 
-    const paymentRetur = await fethcRetur(cookies);
+    const paymentRetur = await fetchRetur(cookies);
 
     const data = {
       props: {
@@ -66,8 +72,14 @@ const fetchData = async (cookies) => {
   return req;
 };
 
-const fethcRetur = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-store-sales?sort[0]=createdAt:desc&populate=*";
+const fetchRetur = async (cookies, start = startDate, end = endDate, noFaktur) => {
+  // get today data
+
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL +
+    `/retur-store-sales?sort[0]=createdAt:desc&populate=*&filters[createdAt][$gte]=${start}&filters[createdAt][$lte]=${end}&filters[status][$eq]=Belum Dibayar${
+      noFaktur ? `&filters[no_retur_store_sale][$containsi]=${noFaktur}` : ""
+    }`;
   const options = {
     method: "GET",
     headers: {
@@ -77,8 +89,7 @@ const fethcRetur = async (cookies) => {
   };
 
   const req = await fetch(endpoint, options);
-  const res = await req.json();
-  return res;
+  return req;
 };
 
 const getCheckInUser = async (cookies, user) => {
@@ -115,6 +126,13 @@ function PembayaranToko({ props }) {
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedDrawerData, setSelectedDrawerData] = useState({});
   const [refetch, setRefetch] = useState(false);
+  const [date, setDate] = useState([moment().startOf("day"), moment().endOf("day")]);
+  const [loadingTable, setLoadingTable] = useState(false);
+  const [kembalian, setKembalian] = useState({});
+  const [kembalianOtomatis, setKembalianOtomatis] = useState({});
+  const [noFaktur, setNoFaktur] = useState("");
+  const [othValue, setOthValue] = useState({});
+
   const router = useRouter();
   const formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -123,10 +141,16 @@ function PembayaranToko({ props }) {
   });
 
   const reloadPage = () => {
+    setKembalian({});
+    setKembalianOtomatis({});
+    setOthValue({});
+    setPaymentValue({});
+    setSelectedPaymentMethod();
+
     setRefetch(!refetch);
   };
 
-  const confirm = async (record) => {
+  const confirmPembayaran = async (record) => {
     const returTrxId = record.id;
     const storeTrxId = record.attributes?.store_sale?.data?.id;
 
@@ -195,6 +219,97 @@ function PembayaranToko({ props }) {
     checkInUser();
   }, []);
 
+  useEffect(() => {
+    function fetchDataSales() {
+      setLoadingTable(true);
+      const start_date = router.query?.start_date ?? startDate;
+      const end_date = router.query?.end_date ?? endDate;
+      const noFaktur = router.query?.no_faktur;
+
+      fetchRetur(cookies, start_date, end_date, noFaktur)
+        .then((res) => res.json())
+        .then((data) => {
+          setDataRetur(data?.data ?? []);
+
+          setLoadingTable(false);
+        })
+        .catch((err) => {
+          console.log(err);
+          setLoadingTable(false);
+        });
+    }
+
+    fetchDataSales();
+  }, [router.query, refetch]);
+
+  function redirectQuery(query, reset = false) {
+    const existingQuery = router.query;
+
+    const mergedQuery = { ...existingQuery, ...query };
+
+    if (reset) {
+      for (const key of reset) {
+        delete mergedQuery[key];
+      }
+    }
+
+    router.replace(
+      {
+        pathname: router.pathname,
+        query: mergedQuery,
+      },
+      undefined,
+      { shallow: true }
+    );
+  }
+
+  useEffect(() => {
+    if (paymentValue && othValue) {
+      for (const [key, value] of Object.entries(paymentValue)) {
+        const totalHarga = dataRetur.find((data) => data.id === parseInt(key))?.attributes?.total ?? 0;
+        const oth = othValue[key] ?? 0;
+        const bayar = value ?? 0;
+
+        const totalKembalian = bayar - totalHarga - oth;
+
+        setKembalianOtomatis({
+          ...kembalianOtomatis,
+          [key]: totalKembalian < 0 ? 0 : parseFloat(totalKembalian).toFixed(2),
+        });
+        setKembalian({
+          ...kembalian,
+          [key]: null,
+        });
+        setOthValue({
+          ...othValue,
+          [key]: 0,
+        });
+      }
+    }
+  }, [paymentValue]);
+
+  useEffect(() => {
+    // calculate diff between kembalian and kembalianOtomatis then set OTH
+    if (kembalian && kembalianOtomatis) {
+      for (const [key, value] of Object.entries(kembalian)) {
+        if (value === null || value === undefined) {
+          continue;
+        }
+        const kembalianOtomatisValue = kembalianOtomatis?.[key] ?? 0;
+        const kembalianValue = value ?? 0;
+
+        const totalOTH = kembalianValue - kembalianOtomatisValue;
+
+        console.log("oth nya", totalOTH);
+
+        setOthValue({
+          ...othValue,
+          [key]: parseFloat(totalOTH).toFixed(2),
+        });
+      }
+    }
+  }, [kembalianOtomatis, kembalian]);
+
   return (
     <>
       <Head>
@@ -208,17 +323,48 @@ function PembayaranToko({ props }) {
               <Skeleton />
             ) : (
               <>
-                <DateTimeComponent />
+                <DatePicker.RangePicker
+                  value={date}
+                  onChange={(_, value) => {
+                    if (value?.[0] !== "" && value?.[1] !== "") {
+                      redirectQuery({
+                        start_date: moment(value?.[0])?.startOf("day").format("YYYY-MM-DDTHH:mm:ss"),
+                        end_date: moment(value?.[1])?.endOf("day").format("YYYY-MM-DDTHH:mm:ss"),
+                      });
+                      setDate(_);
+                    } else {
+                      redirectQuery({}, ["start_date", "end_date"]);
+                      setDate([moment().startOf("day"), moment().endOf("day")]);
+                    }
+                  }}
+                  size="large"
+                  placeholder={["Tanggal Mulai", "Tanggal Selesai"]}
+                />
                 <div className="flex items-center">
                   <div className="w-full md:w-1/5 mb-2 md:mb-0 mr-2">
                     <Input.Search
+                      value={noFaktur}
                       size="large"
                       className=""
                       placeholder="Cari Nomor Faktur / Nama"
                       style={{
                         width: "100%",
                       }}
+                      onChange={(e) => {
+                        if (e.target.value === "") {
+                          redirectQuery({}, ["no_faktur"]);
+                          setNoFaktur("");
+                        } else {
+                          setNoFaktur(e.target.value);
+                        }
+                      }}
+                      onSearch={(e) => {
+                        setTimeout(() => {
+                          redirectQuery({ no_faktur: e });
+                        }, 500);
+                      }}
                     />
+                    <p className="m-0 text-xs text-gray-400">*Tekan 'Enter' atau tekan ikon untuk mencari data</p>
                   </div>
                   <div className="w-full md:w-2/5 mb-2 md:mb-0"></div>
                   <div className="w-full md:w-1/5 mb-2 md:mb-0">
@@ -256,17 +402,25 @@ function PembayaranToko({ props }) {
                 />
 
                 {/* TABEL COMPONENT */}
-                <Table dataSource={dataRetur} className="custom-table" rowClassName="custom-row">
+                <Table
+                  scroll={{
+                    x: 1000,
+                  }}
+                  loading={loadingTable}
+                  dataSource={dataRetur}
+                  className="custom-table"
+                  rowClassName="custom-row"
+                >
                   <Column title="No Faktur" dataIndex={["attributes", "no_retur_store_sale"]} key="faktur" />
                   <Column title="Nama Customer" dataIndex={["attributes", "customer_name"]} key="customer_name" />
-                  <Column
+                  {/* <Column
                     title="Status"
                     dataIndex={["attributes", "status"]}
                     key="status"
                     render={(status) => (
                       <>{status === "Dibayar" ? <Tag color="green">{status}</Tag> : <Tag color="red">{status}</Tag>}</>
                     )}
-                  />
+                  /> */}
                   <Column
                     title="Metode Pembayaran"
                     key="metode_pembayaran"
@@ -354,8 +508,70 @@ function PembayaranToko({ props }) {
                         return formatter.format(kembali);
                       }
 
-                      const kembali = paymentValue?.[record.id] ? paymentValue[record.id] - totalHarga : 0;
-                      return formatter.format(Math.max(kembali, 0));
+                      return (
+                        <InputNumber
+                          onFocus={(e) => e.target.select()}
+                          aria-readonly={
+                            record.attributes.status === "Dibayar" || record.attributes.status === "Diretur"
+                          }
+                          placeholder="Masukan Nominal"
+                          value={kembalian?.[record.id] ?? kembalianOtomatis?.[record.id] ?? 0}
+                          onChange={(v) => {
+                            setKembalian({
+                              ...othValue,
+                              [record.id]: v,
+                            });
+                          }}
+                          formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                          parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
+                          style={{ width: 150 }}
+                        />
+                      );
+                    }}
+                  />
+
+                  <Column
+                    title="OTH"
+                    key="oth"
+                    render={(record) => {
+                      let initialValue = othValue?.[record.id];
+                      const dataPayment = record?.attributes?.store_payments?.data ?? [];
+
+                      if (record.attributes.status === "Dibayar" || record.attributes.status === "Diretur") {
+                        const dataOTH = dataPayment.reduce(
+                          (acc, curr) => (curr.attributes.oth ? parseFloat(acc) + parseFloat(curr.attributes.oth) : 0),
+                          0
+                        );
+
+                        initialValue = dataOTH;
+                      }
+
+                      return (
+                        <InputNumber
+                          onFocus={(e) => e.target.select()}
+                          aria-readonly={
+                            record.attributes.status === "Dibayar" || record.attributes.status === "Diretur"
+                          }
+                          placeholder="Masukan Nominal"
+                          value={initialValue ?? 0}
+                          onChange={(v) => {
+                            setOthValue({
+                              ...othValue,
+                              [record.id]: v,
+                            });
+                          }}
+                          formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                          parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
+                          className={
+                            record.attributes.status === "Dibayar" || record.attributes.status === "Diretur"
+                              ? `pointer-events-none ${initialValue < 0 ? "text-red-600" : ""}`
+                              : othValue?.[record.id] < 0
+                              ? "text-red-600"
+                              : ""
+                          }
+                          style={{ width: 150 }}
+                        />
+                      );
                     }}
                   />
                   <Column
@@ -367,48 +583,36 @@ function PembayaranToko({ props }) {
                       }
 
                       return (
-                        <Popover
-                          showArrow={false}
-                          trigger="click"
-                          content={
-                            <div className="flex flex-col justify-start gap-2">
-                              <Popconfirm
-                                placement="topLeft"
-                                title={
-                                  "Pembayaran akan dilakukan sebesar " +
-                                  formatter.format(paymentValue?.[record.id] ?? 0) +
-                                  ". Lanjutkan?"
-                                }
-                                description={
-                                  "Pembayaran akan dilakukan sebesar " +
-                                  formatter.format(paymentValue?.[record.id] ?? 0) +
-                                  ". Lanjutkan?"
-                                }
-                                onConfirm={() => confirm(record)}
-                                onCancel={cancel}
-                                okButtonProps={{
-                                  style: { backgroundColor: "#00b894" },
-                                }}
-                                okText="Bayar"
-                                cancelText="Batalkan"
-                              >
-                                <Button className="rounded-md mr-2 hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
-                                  Bayar
-                                </Button>
-                              </Popconfirm>
-
-                              <Button
-                                className="rounded-md mr-2 hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
-                                onClick={() => onOpenDrawer(record)}
-                              >
-                                Pemb. Lain
+                        <>
+                          <ConfirmDialog
+                            title={
+                              "Pembayaran akan dilakukan sebesar " +
+                              formatter.format(paymentValue?.[record.id] ?? 0) +
+                              ". Lanjutkan?"
+                            }
+                            message={
+                              "Pembayaran akan dilakukan sebesar " +
+                              formatter.format(paymentValue?.[record.id] ?? 0) +
+                              ". Lanjutkan?"
+                            }
+                            onConfirm={() => confirmPembayaran(record)}
+                            onCancel={() => {}}
+                            okText="Bayar"
+                            cancelText="Batalkan"
+                            component={
+                              <Button className="rounded-md mr-2 hover:text-white focus:text-white hover:bg-cyan-700 border border-cyan-700 focus:bg-cyan-700 ml-1">
+                                Bayar
                               </Button>
-                            </div>
-                          }
-                          placement="bottomLeft"
-                        >
-                          <MenuOutlined className="text-xl cursor-pointer hover:text-primary transition-colors duration-75" />
-                        </Popover>
+                            }
+                          />
+
+                          <Button
+                            className="rounded-md mr-2 hover:text-white focus:text-white hover:bg-cyan-700 border border-cyan-700 focus:bg-cyan-700 ml-1"
+                            onClick={() => onOpenDrawer(record)}
+                          >
+                            Pemb. Lain
+                          </Button>
+                        </>
                       );
                     }}
                   />

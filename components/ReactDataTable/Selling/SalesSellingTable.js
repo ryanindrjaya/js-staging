@@ -61,7 +61,7 @@ export default function SalesSellingTable({
 
     // return;
 
-    if (row.attributes.status === "Diterima") {
+    if (row.attributes.status_pembayaran !== "Lunas" && row.attributes.status !== "Diretur") {
       if (returPage == "toko") router.push("toko/retur/" + row.id);
       if (returPage == "sales") router.push("sales/retur/" + row.id);
       if (returPage == "nonpanel") router.push("non_panel/retur/" + row.id);
@@ -70,10 +70,8 @@ export default function SalesSellingTable({
       const message =
         row.attributes.status === "Diretur"
           ? "Karena status lembar pembelian barang sudah diretur."
-          : row.attributes.status === "Belum Dibayar"
-          ? "Karena status retur harus sudah dibayar."
-          : row.attributes.status === "Diproses"
-          ? "Karena status penjualan sales masih di proses."
+          : row.attributes.status_pembayaran === "Lunas"
+          ? "Karena status pembayaran sudah lunas."
           : "Tidak bisa diretur.";
 
       openNotificationWithIcon("error", "Maaf tidak bisa diretur", message);
