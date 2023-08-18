@@ -221,66 +221,6 @@ function Piutang({ props }) {
 
   const onChangeStatus = async (status, row) => {
 
-    //cek akun
-    var cekAkunMaster = false;
-    var data = row;
-    data.attributes.credit_details.data.forEach((row) => {
-      var akunTunai = false;
-      var akunTransfer = false;
-      var akunGiro = false;
-
-      akunPiutang.data.forEach((item) => {
-
-        if(item.attributes.setting == true){
-          if(row.attributes.tunai > 0 && item.attributes.type == "Tunai") akunTunai = true;
-          else if(row.attributes.transfer > 0 && item.attributes.type == "Transfer") akunTransfer = true;
-          else if(row.attributes.giro > 0 && item.attributes.type == "Giro") akunGiro = true;
-          else if(cekAkunMaster === false && item.attributes.type == "Master"){
-            if(item.attributes.chart_of_account.data.attributes.saldo < data.attributes.total_pembayaran){
-              notification["error"]({
-                message: "Gagal menambahkan data",
-                description: "Data gagal ditambahkan, saldo untuk akun master kurang untuk melakukan pembayaran.",
-              });
-              status = "Draft";
-            } else cekAkunMaster = true;
-          }
-        } else {
-          if(row.attributes.tunai != 0 && akunTunai != true){
-            notification["error"]({
-              message: "Gagal menambahkan data",
-              description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
-            });
-            status = "Draft";
-  
-          } else if(row.attributes.transfer != 0 && akunTransfer != true){
-              notification["error"]({
-                message: "Gagal menambahkan data",
-                description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
-              });
-              status = "Draft";
-              
-          } else if(row.attributes.giro  != 0 && akunGiro != true){
-              notification["error"]({
-                message: "Gagal menambahkan data",
-                description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
-              });
-              status = "Draft";
-  
-          } else if(cekAkunMaster != true){
-            notification["error"]({
-              message: "Gagal menambahkan data",
-              description: "Data gagal ditambahkan, silahkan pilih akun master untuk diaktifkan.",
-            });
-            status = "Draft";
-            
-          }
-
-        }
-
-
-      });
-    });
-
     //Post for publish  
     if(status == "Publish"){
         const dataPiutang = await changeStatusPiutang(status, row.id);
@@ -289,17 +229,10 @@ function Piutang({ props }) {
 
           // update penjualan
             dataPiutang.attributes.credit_details.data.forEach((item) => {
-              const sisa_piutang = item.attributes.sisa_piutang;
-    
-              // if (sisa_piutang == 0) editPenjualanDB("Lunas", item.attributes.purchasing.data.id);
-              // else editPenjualanDB("Dibayar Sebagian", item.attributes.purchasing.data.id);
 
               const saleTypes = ["non_panel_sale", "panel_sale", "sales_sale"];
                 for (const saleType of saleTypes) {
                   const sale = item.attributes[saleType].data;
-                  //console.log(sale, "sale nih", item, saleType, dataPiutang.attributes.total_pembayaran);
-                  // var saleStatus = null;
-                  // if (saleType === "sales_sale") saleStatus = data.attributes.status_pembayaran;
 
                   if (sale != null) {
                     let url = `/${saleType}s/${sale.id}`;
@@ -409,35 +342,20 @@ function Piutang({ props }) {
 const putAkun = async (akun, pembayaran, noPiutang, tipe) => {
   try {
     
-    var saldo = parseFloat(akun.attributes.saldo + pembayaran);
-    if(tipe === "Master") saldo = parseFloat(akun.attributes.saldo - pembayaran);
-
-      const data = {
-        data: {
-          saldo: saldo,
-        },
-      };
-  
-      const JSONdata = JSON.stringify(data);
       const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts/" + akun.id;
       const options = {
-          method: "PUT",
+          method: "GET",
           headers: {
               "Content-Type": "application/json",
               Authorization: "Bearer " + cookies.token,
           },
-          body: JSONdata,
+          //body: JSONdata,
       };
   
       const req = await fetch(endpoint, options);
       const res = await req.json();
 
       if (req.status === 200) {
-          console.log("akun sukses diupdate", res);
-          notification["success"]({
-            message: "Sukses menambahkan data",
-            description: "Pembayaran yang dilakukan sukses.",
-          });
           if(tipe === "Master") updateJurnal(res.data, "piutang", null, noPiutang, pembayaran, user, tipe);
           else updateJurnal(res.data, "piutang", null, noPiutang, pembayaran, user);
       } else {

@@ -36,31 +36,24 @@ const UpdateJurnal = async (
   values.added_by = user.name;
   values.tanggal = moment();
 
-  if(page == "hutang" && tipe !== "Master"){
-    values.kredit = saldo;
+  if(page == "hutang"){
+    if (tipe !== "Master") values.kredit = saldo;
+    else if (tipe === "Master") values.debit = saldo;
     values.catatan = "Transaksi hutang dengan kode " + noHutang;
     values.no_jurnal = `JH/${user.id}/${noJurnal}/${mm}/${yyyy}`;
-    noJurnal++;
-    noJurnal = String(noJurnal).padStart(3, "0");
-  } else if (page == "piutang" && tipe !== "Master") { 
-    values.debit = saldo;
+    // noJurnal++;
+    // noJurnal = String(noJurnal).padStart(3, "0");
+  } else if (page == "piutang") { 
+    if (tipe !== "Master") values.debit = saldo;
+    else if (tipe === "Master") values.kredit = saldo;
     values.catatan = "Transaksi piutang dengan kode " + noPiutang;
     values.no_jurnal = `JP/${user.id}/${noJurnal}/${mm}/${yyyy}`;
-    noJurnal++;
-    noJurnal = String(noJurnal).padStart(3, "0");
-  } else if(page == "hutang" && tipe === "Master"){
-    values.debit = saldo;
-    values.catatan = "Transaksi hutang dengan kode " + noHutang;
-    values.no_jurnal = `JH/${user.id}/${noJurnal}/${mm}/${yyyy}`;
-    noJurnal++;
-    noJurnal = String(noJurnal).padStart(3, "0");
-  } else if (page == "piutang" && tipe === "Master") { 
-    values.kredit = saldo;
-    values.catatan = "Transaksi piutang dengan kode " + noPiutang;
-    values.no_jurnal = `JP/${user.id}/${noJurnal}/${mm}/${yyyy}`;
-    noJurnal++;
-    noJurnal = String(noJurnal).padStart(3, "0");
-  }
+    // noJurnal++;
+    // noJurnal = String(noJurnal).padStart(3, "0");
+  } 
+  
+  noJurnal++;
+  noJurnal = String(noJurnal).padStart(3, "0");
 
   var data = {
     data: values,

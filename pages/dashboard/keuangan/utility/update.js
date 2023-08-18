@@ -79,7 +79,7 @@ const Update = async (
 
             akunGiro = true;;
           } else if(akunMaster === false && item.attributes.type == "Master"){
-            putAkun(item.attributes.chart_of_account.data.id, item.attributes.chart_of_account.data.attributes, form, values.total_pembayaran, page, values?.no_hutang, values?.no_piutang, "Master");
+              putAkun(item.attributes.chart_of_account.data.id, item.attributes.chart_of_account.data.attributes, form, values.total_pembayaran, page, values?.no_hutang, values?.no_piutang, "Master");
             //putAkun(item.attributes.chart_of_account.data.id, dataPiutang.attributes.total_pembayaran, dataPiutang.attributes.no_piutang, "Master");
             akunMaster = true;
           }
@@ -97,58 +97,41 @@ const Update = async (
 const putAkun = async (id, value, form, total, page, noHutang, noPiutang, tipe) => {
   const user = await getUserMe();
 
+  // if(tipe === "Master") updateJurnal(res.data, page, noHutang, noPiutang, total, user, tipe);
+  // else updateJurnal(res.data, page, noHutang, noPiutang, total, user);
+
   id = parseInt(id);
   var saldo = parseFloat(value.saldo);
     var url = null;
     if (page === "hutang" && tipe !== "Master") {
-      //url = "/debt-accounts/";
       url = "/chart-of-accounts/";
       saldo = saldo - total;
     } else if (page === "hutang" && tipe === "Master") {
-      //url = "/debt-accounts/";
       url = "/chart-of-accounts/";
       saldo = saldo - total;
     }
     if (page === "piutang" && tipe !== "Master") {
-      //url = "/credit-accounts/";
       url = "/chart-of-accounts/";
       saldo = saldo + total;
     } else if (page === "piutang" && tipe === "Master") {
-      //url = "/debt-accounts/";
       url = "/chart-of-accounts/";
       saldo = saldo - total;
     }
 
-    value.saldo = saldo;
-    
-    const data = {
-        data: value,
-    };
-
-    // clean object
-    for (var key in data) {
-        if (data[key] === null || data[key] === undefined) {
-            delete data[key];
-        }
-    }
-
-    const JSONdata = JSON.stringify(data);
     const endpoint = process.env.NEXT_PUBLIC_URL + url + id;
     const options = {
-        method: "PUT",
+        method: "GET",
         headers: {
             "Content-Type": "application/json",
             Authorization: "Bearer " + cookies.token,
         },
-        body: JSONdata,
+        //body: JSONdata,
     };
 
     const req = await fetch(endpoint, options);
     const res = await req.json();
 
     if (req.status === 200) {
-        console.log("akun sukses diupdate");
-        //updateJurnal(res.data, page, noHutang, noPiutang, total, user);
         if(tipe === "Master") updateJurnal(res.data, page, noHutang, noPiutang, total, user, tipe);
         else updateJurnal(res.data, page, noHutang, noPiutang, total, user);
     } else {
