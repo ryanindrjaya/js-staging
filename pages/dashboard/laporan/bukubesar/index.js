@@ -14,7 +14,7 @@ import moment from "moment";
 import cookies from "next-cookies";
 import * as XLSX from 'xlsx';
 
-RugiLaba.getInitialProps = async (context) => {
+BukuBesar.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
 
   //const req = await fetchData(cookies);
@@ -77,7 +77,7 @@ const fetchJurnal = async (cookies) => {
   return req;
 };
 
-function RugiLaba({ props }) {
+function BukuBesar({ props }) {
   const user = props.user;
   const akunData = props.akun;
   const [jurnal, setJurnal] = useState(props.jurnal);
@@ -268,18 +268,18 @@ function RugiLaba({ props }) {
 
   }
 
-  useEffect(() => {
-    getDataThisMonth(defaultDate);
-  }, [defaultDate]);
+  // useEffect(() => {
+  //   getDataThisMonth(defaultDate);
+  // }, [defaultDate]);
 
-  useEffect(() => {
-    getDataMonthBefore(beforeDate);
-  }, [beforeDate]);
+  // useEffect(() => {
+  //   getDataMonthBefore(beforeDate);
+  // }, [beforeDate]);
 
-  useEffect(() => {
-    console.log("until date nich", untilDate);
-    getDataUntilThisMonth(untilDate);
-  }, [untilDate]);
+  // useEffect(() => {
+  //   console.log("until date nich", untilDate);
+  //   getDataUntilThisMonth(untilDate);
+  // }, [untilDate]);
 
   var indexEffect = 0;
   useEffect(() => {
@@ -507,7 +507,7 @@ function RugiLaba({ props }) {
             {/* Content */}
             <div name="content" ref={tableRef}>
               <div name="title">
-                <div className="text-center">APOTEK Jaya Sehat</div>
+                <div className="text-center">APOTEK XXX</div>
                 <div className="text-center">Laporan Rugi Laba</div>
                 <div className="text-center">Untuk Periode Yang Berakhir {titleDate}</div>
               </div>
