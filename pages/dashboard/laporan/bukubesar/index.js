@@ -81,40 +81,17 @@ function BukuBesar({ props }) {
   const user = props.user;
   const akunData = props.akun;
   const [jurnal, setJurnal] = useState(props.jurnal);
-  const [defaultDate, setDefaultDate] = useState(moment());
-  const [beforeDate, setBeforelDate] = useState(moment());
-  const [untilDate, setUntilDate] = useState(moment());
-  const router = useRouter();
-  const [akun, setAkun] = useState(akunData);
-  const [loading, setLoading] = useState(false);
-  const [selected, setSelected] = useState();
-
-  // for this month
-  const [pendapatan, setPendapatan] = useState([0,0,0]);
-  const [bebanPokokPenjualan, setBebanPokokPenjualan] = useState([0,0,0]);
-  const [bebanPenjualan, setBebanPenjualan] = useState([0,0,0]);
-  const [bebanUmum, setBebanUmum] = useState([0,0,0]);
-  const [pendapatanLain, setPendapatanLain] = useState([0,0,0]);
-  const [biayaLain, setBiayaLain] = useState([0,0,0]);
-  const [labaBruto, setLabaBruto] = useState([0,0,0]);
-  const [labaOperasional, setLabaOperasional] = useState([0,0,0]);
-  const [labaBelumPajak, setLabaBelumPajak] = useState([0,0,0]);
-
-  //specific data
-  const [spec, setSpec] = useState();
+  const [defaultDate, setDefaultDate] = useState([moment(), moment()]);
 
   const tableRef = useRef(null);
-  const [titleDate, setTitleDate] = useState(null);
 
-  const calculatePrice = (saldo, akun) =>{
-    var debit = 0;
-    var kredit = 0;
-    if(akun.attributes.jenis_akun === true){
-      debit = parseFloat(akun.attributes.debit);
-      kredit = parseFloat(akun.attributes.kredit);
-    }
+  const [saldoAwal, setSaldoAwal] = useState(0);
+  const [debitAkhir, setDebitAkhir] = useState(0);
+  const [kreditAkhir, setKreditAkhir] = useState(0);
+  const [saldoAkhir, setSaldoAkhir] = useState(0);
 
-  }
+  const [startDate, setStartDate] = useState(moment());
+  const [endDate, setEndDate] = useState(moment());
 
   const handlePrintXLS = () => {
     console.log("handlePrintXLS", tableRef, tableRef.current);
@@ -131,7 +108,7 @@ function BukuBesar({ props }) {
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
       
       // Save the workbook as an XLSX file
-      XLSX.writeFile(workbook, 'Laporan Rugi Laba.xlsx');
+      XLSX.writeFile(workbook, 'Laporan Buku Besar.xlsx');
     }
   };
 
@@ -159,6 +136,9 @@ function BukuBesar({ props }) {
               .text-center {
                 text-align: center;
               }
+              .text-right {
+                text-align: right;
+              }
             </style>
           </head>
           <body>
@@ -178,75 +158,39 @@ function BukuBesar({ props }) {
     }
   };
 
-  const handleDateChange = async (date, dateString) => {
-    
-    if(date === null){
-      setDefaultDate(moment());
-      
-    } else {
-      setPendapatan([0,0,0]);
-      setBebanPokokPenjualan([0,0,0]);
-      setBebanPenjualan([0,0,0]);
-      setBebanUmum([0,0,0]);
-      setPendapatanLain([0,0,0]);
-      setBiayaLain([0,0,0]);
-      setLabaBruto([0,0,0]);
-      setLabaOperasional([0,0,0]);
-      setLabaBelumPajak([0,0,0]);
-      setDefaultDate(date);
-      setBeforelDate(date);
-      setUntilDate(date);
-      
-    }
-    
-  };
-  
-  const getDataThisMonth = async (date) => {
-    var startDate = date.startOf('month').format('YYYY-MM-DD');
-    var endDate = date.endOf('month').format('YYYY-MM-DD');
-    setTitleDate(date.endOf('month').format('DD-MM-YYYY'));
-    
-    const req = await getJurnal(startDate, endDate);
-    const res = await req.json();
-    
-    console.log("getDataThisMonth startDate endDate", startDate, endDate);
-    setSpec("month");
-    setJurnal(res);
-  }
-  
-  const getDataMonthBefore = async (date) => {
-    var startDate = date.subtract(1, 'months').startOf('month').format('YYYY-MM-DD');
-    var endDate = date.subtract(0, 'months').endOf('month').format('YYYY-MM-DD');
-    
-    const req = await getJurnal(startDate, endDate);
-    const res = await req.json();
-    
-    console.log("getDataMonthBefore startDate endDate", startDate, endDate);
-    setSpec("before");
-    setJurnal(res);
-  }
+  const handleDateChange = async (date) => {
+    console.log("handleDateChange", date);
+    if (date !== null) {
+      var startDate = date[0].format('YYYY-MM-DD');
+      var endDate = date[1].format('YYYY-MM-DD');
 
-  const getDataUntilThisMonth = async (date) => {
-    var endDate = date.add(1, 'months').endOf('month').format('YYYY-MM-DD');
-    var startDate = date.startOf('year').format('YYYY-MM-DD');
-    
-    const req = await getJurnal(startDate, endDate);
-    const res = await req.json();
-    
-    console.log("getDataUntilThisMonth startDate endDate", startDate, endDate);
-    setSpec("until");
-    setJurnal(res);
-  }
+      setStartDate(date[0]);
+      setEndDate(date[1]);
+  
+      const req = await getJurnal(startDate, endDate);
+      const res = await req.json();
+      
+      setDefaultDate(date);
+      setJurnal(res);
+
+    } else {
+      var startDate = moment().format('YYYY-MM-DD');
+      var endDate = moment().format('YYYY-MM-DD');
+  
+      setStartDate(moment());
+      setEndDate(moment());
+
+      const req = await getJurnal(startDate, endDate);
+      const res = await req.json();
+      
+      setDefaultDate([moment(), moment()]);
+      setJurnal(res);
+    }
+
+  };
 
   const handleClear = async () => {
-    setDefaultDate(moment());
-
-    var startDate = moment().startOf('month').format('YYYY-MM-DD');
-    var endDate = moment().endOf('month').format('YYYY-MM-DD'); 
-
-    var query = `&filters[tanggal][$gte]=${startDate}&filters[tanggal][$lte]=${endDate}`;
-    var endpoint = process.env.NEXT_PUBLIC_URL + `/jurnals?populate=*` + query;
-    await getJurnal(cookies, endpoint);
+    console.log("LOL");
   };
   
   const getJurnal = async (startDate, endDate) => { 
@@ -268,180 +212,25 @@ function BukuBesar({ props }) {
 
   }
 
-  // useEffect(() => {
-  //   getDataThisMonth(defaultDate);
-  // }, [defaultDate]);
-
-  // useEffect(() => {
-  //   getDataMonthBefore(beforeDate);
-  // }, [beforeDate]);
-
-  // useEffect(() => {
-  //   console.log("until date nich", untilDate);
-  //   getDataUntilThisMonth(untilDate);
-  // }, [untilDate]);
-
-  var indexEffect = 0;
   useEffect(() => {
-    console.log("jurnal item", jurnal, spec);
-    
+    console.log("jurnal item", jurnal);
+    var saldo = 0;
+    setSaldoAwal(saldo);
+    setDebitAkhir(0);
+    setKreditAkhir(0);
+    setSaldoAkhir(saldo);
+
     jurnal?.data?.map((item) => {
       const coaData = item.attributes.chart_of_account.data;
-      var saldo = item.attributes.chart_of_account.data.attributes.saldo;
-  
-      //Pendapatan
-      if(coaData.attributes.kode === "400.00.00" || coaData.attributes.kode === "400.01.00"){
-        const newData = [...pendapatan];
-        if(spec === "month"){
-          if (newData[0] === 0) newData[0] = saldo;
-          newData[0] += parseFloat(item.attributes.kredit) - parseFloat(item.attributes.debit);
-        } else if (spec === "before"){
-          if (newData[1] === 0) newData[1] = saldo;
-          newData[1] += parseFloat(item.attributes.kredit) - parseFloat(item.attributes.debit);
-        } else if (spec === "until"){
-          if (newData[2] === 0) newData[2] = saldo;
-          newData[2] += parseFloat(item.attributes.kredit) - parseFloat(item.attributes.debit);
-        }
+      saldo = item.attributes.chart_of_account.data.attributes.saldo;
 
-        setPendapatan(newData);
-  
-      } else if(coaData.attributes.kode === "401.01.00" || coaData.attributes.kode === "402.01.00"){
-        const newData = [...pendapatan];
-        if(spec === "month"){
-          if (newData[0] === 0) newData[0] = saldo;
-          newData[0] += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit);
-        } else if (spec === "before"){
-          if (newData[1] === 0) newData[1] = saldo;
-          newData[1] += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit);
-        } else if (spec === "until"){
-          if (newData[2] === 0) newData[2] = saldo;
-          newData[2] += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit);
-        }
-        
-        setPendapatan(newData);
+      if(coaData.attributes.kode === "111.00.01"){
+        setSaldoAwal(saldo);
+        setDebitAkhir(parseFloat(item.attributes.debit));
+        setKreditAkhir(parseFloat(item.attributes.kredit));
+        setSaldoAkhir(saldo += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit));
       }
-  
-      // HPP
-      if(coaData.attributes.kode === "500.00.00" || coaData.attributes.kode === "500.00.01"
-      ){
-        const newData = [...bebanPokokPenjualan];
-        if(spec === "month"){
-          if (newData[0] === 0) newData[0] = saldo;
-          newData[0] += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit);
-        } else if (spec === "before"){
-          if (newData[1] === 0) newData[1] = saldo;
-          newData[1] += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit);
-        } else if (spec === "until"){
-          if (newData[2] === 0) newData[2] = saldo;
-          newData[2] += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit);
-        }
-
-        setBebanPokokPenjualan(newData);
-      }
-  
-      //Beban Penjualan dan Administrasi
-      if(coaData.attributes.kode === "610.00.00" || coaData.attributes.kode === "610.00.01" ||
-        coaData.attributes.kode === "610.00.02" || coaData.attributes.kode === "610.00.03" ||
-        coaData.attributes.kode === "610.00.04" || coaData.attributes.kode === "610.00.05" ||
-        coaData.attributes.kode === "610.00.06"
-      ){
-        const newData = [...bebanPenjualan];
-        if(spec === "month"){
-          if (newData[0] === 0) newData[0] = saldo;
-          newData[0] += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit);
-        } else if (spec === "before"){
-          if (newData[1] === 0) newData[1] = saldo;
-          newData[1] += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit);
-        } else if (spec === "until"){
-          if (newData[2] === 0) newData[2] = saldo;
-          newData[2] += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit);
-        }
-
-        setBebanPenjualan(newData);
-      }
-  
-      if(coaData.attributes.kode === "710.00.00" || coaData.attributes.kode === "710.00.01" || coaData.attributes.kode === "710.00.02" ||
-        coaData.attributes.kode === "710.00.03" || coaData.attributes.kode === "710.00.04" || coaData.attributes.kode === "710.00.05" ||
-        coaData.attributes.kode === "710.00.06" || coaData.attributes.kode === "710.00.07" || coaData.attributes.kode === "710.00.08" ||
-        coaData.attributes.kode === "710.00.09" || coaData.attributes.kode === "710.00.10" || coaData.attributes.kode === "710.00.11" ||
-        coaData.attributes.kode === "710.00.12" || coaData.attributes.kode === "710.00.13" || coaData.attributes.kode === "710.00.14" ||
-        coaData.attributes.kode === "710.00.15" || coaData.attributes.kode === "710.00.16" || coaData.attributes.kode === "710.00.17" ||
-        coaData.attributes.kode === "710.00.18" || coaData.attributes.kode === "710.00.19" || coaData.attributes.kode === "710.00.20" ||
-        coaData.attributes.kode === "710.00.21" || coaData.attributes.kode === "710.00.22" || coaData.attributes.kode === "710.00.23" ||
-        coaData.attributes.kode === "710.00.24" || coaData.attributes.kode === "710.00.25" || coaData.attributes.kode === "710.00.26" ||
-        coaData.attributes.kode === "710.00.27" || coaData.attributes.kode === "710.00.28" || coaData.attributes.kode === "710.00.29" ||
-        coaData.attributes.kode === "710.00.30" || coaData.attributes.kode === "710.00.31" || coaData.attributes.kode === "710.00.32" ||
-        coaData.attributes.kode === "710.00.33" || coaData.attributes.kode === "710.00.34" || coaData.attributes.kode === "710.00.35" ||
-        coaData.attributes.kode === "710.00.36" || coaData.attributes.kode === "710.00.37" || coaData.attributes.kode === "710.00.38" ||
-        coaData.attributes.kode === "710.00.39" || coaData.attributes.kode === "710.00.40" || coaData.attributes.kode === "710.00.41"
-      ){
-        const newData = [...bebanUmum];
-        if(spec === "month"){
-          if (newData[0] === 0) newData[0] = saldo;
-          newData[0] += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit);
-        } else if (spec === "before"){
-          if (newData[1] === 0) newData[1] = saldo;
-          newData[1] += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit);
-        } else if (spec === "until"){
-          if (newData[2] === 0) newData[2] = saldo;
-          newData[2] += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit);
-        }
-
-        setBebanUmum(newData);
-      }
-  
-      //Pendapatan dan Biaya lain - lain
-      if(coaData.attributes.kode === "811.01.00" || coaData.attributes.kode === "811.01.01" || coaData.attributes.kode === "811.01.02" ||
-        coaData.attributes.kode === "811.01.03" || coaData.attributes.kode === "811.01.04" || coaData.attributes.kode === "811.01.05" ||
-        coaData.attributes.kode === "811.01.06" || coaData.attributes.kode === "811.01.07"
-      ){
-        const newData = [...pendapatanLain];
-        if(spec === "month"){
-          if (newData[0] === 0) newData[0] = saldo;
-          newData[0] += parseFloat(item.attributes.kredit) - parseFloat(item.attributes.debit);
-        } else if (spec === "before"){
-          if (newData[1] === 0) newData[1] = saldo;
-          newData[1] += parseFloat(item.attributes.kredit) - parseFloat(item.attributes.debit);
-        } else if (spec === "until"){
-          if (newData[2] === 0) newData[2] = saldo;
-          newData[2] += parseFloat(item.attributes.kredit) - parseFloat(item.attributes.debit);
-        }
-
-        setPendapatanLain(newData); console.log(newData, "newData");
-      }
-      
-      if(coaData.attributes.kode === "822.01.02" || coaData.attributes.kode === "822.01.03" || coaData.attributes.kode === "822.01.08" ||
-         coaData.attributes.kode === "822.01.09" || coaData.attributes.kode === "822.01.99" || coaData.attributes.kode === "123.00.00"
-      ){
-        const newData = [...biayaLain];
-        if(spec === "month"){
-          if (newData[0] === 0) newData[0] = saldo;
-          newData[0] += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit);
-        } else if (spec === "before"){
-          if (newData[1] === 0) newData[1] = saldo;
-          newData[1] += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit);
-        } else if (spec === "until"){
-          if (newData[2] === 0) newData[2] = saldo;
-          newData[2] += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit);
-        }
-
-        setBiayaLain(newData);
-      }
-      
-      if(coaData.attributes.kode === "822.01.01"){
-        var data = biayaLain;
-        setBiayaLain(data += parseFloat(item.attributes.kredit) - parseFloat(item.attributes.debit));
-      }
-  
     });
-
-    if(indexEffect === 3){
-      indexEffect = 0;
-      setDefaultDate(defaultDate);
-    } else {
-      setDefaultDate(defaultDate);
-      indexEffect++;
-    }
 
   }, [jurnal]);
 
@@ -455,11 +244,11 @@ function BukuBesar({ props }) {
   return (
     <>
       <Head>
-        <title>Rugi Laba</title>
+        <title>Buku Besar</title>
       </Head>
       <DashboardLayout>
         <LayoutWrapper style={{}}>
-          <TitlePage titleText={"Rugi Laba"} />
+          <TitlePage titleText={"Buku Besar"} />
           <LayoutContent>
 
             <div className="w-full flex justify-between">
@@ -474,18 +263,13 @@ function BukuBesar({ props }) {
                   </div>
                 </button>
               </div>
-              <div>
-                <DatePicker.MonthPicker
-                  placeholder="Pilih Bulan dan Tahun"
-                  format="MMMM YYYY"
+              <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
+                <DatePicker.RangePicker
                   size="large"
                   defaultValue= {defaultDate}
                   value={defaultDate}
-                  allowClear
                   onChange= {handleDateChange}
-                  onClear={handleClear}
-                  renderExtraFooter= {() => 'Pilih bulan dan tahun'}
-                  style= {{ width: '200px' }}
+                  renderExtraFooter= {() => 'Pilih tanggal.'}
                 />
               </div>
             </div>
@@ -507,171 +291,39 @@ function BukuBesar({ props }) {
             {/* Content */}
             <div name="content" ref={tableRef}>
               <div name="title">
-                <div className="text-center">APOTEK XXX</div>
-                <div className="text-center">Laporan Rugi Laba</div>
-                <div className="text-center">Untuk Periode Yang Berakhir {titleDate}</div>
+                <div className="text-center">BUKU BESAR</div>
+                <div className="text-center">Periode tanggal {startDate.format('DD/MM/YYYY')} - {endDate.format('DD/MM/YYYY')}</div>
               </div>
 
               <table className="w-full mt-5">
                 <thead className="text-center">
-                  <th className="border-2 p-1" colSpan={2}>Keterangan</th>
-                  <th className="border-2 p-1">Bulan Ini</th>
-                  <th className="border-2 p-1">Bulan Lalu</th>
-                  <th className="border-2 p-1">s/d Bulan Ini</th>
+                  <th className="border-2 p-1">Tanggal</th>
+                  <th className="border-2 p-1">No Bukti</th>
+                  <th className="border-2 p-1">Cost Center</th>
+                  <th className="border-2 p-1">Keterangan</th>
+                  <th className="border-2 p-1">Debet</th>
+                  <th className="border-2 p-1">Kredit</th>
+                  <th className="border-2 p-1">Saldo</th>
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="border-2 p-1" colSpan={5}>Pendapatan</td>
+                    <td className="border-2 text-center"> {startDate.format('DD/MM/YYYY')} - {endDate.format('DD/MM/YYYY')} </td>
+                    <td className="border-2 text-center"> - </td>
+                    <td className="border-2 text-center"> - </td>
+                    <td className="border-2 pl-3 text-left"> Saldo Awal </td>
+                    <td className="border-2 pr-3 text-right"> {formatter.format(0)} </td>
+                    <td className="border-2 pr-3 text-right"> {formatter.format(0)} </td>
+                    <td className="border-2 pr-3 text-right"> {formatter.format(saldoAwal)} </td>
                   </tr>
                   <tr>
-                    <td className="border-2 p-1"></td>
-                    <td className="border-2 p-1">Penjualan Obat dan Alkes</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(pendapatan[0])}</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(pendapatan[1])}</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(pendapatan[2])}</td>
+                    <td className="border-2 text-center"> {startDate.format('DD/MM/YYYY')} - {endDate.format('DD/MM/YYYY')} </td>
+                    <td className="border-2 text-center"> - </td>
+                    <td className="border-2 text-center"> - </td>
+                    <td className="border-2 pl-3 text-left"> Saldo Akhir </td>
+                    <td className="border-2 pr-3 text-right"> {formatter.format(debitAkhir)} </td>
+                    <td className="border-2 pr-3 text-right"> {formatter.format(kreditAkhir)} </td>
+                    <td className="border-2 pr-3 text-right"> {formatter.format(saldoAkhir)} </td>
                   </tr>
-                  <tr>
-                    <td className="border-2 p-1"></td>
-                    <td className="border-2 p-1">Total Pendapatan</td>
-                    <td className="border-2 pr-3 text-right">-</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(pendapatan[1])}</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(pendapatan[2])}</td>
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-1" colSpan={5}>Beban Pokok Penjualan</td>
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-1"></td>
-                    <td className="border-2 p-1">Harga Pokok Penjualan Obat dan Alkes</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(bebanPokokPenjualan[0])}</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(bebanPokokPenjualan[1])}</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(bebanPokokPenjualan[2])}</td>
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-1"></td>
-                    <td className="border-2 p-1">Total Beban Pokok Pendapatan</td>
-                    <td className="border-2 pr-3 text-right">-</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(bebanPokokPenjualan[1])}</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(bebanPokokPenjualan[2])}</td>
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-2" colSpan={5}/> 
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-1" colSpan={2}>Laba Bruto</td>
-                    <td className="border-2 pr-3 text-right">-</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(pendapatan[1] - bebanPokokPenjualan[1])}</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(pendapatan[2] - bebanPokokPenjualan[2])}</td>
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-2" colSpan={5}/> 
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-1" colSpan={5}>Beban Penjualan dan Administrasi</td>
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-1"></td>
-                    <td className="border-2 p-1">Beban Penjualan</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(bebanPenjualan[0])}</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(bebanPenjualan[1])}</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(bebanPenjualan[2])}</td>
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-1"></td>
-                    <td className="border-2 p-1">Beban Umum dan Administrasi</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(bebanUmum[0])}</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(bebanUmum[1])}</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(bebanUmum[2])}</td>
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-1"></td>
-                    <td className="border-2 p-1">Total Beban Penjualan dan Administrasi</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(bebanPenjualan[0] + bebanUmum[0])}</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(bebanPenjualan[1] + bebanUmum[1])}</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(bebanPenjualan[2] + bebanUmum[2])}</td>
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-2" colSpan={5}/> 
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-1" colSpan={2}>Laba Operasional</td>
-                    <td className="border-2 pr-3 text-right">
-                      {formatter.format((pendapatan[0] - bebanPokokPenjualan[0]) - (bebanPenjualan[0] + bebanUmum[0]))}
-                    </td>
-                    <td className="border-2 pr-3 text-right">
-                      {formatter.format((pendapatan[1] - bebanPokokPenjualan[1]) - (bebanPenjualan[1] + bebanUmum[1]))}
-                    </td>
-                    <td className="border-2 pr-3 text-right">
-                      {formatter.format((pendapatan[2] - bebanPokokPenjualan[2]) - (bebanPenjualan[2] + bebanUmum[2]))}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-2" colSpan={5}/> 
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-1" colSpan={5}>Pendapatan dan Biaya lain - lain</td>
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-1"></td>
-                    <td className="border-2 p-1">Pendapatan lain - lain</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(pendapatanLain[0])}</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(pendapatanLain[1])}</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(pendapatanLain[2])}</td>
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-1"></td>
-                    <td className="border-2 p-1">Biaya lain - lain</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(biayaLain[0])}</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(biayaLain[1])}</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(biayaLain[2])}</td>
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-1"></td>
-                    <td className="border-2 p-1">Total Pendapatan (Biaya lain - lain)</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(pendapatanLain[0] - biayaLain[0])}</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(pendapatanLain[1] - biayaLain[1])}</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(pendapatanLain[2] - biayaLain[2])}</td>
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-2" colSpan={5}/> 
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-1" colSpan={2}>Laba Sebelum Pajak</td>
-                    <td className="border-2 pr-3 text-right">
-                      {formatter.format((pendapatan[0] - bebanPokokPenjualan[0]) - (bebanPenjualan[0] + bebanUmum[0]) + (pendapatanLain[0] - biayaLain[0]))}
-                    </td>
-                    <td className="border-2 pr-3 text-right">
-                      {formatter.format((pendapatan[1] - bebanPokokPenjualan[1]) - (bebanPenjualan[1] + bebanUmum[1]) + (pendapatanLain[1] - biayaLain[1]))}
-                    </td>
-                    <td className="border-2 pr-3 text-right">
-                      {formatter.format((pendapatan[2] - bebanPokokPenjualan[2]) - (bebanPenjualan[2] + bebanUmum[2]) + (pendapatanLain[2] - biayaLain[2]))}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-2" colSpan={5}/> 
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-1" colSpan={2}>Pajak Penghasilan</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(0)}</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(0)}</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(0)}</td>
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-2" colSpan={5}/> 
-                  </tr>
-                  <tr>
-                    <td className="border-2 p-1" colSpan={2}>Laba Setelah Pajak</td>
-                    <td className="border-2 pr-3 text-right">
-                      {formatter.format((pendapatan[0] - bebanPokokPenjualan[0]) - (bebanPenjualan[0] + bebanUmum[0]) + (pendapatanLain[0] - biayaLain[0]) - 0)}
-                    </td>
-                    <td className="border-2 pr-3 text-right">
-                      {formatter.format((pendapatan[1] - bebanPokokPenjualan[1]) - (bebanPenjualan[1] + bebanUmum[1]) + (pendapatanLain[1] - biayaLain[1]) - 0)}
-                    </td>
-                    <td className="border-2 pr-3 text-right">
-                      {formatter.format((pendapatan[2] - bebanPokokPenjualan[2]) - (bebanPenjualan[2] + bebanUmum[2]) + (pendapatanLain[2] - biayaLain[2]) - 0)}
-                    </td>
-                  </tr>
-
                 </tbody>
               </table>
               
@@ -684,4 +336,4 @@ function BukuBesar({ props }) {
   );
 }
 
-export default RugiLaba;
+export default BukuBesar;
