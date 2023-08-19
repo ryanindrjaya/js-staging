@@ -380,6 +380,11 @@ export default function Sidebar(props) {
             <a>Piutang Penjualan</a>
           </Link>
         </Menu.Item>
+        <Menu.Item style={submenuStyle} key="rugilaba">
+          <Link href="/dashboard/laporan/rugilaba">
+            <a>Rugi Laba</a>
+          </Link>
+        </Menu.Item>
       </SubMenu>
     ),
     Pajak: (
