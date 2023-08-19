@@ -92,9 +92,12 @@ function RugiLaba({ props }) {
   const [pendapatan, setPendapatan] = useState([0,0,0]);
   const [bebanPokokPenjualan, setBebanPokokPenjualan] = useState([0,0,0]);
   const [bebanPenjualan, setBebanPenjualan] = useState([0,0,0]);
-  const [bebanUmum, setBebanUmum] = useState(0);
-  const [pendapatanLain, setPendapatanLain] = useState(0);
-  const [biayaLain, setBiayaLain] = useState(0);
+  const [bebanUmum, setBebanUmum] = useState([0,0,0]);
+  const [pendapatanLain, setPendapatanLain] = useState([0,0,0]);
+  const [biayaLain, setBiayaLain] = useState([0,0,0]);
+  const [labaBruto, setLabaBruto] = useState([0,0,0]);
+  const [labaOperasional, setLabaOperasional] = useState([0,0,0]);
+  const [labaBelumPajak, setLabaBelumPajak] = useState([0,0,0]);
 
   //specific data
   const [spec, setSpec] = useState();
@@ -118,6 +121,12 @@ function RugiLaba({ props }) {
       setPendapatan([0,0,0]);
       setBebanPokokPenjualan([0,0,0]);
       setBebanPenjualan([0,0,0]);
+      setBebanUmum([0,0,0]);
+      setPendapatanLain([0,0,0]);
+      setBiayaLain([0,0,0]);
+      setLabaBruto([0,0,0]);
+      setLabaOperasional([0,0,0]);
+      setLabaBelumPajak([0,0,0]);
       setDefaultDate(date);
       setBeforelDate(date);
       setUntilDate(date);
@@ -151,7 +160,7 @@ function RugiLaba({ props }) {
   }
 
   const getDataUntilThisMonth = async (date) => {
-    var endDate = date.endOf('month').format('YYYY-MM-DD');
+    var endDate = date.add(1, 'months').endOf('month').format('YYYY-MM-DD');
     var startDate = date.startOf('year').format('YYYY-MM-DD');
     
     const req = await getJurnal(startDate, endDate);
@@ -192,6 +201,10 @@ function RugiLaba({ props }) {
 
   }
 
+  // useEffect(() => {
+  //   handleDateChange(moment());
+  // }, []);
+
   useEffect(() => {
     getDataThisMonth(defaultDate);
   }, [defaultDate]);
@@ -201,35 +214,16 @@ function RugiLaba({ props }) {
   }, [beforeDate]);
 
   useEffect(() => {
+    console.log("until date nich", untilDate);
     getDataUntilThisMonth(untilDate);
   }, [untilDate]);
 
   var indexEffect = 0;
   useEffect(() => {
     console.log("jurnal item", jurnal, spec);
-
-    // if(spec === "month"){
-    //   const newPendapatan = [...pendapatan];
-    //   newPendapatan[1] = 0; newPendapatan[2] = 0;
-    //   setPendapatan(newPendapatan);
-    // } else if (spec === "before"){
-    //   //newData[1] += parseFloat(item.attributes.kredit) - parseFloat(item.attributes.debit);
-    // } else if (spec === "until"){
-    //   //newData[2] += parseFloat(item.attributes.kredit) - parseFloat(item.attributes.debit);
-    // }
-    // if(indexEffect === 3){
-    //   setPendapatan([0,0,0]);
-    // } else {
-    //   indexEffect++;
-    // }
-    //setPendapatan([0,0,0]);
-    setBebanUmum(0);
-    setPendapatanLain(0);
-    setBiayaLain(0);
     
     jurnal?.data?.map((item) => {
       const coaData = item.attributes.chart_of_account.data;
-      console.log("coaData", item.attributes.chart_of_account.data);
       var saldo = item.attributes.chart_of_account.data.attributes.saldo;
   
       //Pendapatan
@@ -299,7 +293,7 @@ function RugiLaba({ props }) {
           if (newData[2] === 0) newData[2] = saldo;
           newData[2] += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit);
         }
-        
+
         setBebanPenjualan(newData);
       }
   
@@ -318,8 +312,19 @@ function RugiLaba({ props }) {
         coaData.attributes.kode === "710.00.36" || coaData.attributes.kode === "710.00.37" || coaData.attributes.kode === "710.00.38" ||
         coaData.attributes.kode === "710.00.39" || coaData.attributes.kode === "710.00.40" || coaData.attributes.kode === "710.00.41"
       ){
-        var data = bebanUmum;
-        setBebanUmum(data += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit));
+        const newData = [...bebanUmum];
+        if(spec === "month"){
+          if (newData[0] === 0) newData[0] = saldo;
+          newData[0] += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit);
+        } else if (spec === "before"){
+          if (newData[1] === 0) newData[1] = saldo;
+          newData[1] += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit);
+        } else if (spec === "until"){
+          if (newData[2] === 0) newData[2] = saldo;
+          newData[2] += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit);
+        }
+
+        setBebanUmum(newData);
       }
   
       //Pendapatan dan Biaya lain - lain
@@ -327,15 +332,37 @@ function RugiLaba({ props }) {
         coaData.attributes.kode === "811.01.03" || coaData.attributes.kode === "811.01.04" || coaData.attributes.kode === "811.01.05" ||
         coaData.attributes.kode === "811.01.06" || coaData.attributes.kode === "811.01.07"
       ){
-        var data = pendapatanLain;
-        setPendapatanLain(data += parseFloat(item.attributes.kredit) - parseFloat(item.attributes.debit));
+        const newData = [...pendapatanLain];
+        if(spec === "month"){
+          if (newData[0] === 0) newData[0] = saldo;
+          newData[0] += parseFloat(item.attributes.kredit) - parseFloat(item.attributes.debit);
+        } else if (spec === "before"){
+          if (newData[1] === 0) newData[1] = saldo;
+          newData[1] += parseFloat(item.attributes.kredit) - parseFloat(item.attributes.debit);
+        } else if (spec === "until"){
+          if (newData[2] === 0) newData[2] = saldo;
+          newData[2] += parseFloat(item.attributes.kredit) - parseFloat(item.attributes.debit);
+        }
+
+        setPendapatanLain(newData); console.log(newData, "newData");
       }
       
       if(coaData.attributes.kode === "822.01.02" || coaData.attributes.kode === "822.01.03" || coaData.attributes.kode === "822.01.08" ||
          coaData.attributes.kode === "822.01.09" || coaData.attributes.kode === "822.01.99" || coaData.attributes.kode === "123.00.00"
       ){
-        var data = biayaLain;
-        setBiayaLain(data += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit));
+        const newData = [...biayaLain];
+        if(spec === "month"){
+          if (newData[0] === 0) newData[0] = saldo;
+          newData[0] += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit);
+        } else if (spec === "before"){
+          if (newData[1] === 0) newData[1] = saldo;
+          newData[1] += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit);
+        } else if (spec === "until"){
+          if (newData[2] === 0) newData[2] = saldo;
+          newData[2] += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit);
+        }
+
+        setBiayaLain(newData);
       }
       
       if(coaData.attributes.kode === "822.01.01"){
@@ -345,7 +372,6 @@ function RugiLaba({ props }) {
   
     });
 
-    console.log("bebanPokokPenjualan", bebanPokokPenjualan);
     if(indexEffect === 3){
       indexEffect = 0;
       //setPendapatan([0,0,0]);
@@ -354,7 +380,25 @@ function RugiLaba({ props }) {
       setDefaultDate(defaultDate);
       indexEffect++;
     }
-    console.log("pendapatan", pendapatan);
+
+    // var labaB = labaBruto;
+    // labaB[0] = (pendapatan[0] - bebanPokokPenjualan[0]);
+    // labaB[1] = (pendapatan[1] - bebanPokokPenjualan[1]);
+    // labaB[2] = (pendapatan[2] - bebanPokokPenjualan[2]);
+    // setLabaBruto(labaB);
+
+    // var labaOp = labaOperasional;
+    // labaOp[0] = (labaB[0]) - (bebanPenjualan[0] + bebanUmum[0]);
+    // labaOp[1] = (labaB[1]) - (bebanPenjualan[1] + bebanUmum[1]);
+    // labaOp[2] = (labaB[2]) - (bebanPenjualan[2] + bebanUmum[2]);
+    // setLabaOperasional(labaOp);
+
+    // var labaBP = labaBelumPajak;
+    // labaBP[0] = (labaOp[0]) + (pendapatanLain[0] - biayaLain[0]);
+    // labaBP[1] = (labaOp[1]) + (pendapatanLain[1] - biayaLain[1]);
+    // labaBP[2] = (labaOp[2]) + (pendapatanLain[2] - biayaLain[2]);
+    // setLabaBelumPajak(labaBP);
+
   }, [jurnal]);
 
 
@@ -463,25 +507,31 @@ function RugiLaba({ props }) {
                   <tr>
                     <td className="border-2 p-1"></td>
                     <td className="border-2 p-1">Beban Umum dan Administrasi</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(bebanUmum)}</td>
-                    <td className="border-2 p-1"></td>
-                    <td className="border-2 p-1"></td>
+                    <td className="border-2 pr-3 text-right">{formatter.format(bebanUmum[0])}</td>
+                    <td className="border-2 pr-3 text-right">{formatter.format(bebanUmum[1])}</td>
+                    <td className="border-2 pr-3 text-right">{formatter.format(bebanUmum[2])}</td>
                   </tr>
                   <tr>
                     <td className="border-2 p-1"></td>
                     <td className="border-2 p-1">Total Beban Penjualan dan Administrasi</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(bebanPenjualan + bebanUmum)}</td>
-                    <td className="border-2 p-1"></td>
-                    <td className="border-2 p-1"></td>
+                    <td className="border-2 pr-3 text-right">{formatter.format(bebanPenjualan[0] + bebanUmum[0])}</td>
+                    <td className="border-2 pr-3 text-right">{formatter.format(bebanPenjualan[1] + bebanUmum[1])}</td>
+                    <td className="border-2 pr-3 text-right">{formatter.format(bebanPenjualan[2] + bebanUmum[2])}</td>
                   </tr>
                   <tr>
                     <td className="border-2 p-2" colSpan={5}/> 
                   </tr>
                   <tr>
                     <td className="border-2 p-1" colSpan={2}>Laba Operasional</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format( (pendapatan - bebanPokokPenjualan) - (bebanPenjualan + bebanUmum) )}</td>
-                    <td className="border-2 p-1"></td>
-                    <td className="border-2 p-1"></td>
+                    <td className="border-2 pr-3 text-right">
+                      {formatter.format((pendapatan[0] - bebanPokokPenjualan[0]) - (bebanPenjualan[0] + bebanUmum[0]))}
+                    </td>
+                    <td className="border-2 pr-3 text-right">
+                      {formatter.format((pendapatan[1] - bebanPokokPenjualan[1]) - (bebanPenjualan[1] + bebanUmum[1]))}
+                    </td>
+                    <td className="border-2 pr-3 text-right">
+                      {formatter.format((pendapatan[2] - bebanPokokPenjualan[2]) - (bebanPenjualan[2] + bebanUmum[2]))}
+                    </td>
                   </tr>
                   <tr>
                     <td className="border-2 p-2" colSpan={5}/> 
@@ -492,23 +542,23 @@ function RugiLaba({ props }) {
                   <tr>
                     <td className="border-2 p-1"></td>
                     <td className="border-2 p-1">Pendapatan lain - lain</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(pendapatanLain)}</td>
-                    <td className="border-2 p-1"></td>
-                    <td className="border-2 p-1"></td>
+                    <td className="border-2 pr-3 text-right">{formatter.format(pendapatanLain[0])}</td>
+                    <td className="border-2 pr-3 text-right">{formatter.format(pendapatanLain[1])}</td>
+                    <td className="border-2 pr-3 text-right">{formatter.format(pendapatanLain[2])}</td>
                   </tr>
                   <tr>
                     <td className="border-2 p-1"></td>
                     <td className="border-2 p-1">Biaya lain - lain</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(biayaLain)}</td>
-                    <td className="border-2 p-1"></td>
-                    <td className="border-2 p-1"></td>
+                    <td className="border-2 pr-3 text-right">{formatter.format(biayaLain[0])}</td>
+                    <td className="border-2 pr-3 text-right">{formatter.format(biayaLain[1])}</td>
+                    <td className="border-2 pr-3 text-right">{formatter.format(biayaLain[2])}</td>
                   </tr>
                   <tr>
                     <td className="border-2 p-1"></td>
                     <td className="border-2 p-1">Total Pendapatan (Biaya lain - lain)</td>
-                    <td className="border-2 pr-3 text-right">{formatter.format(pendapatanLain - biayaLain)}</td>
-                    <td className="border-2 p-1"></td>
-                    <td className="border-2 p-1"></td>
+                    <td className="border-2 pr-3 text-right">{formatter.format(pendapatanLain[0] - biayaLain[0])}</td>
+                    <td className="border-2 pr-3 text-right">{formatter.format(pendapatanLain[1] - biayaLain[1])}</td>
+                    <td className="border-2 pr-3 text-right">{formatter.format(pendapatanLain[2] - biayaLain[2])}</td>
                   </tr>
                   <tr>
                     <td className="border-2 p-2" colSpan={5}/> 
@@ -516,28 +566,38 @@ function RugiLaba({ props }) {
                   <tr>
                     <td className="border-2 p-1" colSpan={2}>Laba Sebelum Pajak</td>
                     <td className="border-2 pr-3 text-right">
-                      {formatter.format( ((pendapatan - bebanPokokPenjualan) - (bebanPenjualan + bebanUmum)) + (pendapatanLain - biayaLain) )}
+                      {formatter.format((pendapatan[0] - bebanPokokPenjualan[0]) - (bebanPenjualan[0] + bebanUmum[0]) + (pendapatanLain[0] - biayaLain[0]))}
                     </td>
-                    <td className="border-2 p-1"></td>
-                    <td className="border-2 p-1"></td>
+                    <td className="border-2 pr-3 text-right">
+                      {formatter.format((pendapatan[1] - bebanPokokPenjualan[1]) - (bebanPenjualan[1] + bebanUmum[1]) + (pendapatanLain[1] - biayaLain[1]))}
+                    </td>
+                    <td className="border-2 pr-3 text-right">
+                      {formatter.format((pendapatan[2] - bebanPokokPenjualan[2]) - (bebanPenjualan[2] + bebanUmum[2]) + (pendapatanLain[2] - biayaLain[2]))}
+                    </td>
                   </tr>
                   <tr>
                     <td className="border-2 p-2" colSpan={5}/> 
                   </tr>
                   <tr>
                     <td className="border-2 p-1" colSpan={2}>Pajak Penghasilan</td>
-                    <td className="border-2 p-1"></td>
-                    <td className="border-2 p-1"></td>
-                    <td className="border-2 p-1"></td>
+                    <td className="border-2 pr-3 text-right">{formatter.format(0)}</td>
+                    <td className="border-2 pr-3 text-right">{formatter.format(0)}</td>
+                    <td className="border-2 pr-3 text-right">{formatter.format(0)}</td>
                   </tr>
                   <tr>
                     <td className="border-2 p-2" colSpan={5}/> 
                   </tr>
                   <tr>
                     <td className="border-2 p-1" colSpan={2}>Laba Setelah Pajak</td>
-                    <td className="border-2 p-1"></td>
-                    <td className="border-2 p-1"></td>
-                    <td className="border-2 p-1"></td>
+                    <td className="border-2 pr-3 text-right">
+                      {formatter.format((pendapatan[0] - bebanPokokPenjualan[0]) - (bebanPenjualan[0] + bebanUmum[0]) + (pendapatanLain[0] - biayaLain[0]) - 0)}
+                    </td>
+                    <td className="border-2 pr-3 text-right">
+                      {formatter.format((pendapatan[1] - bebanPokokPenjualan[1]) - (bebanPenjualan[1] + bebanUmum[1]) + (pendapatanLain[1] - biayaLain[1]) - 0)}
+                    </td>
+                    <td className="border-2 pr-3 text-right">
+                      {formatter.format((pendapatan[2] - bebanPokokPenjualan[2]) - (bebanPenjualan[2] + bebanUmum[2]) + (pendapatanLain[2] - biayaLain[2]) - 0)}
+                    </td>
                   </tr>
 
                 </tbody>
