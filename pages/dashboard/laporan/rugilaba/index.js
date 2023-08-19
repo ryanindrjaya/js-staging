@@ -1,5 +1,5 @@
 import Head from "next/head";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
@@ -12,6 +12,7 @@ import nookies from "nookies";
 import { toast } from "react-toastify";
 import moment from "moment";
 import cookies from "next-cookies";
+import * as XLSX from 'xlsx';
 
 RugiLaba.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -102,6 +103,9 @@ function RugiLaba({ props }) {
   //specific data
   const [spec, setSpec] = useState();
 
+  const tableRef = useRef(null);
+  const [titleDate, setTitleDate] = useState(null);
+
   const calculatePrice = (saldo, akun) =>{
     var debit = 0;
     var kredit = 0;
@@ -111,6 +115,68 @@ function RugiLaba({ props }) {
     }
 
   }
+
+  const handlePrintXLS = () => {
+    console.log("handlePrintXLS", tableRef, tableRef.current);
+    
+    const contentDiv = document.querySelector('[name="content"]');
+  
+    if (contentDiv) {
+      const workbook = XLSX.utils.book_new();
+      
+      // Create the worksheet and add the content to it
+      const worksheet = XLSX.utils.table_to_sheet(contentDiv);
+      
+      // Add the worksheet to the workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+      
+      // Save the workbook as an XLSX file
+      XLSX.writeFile(workbook, 'Laporan Rugi Laba.xlsx');
+    }
+  };
+
+  const handlePrint = () => {
+    const table = tableRef.current;
+    if (table) {
+      const printWindow = window.open('', '_blank');
+      const printDocument = printWindow.document;
+
+      // Write the table content to the print window
+      printDocument.write(`
+        <html>
+          <head>
+            <style>
+              table {
+                border-collapse: collapse;
+                width: 100%;
+                margin-top: 3%; 
+                border: 2px solid #000; /* Add additional border styling as needed */
+              }
+              th, td {
+                border: 1px solid #000; /* Add additional border styling as needed */
+                padding: 8px;
+              }
+              .text-center {
+                text-align: center;
+              }
+            </style>
+          </head>
+          <body>
+            ${table.outerHTML}
+          </body>
+        </html>
+      `);
+      printDocument.close();
+
+      // Use the window.print() method to show the print preview
+      const isPrintSuccessful = printWindow.print();
+
+      // Close the print window if the print dialog was canceled
+      if (!isPrintSuccessful) {
+        printWindow.close();
+      }
+    }
+  };
 
   const handleDateChange = async (date, dateString) => {
     
@@ -138,6 +204,7 @@ function RugiLaba({ props }) {
   const getDataThisMonth = async (date) => {
     var startDate = date.startOf('month').format('YYYY-MM-DD');
     var endDate = date.endOf('month').format('YYYY-MM-DD');
+    setTitleDate(date.endOf('month').format('DD-MM-YYYY'));
     
     const req = await getJurnal(startDate, endDate);
     const res = await req.json();
@@ -200,10 +267,6 @@ function RugiLaba({ props }) {
   return req;
 
   }
-
-  // useEffect(() => {
-  //   handleDateChange(moment());
-  // }, []);
 
   useEffect(() => {
     getDataThisMonth(defaultDate);
@@ -374,30 +437,11 @@ function RugiLaba({ props }) {
 
     if(indexEffect === 3){
       indexEffect = 0;
-      //setPendapatan([0,0,0]);
       setDefaultDate(defaultDate);
     } else {
       setDefaultDate(defaultDate);
       indexEffect++;
     }
-
-    // var labaB = labaBruto;
-    // labaB[0] = (pendapatan[0] - bebanPokokPenjualan[0]);
-    // labaB[1] = (pendapatan[1] - bebanPokokPenjualan[1]);
-    // labaB[2] = (pendapatan[2] - bebanPokokPenjualan[2]);
-    // setLabaBruto(labaB);
-
-    // var labaOp = labaOperasional;
-    // labaOp[0] = (labaB[0]) - (bebanPenjualan[0] + bebanUmum[0]);
-    // labaOp[1] = (labaB[1]) - (bebanPenjualan[1] + bebanUmum[1]);
-    // labaOp[2] = (labaB[2]) - (bebanPenjualan[2] + bebanUmum[2]);
-    // setLabaOperasional(labaOp);
-
-    // var labaBP = labaBelumPajak;
-    // labaBP[0] = (labaOp[0]) + (pendapatanLain[0] - biayaLain[0]);
-    // labaBP[1] = (labaOp[1]) + (pendapatanLain[1] - biayaLain[1]);
-    // labaBP[2] = (labaOp[2]) + (pendapatanLain[2] - biayaLain[2]);
-    // setLabaBelumPajak(labaBP);
 
   }, [jurnal]);
 
@@ -417,27 +461,55 @@ function RugiLaba({ props }) {
         <LayoutWrapper style={{}}>
           <TitlePage titleText={"Rugi Laba"} />
           <LayoutContent>
-            <div className="w-full flex justify-end mb-3">
-              <DatePicker.MonthPicker
-                placeholder="Pilih Bulan dan Tahun"
-                format="MMMM YYYY"
-                size="large"
-                defaultValue= {defaultDate}
-                value={defaultDate}
-                allowClear
-                onChange= {handleDateChange}
-                onClear={handleClear}
-                renderExtraFooter= {() => 'Pilih bulan dan tahun'}
-                style= {{ width: '200px' }}
-              />
+
+            <div className="w-full flex justify-between">
+              <div>
+                <button
+                  onClick={handlePrintXLS}
+                  type="button"
+                  className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm mb-5 mx-2"
+                >
+                  <div className="text-white text-center text-sm font-bold">
+                    <a className="text-white no-underline text-xs sm:text-xs">Print XLS</a>
+                  </div>
+                </button>
+              </div>
+              <div>
+                <DatePicker.MonthPicker
+                  placeholder="Pilih Bulan dan Tahun"
+                  format="MMMM YYYY"
+                  size="large"
+                  defaultValue= {defaultDate}
+                  value={defaultDate}
+                  allowClear
+                  onChange= {handleDateChange}
+                  onClear={handleClear}
+                  renderExtraFooter= {() => 'Pilih bulan dan tahun'}
+                  style= {{ width: '200px' }}
+                />
+              </div>
+            </div>
+
+            <div className="w-full flex justify-end mb-1">
+              <div>
+                <button
+                  onClick={handlePrint}
+                  type="button"
+                  className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm mb-5 mx-2"
+                >
+                  <div className="text-white text-center text-sm font-bold">
+                    <a className="text-white no-underline text-xs sm:text-xs">Print</a>
+                  </div>
+                </button>
+              </div>
             </div>
 
             {/* Content */}
-            <div name="content"> 
-              <div>
+            <div name="content" ref={tableRef}>
+              <div name="title">
                 <div className="text-center">APOTEK XXX</div>
                 <div className="text-center">Laporan Rugi Laba</div>
-                <div className="text-center">Untuk Periode Yang Berakhir</div>
+                <div className="text-center">Untuk Periode Yang Berakhir {titleDate}</div>
               </div>
 
               <table className="w-full mt-5">
