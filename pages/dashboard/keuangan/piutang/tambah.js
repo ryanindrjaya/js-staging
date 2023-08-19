@@ -369,55 +369,55 @@ function Piutang({ props }) {
       });
   
       // cek untuk akun hutang (cek coa)
-      console.log("total tunai, tranfer, giro", totalTunai, totalTransfer, totalGiro);
-      if(document == "Publish"){
+      // console.log("total tunai, tranfer, giro", totalTunai, totalTransfer, totalGiro);
+      // if(document == "Publish"){
   
-        var cekAkunMaster = false;
-        akunPiutang.forEach((item) => {
+      //   var cekAkunMaster = false;
+      //   akunPiutang.forEach((item) => {
   
-          if(item.attributes.setting == true){
-            if(cekAkunMaster === false && item.attributes.type == "Master"){
-              if(item.attributes.chart_of_account.data.attributes.saldo < values.total_pembayaran){
-                notification["error"]({
-                  message: "Gagal menambahkan data",
-                  description: "Data gagal ditambahkan, saldo untuk akun master kurang untuk melakukan pembayaran.",
-                });
+      //     if(item.attributes.setting == true){
+      //       if(cekAkunMaster === false && item.attributes.type == "Master"){
+      //         if(item.attributes.chart_of_account.data.attributes.saldo < values.total_pembayaran){
+      //           notification["error"]({
+      //             message: "Gagal menambahkan data",
+      //             description: "Data gagal ditambahkan, saldo untuk akun master kurang untuk melakukan pembayaran.",
+      //           });
                 
-              } else cekAkunMaster = true;
+      //         } else cekAkunMaster = true;
               
-            }
-          } else {
-            if(totalTunai != 0 && item.attributes.type == "Tunai"){
-                notification["error"]({
-                  message: "Gagal menambahkan data",
-                  description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
-                });
-                setInfo("gagal");
-            } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
-                notification["error"]({
-                  message: "Gagal menambahkan data",
-                  description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
-                });
-                setInfo("gagal");
-            } else if(totalGiro != 0 && item.attributes.type == "Giro"){
-                notification["error"]({
-                  message: "Gagal menambahkan data",
-                  description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
-                });
-                setInfo("gagal");
-            } else if(cekAkunMaster != true){
-                notification["error"]({
-                  message: "Gagal menambahkan data",
-                  description: "Data gagal ditambahkan, silahkan pilih akun master untuk diaktifkan.",
-                });
-                setInfo("gagal");
-            }
+      //       }
+      //     } else {
+      //       if(totalTunai != 0 && item.attributes.type == "Tunai"){
+      //           notification["error"]({
+      //             message: "Gagal menambahkan data",
+      //             description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
+      //           });
+      //           setInfo("gagal");
+      //       } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
+      //           notification["error"]({
+      //             message: "Gagal menambahkan data",
+      //             description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
+      //           });
+      //           setInfo("gagal");
+      //       } else if(totalGiro != 0 && item.attributes.type == "Giro"){
+      //           notification["error"]({
+      //             message: "Gagal menambahkan data",
+      //             description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
+      //           });
+      //           setInfo("gagal");
+      //       } else if(cekAkunMaster != true){
+      //           notification["error"]({
+      //             message: "Gagal menambahkan data",
+      //             description: "Data gagal ditambahkan, silahkan pilih akun master untuk diaktifkan.",
+      //           });
+      //           setInfo("gagal");
+      //       }
   
-          }
+      //     }
           
-        });
+      //   });
   
-      }
+      // }
   
       setDataValues(values);
       setLoading(false);

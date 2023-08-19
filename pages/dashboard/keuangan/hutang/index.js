@@ -312,43 +312,25 @@ function Hutang({ props }) {
 
     const putAkun = async (akun, pembayaran, noHutang, tipe) => {
       try {
-        var saldo = parseFloat(akun.attributes.saldo - pembayaran);
-        if(tipe === "Master") saldo = parseFloat((akun.attributes.saldo ?? 0) - pembayaran);
-
-          const data = {
-            data: {
-              saldo: saldo,
-            },
-          };
-      
-          const JSONdata = JSON.stringify(data);
+        
           const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts/" + akun.id;
           const options = {
-              method: "PUT",
+              method: "GET",
               headers: {
                   "Content-Type": "application/json",
                   Authorization: "Bearer " + cookies.token,
               },
-              body: JSONdata,
+              //body: JSONdata,
           };
       
           const req = await fetch(endpoint, options);
           const res = await req.json();
 
           if (req.status === 200) {
-              console.log("akun sukses diupdate");
-              notification["success"]({
-                message: "Sukses menambahkan data",
-                description: "Pembayaran yang dilakukan sukses.",
-              });
               if(tipe === "Master") updateJurnal(res.data, "hutang", noHutang, null, pembayaran, user, tipe);
               else updateJurnal(res.data, "hutang", noHutang, null, pembayaran, user);
           } else {
               console.log("akun error atau tidak ada");
-              notification["error"]({
-                message: "Gagal menambahkan data",
-                description: "Pembayaran yang dilakukan gagal.",
-              });
           }
         } catch (error) {
            console.log("errorr", error);
