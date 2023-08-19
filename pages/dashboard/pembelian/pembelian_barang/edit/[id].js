@@ -358,7 +358,7 @@ function EditLPB({ props }) {
     //   return;
     // }
 
-    // setDataValues(values);
+    setDataValues(values);
     setLoading(false);
   };
 

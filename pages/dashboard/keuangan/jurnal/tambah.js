@@ -282,11 +282,9 @@ function Jurnal({ props }) {
       //default debit
       if(item.attributes.jenis_akun === true && (saldo + values.debit) > values.kredit){
         saldo = (saldo + values.debit) - values.kredit;
-        putAkun(item, saldo);
 
       } else if (item.attributes.jenis_akun === false && (saldo + values.kredit) > values.debit){
         saldo = (saldo + values.kredit) - values.debit;
-        putAkun(item, saldo);
 
       } else {
         notification["error"]({
@@ -344,45 +342,6 @@ function Jurnal({ props }) {
         description: "Jurnal berhasil ditambahkan.",
       });
     }
-  };
-
-  const putAkun = async (item, saldo) => {
-
-      const data = {
-        data: {
-          saldo: saldo,
-        },
-      };
-  
-      const JSONdata = JSON.stringify(data);
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts/" + item.id;
-      const options = {
-          method: "PUT",
-          headers: {
-              "Content-Type": "application/json",
-              Authorization: "Bearer " + cookies.token,
-          },
-          body: JSONdata,
-      };
-  
-      const req = await fetch(endpoint, options);
-      const res = req.json();
-  
-      if (req.status === 200) {
-          notification["success"]({
-            message: "Sukses menambahkan data",
-            description: "Silahkan cek akun COA",
-          });
-          console.log("akun sukses diupdate", req);
-      } else {
-          notification["error"]({
-            message: "Gagal menambahkan data",
-            description: "akun error atau tidak ada.",
-          });
-          console.log("akun error atau tidak ada");
-      }
-
-      //return res;
   };
 
   const onChangeAkun = async () => {

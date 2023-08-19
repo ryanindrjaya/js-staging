@@ -385,6 +385,11 @@ export default function Sidebar(props) {
             <a>Rugi Laba</a>
           </Link>
         </Menu.Item>
+        <Menu.Item style={submenuStyle} key="bukubesar">
+          <Link href="/dashboard/laporan/bukubesar">
+            <a>Buku Besar</a>
+          </Link>
+        </Menu.Item>
       </SubMenu>
     ),
     Pajak: (

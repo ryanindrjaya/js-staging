@@ -48,25 +48,25 @@ const UpdateJurnal = async (
       values.catatan = "Transaksi lpb dengan kode " + values?.attributes?.no_purchasing;
       if(item.attributes.jenis_akun === true && item.attributes.kode === "115.10.00") {
         values.debit = values.attributes.dpp_value;
-        putAkun(item, values.attributes.dpp_value);
+        
         noJurnal++;
         noJurnal = String(noJurnal).padStart(3, "0");
       }
       else if(item.attributes.jenis_akun === true && item.attributes.kode === "116.20.07"){
         values.debit = values.attributes.ppn_value;
-        putAkun(item, values.attributes.ppn_value);
+        
         noJurnal++;
         noJurnal = String(noJurnal).padStart(3, "0");
       }
       else if(item.attributes.jenis_akun === false && item.attributes.kode === "211.01.01"){
         if(values.attributes.price_after_disc === 0){
           values.kredit = values.attributes.total_purchasing;
-          putAkun(item, values.attributes.total_purchasing);
+          
           noJurnal++;
           noJurnal = String(noJurnal).padStart(3, "0");
         } else {
           values.kredit = values.attributes.price_after_disc;
-          putAkun(item, values.attributes.price_after_disc);
+          
           noJurnal++;
           noJurnal = String(noJurnal).padStart(3, "0");
         }
@@ -104,19 +104,19 @@ const UpdateJurnal = async (
       values.catatan = "Transaksi retur lpb dengan kode " + values?.attributes?.no_retur;
       if(item.attributes.jenis_akun === true && item.attributes.kode === "115.10.00") {
         values.kredit = dpp;
-        putAkun(item, dpp, page);
+        
         noJurnal++;
         noJurnal = String(noJurnal).padStart(3, "0");
       }
       else if(item.attributes.jenis_akun === true && item.attributes.kode === "116.20.07"){
         values.kredit = ppn;
-        putAkun(item, ppn, page);
+        
         noJurnal++;
         noJurnal = String(noJurnal).padStart(3, "0");
       }
       else if(item.attributes.jenis_akun === false && item.attributes.kode === "211.01.02"){
         values.debit = totalPrice;
-        putAkun(item, totalPrice, page);
+        
         noJurnal++;
         noJurnal = String(noJurnal).padStart(3, "0");
       }
@@ -139,12 +139,12 @@ const UpdateJurnal = async (
       values.no_jurnal = `JRPB/${user.id}/${noJurnal}/${mm}/${yyyy}`;
       if(item.attributes.jenis_akun === false && item.attributes.kode === "211.01.01"){
         values.debit = totalPrice;
-        putAkun(item, totalPrice, "retur");
+        
         noJurnal++;
         noJurnal = String(noJurnal).padStart(3, "0");
       } else if(item.attributes.jenis_akun === false && item.attributes.kode === "211.01.02"){
         values.kredit = totalPrice;
-        putAkun(item, totalPrice);
+        
         noJurnal++;
         noJurnal = String(noJurnal).padStart(3, "0");
       }
@@ -211,7 +211,7 @@ const postJurnal = async (data) => {
 
     if (req.status === 200) {
       console.log("suksess jurnal");
-      //openNotificationWithIcon("success");
+      openNotificationWithIcon("success");
     } else {
       openNotificationWithIcon("error", req);
     }
@@ -229,53 +229,6 @@ const fetchAkunCOA = async (cookies, kode1, kode2, kode3) => {
 
   const req = await fetch(endpoint, options);
   return req;
-};
-
-const putAkun = async (akun, pembayaran, page) => {
-  try {
-    var saldo = parseFloat(akun.attributes.saldo + pembayaran);
-
-    if(page === "retur"){
-      saldo = parseFloat(akun.attributes.saldo - pembayaran);
-    }
-
-      const data = {
-        data: {
-          saldo: saldo,
-        },
-      };
-  
-      const JSONdata = JSON.stringify(data);
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts/" + akun.id;
-      const options = {
-          method: "PUT",
-          headers: {
-              "Content-Type": "application/json",
-              Authorization: "Bearer " + cookies.token,
-          },
-          body: JSONdata,
-      };
-  
-      const req = await fetch(endpoint, options);
-      const res = await req.json();
-
-      if (req.status === 200) {
-          console.log("akun sukses diupdate");
-          // notification["success"]({
-          //   message: "Sukses mengubah saldo",
-          //   description: "COA yang dilakukan sukses.",
-          // });
-          
-      } else {
-          console.log("akun error atau tidak ada");
-          notification["error"]({
-            message: "Gagal mengubah saldo",
-            description: "COA yang dilakukan gagal.",
-          });
-      }
-    } catch (error) {
-       console.log("errorr", error);
-    }
 };
 
 export default UpdateJurnal;
