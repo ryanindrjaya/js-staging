@@ -20,8 +20,8 @@ const Print = ({ selling }) => {
   console.log("data", selling);
 
   // stakeholder info
-  const stakeholder = process.env.STAKEHOLDER_NAME;
-  const stakeholderAddress = "Jalan Merdeka Timur II/10 RT/RW 001/001 Malang";
+  const stakeholder = "APOTEK SEJATI";
+  const stakeholderAddress = "Jl. Merdeka Timur No.2-10, Sukoharjo, Kec. Klojen, Kota Malang, Jawa Timur 65119";
   const stakeholderPhone = "(0341) 325837/369339/322208";
   const stakeholderWa = "089523886198";
   const stakeholderNPWP = "75.777.135.7.623.000";

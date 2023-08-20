@@ -36,13 +36,15 @@ const formatter = new Intl.NumberFormat("id-ID", {
 function CetakPesananSales({ props }) {
   const { sales } = props;
 
-  const name = process.env.STAKEHOLDER_NAME;
+  // stakeholder info
+  const name = "APOTEK SEJATI";
+  const address = "Jl. Merdeka Timur No.2-10, Sukoharjo, Kec. Klojen, Kota Malang, Jawa Timur 65119";
+  const phone = "(0341) 325837/369339/322208";
+
   const data = sales.data.attributes;
   const customer = data.customer.data?.attributes;
 
   // header left
-  const address = "Jalan Merdeka Timur II/10 RT/RW 001/001 Malang";
-  const phone = "(0341) 325837/369339/322208";
   const date = data.sale_date; // "2023-04-08"
   const formattedDate = new Date(date).toLocaleDateString("en-GB");
   console.log(formattedDate); // "08/04/2023"

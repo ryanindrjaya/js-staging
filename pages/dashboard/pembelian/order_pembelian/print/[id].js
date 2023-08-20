@@ -5,7 +5,7 @@ import ReactToPrint from "react-to-print";
 
 const Print = ({ props }) => {
   console.log("props", props);
-  const name = process.env.STAKEHOLDER_NAME;
+  const name = "APOTEK SEJATI";
   const noPO = props.purchases.data.attributes.no_po;
   const date = new Date(props.purchases.data.attributes.order_date).toLocaleDateString("id-ID");
   const supplierName = props.purchases.data.attributes.supplier?.data?.attributes?.name;
@@ -188,17 +188,17 @@ const Print = ({ props }) => {
           })}
         </table>
       </div>
-      <div className="flex justify-between">
+      <div className="flex justify-end mb-4">
         {/* <div>
           <div className="font-bold  text-sm uppercase mt-4 flex justify-start">TAMBAHAN :</div>
           <div className=" text-sm uppercase mt-2 flex flex-col justify-start">{getAdditionalFee()}</div>
         </div> */}
-        <div>
-          <div className="font-bold  text-sm uppercase mt-3 flex justify-end">TOTAL HARGA : {getTotalProduct()}</div>
-          <div className="font-bold  text-sm uppercase mt-4 flex justify-end">
+        <div className="mt-2 flex flex-col gap-y-3">
+          <div className="font-bold  text-sm uppercase flex justify-end">TOTAL HARGA : {getTotalProduct()}</div>
+          <div className="font-bold  text-sm uppercase flex justify-end">
             BIAYA PENGIRIMAN : {formatter.format(deliveryFee)}
           </div>
-          <div className="font-bold  text-sm uppercase mt-4 flex justify-end">TOTAL PESANAN : {getTotalPesanan()}</div>
+          <div className="font-bold  text-sm uppercase flex justify-end">TOTAL PESANAN : {getTotalPesanan()}</div>
         </div>
       </div>
 

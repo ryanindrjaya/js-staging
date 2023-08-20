@@ -137,7 +137,12 @@ export default function daftarKeluarBarang({ companyOptions }) {
       console.log("response master", response?.master);
 
       if (response?.data) {
-        setData(response.data);
+        const data = response.data.map((item) => ({
+          ...item,
+          send_qty: item?.sended,
+          send_unit: item?.sended_unit || item?.unit,
+        }));
+        setData(data);
       }
     }
 
@@ -352,6 +357,8 @@ export default function daftarKeluarBarang({ companyOptions }) {
 
   async function handleBulkSend(accept = false) {
     if (data.length === 0) return;
+
+    console.log("data", data);
 
     if (data.some((item) => item.send_qty !== item.sended) && !accept) {
       confirm({

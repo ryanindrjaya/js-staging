@@ -176,7 +176,7 @@ function Pembelian({ props }) {
 
     if (status === "Diterima") {
       // invetory handle
-      await createInventory(row);
+      await createInventory(row, user);
 
       await updateProductFromTable(row);
 

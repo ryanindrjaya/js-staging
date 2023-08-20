@@ -7,7 +7,15 @@ import { useState } from "react";
 import createInventoryRetur from "../../../pages/dashboard/pembelian/utility/createInventoryRetur";
 import nookies from "nookies";
 
-export default function ReactDataTable({ data, onDelete, onPageChange, onChangeStatusPengiriman, onChangeStatus, updateJurnal, user}) {
+export default function ReactDataTable({
+  data,
+  onDelete,
+  onPageChange,
+  onChangeStatusPengiriman,
+  onChangeStatus,
+  updateJurnal,
+  user,
+}) {
   const router = useRouter();
   console.log("data index", data);
   const { Option } = Select;
@@ -259,7 +267,7 @@ export default function ReactDataTable({ data, onDelete, onPageChange, onChangeS
 
       if (status === "Selesai") {
         const changeStatusLpb = await onChangeStatusLpb(row.attributes.purchasing.data.id);
-        const success = await createInventoryRetur(row);
+        const success = await createInventoryRetur(row, user);
 
         if (!success) {
           message.error("Gagal membuat retur");

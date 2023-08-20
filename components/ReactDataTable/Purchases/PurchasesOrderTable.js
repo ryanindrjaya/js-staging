@@ -61,6 +61,15 @@ export default function ReactDataTable({
           Lihat
         </button>
       </div>
+      <div>
+        <button
+          onClick={() => router.replace("/dashboard/pembelian/order_pembelian/print/" + row.id)}
+          className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+        >
+          <UnorderedListOutlined className="mr-2 mt-0.5 float float-left" />
+          Cetak
+        </button>
+      </div>
       {row.attributes.status === "Diterima" ? (
         <div></div>
       ) : (

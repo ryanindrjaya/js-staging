@@ -28,7 +28,7 @@ const getReturDetails = async (id) => {
   return data;
 };
 
-async function createInventoryRetur(row) {
+async function createInventoryRetur(row, user) {
   const data = [];
 
   const retur = await getReturDetails(row.id);
@@ -68,6 +68,7 @@ async function createInventoryRetur(row) {
       no_referensi: noRetur,
       type: "Retur Pembelian",
       keterangan: `Retur Pembelian ke ${supplier}`,
+      author: user,
     };
 
     const gudang = await removeToGudang(body);
