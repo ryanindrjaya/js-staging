@@ -26,10 +26,12 @@ import { loadState } from "../../library/helpers/localStorage";
 const SubMenu = Menu.SubMenu;
 const MenuItemGroup = Menu.ItemGroup;
 const { Sider } = Layout;
-const { toggleOpenDrawer, changeOpenKeys, changeCurrent, toggleCollapsed } = appActions;
+const { toggleOpenDrawer, changeOpenKeys, changeCurrent, toggleCollapsed } =
+  appActions;
 
 export default function Sidebar(props) {
-  const { view, openKeys, collapsed, openDrawer, height, current } = useSelector((state) => state.App);
+  const { view, openKeys, collapsed, openDrawer, height, current } =
+    useSelector((state) => state.App);
   const moduls = loadState("_mod") || [];
 
   const { sidebarTheme } = useSelector((state) => state.ThemeSwitcher);
@@ -44,8 +46,12 @@ export default function Sidebar(props) {
     }
   }
   function onOpenChange(newOpenKeys) {
-    const latestOpenKey = newOpenKeys.find((key) => !(openKeys.indexOf(key) > -1));
-    const latestCloseKey = openKeys.find((key) => !(newOpenKeys.indexOf(key) > -1));
+    const latestOpenKey = newOpenKeys.find(
+      (key) => !(openKeys.indexOf(key) > -1)
+    );
+    const latestCloseKey = openKeys.find(
+      (key) => !(newOpenKeys.indexOf(key) > -1)
+    );
     let nextOpenKeys = [];
     if (latestOpenKey) {
       nextOpenKeys = getAncestorKeys(latestOpenKey).concat(latestOpenKey);
@@ -388,6 +394,11 @@ export default function Sidebar(props) {
         <Menu.Item style={submenuStyle} key="bukubesar">
           <Link href="/dashboard/laporan/bukubesar">
             <a>Buku Besar</a>
+          </Link>
+        </Menu.Item>
+        <Menu.Item style={submenuStyle} key="neraca-detail">
+          <Link href="/dashboard/laporan/neraca-detail">
+            <a>Neraca Detail</a>
           </Link>
         </Menu.Item>
       </SubMenu>
