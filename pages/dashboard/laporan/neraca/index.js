@@ -78,8 +78,8 @@ function NeracaDetail({ props }) {
             </div>
           ) : (
             <div>
-              {/* <DownloadButton data={data} /> */}
-              {/* <NeracaDetailTableView data={data} time={currentTime} /> */}
+              <DownloadButton data={data} />
+              <NeracaDetailTableView data={data} time={currentTime} />
             </div>
           )}
         </LayoutContent>

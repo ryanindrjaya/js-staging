@@ -76,772 +76,406 @@ function NeracaDetailTableView({ data, time }) {
           <p>APOTEK XXX</p>
         </div>
         <div>
-          <p>NERACA DETAIL</p>
+          <p>NERACA</p>
         </div>
         <div className="uppercase">
           <p>PER {indonesianMonth}</p>
         </div>
       </div>
 
-      <Collapse
-        defaultActiveKey={[
-          "1",
-          "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8",
-          "9",
-          "10",
-          "11",
-          "12",
-          "13",
-          "14",
-          "15",
-          "16",
-          "17",
-        ]}
-      >
-        <CollapsePanel header="Kas dan Setara Kas" key="1">
-          <table name="table" className="w-full text-xs">
-            <thead>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">Keterangan</th>
-                <th className="border-2 p-1 w-1/4">Periode Sebelumnya</th>
-                <th className="border-2 p-1 w-1/4">Periode Sekarang</th>
-                <th className="border-2 p-1 w-1/4">COA</th>
-              </tr>
-            </thead>
-            <tbody>
-              {renderTableRows(
-                data.kas,
-                "coa",
-                "previousPeriode",
-                "currentPeriode"
+      <table name="table" className="w-full text-xs">
+        <thead>
+          <tr className="p-2">
+            <th className="border-2 p-1 w-1/3" colSpan={2}>Keterangan</th>
+            <th className="border-2 p-1 w-1/3">Periode Sebelumnya</th>
+            <th className="border-2 p-1 w-1/3">Periode Sekarang</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="p-2">
+            <th className="border-2 p-1" colSpan={4}>Aktiva</th>
+          </tr>
+          <tr className="p-2">
+            <th className="border-2 p-1" colSpan={4}>Aktiva Lancar</th>
+          </tr>
+          <tr className="p-2">
+            <td className="border-2 p-1"></td>
+            <td className="border-2 p-1">Kas dan Setara Kas</td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.kas.previousPeriode.total)}
+            </td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.kas.currentPeriode.total)}
+            </td>
+          </tr>
+          <tr className="p-2">
+            <td className="border-2 p-1"></td>
+            <td className="border-2 p-1">Piutang Usaha</td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.piutang.previousPeriode.total)}
+            </td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.piutang.currentPeriode.total)}
+            </td>
+          </tr>
+          <tr className="p-2">
+            <td className="border-2 p-1"></td>
+            <td className="border-2 p-1">Piutang Lain-lain</td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.piutangLainnya.previousPeriode.total)}
+            </td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.piutangLainnya.currentPeriode.total)}
+            </td>
+          </tr>
+          <tr className="p-2">
+            <td className="border-2 p-1"></td>
+            <td className="border-2 p-1">Persediaan</td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.persediaan.previousPeriode.total)}
+            </td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.persediaan.currentPeriode.total)}
+            </td>
+          </tr>
+          <tr className="p-2">
+            <td className="border-2 p-1"></td>
+            <td className="border-2 p-1">Uang Muka Pajak</td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.pajak.previousPeriode.total)}
+            </td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.pajak.currentPeriode.total)}
+            </td>
+          </tr>
+          <tr className="p-2">
+            <td className="border-2 p-1"></td>
+            <td className="border-2 p-1">Biaya Dibayar Dimuka</td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.biayaBayardiMuka.previousPeriode.total)}
+            </td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.biayaBayardiMuka.currentPeriode.total)}
+            </td>
+          </tr>
+          <tr className="p-2">
+            <td className="border-2 p-1"></td>
+            <td className="border-2 p-1">Uang Muka</td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.uangMuka.previousPeriode.total)}
+            </td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.uangMuka.currentPeriode.total)}
+            </td>
+          </tr>
+          <tr className="p-2">
+            <th className="border-2 p-1"></th>
+            <th className="border-2 p-1">Jumlah Aktiva Lancar</th>
+            <th className="border-2 p-1 text-right">
+              {formatCurrency(
+                data.kas.previousPeriode.total +
+                data.piutang.previousPeriode.total + 
+                data.piutangLainnya.previousPeriode.total +
+                data.persediaan.previousPeriode.total +
+                data.pajak.previousPeriode.total +
+                data.biayaBayardiMuka.previousPeriode.total +
+                data.uangMuka.previousPeriode.total
               )}
-            </tbody>
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1">Jumlah Kas dan Setara Kas</th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.kas.previousPeriode.total)}
-                </th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.kas.currentPeriode.total)}
-                </th>
-                <th className="border-2 p-1"></th>
-              </tr>
-            </tfoot>
-          </table>
-        </CollapsePanel>
-        <CollapsePanel header="Piutang Usaha" key="2">
-          <table name="table" className="w-full text-xs">
-            <thead>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">Keterangan</th>
-                <th className="border-2 p-1 w-1/4">Periode Sebelumnya</th>
-                <th className="border-2 p-1 w-1/4">Periode Sekarang</th>
-                <th className="border-2 p-1 w-1/4">COA</th>
-              </tr>
-            </thead>
-            <tbody>
-              {renderTableRows(
-                data.piutang,
-                "coa",
-                "previousPeriode",
-                "currentPeriode"
+            </th>
+            <th className="border-2 p-1 text-right">
+              {formatCurrency(
+                data.kas.currentPeriode.total +
+                data.piutang.currentPeriode.total + 
+                data.piutangLainnya.currentPeriode.total +
+                data.persediaan.currentPeriode.total +
+                data.pajak.currentPeriode.total +
+                data.biayaBayardiMuka.currentPeriode.total +
+                data.uangMuka.currentPeriode.total
               )}
-            </tbody>
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1">Jumlah Piutang</th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.piutang.previousPeriode.total)}
-                </th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.piutang.currentPeriode.total)}
-                </th>
-                <th className="border-2 p-1"></th>
-              </tr>
-            </tfoot>
-          </table>
-        </CollapsePanel>
-        <CollapsePanel header="Piutang Lain-lain" key="3">
-          <table name="table" className="w-full text-xs">
-            <thead>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">Keterangan</th>
-                <th className="border-2 p-1 w-1/4">Periode Sebelumnya</th>
-                <th className="border-2 p-1 w-1/4">Periode Sekarang</th>
-                <th className="border-2 p-1 w-1/4">COA</th>
-              </tr>
-            </thead>
-            <tbody>
-              {renderTableRows(
-                data.piutangLainnya,
-                "coa",
-                "previousPeriode",
-                "currentPeriode"
-              )}
-            </tbody>
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1">Jumlah Piutang</th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.piutangLainnya.previousPeriode.total)}
-                </th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.piutangLainnya.currentPeriode.total)}
-                </th>
-                <th className="border-2 p-1"></th>
-              </tr>
-            </tfoot>
-          </table>
-        </CollapsePanel>
-        <CollapsePanel header="Persediaan" key="4">
-          <table name="table" className="w-full text-xs">
-            <thead>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">Keterangan</th>
-                <th className="border-2 p-1 w-1/4">Periode Sebelumnya</th>
-                <th className="border-2 p-1 w-1/4">Periode Sekarang</th>
-                <th className="border-2 p-1 w-1/4">COA</th>
-              </tr>
-            </thead>
-            <tbody>
-              {renderTableRows(
-                data.persediaan,
-                "coa",
-                "previousPeriode",
-                "currentPeriode"
-              )}
-            </tbody>
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1">Jumlah Persediaan</th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.persediaan.previousPeriode.total)}
-                </th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.persediaan.currentPeriode.total)}
-                </th>
-                <th className="border-2 p-1"></th>
-              </tr>
-            </tfoot>
-          </table>
-        </CollapsePanel>
-        <CollapsePanel header="Uang Muka Pajak" key="5">
-          <table name="table" className="w-full text-xs">
-            <thead>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">Keterangan</th>
-                <th className="border-2 p-1 w-1/4">Periode Sebelumnya</th>
-                <th className="border-2 p-1 w-1/4">Periode Sekarang</th>
-                <th className="border-2 p-1 w-1/4">COA</th>
-              </tr>
-            </thead>
-            <tbody>
-              {renderTableRows(
-                data.pajak,
-                "coa",
-                "previousPeriode",
-                "currentPeriode"
-              )}
-            </tbody>
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1">Jumlah Muka Pajak</th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.pajak.previousPeriode.total)}
-                </th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.pajak.currentPeriode.total)}
-                </th>
-                <th className="border-2 p-1"></th>
-              </tr>
-            </tfoot>
-          </table>
-        </CollapsePanel>
-        <CollapsePanel header="Biaya Dibayar Dimuka" key="6">
-          <table name="table" className="w-full text-xs">
-            <thead>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">Keterangan</th>
-                <th className="border-2 p-1 w-1/4">Periode Sebelumnya</th>
-                <th className="border-2 p-1 w-1/4">Periode Sekarang</th>
-                <th className="border-2 p-1 w-1/4">COA</th>
-              </tr>
-            </thead>
-            <tbody>
-              {renderTableRows(
-                data.biayaBayardiMuka,
-                "coa",
-                "previousPeriode",
-                "currentPeriode"
-              )}
-            </tbody>
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1">Jumlah Biaya Dibayar Dimuka</th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.biayaBayardiMuka.previousPeriode.total)}
-                </th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.biayaBayardiMuka.currentPeriode.total)}
-                </th>
-                <th className="border-2 p-1"></th>
-              </tr>
-            </tfoot>
-          </table>
-        </CollapsePanel>
-        <CollapsePanel header="Uang Muka" key="7">
-          <table name="table" className="w-full text-xs">
-            <thead>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">Keterangan</th>
-                <th className="border-2 p-1 w-1/4">Periode Sebelumnya</th>
-                <th className="border-2 p-1 w-1/4">Periode Sekarang</th>
-                <th className="border-2 p-1 w-1/4">COA</th>
-              </tr>
-            </thead>
-            <tbody>
-              {renderTableRows(
-                data.uangMuka,
-                "coa",
-                "previousPeriode",
-                "currentPeriode"
-              )}
-            </tbody>
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1">Jumlah Uang Muka</th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.uangMuka.previousPeriode.total)}
-                </th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.uangMuka.currentPeriode.total)}
-                </th>
-                <th className="border-2 p-1"></th>
-              </tr>
-            </tfoot>
-          </table>
-        </CollapsePanel>
-        <CollapsePanel header="Aktiva Tetap" key="8">
-          <p className="font-bold">a. Harga Perolehan</p>
-          <table name="table" className="w-full text-xs">
-            <thead>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">Keterangan</th>
-                <th className="border-2 p-1 w-1/4">Periode Sebelumnya</th>
-                <th className="border-2 p-1 w-1/4">Periode Sekarang</th>
-                <th className="border-2 p-1 w-1/4">COA</th>
-              </tr>
-            </thead>
-            <tbody>
-              {renderTableRows(
-                data.aktivaTetap.hargaPerolehanAktivaTetap,
-                "coa",
-                "previousPeriode",
-                "currentPeriode"
-              )}
-            </tbody>
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1">Jumlah Harga Perolehan</th>
-                <th className="border-2 p-1">
-                  {formatCurrency(
-                    data.aktivaTetap.hargaPerolehanAktivaTetap.previousPeriode
-                      .total
-                  )}
-                </th>
-                <th className="border-2 p-1">
-                  {formatCurrency(
-                    data.aktivaTetap.hargaPerolehanAktivaTetap.currentPeriode
-                      .total
-                  )}
-                </th>
-                <th className="border-2 p-1"></th>
-              </tr>
-            </tfoot>
-          </table>
+            </th>
+          </tr>
 
-          <p className="font-bold pt-5">b. Akumulasi Penyusutan</p>
-          <table name="table" className="w-full text-xs">
-            <thead>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">Keterangan</th>
-                <th className="border-2 p-1 w-1/4">Periode Sebelumnya</th>
-                <th className="border-2 p-1 w-1/4">Periode Sekarang</th>
-                <th className="border-2 p-1 w-1/4">COA</th>
-              </tr>
-            </thead>
-            <tbody>
-              {renderTableRows(
-                data.aktivaTetap.akumulasiPenyusutanAktivaTetap,
-                "coa",
-                "previousPeriode",
-                "currentPeriode"
-              )}
-            </tbody>
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1">Jumlah Akumulasi Penyusutan</th>
-                <th className="border-2 p-1">
-                  {formatCurrency(
-                    data.aktivaTetap.akumulasiPenyusutanAktivaTetap
-                      .previousPeriode.total
-                  )}
-                </th>
-                <th className="border-2 p-1">
-                  {formatCurrency(
-                    data.aktivaTetap.akumulasiPenyusutanAktivaTetap
-                      .currentPeriode.total
-                  )}
-                </th>
-                <th className="border-2 p-1"></th>
-              </tr>
-            </tfoot>
-          </table>
+          <tr className="p-2">
+            <th className="border-2 p-1" colSpan={4}> </th>
+          </tr>
+          <tr className="p-2">
+            <th className="border-2 p-1" colSpan={4}>Aktiva Tetap</th>
+          </tr>
+          <tr className="p-2">
+            <td className="border-2 p-1"></td>
+            <td className="border-2 p-1">Harga Perolehan</td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.aktivaTetap.hargaPerolehanAktivaTetap.previousPeriode.total)}
+            </td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.aktivaTetap.hargaPerolehanAktivaTetap.currentPeriode.total)}
+            </td>
+          </tr>
+          <tr className="p-2">
+            <td className="border-2 p-1"></td>
+            <td className="border-2 p-1">Akumulasi Penyusutan</td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.aktivaTetap.akumulasiPenyusutanAktivaTetap.previousPeriode.total)}
+            </td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.aktivaTetap.akumulasiPenyusutanAktivaTetap.currentPeriode.total)}
+            </td>
+          </tr>
+          <tr className="p-2">
+            <th className="border-2 p-1"></th>
+            <th className="border-2 p-1">Nilai Buku</th>
+            <th className="border-2 p-1 text-right">
+              {formatCurrency(data.aktivaTetap.nilaiBuku.previousPeriode)}
+            </th>
+            <th className="border-2 p-1 text-right">
+              {formatCurrency(data.aktivaTetap.nilaiBuku.currentPeriode)}
+            </th>
+          </tr>
 
-          <table name="table" className="w-full text-xs mt-10">
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">Nilai Buku</th>
-                <th className="border-2 p-1 w-1/4">
-                  {formatCurrency(data.aktivaTetap.nilaiBuku.previousPeriode)}
-                </th>
-                <th className="border-2 p-1 w-1/4">
-                  {formatCurrency(data.aktivaTetap.nilaiBuku.currentPeriode)}
-                </th>
-                <th className="border-2 p-1 w-1/4"></th>
-              </tr>
-            </tfoot>
-          </table>
-        </CollapsePanel>
-        <CollapsePanel header="Aktiva Lain-lain" key="9">
-          <table name="table" className="w-full text-xs">
-            <thead>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">Keterangan</th>
-                <th className="border-2 p-1 w-1/4">Periode Sebelumnya</th>
-                <th className="border-2 p-1 w-1/4">Periode Sekarang</th>
-                <th className="border-2 p-1 w-1/4">COA</th>
-              </tr>
-            </thead>
-            <tbody>
-              {renderTableRows(
-                data.aktivaLainLain.aktivaLainLain,
-                "coa",
-                "previousPeriode",
-                "currentPeriode"
-              )}
-            </tbody>
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1">Jumlah Uang Muka</th>
-                <th className="border-2 p-1">
-                  {formatCurrency(
-                    data.aktivaLainLain.aktivaLainLain.previousPeriode.total
-                  )}
-                </th>
-                <th className="border-2 p-1">
-                  {formatCurrency(
-                    data.aktivaLainLain.aktivaLainLain.currentPeriode.total
-                  )}
-                </th>
-                <th className="border-2 p-1"></th>
-              </tr>
-            </tfoot>
-          </table>
+          <tr className="p-2">
+            <th className="border-2 p-1" colSpan={4}> </th>
+          </tr>
+          <tr className="p-2">
+            <th className="border-2 p-1" colSpan={4}>Aktiva Lain-Lain</th>
+          </tr>
+          <tr className="p-2">
+            <td className="border-2 p-1"></td>
+            <td className="border-2 p-1">Aktiva Lain-lain</td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.aktivaTetap.akumulasiPenyusutanAktivaTetap.previousPeriode.total)}
+            </td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.aktivaTetap.akumulasiPenyusutanAktivaTetap.currentPeriode.total)}
+            </td>
+          </tr>
+          <tr className="p-2">
+            <th className="border-2 p-1"></th>
+            <th className="border-2 p-1">Jumlah Aktiva Tidak Lancar</th>
+            <th className="border-2 p-1 text-right">
+              {formatCurrency(data.aktivaLainLain.aktivaLainLain.previousPeriode.total)}
+            </th>
+            <th className="border-2 p-1 text-right">
+              {formatCurrency(data.aktivaLainLain.aktivaLainLain.currentPeriode.total)}
+            </th>
+          </tr>
 
-          <table name="table" className="w-full text-xs mt-10">
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">
-                  Jumlah Aktiva Tidak Lancar
-                </th>
-                <th className="border-2 p-1 w-1/4">
-                  {formatCurrency(
-                    data.aktivaLainLain.aktivaTidakLancar.previousPeriode.total
-                  )}
-                </th>
-                <th className="border-2 p-1 w-1/4">
-                  {formatCurrency(
-                    data.aktivaLainLain.aktivaTidakLancar.currentPeriode.total
-                  )}
-                </th>
-                <th className="border-2 p-1 w-1/4"></th>
-              </tr>
-            </tfoot>
-          </table>
-        </CollapsePanel>
-        <CollapsePanel header="Hutang Usaha" key="10">
-          <table name="table" className="w-full text-xs">
-            <thead>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">Keterangan</th>
-                <th className="border-2 p-1 w-1/4">Periode Sebelumnya</th>
-                <th className="border-2 p-1 w-1/4">Periode Sekarang</th>
-                <th className="border-2 p-1 w-1/4">COA</th>
-              </tr>
-            </thead>
-            <tbody>
-              {renderTableRows(
-                data.hutangUsaha,
-                "coa",
-                "previousPeriode",
-                "currentPeriode"
-              )}
-            </tbody>
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1">Jumlah Hutang Usaha</th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.hutangUsaha.previousPeriode.total)}
-                </th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.hutangUsaha.currentPeriode.total)}
-                </th>
-                <th className="border-2 p-1"></th>
-              </tr>
-            </tfoot>
-          </table>
-        </CollapsePanel>
-        <CollapsePanel header="Biaya yang masih harus dibayar" key="11">
-          <table name="table" className="w-full text-xs">
-            <thead>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">Keterangan</th>
-                <th className="border-2 p-1 w-1/4">Periode Sebelumnya</th>
-                <th className="border-2 p-1 w-1/4">Periode Sekarang</th>
-                <th className="border-2 p-1 w-1/4">COA</th>
-              </tr>
-            </thead>
-            <tbody>
-              {renderTableRows(
-                data.biayaMasihHarusDiBayar,
-                "coa",
-                "previousPeriode",
-                "currentPeriode"
-              )}
-            </tbody>
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1">
-                  Jumlah Biaya yang masih harus dibayar
-                </th>
-                <th className="border-2 p-1">
-                  {formatCurrency(
-                    data.biayaMasihHarusDiBayar.previousPeriode.total
-                  )}
-                </th>
-                <th className="border-2 p-1">
-                  {formatCurrency(
-                    data.biayaMasihHarusDiBayar.currentPeriode.total
-                  )}
-                </th>
-                <th className="border-2 p-1"></th>
-              </tr>
-            </tfoot>
-          </table>
-        </CollapsePanel>
-        <CollapsePanel header="Hutang Bank" key="12">
-          <table name="table" className="w-full text-xs">
-            <thead>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">Keterangan</th>
-                <th className="border-2 p-1 w-1/4">Periode Sebelumnya</th>
-                <th className="border-2 p-1 w-1/4">Periode Sekarang</th>
-                <th className="border-2 p-1 w-1/4">COA</th>
-              </tr>
-            </thead>
-            <tbody>
-              {renderTableRows(
-                data.hutangBank,
-                "coa",
-                "previousPeriode",
-                "currentPeriode"
-              )}
-            </tbody>
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1">Jumlah Hutang Bank</th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.hutangBank.previousPeriode.total)}
-                </th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.hutangBank.currentPeriode.total)}
-                </th>
-                <th className="border-2 p-1"></th>
-              </tr>
-            </tfoot>
-          </table>
-        </CollapsePanel>
-        <CollapsePanel header="Hutang Pajak" key="13">
-          <table name="table" className="w-full text-xs">
-            <thead>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">Keterangan</th>
-                <th className="border-2 p-1 w-1/4">Periode Sebelumnya</th>
-                <th className="border-2 p-1 w-1/4">Periode Sekarang</th>
-                <th className="border-2 p-1 w-1/4">COA</th>
-              </tr>
-            </thead>
-            <tbody>
-              {renderTableRows(
-                data.hutangPajak,
-                "coa",
-                "previousPeriode",
-                "currentPeriode"
-              )}
-            </tbody>
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1">Jumlah Hutang Pajak</th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.hutangPajak.previousPeriode.total)}
-                </th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.hutangPajak.currentPeriode.total)}
-                </th>
-                <th className="border-2 p-1"></th>
-              </tr>
-            </tfoot>
-          </table>
-        </CollapsePanel>
-        <CollapsePanel header="Hutang Lain-lain" key="14">
-          <table name="table" className="w-full text-xs">
-            <thead>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">Keterangan</th>
-                <th className="border-2 p-1 w-1/4">Periode Sebelumnya</th>
-                <th className="border-2 p-1 w-1/4">Periode Sekarang</th>
-                <th className="border-2 p-1 w-1/4">COA</th>
-              </tr>
-            </thead>
-            <tbody>
-              {renderTableRows(
-                data.hutangLain,
-                "coa",
-                "previousPeriode",
-                "currentPeriode"
-              )}
-            </tbody>
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1">Jumlah Hutang Lain</th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.hutangLain.previousPeriode.total)}
-                </th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.hutangLain.currentPeriode.total)}
-                </th>
-                <th className="border-2 p-1"></th>
-              </tr>
-            </tfoot>
-          </table>
+          <tr className="p-2">
+            <th className="border-2 p-1" colSpan={4}> </th>
+          </tr>
+          <tr className="p-2">
+            <th className="border-2 p-1" colSpan={2}>Jumlah Aktiva</th>
+            <th className="border-2 p-1 text-right">
+              {formatCurrency(
+                data.kas.previousPeriode.total +
+                data.piutang.previousPeriode.total + 
+                data.piutangLainnya.previousPeriode.total +
+                data.persediaan.previousPeriode.total +
+                data.pajak.previousPeriode.total +
+                data.biayaBayardiMuka.previousPeriode.total +
+                data.uangMuka.previousPeriode.total +
 
-          <table name="table" className="w-full text-xs mt-10">
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">
-                  Jumlah Kewajiban Jangka Pendek
-                </th>
-                <th className="border-2 p-1 w-1/4">
-                  {formatCurrency(
-                    data.jumlahKewajibanJangkaPendek.previousPeriode.total
-                  )}
-                </th>
-                <th className="border-2 p-1 w-1/4">
-                  {formatCurrency(
-                    data.jumlahKewajibanJangkaPendek.currentPeriode.total
-                  )}
-                </th>
-                <th className="border-2 p-1 w-1/4"></th>
-              </tr>
-            </tfoot>
-          </table>
-        </CollapsePanel>
-        <CollapsePanel header="Hutang Bank Jangka Panjang" key="15">
-          <table name="table" className="w-full text-xs">
-            <thead>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">Keterangan</th>
-                <th className="border-2 p-1 w-1/4">Periode Sebelumnya</th>
-                <th className="border-2 p-1 w-1/4">Periode Sekarang</th>
-                <th className="border-2 p-1 w-1/4">COA</th>
-              </tr>
-            </thead>
-            <tbody>
-              {renderTableRows(
-                data.hutangBankJangkaPanjang,
-                "coa",
-                "previousPeriode",
-                "currentPeriode"
-              )}
-            </tbody>
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1">
-                  Jumlah Hutang Bank Jangka Panjang
-                </th>
-                <th className="border-2 p-1">
-                  {formatCurrency(
-                    data.hutangBankJangkaPanjang.previousPeriode.total
-                  )}
-                </th>
-                <th className="border-2 p-1">
-                  {formatCurrency(
-                    data.hutangBankJangkaPanjang.currentPeriode.total
-                  )}
-                </th>
-                <th className="border-2 p-1"></th>
-              </tr>
-            </tfoot>
-          </table>
-        </CollapsePanel>
-        <CollapsePanel header="Hutang Lain-lain Jangka Panjang" key="16">
-          <table name="table" className="w-full text-xs">
-            <thead>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">Keterangan</th>
-                <th className="border-2 p-1 w-1/4">Periode Sebelumnya</th>
-                <th className="border-2 p-1 w-1/4">Periode Sekarang</th>
-                <th className="border-2 p-1 w-1/4">COA</th>
-              </tr>
-            </thead>
-            <tbody>
-              {renderTableRows(
-                data.hutangLainJangkaPanjang,
-                "coa",
-                "previousPeriode",
-                "currentPeriode"
-              )}
-            </tbody>
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1">
-                  Jumlah Hutang Lain-lain Jangka Panjang
-                </th>
-                <th className="border-2 p-1">
-                  {formatCurrency(
-                    data.hutangLainJangkaPanjang.previousPeriode.total
-                  )}
-                </th>
-                <th className="border-2 p-1">
-                  {formatCurrency(
-                    data.hutangLainJangkaPanjang.currentPeriode.total
-                  )}
-                </th>
-                <th className="border-2 p-1"></th>
-              </tr>
-            </tfoot>
-          </table>
+                data.aktivaTetap.nilaiBuku.previousPeriode +
 
-          <table name="table" className="w-full text-xs mt-10">
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">
-                  Jumlah Kewajiban Jangka Panjang
-                </th>
-                <th className="border-2 p-1 w-1/4">
-                  {formatCurrency(
-                    data.jumlahKewajibanJangkaPanjang.previousPeriode.total
-                  )}
-                </th>
-                <th className="border-2 p-1 w-1/4">
-                  {formatCurrency(
-                    data.jumlahKewajibanJangkaPanjang.currentPeriode.total
-                  )}
-                </th>
-                <th className="border-2 p-1 w-1/4"></th>
-              </tr>
-            </tfoot>
-          </table>
-        </CollapsePanel>
-        <CollapsePanel header="Modal" key="17">
-          <p className="font-bold">a. Modal</p>
-          <table name="table" className="w-full text-xs">
-            <thead>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">Keterangan</th>
-                <th className="border-2 p-1 w-1/4">Periode Sebelumnya</th>
-                <th className="border-2 p-1 w-1/4">Periode Sekarang</th>
-                <th className="border-2 p-1 w-1/4">COA</th>
-              </tr>
-            </thead>
-            <tbody>
-              {renderTableRows(
-                data.modal,
-                "coa",
-                "previousPeriode",
-                "currentPeriode"
+                data.aktivaLainLain.aktivaLainLain.previousPeriode.total
               )}
-            </tbody>
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1">Modal</th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.modal.previousPeriode.total)}
-                </th>
-                <th className="border-2 p-1">
-                  {formatCurrency(data.modal.currentPeriode.total)}
-                </th>
-                <th className="border-2 p-1"></th>
-              </tr>
-            </tfoot>
-          </table>
+            </th>
+            <th className="border-2 p-1 text-right">
+              {formatCurrency(
+                data.kas.currentPeriode.total +
+                data.piutang.currentPeriode.total + 
+                data.piutangLainnya.currentPeriode.total +
+                data.persediaan.currentPeriode.total +
+                data.pajak.currentPeriode.total +
+                data.biayaBayardiMuka.currentPeriode.total +
+                data.uangMuka.currentPeriode.total +
 
-          <p className="font-bold mt-10">b. Retained Earning</p>
-          <table name="table" className="w-full text-xs">
-            <thead>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">Keterangan</th>
-                <th className="border-2 p-1 w-1/4">Periode Sebelumnya</th>
-                <th className="border-2 p-1 w-1/4">Periode Sekarang</th>
-                <th className="border-2 p-1 w-1/4">COA</th>
-              </tr>
-            </thead>
-            <tbody>
-              {renderTableRows(
-                data.retainedEarning,
-                "coa",
-                "previousPeriode",
-                "currentPeriode"
+                data.aktivaTetap.nilaiBuku.currentPeriode +
+
+                data.aktivaLainLain.aktivaLainLain.currentPeriode.total
               )}
-            </tbody>
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">Total Retained Earning</th>
-                <th className="border-2 p-1 w-1/4">
-                  {formatCurrency(data.retainedEarning.previousPeriode.total)}
-                </th>
-                <th className="border-2 p-1 w-1/4">
-                  {formatCurrency(data.retainedEarning.currentPeriode.total)}
-                </th>
-                <th className="border-2 p-1 w-1/4"></th>
-              </tr>
-            </tfoot>
-          </table>
+            </th>
+          </tr>
+          <tr className="p-2">
+            <th className="border-2 p-1" colSpan={4}> </th>
+          </tr>
 
-          <table name="table" className="w-full text-xs mt-10">
-            <tfoot>
-              <tr className="p-2">
-                <th className="border-2 p-1 w-1/4">Jumlah Ekuitas</th>
-                <th className="border-2 p-1 w-1/4">
-                  {formatCurrency(data.jumlahEkuitas.previousPeriode.total)}
-                </th>
-                <th className="border-2 p-1 w-1/4">
-                  {formatCurrency(data.jumlahEkuitas.currentPeriode.total)}
-                </th>
-                <th className="border-2 p-1 w-1/4"></th>
-              </tr>
-            </tfoot>
-          </table>
-        </CollapsePanel>
-      </Collapse>
+          <tr className="p-2">
+            <th className="border-2 p-1" colSpan={4}>Kewajiban dan Ekuitas</th>
+          </tr>
+          <tr className="p-2">
+            <th className="border-2 p-1" colSpan={4}>Kewajiban Jangka Pendek</th>
+          </tr>
+          <tr className="p-2">
+            <td className="border-2 p-1"></td>
+            <td className="border-2 p-1">Hutang Usaha</td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.hutangUsaha.previousPeriode.total)}
+            </td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.hutangUsaha.currentPeriode.total)}
+            </td>
+          </tr>
+          <tr className="p-2">
+            <td className="border-2 p-1"></td>
+            <td className="border-2 p-1">Biaya yang masih harus dibayar</td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.biayaMasihHarusDiBayar.previousPeriode.total)}
+            </td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.biayaMasihHarusDiBayar.currentPeriode.total)}
+            </td>
+          </tr>
+          <tr className="p-2">
+            <td className="border-2 p-1"></td>
+            <td className="border-2 p-1">Hutang Bank</td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.hutangBank.previousPeriode.total)}
+            </td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.hutangBank.currentPeriode.total)}
+            </td>
+          </tr>
+          <tr className="p-2">
+            <td className="border-2 p-1"></td>
+            <td className="border-2 p-1">Hutang Pajak</td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.hutangPajak.previousPeriode.total)}
+            </td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.hutangPajak.currentPeriode.total)}
+            </td>
+          </tr>
+          <tr className="p-2">
+            <td className="border-2 p-1"></td>
+            <td className="border-2 p-1">Hutang Lain-lain</td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.hutangLain.previousPeriode.total)}
+            </td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.hutangLain.currentPeriode.total)}
+            </td>
+          </tr>
+          <tr className="p-2">
+            <th className="border-2 p-1"></th>
+            <th className="border-2 p-1">Jumlah Kewajiban Jangka Pendek</th>
+            <th className="border-2 p-1 text-right">
+              {formatCurrency(data.jumlahKewajibanJangkaPendek.previousPeriode.total)}
+            </th>
+            <th className="border-2 p-1 text-right">
+              {formatCurrency(data.jumlahKewajibanJangkaPendek.currentPeriode.total)}
+            </th>
+          </tr>
+          <tr className="p-2">
+            <th className="border-2 p-1" colSpan={4}> </th>
+          </tr>
+          <tr className="p-2">
+            <th className="border-2 p-1" colSpan={4}>Kewajiban Jangka Panjang</th>
+          </tr>
+          <tr className="p-2">
+            <td className="border-2 p-1"></td>
+            <td className="border-2 p-1">Hutang Bank</td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.hutangBankJangkaPanjang.previousPeriode.total)}
+            </td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.hutangBankJangkaPanjang.currentPeriode.total)}
+            </td>
+          </tr>
+          <tr className="p-2">
+            <td className="border-2 p-1"></td>
+            <td className="border-2 p-1">Hutang Lain-lain</td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.hutangLainJangkaPanjang.previousPeriode.total)}
+            </td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.hutangLainJangkaPanjang.currentPeriode.total)}
+            </td>
+          </tr>
+          <tr className="p-2">
+            <th className="border-2 p-1"></th>
+            <th className="border-2 p-1">Total Kewajiban Jangka Panjang</th>
+            <th className="border-2 p-1 text-right">
+              {formatCurrency(data.jumlahKewajibanJangkaPanjang.previousPeriode.total)}
+            </th>
+            <th className="border-2 p-1 text-right">
+              {formatCurrency(data.jumlahKewajibanJangkaPanjang.currentPeriode.total)}
+            </th>
+          </tr>
+          <tr className="p-2">
+            <th className="border-2 p-1" colSpan={4}> </th>
+          </tr>
+
+          <tr className="p-2">
+            <th className="border-2 p-1" colSpan={4}>Ekuitas</th>
+          </tr>
+          <tr className="p-2">
+            <td className="border-2 p-1"></td>
+            <td className="border-2 p-1">Modal</td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.modal.previousPeriode.total)}
+            </td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.modal.currentPeriode.total)}
+            </td>
+          </tr>
+          <tr className="p-2">
+            <td className="border-2 p-1"></td>
+            <td className="border-2 p-1">Laba (Rugi) Ditahan</td>
+            <td className="border-2 p-1 text-right">
+              -
+            </td>
+            <td className="border-2 p-1 text-right">
+              -
+            </td>
+          </tr>
+          <tr className="p-2">
+            <td className="border-2 p-1"></td>
+            <td className="border-2 p-1">Laba (Rugi) Tahun Tahun Berjalan</td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.retainedEarning.previousPeriode.rugiLabaTahunBerjalan)}
+            </td>
+            <td className="border-2 p-1 text-right">
+              {formatCurrency(data.retainedEarning.currentPeriode.rugiLabaTahunBerjalan,)}
+            </td>
+          </tr>
+          <tr className="p-2">
+            <th className="border-2 p-1"></th>
+            <th className="border-2 p-1">Jumlah Ekuitas</th>
+            <th className="border-2 p-1 text-right">
+              {formatCurrency(data.jumlahEkuitas.previousPeriode.total)}
+            </th>
+            <th className="border-2 p-1 text-right">
+              {formatCurrency(data.jumlahEkuitas.currentPeriode.total)}
+            </th>
+          </tr>
+
+          <tr className="p-2">
+            <th className="border-2 p-1" colSpan={4}> </th>
+          </tr>
+          <tr className="p-2">
+            <th className="border-2 p-1" colSpan={2}> Jumlah Kewajiban dan Ekuitas</th>
+            <th className="border-2 p-1 text-right">
+              {formatCurrency(
+                data.jumlahKewajibanJangkaPendek.previousPeriode.total +
+
+                data.jumlahKewajibanJangkaPanjang.previousPeriode.total +
+
+                data.jumlahEkuitas.previousPeriode.total
+              )}
+            </th>
+            <th className="border-2 p-1 text-right">
+              {formatCurrency(
+                data.jumlahKewajibanJangkaPendek.currentPeriode.total +
+
+                data.jumlahKewajibanJangkaPanjang.currentPeriode.total +
+
+                data.jumlahEkuitas.currentPeriode.total
+              )}
+            </th>
+          </tr>
+
+        </tbody>
+      </table>
     </div>
   );
 }
