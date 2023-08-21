@@ -396,6 +396,11 @@ export default function Sidebar(props) {
             <a>Buku Besar</a>
           </Link>
         </Menu.Item>
+        <Menu.Item style={submenuStyle} key="neraca">
+          <Link href="/dashboard/laporan/neraca">
+            <a>Neraca</a>
+          </Link>
+        </Menu.Item>
         <Menu.Item style={submenuStyle} key="neraca-detail">
           <Link href="/dashboard/laporan/neraca-detail">
             <a>Neraca Detail</a>

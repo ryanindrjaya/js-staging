@@ -263,7 +263,7 @@ function BukuBesar({ props }) {
                   </div>
                 </button>
               </div>
-              <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
+              <div>
                 <DatePicker.RangePicker
                   size="large"
                   defaultValue= {defaultDate}
