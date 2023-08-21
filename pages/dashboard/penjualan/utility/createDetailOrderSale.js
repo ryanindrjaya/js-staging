@@ -8,7 +8,8 @@ const cookies = nookies.get(null, "token");
 var id = 0;
 
 const createDetailOrderSale = (values, products, setListId, url, lokasiGudang) => {
-  products.productList.reverse().forEach((element, idx) => {
+  const dataToPost = [];
+  products.productList.forEach((element, idx) => {
     console.log("element", element, products);
     //default value
     var qty = 1;
@@ -26,7 +27,23 @@ const createDetailOrderSale = (values, products, setListId, url, lokasiGudang) =
 
     const inventory = lokasiGudang?.[idx];
 
-    POSTSaleDetail(qty, unit, unitPrice, idx, setListId, products, elementId, d1, d2, url, inventory);
+    dataToPost.push({ qty, unit, unitPrice, idx, setListId, products, elementId, d1, d2, url, inventory });
+  });
+
+  dataToPost.reverse().forEach((element) => {
+    POSTSaleDetail(
+      element.qty,
+      element.unit,
+      element.unitPrice,
+      element.id,
+      element.setListId,
+      element.products,
+      element.elementId,
+      element.d1,
+      element.d2,
+      element.url,
+      element.inventory
+    );
   });
 };
 

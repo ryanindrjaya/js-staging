@@ -214,7 +214,7 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange,
               defaultValue={row.attributes.status}
               disabled={row.attributes.status === "Diterima"}
               bordered={false}
-              onChange={(e) => onChangeStatus(e, row)}
+              onChange={(e) => onChangeStatus(e, row, row.id)}
               style={{
                 width: "150px",
               }}

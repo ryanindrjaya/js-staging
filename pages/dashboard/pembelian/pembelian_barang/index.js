@@ -170,7 +170,7 @@ function Pembelian({ props }) {
     });
   };
 
-  const onChangeStatus = async (status, row) => {
+  const onChangeStatus = async (status, row, id) => {
     row.attributes.status = status;
     // const dataStatus = row;
 
@@ -187,7 +187,7 @@ function Pembelian({ props }) {
     const poData = row?.attributes?.purchase?.data;
     const res = await changeStatusPO(poData?.id, status);
     if (res.data) {
-      await changeStatusLPB(status, row.id);
+      const editLPB = await changeStatusLPB(status, id);
     }
   };
 
@@ -240,7 +240,7 @@ function Pembelian({ props }) {
     }
   };
 
-  const changeStatusLPB = async (status, id) => {
+  const changeStatusLPB = async (status, dataId) => {
     try {
       const newValues = {
         data: {
@@ -250,7 +250,7 @@ function Pembelian({ props }) {
 
       const JSONdata = JSON.stringify(newValues);
       const cookies = nookies.get(null, "token");
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings/" + id;
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/purchasings/" + dataId;
 
       const options = {
         method: "PUT",

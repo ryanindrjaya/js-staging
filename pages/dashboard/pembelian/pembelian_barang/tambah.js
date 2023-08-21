@@ -697,7 +697,7 @@ function Tambah({ props }) {
 
   const handleEnterSubmit = (e) => {
     if (e.keyCode === 13) {
-      onFinish(form.getFieldsValue(), false);
+      form.submit();
     }
   };
 

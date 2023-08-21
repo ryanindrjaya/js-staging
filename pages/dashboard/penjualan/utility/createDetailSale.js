@@ -68,7 +68,7 @@ const createDetailSale = (values, products, productTotalPrice, productSubTotal, 
     });
   });
 
-  dataToPost.forEach((element) => {
+  dataToPost.reverse().forEach((element) => {
     POSTSaleDetail(
       element.qty,
       element.disc,

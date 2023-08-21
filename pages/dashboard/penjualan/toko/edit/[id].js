@@ -751,6 +751,9 @@ function EditToko({ props }) {
             product_location: {
               [index]: element.attributes?.location?.data?.id,
             },
+            harga_satuan: {
+              [index]: element.attributes?.unit_price,
+            },
             expired_date: {
               [index]: moment(element.attributes?.expired_date),
             },
