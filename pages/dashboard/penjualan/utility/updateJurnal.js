@@ -34,6 +34,7 @@ const UpdateJurnal = async (
   if(page === "penjualan"){
     var akunPiutang = null;
     if(insidePage === "non panel" || insidePage === "panel") akunPiutang = "114.01.01";
+    else if (insidePage === "toko") akunPiutang = "";
     else if (insidePage === "sales") akunPiutang = "114.01.03";
 
     const reqCOA = await fetchAkunCOA(cookies, akunPiutang, "212.01.07", "400.01.00", "500.00.01", "115.10.00");

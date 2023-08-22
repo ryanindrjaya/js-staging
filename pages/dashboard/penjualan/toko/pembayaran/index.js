@@ -186,8 +186,8 @@ function PembayaranToko({ props }) {
 
       if (mencukupi) {
         const inventoryOut = await createInventoryFromPenjualan(record);
-        if (inventoryOut) {
-          await CreateStorePayment(
+        //if (inventoryOut) { harus dibalikin biar gk error
+          const createStoreData = await CreateStorePayment(
             totalHarga,
             kembali,
             paymentValue[storeTrxId],
@@ -196,11 +196,16 @@ function PembayaranToko({ props }) {
             returTrxId,
             "Pembayaran",
             reloadPage,
-            othValue[storeTrxId]
+            othValue[storeTrxId],
+            updatePembayaranJurnal
           );
-        } else {
-          message.error("Inventory gagal dibuat, transaksi tidak dapat dilakukan.", 2);
-        }
+          // console.log(createStoreData,"createStoreData");
+          // if(createStoreData.data.length > 0){
+          //   // action to update pembayaran jurnal
+          // }
+        // } else {
+        //   message.error("Inventory gagal dibuat, transaksi tidak dapat dilakukan.", 2);
+        // }
       } else {
         message.error("Pembayaran tidak mencukupi", 2);
       }
