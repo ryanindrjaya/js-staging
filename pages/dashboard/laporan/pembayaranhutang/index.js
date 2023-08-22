@@ -687,7 +687,7 @@ function Laporan({ props }) {
                                     }
                                     return (
                                       <React.Fragment key={index}>
-                                        <tr className="text-right">{formatter.format(element.attributes.sisa_hutang - totalRetur)}</tr>
+                                        <tr className="text-right">{formatter.format(element.attributes.sisa_hutang)}</tr>
                                       </React.Fragment>
                                     );
                                   })}
