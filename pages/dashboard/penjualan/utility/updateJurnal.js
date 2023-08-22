@@ -10,6 +10,7 @@ const UpdateJurnal = async (
   user,
   page,
   insidePage,
+  kode,
 ) => {
   
   
@@ -34,8 +35,10 @@ const UpdateJurnal = async (
   if(page === "penjualan"){
     var akunPiutang = null;
     if(insidePage === "non panel" || insidePage === "panel") akunPiutang = "114.01.01";
-    else if (insidePage === "toko") akunPiutang = "";
     else if (insidePage === "sales") akunPiutang = "114.01.03";
+    else if (insidePage === "toko"){
+      akunPiutang = kode;
+    }
 
     const reqCOA = await fetchAkunCOA(cookies, akunPiutang, "212.01.07", "400.01.00", "500.00.01", "115.10.00");
     const akunCOA = await reqCOA.json();
@@ -60,10 +63,16 @@ const UpdateJurnal = async (
         values.no_jurnal = `JPS/${user.id}/${noJurnal}/${mm}/${yyyy}`;
         noJurnal++;
         noJurnal = String(noJurnal).padStart(3, "0");
+      } else if (insidePage === "toko"){
+        values.catatan = "Transaksi toko dengan kode " + values?.attributes?.no_store_sale;
+        values.no_jurnal = `JPT/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+        noJurnal++;
+        noJurnal = String(noJurnal).padStart(3, "0");
       }
 
 
-      if(item.attributes.kode === "114.01.01" || item.attributes.kode === "114.01.03") {
+      //if(item.attributes.kode === "114.01.01" || item.attributes.kode === "114.01.03" || item.attributes.kode === akunPiutang) {
+      if(item.attributes.kode === akunPiutang) {
         //true
         values.debit = values.attributes.total;
         
