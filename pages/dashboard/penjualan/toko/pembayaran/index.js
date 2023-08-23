@@ -54,7 +54,7 @@ PembayaranToko.getInitialProps = async (context) => {
       props: {
         user,
         paymentSales,
-        storeAccount
+        storeAccount,
       },
     };
 
@@ -168,7 +168,7 @@ const getStoreAccount = async (cookies) => {
 function PembayaranToko({ props }) {
   const cookies = nookies.get();
   const userMe = props.user;
-  const storeAccount = props.storeAccount; console.log("store akun", storeAccount);
+  const storeAccount = props.storeAccount;
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState();
   const [paymentValue, setPaymentValue] = useState({});
@@ -208,7 +208,7 @@ function PembayaranToko({ props }) {
 
       if (mencukupi) {
         const inventoryOut = await createInventoryFromPenjualan(record);
-        //if (inventoryOut) { harus dibalikin biar gk error
+        if (inventoryOut) {// harus dibalikin biar gk error
           const createStoreData = await CreateStorePayment(
             totalHarga,
             kembali,
@@ -221,21 +221,18 @@ function PembayaranToko({ props }) {
             othValue[storeTrxId],
           );
 
-          //const createStoreData = createStoreData.data;
-
           console.log(createStoreData,"createStoreData");
           if(createStoreData.data?.id){
             // action to update pembayaran jurnal
-              //updateJurnal(res.data, userMe, "penjualan", "sales");
             storeAccount.data.map((item) => { console.log("masuk", item);
-              if (item.attributes.type === createStoreData.data.attributes.store_payments.data[0].attributes.payment_method){ console.log("masuk");
+              if (item.attributes.type === createStoreData.data.attributes.store_payments.data[0].attributes.payment_method){
                 updateJurnal(createStoreData.data, userMe, "penjualan", "toko", item.attributes.chart_of_account.data.attributes.kode);
               }
             });
           }
-        // } else {
-        //   message.error("Inventory gagal dibuat, transaksi tidak dapat dilakukan.", 2);
-        // }
+        } else {
+          message.error("Inventory gagal dibuat, transaksi tidak dapat dilakukan.", 2);
+        }
       } else {
         message.error("Pembayaran tidak mencukupi", 2);
       }
@@ -494,6 +491,9 @@ function PembayaranToko({ props }) {
                   onCloseDrawer={onCloseDrawer}
                   record={selectedDrawerData}
                   reloadPage={reloadPage}
+                  storeAccount={storeAccount}
+                  userMe={userMe}
+                  updateJurnal={updateJurnal}
                 />
 
                 {/* TABEL COMPONENT */}

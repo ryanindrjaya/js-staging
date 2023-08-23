@@ -4,6 +4,8 @@ import { notification } from "antd";
 import moment from "moment";
 
 const cookies = nookies.get(null, "token");
+var dataLength = 0;
+var dataLengthInc = 0;
 
 const UpdateJurnal = async (
   data,
@@ -11,8 +13,9 @@ const UpdateJurnal = async (
   page,
   insidePage,
   kode,
+  indexMultiPay,
+  multi,
 ) => {
-  
   
   // CLEANING DATA
   var today = new Date();
@@ -34,14 +37,25 @@ const UpdateJurnal = async (
   
   if(page === "penjualan"){
     var akunPiutang = null;
+    
     if(insidePage === "non panel" || insidePage === "panel") akunPiutang = "114.01.01";
     else if (insidePage === "sales") akunPiutang = "114.01.03";
     else if (insidePage === "toko"){
+      dataLength = values.attributes.store_payments.data.length;
       akunPiutang = kode;
-    }
+      if (dataLength !== dataLengthInc) {
+        dataLengthInc++;
+      } else dataLengthInc = 0;
 
-    const reqCOA = await fetchAkunCOA(cookies, akunPiutang, "212.01.07", "400.01.00", "500.00.01", "115.10.00");
-    const akunCOA = await reqCOA.json();
+    }
+    
+    var reqCOA = await fetchAkunCOA(cookies, akunPiutang, "212.01.07", "400.01.00", "500.00.01", "115.10.00");
+    var akunCOA = await reqCOA.json();
+
+    if (indexMultiPay > 0) {
+      reqCOA = await fetchAkunCOA(cookies, akunPiutang);
+      akunCOA = await reqCOA.json();
+    }
 
     console.log("get akunCOA", akunCOA);
 
@@ -70,11 +84,18 @@ const UpdateJurnal = async (
         noJurnal = String(noJurnal).padStart(3, "0");
       }
 
-
       //if(item.attributes.kode === "114.01.01" || item.attributes.kode === "114.01.03" || item.attributes.kode === akunPiutang) {
       if(item.attributes.kode === akunPiutang) {
         //true
         values.debit = values.attributes.total;
+        if (insidePage === "toko" && multi === "Multi") {
+          var detail = values.attributes.store_payments.data[indexMultiPay]; 
+          const charge = detail.attributes.charge;
+          const oth = isNaN(parseFloat(detail.attributes.oth)) ? 0 : parseFloat(detail.attributes.oth);
+          if (indexMultiPay === 0) values.debit = detail.attributes.payment;
+          else values.debit = (detail.attributes.payment - charge ) + oth;
+          console.log("get detail jurnal", detail.attributes.payment, charge, oth);
+        }
         
       } else if (item.attributes.kode === "212.01.07") {
         //false
@@ -104,14 +125,32 @@ const UpdateJurnal = async (
 
   } else if (page === "retur") {
     var akunReturPiutang = null;
+
     if(insidePage === "retur non panel" || insidePage === "retur panel") akunReturPiutang = "114.01.01";
     else if (insidePage === "retur sales") akunReturPiutang = "114.01.03";
+    else if (insidePage === "retur toko"){
+      dataLength = values.attributes.store_payments.data.length;
+      akunReturPiutang = kode;
+      if (dataLength !== dataLengthInc) {
+        dataLengthInc++;
+      } else dataLengthInc = 0;
+      
+    }
 
-    const reqCOA = await fetchAkunCOA(cookies, akunReturPiutang, "212.01.07", "401.01.00", "500.00.01", "115.10.00");
+    var reqCOA = await fetchAkunCOA(cookies, akunReturPiutang, "212.01.07", "401.01.00", "500.00.01", "115.10.00");
     var akunCOA = await reqCOA.json();
 
     akunCOA.data[5] = akunCOA.data[4];
     akunCOA.data[6] = akunCOA.data[0];
+
+    if (insidePage === "retur toko") {
+      akunCOA = null;
+      reqCOA = await fetchAkunCOA(cookies, akunReturPiutang, "212.01.07", "401.01.00", "500.00.01", "115.10.00");
+      akunCOA = await reqCOA.json();
+    } else if (indexMultiPay > 0) {
+      reqCOA = await fetchAkunCOA(cookies, akunReturPiutang);
+      akunCOA = await reqCOA.json();
+    }
 
     console.log("get akunCOA", akunCOA);
     var cekRetur = 0;
@@ -138,20 +177,46 @@ const UpdateJurnal = async (
         values.no_jurnal = `JRPS/${user.id}/${noJurnal}/${mm}/${yyyy}`;
         noJurnal++;
         noJurnal = String(noJurnal).padStart(3, "0");
+      } else if (insidePage === "retur toko"){
+        values.catatan = "Transaksi retur toko dengan kode " + values?.attributes?.no_retur_store_sale;
+        values.no_jurnal = `JRPT/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+        noJurnal++;
+        noJurnal = String(noJurnal).padStart(3, "0");
       }
 
-      if(item.attributes.kode === "114.01.01" || item.attributes.kode === "114.01.03") {
+      //if(item.attributes.kode === "114.01.01" || item.attributes.kode === "114.01.03") {
+      if(item.attributes.kode === akunPiutang) {
         //true
         if (cekRetur === 0) {
           values.kredit = values.attributes.total;
-          
           saldoPiutang = item.attributes.saldo - values.attributes.total;
+
+          //values.kredit = values.attributes.total; console.log(indexMultiPay, "indexMultiPay");
+          if (insidePage === "retur toko" && multi === "Multi") {
+            var detail = values.attributes.store_payments.data[indexMultiPay]; 
+            const charge = detail.attributes.charge;
+            const oth = isNaN(parseFloat(detail.attributes.oth)) ? 0 : parseFloat(detail.attributes.oth);
+            if (indexMultiPay === 0) values.kredit = detail.attributes.payment;
+            else values.kredit = (detail.attributes.payment - charge ) + oth;
+          }
+          console.log("get detail jurnal", detail.attributes.payment, charge, oth, saldoPiutang);
+
           cekRetur++;
         } else {
           item.attributes.saldo = saldoPiutang;
           values.kredit = values.attributes.total;
-          
+
+          if (insidePage === "retur toko" && multi === "Multi") {
+            var detail = values.attributes.store_payments.data[indexMultiPay]; 
+            const charge = detail.attributes.charge;
+            const oth = isNaN(parseFloat(detail.attributes.oth)) ? 0 : parseFloat(detail.attributes.oth);
+            if (indexMultiPay === 0) values.kredit = detail.attributes.payment;
+            else values.kredit = (detail.attributes.payment - charge ) + oth;
+          }
+          console.log("get detail jurnal", detail.attributes.payment, charge, oth, saldoPiutang);
+
         }
+
       } else if (item.attributes.kode === "212.01.07") {
         //false
         values.debit = values.attributes.ppn;

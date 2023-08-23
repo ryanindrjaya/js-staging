@@ -47,7 +47,8 @@ export const CreateStorePayment = async (
       const dataUpdate = await updateTransaction(storeTrxId, result.data.id, reloadPage);
       return dataUpdate;
     } else {
-      await updateReturTransaction(storeTrxId, returTrxId, result.data.id, reloadPage);
+      const dataUpdate = await updateReturTransaction(storeTrxId, returTrxId, result.data.id, reloadPage);
+      return dataUpdate;
     }
 
   } catch (error) {
@@ -139,7 +140,7 @@ export const updateReturTransaction = async (storeTrxId, returTrxId, paymentId, 
         store_payments: paymentId,
       },
     };
-    const endpoint = `${process.env.NEXT_PUBLIC_URL}/retur-store-sales/${returTrxId}`;
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/retur-store-sales/${returTrxId}?populate=*, store_payments.*`;
     const options = {
       method: "PUT",
       headers: {
@@ -159,6 +160,8 @@ export const updateReturTransaction = async (storeTrxId, returTrxId, paymentId, 
     if (reloadPage) {
       reloadPage();
     }
+
+    return result;
   } catch (error) {
     console.log("update transaction error", error);
     message.error("Transaksi Gagal", 2);

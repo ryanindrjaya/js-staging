@@ -3,7 +3,7 @@ import { CreateStorePaymenWithoutUpdate, updateTransaction } from "../../library
 import React, { useEffect, useState } from "react";
 import { createInventoryFromPenjualan } from "../../library/functions/createInventory";
 
-function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
+function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage, storeAccount, userMe, updateJurnal }) {
   const data = record?.attributes;
 
   const confirm = async () => {
@@ -37,10 +37,29 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage }) {
     );
 
     // update transaction
-    await updateTransaction(id, listPaymentId);
+    const createStoreData = await updateTransaction(id, listPaymentId);
+    console.log(createStoreData,"createStoreData");
+    if(createStoreData.data?.id){
+      // action to update pembayaran jurnal
+      if (createStoreData.data.attributes.store_payments.data.length === 1) {
+        storeAccount.data.map((item) => {
+          if (item.attributes.type === createStoreData.data.attributes.store_payments.data[0].attributes.payment_method){
+            updateJurnal(createStoreData.data, userMe, "penjualan", "toko", item.attributes.chart_of_account.data.attributes.kode);
+          }
+        });
+      } else if (createStoreData.data.attributes.store_payments.data.length > 1) {
+        createStoreData.data.attributes.store_payments.data.map((data, index) => {
+          storeAccount.data.map((item) => {
+            if (item.attributes.type === data.attributes.payment_method){
+              updateJurnal(createStoreData.data, userMe, "penjualan", "toko", item.attributes.chart_of_account.data.attributes.kode, index, "Multi");
+            }
+          });
+        });
+      }
+    }
 
     // update inventory
-    await createInventoryFromPenjualan(record);
+    //await createInventoryFromPenjualan(record);
 
     reloadPage();
     onCloseDrawer();

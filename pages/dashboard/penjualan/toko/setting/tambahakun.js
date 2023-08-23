@@ -156,19 +156,22 @@ const Tambah = ({ props }) => {
                     <Select.Option value="TRANSFER" key="TRANSFER">
                       Transfer
                     </Select.Option>
-                    <Select.Option value="BCA" key="BCA">
+                    <Select.Option value="BANK BCA" key="BANK BCA">
                       Bank BCA
                     </Select.Option>
-                    <Select.Option value="DEBIT" key="DEBIT">
+                    <Select.Option value="DEBIT BCA" key="DEBIT BCA">
                       Debit BCA
                     </Select.Option>
                     <Select.Option value="CASH" key="CASH">
                       Cash
                     </Select.Option>
-                    <Select.Option value="TBANK" key="TBANK">
+                    <Select.Option value="LAINNYA" key="LAINNYA">
+                      Lainnya
+                    </Select.Option>
+                    <Select.Option value="TRANSFER BANK" key="TRANSFER BANK">
                       Transfer Bank
                     </Select.Option>
-                    <Select.Option value="KKREDIT" key="KKREDIT">
+                    <Select.Option value="KARTU KREDIT" key="KARTU KREDIT">
                       Kartu Kredit
                     </Select.Option>
                   </Select>

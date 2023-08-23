@@ -6,8 +6,7 @@ import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import router, { useRouter } from "next/router";
 import { Input, notification, Select, DatePicker, Form, Spin } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import Supplier from "@iso/components/Form/AddCost/SupplierForm";
-import DebtTable from "@iso/components/ReactDataTable/Cost/DebtAccountTable";
+import StoreTable from "@iso/components/ReactDataTable/Selling/StoreAccountTable";
 import nookies from "nookies";
 import { toast } from "react-toastify";
 
@@ -78,14 +77,9 @@ function Setting({ props }) {
     //    router.push("/dashboard/biaya/hutang/tambah");
     //};
 
-    //const handleUpdate = (id) => {
-    //    // router.push("/dashboard/pembelian/order_pembelian/edit/" + id);
-    //    openNotificationWithIcon(
-    //        "info",
-    //        "Work In Progress",
-    //        "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
-    //    );
-    //};
+    const handleUpdate = (id) => {
+       router.push("/dashboard/penjualan/toko/setting/edittambahakun" + id);
+    };
 
     const handleDelete = async (id) => {
         const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts/" + id;
@@ -282,7 +276,7 @@ function Setting({ props }) {
                             onFinishFailed={validateError}
                         >
 
-                            <DebtTable
+                            <StoreTable
                                 data={akun}
                                 //onUpdate={handleUpdate}
                                 onDelete={handleDelete}

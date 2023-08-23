@@ -35,7 +35,7 @@ const Tambah = ({ props }) => {
     values.chart_of_account = akunCOA?.id;
     var data = { data: values};
 
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts/"+ akun.data.id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts/"+ akun.data.id;
     const JSONdata = JSON.stringify(data);
 
     const options = {
@@ -57,7 +57,7 @@ const Tambah = ({ props }) => {
         "Berhasil mengubah data",
         "Akun piutang telah berhasil diubah. Silahkan cek kembali akun piutang"
       );
-      router.replace("/dashboard/keuangan/piutang/setting");
+      router.replace("/dashboard/penjualan/toko/setting");
     } else {
       //res.error?.details.errors.map((error) => {
       //  const ErrorMsg = error.path[0];
@@ -181,17 +181,29 @@ const Tambah = ({ props }) => {
                 <div className="w-full md:w-1/3 px-3 mb-2 md:mb-0">
                   <Form.Item name="type">
                     <Select size="large" placeholder="Type" allowClear onChange={setSelectedType} disabled>
-                      <Select.Option value="Master" key="Master">
-                        Master
-                      </Select.Option>
-                      <Select.Option value="Tunai" key="Tunai">
+                      <Select.Option value="TUNAI" key="TUNAI">
                         Tunai
                       </Select.Option>
-                      <Select.Option value="Transfer" key="Transfer">
-                        Bank Transfer
+                      <Select.Option value="TRANSFER" key="TRANSFER">
+                        Transfer
                       </Select.Option>
-                      <Select.Option value="Giro" key="Giro">
-                        Bank Giro
+                      <Select.Option value="BANK BCA" key="BANK BCA">
+                        Bank BCA
+                      </Select.Option>
+                      <Select.Option value="DEBIT BCA" key="DEBIT BCA">
+                        Debit BCA
+                      </Select.Option>
+                      <Select.Option value="CASH" key="CASH">
+                        Cash
+                      </Select.Option>
+                      <Select.Option value="LAINNYA" key="LAINNYA">
+                        Lainnya
+                      </Select.Option>
+                      <Select.Option value="TRANSFER BANK" key="TRANSFER BANK">
+                        Transfer Bank
+                      </Select.Option>
+                      <Select.Option value="KARTU KREDIT" key="KARTU KREDIT">
+                        Kartu Kredit
                       </Select.Option>
                     </Select>
                   </Form.Item>
@@ -206,12 +218,6 @@ const Tambah = ({ props }) => {
                     )}
                   </Form.Item>
                 </div>
-              </div>
-
-              <div className="w-full mt-1 flex justify-between">
-                <Form.Item name="deskripsi" className="w-full mx-2">
-                  <TextArea rows={4} placeholder="Deskripsi" />
-                </Form.Item>
               </div>
 
               <Form.Item>
@@ -269,7 +275,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchAkun = async (cookies, id) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts/"+ id + "?populate=chart_of_account";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts/"+ id + "?populate=chart_of_account";
     const options = {
         method: "GET",
         headers: {
