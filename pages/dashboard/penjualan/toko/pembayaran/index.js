@@ -169,6 +169,7 @@ function PembayaranToko({ props }) {
   const cookies = nookies.get();
   const userMe = props.user;
   const storeAccount = props.storeAccount;
+  const user = props?.user;
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState();
   const [paymentValue, setPaymentValue] = useState({});
@@ -203,12 +204,15 @@ function PembayaranToko({ props }) {
 
       const oth = othValue?.[storeTrxId] ?? 0;
       const bayar = paymentValue[storeTrxId];
+
+      console.log(parseFloat(totalHarga - bayar + oth).toFixed(2));
+
       const sisaPembayaran = parseFloat(totalHarga - bayar + oth).toFixed(2);
       const mencukupi = parseFloat(sisaPembayaran) <= 0;
 
       if (mencukupi) {
         const inventoryOut = await createInventoryFromPenjualan(record);
-        if (inventoryOut) {// harus dibalikin biar gk error
+        if (inventoryOut) {
           const createStoreData = await CreateStorePayment(
             totalHarga,
             kembali,
@@ -739,11 +743,11 @@ function PembayaranToko({ props }) {
                         }
 
                         if (bayar) {
-                          let sisa = parseInt(totalHarga - bayar + oth);
+                          let sisa = parseFloat(totalHarga - bayar + oth).toFixed(2);
 
                           console.log({ sisa });
 
-                          return formatter.format(sisa < 0 ? 0 : sisa);
+                          return formatter.format(sisa < 0 ? 0 : parseFloat(totalHarga - bayar + oth).toFixed(2));
                         } else {
                           return formatter.format(0);
                         }

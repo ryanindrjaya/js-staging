@@ -37,11 +37,11 @@ const formatter = new Intl.NumberFormat("id-ID", {
 function CetakPenjualan({ props }) {
   const { sales } = props;
 
-  const name = process.env.STAKEHOLDER_NAME;
   const data = sales.data.attributes;
 
   // stakeholder info
-  const stakeholderAddress = "Jalan Merdeka Timur II/10 RT/RW 001/001 Malang";
+  const name = "APOTEK SEJATI";
+  const stakeholderAddress = "Jl. Merdeka Timur No.2-10, Sukoharjo, Kec. Klojen, Kota Malang, Jawa Timur 65119";
   const stakeholderPhone = "(0341) 325837/369339/322208";
 
   // header left

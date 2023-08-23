@@ -109,7 +109,7 @@ export const updateLocations = async ({ id, body, url }) => {
   return data;
 };
 
-export async function InventoryOutFromPanel(id, customer, location) {
+export async function InventoryOutFromPanel(id, customer, user) {
   try {
     const data = [];
     const locations = [];
@@ -118,8 +118,6 @@ export async function InventoryOutFromPanel(id, customer, location) {
     const sale = await getPanelSale(id);
     const sale_details = sale.data.attributes.panel_sale_details.data;
     const no_ref = sale.data.attributes.no_panel_sale;
-
-    const user = await getUserMe();
 
     sale_details.forEach((element) => {
       console.log("element store detail (penjualan)", element);
@@ -224,7 +222,7 @@ export async function InventoryOutFromPanel(id, customer, location) {
     });
   }
 }
-export async function InventoryOutFromNonPanel(id, customer) {
+export async function InventoryOutFromNonPanel(id, customer, user) {
   try {
     const data = [];
     const locations = [];
@@ -233,8 +231,6 @@ export async function InventoryOutFromNonPanel(id, customer) {
     const sale = await getNonPanelSale(id);
     const sale_details = sale.data.attributes.non_panel_sale_details.data;
     const no_ref = sale.data.attributes.no_non_panel_sale;
-
-    const user = await getUserMe();
 
     sale_details.forEach((element) => {
       console.log("element store detail (penjualan)", element);
@@ -340,7 +336,7 @@ export async function InventoryOutFromNonPanel(id, customer) {
   }
 }
 
-export async function createInventoryFromPenjualanSales(row) {
+export async function createInventoryFromPenjualanSales(row, user) {
   try {
     const data = [];
     const locations = [];
@@ -350,8 +346,6 @@ export async function createInventoryFromPenjualanSales(row) {
     const sales_sale_details = salesSale.data.attributes.sales_sale_details.data;
     const no_sales_sale = salesSale.data.attributes.no_sales_sale;
     const customer = salesSale.data.attributes.customer?.data?.attributes?.name;
-
-    const user = await getUserMe();
 
     sales_sale_details.forEach((element) => {
       console.log("element store detail (penjualan)", element);
@@ -473,7 +467,7 @@ const getLocationsDetail = async (id) => {
   return data;
 };
 
-export async function createInventoryFromPenjualan(row) {
+export async function createInventoryFromPenjualan(row, user) {
   try {
     const data = [];
     const locations = [];
@@ -483,8 +477,6 @@ export async function createInventoryFromPenjualan(row) {
     const store_sale_details = storeSale.data.attributes.store_sale_details.data;
     const no_store_sale = storeSale.data.attributes.no_store_sale;
     const customer = storeSale.data.attributes.customer_name;
-
-    const user = await getUserMe();
 
     store_sale_details.forEach((element) => {
       console.log("element store detail (penjualan)", element);
@@ -592,9 +584,7 @@ export async function createInventoryFromPenjualan(row) {
   }
 }
 
-export async function createInventoryFromReturPenjualan(row, customer, returPage) {
-  const user = await getUserMe();
-
+export async function createInventoryFromReturPenjualan(row, customer, returPage, user) {
   if (returPage === "retur panel sale") {
     const data = [];
 

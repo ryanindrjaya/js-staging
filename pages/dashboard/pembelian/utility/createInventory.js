@@ -11,7 +11,7 @@ import { notification } from "antd";
 
 const cookies = nookies.get(null, "token");
 
-async function createInventory(row) {
+async function createInventory(row, user) {
   const data = [];
 
   const dataDetails = await fetch(`${process.env.NEXT_PUBLIC_URL}/purchasings/${row.id}?populate=deep`, {
@@ -55,8 +55,6 @@ async function createInventory(row) {
     }
   });
 
-  const user = await getUserMe();
-
   if (data.length > 0) {
     const body = {
       data,
@@ -96,21 +94,5 @@ async function addToGudang(body) {
     });
   }
 }
-
-const getUserMe = async () => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me";
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
-
-  const req = await fetch(endpoint, options);
-  const res = await req.json();
-
-  return res;
-};
 
 export default createInventory;

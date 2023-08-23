@@ -146,26 +146,28 @@ const putRelationSaleDetail = async (id, value, form, router, url, page, locatio
     switch (page) {
       case "panel sale":
         console.log("panel sale");
-        const inventoryOut = await InventoryOutFromPanel(res.data.id, customer);
+        const inventoryOut = await InventoryOutFromPanel(res.data.id, customer, user);
         break;
       case "non panel sale":
         console.log("non panel sale");
-        const inventoryOutNonPanel = await InventoryOutFromNonPanel(res.data.id, customer);
-        break;
-      case "retur store sale":
-        console.log("retur store sale");
-        const inventoryInReturStore = await createInventoryFromReturPenjualan(res.data, customer);
+        const inventoryOutNonPanel = await InventoryOutFromNonPanel(res.data.id, customer, user);
         break;
       case "retur panel sale":
         console.log("retur panel sale");
-        const inventoryInReturPanel = await createInventoryFromReturPenjualan(res.data, customer, "retur panel sale");
+        const inventoryInReturPanel = await createInventoryFromReturPenjualan(
+          res.data,
+          customer,
+          "retur panel sale",
+          user
+        );
         break;
       case "retur non panel sale":
         console.log("retur panel sale");
         const inventoryInReturNonPanel = await createInventoryFromReturPenjualan(
           res.data,
           customer,
-          "retur non panel sale"
+          "retur non panel sale",
+          user
         );
         break;
     }

@@ -4,7 +4,7 @@ import { PrinterOutlined } from "@ant-design/icons";
 
 const Print = ({ props }) => {
   console.log("props", props);
-  const name = process.env.STAKEHOLDER_NAME;
+  const name = "APOTEK SEJATI";
   const noLPB = props.purchases.data.attributes.no_purchasing;
   const noPO = props?.purchases?.data?.attributes?.purchase?.data?.attributes?.no_po || "-";
   const noNotaSupplier = props?.purchases?.data?.attributes?.no_nota_suppplier || "-";

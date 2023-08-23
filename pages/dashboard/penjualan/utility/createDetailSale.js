@@ -10,7 +10,10 @@ var id = 0;
 const createDetailSale = (values, products, productTotalPrice, productSubTotal, setListId, url, form, lokasiGudang) => {
   console.log("create detail function", products);
   console.log("tempList ni ===============", tempListId, form.getFieldValue("product_location"));
-  products.productList.reverse().forEach((element, index) => {
+
+  const dataToPost = [];
+
+  products.productList.forEach((element, index) => {
     // default value
     var qty = 1;
     var disc = 0;
@@ -44,7 +47,7 @@ const createDetailSale = (values, products, productTotalPrice, productSubTotal, 
 
     console.log("data gudang", dataGudang);
 
-    POSTSaleDetail(
+    dataToPost.push({
       qty,
       disc,
       unit,
@@ -61,10 +64,31 @@ const createDetailSale = (values, products, productTotalPrice, productSubTotal, 
       margin,
       productLocationId,
       url,
-      dataGudang
+      dataGudang,
+    });
+  });
+
+  dataToPost.reverse().forEach((element) => {
+    POSTSaleDetail(
+      element.qty,
+      element.disc,
+      element.unit,
+      element.unitPrice,
+      element.subTotal,
+      element.id,
+      element.elementId,
+      element.setListId,
+      element.products,
+      element.newExptDate,
+      element.d1,
+      element.d2,
+      //element.d3,
+      element.margin,
+      element.productLocationId,
+      element.url,
+      element.dataGudang
     );
     id++;
-    subtotalId++;
   });
 };
 

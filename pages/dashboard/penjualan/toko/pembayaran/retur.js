@@ -141,6 +141,7 @@ function PembayaranToko({ props }) {
   const cookies = nookies.get();
   const storeAccount = props.storeAccount;
   const userMe = props.user;
+  const user = props?.user;
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState();
   const [paymentValue, setPaymentValue] = useState({});
@@ -207,7 +208,9 @@ function PembayaranToko({ props }) {
           });
         }
 
-        await createInventoryFromReturPenjualan(record);
+        const customerName = record.attributes?.customer_name;
+
+        await createInventoryFromReturPenjualan(record, customerName, "retur store sale", user);
 
         reloadPage();
       } else {
