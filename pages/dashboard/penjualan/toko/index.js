@@ -98,6 +98,10 @@ function Toko({ props }) {
     router.push("/dashboard/penjualan/toko/tambah");
   };
 
+  const handleSetting = () => {
+    router.push("/dashboard/penjualan/toko/setting");
+  };
+
   const handleNavigateToPembayaran = () => {
     router.push("/dashboard/penjualan/toko/pembayaran");
   };
@@ -698,6 +702,16 @@ function Toko({ props }) {
                       </span>
                       Pembayaran
                     </a>
+                  </div>
+                </button>
+
+                <button
+                  onClick={handleSetting}
+                  type="button"
+                  className="bg-cyan-700 mx-2 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+                >
+                  <div className="text-white text-center text-sm font-bold">
+                    <a className="text-white no-underline text-xs sm:text-xs">Setting Akun</a>
                   </div>
                 </button>
               </div>

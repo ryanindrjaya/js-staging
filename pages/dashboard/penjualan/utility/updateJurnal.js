@@ -10,8 +10,10 @@ const UpdateJurnal = async (
   user,
   page,
   insidePage,
+  kode,
+  indexMultiPay,
+  multi,
 ) => {
-  
   
   // CLEANING DATA
   var today = new Date();
@@ -33,11 +35,20 @@ const UpdateJurnal = async (
   
   if(page === "penjualan"){
     var akunPiutang = null;
+    
     if(insidePage === "non panel" || insidePage === "panel") akunPiutang = "114.01.01";
     else if (insidePage === "sales") akunPiutang = "114.01.03";
+    else if (insidePage === "toko"){
+      akunPiutang = kode;
+    }
+    
+    var reqCOA = await fetchAkunCOA(cookies, akunPiutang, "212.01.07", "400.01.00", "500.00.01", "115.10.00");
+    var akunCOA = await reqCOA.json();
 
-    const reqCOA = await fetchAkunCOA(cookies, akunPiutang, "212.01.07", "400.01.00", "500.00.01", "115.10.00");
-    const akunCOA = await reqCOA.json();
+    if (indexMultiPay > 0) {
+      reqCOA = await fetchAkunCOA(cookies, akunPiutang);
+      akunCOA = await reqCOA.json();
+    }
 
     console.log("get akunCOA", akunCOA);
 
@@ -59,12 +70,25 @@ const UpdateJurnal = async (
         values.no_jurnal = `JPS/${user.id}/${noJurnal}/${mm}/${yyyy}`;
         noJurnal++;
         noJurnal = String(noJurnal).padStart(3, "0");
+      } else if (insidePage === "toko"){
+        values.catatan = "Transaksi toko dengan kode " + values?.attributes?.no_store_sale;
+        values.no_jurnal = `JPT/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+        noJurnal++;
+        noJurnal = String(noJurnal).padStart(3, "0");
       }
 
-
-      if(item.attributes.kode === "114.01.01" || item.attributes.kode === "114.01.03") {
+      //if(item.attributes.kode === "114.01.01" || item.attributes.kode === "114.01.03" || item.attributes.kode === akunPiutang) {
+      if(item.attributes.kode === akunPiutang) {
         //true
         values.debit = values.attributes.total;
+        if (insidePage === "toko" && multi === "Multi") {
+          var detail = values.attributes.store_payments.data[indexMultiPay]; 
+          const charge = detail.attributes.charge;
+          const oth = isNaN(parseFloat(detail.attributes.oth)) ? 0 : parseFloat(detail.attributes.oth);
+          if (indexMultiPay === 0) values.debit = detail.attributes.payment;
+          else values.debit = (detail.attributes.payment - charge ) + oth;
+          console.log("get detail jurnal", detail.attributes.payment, charge, oth);
+        }
         
       } else if (item.attributes.kode === "212.01.07") {
         //false
@@ -94,16 +118,30 @@ const UpdateJurnal = async (
 
   } else if (page === "retur") {
     var akunReturPiutang = null;
+
     if(insidePage === "retur non panel" || insidePage === "retur panel") akunReturPiutang = "114.01.01";
     else if (insidePage === "retur sales") akunReturPiutang = "114.01.03";
+    else if (insidePage === "retur toko"){
+      akunReturPiutang = kode;
+    }
 
-    const reqCOA = await fetchAkunCOA(cookies, akunReturPiutang, "212.01.07", "401.01.00", "500.00.01", "115.10.00");
+    var reqCOA = await fetchAkunCOA(cookies, akunReturPiutang, "212.01.07", "401.01.00", "500.00.01", "115.10.00");
     var akunCOA = await reqCOA.json();
 
     akunCOA.data[5] = akunCOA.data[4];
     akunCOA.data[6] = akunCOA.data[0];
 
-    console.log("get akunCOA", akunCOA);
+    if (insidePage === "retur toko") {
+      akunCOA.data.splice(6, 1);
+      akunCOA.data.splice(5, 1);
+    } 
+    
+    if (indexMultiPay > 0) {
+      reqCOA = await fetchAkunCOA(cookies, akunReturPiutang);
+      akunCOA = await reqCOA.json();
+    }
+
+    console.log("get akunCOA", akunCOA, indexMultiPay);
     var cekRetur = 0;
     var cekPiutang = 0;
     var saldoRetur = 0;
@@ -128,20 +166,46 @@ const UpdateJurnal = async (
         values.no_jurnal = `JRPS/${user.id}/${noJurnal}/${mm}/${yyyy}`;
         noJurnal++;
         noJurnal = String(noJurnal).padStart(3, "0");
+      } else if (insidePage === "retur toko"){
+        values.catatan = "Transaksi retur toko dengan kode " + values?.attributes?.no_retur_store_sale;
+        values.no_jurnal = `JRPT/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+        noJurnal++;
+        noJurnal = String(noJurnal).padStart(3, "0");
       }
 
-      if(item.attributes.kode === "114.01.01" || item.attributes.kode === "114.01.03") {
+      //if(item.attributes.kode === "114.01.01" || item.attributes.kode === "114.01.03") {
+      if(item.attributes.kode === akunReturPiutang) {
         //true
         if (cekRetur === 0) {
           values.kredit = values.attributes.total;
-          
           saldoPiutang = item.attributes.saldo - values.attributes.total;
+
+          //values.kredit = values.attributes.total; console.log(indexMultiPay, "indexMultiPay");
+          if (insidePage === "retur toko" && multi === "Multi") {
+            var detail = values.attributes.store_payments.data[indexMultiPay];
+            const charge = detail.attributes.charge;
+            //const oth = isNaN(parseFloat(detail.attributes.oth)) ? 0 : parseFloat(detail.attributes.oth);
+            if (indexMultiPay === 0) values.kredit = detail.attributes.payment;
+            else values.kredit = detail.attributes.payment + charge;
+          }
+          //console.log("get detail jurnal", detail.attributes.payment, charge, oth, saldoPiutang);
+
           cekRetur++;
         } else {
           item.attributes.saldo = saldoPiutang;
           values.kredit = values.attributes.total;
-          
+
+          if (insidePage === "retur toko" && multi === "Multi") {
+            var detail = values.attributes.store_payments.data[indexMultiPay]; 
+            const charge = detail.attributes.charge;
+            const oth = isNaN(parseFloat(detail.attributes.oth)) ? 0 : parseFloat(detail.attributes.oth);
+            if (indexMultiPay === 0) values.kredit = detail.attributes.payment;
+            else values.kredit = (detail.attributes.payment - charge ) + oth;
+          }
+          //console.log("get detail jurnal", detail.attributes.payment, charge, oth, saldoPiutang);
+
         }
+
       } else if (item.attributes.kode === "212.01.07") {
         //false
         values.debit = values.attributes.ppn;

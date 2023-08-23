@@ -33,6 +33,7 @@ import { MenuOutlined, AuditOutlined, ExclamationCircleOutlined } from "@ant-des
 import confirm from "antd/lib/modal/confirm";
 import moment from "moment";
 import ConfirmDialog from "../../../../../components/Alert/ConfirmDialog";
+import updateJurnal from "../../utility/updateJurnal";
 
 const startDate = moment()?.startOf("day").format("YYYY-MM-DDTHH:mm:ss");
 const endDate = moment()?.endOf("day").format("YYYY-MM-DDTHH:mm:ss");
@@ -46,10 +47,14 @@ PembayaranToko.getInitialProps = async (context) => {
     const reqPaymentSales = await fethcPaymentSales(cookies);
     const paymentSales = await reqPaymentSales.json();
 
+    const reqStoreAccount = await getStoreAccount(cookies);
+    const storeAccount = await reqStoreAccount.json();
+
     const data = {
       props: {
         user,
         paymentSales,
+        storeAccount,
       },
     };
 
@@ -145,8 +150,25 @@ const getCheckOutUser = async (cookies, user) => {
   return res;
 };
 
+const getStoreAccount = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?populate=*&filters[setting][$eq]=" + true;
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  
+  return req;
+};
+
 function PembayaranToko({ props }) {
   const cookies = nookies.get();
+  const userMe = props.user;
+  const storeAccount = props.storeAccount;
   const user = props?.user;
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState();
@@ -189,9 +211,9 @@ function PembayaranToko({ props }) {
       const mencukupi = parseFloat(sisaPembayaran) <= 0;
 
       if (mencukupi) {
-        const inventoryOut = await createInventoryFromPenjualan(record, user);
+        const inventoryOut = await createInventoryFromPenjualan(record);
         if (inventoryOut) {
-          await CreateStorePayment(
+          const createStoreData = await CreateStorePayment(
             totalHarga,
             kembali,
             paymentValue[storeTrxId],
@@ -200,8 +222,18 @@ function PembayaranToko({ props }) {
             returTrxId,
             "Pembayaran",
             reloadPage,
-            othValue[storeTrxId]
+            othValue[storeTrxId],
           );
+
+          console.log(createStoreData,"createStoreData");
+          if(createStoreData.data?.id){
+            // action to update pembayaran jurnal
+            storeAccount.data.map((item) => { console.log("masuk", item);
+              if (item.attributes.type === createStoreData.data.attributes.store_payments.data[0].attributes.payment_method){
+                updateJurnal(createStoreData.data, userMe, "penjualan", "toko", item.attributes.chart_of_account.data.attributes.kode);
+              }
+            });
+          }
         } else {
           message.error("Inventory gagal dibuat, transaksi tidak dapat dilakukan.", 2);
         }
@@ -463,6 +495,9 @@ function PembayaranToko({ props }) {
                   onCloseDrawer={onCloseDrawer}
                   record={selectedDrawerData}
                   reloadPage={reloadPage}
+                  storeAccount={storeAccount}
+                  userMe={userMe}
+                  updateJurnal={updateJurnal}
                 />
 
                 {/* TABEL COMPONENT */}

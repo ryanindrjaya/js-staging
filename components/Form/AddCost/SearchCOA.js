@@ -96,7 +96,9 @@ export default function SearchBar({
           url += "&filters[jenis_akun][$eq]=true";
         } else if (page == "piutang"){
           url += "&filters[jenis_akun][$eq]=false";
-        } else ;
+        } else {
+          
+        };
 
         const endpoint =
           process.env.NEXT_PUBLIC_URL +

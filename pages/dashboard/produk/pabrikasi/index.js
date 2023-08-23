@@ -184,7 +184,7 @@ Pabrikasi.getInitialProps = async (context) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/manufactures?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/manufactures?populate=*&pagination[pageSize]=600";
   const options = {
     method: "GET",
     headers: {
