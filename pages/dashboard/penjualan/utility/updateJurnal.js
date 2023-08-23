@@ -4,8 +4,6 @@ import { notification } from "antd";
 import moment from "moment";
 
 const cookies = nookies.get(null, "token");
-var dataLength = 0;
-var dataLengthInc = 0;
 
 const UpdateJurnal = async (
   data,
@@ -41,12 +39,7 @@ const UpdateJurnal = async (
     if(insidePage === "non panel" || insidePage === "panel") akunPiutang = "114.01.01";
     else if (insidePage === "sales") akunPiutang = "114.01.03";
     else if (insidePage === "toko"){
-      dataLength = values.attributes.store_payments.data.length;
       akunPiutang = kode;
-      if (dataLength !== dataLengthInc) {
-        dataLengthInc++;
-      } else dataLengthInc = 0;
-
     }
     
     var reqCOA = await fetchAkunCOA(cookies, akunPiutang, "212.01.07", "400.01.00", "500.00.01", "115.10.00");
@@ -129,12 +122,7 @@ const UpdateJurnal = async (
     if(insidePage === "retur non panel" || insidePage === "retur panel") akunReturPiutang = "114.01.01";
     else if (insidePage === "retur sales") akunReturPiutang = "114.01.03";
     else if (insidePage === "retur toko"){
-      dataLength = values.attributes.store_payments.data.length;
       akunReturPiutang = kode;
-      if (dataLength !== dataLengthInc) {
-        dataLengthInc++;
-      } else dataLengthInc = 0;
-      
     }
 
     var reqCOA = await fetchAkunCOA(cookies, akunReturPiutang, "212.01.07", "401.01.00", "500.00.01", "115.10.00");
@@ -144,15 +132,16 @@ const UpdateJurnal = async (
     akunCOA.data[6] = akunCOA.data[0];
 
     if (insidePage === "retur toko") {
-      akunCOA = null;
-      reqCOA = await fetchAkunCOA(cookies, akunReturPiutang, "212.01.07", "401.01.00", "500.00.01", "115.10.00");
-      akunCOA = await reqCOA.json();
-    } else if (indexMultiPay > 0) {
+      akunCOA.data.splice(6, 1);
+      akunCOA.data.splice(5, 1);
+    } 
+    
+    if (indexMultiPay > 0) {
       reqCOA = await fetchAkunCOA(cookies, akunReturPiutang);
       akunCOA = await reqCOA.json();
     }
 
-    console.log("get akunCOA", akunCOA);
+    console.log("get akunCOA", akunCOA, indexMultiPay);
     var cekRetur = 0;
     var cekPiutang = 0;
     var saldoRetur = 0;
@@ -185,7 +174,7 @@ const UpdateJurnal = async (
       }
 
       //if(item.attributes.kode === "114.01.01" || item.attributes.kode === "114.01.03") {
-      if(item.attributes.kode === akunPiutang) {
+      if(item.attributes.kode === akunReturPiutang) {
         //true
         if (cekRetur === 0) {
           values.kredit = values.attributes.total;
@@ -193,13 +182,13 @@ const UpdateJurnal = async (
 
           //values.kredit = values.attributes.total; console.log(indexMultiPay, "indexMultiPay");
           if (insidePage === "retur toko" && multi === "Multi") {
-            var detail = values.attributes.store_payments.data[indexMultiPay]; 
+            var detail = values.attributes.store_payments.data[indexMultiPay];
             const charge = detail.attributes.charge;
-            const oth = isNaN(parseFloat(detail.attributes.oth)) ? 0 : parseFloat(detail.attributes.oth);
+            //const oth = isNaN(parseFloat(detail.attributes.oth)) ? 0 : parseFloat(detail.attributes.oth);
             if (indexMultiPay === 0) values.kredit = detail.attributes.payment;
-            else values.kredit = (detail.attributes.payment - charge ) + oth;
+            else values.kredit = detail.attributes.payment + charge;
           }
-          console.log("get detail jurnal", detail.attributes.payment, charge, oth, saldoPiutang);
+          //console.log("get detail jurnal", detail.attributes.payment, charge, oth, saldoPiutang);
 
           cekRetur++;
         } else {
@@ -213,7 +202,7 @@ const UpdateJurnal = async (
             if (indexMultiPay === 0) values.kredit = detail.attributes.payment;
             else values.kredit = (detail.attributes.payment - charge ) + oth;
           }
-          console.log("get detail jurnal", detail.attributes.payment, charge, oth, saldoPiutang);
+          //console.log("get detail jurnal", detail.attributes.payment, charge, oth, saldoPiutang);
 
         }
 

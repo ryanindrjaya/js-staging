@@ -59,7 +59,7 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage, store
     }
 
     // update inventory
-    //await createInventoryFromPenjualan(record);
+    await createInventoryFromPenjualan(record);
 
     reloadPage();
     onCloseDrawer();
