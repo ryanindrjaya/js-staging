@@ -190,10 +190,6 @@ function Laporan({ props }) {
     dispatch({ type: 'ADD_PARAMETER', supplier: searchParameters?.supplier, range: searchParameters?.range, debt: debt });
   };
 
-  // const handleAdd = () => {
-  //   router.push("/dashboard/keuangan/jurnal/tambah");
-  // };
-
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
@@ -220,55 +216,6 @@ function Laporan({ props }) {
       exportTableToXLSX(tableRef.current);
     }
   };
-
-  // const handleDelete = async (data) => {
-
-  //   const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals/" + data.id;
-  //   const cookies = nookies.get(null, "token");
-
-  //   const options = {
-  //     method: "DELETE",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       Authorization: "Bearer " + cookies.token,
-  //     },
-  //   };
-
-  //   const req = await fetch(endpoint, options);
-  //   const res = await req.json();
-  //   if (res) {
-  //     const res = await fetchData(cookies);
-  //     openNotificationWithIcon(
-  //       "success",
-  //       "Berhasil menghapus data",
-  //       "Jurnal yang dipilih telah berhasil dihapus. Silahkan cek kembali jurnal"
-  //     );
-  //     setJurnal(res);
-  //   }
-  // };
-
-  // const openNotificationWithIcon = (type, title, message) => {
-  //   notification[type]({
-  //     message: title,
-  //     description: message,
-  //   });
-  // };
-
-  // const fetchData = async (cookies) => {
-  //   const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=deep";
-  //   const options = {
-  //     method: "GET",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       Authorization: "Bearer " + cookies.token,
-  //     },
-  //   };
-
-  //   const req = await fetch(endpoint, options);
-  //   const res = req.json();
-
-  //   return res;
-  // };
 
   const logOut = () => {
     dispatch(logout());
@@ -498,25 +445,15 @@ function Laporan({ props }) {
                 </div>
               </button>
               <button
-                onClick={handleUpdate}
+                onClick={handlePrint}
                 type="button"
                 className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
               >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">Kolom Tampak</a>
+                  <a className="text-white no-underline text-xs sm:text-xs">Print</a>
                 </div>
               </button>
             </div>
-            
-            {/* <Table
-              data={data}
-              onUpdate={handleUpdate}
-              //onDelete={handleDelete}
-              //onPageChange={handlePageChange}
-              //onChangeStatus={onChangeStatus}
-              tipeLaporan={searchParameters["tipeLaporan"]}
-              user={user}
-            /> */}
 
           <div className="justify-between">
             {searchParameters.tipeLaporan === "Detail" ? (
@@ -856,20 +793,8 @@ function Laporan({ props }) {
             ) : (
               <div hidden></div>
             )}
-
           </div>
 
-            <div className="w-full flex justify-between mt-3">
-                <button
-                  onClick={handlePrint}
-                  type="button"
-                  className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm mb-5 mx-2"
-                >
-                  <div className="text-white text-center text-sm font-bold">
-                    <a className="text-white no-underline text-xs sm:text-xs">Print</a>
-                  </div>
-                </button>
-            </div>
             <tokenVerify logOut={logOut} />
           </LayoutContent>
         </LayoutWrapper>
