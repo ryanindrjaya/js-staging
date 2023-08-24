@@ -6,7 +6,7 @@ import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import router, { useRouter } from "next/router";
 import { Input, notification, Select, DatePicker, Form, Spin } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import Supplier from "@iso/components/Form/AddCost/SupplierForm";
+import SearchCOA from "@iso/components/Form/AddReport/SearchCOA";
 import COATable from "@iso/components/ReactDataTable/Cost/ChartOfAccountTable";
 import nookies from "nookies";
 import { toast } from "react-toastify";
@@ -80,18 +80,27 @@ const fetchJurnal = async (cookies) => {
 function BukuBesar({ props }) {
   const user = props.user;
   const akunData = props.akun;
-  const [jurnal, setJurnal] = useState(props.jurnal);
+  const [jurnal, setJurnal] = useState();
   const [defaultDate, setDefaultDate] = useState([moment(), moment()]);
 
   const tableRef = useRef(null);
 
+  const [debitAwal, setDebitAwal] = useState(0);
+  const [kreditAwal, setKreditAwal] = useState(0);
   const [saldoAwal, setSaldoAwal] = useState(0);
   const [debitAkhir, setDebitAkhir] = useState(0);
   const [kreditAkhir, setKreditAkhir] = useState(0);
   const [saldoAkhir, setSaldoAkhir] = useState(0);
+  const [tempSaldo, setTempSaldo] = useState(0);
 
   const [startDate, setStartDate] = useState(moment());
   const [endDate, setEndDate] = useState(moment());
+
+  //Akun COA
+  const [akunCOA, setAkunCOA] = useState();
+
+  //Data Before
+  const [dataBefore, setDataBefore] = useState();
 
   const handlePrintXLS = () => {
     console.log("handlePrintXLS", tableRef, tableRef.current);
@@ -159,7 +168,7 @@ function BukuBesar({ props }) {
   };
 
   const handleDateChange = async (date) => {
-    console.log("handleDateChange", date);
+    
     if (date !== null) {
       var startDate = date[0].format('YYYY-MM-DD');
       var endDate = date[1].format('YYYY-MM-DD');
@@ -185,18 +194,24 @@ function BukuBesar({ props }) {
       
       setDefaultDate([moment(), moment()]);
       setJurnal(res);
+
     }
 
+    
   };
 
   const handleClear = async () => {
     console.log("LOL");
   };
   
-  const getJurnal = async (startDate, endDate) => { 
+  const getJurnal = async (startDate, endDate, data) => {
 
   const cookies = nookies.get(null, "token");
   var query = `&filters[tanggal][$gte]=${startDate}&filters[tanggal][$lte]=${endDate}`;
+
+  if (data === true){
+    query = `&filters[tanggal][$lte]=${endDate}`;
+  } 
 
   const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*" + query;
   const options = {
@@ -212,27 +227,89 @@ function BukuBesar({ props }) {
 
   }
 
+  const calculateBefore = async () => {
+    const minusOneDay = startDate.clone().subtract(1, 'day');
+    const req = await getJurnal(null, minusOneDay.format('YYYY-MM-DD'), true);
+    const res = await req.json();
+
+    setDataBefore(res);
+  };
+
   useEffect(() => {
-    console.log("jurnal item", jurnal);
-    var saldo = 0;
-    setSaldoAwal(saldo);
-    setDebitAkhir(0);
-    setKreditAkhir(0);
-    setSaldoAkhir(saldo);
+    
+    var saldo = tempSaldo;
+    var debitawal = 0;
+    var kreditawal = 0;
+    var debitakhir = 0;
+    var kreditakhir = 0;
+    
+    if(akunCOA != undefined){
+      dataBefore?.data?.map((item) => {
+        const coaData = item.attributes.chart_of_account.data;
+        saldo = item.attributes.chart_of_account.data.attributes.saldo;
+        setTempSaldo(saldo);
+          if(coaData.attributes.kode === akunCOA.attributes.kode){
+            //setSaldoAwal(saldo);
+            debitawal += parseFloat(item.attributes.debit);
+            kreditawal += parseFloat(item.attributes.kredit);
+          }
+        
+      });
 
-    jurnal?.data?.map((item) => {
-      const coaData = item.attributes.chart_of_account.data;
-      saldo = item.attributes.chart_of_account.data.attributes.saldo;
-
-      if(coaData.attributes.kode === "111.00.01"){
-        setSaldoAwal(saldo);
-        setDebitAkhir(parseFloat(item.attributes.debit));
-        setKreditAkhir(parseFloat(item.attributes.kredit));
-        setSaldoAkhir(saldo += parseFloat(item.attributes.debit) - parseFloat(item.attributes.kredit));
+      if (dataBefore.data.length > 0){
+        setDebitAwal(debitawal);
+        setKreditAwal(kreditawal);
+      } else {
+        setDebitAwal(0);
+        setKreditAwal(0);
       }
-    });
 
-  }, [jurnal]);
+      if (akunCOA.attributes.jenis_akun === true) {
+        saldo = (saldo + debitawal) - kreditawal;
+        setSaldoAwal(saldo);
+      }
+      else if (akunCOA.attributes.jenis_akun === false) {
+        saldo = (saldo + kreditawal) - debitawal;
+        setSaldoAwal(saldo);
+      } 
+
+      jurnal?.data?.map((item) => {
+        const coaData = item.attributes.chart_of_account.data;
+        //saldo = item.attributes.chart_of_account.data.attributes.saldo;
+
+          if(coaData.attributes.kode === akunCOA.attributes.kode){
+            //setSaldoAwal(saldo);
+            debitakhir += parseFloat(item.attributes.debit);
+            kreditakhir += parseFloat(item.attributes.kredit);
+          }
+        
+      });
+
+      if (jurnal.data.length > 0){
+        setDebitAkhir(debitakhir);
+        setKreditAkhir(kreditakhir);
+      } else {
+        setDebitAkhir(0);
+        setKreditAkhir(0);
+      }
+
+      if(akunCOA.attributes.jenis_akun === true) setSaldoAkhir((saldo + debitakhir) - kreditakhir);
+      else if (akunCOA.attributes.jenis_akun === false) setSaldoAkhir((saldo + kreditakhir) - debitakhir);
+    }
+    
+    if (akunCOA === undefined){
+      setSaldoAwal(0);
+      setSaldoAkhir(0);
+    }
+  }, [dataBefore, jurnal, akunCOA]);
+
+  useEffect(() => {
+    calculateBefore();
+  }, [startDate, endDate]);
+
+  useEffect(() => {
+    handleDateChange(defaultDate);
+  }, []);
 
 
   var formatter = new Intl.NumberFormat("id-ID", {
@@ -263,13 +340,15 @@ function BukuBesar({ props }) {
                   </div>
                 </button>
               </div>
+              <div className="w-1/3">
+                <SearchCOA onChange={setAkunCOA} selectedAkun={akunCOA}/>
+              </div>
               <div>
                 <DatePicker.RangePicker
                   size="large"
                   defaultValue= {defaultDate}
                   value={defaultDate}
                   onChange= {handleDateChange}
-                  renderExtraFooter= {() => 'Pilih tanggal.'}
                 />
               </div>
             </div>
@@ -296,23 +375,25 @@ function BukuBesar({ props }) {
               </div>
 
               <table className="w-full mt-5">
-                <thead className="text-center">
-                  <th className="border-2 p-1">Tanggal</th>
-                  <th className="border-2 p-1">No Bukti</th>
-                  <th className="border-2 p-1">Cost Center</th>
-                  <th className="border-2 p-1">Keterangan</th>
-                  <th className="border-2 p-1">Debet</th>
-                  <th className="border-2 p-1">Kredit</th>
-                  <th className="border-2 p-1">Saldo</th>
-                </thead>
+                {/* <thead className="text-center">
+                </thead> */}
                 <tbody>
+                  <tr className="text-center">
+                    <th className="border-2 p-1">Tanggal</th>
+                    <th className="border-2 p-1">No Bukti</th>
+                    <th className="border-2 p-1">Cost Center</th>
+                    <th className="border-2 p-1">Keterangan</th>
+                    <th className="border-2 p-1">Debet</th>
+                    <th className="border-2 p-1">Kredit</th>
+                    <th className="border-2 p-1">Saldo</th>
+                  </tr>
                   <tr>
-                    <td className="border-2 text-center"> {startDate.format('DD/MM/YYYY')} - {endDate.format('DD/MM/YYYY')} </td>
+                    <td className="border-2 text-center"> Sebelum tanggal - {startDate.format('DD/MM/YYYY')} </td>
                     <td className="border-2 text-center"> - </td>
                     <td className="border-2 text-center"> - </td>
                     <td className="border-2 pl-3 text-left"> Saldo Awal </td>
-                    <td className="border-2 pr-3 text-right"> {formatter.format(0)} </td>
-                    <td className="border-2 pr-3 text-right"> {formatter.format(0)} </td>
+                    <td className="border-2 pr-3 text-right"> {formatter.format(debitAwal)} </td>
+                    <td className="border-2 pr-3 text-right"> {formatter.format(kreditAwal)} </td>
                     <td className="border-2 pr-3 text-right"> {formatter.format(saldoAwal)} </td>
                   </tr>
                   <tr>

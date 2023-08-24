@@ -4,6 +4,7 @@ import { PrinterOutlined } from "@ant-design/icons";
 import ReactToPrint from "react-to-print";
 import { useRouter } from "next/router";
 import { useSelector } from 'react-redux';
+import { useEffect } from "react";
 import moment from "moment";
 
 const Print = ({ props }) => {
@@ -30,9 +31,14 @@ const Print = ({ props }) => {
   var idPurchasing = null;
   //var tempData = debt;
 
-
+  const tableRef = React.useRef(null);
   const print = () => {
-    window.print();
+    //window.print();
+    const isPrintSuccessful = window.print();
+    // Close the print window if the print dialog was canceled
+    if (!isPrintSuccessful) {
+      window.close();
+    }
     return false;
   };
 
@@ -96,6 +102,10 @@ const Print = ({ props }) => {
     return new Date(value).toLocaleDateString(locale);
   }
 
+  useEffect(() => {
+    print();
+  }, []);
+
   return (
     <div className="m-3">
       <div className="flex justify-end mb-5">
@@ -109,7 +119,7 @@ const Print = ({ props }) => {
 
       <div className="justify-between" style={{ margin: '5pt' }}>
       {tipeLaporan === "Detail" ? (
-        <div> Detail
+        <div ref={tableRef}> Detail
           <table name="detail" className="w-full text-xs" >
           <thead>
             <tr className="p-2">
@@ -324,7 +334,7 @@ const Print = ({ props }) => {
         )}    
 
         {tipeLaporan == "Rekap" ? (
-        <div> Rekap
+        <div ref={tableRef}> Rekap
           <table name="pembelian" className="w-full text-xs" >
           <thead>
             <tr className="p-2">

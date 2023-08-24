@@ -16,6 +16,7 @@ import nookies from "nookies";
 import tokenVerify from "../../../../authentication/tokenVerify";
 import { prop } from "styled-tools";
 import moment from "moment";
+import * as XLSX from 'xlsx';
 
 Laporan.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -118,6 +119,25 @@ function Laporan({ props }) {
   // Range Picker
   const { RangePicker } = DatePicker;
 
+  const handlePrintXLS = () => {
+    console.log("handlePrintXLS", tableRef, tableRef.current);
+    
+    const contentDiv = document.querySelector('[name="content"]');
+  
+    if (contentDiv) {
+      const workbook = XLSX.utils.book_new();
+      
+      // Create the worksheet and add the content to it
+      const worksheet = XLSX.utils.table_to_sheet(contentDiv);
+      
+      // Add the worksheet to the workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+      
+      // Save the workbook as an XLSX file
+      XLSX.writeFile(workbook, 'Laporan Piutang.xlsx');
+    }
+  };
+
   const handlePrint = () => {
     const table = tableRef.current;
     if (table) {
@@ -157,10 +177,6 @@ function Laporan({ props }) {
     }
   };
 
-  // const handleAdd = () => {
-  //   router.push("/dashboard/keuangan/jurnal/tambah");
-  // };
-
   const handleUpdate = (id) => {
     // router.push("/dashboard/pembelian/order_pembelian/edit/" + id);
     openNotificationWithIcon(
@@ -199,54 +215,12 @@ function Laporan({ props }) {
 
   };
 
-  // const handleDelete = async (data) => {
-
-  //   const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals/" + data.id;
-  //   const cookies = nookies.get(null, "token");
-
-  //   const options = {
-  //     method: "DELETE",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       Authorization: "Bearer " + cookies.token,
-  //     },
-  //   };
-
-  //   const req = await fetch(endpoint, options);
-  //   const res = await req.json();
-  //   if (res) {
-  //     const res = await fetchData(cookies);
-  //     openNotificationWithIcon(
-  //       "success",
-  //       "Berhasil menghapus data",
-  //       "Jurnal yang dipilih telah berhasil dihapus. Silahkan cek kembali jurnal"
-  //     );
-  //     setJurnal(res);
-  //   }
-  // };
-
-  // const openNotificationWithIcon = (type, title, message) => {
-  //   notification[type]({
-  //     message: title,
-  //     description: message,
-  //   });
-  // };
-
-  // const fetchData = async (cookies) => {
-  //   const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=deep";
-  //   const options = {
-  //     method: "GET",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       Authorization: "Bearer " + cookies.token,
-  //     },
-  //   };
-
-  //   const req = await fetch(endpoint, options);
-  //   const res = req.json();
-
-  //   return res;
-  // };
+  const openNotificationWithIcon = (type, title, message) => {
+    notification[type]({
+      message: title,
+      description: message,
+    });
+  };
 
   const logOut = () => {
     dispatch(logout());
@@ -259,12 +233,6 @@ function Laporan({ props }) {
       let endDate = "";
 
       for (const key in searchParameters) {
-        // if (key === "user" && searchParameters[key] !== null) {
-        //   console.log("search", searchParameters);
-        //   //query += `filters[credit_details][customer][id]=${searchParameters[key].id}&`;
-        // } else {
-        //   query += "";
-        // }
 
         if (key === "sales") {
           console.log("search", searchParameters);
@@ -371,23 +339,6 @@ function Laporan({ props }) {
                    }
                  />
               </div>
-              {/* <div className="w-full md:w-1/4 px-3">
-                <Select
-                  placeholder="Status Pembayaran"
-                  size="large"
-                  style={{
-                    width: "100%",
-                    marginRight: "10px",
-                  }}
-                  allowClear
-                  onChange={(e) =>
-                    setSearchParameters({ ...searchParameters, status_pembayaran: e })
-                  }
-                >
-                  <Select.Option value="Dibayar">Dibayar</Select.Option>
-                  <Select.Option value="Dibayar Sebagian">Dibayar Sebagian</Select.Option>
-                </Select>
-              </div> */}
               <div className="w-full md:w-1/4 px-3">
                 <Select
                   placeholder="Tipe Laporan"
@@ -420,19 +371,6 @@ function Laporan({ props }) {
 
             <div className="w-full flex justify-start">
               <div className="w-full md:w-1/4 px-3">
-                {/* <Select
-                  allowClear
-                  // value={filter.sales}
-                  // onClear={() => setFilter({ ...filter, sales: null })}
-                  // onSelect={(value) => setFilter({ ...filter, sales: value })}
-                  placeholder="Sales"
-                  size="large"
-                  style={{
-                    width: "100%",
-                    marginRight: "10px",
-                  }}
-                  options={dataUser}
-                /> */}
                   <SearchSales
                    onChangeSales={(e) =>
                      setSearchParameters({ ...searchParameters, sales: e })
@@ -475,7 +413,7 @@ function Laporan({ props }) {
                 </div>
               </button>
               <button
-                onClick={handleUpdate}
+                onClick={handlePrintXLS}
                 type="button"
                 className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
               >
@@ -484,30 +422,20 @@ function Laporan({ props }) {
                 </div>
               </button>
               <button
-                onClick={handleUpdate}
+                onClick={handlePrint}
                 type="button"
                 className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
               >
                 <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">Kolom Tampak</a>
+                  <a className="text-white no-underline text-xs sm:text-xs">Print</a>
                 </div>
               </button>
             </div>
-            
-            {/* <Table
-              data={data}
-              onUpdate={handleUpdate}
-              //onDelete={handleDelete}
-              //onPageChange={handlePageChange}
-              //onChangeStatus={onChangeStatus}
-              tipeLaporan={searchParameters["tipeLaporan"]}
-              user={user}
-            /> */}
 
           <div className="justify-between">
             {searchParameters.tipeLaporan === "Detail" ? (
-            <div> Detail
-              <table name="pembelian" className="w-full text-xs" ref={tableRef}>
+            <div name="content" ref={tableRef}> Detail
+              <table name="pembelian" className="w-full text-xs">
               <thead>
                 <tr className="p-2">
                   <th className="border-2 p-1">No Penagihan</th>
@@ -725,8 +653,8 @@ function Laporan({ props }) {
             )}  
 
             {searchParameters.tipeLaporan === "Rekap" ? (
-            <div> Detail
-              <table name="pembelian" className="w-full text-xs" ref={tableRef}>
+            <div name="content" ref={tableRef}> Detail
+              <table name="pembelian" className="w-full text-xs">
               <thead>
                 <tr className="p-2">
                   <th className="border-2 p-1">No Penagihan</th>
@@ -942,17 +870,6 @@ function Laporan({ props }) {
 
             </div>
 
-            <div className="w-full flex justify-between mt-3">
-                <button
-                  onClick={handlePrint}
-                  type="button"
-                  className="bg-cyan-700 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm mb-5 mx-2"
-                >
-                  <div className="text-white text-center text-sm font-bold">
-                    <a className="text-white no-underline text-xs sm:text-xs">Print</a>
-                  </div>
-                </button>
-            </div>
             <tokenVerify logOut={logOut} />
           </LayoutContent>
         </LayoutWrapper>
