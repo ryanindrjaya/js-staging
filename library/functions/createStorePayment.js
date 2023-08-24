@@ -44,10 +44,13 @@ export const CreateStorePayment = async (
     console.log("create store payment", result);
 
     if (paymentType === "Pembayaran") {
-      await updateTransaction(storeTrxId, result.data.id, reloadPage);
+      const dataUpdate = await updateTransaction(storeTrxId, result.data.id, reloadPage);
+      return dataUpdate;
     } else {
-      await updateReturTransaction(storeTrxId, returTrxId, result.data.id, reloadPage);
+      const dataUpdate = await updateReturTransaction(storeTrxId, returTrxId, result.data.id, reloadPage);
+      return dataUpdate;
     }
+
   } catch (error) {
     console.log("create payment error", error);
     message.error("Pembayaran Gagal", 2);
@@ -100,7 +103,7 @@ export const updateTransaction = async (storeTrxId, paymentId, reloadPage) => {
         store_payments: paymentId,
       },
     };
-    const endpoint = `${process.env.NEXT_PUBLIC_URL}/store-sales/${storeTrxId}`;
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/store-sales/${storeTrxId}?populate=*, store_payments.*`;
     const options = {
       method: "PUT",
       headers: {
@@ -117,6 +120,8 @@ export const updateTransaction = async (storeTrxId, paymentId, reloadPage) => {
     if (reloadPage) {
       reloadPage();
     }
+
+    return result;
   } catch (error) {
     console.log("update transaction error", error);
     message.error("Transaksi Gagal", 2);
@@ -135,7 +140,7 @@ export const updateReturTransaction = async (storeTrxId, returTrxId, paymentId, 
         store_payments: paymentId,
       },
     };
-    const endpoint = `${process.env.NEXT_PUBLIC_URL}/retur-store-sales/${returTrxId}`;
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/retur-store-sales/${returTrxId}?populate=*, store_payments.*`;
     const options = {
       method: "PUT",
       headers: {
@@ -155,6 +160,8 @@ export const updateReturTransaction = async (storeTrxId, returTrxId, paymentId, 
     if (reloadPage) {
       reloadPage();
     }
+
+    return result;
   } catch (error) {
     console.log("update transaction error", error);
     message.error("Transaksi Gagal", 2);

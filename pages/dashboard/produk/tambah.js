@@ -591,7 +591,7 @@ const fetchDataCategories = async (cookies) => {
 };
 
 const fetchDataManufactures = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/manufactures";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/manufactures?pagination[pageSize]=600";
   const options = {
     method: "GET",
     headers: {
