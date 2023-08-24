@@ -278,13 +278,6 @@ function Laporan({ props }) {
       let endDate = "";
 
       for (const key in searchParameters) {
-        // if (key === "user" && searchParameters[key] !== null) {
-        //   console.log("search", searchParameters);
-        //   //query += `filters[credit_details][customer][id]=${searchParameters[key].id}&`;
-        // } else {
-        //   query += "";
-        // }
-
         if (key === "status_pembayaran") {
           if (searchParameters[key] !== undefined) {
             query += `filters[${key}]=${searchParameters[key]}&`;
@@ -314,16 +307,6 @@ function Laporan({ props }) {
         } else {
           query += "";
         }
-
-        // if (key === "area" || key === "wilayah") {
-        //   if (searchParameters[key] !== null) {
-        //     query += `filters[credit_details][customer][${key}][id]=${searchParameters[key].id}&`;
-        //   } else {
-        //     query += "";
-        //   }
-        // } else {
-        //   query += "";
-        // }
       }
 
       const endpoint = process.env.NEXT_PUBLIC_URL + "/debts?populate[0]=supplier&populate[1]=debt_details.purchasing.returs&filters[document][$eq]=Publish&" + query;
@@ -368,7 +351,7 @@ function Laporan({ props }) {
                   }
                  />
               </div>
-              <div className="w-full md:w-1/4 px-3">
+              {/* <div className="w-full md:w-1/4 px-3">
                 <Select
                   placeholder="Status Pembayaran"
                   size="large"
@@ -385,7 +368,7 @@ function Laporan({ props }) {
                   <Select.Option value="Dibayar Sebagian">Dibayar Sebagian</Select.Option>
                   <Select.Option value="Belum Dibayar">Belum Dibayar</Select.Option>
                 </Select>
-              </div>
+              </div> */}
               <div className="w-full md:w-1/4 px-3">
                 <Select
                   placeholder="Tipe Laporan"

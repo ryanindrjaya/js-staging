@@ -157,13 +157,48 @@ function Laporan({ props }) {
   };
 
   const handlePrint = () => {
-    // console.log("data", data.data);
-    router.push("/dashboard/laporan/pembeliandanretur/print/" + searchParameters?.tipeTransaksi);
-    //router.query.data = searchParameters;
-    data.data.forEach(element => {
-      dispatch({ type: 'ADD_LIST', list: element });
-    });
-    
+    // // console.log("data", data.data);
+    // router.push("/dashboard/laporan/pembeliandanretur/print/" + searchParameters?.tipeTransaksi);
+    // //router.query.data = searchParameters;
+    // data.data.forEach(element => {
+    //   dispatch({ type: 'ADD_LIST', list: element });
+    // });
+    const table = tableRef.current;
+    if (table) {
+      const printWindow = window.open('', '_blank');
+      const printDocument = printWindow.document;
+
+      // Write the table content to the print window
+      printDocument.write(`
+        <html>
+          <head>
+            <style>
+              table {
+                border-collapse: collapse;
+                width: 100%;
+                border: 2px solid #000; /* Add additional border styling as needed */
+              }
+              th, td {
+                border: 1px solid #000; /* Add additional border styling as needed */
+                padding: 8px;
+              }
+            </style>
+          </head>
+          <body>
+            ${table.outerHTML}
+          </body>
+        </html>
+      `);
+      printDocument.close();
+
+      // Use the window.print() method to show the print preview
+      const isPrintSuccessful = printWindow.print();
+
+      // Close the print window if the print dialog was canceled
+      if (!isPrintSuccessful) {
+        printWindow.close();
+      }
+    }
   };
 
   const handleUpdate = (id) => {
