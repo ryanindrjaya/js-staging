@@ -7,14 +7,7 @@ var tempProductListId = [];
 var tempSupplierId = 0;
 var tempLocationId;
 
-const CreateOrder = async (
-  grandTotal,
-  totalPrice,
-  values,
-  listId,
-  form,
-  router
-) => {
+const CreateOrder = async (grandTotal, totalPrice, values, listId, form, router) => {
   // CLEANING DATA
   var orderDate = new Date(values.order_date);
   var deliveryDate = new Date(values.delivery_date);
@@ -32,8 +25,7 @@ const CreateOrder = async (
   values.delivery_date = deliveryDate;
   values.supplier_id = supplierId;
   values.status = "Diproses";
-  values.delivery_total =
-    grandTotal === 0 ? parseFloat(totalPrice) : parseFloat(grandTotal);
+  values.delivery_total = grandTotal === 0 ? parseFloat(totalPrice) : parseFloat(grandTotal);
   values.purchase_details = null;
   values.supplier_id = null;
 
@@ -43,6 +35,8 @@ const CreateOrder = async (
 
   const req = await createData(data);
   const res = await req.json();
+
+  console.log("res", res);
 
   if (req.status === 200) {
     await putRelationOrder(res.data.id, res.data.attributes, form, router);
@@ -130,14 +124,12 @@ const openNotificationWithIcon = (type) => {
   if (type === "error") {
     notification[type]({
       message: "Gagal menambahkan data",
-      description:
-        "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
+      description: "Produk gagal ditambahkan. Silahkan cek NO PO atau kelengkapan data lainnya",
     });
   } else if (type === "success") {
     notification[type]({
       message: "Berhasil menambahkan data",
-      description:
-        "Produk berhasil ditambahkan. Silahkan cek pada halaman Order Pembelian",
+      description: "Produk berhasil ditambahkan. Silahkan cek pada halaman Order Pembelian",
     });
   }
 };

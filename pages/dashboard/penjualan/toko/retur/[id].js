@@ -489,7 +489,7 @@ function ReturToko({ props }) {
       dispatch({
         type: "SET_SALE_INITIAL_PRODUCT",
         product: element.attributes.product.data,
-        qty: 0,
+        qty: 1,
         unit: element.attributes.unit,
         unitIndex: indexUnit,
         disc: element.attributes.disc,

@@ -116,7 +116,7 @@ const fetchUser = async (cookies) => {
 };
 
 function SalesSale({ props }) {
-  const author = props.user;
+  const author = props.userMe;
   const [user, setUser] = useState(props.user || []);
   const [locations, setLocations] = useState(props.locations?.data || []);
   const [customers, setCustomers] = useState(props.customers?.data || []);
@@ -244,6 +244,8 @@ function SalesSale({ props }) {
     if (status === "Diterima") {
       console.log(row, "row nich");
       if (row?.attributes?.sales_sell?.data) {
+        console.log("author", author);
+
         const inventoryOut = await createInventoryFromPenjualanSales(row, author);
         console.log(inventoryOut, "inventoryOut nich");
 

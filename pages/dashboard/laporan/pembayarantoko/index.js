@@ -330,7 +330,7 @@ export default function PembayaranToko() {
                 />
                 <Column
                   align="center"
-                  render={(value) => (value !== 0 ? formatter.format(value) : "")}
+                  render={(value) => (value > 0 ? formatter.format(value) : "")}
                   title="DEBET"
                   key="debit"
                   dataIndex="debit"

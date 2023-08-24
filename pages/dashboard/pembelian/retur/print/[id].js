@@ -112,13 +112,15 @@ const Print = ({ props }) => {
             const formattedDate = `${day < 10 ? "0" + day : day}-${month < 10 ? "0" + month : month}-${year}`;
             const subTotal = element.attributes.sub_total;
 
+            const hargaSatuanNet = subTotal / qty - hargaSatuan + hargaSatuan;
+
             // index++;
             return (
               <tr className="p-2">
                 <Td content={index + 1} />
                 <Td content={productName} />
                 <Td content={totalUnit} />
-                <Td content={formatter.format(hargaSatuan)} />
+                <Td content={formatter.format(hargaSatuanNet)} />
                 <Td content={batch} />
                 <Td content={formattedDate} />
                 <Td content={formatter.format(subTotal)} />

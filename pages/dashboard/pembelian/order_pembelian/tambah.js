@@ -17,7 +17,9 @@ import createDetailOrderFunc from "../utility/createOrderDetail";
 import createOrderFunc from "../utility/createOrder";
 import calculatePrice from "../utility/calculatePrice";
 import setDiskonValue from "../../produk/utility/setDiskonValue";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 import moment from "moment";
+import confirm from "antd/lib/modal/confirm";
 
 Tambah.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -281,7 +283,21 @@ function Tambah({ props }) {
 
   const handleEnterSubmit = (e) => {
     if (e.keyCode === 13) {
-      onFinish(form.getFieldsValue(), false);
+      e.preventDefault();
+      confirm({
+        title: "Apakah anda yakin ingin menambahkan data ini?",
+        icon: <ExclamationCircleOutlined />,
+        content: "Data Order Pembelian akan ditambahkan.",
+        okText: "Ya",
+        centered: true,
+        cancelText: "Tidak",
+        onOk() {
+          form.submit();
+        },
+        onCancel() {
+          console.log("Cancel");
+        },
+      });
     }
   };
 
@@ -302,7 +318,7 @@ function Tambah({ props }) {
               }}
               onFinish={onFinish}
               onFinishFailed={onFinishFailed}
-              onKeyUp={handleEnterSubmit}
+              // onKeyDown={handleEnterSubmit}
             >
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">

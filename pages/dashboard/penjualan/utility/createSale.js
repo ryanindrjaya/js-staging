@@ -131,7 +131,7 @@ const putRelationSaleDetail = async (id, value, form, router, url, page, locatio
   const posted = simpanData !== "Draft";
 
   if (res?.data && posted && page !== "store sale") {
-    const getData = await fetch(endpoint + "?populate=deep,2", {
+    const getData = await fetch(endpoint + "?populate=deep,3", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -140,8 +140,11 @@ const putRelationSaleDetail = async (id, value, form, router, url, page, locatio
     });
     const resData = await getData.json();
     console.log("res data", resData);
+    const api = page?.split(" ").join("_");
     const customer =
-      resData?.data?.attributes?.customer?.data?.attributes?.name ?? resData?.data?.attributes?.customer_name;
+      resData?.data?.attributes?.customer?.data?.attributes?.name ??
+      resData?.data?.attributes?.[api]?.data?.attributes?.customer?.data?.attributes?.name ??
+      resData?.data?.attributes?.customer_name;
     console.log("otw update stock");
     switch (page) {
       case "panel sale":
@@ -215,7 +218,7 @@ const putRelationSaleDetail = async (id, value, form, router, url, page, locatio
 };
 
 const getUserMe = async () => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=*";
   const options = {
     method: "GET",
     headers: {
