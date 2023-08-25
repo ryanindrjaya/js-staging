@@ -21,6 +21,8 @@ const Tambah = ({ props }) => {
   const modules = props?.modules?.data || [];
   const locations = props?.locations;
 
+  console.log("role", role);
+
   const onFinish = async (values) => {
     setLoading(true);
 
@@ -282,7 +284,7 @@ Tambah.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   let data;
 
-  const req = await fetchData(cookies, "/users-permissions/roles");
+  const req = await fetchData(cookies, "/users-permissions/roles?populate=*");
   data = await req.json();
 
   const reqLocations = await fetchData(cookies, "/locations");
