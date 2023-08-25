@@ -496,7 +496,7 @@ function ReturToko({ props }) {
         margin: element.attributes.margin,
         d1: element.attributes.disc1,
         d2: element.attributes.disc2,
-        expired_date: element.attributes.expired_date,
+        expired_date: moment(element?.attributes?.expired_date),
         //priceAfterDisc,
         //subTotal,
         //unit: element.attributes.unit_order,

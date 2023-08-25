@@ -161,7 +161,7 @@ const getStoreAccount = async (cookies) => {
   };
 
   const req = await fetch(endpoint, options);
-  
+
   return req;
 };
 
@@ -211,7 +211,7 @@ function PembayaranToko({ props }) {
       const mencukupi = parseFloat(sisaPembayaran) <= 0;
 
       if (mencukupi) {
-        const inventoryOut = await createInventoryFromPenjualan(record);
+        const inventoryOut = await createInventoryFromPenjualan(record, userMe);
         if (inventoryOut) {
           const createStoreData = await CreateStorePayment(
             totalHarga,
@@ -222,15 +222,25 @@ function PembayaranToko({ props }) {
             returTrxId,
             "Pembayaran",
             reloadPage,
-            othValue[storeTrxId],
+            othValue[storeTrxId]
           );
 
-          console.log(createStoreData,"createStoreData");
-          if(createStoreData.data?.id){
+          console.log(createStoreData, "createStoreData");
+          if (createStoreData.data?.id) {
             // action to update pembayaran jurnal
-            storeAccount.data.map((item) => { console.log("masuk", item);
-              if (item.attributes.type === createStoreData.data.attributes.store_payments.data[0].attributes.payment_method){
-                updateJurnal(createStoreData.data, userMe, "penjualan", "toko", item.attributes.chart_of_account.data.attributes.kode);
+            storeAccount.data.map((item) => {
+              console.log("masuk", item);
+              if (
+                item.attributes.type ===
+                createStoreData.data.attributes.store_payments.data[0].attributes.payment_method
+              ) {
+                updateJurnal(
+                  createStoreData.data,
+                  userMe,
+                  "penjualan",
+                  "toko",
+                  item.attributes.chart_of_account.data.attributes.kode
+                );
               }
             });
           }
