@@ -247,7 +247,7 @@ const fetchAkunPiutang = async (cookies) => {
 };
 
 function Piutang({ props }) {
-  const biaya = useSelector((state) => state.Cost);
+  const biaya = useSelector((state) => state.Cost); console.log("biaya", biaya.info);
   const dispatch = useDispatch();
 
   //var selectedProduct = products?.productList;
@@ -367,57 +367,18 @@ function Piutang({ props }) {
           setInfo("gagal");
         }
       });
-  
-      // cek untuk akun hutang (cek coa)
-      // console.log("total tunai, tranfer, giro", totalTunai, totalTransfer, totalGiro);
-      // if(document == "Publish"){
-  
-      //   var cekAkunMaster = false;
-      //   akunPiutang.forEach((item) => {
-  
-      //     if(item.attributes.setting == true){
-      //       if(cekAkunMaster === false && item.attributes.type == "Master"){
-      //         if(item.attributes.chart_of_account.data.attributes.saldo < values.total_pembayaran){
-      //           notification["error"]({
-      //             message: "Gagal menambahkan data",
-      //             description: "Data gagal ditambahkan, saldo untuk akun master kurang untuk melakukan pembayaran.",
-      //           });
-                
-      //         } else cekAkunMaster = true;
-              
-      //       }
-      //     } else {
-      //       if(totalTunai != 0 && item.attributes.type == "Tunai"){
-      //           notification["error"]({
-      //             message: "Gagal menambahkan data",
-      //             description: "Data gagal ditambahkan, silahkan pilih akun tunai untuk diaktifkan.",
-      //           });
-      //           setInfo("gagal");
-      //       } else if(totalTransfer != 0 && item.attributes.type == "Transfer"){
-      //           notification["error"]({
-      //             message: "Gagal menambahkan data",
-      //             description: "Data gagal ditambahkan, silahkan pilih akun transfer untuk diaktifkan.",
-      //           });
-      //           setInfo("gagal");
-      //       } else if(totalGiro != 0 && item.attributes.type == "Giro"){
-      //           notification["error"]({
-      //             message: "Gagal menambahkan data",
-      //             description: "Data gagal ditambahkan, silahkan pilih akun giro untuk diaktifkan.",
-      //           });
-      //           setInfo("gagal");
-      //       } else if(cekAkunMaster != true){
-      //           notification["error"]({
-      //             message: "Gagal menambahkan data",
-      //             description: "Data gagal ditambahkan, silahkan pilih akun master untuk diaktifkan.",
-      //           });
-      //           setInfo("gagal");
-      //       }
-  
-      //     }
-          
-      //   });
-  
-      // }
+
+      console.log("total tunai, tranfer, giro", totalTunai, totalTransfer, totalGiro);
+      console.log(values, "values", document);
+      if(document === "Publish"){
+        if(values.bayar1 === 0 && values.bayar2 === 0 && values.bayar3 === 0 && values.total_pembayaran === undefined) {
+          notification["error"]({
+            message: "Gagal menambahkan data",
+            description: "Data gagal ditambahkan, karena total pembayaran tidak sesuai.",
+          });
+          setInfo("gagal");
+        }
+      }
   
       setDataValues(values);
       setLoading(false);
@@ -676,8 +637,7 @@ function Piutang({ props }) {
   }, [biaya.info]);
 
   useEffect(() => {
-    //if (dataValues && info == "sukses") createDetailSale();
-    if (dataValues) createDetail();
+    if (dataValues && info === "sukses") createDetail();
   }, [dataValues]);
 
   useEffect(() => {
@@ -690,6 +650,7 @@ function Piutang({ props }) {
     // used to reset redux from value before
     clearData();
     form.resetFields();
+    //router.push("/dashboard/keuangan/piutang/tambah");
     var sisaHutang = 0;
     var pembayaran = [];
     var total = 0;

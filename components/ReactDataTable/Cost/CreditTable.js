@@ -185,7 +185,8 @@ export default function ReactDataTable({
             <>
             <Select
                 defaultValue={row.attributes.document}
-                disabled={row.attributes.document === "Publish"}
+                //disabled={row.attributes.document === "Publish"}
+                disabled
                 bordered={false}
                 onChange={(e) => onChangeStatus(e, row)}
                 style={{

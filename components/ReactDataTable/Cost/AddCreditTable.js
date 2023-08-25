@@ -218,6 +218,9 @@ export default function ReactDataTable({
     if (row.attributes.total - row.subtotal >= tunai + transfer + giro) setModalSisa(tunai + transfer + giro);
     else {
       handleCek("error");
+      setTunai(0);
+      setTransfer(0);
+      setGiro(0);
       onChangeTunai(0, row, idx);
       onChangeTransfer(0, row, idx);
       onChangeGiro(0, row, idx);
