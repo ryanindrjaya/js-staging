@@ -80,6 +80,20 @@ export default function SalesSellingTable({
     //router.push("toko/retur/" + row.id);
   };
 
+  function printReturPenjualan(row) {
+    const returId = row.attributes.retur_sales_sale?.data?.id;
+
+    if (returId) {
+      router.push("sales/retur/print/" + returId);
+    } else {
+      openNotificationWithIcon(
+        "error",
+        "Maaf tidak bisa dicetak",
+        "Data retur belum ada, silahkan buat retur terlebih dahulu"
+      );
+    }
+  }
+
   const onConfirm = (id) => {
     console.log(id);
     onDelete(id);
@@ -160,6 +174,18 @@ export default function SalesSellingTable({
           >
             <UndoOutlined className="mr-2 mt-0.5 float float-left" />
             Retur Penjualan
+          </button>
+        </div>
+      )}
+
+      {row.attributes.status === "Diretur" && (
+        <div>
+          <button
+            onClick={() => printReturPenjualan(row)}
+            className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+          >
+            <UndoOutlined className="mr-2 mt-0.5 float float-left" />
+            Cetak Retur Penjualan
           </button>
         </div>
       )}

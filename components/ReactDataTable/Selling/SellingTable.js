@@ -193,12 +193,14 @@ export default function ReactDataTable({
 
   function printReturPenjualan(row) {
     const returId = row.attributes.retur_store_sale?.data?.id;
+    const returNon = row.attributes.retur_non_panel_sales?.data[0]?.id;
+    const returPanel = row.attributes.retur_panel_sales?.data[0]?.id;
 
-    if (returId) {
+    if (returId || returNon || returPanel) {
       if (returPage == "toko") router.push("toko/retur/print/" + returId);
       if (returPage == "sales") router.push("sales/retur/print/" + row.id);
-      if (returPage == "nonpanel") router.push("non_panel/retur/print/" + row.id);
-      if (returPage == "panel") router.push("panel/retur/print/" + row.id);
+      if (returPage == "nonpanel") router.push("non_panel/retur/print/" + returNon);
+      if (returPage == "panel") router.push("panel/retur/print/" + returPanel);
     } else {
       openNotificationWithIcon(
         "error",
@@ -267,6 +269,17 @@ export default function ReactDataTable({
               Melihat Pembayaran
             </button>
           </div>
+          {row?.attributes?.retur_non_panel_sales?.data[0]?.id || row?.attributes?.retur_panel_sales?.data[0]?.id ? (
+            <div>
+              <button
+                onClick={() => printReturPenjualan(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+              >
+                <UndoOutlined className="mr-2 mt-0.5 float float-left" />
+                Cetak Retur Penjualan
+              </button>
+            </div>
+          ) : (
           <div>
             <button
               onClick={() => returPenjualan(row)}
@@ -276,19 +289,11 @@ export default function ReactDataTable({
               Retur Penjualan
             </button>
           </div>
+          )}
 
           {row.attributes.status_data != "Draft" ? (
             <></>
           ) : (
-            //<div>
-            //  <button
-            //    onClick={() => lihat(row)}
-            //    className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-            //  >
-            //    <CloseOutlined className="mr-2 mt-0.5 float float-left" />
-            //    Batal
-            //  </button>
-            //</div>
             <AlertDialog
               onCancel={onCancel}
               onConfirm={onConfirm}
