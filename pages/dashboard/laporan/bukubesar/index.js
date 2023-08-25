@@ -247,12 +247,12 @@ function BukuBesar({ props }) {
       dataBefore?.data?.map((item) => {
         const coaData = item.attributes.chart_of_account.data;
         saldo = item.attributes.chart_of_account.data.attributes.saldo;
-        setTempSaldo(saldo);
-          if(coaData.attributes.kode === akunCOA.attributes.kode){
-            //setSaldoAwal(saldo);
-            debitawal += parseFloat(item.attributes.debit);
-            kreditawal += parseFloat(item.attributes.kredit);
-          }
+        if(coaData.attributes.kode === akunCOA.attributes.kode){
+          //setSaldoAwal(saldo);
+          setTempSaldo(saldo);
+          debitawal += parseFloat(item.attributes.debit);
+          kreditawal += parseFloat(item.attributes.kredit);
+        } else setTempSaldo(saldo);
         
       });
 
@@ -297,7 +297,7 @@ function BukuBesar({ props }) {
       else if (akunCOA.attributes.jenis_akun === false) setSaldoAkhir((saldo + kreditakhir) - debitakhir);
     }
     
-    if (akunCOA === undefined){
+    if (akunCOA === undefined || dataBefore?.data?.length === 0){
       setSaldoAwal(0);
       setSaldoAkhir(0);
     }
