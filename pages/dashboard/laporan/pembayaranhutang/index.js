@@ -102,7 +102,7 @@ const fetchLPB = async (cookies) => {
 };
 
 const fetchSupplier = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/suppliers?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/suppliers?populate=*&pagination[pageSize]=200";
   const options = {
     method: "GET",
     headers: {
