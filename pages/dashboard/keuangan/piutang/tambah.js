@@ -689,6 +689,7 @@ function Piutang({ props }) {
   useEffect(() => {
     // used to reset redux from value before
     clearData();
+    form.resetFields();
     var sisaHutang = 0;
     var pembayaran = [];
     var total = 0;
