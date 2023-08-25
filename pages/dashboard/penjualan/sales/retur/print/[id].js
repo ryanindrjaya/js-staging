@@ -3,7 +3,7 @@ import nookies from "nookies";
 import moment from "moment";
 import { PrinterOutlined } from "@ant-design/icons";
 
-export default function PrintRetur({ id, data }) {
+export default function PrintRetur({ id, data }) { console.log(data);
   // stakeholder info
   const stakeholderName = "APOTEK SEJATI";
   const stakeholderAddress = "Jl. Merdeka Timur No.2-10, Sukoharjo, Kec. Klojen, Kota Malang, Jawa Timur 65119";
@@ -12,7 +12,7 @@ export default function PrintRetur({ id, data }) {
   const stakeholderNPWP = "75.777.135.7.623.000";
 
   const { attributes } = data?.data;
-  const details = attributes?.retur_non_panel_sale_details?.data ?? [];
+  const details = attributes?.retur_sales_sale_details?.data ?? [];
 
   const [totalPembelian, setTotalPembelian] = useState(0);
 
@@ -75,18 +75,16 @@ export default function PrintRetur({ id, data }) {
       <div className="font-bold grid grid-cols-8 mb-2">
         {/* NO */}
         <p className="m-0 col-span-2">NO</p>
-        <p className="m-0 col-span-6">: {attributes?.no_retur_non_panel_sale}</p>
+        <p className="m-0 col-span-6">: {attributes?.no_retur_sales_sale}</p>
 
         <p className="m-0 col-span-2">TANGGAL</p>
-        <p className="m-0 col-span-6">
-          : {moment(attributes?.retur_date || attributes?.createdAt).format("DD/MM/YYYY")}
-        </p>
+        <p className="m-0 col-span-6">: {moment(attributes?.retur_date).format("DD/MM/YYYY")}</p>
 
         <p className="m-0 col-span-2">USER</p>
         <p className="m-0 col-span-6 uppercase">: {attributes?.added_by}</p>
 
-        {/* <p className="m-0 col-span-2">CUSTOMER</p>
-        <p className="m-0 col-span-6 uppercase">: {attributes?.customer_name}</p> */}
+        <p className="m-0 col-span-2">CUSTOMER</p>
+        <p className="m-0 col-span-6 uppercase">: {attributes?.sales_sale?.data?.attributes?.customer_name}</p>
       </div>
 
       <table className="w-full border mt-3">
@@ -135,9 +133,9 @@ export default function PrintRetur({ id, data }) {
           <p className="m-0">TOTAL PEMBELIAN</p>
           <p className="m-0">: {numberFormat.format(attributes?.total)}</p>
           <p className="m-0">DPP</p>
-          <p className="m-0">: {numberFormat.format(attributes?.dpp)}</p>
+          <p className="m-0">: {numberFormat.format(attributes?.total / 1.11)}</p>
           <p className="m-0">PPN</p>
-          <p className="m-0">: {numberFormat.format(attributes?.ppn)}</p>
+          <p className="m-0">: {numberFormat.format(((attributes?.total / 1.11) * 11) / 100)}</p>
           <BiayaTambahan />
           <p className="m-0">TOTAL BAYAR</p>
           <p className="m-0">: {numberFormat.format(attributes?.total)}</p>
@@ -153,7 +151,7 @@ PrintRetur.getInitialProps = async (ctx) => {
   const { id } = ctx.query;
   const cookies = nookies.get(ctx);
 
-  const endpoint = `${process.env.NEXT_PUBLIC_URL}/retur-non-panel-sales/${id}?populate=deep`;
+  const endpoint = `${process.env.NEXT_PUBLIC_URL}/retur-sales-sales/${id}?populate=deep`;
   const options = {
     method: "GET",
     headers: {

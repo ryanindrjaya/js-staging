@@ -23,6 +23,7 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     max = new Date(rangePicker[1]);
   }
 
+  console.log("data", data, retur);
   var index = 0;
   data?.forEach((element) => {
 
@@ -39,14 +40,9 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
     element.sisaHutangFix = element.hutangJatuhTempo; 
     sisaHutang[index] = element.sisaHutang;
     
+    returSubtotal = 0;
     index++;
   });
-
-  //const onChangeSisaHutang = (value, data, index) => {
-  //  var sisa = data.sisaHutangFix;
-  //  sisa = sisa;
-  //  dispatch({ type: "CHANGE_DATA_SISAHUTANG", sisahutang: sisa, listData: data, index: index });
-  //};
 
   const cekData = (data) => {
     for (const key in biaya.list) {
@@ -86,7 +82,6 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       });
     }
 
-    //if(cek == "none"){
       dispatch({ type: "CHANGE_PILIH_DATA", pilihData: pilihData, listData: data, index: index });
       dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: data.sisaHutang - data.dibayar, listData: data, index: index });
       onChangeTunai(0, data, index);
@@ -96,10 +91,6 @@ export default function ReactDataTable({ data, retur, biaya, calculatePriceTotal
       onChangeOth(0, data, index);
       onChangeId(data.id, data, index);
 
-      //if (dataEdit) onChangeId("create", data, index);
-    //}
-
-    //biaya.info[index].id = data.id;
   };
 
   const onChangeId = (value, data, index) => {
