@@ -68,7 +68,7 @@ const createDetailSale = (values, products, productTotalPrice, productSubTotal, 
     });
   });
 
-  dataToPost.reverse().forEach((element) => {
+  dataToPost.forEach((element) => {
     POSTSaleDetail(
       element.qty,
       element.disc,
@@ -88,7 +88,6 @@ const createDetailSale = (values, products, productTotalPrice, productSubTotal, 
       element.url,
       element.dataGudang
     );
-    id++;
   });
 };
 

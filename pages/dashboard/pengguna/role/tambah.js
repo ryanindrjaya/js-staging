@@ -4,12 +4,14 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import { Button, Form, Input } from "antd";
+import { Button, Checkbox, Form, Input } from "antd";
 import nookies from "nookies";
 import { toast } from "react-toastify";
 import { Spin } from "antd";
 
-const Tambah = () => {
+const Tambah = ({ props }) => {
+  const moduls = props.modules?.data || [];
+  console.log(props);
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const cookies = nookies.get(null, "token");
@@ -56,6 +58,7 @@ const Tambah = () => {
           <TitlePage titleText={"Tambahkan Role"} />
           <LayoutContent>
             <Form
+              layout="vertical"
               form={form}
               name="add_role"
               initialValues={{
@@ -63,33 +66,50 @@ const Tambah = () => {
               }}
               onFinish={onFinish}
             >
-              <div className="flex flex-wrap -mx-3 mb-6">
-                <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="name"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Nama role tidak boleh kosong!",
-                      },
-                    ]}
-                  >
-                    <Input style={{ height: "50px" }} placeholder="Nama Role" />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0">
-                  <Form.Item
-                    name="description"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Deskripsi tidak boleh kosong!",
-                      },
-                    ]}
-                  >
-                    <Input style={{ height: "50px" }} placeholder="Deskripsi" />
-                  </Form.Item>
-                </div>
+              <div className="w-full flex flex-col md:flex-row gap-4">
+                <Form.Item
+                  className="w-full md:w-1/2"
+                  name="name"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Nama role tidak boleh kosong!",
+                    },
+                  ]}
+                >
+                  <Input style={{ height: "50px" }} placeholder="Nama Role" />
+                </Form.Item>
+                <Form.Item
+                  className="w-full md:w-1/2"
+                  name="description"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Deskripsi tidak boleh kosong!",
+                    },
+                  ]}
+                >
+                  <Input style={{ height: "50px" }} placeholder="Deskripsi" />
+                </Form.Item>
+              </div>
+
+              <div className="w-full flex gap-4">
+                <Form.Item
+                  className="w-full"
+                  name="moduls"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Modul tidak boleh kosong!",
+                    },
+                  ]}
+                  label="Hak Akses"
+                >
+                  <Checkbox.Group
+                    style={{ width: "100%" }}
+                    options={moduls.map((item) => ({ label: item?.attributes?.name, value: item.id }))}
+                  />
+                </Form.Item>
               </div>
 
               <Form.Item>
@@ -98,7 +118,7 @@ const Tambah = () => {
                     <Spin />
                   </div>
                 ) : (
-                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
+                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700">
                     Submit
                   </Button>
                 )}
@@ -109,6 +129,33 @@ const Tambah = () => {
       </DashboardLayout>
     </>
   );
+};
+
+Tambah.getInitialProps = async (context) => {
+  const cookies = nookies.get(context);
+
+  const reqModules = await fetchData(cookies, "/moduls");
+  const resModules = await reqModules.json();
+
+  return {
+    props: {
+      modules: resModules,
+    },
+  };
+};
+
+const fetchData = async (cookies, url) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + url;
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
 export default Tambah;

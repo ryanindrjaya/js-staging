@@ -17,6 +17,8 @@ import createDetailOrderFunc from "../../utility/createOrderDetail";
 import createOrderFunc from "../../utility/createOrder";
 import calculatePrice from "../../utility/calculatePrice";
 import moment from "moment";
+import confirm from "antd/lib/modal/confirm";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 
 function getUnitIndex(data, selected) {
   let unit = 0;
@@ -458,6 +460,26 @@ function Edit({ props }) {
     };
   }, []);
 
+  const handleEnterSubmit = (e) => {
+    if (e.keyCode === 13) {
+      e.preventDefault();
+      confirm({
+        title: "Apakah anda yakin ingin menambahkan data ini?",
+        icon: <ExclamationCircleOutlined />,
+        content: "Data Order Pembelian akan ditambahkan.",
+        okText: "Ya",
+        centered: true,
+        cancelText: "Tidak",
+        onOk() {
+          form.submit();
+        },
+        onCancel() {
+          console.log("Cancel");
+        },
+      });
+    }
+  };
+
   return (
     <>
       <Head>
@@ -473,6 +495,7 @@ function Edit({ props }) {
               name="add_order"
               onFinish={onFinish}
               onFinishFailed={onFinishFailed}
+              onKeyDown={handleEnterSubmit}
             >
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">

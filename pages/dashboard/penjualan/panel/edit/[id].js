@@ -1054,6 +1054,7 @@ function Edit({ props }) {
                     productSubTotal={productSubTotal}
                     setProductSubTotal={setProductSubTotal}
                     dataLocationStock={dataLocationStock}
+                    setDataLocationStock={setDataLocationStock}
                     formObj={form}
                     getProduct={getProductAtLocation}
                     editPriceDisc={true}

@@ -61,6 +61,13 @@ const Print = ({ selling }) => {
     return formatter.format(subTotal ?? 0);
   };
 
+  const getHargaSatuan = (data) => {
+    const price = data?.unit_price || 0;
+    const priceWithMargin = price + (price * data.margin) / 100;
+
+    return formatter.format(priceWithMargin ?? 0);
+  };
+
   return (
     <div className="m-2">
       <div className="flex print:hidden justify-end mb-5">
@@ -129,7 +136,7 @@ const Print = ({ selling }) => {
                 {attributes?.qty} {attributes?.unit}
               </td>
               <td className="border-2 p-2">{attributes.product.data.attributes.name}</td>
-              <td className="border-2 p-2">{formatter.format(attributes?.unit_price || 0)}</td>
+              <td className="border-2 p-2">{getHargaSatuan(attributes)}</td>
               <td className="border-2 p-2">{formatter.format(attributes?.disc || 0)}</td>
               <td className="border-2 p-2">{attributes?.disc1 ? `${attributes?.disc1}%` : ""}</td>
               <td className="border-2 p-2">{attributes?.disc2 ? `${attributes?.disc2}%` : ""}</td>

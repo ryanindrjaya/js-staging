@@ -309,6 +309,7 @@ function ReturSales({ props }) {
       type: "Retur Penjualan",
       keterangan: `Retur Penjualan dari ${sales.data.attributes.customer?.data?.attributes?.name}`,
       no_referensi: formValues.no_retur_sales_sale,
+      author: user,
     };
 
     const endpointStock = `${process.env.NEXT_PUBLIC_URL}/inventories/add`;

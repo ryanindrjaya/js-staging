@@ -30,7 +30,7 @@ const createDetailOrderSale = (values, products, setListId, url, lokasiGudang) =
     dataToPost.push({ qty, unit, unitPrice, idx, setListId, products, elementId, d1, d2, url, inventory });
   });
 
-  dataToPost.reverse().forEach((element) => {
+  dataToPost.forEach((element) => {
     POSTSaleDetail(
       element.qty,
       element.unit,

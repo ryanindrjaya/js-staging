@@ -56,6 +56,7 @@ export default function SignInPage(props) {
         });
 
         const user = await getUserInformation(res.jwt);
+        const moduls = await getModuls(user.role.id);
         // set role token
         nookies.set(null, "role", user.role.name, {
           maxAge: 30 * 24 * 60 * 60,
@@ -94,6 +95,22 @@ export default function SignInPage(props) {
     const res = await req.json();
     console.log(res);
     return res;
+  };
+
+  const getModuls = async (id) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/moduls/roles/" + id;
+
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    return res?.moduls || [];
   };
 
   const onClose = (e) => {

@@ -14,6 +14,7 @@ import { useSelector, useDispatch } from "react-redux";
 import LoadingAnimations from "@iso/components/Animations/Loading";
 import moment from "moment";
 import { Form, Button, Spin, Input, DatePicker, Select, InputNumber, notification, Row } from "antd";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 import createDetailPurchasing from "../utility/createPurchasingDetail";
 import createPurchasing from "../utility/createPurchasing";
 import updateOrder from "../utility/updateOrder";
@@ -23,6 +24,7 @@ import SearchPO from "../../../../components/Form/AddOrder/SearchPO";
 import createInventory from "../utility/createInventory";
 import updateProductFromTable from "../utility/updateProductFromTable";
 import updateJurnal from "../utility/updateJurnal";
+import confirm from "antd/lib/modal/confirm";
 
 Tambah.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -697,7 +699,21 @@ function Tambah({ props }) {
 
   const handleEnterSubmit = (e) => {
     if (e.keyCode === 13) {
-      form.submit();
+      e.preventDefault();
+      confirm({
+        title: "Apakah anda yakin ingin menambahkan data ini?",
+        icon: <ExclamationCircleOutlined />,
+        content: "Data Pembelian Barang akan ditambahkan.",
+        okText: "Ya",
+        centered: true,
+        cancelText: "Tidak",
+        onOk() {
+          form.submit();
+        },
+        onCancel() {
+          console.log("Cancel");
+        },
+      });
     }
   };
 
@@ -718,7 +734,8 @@ function Tambah({ props }) {
               }}
               onFinish={onFinish}
               onFinishFailed={onFinishFailed}
-              onKeyUp={handleEnterSubmit}
+              // onKeyDown={handleEnterSubmit}
+              scrollToFirstError
             >
               <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">

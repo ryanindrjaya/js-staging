@@ -53,7 +53,7 @@ export default function SearchBar({
   };
 
   const getUserInfo = async () => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/users/me?populate=*`;
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/users/me?populate=locations`;
     const options = {
       method: "GET",
       headers: {
@@ -89,7 +89,8 @@ export default function SearchBar({
         let queryLocations = await getUserInfo();
 
         const endpoint =
-          process.env.NEXT_PUBLIC_URL + `/products?populate=*&filters[name][$contains]=${query}&${queryLocations}`;
+          process.env.NEXT_PUBLIC_URL +
+          `/products?populate=locations&filters[name][$contains]=${query}&${queryLocations}`;
         const options = {
           method: "GET",
           headers: {

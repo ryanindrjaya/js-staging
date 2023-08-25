@@ -416,8 +416,25 @@ function EditToko({ props }) {
     return res;
   };
 
+  const checkStokGudang = () => {
+    console.log("dataLocationStock", dataLocationStock);
+    const availableStock = Object.values(dataLocationStock).every((stock) => stock);
+
+    return availableStock;
+  };
+
   const onFinish = async (values, accept) => {
     if (accept) {
+      const stokAda = checkStokGudang();
+
+      if (!stokAda) {
+        notification["error"]({
+          message: "Stok tidak tersedia",
+          description: "Stok tidak tersedia di gudang. Silahkan cek kembali",
+        });
+        return;
+      }
+
       setLoading(true);
       try {
         /* 
@@ -725,7 +742,10 @@ function EditToko({ props }) {
       if (initialValues.attributes.store_sale_details?.data.length > 0) {
         const details = initialValues.attributes.store_sale_details.data;
 
-        details.forEach((element, index) => {
+        for (let i = 0; i < details.length; i++) {
+          const element = details[i];
+          const index = i;
+
           const product = element.attributes?.product?.data;
           const unit = element?.attributes?.unit;
 
@@ -788,7 +808,7 @@ function EditToko({ props }) {
           if (index === details.length - 1) {
             setIsFetchingData(false);
           }
-        });
+        }
       }
     } else {
       notification["error"]({

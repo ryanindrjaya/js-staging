@@ -761,6 +761,7 @@ function Toko({ props }) {
                     setProductSubTotal={setProductSubTotal}
                     dataLocationStock={dataLocationStock}
                     formObj={form}
+                    setDataLocationStock={setDataLocationStock}
                     getProduct={getProductAtLocation}
                     editPriceDisc={true}
                   />

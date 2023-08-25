@@ -133,9 +133,9 @@ export default function PrintRetur({ id, data }) {
           <p className="m-0">TOTAL PEMBELIAN</p>
           <p className="m-0">: {numberFormat.format(attributes?.total)}</p>
           <p className="m-0">DPP</p>
-          <p className="m-0">: {numberFormat.format(attributes?.dpp)}</p>
+          <p className="m-0">: {numberFormat.format(attributes?.total / 1.11)}</p>
           <p className="m-0">PPN</p>
-          <p className="m-0">: {numberFormat.format(attributes?.ppn)}</p>
+          <p className="m-0">: {numberFormat.format(((attributes?.total / 1.11) * 11) / 100)}</p>
           <BiayaTambahan />
           <p className="m-0">TOTAL BAYAR</p>
           <p className="m-0">: {numberFormat.format(attributes?.total)}</p>
