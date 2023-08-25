@@ -763,6 +763,7 @@ function Tambah({ props }) {
                       style={{
                         width: "100%",
                       }}
+                      disabled
                     >
                       <Select.Option value="Diproses" key={"Diproses"}>
                         Diproses
