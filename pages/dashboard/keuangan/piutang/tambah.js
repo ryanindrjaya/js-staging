@@ -569,9 +569,9 @@ function Piutang({ props }) {
 
   const calculatePriceTotal = (row, index) => {
     const total = calculatePrice(row, biaya, sisaHutangTotal, index);
-    sisaHutang[index] = total - row?.dibayar;
-    row.sisaPiutang = total - row?.dibayar;
-    var priceTotal = total - row?.dibayar; console.log("sisa hutang", sisaHutang, total, row.sisaPiutang, priceTotal);
+    sisaHutang[index] = total;
+    row.sisaPiutang = total;
+    var priceTotal = total;
     return formatter.format(priceTotal);
   };
 
@@ -758,7 +758,7 @@ function Piutang({ props }) {
       element.sisaHutang = 0;
       element.dibayar = 0;
 
-      pembayaran.forEach((item) => { console.log(pembayaran, "pembayaran");
+      pembayaran.forEach((item) => { console.log(pembayaran, "pembayaran", element);
         //if(item.id == element.id) element.attributes.total -= item.total;
         if(item.id === element.id && item.keterangan === element.keterangan) element.dibayar += item.total;
       });
