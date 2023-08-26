@@ -247,7 +247,7 @@ const fetchAkunPiutang = async (cookies) => {
 };
 
 function Piutang({ props }) {
-  const biaya = useSelector((state) => state.Cost); console.log("biaya", biaya.info);
+  const biaya = useSelector((state) => state.Cost);
   const dispatch = useDispatch();
 
   //var selectedProduct = products?.productList;
