@@ -159,7 +159,7 @@ const putRelationDetail = async (id, value, form, router, url, page, setCreateId
   }
 
   const JSONdata = JSON.stringify(data);
-  const endpoint = process.env.NEXT_PUBLIC_URL + url + id;
+  const endpoint = process.env.NEXT_PUBLIC_URL + url + id + "?populate=deep";
   const options = {
     method: "PUT",
     headers: {
