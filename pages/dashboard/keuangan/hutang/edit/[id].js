@@ -316,6 +316,28 @@ function Hutang({ props }) {
         setInfo("gagal");
       }
   
+      var totalHutang = totalHutangJatuhTempo();
+      var totalBayaran = totalPembayaran();
+      console.log("total tunai, tranfer, giro", totalTunai, totalTransfer, totalGiro);
+      console.log(values, "values", document);
+      if(document === "Publish"){ console.log("Publish", values);
+        if(values.sisa_hutang_jatuh_tempo <= 0 || values.sisa_hutang_jatuh_tempo === undefined) {
+          notification["error"]({
+            message: "Gagal menambahkan data",
+            description: "Data gagal ditambahkan, karena total pembayaran melebihi total hutang jatuh tempo.",
+          });
+          setInfo("gagal");
+        }
+      } else if (document === "Draft") { console.log("Draft", values, totalHutang);
+        if(totalHutang < totalBayaran) { console.log("lol");
+          notification["error"]({
+            message: "Gagal menambahkan data",
+            description: "Data gagal ditambahkan, karena total pembayaran melebihi total hutang jatuh tempo.",
+          });
+          setInfo("gagal");
+        } 
+      }
+
       setDataValues(values);
       setLoading(false);
 
@@ -462,7 +484,9 @@ function Hutang({ props }) {
   };
 
   const calculatePriceTotal = (row, index) => {
-    const total = calculatePrice(row, biaya, sisaHutangTotal, index);
+    var total = calculatePrice(row, biaya, sisaHutangTotal, index);
+
+    if (total < 0) total = 0;
 
     sisaHutang[index] = total;
     return formatter.format(total);
@@ -502,6 +526,9 @@ function Hutang({ props }) {
     var totalHutang = totalHutangJatuhTempo();
     var totalBayar = totalPembayaran();
     total = totalHutang - totalBayar;
+
+    if (total < 0) total = 0;
+
     return total;
   };
 

@@ -603,9 +603,9 @@ function Piutang({ props }) {
 
   const calculatePriceTotal = (row, index) => {
     const total = calculatePrice(row, biaya, sisaHutangTotal, index);
-    sisaHutang[index] = total - row?.dibayar;
-    row.sisaPiutang = total - row?.dibayar;
-    var priceTotal = total - row?.dibayar;
+    sisaHutang[index] = total;
+    row.sisaPiutang = total;
+    var priceTotal = total;
     return formatter.format(priceTotal);
   };
 
