@@ -719,6 +719,8 @@ function Hutang({ props }) {
         } else if (statusPembayaran === "Lunas") {
           status = "Selesai";
         }
+
+        if (row.attributes.status === "Dibatalkan") status = "Batal";
       } else {
         if (statusPembayaran === "Belum Lunas" && purchasingHistory.length == 0) {
           status = "Tempo";
@@ -729,6 +731,8 @@ function Hutang({ props }) {
         } else {
           status = "Menunggu";
         }
+
+        if (row.attributes.status === "Dibatalkan") status = "Batal";
       }
 
       if (status == "Tempo" || statusPembayaran == "Dibayar Sebagian") {
