@@ -446,7 +446,7 @@ function Laporan({ props }) {
                     return(
                     <tbody>
                       <tr>
-                        <td className="border-2 p-1 w-fit align-text-top" rowSpan="2">{index}</td>
+                        <td className="border-2 p-1 w-fit align-text-top">{index}</td>
                         <td className="border-2 p-1 w-fit">
                           Supplier : {row?.attributes?.supplier?.data?.attributes?.name}
                         </td>
@@ -464,10 +464,9 @@ function Laporan({ props }) {
                         </td>
                         <td className="border-2 p-1 w-fit"></td>
                       </tr>
-
                       {row.attributes?.purchasing_details?.data?.map((element, index) => (
                       <tr>
-                          <td hidden></td>
+                          <td key={index} className="border-2 p-1 w-fit"></td>
                           <td key={index} className="border-2 p-1 w-fit">
                             {element?.attributes?.product?.data?.attributes?.name}
                           </td>
@@ -536,7 +535,7 @@ function Laporan({ props }) {
                               return(
                               <tbody>
                                 <tr>
-                                  <td className="border-2 p-1 align-text-top w-fit" rowSpan={2}>{index}</td>
+                                  <td className="border-2 p-1 align-text-top w-fit">{index}</td>
                                   <td className="border-2 p-1 w-fit">Supplier : {row.attributes.supplier.data.attributes.name}</td>
                                   <td className="border-2 p-1 w-fit">Tanggal : {formatMyDate(row.attributes.date_purchasing)}</td>
                                   <td className="border-2 p-1 w-fit">No : {element.attributes.no_retur}</td>
@@ -549,7 +548,7 @@ function Laporan({ props }) {
                                 </tr>
                                 {element.attributes.retur_details.data.map((item, idx) => (
                                 <tr>
-                                  <td hidden></td>
+                                  <td className="border-2 p-1 w-fit" key={idx}></td>
                                   <td className="border-2 p-1 w-fit" key={idx}>
                                     {item.attributes.products.data[0].attributes.name}
                                   </td>
@@ -612,7 +611,7 @@ function Laporan({ props }) {
                 return(
                 <tbody>
                   <tr>
-                    <td className="border-2 p-1 w-fit align-text-top" rowSpan="2">{index}</td>
+                    <td className="border-2 p-1 w-fit align-text-top">{index}</td>
                     <td className="border-2 p-1 w-fit">
                       Supplier : {row?.attributes?.supplier?.data?.attributes?.name}
                     </td>
@@ -633,7 +632,7 @@ function Laporan({ props }) {
 
                   {row.attributes?.purchasing_details?.data?.map((element, index) => (
                   <tr>
-                      <td hidden></td>
+                      <td key={index} className="border-2 p-1 w-fit"></td>
                       <td key={index} className="border-2 p-1 w-fit">
                         {element?.attributes?.product?.data?.attributes?.name}
                       </td>
@@ -693,7 +692,7 @@ function Laporan({ props }) {
                     return(
                     <tbody>
                       <tr>
-                        <td className="border-2 p-1 align-text-top w-fit" rowSpan={2}>{index}</td>
+                        <td className="border-2 p-1 align-text-top w-fit">{index}</td>
                         <td className="border-2 p-1 w-fit">Supplier : {row.attributes.supplier.data.attributes.name}</td>
                         <td className="border-2 p-1 w-fit">Tanggal : {formatMyDate(row.attributes.date_purchasing)}</td>
                         <td className="border-2 p-1 w-fit">No : {element.attributes.no_retur}</td>
@@ -706,7 +705,7 @@ function Laporan({ props }) {
                       </tr>
                       {element.attributes.retur_details.data.map((item, idx) => (
                       <tr>
-                        <td hidden></td>
+                        <td className="border-2 p-1 w-fit" key={idx}></td>
                         <td className="border-2 p-1 w-fit" key={idx}>
                           {item.attributes.products.data[0].attributes.name}
                         </td>

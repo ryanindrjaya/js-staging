@@ -87,7 +87,7 @@ function BukuBesar({ props }) {
 
   const [debitAwal, setDebitAwal] = useState(0);
   const [kreditAwal, setKreditAwal] = useState(0);
-  const [saldoAwal, setSaldoAwal] = useState(0);
+  const [saldoAwal, setSaldoAwal] = useState(0); console.log("saldoAwal", saldoAwal);
   const [debitAkhir, setDebitAkhir] = useState(0);
   const [kreditAkhir, setKreditAkhir] = useState(0);
   const [saldoAkhir, setSaldoAkhir] = useState(0);
@@ -206,24 +206,24 @@ function BukuBesar({ props }) {
   
   const getJurnal = async (startDate, endDate, data) => {
 
-  const cookies = nookies.get(null, "token");
-  var query = `&filters[tanggal][$gte]=${startDate}&filters[tanggal][$lte]=${endDate}`;
+    const cookies = nookies.get(null, "token");
+    var query = `&filters[tanggal][$gte]=${startDate}&filters[tanggal][$lte]=${endDate}`;
 
-  if (data === true){
-    query = `&filters[tanggal][$lte]=${endDate}`;
-  } 
+    if (data === true){
+      query = `&filters[tanggal][$lte]=${endDate}`;
+    } 
 
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*" + query;
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*" + query;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
 
-  const req = await fetch(endpoint, options);
-  return req;
+    const req = await fetch(endpoint, options);
+    return req;
 
   }
 
@@ -232,24 +232,28 @@ function BukuBesar({ props }) {
     const req = await getJurnal(null, minusOneDay.format('YYYY-MM-DD'), true);
     const res = await req.json();
 
+    if (akunCOA) setSaldoAwal(akunCOA.attributes.saldo);
     setDataBefore(res);
   };
 
-  useEffect(() => {
+  useEffect(() => { console.log("akuncoa", akunCOA, dataBefore, jurnal);
     
-    var saldo = tempSaldo;
+    var saldo = 0;
     var debitawal = 0;
     var kreditawal = 0;
     var debitakhir = 0;
     var kreditakhir = 0;
     
-    if(akunCOA != undefined){
+    if(akunCOA != undefined && startDate && endDate){
+
+      saldo = akunCOA.attributes.saldo; console.log("saldo", saldo, saldoAwal);
+
       dataBefore?.data?.map((item) => {
         const coaData = item.attributes.chart_of_account.data;
-        saldo = item.attributes.chart_of_account.data.attributes.saldo;
+        //saldo = item.attributes.chart_of_account.data.attributes.saldo;
         if(coaData.attributes.kode === akunCOA.attributes.kode){
-          //setSaldoAwal(saldo);
-          setTempSaldo(saldo);
+          setSaldoAwal(saldo);
+          //setTempSaldo(saldo);
           debitawal += parseFloat(item.attributes.debit);
           kreditawal += parseFloat(item.attributes.kredit);
         } else setTempSaldo(saldo);
@@ -278,7 +282,7 @@ function BukuBesar({ props }) {
         //saldo = item.attributes.chart_of_account.data.attributes.saldo;
 
           if(coaData.attributes.kode === akunCOA.attributes.kode){
-            //setSaldoAwal(saldo);
+            setSaldoAwal(saldo);
             debitakhir += parseFloat(item.attributes.debit);
             kreditakhir += parseFloat(item.attributes.kredit);
           }
@@ -293,11 +297,19 @@ function BukuBesar({ props }) {
         setKreditAkhir(0);
       }
 
-      if(akunCOA.attributes.jenis_akun === true) setSaldoAkhir((saldo + debitakhir) - kreditakhir);
-      else if (akunCOA.attributes.jenis_akun === false) setSaldoAkhir((saldo + kreditakhir) - debitakhir);
+      if(akunCOA.attributes.jenis_akun === true) {
+        saldo = (saldo + debitakhir) - kreditakhir;
+        setSaldoAkhir(saldo);
+      } else if (akunCOA.attributes.jenis_akun === false){
+        saldo = (saldo + kreditakhir) - debitakhir;
+        setSaldoAkhir(saldo);
+      }
+
+    } else {
+      setSaldoAwal(0);
     }
     
-    if (akunCOA === undefined || dataBefore?.data?.length === 0){
+    if (akunCOA === undefined){
       setSaldoAwal(0);
       setSaldoAkhir(0);
     }
@@ -372,9 +384,10 @@ function BukuBesar({ props }) {
               <div name="title">
                 <div className="text-center">BUKU BESAR</div>
                 <div className="text-center">Periode tanggal {startDate.format('DD/MM/YYYY')} - {endDate.format('DD/MM/YYYY')}</div>
+                <div className="text-center">{akunCOA?.attributes?.nama}</div>
               </div>
 
-              <table className="w-full mt-5">
+              <table className="w-full mt-3">
                 {/* <thead className="text-center">
                 </thead> */}
                 <tbody>
