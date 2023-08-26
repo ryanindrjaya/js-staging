@@ -227,7 +227,7 @@ export default function ReactDataTable({
                 disabled={!editPriceDisc}
                 defaultValue={priceUnit}
                 prefix="Rp. "
-                formatter={(value) => numberFormat(value)}
+                //formatter={(value) => numberFormat(value)}
                 parser={(value) => value.replace(/\Rp\s?|(\.*)/g, "")}
                 onChange={(e) => onChangePriceUnit(e, row, unit[idx], idx, e)}
                 style={{
