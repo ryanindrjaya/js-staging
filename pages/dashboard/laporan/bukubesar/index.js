@@ -87,7 +87,7 @@ function BukuBesar({ props }) {
 
   const [debitAwal, setDebitAwal] = useState(0);
   const [kreditAwal, setKreditAwal] = useState(0);
-  const [saldoAwal, setSaldoAwal] = useState(0); console.log("saldoAwal", saldoAwal);
+  const [saldoAwal, setSaldoAwal] = useState(0);
   const [debitAkhir, setDebitAkhir] = useState(0);
   const [kreditAkhir, setKreditAkhir] = useState(0);
   const [saldoAkhir, setSaldoAkhir] = useState(0);
@@ -236,7 +236,7 @@ function BukuBesar({ props }) {
     setDataBefore(res);
   };
 
-  useEffect(() => { console.log("akuncoa", akunCOA, dataBefore, jurnal);
+  useEffect(() => {
     
     var saldo = 0;
     var debitawal = 0;
@@ -246,7 +246,7 @@ function BukuBesar({ props }) {
     
     if(akunCOA != undefined && startDate && endDate){
 
-      saldo = akunCOA.attributes.saldo; console.log("saldo", saldo, saldoAwal);
+      saldo = akunCOA.attributes.saldo;
 
       dataBefore?.data?.map((item) => {
         const coaData = item.attributes.chart_of_account.data;
