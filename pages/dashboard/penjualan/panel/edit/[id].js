@@ -499,7 +499,7 @@ function Edit({ props }) {
           }
         }
 
-        sanitizedValues.non_panel_sale_details = detailsId;
+        sanitizedValues.panel_sale_details = detailsId;
 
         // update master Data
         const res = await updateMasterData(sanitizedValues, editData.id);
