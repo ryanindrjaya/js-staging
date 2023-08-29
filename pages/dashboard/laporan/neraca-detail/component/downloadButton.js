@@ -2,8 +2,11 @@ import { Button } from "antd";
 import React from "react";
 import { CSVLink } from "react-csv";
 
-export default function DownloadButton({ data }) {
+export default function DownloadButton({ data, currentTime}) {
   const csvData = [
+    ["APOTEK SEJATI"],
+    ["NERACA DETAIL"],
+    ["Per", currentTime.format("M YYYY")],
     ["Kas dan Setara Kas"],
     ["Keterangan", "Periode Sebelumnya", "Periode Sekarang", "COA"],
     [
@@ -266,6 +269,30 @@ export default function DownloadButton({ data }) {
       data.aktivaTetap.hargaPerolehanAktivaTetap.previousPeriode.asetTetap,
       data.aktivaTetap.hargaPerolehanAktivaTetap.currentPeriode.asetTetap,
       data.aktivaTetap.hargaPerolehanAktivaTetap.coa.asetTetap,
+    ],
+    [
+      "Aktiva Tetap Tanah",
+      data.aktivaTetap.hargaPerolehanAktivaTetap.previousPeriode.aktivaTetapTanah,
+      data.aktivaTetap.hargaPerolehanAktivaTetap.currentPeriode.aktivaTetapTanah,
+      data.aktivaTetap.hargaPerolehanAktivaTetap.coa.aktivaTetapTanah,
+    ],
+    [
+      "Aktiva Tetap Bangunan",
+      data.aktivaTetap.hargaPerolehanAktivaTetap.previousPeriode.aktivaTetapBangunan,
+      data.aktivaTetap.hargaPerolehanAktivaTetap.currentPeriode.aktivaTetapBangunan,
+      data.aktivaTetap.hargaPerolehanAktivaTetap.coa.aktivaTetapBangunan,
+    ],
+    [
+      "Aktiva Tetap Kendaraan",
+      data.aktivaTetap.hargaPerolehanAktivaTetap.previousPeriode.aktivaTetapKendaraan,
+      data.aktivaTetap.hargaPerolehanAktivaTetap.currentPeriode.aktivaTetapKendaraan,
+      data.aktivaTetap.hargaPerolehanAktivaTetap.coa.aktivaTetapKendaraan,
+    ],
+    [
+      "Aktiva Tetap Inventaris Kantor",
+      data.aktivaTetap.hargaPerolehanAktivaTetap.previousPeriode.aktivaTetapInventarisKantor,
+      data.aktivaTetap.hargaPerolehanAktivaTetap.currentPeriode.aktivaTetapInventarisKantor,
+      data.aktivaTetap.hargaPerolehanAktivaTetap.coa.aktivaTetapInventarisKantor,
     ],
     [
       "Jumlah Harga Perolehan",

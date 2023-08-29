@@ -2,8 +2,11 @@ import { Button } from "antd";
 import React from "react";
 import { CSVLink } from "react-csv";
 
-export default function DownloadButton({ data }) {
+export default function DownloadButton({ data, currentTime }) {
   const csvData = [
+    ["APOTEK SEJATI"],
+    ["NERACA DETAIL"],
+    ["Per", currentTime.format("M YYYY")],
     ["Keterangan", "Periode Sebelumnya", "Periode Sekarang"],
     [],
     ["Aktiva"],

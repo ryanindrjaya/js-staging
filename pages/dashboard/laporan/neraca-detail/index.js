@@ -6,7 +6,7 @@ import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import { DatePicker } from "antd";
 import moment from "moment";
 import nookies from "nookies";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DownloadButton from "./component/downloadButton";
 import NeracaDetailTableView from "./component/tableView";
 
@@ -78,7 +78,7 @@ function NeracaDetail({ props }) {
             </div>
           ) : (
             <div>
-              <DownloadButton data={data} />
+              <DownloadButton data={data} currentTime={currentTime}/>
               <NeracaDetailTableView data={data} time={currentTime} />
             </div>
           )}
