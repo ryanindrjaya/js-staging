@@ -64,22 +64,23 @@ function renderTableRows(data, coaKey, previousPeriodeKey, currentPeriodeKey) {
   ));
 }
 
-function NeracaDetailTableView({ data, time }) {
+function NeracaDetailTableView({ data, time }) { console.log("data view", data, time);
   const currentTime = time.format("M YYYY");
   const currentTimeParse = parseInt(currentTime);
   const indonesianMonth = getIndonesianMonth(currentTimeParse);
+  const year = new Date(time).getFullYear();
 
   return (
     <div className="mt-10">
       <div className="grid justify-center w-full font-bold text-center text-sm">
         <div>
-          <p>APOTEK XXX</p>
+          <p>APOTEK SEJATI</p>
         </div>
         <div>
           <p>NERACA DETAIL</p>
         </div>
         <div className="uppercase">
-          <p>PER {indonesianMonth}</p>
+          <p>PER {indonesianMonth} {year}</p>
         </div>
       </div>
 
