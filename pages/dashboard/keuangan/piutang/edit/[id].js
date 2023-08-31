@@ -388,6 +388,18 @@ function Piutang({ props }) {
       values.bayar2 = totalTransfer;
       values.bayar3 = totalGiro;
     
+      console.log("total tunai, tranfer, giro", totalTunai, totalTransfer, totalGiro);
+      console.log(values, "values");
+      if(document === "Publish"){
+        if(values.bayar1 <= 0 && values.bayar2 <= 0 && values.bayar3 <= 0 && values.total_pembayaran === undefined) {
+          notification["error"]({
+            message: "Gagal menambahkan data",
+            description: "Data gagal ditambahkan, karena total pembayaran tidak sesuai.",
+          });
+          setInfo("gagal");
+        }
+      }
+
       setDataValues(values);
       setLoading(false);
       
@@ -522,7 +534,7 @@ function Piutang({ props }) {
             item.attributes.sisa_piutang == 0
           ) {
             data.attributes.status = "Dibayar";
-            if (saleType == "sales_sale") data.attributes.status_pembayaran = "Dibayar";
+            if (saleType == "sales_sale") data.attributes.status_pembayaran = "Lunas";
 
           } else if (
             
@@ -591,9 +603,9 @@ function Piutang({ props }) {
 
   const calculatePriceTotal = (row, index) => {
     const total = calculatePrice(row, biaya, sisaHutangTotal, index);
-    sisaHutang[index] = total - row?.dibayar;
-    row.sisaPiutang = total - row?.dibayar;
-    var priceTotal = total - row?.dibayar;
+    sisaHutang[index] = total;
+    row.sisaPiutang = total;
+    var priceTotal = total;
     return formatter.format(priceTotal);
   };
 

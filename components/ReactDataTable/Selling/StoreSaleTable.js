@@ -187,11 +187,6 @@ export default function ReactDataTable({
     },
   };
 
-  // number format 100,000,000.00 with regex
-  const numberFormat = (value) => {
-    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
-
   const columns = [
     {
       name: "Nama Produk",
@@ -226,9 +221,8 @@ export default function ReactDataTable({
               <InputNumber
                 disabled={!editPriceDisc}
                 defaultValue={priceUnit}
-                prefix="Rp. "
-                formatter={(value) => numberFormat(value)}
-                parser={(value) => value.replace(/\Rp\s?|(\.*)/g, "")}
+                formatter={(value) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                 onChange={(e) => onChangePriceUnit(e, row, unit[idx], idx, e)}
                 style={{
                   width: "100%",

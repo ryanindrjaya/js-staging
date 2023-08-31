@@ -68,27 +68,28 @@ function NeracaDetailTableView({ data, time }) {
   const currentTime = time.format("M YYYY");
   const currentTimeParse = parseInt(currentTime);
   const indonesianMonth = getIndonesianMonth(currentTimeParse);
+  const year = new Date(time).getFullYear();
 
   return (
     <div className="mt-10">
       <div className="grid justify-center w-full font-bold text-center text-sm">
         <div>
-          <p>APOTEK XXX</p>
+          <p>APOTEK SEJATI</p>
         </div>
         <div>
           <p>NERACA</p>
         </div>
         <div className="uppercase">
-          <p>PER {indonesianMonth}</p>
+          <p>PER {indonesianMonth} {year}</p>
         </div>
       </div>
 
       <table name="table" className="w-full text-xs">
         <thead>
           <tr className="p-2">
-            <th className="border-2 p-1 w-1/3" colSpan={2}>Keterangan</th>
-            <th className="border-2 p-1 w-1/3">Periode Sebelumnya</th>
-            <th className="border-2 p-1 w-1/3">Periode Sekarang</th>
+            <th className="border-2 p-1 w-1/3 text-center" colSpan={2}>Keterangan</th>
+            <th className="border-2 p-1 w-1/3 text-center">Periode Sebelumnya</th>
+            <th className="border-2 p-1 w-1/3 text-center">Periode Sekarang</th>
           </tr>
         </thead>
         <tbody>

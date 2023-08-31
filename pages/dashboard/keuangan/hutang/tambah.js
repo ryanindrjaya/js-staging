@@ -211,7 +211,7 @@ function Hutang({ props }) {
       var totalTunai = 0;
       var totalTransfer = 0;
       var totalGiro = 0;
-      console.log(values,"value");
+      
       setLoading(true);
       setInfo("sukses");
   
@@ -254,6 +254,27 @@ function Hutang({ props }) {
           setInfo("gagal");
         }
       });
+
+      var totalHutang = totalHutangJatuhTempo();
+      var totalBayaran = totalPembayaran();
+
+      if(document === "Publish"){
+        if(values.sisa_hutang_jatuh_tempo <= 0 || values.sisa_hutang_jatuh_tempo === undefined) {
+          notification["error"]({
+            message: "Gagal menambahkan data",
+            description: "Data gagal ditambahkan, karena total pembayaran melebihi total hutang jatuh tempo.",
+          });
+          setInfo("gagal");
+        }
+      } else if (document === "Draft") {
+          if(totalHutang < totalBayaran) {
+            notification["error"]({
+              message: "Gagal menambahkan data",
+              description: "Data gagal ditambahkan, karena total pembayaran melebihi total hutang jatuh tempo.",
+            });
+            setInfo("gagal");
+          } 
+      }
   
       setDataValues(values);
       setLoading(false);
@@ -361,7 +382,9 @@ function Hutang({ props }) {
   };
 
   const calculatePriceTotal = (row, index) => {
-    const total = calculatePrice(row, biaya, sisaHutangTotal, index);
+    var total = calculatePrice(row, biaya, sisaHutangTotal, index);
+    console.log("row", row, total, sisaHutangTotal, hutang.data);
+    if (total < 0) total = 0;
 
     sisaHutang[index] = total;
     return formatter.format(total);
@@ -403,6 +426,9 @@ function Hutang({ props }) {
     var totalHutang = totalHutangJatuhTempo();
     var totalBayar = totalPembayaran();
     total = totalHutang - totalBayar;
+
+    if (total < 0) total = 0;
+
     return total;
   };
 
@@ -444,6 +470,14 @@ function Hutang({ props }) {
       }
       setTotalItem(lastKey);
     }
+
+    if (totalHutangJatuhTempo() < totalPembayaran()){
+      notification["info"]({
+        message: "Pembayaran berlebih",
+        description: "Tidak dapat melakukan pembayaran, melebihi total hutang jatuh tempo.",
+      });
+    }
+
   }, [biaya.info]);
 
   useEffect(() => {
@@ -489,6 +523,9 @@ function Hutang({ props }) {
         } else if (statusPembayaran === "Lunas") {
           status = "Selesai";
         }
+
+        if (row.attributes.status === "Dibatalkan") status = "Batal";
+
       } else {
         if (statusPembayaran === "Belum Lunas" && purchasingHistory.length == 0) {
           status = "Tempo";
@@ -499,33 +536,33 @@ function Hutang({ props }) {
         } else {
           status = "Menunggu";
         }
+
+        if (row.attributes.status === "Dibatalkan") status = "Batal";
       }
+
+      console.log(row, "row");
 
       if (status == "Tempo" || statusPembayaran == "Dibayar Sebagian") {
         row.hidden = false;
         dataTabel[lpbId] = row;
-        //biaya.list.push(row);
         dispatch({ type: "ADD_LIST", list: row });
-        //dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: row, index: infoId });
-        //dispatch({ type: "CHANGE_ID", id: row.id, listData: row, index: infoId });
         infoId++;
       }
 
       lpbId++;
     });
 
-    //console.log(biaya,"hutang data", hutang.data);
-    //biaya.list[0].sisaHutangFix = 1;
-    //biaya.list[0].sisaHutang = 0;
     var pembayaran = [];
     var total = 0;
     var idDetail = null;
-    hutang.data.forEach(element => {
-      element.attributes.debt_details.data.forEach(details => {
-        total = details.attributes.giro + details.attributes.transfer + details.attributes.tunai;
-        idDetail = details?.attributes?.purchasing?.data?.id;
-        pembayaran.push({ id: idDetail, total: total});
-      });
+    hutang.data.forEach(element => { console.log(element, "element, hutang");
+      if (element.attributes.document === "Publish"){
+        element.attributes.debt_details.data.forEach(details => {
+          total = details.attributes.giro + details.attributes.transfer + details.attributes.tunai;
+          idDetail = details?.attributes?.purchasing?.data?.id;
+          pembayaran.push({ id: idDetail, total: total});
+        });
+      }
     });
 
     dataTabel.forEach((element, index) => {
@@ -554,7 +591,7 @@ function Hutang({ props }) {
               subtotal: row.subtotal,
             };
 
-          element.sisaHutang = parseInt(element.attributes.total) - parseInt(element.subtotal);
+          element.sisaHutang = element.attributes.total - element.subtotal;
 
         }
       });

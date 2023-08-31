@@ -9,6 +9,7 @@ import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchCOA from "@iso/components/Form/AddReport/SearchCOA";
 import COATable from "@iso/components/ReactDataTable/Cost/ChartOfAccountTable";
 import nookies from "nookies";
+import { LoadingOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import moment from "moment";
 import cookies from "next-cookies";
@@ -102,6 +103,9 @@ function BukuBesar({ props }) {
   //Data Before
   const [dataBefore, setDataBefore] = useState();
 
+  const [isLoading, setIsLoading] = useState(false);
+  var saldoForData = 0;
+
   const handlePrintXLS = () => {
     console.log("handlePrintXLS", tableRef, tableRef.current);
     
@@ -168,7 +172,7 @@ function BukuBesar({ props }) {
   };
 
   const handleDateChange = async (date) => {
-    
+    setIsLoading(true);
     if (date !== null) {
       var startDate = date[0].format('YYYY-MM-DD');
       var endDate = date[1].format('YYYY-MM-DD');
@@ -197,7 +201,7 @@ function BukuBesar({ props }) {
 
     }
 
-    
+    setIsLoading(false);
   };
 
   const handleClear = async () => {
@@ -206,24 +210,28 @@ function BukuBesar({ props }) {
   
   const getJurnal = async (startDate, endDate, data) => {
 
-  const cookies = nookies.get(null, "token");
-  var query = `&filters[tanggal][$gte]=${startDate}&filters[tanggal][$lte]=${endDate}`;
+    const cookies = nookies.get(null, "token");
+    var query = `&filters[tanggal][$gte]=${startDate}&filters[tanggal][$lte]=${endDate}`;
 
-  if (data === true){
-    query = `&filters[tanggal][$lte]=${endDate}`;
-  } 
+    if (data === true){
+      query = `&filters[tanggal][$lte]=${endDate}`;
+    } 
 
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*" + query;
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + cookies.token,
-    },
-  };
+    if(akunCOA){
+      query += "&filters[chart_of_account][id][$eq]="+ akunCOA.id;
+    }
 
-  const req = await fetch(endpoint, options);
-  return req;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*" + query;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    return req;
 
   }
 
@@ -232,28 +240,34 @@ function BukuBesar({ props }) {
     const req = await getJurnal(null, minusOneDay.format('YYYY-MM-DD'), true);
     const res = await req.json();
 
+    if (akunCOA) setSaldoAwal(akunCOA.attributes.saldo);
     setDataBefore(res);
   };
 
   useEffect(() => {
-    
-    var saldo = tempSaldo;
+    setIsLoading(true);
+
+    var saldo = 0;
     var debitawal = 0;
     var kreditawal = 0;
     var debitakhir = 0;
     var kreditakhir = 0;
     
-    if(akunCOA != undefined){
+    if(akunCOA !== undefined && startDate && endDate && akunCOA){
+
+      saldo = akunCOA.attributes.saldo;
+
       dataBefore?.data?.map((item) => {
         const coaData = item.attributes.chart_of_account.data;
-        saldo = item.attributes.chart_of_account.data.attributes.saldo;
+        //saldo = item.attributes.chart_of_account.data.attributes.saldo;
         if(coaData.attributes.kode === akunCOA.attributes.kode){
-          //setSaldoAwal(saldo);
-          setTempSaldo(saldo);
+          setSaldoAwal(saldo);
+          //setTempSaldo(saldo);
           debitawal += parseFloat(item.attributes.debit);
           kreditawal += parseFloat(item.attributes.kredit);
         } else setTempSaldo(saldo);
         
+        saldoForData = saldo;
       });
 
       if (dataBefore.data.length > 0){
@@ -271,14 +285,14 @@ function BukuBesar({ props }) {
       else if (akunCOA.attributes.jenis_akun === false) {
         saldo = (saldo + kreditawal) - debitawal;
         setSaldoAwal(saldo);
-      } 
+      }
 
       jurnal?.data?.map((item) => {
         const coaData = item.attributes.chart_of_account.data;
         //saldo = item.attributes.chart_of_account.data.attributes.saldo;
 
           if(coaData.attributes.kode === akunCOA.attributes.kode){
-            //setSaldoAwal(saldo);
+            setSaldoAwal(saldo);
             debitakhir += parseFloat(item.attributes.debit);
             kreditakhir += parseFloat(item.attributes.kredit);
           }
@@ -293,19 +307,32 @@ function BukuBesar({ props }) {
         setKreditAkhir(0);
       }
 
-      if(akunCOA.attributes.jenis_akun === true) setSaldoAkhir((saldo + debitakhir) - kreditakhir);
-      else if (akunCOA.attributes.jenis_akun === false) setSaldoAkhir((saldo + kreditakhir) - debitakhir);
+      if(akunCOA.attributes.jenis_akun === true) {
+        saldo = (saldo + debitakhir) - kreditakhir;
+        setSaldoAkhir(saldo);
+      } else if (akunCOA.attributes.jenis_akun === false){
+        saldo = (saldo + kreditakhir) - debitakhir;
+        setSaldoAkhir(saldo);
+      }
+
+    } else {
+      setSaldoAwal(0);
     }
     
-    if (akunCOA === undefined || dataBefore?.data?.length === 0){
+    if (akunCOA === undefined){
       setSaldoAwal(0);
       setSaldoAkhir(0);
     }
-  }, [dataBefore, jurnal, akunCOA]);
+
+    setIsLoading(false);
+  }, [dataBefore, jurnal]);
 
   useEffect(() => {
+    setIsLoading(true);
+    handleDateChange([startDate, endDate]);
     calculateBefore();
-  }, [startDate, endDate]);
+    setIsLoading(false);
+  }, [startDate, endDate, akunCOA]);
 
   useEffect(() => {
     handleDateChange(defaultDate);
@@ -368,48 +395,81 @@ function BukuBesar({ props }) {
             </div>
 
             {/* Content */}
+            {isLoading ? (
+              <div className="flex w-full justify-center mt-20">
+                <LoadingOutlined style={{ fontSize: "50px" }} />
+              </div>
+            ) : (
             <div name="content" ref={tableRef}>
               <div name="title">
                 <div className="text-center">BUKU BESAR</div>
                 <div className="text-center">Periode tanggal {startDate.format('DD/MM/YYYY')} - {endDate.format('DD/MM/YYYY')}</div>
+                <div className="text-center">{akunCOA?.attributes?.nama}</div>
               </div>
 
-              <table className="w-full mt-5">
+              <table className="w-full mt-3">
                 {/* <thead className="text-center">
                 </thead> */}
                 <tbody>
                   <tr className="text-center">
                     <th className="border-2 p-1">Tanggal</th>
-                    <th className="border-2 p-1">No Bukti</th>
-                    <th className="border-2 p-1">Cost Center</th>
+                    <th className="border-2 p-1">Catatan</th>
+                    <th className="border-2 p-1">Nama Pembuat</th>
                     <th className="border-2 p-1">Keterangan</th>
                     <th className="border-2 p-1">Debet</th>
                     <th className="border-2 p-1">Kredit</th>
                     <th className="border-2 p-1">Saldo</th>
                   </tr>
                   <tr>
-                    <td className="border-2 text-center"> Sebelum tanggal - {startDate.format('DD/MM/YYYY')} </td>
+                    <td className="border-2 p-2 text-center"> Sebelum tanggal - {startDate.format('DD/MM/YYYY')} </td>
                     <td className="border-2 text-center"> - </td>
                     <td className="border-2 text-center"> - </td>
-                    <td className="border-2 pl-3 text-left"> Saldo Awal </td>
-                    <td className="border-2 pr-3 text-right"> {formatter.format(debitAwal)} </td>
-                    <td className="border-2 pr-3 text-right"> {formatter.format(kreditAwal)} </td>
-                    <td className="border-2 pr-3 text-right"> {formatter.format(saldoAwal)} </td>
+                    <td className="border-2 p-1 text-left"> Saldo Awal </td>
+                    <td className="border-2 p-2 text-right"> {formatter.format(debitAwal)} </td>
+                    <td className="border-2 p-2 text-right"> {formatter.format(kreditAwal)} </td>
+                    <td className="border-2 p-2 text-right"> {formatter.format(saldoAwal)} </td>
                   </tr>
+                  {jurnal?.data?.map((item, index) => {
+                    var dateBaru = moment(item.attributes.publishedAt); console.log("index", index);
+                    if (index === 0) item.saldoAwal = saldoAwal;
+                    else item.saldoAwal = saldoForData;
+
+                    if (akunCOA?.attributes?.jenis_akun === true) {
+                      item.saldoAwal += item?.attributes?.debit - item?.attributes?.kredit;
+                      saldoForData = item.saldoAwal;
+                    }
+                    else if (akunCOA?.attributes?.jenis_akun === false) {
+                      item.saldoAwal += item?.attributes?.kredit - item?.attributes?.debit;
+                      saldoForData = item.saldoAwal;
+                    } 
+
+                    return (
+                      <tr>
+                        <td className="border-2 text-center">{dateBaru.format('DD/MM/YYYY')}</td>
+                        <td className="border-2 text-center"> {item.attributes.catatan} </td>
+                        <td className="border-2 text-center"> {item.attributes.added_by} </td>
+                        <td className="border-2 p-1 text-left"></td>
+                        <td className="border-2 p-2 text-right"> {formatter.format(item?.attributes?.debit)} </td>
+                        <td className="border-2 p-2 text-right"> {formatter.format(item?.attributes?.kredit)} </td>
+                        <td className="border-2 p-2 text-right"> {formatter.format(item?.saldoAwal)} </td>
+                      </tr>
+                    );
+                  })}
                   <tr>
-                    <td className="border-2 text-center"> {startDate.format('DD/MM/YYYY')} - {endDate.format('DD/MM/YYYY')} </td>
+                    <td className="border-2 p-2 text-center"> {startDate.format('DD/MM/YYYY')} - {endDate.format('DD/MM/YYYY')} </td>
                     <td className="border-2 text-center"> - </td>
                     <td className="border-2 text-center"> - </td>
-                    <td className="border-2 pl-3 text-left"> Saldo Akhir </td>
-                    <td className="border-2 pr-3 text-right"> {formatter.format(debitAkhir)} </td>
-                    <td className="border-2 pr-3 text-right"> {formatter.format(kreditAkhir)} </td>
-                    <td className="border-2 pr-3 text-right"> {formatter.format(saldoAkhir)} </td>
+                    <td className="border-2 p-1 text-left"> Saldo Akhir </td>
+                    <td className="border-2 p-2 text-right"> {formatter.format(debitAkhir)} </td>
+                    <td className="border-2 p-2 text-right"> {formatter.format(kreditAkhir)} </td>
+                    <td className="border-2 p-2 text-right"> {formatter.format(saldoAkhir)} </td>
                   </tr>
                 </tbody>
               </table>
               
             </div>
-            
+            )}
+
           </LayoutContent>
         </LayoutWrapper>
       </DashboardLayout>
