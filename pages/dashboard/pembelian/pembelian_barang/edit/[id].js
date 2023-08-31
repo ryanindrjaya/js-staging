@@ -1032,7 +1032,8 @@ function EditLPB({ props }) {
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item name="disc_type">
                     <Select
-                      disabled={products.productList.length === 0}
+                      //disabled={products.productList.length === 0}
+                      disabled
                       onChange={setDiscType}
                       placeholder="Pilih Jenis Diskon"
                       size="large"
@@ -1052,16 +1053,19 @@ function EditLPB({ props }) {
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item name="disc_value" noStyle>
                     <InputNumber
-                      disabled={products.productList.length === 0}
+                      //disabled={products.productList.length === 0}
+                      disabled
                       onChange={setTotalWithDisc}
                       size="large"
-                      min={0}
+                      //min={0}
                       placeholder="Diskon"
                       style={{ width: "100%" }}
                     />
                   </Form.Item>
                 </div>
-                <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
+              </div>
+              
+                {/* <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item name="delivery_fee" noStyle>
                     <InputNumber
                       onChange={(e) => setBiayaPengiriman(e)}
@@ -1070,7 +1074,8 @@ function EditLPB({ props }) {
                       style={{ width: "100%" }}
                     />
                   </Form.Item>
-                </div>
+                </div> */}
+              <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item initialValue={true} name="DPP_active">
                     <Select
