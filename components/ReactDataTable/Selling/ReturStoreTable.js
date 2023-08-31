@@ -15,6 +15,8 @@ export default function ReactDataTable({
   onSelectLocation,
   stokString,
   formObj,
+  setSelectedItems,
+  selectedItems,
 }) {
   const dispatch = useDispatch();
   var defaultDp1 = 0;
@@ -138,6 +140,7 @@ export default function ReactDataTable({
     {
       name: "Nama Produk",
       width: "150px",
+      wrap: true,
       selector: (row) => row.attributes?.name,
     },
     {
@@ -145,17 +148,25 @@ export default function ReactDataTable({
       width: "250px",
       sortable: true,
       selector: (row, idx) => {
+        const selected = selectedItems?.find((element) => {
+          return element.index === idx;
+        });
+
         return (
           <>
             <Form.Item
               label={"product_location"}
               name={["product_location", `${idx}`]}
-              rules={[
-                {
-                  required: true,
-                  message: "Lokasi produk tidak boleh kosong!",
-                },
-              ]}
+              rules={
+                selected
+                  ? [
+                      {
+                        required: true,
+                        message: "Lokasi produk tidak boleh kosong!",
+                      },
+                    ]
+                  : null
+              }
               noStyle
             >
               <Select
@@ -233,6 +244,10 @@ export default function ReactDataTable({
 
         const max = selectedStok?.split(" ")?.[0] ?? 0;
 
+        const selected = selectedItems?.find((element) => {
+          return element.index === idx;
+        });
+
         return (
           <>
             <Row>
@@ -242,12 +257,16 @@ export default function ReactDataTable({
                   onChange={(e) => onChangeQty(e, row, idx)}
                   min={1}
                   max={unitChange ? parseInt(max) : dataDetailTrx?.data?.[idx]?.attributes?.qty} // added max qty for retur penjualan
-                  rules={[
-                    {
-                      required: true,
-                      message: "Required",
-                    },
-                  ]}
+                  rules={
+                    selected
+                      ? [
+                          {
+                            required: true,
+                            message: "Required",
+                          },
+                        ]
+                      : null
+                  }
                   style={{
                     width: "30%",
                   }}
@@ -429,17 +448,24 @@ export default function ReactDataTable({
       width: "150px",
       sortable: true,
       selector: (row, idx) => {
+        const selected = selectedItems?.find((element) => {
+          return element.index === idx;
+        });
         return (
           <>
             <Form.Item
               label={"exp date"}
               name={["expired_date", `${idx}`]}
-              rules={[
-                {
-                  required: true,
-                  message: "Tanggal EXP produk tidak boleh kosong!",
-                },
-              ]}
+              rules={
+                selected
+                  ? [
+                      {
+                        required: true,
+                        message: "Tanggal EXP produk tidak boleh kosong!",
+                      },
+                    ]
+                  : null
+              }
               noStyle
             >
               <DatePicker placeholder="EXP. Date" size="normal" format={"DD/MM/YYYY"} />
@@ -458,28 +484,34 @@ export default function ReactDataTable({
       width: "200px",
       selector: (row, idx) => formatter.format(productSubTotal[idx]),
     },
-    {
-      name: "Hapus",
-      width: "150px",
-      selector: (row, idx) => (
-        <AlertDialog
-          onCancel={onCancel}
-          onConfirm={onConfirm}
-          title="Hapus Produk"
-          message="Produk akan dihapus dari daftar ini. Lanjutkan?"
-          id={idx}
-        />
-      ),
-    },
+    // {
+    //   name: "Hapus",
+    //   width: "150px",
+    //   selector: (row, idx) => (
+    //     <AlertDialog
+    //       onCancel={onCancel}
+    //       onConfirm={onConfirm}
+    //       title="Hapus Produk"
+    //       message="Produk akan dihapus dari daftar ini. Lanjutkan?"
+    //       id={idx}
+    //     />
+    //   ),
+    // },
   ];
 
   return (
-    <DataTable
-      customStyles={customStyles}
-      paginationRowsPerPageOptions={[50]}
-      columns={columns}
-      data={products.productList}
-      noDataComponent={`--Belum ada produk--`}
-    />
+    <>
+      <p className="mb-1">Pilih item yang hendak diretur :</p>
+      <DataTable
+        customStyles={customStyles}
+        paginationRowsPerPageOptions={[50]}
+        columns={columns}
+        keyField="index"
+        data={products.productList}
+        noDataComponent={`--Belum ada produk--`}
+        selectableRows
+        onSelectedRowsChange={(e) => setSelectedItems(e.selectedRows)}
+      />
+    </>
   );
 }

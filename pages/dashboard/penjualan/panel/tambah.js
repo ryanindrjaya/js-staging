@@ -346,6 +346,16 @@ function Toko({ props }) {
 
   const onFinish = (values, accept) => {
     if (accept) {
+      const stokAda = Object.values(dataLocationStock).every((stock) => stock);
+
+      if (!stokAda) {
+        notification["error"]({
+          message: "Stok tidak cukup",
+          description: "Stok di gudang tidak mencukupi untuk melakukan penjualan",
+        });
+        return;
+      }
+
       totalBelumDibayar = grandTotal;
       setLoading(true);
       values.status_data = simpanData;

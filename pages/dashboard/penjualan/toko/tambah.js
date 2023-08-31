@@ -616,7 +616,7 @@ function Toko({ props }) {
               }}
               onFinish={(values) => onFinish(values, false)}
               onFinishFailed={validateError}
-              onKeyUp={handleEnterSubmit}
+              // onKeyUp={handleEnterSubmit}
             >
               <DateTimeComponent />
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-1">

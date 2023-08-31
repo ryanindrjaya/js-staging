@@ -205,9 +205,9 @@ function PesananSales({ props }) {
   };
 
   const createSale = async (values) => {
-    values.sale_date = today;
+    values.sale_date = moment().format("YYYY-MM-DD");
     values.added_by = user.name;
-    values.customer = customer;
+    values.customer = customer.id;
     values.total_item = products?.productList?.length || 0;
     values.customer_name = customer?.attributes?.name;
     values.sales = user.name;
@@ -375,8 +375,6 @@ function PesananSales({ props }) {
     }
   };
 
-  console.log("dataLocationStock", dataLocationStock);
-
   const getStockAtLocation = async (productId, unit, idx) => {
     try {
       const response = await getStock(productId, unit);
@@ -443,13 +441,7 @@ function PesananSales({ props }) {
               </div>
             </div>
 
-            <Form
-              onKeyUp={handleEnterSubmit}
-              form={form}
-              name="add"
-              onFinish={(values) => onFinish(values, false)}
-              onFinishFailed={validateError}
-            >
+            <Form form={form} name="add" onFinish={(values) => onFinish(values, false)} onFinishFailed={validateError}>
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-4">
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item

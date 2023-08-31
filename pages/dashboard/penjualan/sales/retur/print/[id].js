@@ -3,7 +3,8 @@ import nookies from "nookies";
 import moment from "moment";
 import { PrinterOutlined } from "@ant-design/icons";
 
-export default function PrintRetur({ id, data }) { console.log(data);
+export default function PrintRetur({ id, data }) {
+  console.log(data);
   // stakeholder info
   const stakeholderName = "APOTEK SEJATI";
   const stakeholderAddress = "Jl. Merdeka Timur No.2-10, Sukoharjo, Kec. Klojen, Kota Malang, Jawa Timur 65119";
@@ -130,7 +131,7 @@ export default function PrintRetur({ id, data }) { console.log(data);
         <p className="font-bold">ITEM : {details?.length}</p>
 
         <div className="grid font-bold gap-x-6 grid-cols-2">
-          <p className="m-0">TOTAL PEMBELIAN</p>
+          <p className="m-0">TOTAL RETUR PENJUALAN</p>
           <p className="m-0">: {numberFormat.format(attributes?.total)}</p>
           <p className="m-0">DPP</p>
           <p className="m-0">: {numberFormat.format(attributes?.total / 1.11)}</p>

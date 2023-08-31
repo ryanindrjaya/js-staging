@@ -11,7 +11,7 @@ import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import { useSelector, useDispatch } from "react-redux";
 import calculatePrice from "../../utility/calculatePrice";
 import ReturStoreTable from "../.../../../../../../components/ReactDataTable/Selling/ReturStoreTable";
-import createDetailSaleFunc from "../../utility/createDetailSale";
+import createDetailSaleFunc, { createDetailReturSale } from "../../utility/createDetailSale";
 import createSaleFunc from "../../utility/createSale";
 import { useRouter } from "next/router";
 import moment from "moment";
@@ -114,6 +114,8 @@ function ReturToko({ props }) {
   const [dataValues, setDataValues] = useState();
   const [selectedCategory, setSelectedCategory] = useState("BEBAS");
   const [deliveryFee, setDeliveryFee] = useState(0);
+
+  const [selectedItems, setSelectedItems] = useState();
 
   const [listId, setListId] = useState([]);
   const [productTotalPrice, setProductTotalPrice] = useState({});
@@ -272,7 +274,7 @@ function ReturToko({ props }) {
   };
 
   const createDetailSale = async () => {
-    await createDetailSaleFunc(
+    await createDetailReturSale(
       dataValues,
       products,
       productTotalPrice,
@@ -280,7 +282,8 @@ function ReturToko({ props }) {
       setListId,
       "/retur-store-sale-details",
       form,
-      lokasiGudang
+      lokasiGudang,
+      selectedItems
     );
   };
 
@@ -315,7 +318,7 @@ function ReturToko({ props }) {
       products,
       productTotalPrice,
       productSubTotal,
-      setTotalPrice,
+      () => {},
       index,
       setProductSubTotal
     );
@@ -385,6 +388,26 @@ function ReturToko({ props }) {
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
 
   useEffect(() => {
+    console.log("productsubtotal", productSubTotal);
+    const subTotalAcc = selectedItems?.reduce((acc, curr) => {
+      const subTotal = productSubTotal?.[curr.index] ?? 0;
+      return acc + subTotal;
+    }, 0);
+
+    console.log("subTotalAcc", subTotalAcc);
+
+    if (subTotalAcc > 0) {
+      setTotalPrice(subTotalAcc);
+      setDPPActive(true);
+      setPPNActive(true);
+    } else {
+      setTotalPrice(0);
+      setDPPActive(false);
+      setPPNActive(false);
+    }
+  }, [selectedItems, productSubTotal, calculatePriceAfterDisc]);
+
+  useEffect(() => {
     sumAdditionalPrice();
   }, [additionalFee]);
 
@@ -408,7 +431,7 @@ function ReturToko({ props }) {
     } else {
       setDPP(0);
     }
-  }, [dppActive]);
+  }, [dppActive, grandTotal]);
 
   useEffect(() => {
     // set ppn
@@ -417,7 +440,7 @@ function ReturToko({ props }) {
     } else {
       setPPN(0);
     }
-  }, [ppnActive]);
+  }, [ppnActive, grandTotal]);
 
   useEffect(() => {
     // used to reset redux from value before
@@ -445,9 +468,7 @@ function ReturToko({ props }) {
       data: store,
     });
 
-    var productId = 0;
-
-    retur_details.forEach((element) => {
+    retur_details.forEach((element, index) => {
       var indexUnit = 1;
       var unitOrder = element.attributes.unit_order;
       var productUnit = element.attributes.product.data.attributes;
@@ -464,22 +485,22 @@ function ReturToko({ props }) {
 
       form.setFieldsValue({
         jumlah_option: {
-          [productId]: element.attributes.unit,
+          [index]: element.attributes.unit,
         },
         disc_rp: {
-          [productId]: element.attributes.disc,
+          [index]: element.attributes.disc,
         },
         disc_rp1: {
-          [productId]: element.attributes.disc1,
+          [index]: element.attributes.disc1,
         },
         disc_rp2: {
-          [productId]: element.attributes.disc2,
+          [index]: element.attributes.disc2,
         },
         margin: {
-          [productId]: element.attributes.margin,
+          [index]: element.attributes.margin,
         },
         expired_date: {
-          [productId]: moment(momentString),
+          [index]: moment(momentString),
         },
         DPP_active: true,
         PPN_active: true,
@@ -502,9 +523,8 @@ function ReturToko({ props }) {
         //unit: element.attributes.unit_order,
         //unitIndex,
         priceUnit: element.attributes.unit_price,
-        index: productId,
+        index: index,
       });
-      productId++;
     });
 
     setTimeout(() => {
@@ -699,6 +719,8 @@ function ReturToko({ props }) {
                     onSelectLocation={onSelectLocation}
                     stokString={stokString}
                     formObj={form}
+                    setSelectedItems={setSelectedItems}
+                    selectedItems={selectedItems}
                   />
                 </div>
               )}

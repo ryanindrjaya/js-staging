@@ -4,7 +4,7 @@ import { productKeys } from "./utils/productKeys";
 import { getRelationalData, getLocationsId } from "./utils/getRelationalData";
 import nookies from "nookies";
 import { toast } from "react-toastify";
-import { Progress } from "antd";
+import { Progress, Spin, message } from "antd";
 
 export default function UploadProduk({ setCustomer }) {
   const [loading, setLoading] = useState(false);
@@ -13,56 +13,40 @@ export default function UploadProduk({ setCustomer }) {
   const [status, setStatus] = useState("");
   const cookies = nookies.get(null);
 
-  const postData = (data) => {
-    let increment = 100 / data.length;
+  const postData = async (row) => {
     const endpoint = process.env.NEXT_PUBLIC_URL + "/customers";
 
     try {
-      data.forEach(async (row, idx) => {
-        const data = {
-          data: row,
-        };
-        const options = {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-          },
-          body: JSON.stringify(data),
-        };
+      const data = {
+        data: row,
+      };
+      const options = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+        body: JSON.stringify(data),
+      };
 
-        console.log("options", options);
+      console.log("options", options);
 
-        try {
-          const req = await fetch(endpoint, options);
-          const res = await req.json();
+      try {
+        const req = await fetch(endpoint, options);
+        const res = await req.json();
 
-          console.log("res", res);
-
-          setPercent((prev) => Math.round(prev + increment));
-
-          if (req.status == 200) {
-            const endpointProduct = process.env.NEXT_PUBLIC_URL + "/customers?populate=*";
-
-            const optionsAllProduct = {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + cookies.token,
-              },
-            };
-
-            const reqProduct = await fetch(endpointProduct, optionsAllProduct);
-            const resProduct = await reqProduct.json();
-
-            setCustomer(resProduct);
-          }
-        } catch (err) {
-          console.log(err);
-        }
-      });
+        console.log("res", res);
+      } catch (err) {
+        console.log(err);
+      }
     } catch (err) {
-      toast.error("Gagal mengunggah data");
+      console.log(err);
+      message.error({
+        content: "Gagal mengunggah data",
+        key: "process",
+        duration: 2,
+      });
+      message.destroy("process");
       setLoading(false);
     }
   };
@@ -89,9 +73,7 @@ export default function UploadProduk({ setCustomer }) {
     }
 
     const endpoint =
-      process.env.NEXT_PUBLIC_URL +
-      "/customers?sort[0]=createdAt:desc&pagination[limit]=1&filters[code][$contains]=" +
-      code;
+      process.env.NEXT_PUBLIC_URL + "/customers?sort[0]=id:desc&pagination[limit]=1&filters[code][$contains]=" + code;
     const options = {
       method: "GET",
       headers: {
@@ -106,8 +88,8 @@ export default function UploadProduk({ setCustomer }) {
     console.log(res);
 
     if (req.status === 200) {
-      const lastCustomer = res.data[0];
-      const lastCustomerId = parseInt(lastCustomer?.attributes?.code?.split(code)[1] || 0);
+      const lastCustomer = res?.data?.[0];
+      const lastCustomerId = parseInt(lastCustomer?.attributes?.code?.split(code)?.[1] || 0);
 
       return code + String(lastCustomerId + 1).padStart(5, "0");
     } else {
@@ -143,75 +125,76 @@ export default function UploadProduk({ setCustomer }) {
   };
 
   const parseData = async (data) => {
-    const parsedData = await Promise.all(
-      data.map(async (row) => {
-        let result = {};
-        for (let key in row) {
-          switch (key) {
-            case "NAMA CUSTOMER":
-              result["name"] = row[key];
-              break;
-            case "ALAMAT":
-              result["address"] = row[key];
-              break;
-            case "KOTA":
-              result["city"] = row[key];
-              break;
-            case "TELEPON":
-              result["phone"] = row[key];
-              break;
-            case "TIPE PENJUALAN":
-              result["tipe_penjualan"] = [row[key]];
-              result["tipe_penjualan_query"] = row[key];
-              break;
-            case "GOLONGAN CUSTOMER":
-              result["customer_type"] = row[key];
-              break;
-            case "DESKRIPSI":
-              result["description"] = row[key];
-              break;
-            case "NAMA SALES":
-              result["sales_name"] = row[key];
-              break;
-            case "AREA":
-              result["area"] = await getRelationId(row[key], "/areas");
-              break;
-            case "WILAYAH":
-              result["wilayah"] = await getRelationId(row[key], "/wilayahs");
-              break;
-            case "BATAS KREDIT":
-              result["credit_limit"] = parseInt(row?.[key] || 0);
-              break;
-            case "TERMIN PEMBAYARAN":
-              result["credit_limit_duration"] = row[key] || 0;
-              result["credit_limit_duration_type"] = "Hari";
-              break;
-            case "SALDO AWAL":
-              result["saldo_awal"] = parseInt(row?.[key] || 0);
-              break;
-            case "NAMA NPWP":
-              result["nama_npwp"] = row[key];
-              break;
-            case "NOMOR NPWP":
-              result["nomor_npwp"] = String(row[key]);
-              break;
-            case "ALAMAT NPWP":
-              result["alamat_npwp"] = row[key];
-              break;
-            case "NOMOR NIK":
-              result["nik"] = String(row[key]);
-              break;
-            default:
-              break;
-          }
+    const parsedData = [];
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+      let result = {};
+      for (let key in row) {
+        switch (key) {
+          case "NAMA CUSTOMER*":
+            result["name"] = row[key];
+            break;
+          case "ALAMAT*":
+            result["address"] = row[key];
+            break;
+          case "KOTA*":
+            result["city"] = row[key];
+            break;
+          case "TELEPON*":
+            result["phone"] = row[key];
+            break;
+          case "TIPE PENJUALAN*":
+            result["tipe_penjualan"] = [row[key]];
+            result["tipe_penjualan_query"] = row[key];
+            break;
+          case "GOLONGAN CUSTOMER*":
+            result["customer_type"] = row[key];
+            break;
+          case "DESKRIPSI":
+            result["description"] = row[key];
+            break;
+          case "NAMA SALES*":
+            result["sales_name"] = row[key];
+            break;
+          case "AREA*":
+            result["area"] = await getRelationId(row[key], "/areas");
+            break;
+          case "WILAYAH*":
+            result["wilayah"] = await getRelationId(row[key], "/wilayahs");
+            break;
+          case "BATAS KREDIT":
+            result["credit_limit"] = parseInt(row?.[key] || 0);
+            break;
+          case "TERMIN PEMBAYARAN":
+            result["credit_limit_duration"] = row[key] || 0;
+            result["credit_limit_duration_type"] = "Hari";
+            break;
+          case "SALDO AWAL":
+            result["saldo_awal"] = parseInt(row?.[key] || 0);
+            break;
+          case "NAMA NPWP":
+            result["nama_npwp"] = row[key];
+            break;
+          case "NOMOR NPWP":
+            result["nomor_npwp"] = String(row[key]);
+            break;
+          case "ALAMAT NPWP":
+            result["alamat_npwp"] = row[key];
+            break;
+          case "NOMOR NIK":
+            result["nik"] = String(row[key]);
+            break;
+          default:
+            break;
         }
+      }
 
-        result["code"] = await getCustomerCode(row["TIPE PENJUALAN"]);
+      result["code"] = await getCustomerCode(row["TIPE PENJUALAN*"]);
 
-        return result;
-      })
-    );
+      await postData(result);
 
+      parsedData.push(result);
+    }
     return parsedData;
   };
 
@@ -220,6 +203,12 @@ export default function UploadProduk({ setCustomer }) {
 
     console.log(e.target.files);
     try {
+      message.loading({
+        content: "Memproses data excel, jangan tutup halaman ini...",
+        key: "process",
+        duration: 60 * 1000,
+      });
+
       const file = e.target.files[0];
       const reader = new FileReader();
       reader.onload = async (event) => {
@@ -228,9 +217,31 @@ export default function UploadProduk({ setCustomer }) {
         const workSheetName = workbook.SheetNames[0];
         const workSheet = workbook.Sheets[workSheetName];
         const fileData = XLSX.utils.sheet_to_json(workSheet);
-        const rowsData = await parseData(fileData);
 
-        postData(rowsData);
+        await parseData(fileData);
+
+        const endpointProduct = process.env.NEXT_PUBLIC_URL + "/customers?populate=*";
+
+        const optionsAllProduct = {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+        };
+
+        const reqProduct = await fetch(endpointProduct, optionsAllProduct);
+        const resProduct = await reqProduct.json();
+
+        message.success({
+          content: "Berhasil mengunggah data",
+          key: "process",
+          duration: 2,
+        });
+
+        setCustomer(resProduct);
+
+        setLoading(false);
       };
       reader.readAsBinaryString(file);
     } catch (err) {
@@ -258,7 +269,7 @@ export default function UploadProduk({ setCustomer }) {
 
   return loading ? (
     <div className="flex flex-col items-center justify-center w-full">
-      <Progress type="circle" width={35} percent={percent} status={status} />
+      <Spin />
     </div>
   ) : (
     <>

@@ -7,10 +7,12 @@ const cookies = nookies.get(null, "token");
 
 var id = 0;
 
-const createDetailOrderSale = (values, products, setListId, url, lokasiGudang) => {
+const createDetailOrderSale = async (values, products, setListId, url, lokasiGudang) => {
   const dataToPost = [];
-  products.productList.forEach((element, idx) => {
-    console.log("element", element, products);
+  const detailIds = [];
+
+  for (let index = 0; index < products.productList.length; index++) {
+    const element = products.productList[index];
     //default value
     var qty = 1;
     var unit = element.attributes.unit_1;
@@ -18,33 +20,33 @@ const createDetailOrderSale = (values, products, setListId, url, lokasiGudang) =
     var elementId = element.id;
     tempListId = [];
 
-    qty = products.productInfo[idx]?.qty ?? 1;
-    unit = products.productInfo[idx]?.unit ?? element.attributes.unit_1;
-    unitPrice = products.productInfo?.[idx]?.priceUnit ?? element.attributes.sold_price_1;
+    qty = products.productInfo[index]?.qty ?? 1;
+    unit = products.productInfo[index]?.unit ?? element.attributes.unit_1;
+    unitPrice = products.productInfo?.[index]?.priceUnit ?? element.attributes.sold_price_1;
 
-    var d1 = products.productInfo[idx]?.d1;
-    var d2 = products.productInfo[idx]?.d2;
+    var d1 = products.productInfo[index]?.d1;
+    var d2 = products.productInfo[index]?.d2;
 
-    const inventory = lokasiGudang?.[idx];
+    const inventory = lokasiGudang?.[index];
 
-    dataToPost.push({ qty, unit, unitPrice, idx, setListId, products, elementId, d1, d2, url, inventory });
-  });
-
-  dataToPost.forEach((element) => {
-    POSTSaleDetail(
-      element.qty,
-      element.unit,
-      element.unitPrice,
-      element.id,
-      element.setListId,
-      element.products,
-      element.elementId,
-      element.d1,
-      element.d2,
-      element.url,
-      element.inventory
+    const id = await POSTSaleDetail(
+      qty,
+      unit,
+      unitPrice,
+      index,
+      setListId,
+      products,
+      elementId,
+      d1,
+      d2,
+      url,
+      inventory
     );
-  });
+
+    detailIds.push(id);
+  }
+
+  setListId(detailIds);
 };
 
 const POSTSaleDetail = async (qty, unit, unitPrice, id, setListId, products, elementId, d1, d2, url, inventory) => {
@@ -75,10 +77,7 @@ const POSTSaleDetail = async (qty, unit, unitPrice, id, setListId, products, ele
   const res = await req.json();
 
   if (req.status === 200) {
-    tempListId.push(res.data?.id);
-    if (tempListId.length === products.productList.length) {
-      setListId(tempListId);
-    }
+    return res.data?.id;
   }
 };
 

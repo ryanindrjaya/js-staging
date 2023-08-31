@@ -255,8 +255,25 @@ function Toko({ props }) {
     return res;
   };
 
+  const checkStokGudang = () => {
+    console.log("dataLocationStock", dataLocationStock);
+    const availableStock = Object.values(dataLocationStock).every((stock) => stock);
+
+    return availableStock;
+  };
+
   const onFinish = async (values, accept) => {
     if (accept) {
+      const stokAda = Object.values(dataLocationStock).every((stock) => stock);
+
+      if (!stokAda) {
+        notification["error"]({
+          message: "Stok tidak cukup",
+          description: "Stok di gudang tidak mencukupi untuk melakukan penjualan",
+        });
+        return;
+      }
+
       setLoading(true);
       const isValid = await dataValidation();
       if (!isValid) {
