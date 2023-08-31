@@ -4,23 +4,27 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
-import { Button, Checkbox, Form, Input } from "antd";
+import { Button, Card, Checkbox, Form, Input } from "antd";
 import nookies from "nookies";
 import { toast } from "react-toastify";
 import { Spin } from "antd";
 
 const Tambah = ({ props }) => {
-  const moduls = props.modules?.data || [];
+  const moduls = props.modules || {};
   console.log(props);
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [selected, setSelected] = useState({});
   const cookies = nookies.get(null, "token");
+
+  console.log("moduls", moduls);
 
   const onFinish = async (values) => {
     setLoading(true);
 
     const moduls = values.moduls_data;
 
+    // manual parsing
     values.moduls = moduls.map((item) => parseInt(item.split("|")[0]));
     values.permissions_data = moduls.map((item) => item.split("|")[1]);
 
@@ -114,14 +118,44 @@ const Tambah = ({ props }) => {
                   ]}
                   label="Hak Akses"
                 >
-                  <Checkbox.Group
-                    className="w-full grid grid-cols-4 gap-y-3"
-                    style={{ width: "100%" }}
-                    options={moduls.map((item) => ({
-                      label: item?.attributes?.name,
-                      value: `${item.id}|${item?.attributes?.api}`,
-                    }))}
-                  />
+                  <Checkbox.Group>
+                    <div className="w-full grid grid-cols-3 gap-2">
+                      {Object.entries(moduls).map(([key, value]) => {
+                        if (value?.length > 0) {
+                          // has children
+                          return (
+                            <Card>
+                              <div className="w-full flex items-center mb-1 gap-x-2">
+                                <p className="mb-0 font-bold text-lg">{key}</p>
+                              </div>
+                              <div className="w-full grid grid-cols-2 gap-x-3">
+                                {value.map((item) => {
+                                  return (
+                                    <Checkbox className="m-0" value={`${item.id}|${item?.attributes?.api}`}>
+                                      <span className="text-gray-500">{item?.attributes?.name}</span>
+                                    </Checkbox>
+                                  );
+                                })}
+                              </div>
+                            </Card>
+                          );
+                        } else {
+                          // no children
+                          return (
+                            <Card>
+                              <p className="mb-1 font-bold text-lg">{key}</p>
+
+                              <div className="w-full grid grid-cols-4 gap-y-3">
+                                <Checkbox className="m-0" value={`${value.id}|${value?.attributes?.api}`}>
+                                  <span className="text-gray-500">{value?.attributes?.name}</span>
+                                </Checkbox>
+                              </div>
+                            </Card>
+                          );
+                        }
+                      })}
+                    </div>
+                  </Checkbox.Group>
                 </Form.Item>
               </div>
 
@@ -150,9 +184,27 @@ Tambah.getInitialProps = async (context) => {
   const reqModules = await fetchData(cookies, "/moduls");
   const resModules = await reqModules.json();
 
+  console.log("resModules", resModules);
+
+  const groupBy = (array, key) => {
+    return array.reduce((result, currentValue) => {
+      console.log("result", result);
+      if (!currentValue?.attributes[key]) {
+        result[currentValue?.attributes.uid] = currentValue;
+
+        return result;
+      } else {
+        (result[currentValue?.attributes[key]] = result[currentValue?.attributes[key]] || []).push(currentValue);
+        return result;
+      }
+    }, {});
+  };
+
+  const grouped = groupBy(resModules?.data ?? [], "parent_modul");
+
   return {
     props: {
-      modules: resModules,
+      modules: grouped,
     },
   };
 };
