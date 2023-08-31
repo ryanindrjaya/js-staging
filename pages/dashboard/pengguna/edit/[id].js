@@ -203,14 +203,6 @@ const Edit = ({ props }) => {
                     )}
                   </Select>
                 </Form.Item>
-
-                <Form.Item name="moduls" className="w-full" initialValue={userModuls}>
-                  <Select mode="multiple" size="large" placeholder="Modul">
-                    {modules.map((module) => (
-                      <Select.Option value={module.id}>{module.attributes.name}</Select.Option>
-                    ))}
-                  </Select>
-                </Form.Item>
               </div>
 
               <Form.Item>

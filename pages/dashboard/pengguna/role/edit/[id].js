@@ -8,12 +8,15 @@ import { Button, Checkbox, Form, Input } from "antd";
 import nookies from "nookies";
 import { toast } from "react-toastify";
 import { Spin } from "antd";
+import { useRouter } from "next/router";
 
-const Tambah = ({ props }) => {
+const Edit = ({ props }) => {
+  const initialData = props.data;
   const moduls = props.modules?.data || [];
   console.log(props);
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const cookies = nookies.get(null, "token");
 
   const onFinish = async (values) => {
@@ -26,11 +29,11 @@ const Tambah = ({ props }) => {
 
     delete values.moduls_data;
 
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/moduls/roles";
+    const endpoint = process.env.NEXT_PUBLIC_URL + `/moduls/roles/${initialData.id}`;
     const JSONdata = JSON.stringify(values);
 
     const options = {
-      method: "POST",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: "Bearer " + cookies.token,
@@ -45,11 +48,18 @@ const Tambah = ({ props }) => {
 
     if (req.status === 200) {
       form.resetFields();
-      toast.success("Role berhasil ditambahkan!", {
+      toast.success("Role berhasil diubah!", {
         position: toast.POSITION.TOP_RIGHT,
       });
+      router.replace(
+        {
+          pathname: "/dashboard/pengguna/role",
+        },
+        undefined,
+        { shallow: true }
+      );
     } else {
-      toast.error("Tidak dapat menambahkan Role baru", {
+      toast.error("Tidak dapat mengubah Role baru", {
         position: toast.POSITION.TOP_RIGHT,
       });
     }
@@ -60,21 +70,13 @@ const Tambah = ({ props }) => {
   return (
     <>
       <Head>
-        <title>Tambahkan Role</title>
+        <title>Edit Role</title>
       </Head>
       <DashboardLayout>
         <LayoutWrapper style={{}}>
-          <TitlePage titleText={"Tambahkan Role"} />
+          <TitlePage titleText={"Edit Role"} />
           <LayoutContent>
-            <Form
-              layout="vertical"
-              form={form}
-              name="add_role"
-              initialValues={{
-                remember: true,
-              }}
-              onFinish={onFinish}
-            >
+            <Form layout="vertical" form={form} name="add_role" initialValues={initialData} onFinish={onFinish}>
               <div className="w-full flex flex-col md:flex-row gap-4">
                 <Form.Item
                   className="w-full md:w-1/2"
@@ -144,14 +146,24 @@ const Tambah = ({ props }) => {
   );
 };
 
-Tambah.getInitialProps = async (context) => {
+Edit.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
+  const id = context.query.id;
+
+  const initialData = await fetchData(cookies, `/moduls/roles/${id}`);
+  const resInitialData = await initialData.json();
+
+  const data = {
+    ...resInitialData,
+    moduls_data: resInitialData?.moduls?.map((item) => `${item.id}|${item?.api}`),
+  };
 
   const reqModules = await fetchData(cookies, "/moduls");
   const resModules = await reqModules.json();
 
   return {
     props: {
+      data: data,
       modules: resModules,
     },
   };
@@ -171,4 +183,4 @@ const fetchData = async (cookies, url) => {
   return req;
 };
 
-export default Tambah;
+export default Edit;

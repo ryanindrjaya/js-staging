@@ -52,7 +52,7 @@ const Role = ({ props }) => {
   return (
     <>
       <Head>
-        <title>Daftar Pengguna</title>
+        <title>Daftar Role Pengguna</title>
       </Head>
       <DashboardLayout>
         <LayoutWrapper style={{}}>
