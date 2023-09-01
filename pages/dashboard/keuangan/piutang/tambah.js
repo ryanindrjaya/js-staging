@@ -5,17 +5,7 @@ import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import {
-  Row,
-  Form,
-  Input,
-  InputNumber,
-  Select,
-  Button,
-  Spin,
-  notification,
-  DatePicker,
-} from "antd";
+import { Row, Form, Input, InputNumber, Select, Button, Spin, notification, DatePicker } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
 import AddSellSalesTable from "@iso/components/ReactDataTable/Selling/AddSellSalesTable";
@@ -31,6 +21,7 @@ import nookies from "nookies";
 import moment from "moment";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import confirm from "antd/lib/modal/confirm";
+import getUserCodeName from "../../../../library/functions/getUserCodeName";
 
 Piutang.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -115,8 +106,7 @@ const fetchDataUser = async (cookies) => {
 
 const fetchUserSales = async (cookies) => {
   const endpoint =
-    process.env.NEXT_PUBLIC_URL +
-    "/users?populate=*&filters[role][name][$eq]=Sales&?filters[role][type][$eq]=Sales";
+    process.env.NEXT_PUBLIC_URL + "/users?populate=*&filters[role][name][$eq]=Sales&?filters[role][type][$eq]=Sales";
   const options = {
     method: "GET",
     headers: {
@@ -130,7 +120,9 @@ const fetchUserSales = async (cookies) => {
 };
 
 const fetchPiutang = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/credits?populate=*, credit_details.sales_sale.*, credit_details.panel_sale.*, credit_details.non_panel_sale.*";
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL +
+    "/credits?populate=*, credit_details.sales_sale.*, credit_details.panel_sale.*, credit_details.non_panel_sale.*";
   const options = {
     method: "GET",
     headers: {
@@ -144,8 +136,7 @@ const fetchPiutang = async (cookies) => {
 };
 
 const fetchReturSales = async (cookies) => {
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/retur-sales-sales?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-sales-sales?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -173,8 +164,7 @@ const fetchSales = async (cookies) => {
 };
 
 const fetchReturPanel = async (cookies) => {
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/retur-panel-sales?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-panel-sales?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -202,8 +192,7 @@ const fetchPanel = async (cookies) => {
 };
 
 const fetchReturNonPanel = async (cookies) => {
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/retur-non-panel-sales?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/retur-non-panel-sales?populate=*";
   const options = {
     method: "GET",
     headers: {
@@ -217,8 +206,7 @@ const fetchReturNonPanel = async (cookies) => {
 };
 
 const fetchNonPanel = async (cookies) => {
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/non-panel-sales?populate=*, customer.area, customer.wilayah";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/non-panel-sales?populate=*, customer.area, customer.wilayah";
   const options = {
     method: "GET",
     headers: {
@@ -232,8 +220,7 @@ const fetchNonPanel = async (cookies) => {
 };
 
 const fetchAkunPiutang = async (cookies) => {
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/credit-accounts?populate=*&filters[setting][$eq]=true";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/credit-accounts?populate=*&filters[setting][$eq]=true";
   const options = {
     method: "GET",
     headers: {
@@ -278,7 +265,8 @@ function Piutang({ props }) {
   const [document, setDocument] = useState();
 
   const [dataValues, setDataValues] = useState();
-  const [createId, setCreateId] = useState(); console.log(createId, "createId");
+  const [createId, setCreateId] = useState();
+  console.log(createId, "createId");
 
   const [listId, setListId] = useState([]);
 
@@ -288,8 +276,7 @@ function Piutang({ props }) {
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
   var date = today.getDate() + "/" + mm + "/" + yyyy;
-  var time =
-    today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 
   const cookies = nookies.get(null, "token");
   const tempList = [];
@@ -318,13 +305,8 @@ function Piutang({ props }) {
   const [rangePicker, setRangePicker] = useState();
 
   // NO Piutang
-  var noPiutang = String(props.piutang?.meta?.pagination.total + 1).padStart(
-    3,
-    "0"
-  );
-  const [categorySale, setCategorySale] = useState(
-    `PP/ET/${user.id}/${noPiutang}/${mm}/${yyyy}`
-  );
+  var noPiutang = String(props.piutang?.meta?.pagination.total + 1).padStart(3, "0");
+  const [categorySale, setCategorySale] = useState(`PP/ET/${user.id}/${noPiutang}/${mm}/${yyyy}`);
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -338,7 +320,7 @@ function Piutang({ props }) {
       var biayaInfo = biaya.info;
       setLoading(true);
       setInfo("sukses");
-  
+
       var totalTunai = 0;
       var totalTransfer = 0;
       var totalGiro = 0;
@@ -347,17 +329,17 @@ function Piutang({ props }) {
         totalTransfer += biaya.info[key].transfer;
         totalGiro += biaya.info[key].giro;
       }
-  
+
       values.metode_bayar1 = "tunai";
       values.metode_bayar2 = "transfer";
       values.metode_bayar3 = "giro";
-  
+
       values.bayar1 = totalTunai;
       values.bayar2 = totalTransfer;
       values.bayar3 = totalGiro;
-  
-      if(values.tanggal === null || values.tanggal === undefined) values.tanggal = moment();
-  
+
+      if (values.tanggal === null || values.tanggal === undefined) values.tanggal = moment();
+
       props.piutang.data.forEach((element) => {
         if (values.no_piutang == element.attributes.no_piutang) {
           notification["error"]({
@@ -370,8 +352,8 @@ function Piutang({ props }) {
 
       console.log("total tunai, tranfer, giro", totalTunai, totalTransfer, totalGiro);
       console.log(values, "values", document);
-      if(document === "Publish"){
-        if(values.bayar1 <= 0 && values.bayar2 <= 0 && values.bayar3 <= 0 && values.total_pembayaran === undefined) {
+      if (document === "Publish") {
+        if (values.bayar1 <= 0 && values.bayar2 <= 0 && values.bayar3 <= 0 && values.total_pembayaran === undefined) {
           notification["error"]({
             message: "Gagal menambahkan data",
             description: "Data gagal ditambahkan, karena total pembayaran tidak sesuai.",
@@ -379,10 +361,9 @@ function Piutang({ props }) {
           setInfo("gagal");
         }
       }
-  
+
       setDataValues(values);
       setLoading(false);
-
     } else {
       confirm({
         title: "Apakah anda yakin?",
@@ -404,15 +385,7 @@ function Piutang({ props }) {
 
   const createDetail = async () => {
     //await createDetailSaleFunc(dataValues, products, productTotalPrice, productSubTotal, setListId, "/sales-sale-details");
-    await createDetails(
-      dataValues,
-      dataTabel,
-      biaya,
-      sisaHutang,
-      setListId,
-      "/credit-details",
-      "piutang"
-    );
+    await createDetails(dataValues, dataTabel, biaya, sisaHutang, setListId, "/credit-details", "piutang");
   };
 
   const createMaster = async (values) => {
@@ -435,7 +408,7 @@ function Piutang({ props }) {
       "piutang",
       akunPiutang,
       setCreateId,
-      akunPiutang,
+      akunPiutang
     );
     //console.log("Create master data", createId);
     //editPenjualan(createId);
@@ -446,8 +419,7 @@ function Piutang({ props }) {
     //var data = null;
     //var total = null;
 
-    const endpoint =
-      process.env.NEXT_PUBLIC_URL + "/credits/" + value.id + "?populate=deep";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/credits/" + value.id + "?populate=deep";
     const options = {
       method: "GET",
       headers: {
@@ -473,42 +445,28 @@ function Piutang({ props }) {
           url = url.replaceAll("_", "-");
           const data = sale;
           console.log("link url", url);
-          const pembayaran =
-            item.attributes.giro +
-            item.attributes.transfer +
-            item.attributes.tunai;
-          const total =
-            pembayaran +
-            item.attributes.total_retur +
-            item.attributes.sisa_piutang;
+          const pembayaran = item.attributes.giro + item.attributes.transfer + item.attributes.tunai;
+          const total = pembayaran + item.attributes.total_retur + item.attributes.sisa_piutang;
           const floatTotal = parseFloat(total.toFixed(2));
           const floatDataTotal = parseFloat(data.attributes.total.toFixed(2));
 
           //console.log("item nih", item, floatTotal, floatDataTotal);
-          if (
-            
-            item.attributes.sisa_piutang == 0
-          ) {
+          if (item.attributes.sisa_piutang == 0) {
             data.attributes.status = "Dibayar";
             if (saleType == "sales_sale") data.attributes.status_pembayaran = "Lunas";
-
-          } else if (
-            
-            item.attributes.sisa_piutang > 0
-          ) {
+          } else if (item.attributes.sisa_piutang > 0) {
             data.attributes.status = "Dibayar Sebagian";
             if (saleType == "sales_sale") data.attributes.status_pembayaran = "Dibayar Sebagian";
-
           } else {
             console.log("error update status pembayaran di penjualan");
           }
 
-          data.attributes[`${saleType}_details`] = data.attributes[
-            `${saleType}_details`
-          ].data.map((detail) => detail.id);
-          data.attributes[`retur_${saleType}s`] = data.attributes[
-            `retur_${saleType}s`
-          ]?.data?.map((retur) => retur?.id);
+          data.attributes[`${saleType}_details`] = data.attributes[`${saleType}_details`].data.map(
+            (detail) => detail.id
+          );
+          data.attributes[`retur_${saleType}s`] = data.attributes[`retur_${saleType}s`]?.data?.map(
+            (retur) => retur?.id
+          );
 
           data.attributes.area = data?.attributes?.area?.data?.id;
           data.attributes.customer = data?.attributes?.customer?.data?.id;
@@ -524,18 +482,18 @@ function Piutang({ props }) {
   const editPenjualanDB = async (value, url, type) => {
     try {
       var tempData = null;
-      if (type === "sales_sale"){
+      if (type === "sales_sale") {
         tempData = {
           data: {
             status_pembayaran: value.status_pembayaran,
           },
-        };  
+        };
       } else {
         tempData = {
           data: {
             status: value.status,
           },
-        };  
+        };
       }
       const data = tempData;
 
@@ -577,15 +535,15 @@ function Piutang({ props }) {
 
   const totalPiutangJatuhTempo = () => {
     var total = 0;
-    if(biaya.info != null){ //total = 0;
+    if (biaya.info != null) {
+      //total = 0;
 
-      for(let row in biaya.info) {
-
+      for (let row in biaya.info) {
         if (biaya.info[row].pilihData == "pilih") {
-          total = total + (biaya.list[row].attributes.total - biaya.list[row].subtotal) - biaya.list[row].dibayar ;
+          total = total + (biaya.list[row].attributes.total - biaya.list[row].subtotal) - biaya.list[row].dibayar;
         }
-        if(biaya.info[row].totalHutangJatuhTempo == undefined) total = 0;
-      };
+        if (biaya.info[row].totalHutangJatuhTempo == undefined) total = 0;
+      }
     }
     return total;
   };
@@ -619,7 +577,7 @@ function Piutang({ props }) {
 
   useEffect(() => {
     if (createId != undefined || createId != null) {
-      if(dataValues.document == "Publish") editPenjualan(createId);
+      if (dataValues.document == "Publish") editPenjualan(createId);
     }
   }, [createId]);
 
@@ -646,6 +604,40 @@ function Piutang({ props }) {
     }
   }, [listId]);
 
+  async function fetchLatestNoReferensi() {
+    const codename = await getUserCodeName();
+
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/credits?sort[0]=id:desc&pagination[limit]=1&filters[no_piutang][$contains]=${codename}/PP/`;
+    const headers = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${cookies.token}`,
+      },
+    };
+
+    const response = await fetch(endpoint, headers)
+      .then((res) => {
+        return res.json();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    if (response) {
+      const latestDaata = response.data?.[0];
+      const no = parseInt(latestDaata?.attributes?.no_piutang?.split("/")?.[2] || 0) + 1;
+      console.log("no", no);
+      const latestNoReferensi = `${codename}/PP/${String(no).padStart(5, "0")}/${moment().format("MM/YYYY")}`;
+      form.setFieldsValue({
+        no_piutang: latestNoReferensi,
+      });
+      return latestNoReferensi;
+    }
+
+    console.log("response from fetchLatestNoReferensi", response);
+  }
+
   useEffect(() => {
     // used to reset redux from value before
     clearData();
@@ -656,12 +648,15 @@ function Piutang({ props }) {
     var total = 0;
     var idDetail = null;
 
-    // sales data
-    sales.forEach((row) => { console.log(row, "sales buosss");
+    fetchLatestNoReferensi();
 
-      if(row.attributes.status === "Diterima") {
+    // sales data
+    sales.forEach((row) => {
+      console.log(row, "sales buosss");
+
+      if (row.attributes.status === "Diterima") {
         row.status = row.attributes.status_pembayaran;
-      } else if(row.attributes.status === "Diproses") {
+      } else if (row.attributes.status === "Diproses") {
         row.status = row.attributes.status;
       } else {
         row.status = "Belum Dibayar";
@@ -671,8 +666,7 @@ function Piutang({ props }) {
         if (dataTabel.length > 0) {
           //row.sisaPiutang = row.attributes.total;
           dataTabel[dataTabel.length] = row;
-        }
-        else{
+        } else {
           dataTabel[0] = row;
         }
         //biaya.list.push(row);
@@ -684,14 +678,13 @@ function Piutang({ props }) {
 
     // panel data
     panel.forEach((row) => {
-
-      if(row.attributes.status) {
+      if (row.attributes.status) {
         row.status = row.attributes.status;
       } else {
         row.status = "Belum Dibayar";
       }
 
-      if(row.attributes.status_data == "Publish"){
+      if (row.attributes.status_data == "Publish") {
         if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian") {
           if (dataTabel.length > 0) dataTabel[dataTabel.length] = row;
           else dataTabel[0] = row;
@@ -705,14 +698,13 @@ function Piutang({ props }) {
 
     // non panel data
     nonPanel.forEach((row) => {
-
-      if(row.attributes.status) {
+      if (row.attributes.status) {
         row.status = row.attributes.status;
       } else {
         row.status = "Belum Dibayar";
       }
 
-      if(row.attributes.status_data == "Publish"){
+      if (row.attributes.status_data == "Publish") {
         if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian") {
           if (dataTabel.length > 0) dataTabel[dataTabel.length] = row;
           else dataTabel[0] = row;
@@ -728,10 +720,10 @@ function Piutang({ props }) {
     var keterangan = null;
     var indexPiutang = 0;
     piutang.forEach((item) => {
-      if(item.attributes.document === "Publish"){
+      if (item.attributes.document === "Publish") {
         item.attributes.credit_details.data.forEach((detail) => {
           total = detail.attributes.giro + detail.attributes.transfer + detail.attributes.tunai;
-          if(detail.attributes.sales_sale?.data !== null){
+          if (detail.attributes.sales_sale?.data !== null) {
             idDetail = detail.attributes.sales_sale?.data?.id;
             keterangan = "sales";
           } else if (detail.attributes.panel_sale?.data !== null) {
@@ -740,17 +732,14 @@ function Piutang({ props }) {
           } else if (detail.attributes.non_panel_sale?.data !== null) {
             idDetail = detail.attributes.non_panel_sale?.data?.id;
             keterangan = "nonpanel";
-          } else { 
+          } else {
             console.log("piutang data salah");
           }
           //idDetail = detail.attributes.non_panel_sale?.data?.id ?? detail.attributes.panel_sale?.data?.id ?? detail.attributes.sales_sale?.data?.id;
-          pembayaran[indexPiutang] = { id: idDetail, total: total, keterangan: keterangan};
+          pembayaran[indexPiutang] = { id: idDetail, total: total, keterangan: keterangan };
           indexPiutang++;
-  
         });
-
       }
-
     });
 
     dataTabel.forEach((element, index) => {
@@ -758,19 +747,16 @@ function Piutang({ props }) {
       element.sisaHutang = 0;
       element.dibayar = 0;
 
-      pembayaran.forEach((item) => { console.log(pembayaran, "pembayaran", element);
+      pembayaran.forEach((item) => {
+        console.log(pembayaran, "pembayaran", element);
         //if(item.id == element.id) element.attributes.total -= item.total;
-        if(item.id === element.id && item.keterangan === element.keterangan) element.dibayar += item.total;
+        if (item.id === element.id && item.keterangan === element.keterangan) element.dibayar += item.total;
       });
 
       returSales.forEach((row) => {
         row.subtotal = 0;
 
-        if (
-          element?.attributes?.no_sales_sale ==
-          row.attributes?.sales_sale?.data?.attributes.no_sales_sale
-        ) {
-
+        if (element?.attributes?.no_sales_sale == row.attributes?.sales_sale?.data?.attributes.no_sales_sale) {
           element.subtotal += row.attributes.total;
 
           if (dataRetur.length > 0)
@@ -791,11 +777,7 @@ function Piutang({ props }) {
       returPanel.forEach((row) => {
         row.subtotal = 0;
 
-        if (
-          element.attributes?.no_panel_sale ==
-          row.attributes?.panel_sale?.data?.attributes.no_panel_sale
-        ) {
-
+        if (element.attributes?.no_panel_sale == row.attributes?.panel_sale?.data?.attributes.no_panel_sale) {
           element.subtotal += row.attributes.total;
 
           if (dataRetur.length > 0)
@@ -817,10 +799,8 @@ function Piutang({ props }) {
         row.subtotal = 0;
 
         if (
-          element.attributes?.no_non_panel_sale ==
-          row.attributes?.non_panel_sale?.data?.attributes.no_non_panel_sale
+          element.attributes?.no_non_panel_sale == row.attributes?.non_panel_sale?.data?.attributes.no_non_panel_sale
         ) {
-
           element.subtotal += row.attributes.total;
 
           if (dataRetur.length > 0)
@@ -842,7 +822,12 @@ function Piutang({ props }) {
       dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
       dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: 0, listData: element, index: index });
       dispatch({ type: "CHANGE_DATA_GIRO", giro: 0, listData: element, index: index });
-      dispatch({ type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO", totalHutangJatuhTempo: element.sisaHutang, listData: element, index: index });
+      dispatch({
+        type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO",
+        totalHutangJatuhTempo: element.sisaHutang,
+        listData: element,
+        index: index,
+      });
     });
 
     //console.log("datatable", dataTabel.length);
@@ -851,7 +836,6 @@ function Piutang({ props }) {
     //     dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: item, index: index });
     //   });
     // }
-
   }, []);
 
   // useEffect(() => {
@@ -893,7 +877,7 @@ function Piutang({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="no_piutang"
-                    initialValue={categorySale}
+                    // initialValue={categorySale}
                     rules={[
                       {
                         required: true,
@@ -901,10 +885,7 @@ function Piutang({ props }) {
                       },
                     ]}
                   >
-                    <Input
-                      style={{ height: "40px" }}
-                      placeholder="No. Hutang"
-                    />
+                    <Input style={{ height: "40px" }} placeholder="Mengambil nomor..." />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
@@ -935,10 +916,7 @@ function Piutang({ props }) {
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item name="tanggalRentang">
-                    <RangePicker
-                      size="large"
-                      onChange={(values) => setRangePicker(values)}
-                    />
+                    <RangePicker size="large" onChange={(values) => setRangePicker(values)} />
                   </Form.Item>
                 </div>
               </div>
@@ -986,10 +964,7 @@ function Piutang({ props }) {
                     >
                       {dataUserSales.map((element) => {
                         return (
-                          <Select.Option
-                            value={element.name}
-                            key={element.name}
-                          >
+                          <Select.Option value={element.name} key={element.name}>
                             {element.name}
                           </Select.Option>
                         );
@@ -1043,32 +1018,17 @@ function Piutang({ props }) {
               </div>
 
               <div className="w-full flex flex-wrap mb-3">
-                <Form.Item
-                  name="total_item"
-                  className="w-full h-2 mx-2 flex justify-end font-bold"
-                >
+                <Form.Item name="total_item" className="w-full h-2 mx-2 flex justify-end font-bold">
                   <span> TOTAL ITEM </span> <span> : {totalItem}</span>
                 </Form.Item>
-                <Form.Item
-                  name="total_hutang_jatuh_tempo"
-                  className="w-full h-2 mx-2 flex justify-end font-bold"
-                >
-                  <span> TOTAL PIUTANG JATUH TEMPO </span>{" "}
-                  <span> : {formatter.format(totalPiutangJatuhTempo())}</span>
+                <Form.Item name="total_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
+                  <span> TOTAL PIUTANG JATUH TEMPO </span> <span> : {formatter.format(totalPiutangJatuhTempo())}</span>
                 </Form.Item>
-                <Form.Item
-                  name="total_pembayaran"
-                  className="w-full h-2 mx-2 flex justify-end font-bold"
-                >
-                  <span> TOTAL PEMBAYARAN </span>{" "}
-                  <span> : {formatter.format(totalPembayaran())}</span>
+                <Form.Item name="total_pembayaran" className="w-full h-2 mx-2 flex justify-end font-bold">
+                  <span> TOTAL PEMBAYARAN </span> <span> : {formatter.format(totalPembayaran())}</span>
                 </Form.Item>
-                <Form.Item
-                  name="sisa_hutang_jatuh_tempo"
-                  className="w-full h-2 mx-2 flex justify-end font-bold"
-                >
-                  <span> SISA PIUTANG JATUH TEMPO </span>{" "}
-                  <span> : {formatter.format(sisaPiutangJatuhTempo())}</span>
+                <Form.Item name="sisa_hutang_jatuh_tempo" className="w-full h-2 mx-2 flex justify-end font-bold">
+                  <span> SISA PIUTANG JATUH TEMPO </span> <span> : {formatter.format(sisaPiutangJatuhTempo())}</span>
                 </Form.Item>
               </div>
 

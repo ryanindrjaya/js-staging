@@ -19,6 +19,7 @@ import LoadingAnimations from "@iso/components/Animations/Loading";
 import SalesTable from "../../../../../components/ReactDataTable/Selling/SalesTable";
 import ConfirmDialog from "../../../../../components/Alert/ConfirmDialog";
 import { updateLocations } from "../../../../../library/functions/createInventory";
+import getUserCodeName from "../../../../../library/functions/getUserCodeName";
 
 ReturSales.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -172,7 +173,6 @@ function ReturSales({ props }) {
 
   // NO Sales
   var noSales = String(returSales?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`RPS/ET/${user.id}/${noSales}/${mm}/${yyyy}`);
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);
@@ -444,13 +444,48 @@ function ReturSales({ props }) {
     }
   }, [ppnActive, grandTotal]);
 
+  async function fetchLatestNoReferensi() {
+    const codename = await getUserCodeName();
+
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/retur-sales-sales?sort[0]=id:desc&pagination[limit]=1&filters[no_retur_sales_sale][$contains]=${codename}/RS/`;
+    const headers = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${cookies.token}`,
+      },
+    };
+
+    const response = await fetch(endpoint, headers)
+      .then((res) => {
+        return res.json();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    if (response) {
+      const latestDaata = response.data?.[0];
+      const no = parseInt(latestDaata?.attributes?.no_retur_sales_sale?.split("/")?.[2] || 0) + 1;
+      console.log("no", no);
+      const latestNoReferensi = `${codename}/RS/${String(no).padStart(5, "0")}/${moment().format("MM/YYYY")}`;
+      form.setFieldsValue({
+        no_retur_sales_sale: latestNoReferensi,
+      });
+      return latestNoReferensi;
+    }
+
+    console.log("response from fetchLatestNoReferensi", response);
+  }
+
   useEffect(() => {
     // used to reset redux from value before
     clearData();
 
+    fetchLatestNoReferensi();
+
     form.setFieldsValue({
       no_sales_sale: sales.data.attributes.no_sales_sale,
-      no_retur_sales_sale: categorySale,
       disc_type: sales.data.attributes.disc_type,
       disc_value: sales.data.attributes.disc_value,
       additional_fee_1_sub: sales.data.attributes?.additional_fee_1_sub,
@@ -666,7 +701,6 @@ function ReturSales({ props }) {
                 <div className="w-full md:w-1/3 mb-2 md:mb-0">
                   <Form.Item
                     name="no_retur_sales_sale"
-                    initialValue={categorySale}
                     rules={[
                       {
                         required: true,
@@ -674,7 +708,7 @@ function ReturSales({ props }) {
                       },
                     ]}
                   >
-                    <Input style={{ height: "40px" }} placeholder="No. Penjualan" />
+                    <Input style={{ height: "40px" }} placeholder="Mengambil nomor..." />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 mb-2 md:mb-0">

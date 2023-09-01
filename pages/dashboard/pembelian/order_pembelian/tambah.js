@@ -20,6 +20,7 @@ import setDiskonValue from "../../produk/utility/setDiskonValue";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import moment from "moment";
 import confirm from "antd/lib/modal/confirm";
+import getUserCodeName from "../../../../library/functions/getUserCodeName";
 
 Tambah.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -186,6 +187,40 @@ function Tambah({ props }) {
     setBiayaTambahan(newTotal);
   };
 
+  async function fetchLatestNoReferensi() {
+    const codename = await getUserCodeName();
+
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/purchases?sort[0]=id:desc&pagination[limit]=1&filters[no_po][$contains]=${codename}/PO/`;
+    const headers = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${cookies.token}`,
+      },
+    };
+
+    const response = await fetch(endpoint, headers)
+      .then((res) => {
+        return res.json();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    if (response) {
+      const latestDaata = response.data?.[0];
+      const no = parseInt(latestDaata?.attributes?.no_po?.split("/")?.[2] || 0) + 1;
+      console.log("no", no);
+      const latestNoReferensi = `${codename}/PO/${String(no).padStart(5, "0")}/${moment().format("MM/YYYY")}`;
+      form.setFieldsValue({
+        no_po: latestNoReferensi,
+      });
+      return latestNoReferensi;
+    }
+
+    console.log("response from fetchLatestNoReferensi", response);
+  }
+
   const calculatePriceAfterDisc = (row, index) => {
     const total = calculatePrice(row, products, productTotalPrice, productSubTotal, setTotalPrice, index);
 
@@ -275,12 +310,6 @@ function Tambah({ props }) {
     });
   }, [supplier]);
 
-  useEffect(() => {
-    form.setFieldsValue({
-      order_date: moment(),
-    });
-  }, []);
-
   const handleEnterSubmit = (e) => {
     if (e.keyCode === 13) {
       e.preventDefault();
@@ -300,6 +329,14 @@ function Tambah({ props }) {
       });
     }
   };
+
+  useEffect(() => {
+    fetchLatestNoReferensi();
+
+    form.setFieldsValue({
+      order_date: moment(),
+    });
+  }, []);
 
   return (
     <>
@@ -327,7 +364,6 @@ function Tambah({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="no_po"
-                    initialValue={`PO/ET/${totalPurchases}/${mm}/${yyyy}`}
                     rules={[
                       {
                         required: true,
@@ -335,7 +371,7 @@ function Tambah({ props }) {
                       },
                     ]}
                   >
-                    <Input style={{ height: "40px" }} placeholder="No.PO" />
+                    <Input style={{ height: "40px" }} placeholder="Mengambil nomor..." />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">

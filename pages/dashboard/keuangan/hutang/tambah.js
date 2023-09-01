@@ -20,6 +20,7 @@ import DataTable from "react-data-table-component";
 import * as moment from "moment";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import confirm from "antd/lib/modal/confirm";
+import getUserCodeName from "../../../../library/functions/getUserCodeName";
 
 Hutang.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -49,7 +50,7 @@ Hutang.getInitialProps = async (context) => {
       returLPB,
       hutang,
       akunHutang,
-      akunCOA
+      akunCOA,
     },
   };
 };
@@ -211,10 +212,10 @@ function Hutang({ props }) {
       var totalTunai = 0;
       var totalTransfer = 0;
       var totalGiro = 0;
-      
+
       setLoading(true);
       setInfo("sukses");
-  
+
       // if(values.akun != undefined);
       // else {
       //   notification["error"]({
@@ -223,19 +224,17 @@ function Hutang({ props }) {
       //   });
       //   setInfo("gagal");
       // }
-  
+
       for (const key in biaya.info) {
         totalTunai += biaya.info[key].tunai;
         totalTransfer += biaya.info[key].transfer;
         totalGiro += biaya.info[key].giro;
       }
-  
+
       var totalBayar = values.bayar1 + values.bayar2 + values.bayar3;
       var totalBayarProduk = totalTunai + totalTransfer + totalGiro;
       if (
-        (totalTunai != values.bayar1 ||
-          totalTransfer != values.bayar2 ||
-          totalGiro != values.bayar3) &&
+        (totalTunai != values.bayar1 || totalTransfer != values.bayar2 || totalGiro != values.bayar3) &&
         totalBayar != totalBayarProduk
       ) {
         notification["error"]({
@@ -244,7 +243,7 @@ function Hutang({ props }) {
         });
         setInfo("gagal");
       }
-  
+
       hutang.data.forEach((element) => {
         if (values.no_hutang == element.attributes.no_hutang) {
           notification["error"]({
@@ -258,8 +257,8 @@ function Hutang({ props }) {
       var totalHutang = totalHutangJatuhTempo();
       var totalBayaran = totalPembayaran();
 
-      if(document === "Publish"){
-        if(values.sisa_hutang_jatuh_tempo <= 0 || values.sisa_hutang_jatuh_tempo === undefined) {
+      if (document === "Publish") {
+        if (values.sisa_hutang_jatuh_tempo <= 0 || values.sisa_hutang_jatuh_tempo === undefined) {
           notification["error"]({
             message: "Gagal menambahkan data",
             description: "Data gagal ditambahkan, karena total pembayaran melebihi total hutang jatuh tempo.",
@@ -267,18 +266,17 @@ function Hutang({ props }) {
           setInfo("gagal");
         }
       } else if (document === "Draft") {
-          if(totalHutang < totalBayaran) {
-            notification["error"]({
-              message: "Gagal menambahkan data",
-              description: "Data gagal ditambahkan, karena total pembayaran melebihi total hutang jatuh tempo.",
-            });
-            setInfo("gagal");
-          } 
+        if (totalHutang < totalBayaran) {
+          notification["error"]({
+            message: "Gagal menambahkan data",
+            description: "Data gagal ditambahkan, karena total pembayaran melebihi total hutang jatuh tempo.",
+          });
+          setInfo("gagal");
+        }
       }
-  
+
       setDataValues(values);
       setLoading(false);
-
     } else {
       confirm({
         title: "Apakah anda yakin?",
@@ -296,7 +294,6 @@ function Hutang({ props }) {
         },
       });
     }
-
   };
 
   const createDetail = async () => {
@@ -313,7 +310,18 @@ function Hutang({ props }) {
     values.document = document;
     values.tanggal_pembayaran = tanggal;
     values.status_pembayaran = "Dibayar";
-    await createData(sisaHutang, values, listId, form, router, "/debts/", "hutang", dataAkunCOA, setCreateId, akunHutang);
+    await createData(
+      sisaHutang,
+      values,
+      listId,
+      form,
+      router,
+      "/debts/",
+      "hutang",
+      dataAkunCOA,
+      setCreateId,
+      akunHutang
+    );
   };
 
   //changes status pembayaran in lpb
@@ -335,7 +343,7 @@ function Hutang({ props }) {
     const res = await req.json();
 
     // TODO :::: ENHANCEMENT CODE
-    if(res.data.attributes.document == "Publish"){
+    if (res.data.attributes.document == "Publish") {
       res.data.attributes.debt_details.data.forEach((item) => {
         const sisa_hutang = item.attributes.sisa_hutang;
         console.log("detail", item);
@@ -471,13 +479,12 @@ function Hutang({ props }) {
       setTotalItem(lastKey);
     }
 
-    if (totalHutangJatuhTempo() < totalPembayaran()){
+    if (totalHutangJatuhTempo() < totalPembayaran()) {
       notification["info"]({
         message: "Pembayaran berlebih",
         description: "Tidak dapat melakukan pembayaran, melebihi total hutang jatuh tempo.",
       });
     }
-
   }, [biaya.info]);
 
   useEffect(() => {
@@ -490,9 +497,45 @@ function Hutang({ props }) {
     }
   }, [listId]);
 
+  async function fetchLatestNoReferensi() {
+    const codename = await getUserCodeName();
+
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/debts?sort[0]=id:desc&pagination[limit]=1&filters[no_hutang][$contains]=${codename}/PH/`;
+    const headers = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${cookies.token}`,
+      },
+    };
+
+    const response = await fetch(endpoint, headers)
+      .then((res) => {
+        return res.json();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    if (response) {
+      const latestDaata = response.data?.[0];
+      const no = parseInt(latestDaata?.attributes?.no_hutang?.split("/")?.[2] || 0) + 1;
+      console.log("no", no);
+      const latestNoReferensi = `${codename}/PH/${String(no).padStart(5, "0")}/${moment().format("MM/YYYY")}`;
+      form.setFieldsValue({
+        no_hutang: latestNoReferensi,
+      });
+      return latestNoReferensi;
+    }
+
+    console.log("response from fetchLatestNoReferensi", response);
+  }
+
   useEffect(() => {
     // used to reset redux from value before
     clearData();
+
+    fetchLatestNoReferensi();
 
     var lpbId = 0;
     var infoId = 0;
@@ -525,7 +568,6 @@ function Hutang({ props }) {
         }
 
         if (row.attributes.status === "Dibatalkan") status = "Batal";
-
       } else {
         if (statusPembayaran === "Belum Lunas" && purchasingHistory.length == 0) {
           status = "Tempo";
@@ -555,35 +597,36 @@ function Hutang({ props }) {
     var pembayaran = [];
     var total = 0;
     var idDetail = null;
-    hutang.data.forEach(element => { console.log(element, "element, hutang");
-      if (element.attributes.document === "Publish"){
-        element.attributes.debt_details.data.forEach(details => {
+    hutang.data.forEach((element) => {
+      console.log(element, "element, hutang");
+      if (element.attributes.document === "Publish") {
+        element.attributes.debt_details.data.forEach((details) => {
           total = details.attributes.giro + details.attributes.transfer + details.attributes.tunai;
           idDetail = details?.attributes?.purchasing?.data?.id;
-          pembayaran.push({ id: idDetail, total: total});
+          pembayaran.push({ id: idDetail, total: total });
         });
       }
     });
 
     dataTabel.forEach((element, index) => {
       element.subtotal = 0;
-      element.sisaHutang =  0;
+      element.sisaHutang = 0;
       element.dibayar = 0;
 
       returLPB.forEach((row) => {
         row.subtotal = 0;
-      
+
         if (element.attributes.no_purchasing == row.attributes.purchasing.data?.attributes.no_purchasing) {
           row.attributes.retur_details.data.forEach((detail) => {
             row.subtotal += parseInt(detail.attributes.sub_total);
           });
-          
+
           element.subtotal += row.attributes.total;
 
           if (dataRetur.length > 0)
             dataRetur[dataRetur.length] = {
-                id: element.attributes.no_purchasing,
-                subtotal: row.subtotal,
+              id: element.attributes.no_purchasing,
+              subtotal: row.subtotal,
             };
           else
             dataRetur[0] = {
@@ -592,16 +635,13 @@ function Hutang({ props }) {
             };
 
           element.sisaHutang = element.attributes.total - element.subtotal;
-
         }
       });
-      
+
       pembayaran.forEach((item) => {
-        if(item.id == element.id) element.dibayar += item.total;
+        if (item.id == element.id) element.dibayar += item.total;
       });
-
     });
-
   }, []);
 
   const validateError = () => {
@@ -638,7 +678,7 @@ function Hutang({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="no_hutang"
-                    initialValue={categorySale}
+                    // initialValue={categorySale}
                     rules={[
                       {
                         required: true,
@@ -646,7 +686,7 @@ function Hutang({ props }) {
                       },
                     ]}
                   >
-                    <Input style={{ height: "40px" }} placeholder="No. Hutang" />
+                    <Input style={{ height: "40px" }} placeholder="Mengambil nomor..." />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">

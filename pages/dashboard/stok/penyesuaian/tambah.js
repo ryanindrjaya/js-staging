@@ -10,6 +10,7 @@ import useDebounce from "../../../../hooks/useDebounce";
 import nookies from "nookies";
 import DataTable from "react-data-table-component";
 import { useRouter } from "next/router";
+import getUserCodeName from "../../../../library/functions/getUserCodeName";
 
 const requiredRules = [{ required: true, message: "Field ini wajib diisi" }];
 
@@ -76,7 +77,9 @@ export default function tambahPenyesuaian() {
 
   // get latest no_referensi
   async function fetchLatestNoReferensi() {
-    const endpoint = `${process.env.NEXT_PUBLIC_URL}/inventory-adjustments?sort[0]=id:desc&pagination[limit]=1`;
+    const codename = await getUserCodeName();
+
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/inventory-adjustments?sort[0]=id:desc&pagination[limit]=1&filters[no_referensi][$contains]=${codename}/SA/`;
     const headers = {
       method: "GET",
       headers: {
@@ -95,9 +98,9 @@ export default function tambahPenyesuaian() {
 
     if (response) {
       const latestDaata = response.data?.[0];
-      const no = parseInt(latestDaata?.attributes?.no_referensi?.split("/")?.[1] || 0) + 1;
+      const no = parseInt(latestDaata?.attributes?.no_referensi?.split("/")?.[2] || 0) + 1;
       console.log("no", no);
-      const latestNoReferensi = `PS/${String(no).padStart(5, "0")}/${moment().format("MM/YYYY")}`;
+      const latestNoReferensi = `${codename}/SA/${String(no).padStart(5, "0")}/${moment().format("MM/YYYY")}`;
       form.setFieldsValue({
         no_referensi: latestNoReferensi,
       });

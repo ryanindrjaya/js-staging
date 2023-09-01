@@ -5,24 +5,15 @@ import moment from "moment";
 
 const cookies = nookies.get(null, "token");
 
-const UpdateJurnal = async (
-  data,
-  user,
-  page,
-  insidePage,
-  kode,
-  indexMultiPay,
-  multi,
-) => {
-  
+const UpdateJurnal = async (data, user, page, insidePage, kode, indexMultiPay, multi) => {
   // CLEANING DATA
   var today = new Date();
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
-  var jurnal = await getJurnal();
-  var noJurnal = String(jurnal?.meta?.pagination?.total + 1).padStart(3, "0");
+  var jurnal = await getJurnal(user.codename);
+  var noJurnal = String(jurnal?.meta?.pagination?.total + 1).padStart(5, "0");
   console.log("get jurnal", jurnal);
-  
+
   var values = data;
   delete values.id;
   values.no_jurnal = "";
@@ -32,16 +23,16 @@ const UpdateJurnal = async (
   values.chart_of_account = null;
   values.added_by = user.name;
   values.tanggal = moment();
-  
-  if(page === "penjualan"){
+
+  if (page === "penjualan") {
     var akunPiutang = null;
-    
-    if(insidePage === "non panel" || insidePage === "panel") akunPiutang = "114.01.01";
+
+    if (insidePage === "non panel" || insidePage === "panel") akunPiutang = "114.01.01";
     else if (insidePage === "sales") akunPiutang = "114.01.03";
-    else if (insidePage === "toko"){
+    else if (insidePage === "toko") {
       akunPiutang = kode;
     }
-    
+
     var reqCOA = await fetchAkunCOA(cookies, akunPiutang, "212.01.07", "400.01.00", "500.00.01", "115.10.00");
     var akunCOA = await reqCOA.json();
 
@@ -55,57 +46,52 @@ const UpdateJurnal = async (
     akunCOA.data.map((item) => {
       values.debit = 0;
       values.kredit = 0;
-      if (insidePage === "non panel"){
+      if (insidePage === "non panel") {
         values.catatan = "Transaksi non panel dengan kode " + values?.attributes?.no_non_panel_sale;
-        values.no_jurnal = `JPNP/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+        values.no_jurnal = `${user.codename}/JPNP/${noJurnal}/${mm}/${yyyy}`;
         noJurnal++;
-        noJurnal = String(noJurnal).padStart(3, "0");
-      } else if (insidePage === "panel"){
+        noJurnal = String(noJurnal).padStart(5, "0");
+      } else if (insidePage === "panel") {
         values.catatan = "Transaksi panel dengan kode " + values?.attributes?.no_panel_sale;
-        values.no_jurnal = `JPP/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+        values.no_jurnal = `${user.codename}/JPP/${noJurnal}/${mm}/${yyyy}`;
         noJurnal++;
-        noJurnal = String(noJurnal).padStart(3, "0");
-      } else if (insidePage === "sales"){
+        noJurnal = String(noJurnal).padStart(5, "0");
+      } else if (insidePage === "sales") {
         values.catatan = "Transaksi sales dengan kode " + values?.attributes?.no_sales_sale;
-        values.no_jurnal = `JPS/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+        values.no_jurnal = `${user.codename}/JPS/${noJurnal}/${mm}/${yyyy}`;
         noJurnal++;
-        noJurnal = String(noJurnal).padStart(3, "0");
-      } else if (insidePage === "toko"){
+        noJurnal = String(noJurnal).padStart(5, "0");
+      } else if (insidePage === "toko") {
         values.catatan = "Transaksi toko dengan kode " + values?.attributes?.no_store_sale;
-        values.no_jurnal = `JPT/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+        values.no_jurnal = `${user.codename}/JPT/${noJurnal}/${mm}/${yyyy}`;
         noJurnal++;
-        noJurnal = String(noJurnal).padStart(3, "0");
+        noJurnal = String(noJurnal).padStart(5, "0");
       }
 
       //if(item.attributes.kode === "114.01.01" || item.attributes.kode === "114.01.03" || item.attributes.kode === akunPiutang) {
-      if(item.attributes.kode === akunPiutang) {
+      if (item.attributes.kode === akunPiutang) {
         //true
         values.debit = values.attributes.total;
         if (insidePage === "toko" && multi === "Multi") {
-          var detail = values.attributes.store_payments.data[indexMultiPay]; 
+          var detail = values.attributes.store_payments.data[indexMultiPay];
           const charge = detail.attributes.charge;
           const oth = isNaN(parseFloat(detail.attributes.oth)) ? 0 : parseFloat(detail.attributes.oth);
           if (indexMultiPay === 0) values.debit = detail.attributes.payment;
-          else values.debit = (detail.attributes.payment - charge ) + oth;
+          else values.debit = detail.attributes.payment - charge + oth;
           console.log("get detail jurnal", detail.attributes.payment, charge, oth);
         }
-        
       } else if (item.attributes.kode === "212.01.07") {
         //false
         values.kredit = values.attributes.ppn;
-        
       } else if (item.attributes.kode === "400.01.00") {
         //false
         values.kredit = values.attributes.dpp;
-        
       } else if (item.attributes.kode === "500.00.01") {
         //true
         values.debit = values.attributes.total;
-        
       } else if (item.attributes.kode === "115.10.00") {
         //true
         values.kredit = values.attributes.total;
-        
       }
       values.chart_of_account = item.id;
 
@@ -115,13 +101,12 @@ const UpdateJurnal = async (
 
       postJurnal(data);
     });
-
   } else if (page === "retur") {
     var akunReturPiutang = null;
 
-    if(insidePage === "retur non panel" || insidePage === "retur panel") akunReturPiutang = "114.01.01";
+    if (insidePage === "retur non panel" || insidePage === "retur panel") akunReturPiutang = "114.01.01";
     else if (insidePage === "retur sales") akunReturPiutang = "114.01.03";
-    else if (insidePage === "retur toko"){
+    else if (insidePage === "retur toko") {
       akunReturPiutang = kode;
     }
 
@@ -134,8 +119,8 @@ const UpdateJurnal = async (
     if (insidePage === "retur toko") {
       akunCOA.data.splice(6, 1);
       akunCOA.data.splice(5, 1);
-    } 
-    
+    }
+
     if (indexMultiPay > 0) {
       reqCOA = await fetchAkunCOA(cookies, akunReturPiutang);
       akunCOA = await reqCOA.json();
@@ -151,30 +136,30 @@ const UpdateJurnal = async (
       values.debit = 0;
       values.kredit = 0;
 
-      if (insidePage === "retur non panel"){
+      if (insidePage === "retur non panel") {
         values.catatan = "Transaksi retur non panel dengan kode " + values?.attributes?.no_retur_non_panel_sale;
-        values.no_jurnal = `JRPNP/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+        values.no_jurnal = `${user.codename}/JRPNP/${noJurnal}/${mm}/${yyyy}`;
         noJurnal++;
-        noJurnal = String(noJurnal).padStart(3, "0");
-      } else if (insidePage === "retur panel"){
+        noJurnal = String(noJurnal).padStart(5, "0");
+      } else if (insidePage === "retur panel") {
         values.catatan = "Transaksi retur panel dengan kode " + values?.attributes?.no_retur_panel_sale;
-        values.no_jurnal = `JRPP/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+        values.no_jurnal = `${user.codename}/JRPP/${noJurnal}/${mm}/${yyyy}`;
         noJurnal++;
-        noJurnal = String(noJurnal).padStart(3, "0");
-      } else if (insidePage === "retur sales"){
+        noJurnal = String(noJurnal).padStart(5, "0");
+      } else if (insidePage === "retur sales") {
         values.catatan = "Transaksi retur sales dengan kode " + values?.attributes?.no_retur_sales_sale;
-        values.no_jurnal = `JRPS/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+        values.no_jurnal = `${user.codename}/JRPS/${noJurnal}/${mm}/${yyyy}`;
         noJurnal++;
-        noJurnal = String(noJurnal).padStart(3, "0");
-      } else if (insidePage === "retur toko"){
+        noJurnal = String(noJurnal).padStart(5, "0");
+      } else if (insidePage === "retur toko") {
         values.catatan = "Transaksi retur toko dengan kode " + values?.attributes?.no_retur_store_sale;
-        values.no_jurnal = `JRPT/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+        values.no_jurnal = `${user.codename}/JRPT/${noJurnal}/${mm}/${yyyy}`;
         noJurnal++;
-        noJurnal = String(noJurnal).padStart(3, "0");
+        noJurnal = String(noJurnal).padStart(5, "0");
       }
 
       //if(item.attributes.kode === "114.01.01" || item.attributes.kode === "114.01.03") {
-      if(item.attributes.kode === akunReturPiutang) {
+      if (item.attributes.kode === akunReturPiutang) {
         //true
         if (cekRetur === 0) {
           values.kredit = values.attributes.total;
@@ -196,53 +181,45 @@ const UpdateJurnal = async (
           values.kredit = values.attributes.total;
 
           if (insidePage === "retur toko" && multi === "Multi") {
-            var detail = values.attributes.store_payments.data[indexMultiPay]; 
+            var detail = values.attributes.store_payments.data[indexMultiPay];
             const charge = detail.attributes.charge;
             const oth = isNaN(parseFloat(detail.attributes.oth)) ? 0 : parseFloat(detail.attributes.oth);
             if (indexMultiPay === 0) values.kredit = detail.attributes.payment;
-            else values.kredit = (detail.attributes.payment - charge ) + oth;
+            else values.kredit = detail.attributes.payment - charge + oth;
           }
           //console.log("get detail jurnal", detail.attributes.payment, charge, oth, saldoPiutang);
-
         }
-
       } else if (item.attributes.kode === "212.01.07") {
         //false
         values.debit = values.attributes.ppn;
-        
       } else if (item.attributes.kode === "401.01.00") {
         //true
         if (cekPiutang === 0) {
           values.debit = values.attributes.dpp;
-          
+
           saldoRetur = item.attributes.saldo + values.attributes.dpp;
           cekPiutang++;
-        }
-        else{
+        } else {
           item.attributes.saldo = saldoRetur;
           values.debit = values.attributes.total;
-          
         }
       } else if (item.attributes.kode === "500.00.01") {
         //true
         values.kredit = values.attributes.total;
-        
       } else if (item.attributes.kode === "115.10.00") {
         //true
         values.debit = values.attributes.total;
-        
       }
       values.chart_of_account = item.id;
 
       var data = {
         data: values,
-      }; console.log("get data post", data, akunReturPiutang, insidePage, page);
+      };
+      console.log("get data post", data, akunReturPiutang, insidePage, page);
 
       postJurnal(data);
     });
-
   }
-  
 };
 
 const openNotificationWithIcon = (type, req) => {
@@ -259,9 +236,8 @@ const openNotificationWithIcon = (type, req) => {
   }
 };
 
-
-const getJurnal = async () => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*";
+const getJurnal = async (codename) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*&filters[no_jurnal][$contains]=" + codename;
   const options = {
     method: "GET",
     headers: {
@@ -272,7 +248,7 @@ const getJurnal = async () => {
 
   const req = await fetch(endpoint, options);
   const res = await req.json();
-  
+
   return res;
 };
 
@@ -291,22 +267,29 @@ const postJurnal = async (data) => {
 
   const req = await fetch(endpoint, options);
   const res = await req.json();
-    console.log("req create", req, res);
+  console.log("req create", req, res);
 
-    if (req.status === 200) {
-      console.log("suksess jurnal");
-      openNotificationWithIcon("success");
-    } else {
-      openNotificationWithIcon("error", req);
-    }
-}
+  if (req.status === 200) {
+    console.log("suksess jurnal");
+    openNotificationWithIcon("success");
+  } else {
+    openNotificationWithIcon("error", req);
+  }
+};
 
 const fetchAkunCOA = async (cookies, kode1, kode2, kode3, kode4, kode5) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?populate=*&filters[kode][$eq][0]="+ kode1 +
-  "&filters[kode][$eq][1]="+ kode2 +
-  "&filters[kode][$eq][2]="+ kode3 +
-  "&filters[kode][$eq][3]="+ kode4 +
-  "&filters[kode][$eq][4]="+ kode5;
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL +
+    "/chart-of-accounts?populate=*&filters[kode][$eq][0]=" +
+    kode1 +
+    "&filters[kode][$eq][1]=" +
+    kode2 +
+    "&filters[kode][$eq][2]=" +
+    kode3 +
+    "&filters[kode][$eq][3]=" +
+    kode4 +
+    "&filters[kode][$eq][4]=" +
+    kode5;
   const options = {
     method: "GET",
     headers: {

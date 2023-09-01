@@ -17,6 +17,7 @@ import nookies from "nookies";
 import moment from "moment";
 import confirm from "antd/lib/modal/confirm";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
+import getUserCodeName from "../../../../library/functions/getUserCodeName";
 
 PesananSales.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -159,7 +160,6 @@ function PesananSales({ props }) {
 
   // NO Sales Sale
   var noSale = String(props.sale?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`PPS/ET/${user.id}/${noSale}/${mm}/${yyyy}`);
 
   var formatter = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -306,9 +306,44 @@ function PesananSales({ props }) {
     }
   }, [customer]);
 
+  async function fetchLatestNoReferensi() {
+    const codename = await getUserCodeName();
+
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/sales-sells?sort[0]=id:desc&pagination[limit]=1&filters[no_sales_sell][$contains]=${codename}/SO/`;
+    const headers = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${cookies.token}`,
+      },
+    };
+
+    const response = await fetch(endpoint, headers)
+      .then((res) => {
+        return res.json();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    if (response) {
+      const latestDaata = response.data?.[0];
+      const no = parseInt(latestDaata?.attributes?.no_sales_sell?.split("/")?.[2] || 0) + 1;
+      console.log("no", no);
+      const latestNoReferensi = `${codename}/SO/${String(no).padStart(5, "0")}/${moment().format("MM/YYYY")}`;
+      form.setFieldsValue({
+        no_sales_sell: latestNoReferensi,
+      });
+      return latestNoReferensi;
+    }
+
+    console.log("response from fetchLatestNoReferensi", response);
+  }
+
   useEffect(() => {
     // used to reset redux from value before
     clearData();
+    fetchLatestNoReferensi();
     form.setFieldsValue({
       customer: customerData?.attributes.name,
     });
@@ -446,7 +481,7 @@ function PesananSales({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="no_sales_sell"
-                    initialValue={categorySale}
+                    // initialValue={categorySale}
                     rules={[
                       {
                         required: true,
@@ -454,7 +489,7 @@ function PesananSales({ props }) {
                       },
                     ]}
                   >
-                    <Input style={{ height: "40px" }} placeholder="No. Penjualan" />
+                    <Input style={{ height: "40px" }} placeholder="Mengambil nomor..." />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">

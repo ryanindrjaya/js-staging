@@ -16,6 +16,7 @@ import { useRouter } from "next/router";
 import LoadingAnimations from "@iso/components/Animations/Loading";
 import createReturInventory from "../../utility/createReturInventory";
 import moment from "moment";
+import getUserCodeName from "../../../../../library/functions/getUserCodeName";
 
 ReturNonPanel.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -534,13 +535,48 @@ function ReturNonPanel({ props }) {
     }
   }, [ppnActive]);
 
+  async function fetchLatestNoReferensi() {
+    const codename = await getUserCodeName();
+
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/retur-non-panel-sales?sort[0]=id:desc&pagination[limit]=1&filters[no_retur_non_panel_sale][$contains]=${codename}/RN/`;
+    const headers = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${cookies.token}`,
+      },
+    };
+
+    const response = await fetch(endpoint, headers)
+      .then((res) => {
+        return res.json();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    if (response) {
+      const latestDaata = response.data?.[0];
+      const no = parseInt(latestDaata?.attributes?.no_retur_non_panel_sale?.split("/")?.[2] || 0) + 1;
+      console.log("no", no);
+      const latestNoReferensi = `${codename}/RN/${String(no).padStart(5, "0")}/${moment().format("MM/YYYY")}`;
+      form.setFieldsValue({
+        no_retur_non_panel_sale: latestNoReferensi,
+      });
+      return latestNoReferensi;
+    }
+
+    console.log("response from fetchLatestNoReferensi", response);
+  }
+
   useEffect(() => {
     // used to reset redux from value before
     clearData();
 
+    fetchLatestNoReferensi();
+
     form.setFieldsValue({
       no_non_panel_sale: nonPanel.data.attributes.no_non_panel_sale,
-      no_retur_non_panel_sale: categorySale,
       disc_type: nonPanel.data.attributes.disc_type,
       disc_value: nonPanel.data.attributes.disc_value,
       additional_fee_1_sub: nonPanel.data.attributes?.additional_fee_1_sub,
@@ -617,7 +653,7 @@ function ReturNonPanel({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="no_retur_non_panel_sale"
-                    initialValue={categorySale}
+                    // initialValue={categorySale}
                     rules={[
                       {
                         required: true,
@@ -625,7 +661,7 @@ function ReturNonPanel({ props }) {
                       },
                     ]}
                   >
-                    <Input style={{ height: "40px" }} placeholder="No. Penjualan" />
+                    <Input style={{ height: "40px" }} placeholder="Mengambil nomor..." />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">

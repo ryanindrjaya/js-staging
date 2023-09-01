@@ -16,6 +16,8 @@ import DateTimeComponent from "../../../../components/DateTime/dateTime";
 import nookies from "nookies";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import confirm from "antd/lib/modal/confirm";
+import getUserCodeName from "../../../../library/functions/getUserCodeName";
+import moment from "moment";
 
 Toko.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -239,7 +241,6 @@ function Toko({ props }) {
 
   // NO Store Sale
   const trxNumber = String(userLastDocNumber).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`${userCodeName}/${trxNumber}/${mm}/${yyyy}`);
 
   const getProductAtLocation = async (unit = 1, changedIdx = products?.productList?.length - 1 ?? 0) => {
     const locationId = form.getFieldValue("location");
@@ -528,6 +529,7 @@ function Toko({ props }) {
     // used to reset redux from value before
     clearData();
     setProductSubTotal({});
+    fetchLatestNoReferensi();
     form.setFieldsValue({
       customer: customerData?.attributes.name,
     });
@@ -558,6 +560,40 @@ function Toko({ props }) {
       label: "RESEP",
     },
   };
+
+  async function fetchLatestNoReferensi() {
+    const codename = await getUserCodeName();
+
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/store-sales?sort[0]=id:desc&pagination[limit]=1&filters[no_store_sale][$contains]=${codename}/OT/`;
+    const headers = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${cookies.token}`,
+      },
+    };
+
+    const response = await fetch(endpoint, headers)
+      .then((res) => {
+        return res.json();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    if (response) {
+      const latestDaata = response.data?.[0];
+      const no = parseInt(latestDaata?.attributes?.no_store_sale?.split("/")?.[2] || 0) + 1;
+      console.log("no", no);
+      const latestNoReferensi = `${codename}/OT/${String(no).padStart(5, "0")}/${moment().format("MM/YYYY")}`;
+      form.setFieldsValue({
+        no_store_sale: latestNoReferensi,
+      });
+      return latestNoReferensi;
+    }
+
+    console.log("response from fetchLatestNoReferensi", response);
+  }
 
   const handleButtonClick = (category) => {
     setSelectedCategory(category);
@@ -623,7 +659,6 @@ function Toko({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="no_store_sale"
-                    initialValue={categorySale}
                     rules={[
                       {
                         required: true,
@@ -631,7 +666,7 @@ function Toko({ props }) {
                       },
                     ]}
                   >
-                    <Input style={{ height: "40px" }} placeholder="No. Penjualan" />
+                    <Input style={{ height: "40px" }} placeholder="Mengambil nomor..." />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2">
