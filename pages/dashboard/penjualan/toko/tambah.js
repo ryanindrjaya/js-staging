@@ -788,6 +788,7 @@ function Toko({ props }) {
                       style={{
                         width: "100%",
                       }}
+                      disabled
                     >
                       <Select.Option value="Tetap" key={"Tetap"}>
                         Tetap
@@ -808,6 +809,7 @@ function Toko({ props }) {
                       max={discMax}
                       placeholder="Diskon"
                       style={{ width: "100%" }}
+                      disabled
                     />
                   </Form.Item>
                 </div>

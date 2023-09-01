@@ -92,9 +92,9 @@ export default function SearchBar({
     } else {
       try {
         var url = `/chart-of-accounts?populate=*&filters[nama][$contains]=${query}`;
-        if(page == "hutang"){
+        if(page === "hutang" || page === "debit"){
           url += "&filters[jenis_akun][$eq]=true";
-        } else if (page == "piutang"){
+        } else if (page === "piutang" || page === "kredit"){
           url += "&filters[jenis_akun][$eq]=false";
         } else {
           
