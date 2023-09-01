@@ -15,13 +15,43 @@ const Tambah = ({ props }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [selectLocations, setSelectLocation] = useState({});
+  const [code, setCode] = useState(null);
   const cookies = nookies.get(null, "token");
   const role = props?.data?.roles;
 
   const modules = props?.modules?.data || [];
   const locations = props?.locations;
 
-  console.log("role", role);
+  const checkCode = async (e) => {
+    if (!e.target.value) return setCode(null);
+
+    setCode({
+      available: "validating",
+      message: "Memeriksa kode pengguna...",
+    });
+
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL +
+      `/users?filters[codename]=${e.target.value}&pagination[page]=1&pagination[pageSize]=1`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    console.log("respon check code", res);
+
+    if (res && res?.length === 0) {
+      setCode({ available: "success", message: "Kode tersedia" });
+    } else {
+      setCode({ available: "error", message: "Kode tidak tersedia" });
+    }
+  };
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -163,8 +193,17 @@ const Tambah = ({ props }) => {
                         message: "Kode Pengguna tidak boleh kosong!",
                       },
                     ]}
+                    help={code?.message}
+                    validateStatus={code ? code?.available : null}
+                    hasFeedback
                   >
                     <Input
+                      // capitalize
+                      onInput={(e) => {
+                        e.target.value = e.target.value.toUpperCase();
+                      }}
+                      maxLength={3}
+                      onChange={checkCode}
                       style={{ height: "50px" }}
                       prefix={<UserOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
                       placeholder="Kode Pengguna"
