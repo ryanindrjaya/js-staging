@@ -13,8 +13,8 @@ import createSaleFunc from "../utility/createSale";
 import createDetailSaleFunc from "../utility/createDetailSale";
 import calculatePrice from "../utility/calculatePrice";
 import DateTimeComponent from "../../../../components/DateTime/dateTime";
-//import Coa from "@iso/components/Form/AddCost/SearchCOA";
-import Coa from "@iso/components/Form/AddSale/SearchCOA";
+import Coa from "@iso/components/Form/AddCost/SearchCOA";
+import CoaSale from "@iso/components/Form/AddSale/SearchCOA";
 import nookies from "nookies";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import confirm from "antd/lib/modal/confirm";
@@ -233,7 +233,7 @@ function Toko({ props }) {
 
   //Akun COA
   const [akunCOAONGKIR, setAkunCOAONGKIR] = useState();
-  const [akunCOALAIN, setAkunCOALAIN] = useState(); console.log(storeAccounts, "storeAccounts", akunCOAONGKIR, akunCOALAIN);
+  const [akunCOALAIN, setAkunCOALAIN] = useState();
   
   const router = useRouter();
   const { TextArea } = Input;
@@ -551,28 +551,22 @@ function Toko({ props }) {
 
   useEffect(() => {
     if(akunCOAONGKIR){
-      var data = {
-        label: `${akunCOAONGKIR?.attributes?.nama}`,
-        
-      };
-
       form.setFieldsValue({
-        //delivery_coa: {
-          delivery_coa: {
-            akun: data
-          }
-        //}
+        akunCOA: {
+          label: `${akunCOAONGKIR?.attributes?.nama}`,
+          value: akunCOAONGKIR?.id,
+        }
       });
     } 
     
-    // if(akunCOALAIN){
-    //   form.setFieldsValue({
-    //     'lain_coa.akun': {
-    //       label: `${akunCOALAIN?.attributes?.nama}`,
-    //       value: akunCOALAIN?.id,
-    //     }
-    //   });
-    // }
+    if(akunCOALAIN){
+      form.setFieldsValue({
+        akun: {
+          label: `${akunCOALAIN?.attributes?.nama}`,
+          value: akunCOALAIN?.id,
+        }
+      });
+    }
 
   }, [akunCOAONGKIR, akunCOALAIN]);
 
@@ -943,9 +937,11 @@ function Toko({ props }) {
               </div>
               <div className="w-full flex flex-wrap -mx-3 my-1 ">
                 <div className="w-full md:w-1/3 px-3">
-                  <Form.Item name="delivery_coa" noStyle>
-                    <Coa onChange={setAkunCOAONGKIR} selectedAkun={akunCOAONGKIR} disabled/>
-                  </Form.Item>
+                  <div className="w-full md:w-full mb-2 md:mb-0">
+                    <Form.Item name="delivery_coa" noStyle>
+                      <CoaSale onChange={setAkunCOAONGKIR} selectedAkun={akunCOAONGKIR} disabled/>
+                    </Form.Item>
+                  </div>
                 </div>
                 <div className="w-full md:w-1/3 px-3">
                   <Form.Item name="delivery_fee" noStyle>
@@ -966,6 +962,12 @@ function Toko({ props }) {
               <div className="w-full flex flex-wrap justify-end mb-3">
                 <div className="w-full md:w-1/3 px-3 mb-2 text-center md:mb-0">
                   <p className="mb-4 font-bold">Akun</p>
+                  <Form.Item name="lain_coa" noStyle>
+                    <Coa onChange={setAkunCOALAIN} selectedAkun={akunCOALAIN} disabled/>
+                  </Form.Item>
+                  <Form.Item name="lain_coa" noStyle>
+                    <Coa onChange={setAkunCOALAIN} selectedAkun={akunCOALAIN} disabled/>
+                  </Form.Item>
                   <Form.Item name="lain_coa" noStyle>
                     <Coa onChange={setAkunCOALAIN} selectedAkun={akunCOALAIN} disabled/>
                   </Form.Item>
