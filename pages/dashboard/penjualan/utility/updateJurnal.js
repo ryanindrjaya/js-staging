@@ -45,6 +45,16 @@ const UpdateJurnal = async (
     var reqCOA = await fetchAkunCOA(cookies, akunPiutang, "212.01.07", "400.01.00", "500.00.01", "115.10.00");
     var akunCOA = await reqCOA.json();
 
+    var kodeDelivery = null;
+    if (insidePage === "toko" && values.attributes.delivery_fee !== 0){
+      var reqToko = await fetchAkunToko(cookies);
+      var akunToko = await reqToko.json(); console.log("get akunToko", akunToko);
+      var kodeData = akunToko.data[0].attributes.chart_of_account.data.attributes.kode;
+      reqCOA = await fetchAkunCOA(cookies, akunPiutang, "212.01.07", "400.01.00", "500.00.01", "115.10.00", kodeData);
+      akunCOA = await reqCOA.json();
+      kodeDelivery = kodeData;
+    }
+
     if (indexMultiPay > 0) {
       reqCOA = await fetchAkunCOA(cookies, akunPiutang);
       akunCOA = await reqCOA.json();
@@ -106,6 +116,9 @@ const UpdateJurnal = async (
         //true
         values.kredit = values.attributes.total;
         
+      } else if (kodeDelivery !== null) {
+        //false
+        values.kredit = values.attributes.delivery_fee;
       }
       values.chart_of_account = item.id;
 
@@ -301,12 +314,27 @@ const postJurnal = async (data) => {
     }
 }
 
-const fetchAkunCOA = async (cookies, kode1, kode2, kode3, kode4, kode5) => {
+const fetchAkunCOA = async (cookies, kode1, kode2, kode3, kode4, kode5, kode6) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?populate=*&filters[kode][$eq][0]="+ kode1 +
   "&filters[kode][$eq][1]="+ kode2 +
   "&filters[kode][$eq][2]="+ kode3 +
   "&filters[kode][$eq][3]="+ kode4 +
-  "&filters[kode][$eq][4]="+ kode5;
+  "&filters[kode][$eq][4]="+ kode5 +
+  "&filters[kode][$eq][5]="+ kode6;
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchAkunToko = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?populate=*&filters[type][$eq]=ONGKIR&filters[setting][$eq]=true";
   const options = {
     method: "GET",
     headers: {

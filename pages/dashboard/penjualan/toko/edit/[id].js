@@ -164,7 +164,7 @@ function EditToko({ props }) {
 
   const userLastDocNumber = props.userLastDocNumber;
 
-  const initialValues = props.initialData?.data;
+  const initialValues = props.initialData?.data; console.log(initialValues, "initialValues");
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);

@@ -208,14 +208,8 @@ const Tambah = ({ props }) => {
                       <Select.Option value="ONGKIR" key="ONGKIR">
                         Ongkir
                       </Select.Option>
-                      <Select.Option value="TAMBAHAN LAIN 1" key="TAMBAHAN LAIN 1">
-                        Tambahan Lain - Lain 1
-                      </Select.Option>
-                      <Select.Option value="TAMBAHAN LAIN 2" key="TAMBAHAN LAIN 2">
-                        Tambahan Lain - Lain 2
-                      </Select.Option>
-                      <Select.Option value="TAMBAHAN LAIN 3" key="TAMBAHAN LAIN 3">
-                        Tambahan Lain - Lain 3
+                      <Select.Option value="TAMBAHAN LAIN" key="TAMBAHAN LAIN">
+                        Tambahan Lain - Lain
                       </Select.Option>
                     </Select>
                   </Form.Item>
