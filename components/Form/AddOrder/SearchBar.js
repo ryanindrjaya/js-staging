@@ -4,6 +4,7 @@ import { CaretDownOutlined } from "@ant-design/icons";
 import nookies from "nookies";
 import action from "@iso/redux/application/order/action";
 import { useDispatch } from "react-redux";
+import useDebounce from "../../../hooks/useDebounce";
 
 const { addProduct } = action;
 
@@ -22,6 +23,9 @@ export default function SearchBar({
 }) {
   const dispatch = useDispatch();
   const [userLocations, setUserLocations] = useState("");
+  const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+  const debounceQuery = useDebounce(query, 500);
   const [product, setProduct] = useState();
   const [data, setData] = useState([]);
   const cookies = nookies.get(null, "token");
@@ -80,11 +84,22 @@ export default function SearchBar({
     setUserLocations(locationData.join("&"));
   };
 
+  useEffect(() => {
+    if (debounceQuery) {
+      fetchProduct(debounceQuery, (data) => {
+        setData(data);
+        setLoading(false);
+      });
+    }
+  }, [debounceQuery]);
+
   const handleSearch = (newValue) => {
     if (newValue) {
-      fetchProduct(newValue, setData);
+      setLoading(true);
+      setQuery(newValue);
     } else {
       setData([]);
+      setQuery("");
     }
   };
 
@@ -138,6 +153,7 @@ export default function SearchBar({
           <Select
             disabled={disabled}
             allowClear
+            loading={loading}
             size="large"
             showSearch
             value={product}
