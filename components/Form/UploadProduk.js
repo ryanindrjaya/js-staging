@@ -4,7 +4,7 @@ import { productKeys } from "./utils/productKeys";
 import { getRelationalData, getLocationsId } from "./utils/getRelationalData";
 import nookies from "nookies";
 import { toast } from "react-toastify";
-import { Progress } from "antd";
+import { Progress, Spin, message } from "antd";
 
 export default function UploadProduk({ setProduct }) {
   const [loading, setLoading] = useState(false);
@@ -12,87 +12,102 @@ export default function UploadProduk({ setProduct }) {
   const [error, setError] = useState(null);
   const [status, setStatus] = useState("");
 
-  console.log("percent", percent);
-
-  const postData = (data) => {
-    let increment = 100 / data.length;
-    console.log("increment", increment);
+  const postData = async (row) => {
     const cookies = nookies.get(null);
     const endpoint = process.env.NEXT_PUBLIC_URL + "/products";
 
     try {
-      data.forEach(async (row, idx) => {
-        const data = {
-          data: row,
-        };
-        const options = {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-          },
-          body: JSON.stringify(data),
-        };
+      const data = {
+        data: row,
+      };
+      const options = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+        body: JSON.stringify(data),
+      };
 
-        console.log("options", options);
+      console.log("options", options);
 
-        try {
-          const req = await fetch(endpoint, options);
-          const res = await req.json();
+      try {
+        const req = await fetch(endpoint, options);
+        const res = await req.json();
 
-          setPercent((prev) => Math.round(prev + increment));
+        console.log("res", res);
 
-          if (req.status == 200) {
-            const endpointProduct = process.env.NEXT_PUBLIC_URL + "/products?populate=*";
-
-            const optionsAllProduct = {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + cookies.token,
-              },
-            };
-
-            const reqProduct = await fetch(endpointProduct, optionsAllProduct);
-            const resProduct = await reqProduct.json();
-
-            setProduct(resProduct);
-          }
-        } catch (err) {
-          console.log(err);
+        if (req.status == 200) {
+          return true;
+        } else {
+          return false;
         }
-      });
+      } catch (err) {
+        console.log(err);
+      }
     } catch (err) {
       toast.error("Gagal mengunggah data");
       setLoading(false);
+      return false;
     }
   };
 
   const convertToJson = async (data) => {
-    const rows = data.map(async (row) => {
+    const rows = [];
+
+    for (let i = 0; i < data.length; i++) {
       let rowData = {};
-      row.forEach((element, index) => {
-        rowData[productKeys[index]] = element;
-      });
+      const row = data[i];
+
+      for (let j = 0; j < row.length; j++) {
+        const element = row[j];
+        const key = productKeys[j];
+
+        if (j === 0) {
+          // SKU
+          rowData[key] = `${element}` || "";
+          continue;
+        }
+
+        if (
+          key === "description" ||
+          key === "sub_category" ||
+          key === "group" ||
+          key === "manufacture" ||
+          key === "locations" ||
+          key === "unit_1" ||
+          key === "unit_2" ||
+          key === "unit_3" ||
+          key === "unit_4" ||
+          key === "unit_5"
+        ) {
+          rowData[key] = element || "";
+          continue;
+        }
+
+        rowData[key] = element || 0;
+      }
 
       if (!rowData.SKU) {
         return;
       }
 
+      console.log("rowData", rowData);
+
       // process relational data
-      const categoryIdRaw = rowData?.category?.split("-")[0].trim() || "";
-      const subCategoryIdRaw = rowData?.sub_category?.split("-")[0].trim() || "";
-      const groupAliasRaw = rowData?.group?.split("-")[0].trim() || "";
-      const manufactureAliasRaw = rowData?.manufacture?.split("-")[0].trim() || "";
+      const categoryIdRaw = rowData?.category?.trim() || "";
+      const subCategoryIdRaw = typeof rowData?.sub_category === "string" ? rowData?.sub_category?.trim() || "" : null;
+      const groupAliasRaw = rowData?.group?.trim() || "";
+      const manufactureAliasRaw = rowData?.manufacture?.trim() || "";
       const locationNamesArrRaw = rowData?.locations?.split(",") || [];
       const locationsNamesTrimmed = locationNamesArrRaw.map((item) => item?.trim());
 
       console.log("manufacture alias", manufactureAliasRaw);
 
-      const categoryId = await getRelationalData("categories", "category_id", categoryIdRaw);
-      const subCategoryId = await getRelationalData("sub-categories", "sub_id", subCategoryIdRaw);
-      const groupId = await getRelationalData("groups", "alias", groupAliasRaw);
-      const manufactureId = await getRelationalData("manufactures", "code", manufactureAliasRaw);
+      const categoryId = await getRelationalData("categories", "name", categoryIdRaw);
+      const subCategoryId = await getRelationalData("sub-categories", "name", subCategoryIdRaw);
+      const groupId = await getRelationalData("groups", "name", groupAliasRaw);
+      const manufactureId = await getRelationalData("manufactures", "name", manufactureAliasRaw);
       const locationsId = await getLocationsId(locationsNamesTrimmed);
 
       rowData = {
@@ -104,17 +119,28 @@ export default function UploadProduk({ setProduct }) {
         locations: locationsId,
       };
 
-      return rowData;
-    });
+      const success = await postData(rowData);
 
-    const resolvedRows = await Promise.all(rows);
-    return resolvedRows;
+      if (!success) {
+        setLoading(false);
+        break;
+      }
+
+      rows.push(rowData);
+    }
+
+    return rows;
   };
 
   const importExcel = (e) => {
+    const cookies = nookies.get(null);
     setLoading(true);
 
-    console.log(e.target.files);
+    message.loading({
+      content: "Memproses data excel, jangan tutup halaman ini...",
+      key: "process",
+      duration: 300 * 1000,
+    });
     try {
       const file = e.target.files[0];
       const reader = new FileReader();
@@ -126,7 +152,38 @@ export default function UploadProduk({ setProduct }) {
         const fileData = XLSX.utils.sheet_to_json(workSheet, { header: 1 });
         fileData.splice(0, 2);
         const rowsData = await convertToJson(fileData);
-        postData(rowsData);
+
+        if (rowsData.length === fileData.length) {
+          const endpointProduct = process.env.NEXT_PUBLIC_URL + "/products?populate=*";
+
+          const optionsAllProduct = {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + cookies.token,
+            },
+          };
+
+          const reqProduct = await fetch(endpointProduct, optionsAllProduct);
+          const resProduct = await reqProduct.json();
+
+          setProduct(resProduct);
+
+          message.success({
+            content: "Berhasil mengunggah data",
+            key: "process",
+            duration: 2,
+          });
+
+          setLoading(false);
+        } else {
+          message.error({
+            content: "Gagal mengunggah data",
+            key: "process",
+            duration: 2,
+          });
+          setLoading(false);
+        }
       };
       reader.readAsBinaryString(file);
     } catch (err) {
@@ -154,7 +211,7 @@ export default function UploadProduk({ setProduct }) {
 
   return loading ? (
     <div className="flex flex-col items-center justify-center w-full">
-      <Progress type="circle" width={35} percent={percent} status={status} />
+      <Spin />
     </div>
   ) : (
     <>

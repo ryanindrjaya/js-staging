@@ -10,6 +10,7 @@ import nookies from "nookies";
 import { ArrowLeftOutlined, PrinterOutlined } from "@ant-design/icons";
 import DataTable from "react-data-table-component";
 import moment from "moment";
+import getUserCodeName from "../../../library/functions/getUserCodeName";
 
 export default function permintaanBarang() {
   const { token } = nookies.get();
@@ -25,6 +26,7 @@ export default function permintaanBarang() {
     product: false,
     send: false,
     print: false,
+    noRef: false,
   });
   const [location1, setLocation1] = useState("");
   const [selectedLocation1, setSelectedLocation1] = useState();
@@ -352,10 +354,11 @@ export default function permintaanBarang() {
       return;
     }
 
-    const [no_referensi, no_referensi_recipient] = await fetchLatestNoReferensi();
+    const [no_referensi, no_referensi_recipient, no_referensi_mutasi] = await fetchLatestNoReferensi();
 
     values.no_referensi = no_referensi;
     values.no_referensi_recipient = no_referensi_recipient;
+    values.no_referensi_mutasi = no_referensi_mutasi;
     values.date = values?.date?.format("YYYY-MM-DD") || moment().format("YYYY-MM-DD");
     values.location_sender = selectedLocation1?.id;
     values.location_recipient = selectedLocation2?.id;
@@ -445,7 +448,11 @@ export default function permintaanBarang() {
 
   // get latest no_referensi
   async function fetchLatestNoReferensi() {
-    const endpoint = `${process.env.NEXT_PUBLIC_URL}/product-requests?sort[0]=id:desc&pagination[limit]=1`;
+    setLoading({ ...loading, noRef: true });
+
+    const codename = await getUserCodeName();
+
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/product-requests?sort[0]=id:desc&pagination[limit]=1&filters[no_referensi_mutasi][$contains]=${codename}/MT/`;
     const headers = {
       method: "GET",
       headers: {
@@ -454,25 +461,26 @@ export default function permintaanBarang() {
       },
     };
 
-    const response = await fetch(endpoint, headers)
-      .then((res) => {
-        return res.json();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    const response = await fetch(endpoint, headers).then((res) => {
+      return res.json();
+    });
 
     if (response) {
       const latestDaata = response.data?.[0];
       console.log("latest data", latestDaata);
-      const no = parseInt(latestDaata?.attributes?.no_referensi_recipient?.split("/")?.[1] || 0) + 1;
-      const noRecipient = parseInt(latestDaata?.attributes?.no_referensi_recipient?.split("/")?.[1] || 0) + 2;
-      const latestNoReferensi = `MT/${String(no).padStart(3, "0")}/${moment().format("DD/MM/YYYY")}`;
-      const latestNoReferensiRecipient = `MT/${String(noRecipient).padStart(3, "0")}/${moment().format("DD/MM/YYYY")}`;
+      const no = parseInt(latestDaata?.attributes?.no_referensi_recipient?.split("/")?.[2] || 0) + 1;
+      const noRecipient = parseInt(latestDaata?.attributes?.no_referensi_recipient?.split("/")?.[2] || 0) + 1;
+
+      const latestNoReferensiMutasi = `${codename}/MT/${String(no).padStart(5, "0")}/${moment().format("MM/YYYY")}`;
+      const latestNoReferensi = `${codename}/MK/${String(no).padStart(5, "0")}/${moment().format("MM/YYYY")}`;
+      const latestNoReferensiRecipient = `${codename}/MM/${String(noRecipient).padStart(5, "0")}/${moment().format(
+        "MM/YYYY"
+      )}`;
       form.setFieldsValue({
-        no_referensi: latestNoReferensi,
+        no_referensi: latestNoReferensiMutasi,
       });
-      return [latestNoReferensi, latestNoReferensiRecipient];
+      setLoading({ ...loading, noRef: false });
+      return [latestNoReferensi, latestNoReferensiRecipient, latestNoReferensiMutasi];
     }
 
     console.log("response from fetchLatestNoReferensi", response);
@@ -544,14 +552,9 @@ export default function permintaanBarang() {
         },
       },
       {
-        name: "No Referensi Pengirim",
-        width: "170px",
-        selector: (row) => row.no_referensi,
-      },
-      {
-        name: "No Referensi Penerima",
-        width: "170px",
-        selector: (row) => row?.no_referensi_recipient || "-",
+        name: "No Referensi",
+        width: "190px",
+        selector: (row) => row.no_referensi_mutasi,
       },
       {
         name: "Tanggal Buat",
@@ -651,7 +654,7 @@ export default function permintaanBarang() {
                   </p>
 
                   <p className="text-sm mb-0 font-bold uppercase">
-                    {selectedData ? selectedData?.no_referensi : form.getFieldValue("no_referensi")}
+                    {selectedData ? selectedData?.no_referensi_mutasi : form.getFieldValue("no_referensi")}
                   </p>
                   <p className="text-sm mb-0 font-bold uppercase">
                     {selectedData ? selectedData?.location_sender : selectedLocation1?.name}
@@ -723,7 +726,11 @@ export default function permintaanBarang() {
                             name="no_referensi"
                             className="m-0"
                           >
-                            <Input size="large" placeholder="No Refrensi" className="w-full lg:col-span-1 col-span-3" />
+                            <Input
+                              size="large"
+                              placeholder={loading.noRef ? "Meengambil No Referensi..." : "No Referensi"}
+                              className="w-full lg:col-span-1 col-span-3"
+                            />
                           </Form.Item>
                           <Form.Item
                             rules={[

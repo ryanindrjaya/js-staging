@@ -32,7 +32,7 @@ const Edit = ({ props }) => {
   const role = props?.role?.roles;
   const modules = props?.modules?.data || [];
   const user = props?.user;
-  const userRole = props?.user.role;
+  const userRole = props?.user?.role;
   const userLocation = props?.user.locations;
   const userModuls = formatInitialValue(props?.user.moduls);
   const locations = props?.locations;
@@ -190,7 +190,7 @@ const Edit = ({ props }) => {
               />
 
               <div className="w-full md:w-1/2 flex gap-x-3">
-                <Form.Item name="role_id" className="w-full" initialValue={userRole.id}>
+                <Form.Item name="role_id" className="w-full" initialValue={userRole?.id}>
                   <Select size="large" placeholder="Role">
                     {role.map((role) =>
                       role.name === "Authenticated" || role.name === "Public" ? (
@@ -201,14 +201,6 @@ const Edit = ({ props }) => {
                         <Select.Option value={role.id}>{role.name}</Select.Option>
                       )
                     )}
-                  </Select>
-                </Form.Item>
-
-                <Form.Item name="moduls" className="w-full" initialValue={userModuls}>
-                  <Select mode="multiple" size="large" placeholder="Modul">
-                    {modules.map((module) => (
-                      <Select.Option value={module.id}>{module.attributes.name}</Select.Option>
-                    ))}
                   </Select>
                 </Form.Item>
               </div>

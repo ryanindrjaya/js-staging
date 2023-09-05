@@ -183,7 +183,7 @@ const Print = ({ selling }) => {
         </div>
         <div className="pembayaran flex flex-col items-end">
           <div className="grid grid-cols-2 gap-x-8 font-bold">
-            <p className="m-0">TOTAL PEMBELIAN</p>
+            <p className="m-0">TOTAL PENJUALAN</p>
             <p className="m-0">: {formatter.format(totalPembelian || 0)}</p>
             <p className="m-0">DPP</p>
             <p className="m-0">: {formatter.format(data?.dpp || 0)}</p>

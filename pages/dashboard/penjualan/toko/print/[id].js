@@ -161,7 +161,10 @@ function CetakPenjualan({ props }) {
             Barang yang sudah dibeli melebihi 1, hari tidak dapat <br />
             ditukar/dikembalikan kecuali ada kesepakatan
           </p>
-          <p>DIBUAT OLEH {maker}</p>
+          <p className="m-0">DIBUAT OLEH {maker}</p>
+          <p className="m-0 font-bold">
+            <span className="font-normal">TANGGAL CETAK: </span> {moment().format("DD/MM/YYYY HH:mm:ss")}
+          </p>
         </div>
         <div>
           <p className="font-bold text-sm m-1">TOTAL PENJUALAN : {formatter.format(totalPenjualan)}</p>

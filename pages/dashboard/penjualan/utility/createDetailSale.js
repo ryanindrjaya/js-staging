@@ -2,18 +2,23 @@ import React from "react";
 import nookies from "nookies";
 import * as moment from "moment";
 
-var tempListId = [];
 const cookies = nookies.get(null, "token");
-var subtotalId = 0;
-var id = 0;
 
-const createDetailSale = (values, products, productTotalPrice, productSubTotal, setListId, url, form, lokasiGudang) => {
-  console.log("create detail function", products);
-  console.log("tempList ni ===============", tempListId, form.getFieldValue("product_location"));
+const createDetailSale = async (
+  values,
+  products,
+  productTotalPrice,
+  productSubTotal,
+  setListId,
+  url,
+  form,
+  lokasiGudang
+) => {
+  const detailIds = [];
 
-  const dataToPost = [];
+  for (let index = 0; index < products.productList.length; index++) {
+    const element = products.productList[index];
 
-  products.productList.forEach((element, index) => {
     // default value
     var qty = 1;
     var disc = 0;
@@ -24,7 +29,6 @@ const createDetailSale = (values, products, productTotalPrice, productSubTotal, 
     var subTotal = 0;
     const productLoc = form.getFieldValue("product_location") ?? values?.location;
     console.log("productLoc", productLoc);
-    tempListId = [];
 
     var expDate = values.expired_date?.[id];
     var newExptDate = moment
@@ -47,7 +51,7 @@ const createDetailSale = (values, products, productTotalPrice, productSubTotal, 
 
     console.log("data gudang", dataGudang);
 
-    dataToPost.push({
+    const id = await POSTSaleDetail(
       qty,
       disc,
       unit,
@@ -64,31 +68,86 @@ const createDetailSale = (values, products, productTotalPrice, productSubTotal, 
       margin,
       productLocationId,
       url,
-      dataGudang,
-    });
-  });
-
-  dataToPost.forEach((element) => {
-    POSTSaleDetail(
-      element.qty,
-      element.disc,
-      element.unit,
-      element.unitPrice,
-      element.subTotal,
-      element.id,
-      element.elementId,
-      element.setListId,
-      element.products,
-      element.newExptDate,
-      element.d1,
-      element.d2,
-      //element.d3,
-      element.margin,
-      element.productLocationId,
-      element.url,
-      element.dataGudang
+      dataGudang
     );
-  });
+
+    detailIds.push(id);
+  }
+
+  setListId(detailIds);
+};
+export const createDetailReturSale = async (
+  values,
+  products,
+  productTotalPrice,
+  productSubTotal,
+  setListId,
+  url,
+  form,
+  lokasiGudang,
+  items
+) => {
+  const detailIds = [];
+
+  for (let index = 0; index < items.length; index++) {
+    const element = items[index];
+
+    // default value
+    var qty = 1;
+    var disc = 0;
+    var margin = 0;
+    var unit = element.attributes.unit_1;
+    var unitPrice = element.attributes.sold_price_1;
+    var unitPriceAfterDisc = element.attributes.sold_price_1;
+    var subTotal = 0;
+    const productLoc = form.getFieldValue("product_location") ?? values?.location;
+    console.log("productLoc", productLoc);
+
+    var expDate = values.expired_date?.[id];
+    var newExptDate = moment
+      .utc(expDate)
+      .utcOffset(7 * 60)
+      .format();
+
+    var elementId = element.id;
+    qty = products.productInfo[element.index]?.qty ?? 1;
+    disc = products.productInfo[element.index]?.disc ?? 0;
+    unit = products.productInfo[element.index]?.unit ?? element.attributes.unit_1;
+    unitPrice = products.productInfo[element.index]?.priceUnit ?? element.attributes.sold_price_1;
+    unitPriceAfterDisc = productTotalPrice?.[element.index];
+    subTotal = productSubTotal?.[element.index];
+    var d1 = products.productInfo[element.index]?.d1 ?? element.attributes.disc_1_1;
+    var d2 = products.productInfo[element.index]?.d2 ?? 0;
+    margin = products.productInfo[element.index]?.margin ?? 0;
+    var productLocationId = productLoc?.[element.index] ?? productLoc;
+    const dataGudang = lokasiGudang?.[element.index];
+
+    console.log("data gudang", dataGudang);
+
+    const id = await POSTSaleDetail(
+      qty,
+      disc,
+      unit,
+      unitPrice,
+      subTotal,
+      id,
+      elementId,
+      setListId,
+      products,
+      newExptDate,
+      d1,
+      d2,
+      //d3,
+      margin,
+      productLocationId,
+      url,
+      dataGudang
+    );
+
+    detailIds.push(id);
+  }
+
+  setListId(detailIds);
 };
 
 const POSTSaleDetail = async (
@@ -145,10 +204,7 @@ const POSTSaleDetail = async (
   const res = await req.json();
 
   if (req.status === 200) {
-    tempListId.push(res.data?.id);
-    if (tempListId.length === products.productList.length) {
-      setListId(tempListId);
-    }
+    return res.data?.id;
   }
 };
 

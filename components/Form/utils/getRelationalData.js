@@ -24,8 +24,8 @@ export async function getRelationalData(url, parameter, query) {
 export async function getLocationsId(locationsNamesArr = []) {
   let endpoint = process.env.NEXT_PUBLIC_URL + "/locations?";
 
-  locationsNamesArr?.forEach((locationName, index) => {
-    endpoint += `filters[name][$in][${index}]=${locationName}`;
+  locationsNamesArr?.forEach((locationName = "", index) => {
+    endpoint += `filters[location_id][$eq][${index}]=${locationName}&`;
     if (index < locationsNamesArr.length - 1) {
       endpoint += "&";
     }

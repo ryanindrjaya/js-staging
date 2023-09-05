@@ -150,6 +150,9 @@ const Print = ({ selling }) => {
           <div>
             <p className="m-0">Harga sudah termasuk PPN</p>
             <p className="m-0 uppercase">DIBUAT OLEH : {data.added_by}</p>
+            <p className="m-0 font-bold">
+              <span className="font-normal">TANGGAL CETAK: </span> {moment().format("DD/MM/YYYY HH:mm:ss")}
+            </p>
           </div>
         </div>
         <div className="ttd font-bold flex items-end">
@@ -172,7 +175,7 @@ const Print = ({ selling }) => {
         </div>
         <div className="pembayaran flex flex-col items-end">
           <div className="grid grid-cols-2 gap-x-8 font-bold">
-            <p className="m-0">TOTAL PEMBELIAN</p>
+            <p className="m-0">TOTAL PENJUALAN</p>
             <p className="m-0">: {formatter.format(totalPembelian || 0)}</p>
             <p className="m-0">DPP</p>
             <p className="m-0">: {formatter.format(data?.dpp || 0)}</p>

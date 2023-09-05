@@ -228,7 +228,10 @@ export default function Reducer(state = initState, action) {
       };
 
     case "SET_SALE_INITIAL_PRODUCT":
-      state.productList.push(action.product);
+      state.productList.push({
+        ...action.product,
+        index: action?.index,
+      });
       var id = action.index;
 
       return {

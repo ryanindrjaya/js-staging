@@ -9,6 +9,7 @@ import SignInStyleWrapper from "../styled/SignIn.styles";
 import { Spin, Alert } from "antd";
 import nookies from "nookies";
 import { saveState } from "../library/helpers/localStorage";
+import Head from "next/dist/shared/lib/head";
 
 const { login } = authActions;
 
@@ -57,6 +58,9 @@ export default function SignInPage(props) {
 
         const user = await getUserInformation(res.jwt);
         const moduls = await getModuls(user.role.id);
+
+        console.log("moduls", moduls);
+
         // set role token
         nookies.set(null, "role", user.role.name, {
           maxAge: 30 * 24 * 60 * 60,
@@ -65,7 +69,7 @@ export default function SignInPage(props) {
           sameSite: "strict",
         });
 
-        saveState("_mod", user.moduls);
+        saveState("_mod", moduls);
 
         // redirect
         router.replace("/dashboard");
@@ -73,6 +77,7 @@ export default function SignInPage(props) {
         setFailedLogin(true);
       }
     } catch (error) {
+      console.log(error);
       setFailedLogin(true);
       setfailedLoginMsg("Kesalahan Pada Server. Silahkan cek kembali");
     }
@@ -110,7 +115,26 @@ export default function SignInPage(props) {
     const req = await fetch(endpoint, options);
     const res = await req.json();
 
-    return res?.moduls || [];
+    console.log("res", res);
+
+    // group by parent_modul
+    const groupBy = (array, key) => {
+      return array.reduce((result, currentValue) => {
+        console.log("result", result);
+        if (!currentValue[key]) {
+          result[currentValue.uid] = currentValue;
+
+          return result;
+        } else {
+          (result[currentValue[key]] = result[currentValue[key]] || []).push(currentValue);
+          return result;
+        }
+      }, {});
+    };
+
+    const grouped = groupBy(res?.moduls, "parent_modul");
+
+    return grouped || {};
   };
 
   const onClose = (e) => {
@@ -131,59 +155,66 @@ export default function SignInPage(props) {
   // =========================== UI ===========================
 
   return (
-    <SignInStyleWrapper className="isoSignInPage">
-      <div className="isoLoginContentWrapper">
-        <div className="isoLoginContent">
-          <div className="isoLogoWrapper">JAYA SEHAT</div>
+    <>
+      <Head>
+        <title>Jaya Sehat | Login</title>
+      </Head>
+      <SignInStyleWrapper className="isoSignInPage">
+        <div className="isoLoginContentWrapper">
+          <div className="isoLoginContent">
+            <div className="isoLogoWrapper">JAYA SEHAT</div>
 
-          <div className="isoSignInForm">
-            <div className="isoInputWrapper">
-              <Input onChange={setValue} name="username" id="inputUserName" size="large" placeholder="Username" />
-            </div>
+            <div className="isoSignInForm">
+              <div className="isoInputWrapper">
+                <Input onChange={setValue} name="username" id="inputUserName" size="large" placeholder="Username" />
+              </div>
 
-            <div className="isoInputWrapper">
-              <Input
-                onChange={setValue}
-                id="inpuPassword"
-                size="large"
-                name="password"
-                type="password"
-                placeholder="Password"
-              />
-            </div>
+              <div className="isoInputWrapper">
+                <Input
+                  onChange={setValue}
+                  id="inpuPassword"
+                  size="large"
+                  name="password"
+                  type="password"
+                  placeholder="Password"
+                />
+              </div>
 
-            <div className="isoInputWrapper isoLeftRightComponent">
-              {loading ? (
-                <div className="center">
-                  <Spin />
-                </div>
+              <div className="isoInputWrapper isoLeftRightComponent">
+                {loading ? (
+                  <div className="center">
+                    <Spin />
+                  </div>
+                ) : (
+                  <div className="flex flex-col">
+                    {message ? (
+                      <p className={`text-sm ${message === "success" ? "text-green-500" : "text-red-500"}`}>
+                        {message}
+                      </p>
+                    ) : (
+                      ""
+                    )}
+                    <Button block type="primary" onClick={handleLogin}>
+                      <IntlMessages id="page.signInButton" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+              {failedLogin ? (
+                <Alert
+                  message="Login Error"
+                  description="Username atau Password salah"
+                  type="error"
+                  closable
+                  onClose={onClose}
+                />
               ) : (
-                <div className="flex flex-col">
-                  {message ? (
-                    <p className={`text-sm ${message === "success" ? "text-green-500" : "text-red-500"}`}>{message}</p>
-                  ) : (
-                    ""
-                  )}
-                  <Button block type="primary" onClick={handleLogin}>
-                    <IntlMessages id="page.signInButton" />
-                  </Button>
-                </div>
+                <div></div>
               )}
             </div>
-            {failedLogin ? (
-              <Alert
-                message="Login Error"
-                description="Username atau Password salah"
-                type="error"
-                closable
-                onClose={onClose}
-              />
-            ) : (
-              <div></div>
-            )}
           </div>
         </div>
-      </div>
-    </SignInStyleWrapper>
+      </SignInStyleWrapper>
+    </>
   );
 }

@@ -8,8 +8,8 @@ import authActions from "../authentication/actions";
 import SignInStyleWrapper from "../styled/SignIn.styles";
 import { Spin, Alert } from "antd";
 import nookies from "nookies";
-import Head from "next/head";
 import { saveState } from "../library/helpers/localStorage";
+import Head from "next/dist/shared/lib/head";
 
 const { login } = authActions;
 
@@ -21,8 +21,6 @@ export default function SignInPage(props) {
   const [failedLoginMsg, setfailedLoginMsg] = useState("Username atau Password salah");
   const [field, setField] = useState({});
   const message = useSelector((state) => state.session.sessionMessage);
-
-  const isExpired = router?.query?.session || true;
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -54,20 +52,24 @@ export default function SignInPage(props) {
         nookies.set(null, "token", res.jwt, {
           maxAge: 30 * 24 * 60 * 60,
           path: "/",
-          secure: process.env.NODE_ENV !== "development",
+          secure: process.env.NEXT_PUBLIC_URL !== "development",
           sameSite: "strict",
         });
 
         const user = await getUserInformation(res.jwt);
+        const moduls = await getModuls(user.role.id);
+
+        console.log("moduls", moduls);
+
         // set role token
         nookies.set(null, "role", user.role.name, {
           maxAge: 30 * 24 * 60 * 60,
           path: "/",
-          secure: process.env.NODE_ENV !== "development",
+          secure: process.env.NEXT_PUBLIC_URL !== "development",
           sameSite: "strict",
         });
 
-        saveState("_mod", user.moduls);
+        saveState("_mod", moduls);
 
         // redirect
         router.replace("/dashboard");
@@ -99,6 +101,38 @@ export default function SignInPage(props) {
     return res;
   };
 
+  const getModuls = async (id) => {
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/moduls/roles/" + id;
+
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    const req = await fetch(endpoint, options);
+    const res = await req.json();
+
+    // group by parent_modul
+    const groupBy = (array, key) => {
+      return array.reduce((result, currentValue) => {
+        if (!currentValue[key]) {
+          result[currentValue.uid] = currentValue;
+
+          return result;
+        }
+
+        (result[currentValue[key]] = result[currentValue[key]] || []).push(currentValue);
+        return result;
+      }, {});
+    };
+
+    const grouped = groupBy(res?.moduls, "parent_modul");
+
+    return grouped || {};
+  };
+
   const onClose = (e) => {
     console.log(e, "I was closed.");
   };
@@ -119,7 +153,7 @@ export default function SignInPage(props) {
   return (
     <>
       <Head>
-        <title>Login</title>
+        <title>Jaya Sehat | Login</title>
       </Head>
       <SignInStyleWrapper className="isoSignInPage">
         <div className="isoLoginContentWrapper">
@@ -149,8 +183,10 @@ export default function SignInPage(props) {
                   </div>
                 ) : (
                   <div className="flex flex-col">
-                    {isExpired !== true ? (
-                      <p className="text-sm text-red-500">Sesi anda telah berakhir, harap login kembali</p>
+                    {message ? (
+                      <p className={`text-sm ${message === "success" ? "text-green-500" : "text-red-500"}`}>
+                        {message}
+                      </p>
                     ) : (
                       ""
                     )}

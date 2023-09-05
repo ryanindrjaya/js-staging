@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Select } from "antd";
 import { CaretDownOutlined } from "@ant-design/icons";
 import nookies from "nookies";
@@ -21,13 +21,17 @@ export default function SearchBar({
   disabled = false,
 }) {
   const dispatch = useDispatch();
-
+  const [userLocations, setUserLocations] = useState("");
   const [product, setProduct] = useState();
   const [data, setData] = useState([]);
   const cookies = nookies.get(null, "token");
   const productList = [];
 
   const handleChange = async (id) => {};
+
+  useEffect(() => {
+    getUserInfo();
+  }, []);
 
   const handleSelect = async (id) => {
     const endpoint = process.env.NEXT_PUBLIC_URL + `/products/${id}`;
@@ -64,11 +68,16 @@ export default function SearchBar({
     const req = await fetch(endpoint, options);
     const res = await req.json();
 
-    const locationData = res.locations.map((location, idx) => {
-      return `filters[$or][${idx}][locations][id][$eq]=${location?.id}`;
-    });
+    const locationData = [];
+
+    for (let idx = 0; idx < res.locations.length; idx++) {
+      const location = res.locations[idx];
+
+      locationData.push(`filters[$or][${idx}][locations][id][$eq]=${location?.id}`);
+    }
+
     // console.log("querylocation " + queryLocations);
-    return locationData.join("&");
+    setUserLocations(locationData.join("&"));
   };
 
   const handleSearch = (newValue) => {
@@ -86,11 +95,9 @@ export default function SearchBar({
       callback([]);
     } else {
       try {
-        let queryLocations = await getUserInfo();
-
         const endpoint =
           process.env.NEXT_PUBLIC_URL +
-          `/products?populate=locations&filters[name][$contains]=${query}&${queryLocations}`;
+          `/products?populate=locations&filters[name][$contains]=${query}&${userLocations}`;
         const options = {
           method: "GET",
           headers: {

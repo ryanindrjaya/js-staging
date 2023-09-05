@@ -17,6 +17,7 @@ import SalesTable from "../../../../components/ReactDataTable/Selling/SalesTable
 import SearchOrder from "../../../../components/Form/AddSale/SearchPO";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import confirm from "antd/lib/modal/confirm";
+import getUserCodeName from "../../../../library/functions/getUserCodeName";
 
 Toko.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -200,7 +201,6 @@ function Toko({ props }) {
 
   // NO Sales Sale
   var noSalesSale = String(salesSale?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`PS/ET/${user.id}/${noSalesSale}/${mm}/${yyyy}`);
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);
@@ -255,8 +255,25 @@ function Toko({ props }) {
     return res;
   };
 
+  const checkStokGudang = () => {
+    console.log("dataLocationStock", dataLocationStock);
+    const availableStock = Object.values(dataLocationStock).every((stock) => stock);
+
+    return availableStock;
+  };
+
   const onFinish = async (values, accept) => {
     if (accept) {
+      const stokAda = Object.values(dataLocationStock).every((stock) => stock);
+
+      if (!stokAda) {
+        notification["error"]({
+          message: "Stok tidak cukup",
+          description: "Stok di gudang tidak mencukupi untuk melakukan penjualan",
+        });
+        return;
+      }
+
       setLoading(true);
       const isValid = await dataValidation();
       if (!isValid) {
@@ -623,7 +640,43 @@ function Toko({ props }) {
     }
   }, [customer]);
 
+  async function fetchLatestNoReferensi() {
+    const codename = await getUserCodeName();
+
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/sales-sales?sort[0]=id:desc&pagination[limit]=1&filters[no_sales_sale][$contains]=${codename}/PS/`;
+    const headers = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${cookies.token}`,
+      },
+    };
+
+    const response = await fetch(endpoint, headers)
+      .then((res) => {
+        return res.json();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    if (response) {
+      const latestDaata = response.data?.[0];
+      const no = parseInt(latestDaata?.attributes?.no_sales_sale?.split("/")?.[2] || 0) + 1;
+      console.log("no", no);
+      const latestNoReferensi = `${codename}/PS/${String(no).padStart(5, "0")}/${moment().format("MM/YYYY")}`;
+      form.setFieldsValue({
+        no_sales_sale: latestNoReferensi,
+      });
+      return latestNoReferensi;
+    }
+
+    console.log("response from fetchLatestNoReferensi", response);
+  }
+
   useEffect(() => {
+    fetchLatestNoReferensi();
+
     // used to reset redux from value before
     clearData();
     setProductSubTotal({});
@@ -774,7 +827,6 @@ function Toko({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="no_sales_sale"
-                    initialValue={categorySale}
                     rules={[
                       {
                         required: true,
@@ -782,7 +834,7 @@ function Toko({ props }) {
                       },
                     ]}
                   >
-                    <Input style={{ height: "40px" }} placeholder="No. Penjualan" />
+                    <Input style={{ height: "40px" }} placeholder="Mengambil nomor..." />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">

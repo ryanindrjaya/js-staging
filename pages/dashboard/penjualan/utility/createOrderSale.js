@@ -9,7 +9,7 @@ var tempLocationId;
 
 const CreateOrderSale = async (values, listId, form, router, setLoading) => {
   tempProductListId = [];
-  
+
   // CLEANING DATA
   listId.forEach((element) => {
     tempProductListId.push({ id: element });
@@ -22,6 +22,8 @@ const CreateOrderSale = async (values, listId, form, router, setLoading) => {
     data: values,
   };
 
+  console.log("payload", data);
+
   const req = await createData(data);
   const res = await req.json();
 
@@ -33,6 +35,7 @@ const CreateOrderSale = async (values, listId, form, router, setLoading) => {
 };
 
 const createData = async (data) => {
+  console.log(data);
   const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sells";
   const JSONdata = JSON.stringify(data);
 

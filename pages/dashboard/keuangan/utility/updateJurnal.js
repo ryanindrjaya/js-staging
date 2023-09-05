@@ -8,23 +8,14 @@ var tempProductListId = [];
 var tempSupplierId = 0;
 var tempLocationId;
 
-const UpdateJurnal = async (
-  akun,
-  page,
-  noHutang, 
-  noPiutang,
-  saldo,
-  user,
-  tipe
-) => {
+const UpdateJurnal = async (akun, page, noHutang, noPiutang, saldo, user, tipe) => {
   // CLEANING DATA
-  
+
   var today = new Date();
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
-  var jurnal = await getJurnal();
-  var noJurnal = String(jurnal?.meta?.pagination?.total + 1).padStart(3, "0");
-  console.log("get jurnal", jurnal);
+  var jurnal = await getJurnal(user.codename);
+  var noJurnal = String(jurnal?.meta?.pagination?.total + 1).padStart(5, "0");
 
   var values = { ...akun };
   delete values.id;
@@ -36,24 +27,24 @@ const UpdateJurnal = async (
   values.added_by = user.name;
   values.tanggal = moment();
 
-  if(page == "hutang"){
+  if (page == "hutang") {
     if (tipe !== "Master") values.kredit = saldo;
     else if (tipe === "Master") values.debit = saldo;
     values.catatan = "Transaksi hutang dengan kode " + noHutang;
-    values.no_jurnal = `JH/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+    values.no_jurnal = `${user.codename}/JH/${noJurnal}/${mm}/${yyyy}`;
     // noJurnal++;
     // noJurnal = String(noJurnal).padStart(3, "0");
-  } else if (page == "piutang") { 
+  } else if (page == "piutang") {
     if (tipe !== "Master") values.debit = saldo;
     else if (tipe === "Master") values.kredit = saldo;
     values.catatan = "Transaksi piutang dengan kode " + noPiutang;
-    values.no_jurnal = `JP/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+    values.no_jurnal = `${user.codename}/JP/${noJurnal}/${mm}/${yyyy}`;
     // noJurnal++;
     // noJurnal = String(noJurnal).padStart(3, "0");
-  } 
-  
+  }
+
   noJurnal++;
-  noJurnal = String(noJurnal).padStart(3, "0");
+  noJurnal = String(noJurnal).padStart(5, "0");
 
   var data = {
     data: values,
@@ -75,15 +66,14 @@ const UpdateJurnal = async (
 
   const req = await fetch(endpoint, options);
   const res = await req.json();
-    console.log("req create", req, res);
+  console.log("req create", req, res);
 
-    if (req.status === 200) {
-      console.log("suksess");
-      openNotificationWithIcon("success");
-    } else {
-      openNotificationWithIcon("error", req);
-    }
-
+  if (req.status === 200) {
+    console.log("suksess");
+    openNotificationWithIcon("success");
+  } else {
+    openNotificationWithIcon("error", req);
+  }
 };
 
 const openNotificationWithIcon = (type, req) => {
@@ -100,8 +90,8 @@ const openNotificationWithIcon = (type, req) => {
   }
 };
 
-const getJurnal = async () => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*";
+const getJurnal = async (codename) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + `/jurnals?populate=*&filters[no_jurnal][$contains]=${codename}`;
   const options = {
     method: "GET",
     headers: {

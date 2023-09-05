@@ -18,6 +18,7 @@ import { useRouter } from "next/router";
 import SearchLPB from "../../../../components/Form/AddOrder/SearchLPB";
 import moment from "moment";
 import createInventoryRetur from "../utility/createInventoryRetur";
+import getUserCodeName from "../../../../library/functions/getUserCodeName";
 
 Retur.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -278,6 +279,40 @@ function Retur({ props }) {
     return popUpDialog;
   };
 
+  async function fetchLatestNoReferensi() {
+    const codename = await getUserCodeName();
+
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/returs?sort[0]=id:desc&pagination[limit]=1&filters[no_retur][$contains]=${codename}/RB/`;
+    const headers = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${cookies.token}`,
+      },
+    };
+
+    const response = await fetch(endpoint, headers)
+      .then((res) => {
+        return res.json();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    if (response) {
+      const latestDaata = response.data?.[0];
+      const no = parseInt(latestDaata?.attributes?.no_retur?.split("/")?.[2] || 0) + 1;
+      console.log("no", no);
+      const latestNoReferensi = `${codename}/RB/${String(no).padStart(5, "0")}/${moment().format("MM/YYYY")}`;
+      form.setFieldsValue({
+        no_retur: latestNoReferensi,
+      });
+      return latestNoReferensi;
+    }
+
+    console.log("response from fetchLatestNoReferensi", response);
+  }
+
   const onFinish = async (values) => {
     setLoading(true);
 
@@ -460,6 +495,7 @@ function Retur({ props }) {
 
   useEffect(() => {
     dispatch({ type: "CLEAR_DATA" });
+    fetchLatestNoReferensi();
     setProductValue();
 
     return () => {
@@ -546,7 +582,7 @@ function Retur({ props }) {
                       },
                     ]}
                   >
-                    <Input style={{ height: "40px" }} placeholder="No.Retur" />
+                    <Input style={{ height: "40px" }} placeholder="Mengambil nomor..." />
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">

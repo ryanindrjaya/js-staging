@@ -8,21 +8,15 @@ var tempProductListId = [];
 var tempSupplierId = 0;
 var tempLocationId;
 
-const UpdateJurnal = async (
-  data,
-  user,
-  page
-) => {
-  
-  
+const UpdateJurnal = async (data, user, page) => {
   // CLEANING DATA
   var today = new Date();
   var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
   var yyyy = today.getFullYear();
-  var jurnal = await getJurnal();
-  var noJurnal = String(jurnal?.meta?.pagination?.total + 1).padStart(3, "0");
+  var jurnal = await getJurnal(user.codename);
+  var noJurnal = String(jurnal?.meta?.pagination?.total + 1).padStart(5, "0");
   console.log("get jurnal", jurnal);
-  
+
   var values = data;
   delete values.id;
   values.no_jurnal = "";
@@ -32,9 +26,8 @@ const UpdateJurnal = async (
   values.chart_of_account = null;
   values.added_by = user.name;
   values.tanggal = moment();
-  
-  if(page === "lpb"){
 
+  if (page === "lpb") {
     //JURNAL LEMBAR PENERIMAAN BARANG
     const reqCOA = await fetchAkunCOA(cookies, "115.10.00", "116.20.07", "211.01.01");
     const akunCOA = await reqCOA.json();
@@ -44,31 +37,29 @@ const UpdateJurnal = async (
     akunCOA.data.map((item) => {
       values.debit = 0;
       values.kredit = 0;
-      values.no_jurnal = `JPB/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+      values.no_jurnal = `${user.codename}/JPB/${noJurnal}/${mm}/${yyyy}`;
       values.catatan = "Transaksi lpb dengan kode " + values?.attributes?.no_purchasing;
-      if(item.attributes.jenis_akun === true && item.attributes.kode === "115.10.00") {
+      if (item.attributes.jenis_akun === true && item.attributes.kode === "115.10.00") {
         values.debit = values.attributes.dpp_value;
-        
+
         noJurnal++;
-        noJurnal = String(noJurnal).padStart(3, "0");
-      }
-      else if(item.attributes.jenis_akun === true && item.attributes.kode === "116.20.07"){
+        noJurnal = String(noJurnal).padStart(5, "0");
+      } else if (item.attributes.jenis_akun === true && item.attributes.kode === "116.20.07") {
         values.debit = values.attributes.ppn_value;
-        
+
         noJurnal++;
-        noJurnal = String(noJurnal).padStart(3, "0");
-      }
-      else if(item.attributes.jenis_akun === false && item.attributes.kode === "211.01.01"){
-        if(values.attributes.price_after_disc === 0){
+        noJurnal = String(noJurnal).padStart(5, "0");
+      } else if (item.attributes.jenis_akun === false && item.attributes.kode === "211.01.01") {
+        if (values.attributes.price_after_disc === 0) {
           values.kredit = values.attributes.total_purchasing;
-          
+
           noJurnal++;
-          noJurnal = String(noJurnal).padStart(3, "0");
+          noJurnal = String(noJurnal).padStart(5, "0");
         } else {
           values.kredit = values.attributes.price_after_disc;
-          
+
           noJurnal++;
-          noJurnal = String(noJurnal).padStart(3, "0");
+          noJurnal = String(noJurnal).padStart(5, "0");
         }
       }
       values.chart_of_account = item.id;
@@ -79,20 +70,19 @@ const UpdateJurnal = async (
 
       postJurnal(data);
     });
-
-  } else if(page === "retur"){
-    
+  } else if (page === "retur") {
     //JURNAL RETUR BELI POTONG UTANG
     const reqCOA = await fetchAkunCOA(cookies, "115.10.00", "116.20.07", "211.01.02");
     const akunCOA = await reqCOA.json();
 
     console.log("get akunCOA", akunCOA);
 
-    var totalPrice = values.attributes.total_price; console.log(values, "retur values");
+    var totalPrice = values.attributes.total_price;
+    console.log(values, "retur values");
     var dpp = 0;
     var ppn = 0;
 
-    if(values.attributes.DPP_PPN_active === true){
+    if (values.attributes.DPP_PPN_active === true) {
       dpp = totalPrice / 1.11;
       ppn = dpp * 0.11;
     }
@@ -100,25 +90,23 @@ const UpdateJurnal = async (
     akunCOA.data.map((item) => {
       values.debit = 0;
       values.kredit = 0;
-      values.no_jurnal = `JRPB/${user.id}/${noJurnal}/${mm}/${yyyy}`;
+      values.no_jurnal = `${user.codename}/JRPB/${noJurnal}/${mm}/${yyyy}`;
       values.catatan = "Transaksi retur lpb dengan kode " + values?.attributes?.no_retur;
-      if(item.attributes.jenis_akun === true && item.attributes.kode === "115.10.00") {
+      if (item.attributes.jenis_akun === true && item.attributes.kode === "115.10.00") {
         values.kredit = dpp;
-        
+
         noJurnal++;
-        noJurnal = String(noJurnal).padStart(3, "0");
-      }
-      else if(item.attributes.jenis_akun === true && item.attributes.kode === "116.20.07"){
+        noJurnal = String(noJurnal).padStart(5, "0");
+      } else if (item.attributes.jenis_akun === true && item.attributes.kode === "116.20.07") {
         values.kredit = ppn;
-        
+
         noJurnal++;
-        noJurnal = String(noJurnal).padStart(3, "0");
-      }
-      else if(item.attributes.jenis_akun === false && item.attributes.kode === "211.01.02"){
+        noJurnal = String(noJurnal).padStart(5, "0");
+      } else if (item.attributes.jenis_akun === false && item.attributes.kode === "211.01.02") {
         values.debit = totalPrice;
-        
+
         noJurnal++;
-        noJurnal = String(noJurnal).padStart(3, "0");
+        noJurnal = String(noJurnal).padStart(5, "0");
       }
       values.chart_of_account = item.id;
 
@@ -136,17 +124,17 @@ const UpdateJurnal = async (
     akunCOABayar.data.map((item) => {
       values.debit = 0;
       values.kredit = 0;
-      values.no_jurnal = `JRPB/${user.id}/${noJurnal}/${mm}/${yyyy}`;
-      if(item.attributes.jenis_akun === false && item.attributes.kode === "211.01.01"){
+      values.no_jurnal = `${user.codename}/JRPB/${noJurnal}/${mm}/${yyyy}`;
+      if (item.attributes.jenis_akun === false && item.attributes.kode === "211.01.01") {
         values.debit = totalPrice;
-        
+
         noJurnal++;
-        noJurnal = String(noJurnal).padStart(3, "0");
-      } else if(item.attributes.jenis_akun === false && item.attributes.kode === "211.01.02"){
+        noJurnal = String(noJurnal).padStart(5, "0");
+      } else if (item.attributes.jenis_akun === false && item.attributes.kode === "211.01.02") {
         values.kredit = totalPrice;
-        
+
         noJurnal++;
-        noJurnal = String(noJurnal).padStart(3, "0");
+        noJurnal = String(noJurnal).padStart(5, "0");
       }
       values.chart_of_account = item.id;
 
@@ -156,9 +144,7 @@ const UpdateJurnal = async (
 
       postJurnal(data);
     });
-
   }
-  
 };
 
 const openNotificationWithIcon = (type, req) => {
@@ -175,9 +161,8 @@ const openNotificationWithIcon = (type, req) => {
   }
 };
 
-
-const getJurnal = async () => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*";
+const getJurnal = async (codename) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + `/jurnals?populate=*&filters[no_jurnal][$contains]=${codename}`;
   const options = {
     method: "GET",
     headers: {
@@ -188,7 +173,7 @@ const getJurnal = async () => {
 
   const req = await fetch(endpoint, options);
   const res = await req.json();
-  
+
   return res;
 };
 
@@ -207,18 +192,25 @@ const postJurnal = async (data) => {
 
   const req = await fetch(endpoint, options);
   const res = await req.json();
-    console.log("req create", req, res);
+  console.log("req create", req, res);
 
-    if (req.status === 200) {
-      console.log("suksess jurnal");
-      openNotificationWithIcon("success");
-    } else {
-      openNotificationWithIcon("error", req);
-    }
-}
+  if (req.status === 200) {
+    console.log("suksess jurnal");
+    openNotificationWithIcon("success");
+  } else {
+    openNotificationWithIcon("error", req);
+  }
+};
 
 const fetchAkunCOA = async (cookies, kode1, kode2, kode3) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/chart-of-accounts?populate=*&filters[kode][$in][0]="+ kode1 +"&filters[kode][$in][1]="+ kode2 +"&filters[kode][$in][2]="+ kode3;
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL +
+    "/chart-of-accounts?populate=*&filters[kode][$in][0]=" +
+    kode1 +
+    "&filters[kode][$in][1]=" +
+    kode2 +
+    "&filters[kode][$in][2]=" +
+    kode3;
   const options = {
     method: "GET",
     headers: {

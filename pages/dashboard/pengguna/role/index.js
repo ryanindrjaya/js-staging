@@ -23,7 +23,7 @@ const Role = ({ props }) => {
   };
 
   const handleDelete = async (id) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/users-permissions/roles/" + id;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/moduls/roles/" + id;
     const cookies = nookies.get(null, "token");
 
     const options = {
@@ -36,7 +36,7 @@ const Role = ({ props }) => {
 
     const req = await fetch(endpoint, options);
     const res = await req.json();
-    if (res) {
+    if (req.ok) {
       const req = await fetchData(cookies);
       const data = await req.json();
 
@@ -46,13 +46,15 @@ const Role = ({ props }) => {
 
       setRole(roleData);
       toast.success("Role berhasil dihapus");
+    } else {
+      toast.error("Role gagal dihapus");
     }
   };
 
   return (
     <>
       <Head>
-        <title>Daftar Pengguna</title>
+        <title>Daftar Role Pengguna</title>
       </Head>
       <DashboardLayout>
         <LayoutWrapper style={{}}>

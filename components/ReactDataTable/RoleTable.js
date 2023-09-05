@@ -1,10 +1,11 @@
 import DataTable from "react-data-table-component";
 import AlertDialog from "../Alert/Alert";
+import { Button } from "antd";
+import { EditOutlined } from "@ant-design/icons";
+import { useRouter } from "next/router";
 
 export default function ReactDataTable({ roleData, onDelete, onUpdate }) {
-
-
- 
+  const router = useRouter();
   const onConfirm = (id) => {
     onDelete(id);
   };
@@ -14,7 +15,7 @@ export default function ReactDataTable({ roleData, onDelete, onUpdate }) {
   };
 
   const onEdit = (id) => {
-    onUpdate(id);
+    router.push("/dashboard/pengguna/role/edit/" + id);
   };
 
   const customStyles = {
@@ -31,7 +32,7 @@ export default function ReactDataTable({ roleData, onDelete, onUpdate }) {
       name: "Nama",
       width: "w-1/3",
       sortable: true,
-      
+
       selector: (row) => row.name,
     },
     {
@@ -41,12 +42,16 @@ export default function ReactDataTable({ roleData, onDelete, onUpdate }) {
       selector: (row) => row.description,
     },
 
-    { 
+    {
       name: "Tindakan",
       width: "w-1/3",
       selector: (row) => (
         <>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="flex gap-x-3">
+            <Button onClick={() => onEdit(row.id)} type="default" color="orange">
+              <EditOutlined />
+              Edit
+            </Button>
             <AlertDialog
               onCancel={onCancel}
               onConfirm={onConfirm}
@@ -60,5 +65,5 @@ export default function ReactDataTable({ roleData, onDelete, onUpdate }) {
     },
   ];
 
-  return <DataTable  customStyles={customStyles} columns={columns} data={roleData}  pagination />;
+  return <DataTable customStyles={customStyles} columns={columns} data={roleData} pagination />;
 }
