@@ -143,6 +143,7 @@ export default function ReactDataTable({
   const columns = [
     {
       name: "Nama Produk",
+      wrap: true,
       selector: (row) => row.attributes?.name,
     },
     {

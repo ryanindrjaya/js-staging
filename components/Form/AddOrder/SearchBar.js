@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Form, Select } from "antd";
+import { Form, Select, message } from "antd";
 import { CaretDownOutlined } from "@ant-design/icons";
 import nookies from "nookies";
 import action from "@iso/redux/application/order/action";
@@ -59,6 +59,14 @@ export default function SearchBar({
       form.setFieldsValue({ products: undefined });
     }
   };
+
+  useEffect(() => {
+    if (loading) {
+      message.loading({ content: "Mengambil data...", key: "loading", duration: 5000 });
+    } else {
+      message.destroy("loading");
+    }
+  }, [loading]);
 
   const getUserInfo = async () => {
     const endpoint = process.env.NEXT_PUBLIC_URL + `/users/me?populate=locations`;

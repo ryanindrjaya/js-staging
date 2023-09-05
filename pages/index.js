@@ -117,16 +117,32 @@ export default function SignInPage(props) {
 
     console.log("res", res);
 
+    let order = 0;
+
     // group by parent_modul
     const groupBy = (array, key) => {
-      return array.reduce((result, currentValue) => {
+      return array.reduce((result, currentValue, idx) => {
         console.log("result", result);
         if (!currentValue[key]) {
-          result[currentValue.uid] = currentValue;
+          result[currentValue.uid] = {
+            ...currentValue,
+            order: order,
+          };
+
+          order++;
 
           return result;
         } else {
-          (result[currentValue[key]] = result[currentValue[key]] || []).push(currentValue);
+          if (!result[currentValue[key]]) {
+            result[currentValue[key]] = {
+              order: order,
+              child: [],
+            };
+            order++;
+          }
+
+          (result[currentValue[key]] = result[currentValue[key]] || { child: [] }).child.push(currentValue);
+
           return result;
         }
       }, {});

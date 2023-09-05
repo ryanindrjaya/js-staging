@@ -77,6 +77,7 @@ export default function SignInPage(props) {
         setFailedLogin(true);
       }
     } catch (error) {
+      console.log(error);
       setFailedLogin(true);
       setfailedLoginMsg("Kesalahan Pada Server. Silahkan cek kembali");
     }
@@ -114,17 +115,36 @@ export default function SignInPage(props) {
     const req = await fetch(endpoint, options);
     const res = await req.json();
 
+    console.log("res", res);
+
+    let order = 0;
+
     // group by parent_modul
     const groupBy = (array, key) => {
-      return array.reduce((result, currentValue) => {
+      return array.reduce((result, currentValue, idx) => {
+        console.log("result", result);
         if (!currentValue[key]) {
-          result[currentValue.uid] = currentValue;
+          result[currentValue.uid] = {
+            ...currentValue,
+            order: order,
+          };
+
+          order++;
+
+          return result;
+        } else {
+          if (!result[currentValue[key]]) {
+            result[currentValue[key]] = {
+              order: order,
+              child: [],
+            };
+            order++;
+          }
+
+          (result[currentValue[key]] = result[currentValue[key]] || { child: [] }).child.push(currentValue);
 
           return result;
         }
-
-        (result[currentValue[key]] = result[currentValue[key]] || []).push(currentValue);
-        return result;
       }, {});
     };
 

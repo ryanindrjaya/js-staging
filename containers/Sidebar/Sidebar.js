@@ -139,43 +139,45 @@ export default function Sidebar(props) {
               submenuColor={submenuColor}
               submenuStyle={submenuStyle}
             />
-            {Object.entries(moduls).map(([key, value], idx) => {
-              if (value?.length > 0) {
-                // has submenu
-                return (
-                  <SubMenu
-                    key={`${key}|${idx}`}
-                    title={
-                      <span className="isoMenuHolder" style={submenuColor}>
-                        {icons[key]}
-                        <span className="nav-text">{key}</span>
-                      </span>
-                    }
-                  >
-                    {value.map((item) => {
-                      return (
-                        <Menu.Item key={item.uid} style={submenuStyle}>
-                          <Link href={`/dashboard/${item?.uri}`}>
-                            <a>{item?.name}</a>
-                          </Link>
-                        </Menu.Item>
-                      );
-                    })}
-                  </SubMenu>
-                );
-              } else {
-                return (
-                  <Menu.Item key={key}>
-                    <Link href={`/dashboard/${value?.uri}`}>
-                      <a className="isoMenuHolder" style={submenuColor}>
-                        {icons[key]}
-                        {value?.name}
-                      </a>
-                    </Link>
-                  </Menu.Item>
-                );
-              }
-            })}
+            {Object.entries(moduls)
+              .sort((a, b) => a[1].order - b[1].order) // sort by order asc
+              .map(([key, value], idx) => {
+                if (value?.child?.length > 0) {
+                  // has submenu
+                  return (
+                    <SubMenu
+                      key={`${key}|${idx}`}
+                      title={
+                        <span className="isoMenuHolder" style={submenuColor}>
+                          {icons[key]}
+                          <span className="nav-text">{key}</span>
+                        </span>
+                      }
+                    >
+                      {value?.child.map((item) => {
+                        return (
+                          <Menu.Item key={item.uid} style={submenuStyle}>
+                            <Link href={`/dashboard/${item?.uri}`}>
+                              <a>{item?.name}</a>
+                            </Link>
+                          </Menu.Item>
+                        );
+                      })}
+                    </SubMenu>
+                  );
+                } else {
+                  return (
+                    <Menu.Item key={key}>
+                      <Link href={`/dashboard/${value?.uri}`}>
+                        <a className="isoMenuHolder" style={submenuColor}>
+                          {icons[key]}
+                          {value?.name}
+                        </a>
+                      </Link>
+                    </Menu.Item>
+                  );
+                }
+              })}
           </Menu>
         </Scrollbars>
       </Sider>
