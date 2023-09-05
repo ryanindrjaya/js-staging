@@ -13,6 +13,8 @@ import createSaleFunc from "../utility/createSale";
 import createDetailSaleFunc from "../utility/createDetailSale";
 import calculatePrice from "../utility/calculatePrice";
 import DateTimeComponent from "../../../../components/DateTime/dateTime";
+import Coa from "@iso/components/Form/AddCost/SearchCOA";
+import CoaSale from "@iso/components/Form/AddSale/SearchCOA";
 import nookies from "nookies";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import confirm from "antd/lib/modal/confirm";
@@ -35,10 +37,13 @@ Toko.getInitialProps = async (context) => {
 
   const reqCustomer = await fetchCustomer(cookies);
   const customer = await reqCustomer.json();
-
+  
   const reqUserDoc = await fetchUserDoc(cookies, user.codename);
   const userDoc = await reqUserDoc.json();
   const userLastDocNumber = userDoc.meta.pagination.total + 1;
+  
+  const reqStoreAccounts = await fetchStoreAccounts(cookies);
+  const storeAccounts = await reqStoreAccounts.json();
 
   return {
     props: {
@@ -48,6 +53,7 @@ Toko.getInitialProps = async (context) => {
       inven,
       storeSale,
       customer,
+      storeAccounts,
     },
   };
 };
@@ -169,6 +175,20 @@ async function getStock(productId, unit) {
   return res;
 }
 
+const fetchStoreAccounts = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?populate=*&filters[type][$eq]=TAMBAHAN LAIN&filters[type][$eq]=ONGKIR&filters[setting][$eq]=true";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
 function Toko({ props }) {
   const cookies = nookies.get(null, "token");
   const products = useSelector((state) => state.Sales);
@@ -184,6 +204,7 @@ function Toko({ props }) {
   const inven = props.inven.data;
   const storeSale = props.storeSale;
   const customerData = props.customer.data[0];
+  const storeAccounts = props.storeAccounts;
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -212,6 +233,10 @@ function Toko({ props }) {
   const [discMax, setDiscMax] = useState();
   const [discValue, setDiscValue] = useState(0);
 
+  //Akun COA
+  const [akunCOAONGKIR, setAkunCOAONGKIR] = useState();
+  const [akunCOALAIN, setAkunCOALAIN] = useState();
+  
   const router = useRouter();
   const { TextArea } = Input;
   var today = new Date();
@@ -526,6 +551,27 @@ function Toko({ props }) {
   }, [discType]);
 
   useEffect(() => {
+    if(akunCOAONGKIR){
+      form.setFieldsValue({
+        akunCOA: {
+          label: `${akunCOAONGKIR?.attributes?.nama}`,
+          value: akunCOAONGKIR?.id,
+        }
+      });
+    } 
+    
+    if(akunCOALAIN){
+      form.setFieldsValue({
+        akun: {
+          label: `${akunCOALAIN?.attributes?.nama}`,
+          value: akunCOALAIN?.id,
+        }
+      });
+    }
+
+  }, [akunCOAONGKIR, akunCOALAIN]);
+
+  useEffect(() => {
     // used to reset redux from value before
     clearData();
     setProductSubTotal({});
@@ -534,6 +580,19 @@ function Toko({ props }) {
       customer: customerData?.attributes.name,
     });
     setCustomer(customerData);
+
+    if (storeAccounts.data.length > 0){
+
+      storeAccounts.data.map((item) => {
+        if (item.attributes.type === "ONGKIR") {
+          setAkunCOAONGKIR(item.attributes.chart_of_account.data);
+        }
+        else if (item.attributes.type === "TAMBAHAN LAIN"){
+          setAkunCOALAIN(item.attributes.chart_of_account.data);
+        } 
+      });
+    }
+
   }, []);
 
   const validateError = () => {
@@ -823,6 +882,7 @@ function Toko({ props }) {
                       style={{
                         width: "100%",
                       }}
+                      disabled
                     >
                       <Select.Option value="Tetap" key={"Tetap"}>
                         Tetap
@@ -843,10 +903,11 @@ function Toko({ props }) {
                       max={discMax}
                       placeholder="Diskon"
                       style={{ width: "100%" }}
+                      disabled
                     />
                   </Form.Item>
                 </div>
-                <div className="w-full md:w-1/3 px-3 mt-5 ">
+                {/* <div className="w-full md:w-1/3 px-3 mt-5 ">
                   <Form.Item name="delivery_fee" noStyle>
                     <InputNumber
                       placeholder="Biaya Pengiriman"
@@ -857,7 +918,7 @@ function Toko({ props }) {
                       onChange={setBiayaPengiriman}
                     />
                   </Form.Item>
-                </div>
+                </div> */}
               </div>
               <div className="w-full flex flex-wrap -mx-3 my-1 ">
                 <div className="w-full md:w-1/3 px-3">
@@ -909,10 +970,43 @@ function Toko({ props }) {
                   </Form.Item>
                 </div>
               </div>
+              <div className="w-full flex flex-wrap -mx-3 my-1 ">
+                <div className="w-full md:w-1/3 px-3">
+                  <div className="w-full md:w-full mb-2 md:mb-0">
+                    <Form.Item name="delivery_coa" noStyle>
+                      <CoaSale onChange={setAkunCOAONGKIR} selectedAkun={akunCOAONGKIR} disabled/>
+                    </Form.Item>
+                  </div>
+                </div>
+                <div className="w-full md:w-1/3 px-3">
+                  <Form.Item name="delivery_fee" noStyle>
+                    <InputNumber
+                      placeholder="Titipan Ongkir"
+                      size="large"
+                      style={{
+                        width: "100%",
+                      }}
+                      onChange={setBiayaPengiriman}
+                    />
+                  </Form.Item>
+                </div>
+              </div>
               <div className="w-full flex md:w-3/4 justify-end mb-2">
                 <p className="mb-4 font-bold text-center">Biaya Tambahan Lain Lain</p>
               </div>
               <div className="w-full flex flex-wrap justify-end mb-3">
+                <div className="w-full md:w-1/3 px-3 mb-2 text-center md:mb-0">
+                  <p className="mb-4 font-bold">Akun</p>
+                  <Form.Item name="lain_coa" noStyle>
+                    <Coa onChange={setAkunCOALAIN} selectedAkun={akunCOALAIN} disabled/>
+                  </Form.Item>
+                  <Form.Item name="lain_coa" noStyle>
+                    <Coa onChange={setAkunCOALAIN} selectedAkun={akunCOALAIN} disabled/>
+                  </Form.Item>
+                  <Form.Item name="lain_coa" noStyle>
+                    <Coa onChange={setAkunCOALAIN} selectedAkun={akunCOALAIN} disabled/>
+                  </Form.Item>
+                </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 text-center md:mb-0">
                   <p className="mb-4 font-bold">Keterangan</p>
                   <Form.Item name="additional_fee_1_desc">

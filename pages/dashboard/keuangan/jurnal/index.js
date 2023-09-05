@@ -189,6 +189,48 @@ function Jurnal({ props }) {
     dispatch(logout());
   };
 
+  const handlePageChange = async (page) => {
+    const cookies = nookies.get(null, "token");
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*&pagination[page]=" + page;
+
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
+    };
+
+    try {
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
+
+      if (res) {
+        setJurnal((prevData) => ({
+          data: filterDuplicateData(prevData.data?.concat(res.data)),
+          meta: prevData.meta,
+        }));
+        console.log("page change success");
+      } else {
+        console.log("something is wrong");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const filterDuplicateData = (arr) => {
+    const seen = new Set();
+
+    const filteredArr = arr.filter((el) => {
+      const duplicate = seen.has(el.id);
+      seen.add(el.id);
+      return !duplicate;
+    });
+
+    return filteredArr;
+  };
+
   useEffect(() => {
     const searchQuery = async () => {
       let query = "";
@@ -399,7 +441,7 @@ function Jurnal({ props }) {
               data={jurnal}
               onUpdate={handleUpdate}
               onDelete={handleDelete}
-              //onPageChange={handlePageChange}
+              onPageChange={handlePageChange}
               //onChangeStatus={onChangeStatus}
               user={user}
             />

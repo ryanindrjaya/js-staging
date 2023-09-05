@@ -37,7 +37,7 @@ const formatter = new Intl.NumberFormat("id-ID", {
 function CetakPenjualan({ props }) {
   const { sales } = props;
 
-  const data = sales.data.attributes;
+  const data = sales.data.attributes; console.log("data true", data);
 
   // stakeholder info
   const name = "APOTEK SEJATI";
@@ -63,22 +63,35 @@ function CetakPenjualan({ props }) {
 
   // footer
   const maker = data?.added_by;
-  const totalPembelian = data?.total;
+  const totalPenjualan = data.dpp + data.ppn;
+  const totalBayar = data?.total;
   const isDPPActive = data?.is_dpp_active;
   const dpp = data?.dpp;
   const ppn = data?.ppn;
-  const biayaTambahan = [1, 2, 3].reduce((acc, curr) => {
-    if (data?.[`additional_fee_${curr}_sub`]) {
-      console.log(`additional fee ${curr}`, data?.[`additional_fee_${curr}_sub`]);
-      return acc + data[`additional_fee_${curr}_sub`];
-    } else {
-      return acc;
-    }
-  }, 0);
+  // const biayaTambahan = [1, 2, 3].reduce((acc, curr) => {
+  //   if (data?.[`additional_fee_${curr}_sub`]) {
+  //     console.log(`additional fee ${curr}`, data?.[`additional_fee_${curr}_sub`]);
+  //     return acc + data[`additional_fee_${curr}_sub`];
+  //   } else {
+  //     return acc;
+  //   }
+  // }, 0);
 
   // additional cost
-  const addFee = data?.additional_fee_1_sub + data?.additional_fee_2_sub + data?.additional_fee_3_sub ?? 0;
+  //const addFee = data?.additional_fee_1_sub + data?.additional_fee_2_sub + data?.additional_fee_3_sub ?? 0;
   const deliveryFee = data?.delivery_fee ?? 0;
+  var addFee = [];
+  if (data.additional_fee_1_desc !== null && data.additional_fee_1_sub !== 0) {
+    addFee.push({ket: data.additional_fee_1_desc, saldo: data.additional_fee_1_sub});
+  } else addFee[0] = {ket: null, saldo: 0};
+
+  if (data.additional_fee_2_desc !== null && data.additional_fee_2_sub !== 0) {
+    addFee.push({ket: data.additional_fee_2_desc, saldo: data.additional_fee_2_sub});
+  } else addFee[1] = {ket: null, saldo: 0};
+
+  if (data.additional_fee_3_desc !== null && data.additional_fee_3_sub !== 0) {
+    addFee.push({ket: data.additional_fee_3_desc, saldo: data.additional_fee_3_sub});
+  } else addFee[2] = {ket: null, saldo: 0};
 
   const print = () => {
     window.print();
@@ -154,12 +167,27 @@ function CetakPenjualan({ props }) {
           </p>
         </div>
         <div>
-          <p className="font-bold text-sm m-1">TOTAL PEMBELIAN : {formatter.format(totalPembelian)}</p>
+          <p className="font-bold text-sm m-1">TOTAL PENJUALAN : {formatter.format(totalPenjualan)}</p>
           <p className="font-bold text-sm m-1">DPP : {formatter.format(dpp)}</p>
           <p className="font-bold text-sm m-1">PPN : {formatter.format(ppn)}</p>
-          <p className="font-bold text-sm m-1">BIAYA PENGIRIMAN : {formatter.format(deliveryFee)}</p>
-          <p className="font-bold text-sm m-1">BIAYA TAMBAHAN : {formatter.format(biayaTambahan)}</p>
-          <p className="font-bold text-sm m-1">Total Bayar : {formatter.format(totalPembelian)}</p>
+          <p className="font-bold text-sm m-1">TITIPAN ONGKIR : {formatter.format(deliveryFee)}</p>
+          {/* <p className="font-bold text-sm m-1">BIAYA TAMBAHAN : {formatter.format(biayaTambahan)}</p> */}
+          {addFee[0].ket === null && addFee[0].saldo === 0 ? (
+            <div hidden/>
+          ) : (
+            <p className="font-bold text-sm m-1">{addFee[0].ket} : {formatter.format(addFee[0].saldo)}</p>
+          )}
+          {addFee[1].ket === null && addFee[1].saldo === 0 ? (
+            <div hidden/>
+          ) : (
+            <p className="font-bold text-sm m-1">{addFee[1].ket} : {formatter.format(addFee[1].saldo)}</p>
+          )}
+          {addFee[2].ket === null && addFee[2].saldo === 0 ? (
+            <div hidden/>
+          ) : (
+            <p className="font-bold text-sm m-1">{addFee[2].ket} : {formatter.format(addFee[2].saldo)}</p>
+          )}
+          <p className="font-bold text-sm m-1">TOTAL BAYAR : {formatter.format(totalBayar)}</p>
         </div>
       </div>
     </div>
