@@ -121,7 +121,7 @@ function BukuBesar({ props }) {
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
       
       // Save the workbook as an XLSX file
-      XLSX.writeFile(workbook, 'Laporan Buku Besar.xlsx');
+      XLSX.writeFile(workbook, 'Laporan '+ akunCOA?.attributes?.kode +' - '+ akunCOA?.attributes?.nama +'.xlsx');
     }
   };
 
@@ -402,9 +402,9 @@ function BukuBesar({ props }) {
             ) : (
             <div name="content" ref={tableRef}>
               <div name="title">
-                <div className="text-center">BUKU BESAR</div>
+                <div className="text-center">{akunCOA?.attributes?.kode} - {akunCOA?.attributes?.nama} (PT SEJATI)</div>
                 <div className="text-center">Periode tanggal {startDate.format('DD/MM/YYYY')} - {endDate.format('DD/MM/YYYY')}</div>
-                <div className="text-center">{akunCOA?.attributes?.nama}</div>
+                {/* <div className="text-center">{akunCOA?.attributes?.nama}</div> */}
               </div>
 
               <table className="w-full mt-3">

@@ -111,10 +111,12 @@ const UpdateJurnal = async (
       } else if (item.attributes.kode === "500.00.01") {
         //true
         values.debit = values.attributes.total;
-        
+        if (insidePage === "toko") values.debit = values.attributes.dpp + values.attributes.ppn;
+
       } else if (item.attributes.kode === "115.10.00") {
         //true
         values.kredit = values.attributes.total;
+        if (insidePage === "toko") values.kredit = values.attributes.dpp + values.attributes.ppn;
         
       } else if (kodeDelivery !== null) {
         //false
