@@ -630,7 +630,8 @@ function Edit({ props }) {
                     <TextArea rows={4} placeholder="Alamat Pengiriman" />
                   </Form.Item>
                 </div>
-                <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
+              </div>
+                {/* <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item name="delivery_fee">
                     <InputNumber
                       onChange={sumDeliveryPrice}
@@ -641,7 +642,8 @@ function Edit({ props }) {
                       style={{ width: "100%" }}
                     />
                   </Form.Item>
-                </div>
+                </div> */}
+              <div className="flex flex-wrap -mx-3 mb-3">
                 <div className="w-full md:w-1/3 px-3 mb-2 mt-5 md:mb-0">
                   <Form.Item name="delivery_status" initialValue={"Loading"}>
                     <Select

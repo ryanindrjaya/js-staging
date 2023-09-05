@@ -135,7 +135,7 @@ export default function SearchBar({
   return (
     <>
       <div className="w-full md:w-full mb-2 md:mb-0">
-        <Form.Item name="akun">
+        <Form.Item name="akunCOA">
           <Select
             disabled={disabled}
             allowClear

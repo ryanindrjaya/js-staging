@@ -174,6 +174,12 @@ const Tambah = ({ props }) => {
                     <Select.Option value="KARTU KREDIT" key="KARTU KREDIT">
                       Kartu Kredit
                     </Select.Option>
+                    <Select.Option value="ONGKIR" key="ONGKIR">
+                      Ongkir
+                    </Select.Option>
+                    <Select.Option value="TAMBAHAN LAIN" key="TAMBAHAN LAIN">
+                      Tambahan Lain - Lain
+                    </Select.Option>
                   </Select>
                 </Form.Item>
 
