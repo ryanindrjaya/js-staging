@@ -102,12 +102,13 @@ export default function SearchBar({
   }, [debounceQuery]);
 
   const handleSearch = (newValue) => {
-    if (newValue) {
+    if (newValue !== "" && newValue !== undefined && newValue !== null) {
       setLoading(true);
       setQuery(newValue);
     } else {
       setData([]);
-      setQuery("");
+      setQuery(null);
+      setLoading(false);
     }
   };
 
@@ -120,7 +121,7 @@ export default function SearchBar({
       try {
         const endpoint =
           process.env.NEXT_PUBLIC_URL +
-          `/products?populate=locations&filters[name][$contains]=${query}&${userLocations}`;
+          `/products?filters[name][$contains]=${query}&${userLocations}&pagination[page]=1&pagination[pageSize]=10&sort=name:asc`;
         const options = {
           method: "GET",
           headers: {
@@ -135,16 +136,11 @@ export default function SearchBar({
         console.log("endpoint", endpoint);
 
         if (req.status == 200) {
-          const filteredProductByLocation = res.data.filter((item) =>
-            item.attributes.locations.data.some((location) =>
-              user.locations.some((userLocation) => userLocation.id === location.id)
-            )
-          );
-
-          const products = filteredProductByLocation.map((product) => ({
-            label: `${product.attributes.name}`,
-            value: product.id,
-          }));
+          const products =
+            res?.data?.map((product) => ({
+              label: `${product.attributes.name}`,
+              value: product.id,
+            })) || [];
 
           callback(products);
         }
