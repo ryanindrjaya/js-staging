@@ -458,8 +458,8 @@ function BukuBesar({ props }) {
                     // Use the exec method to find the pattern in the string
                     const match = regex.exec(inputString);
                     const matchBetween = regexBetween.exec(inputString);
-                    var codeValue = null;
-                    var codeBetween = null;
+                    var codeValue = "-";
+                    var codeBetween = "-";
 
                     // Check if a match was found
                     if (match) {
