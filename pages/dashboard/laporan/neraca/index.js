@@ -59,7 +59,7 @@ function NeracaDetail({ props }) {
   return (
     <DashboardLayout>
       <LayoutWrapper style={{}}>
-        <TitlePage titleText={"LAPORAN NERACA DETAIL"} />
+        <TitlePage titleText={"LAPORAN NERACA"} />
         <LayoutContent>
           <div className="w-1/3">
             <p>Pilih Periode : </p>
