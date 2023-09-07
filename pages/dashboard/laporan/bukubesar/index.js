@@ -450,6 +450,7 @@ function BukuBesar({ props }) {
                     // Example input string
                     //const inputString = "Store Transaction with Code AM/001/01/2023";
                     const inputString = item.attributes.catatan;
+                    
 
                     // Use a regular expression to match the pattern after "Code "
                     const regex = /kode (\S+)/;
@@ -466,7 +467,11 @@ function BukuBesar({ props }) {
                       codeValue = match[1];
                       console.log(codeValue); 
                     } else {
-                      console.log("No match found.");
+                      if (item.attributes.no_jurnal.includes("JM")) {
+                        codeValue = item.attributes.no_jurnal;
+                      } else {
+                        console.log("The string does not contain 'JM'");
+                      }
                     }
 
                     // Check if a matchBetween was found
@@ -474,7 +479,11 @@ function BukuBesar({ props }) {
                       codeBetween = matchBetween[1];
                       console.log(codeBetween);
                     } else {
-                      console.log("No match found. 2");
+                      if (item.attributes.no_jurnal.includes("JM")) {
+                        codeBetween = "jurnal memo";
+                      } else {
+                        console.log("The string does not contain 'JM'");
+                      }
                     }
 
                     return (
