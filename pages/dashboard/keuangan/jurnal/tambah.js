@@ -81,7 +81,7 @@ const fetchUser = async (cookies) => {
 };
 
 const fetchJurnal = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*&filters[no_jurnal][$contains]=JM";
   const options = {
     method: "GET",
     headers: {
@@ -304,7 +304,12 @@ function Jurnal({ props }) {
 
     console.log("data values", values, akuns);
 
+    var noJurnalInput = null;
     akuns.akun.forEach((item, index) => {
+      console.log("data item", item, index, noJurnal);
+      noJurnalInput = String(props.jurnal?.meta?.pagination.total + 1 + index).padStart(5, "0");
+
+      values.no_jurnal = `${user.codename}/JM/${noJurnalInput}/${mm}/${yyyy}`;
       values.catatan = values.catatanData[index];
       values.debit = values.debitData[index];
       values.kredit = values.kreditData[index];

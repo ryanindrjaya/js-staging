@@ -184,7 +184,8 @@ function BukuBesar({ props }) {
       const res = await req.json();
       
       setDefaultDate(date);
-      setJurnal(res);
+      if (akunCOA !== undefined) setJurnal(res);
+      else setJurnal();
 
     } else {
       var startDate = moment().format('YYYY-MM-DD');
@@ -197,8 +198,9 @@ function BukuBesar({ props }) {
       const res = await req.json();
       
       setDefaultDate([moment(), moment()]);
-      setJurnal(res);
-
+      if (akunCOA !== undefined) setJurnal(res);
+      else setJurnal();
+      console.log(akunCOA, "akunCOA");
     }
 
     setIsLoading(false);
@@ -299,7 +301,7 @@ function BukuBesar({ props }) {
         
       });
 
-      if (jurnal.data.length > 0){
+      if (jurnal?.data?.length > 0){
         setDebitAkhir(debitakhir);
         setKreditAkhir(kreditakhir);
       } else {
@@ -413,15 +415,17 @@ function BukuBesar({ props }) {
                 <tbody>
                   <tr className="text-center">
                     <th className="border-2 p-1">Tanggal</th>
-                    <th className="border-2 p-1">Catatan</th>
-                    <th className="border-2 p-1">Nama Pembuat</th>
+                    <th className="border-2 p-1">Nomor Referensi</th>
+                    <th className="border-2 p-1">Jenis</th>
+                    <th className="border-2 p-1">Pembuat</th>
                     <th className="border-2 p-1">Keterangan</th>
                     <th className="border-2 p-1">Debet</th>
                     <th className="border-2 p-1">Kredit</th>
                     <th className="border-2 p-1">Saldo</th>
                   </tr>
                   <tr>
-                    <td className="border-2 p-2 text-center"> Sebelum tanggal - {startDate.format('DD/MM/YYYY')} </td>
+                    <td className="border-2 p-2 text-center"> {startDate.format('DD/MM/YYYY')} </td>
+                    <td className="border-2 text-center"> - </td>
                     <td className="border-2 text-center"> - </td>
                     <td className="border-2 text-center"> - </td>
                     <td className="border-2 p-1 text-left"> Saldo Awal </td>
@@ -430,7 +434,7 @@ function BukuBesar({ props }) {
                     <td className="border-2 p-2 text-right"> {formatter.format(saldoAwal)} </td>
                   </tr>
                   {jurnal?.data?.map((item, index) => {
-                    var dateBaru = moment(item.attributes.publishedAt); console.log("index", index);
+                    var dateBaru = moment(item.attributes.publishedAt);
                     if (index === 0) item.saldoAwal = saldoAwal;
                     else item.saldoAwal = saldoForData;
 
@@ -443,12 +447,52 @@ function BukuBesar({ props }) {
                       saldoForData = item.saldoAwal;
                     } 
 
+                    // Example input string
+                    //const inputString = "Store Transaction with Code AM/001/01/2023";
+                    const inputString = item.attributes.catatan;
+                    
+
+                    // Use a regular expression to match the pattern after "Code "
+                    const regex = /kode (\S+)/;
+                    const regexBetween = /Transaksi (.*?) dengan/;
+
+                    // Use the exec method to find the pattern in the string
+                    const match = regex.exec(inputString);
+                    const matchBetween = regexBetween.exec(inputString);
+                    var codeValue = "-";
+                    var codeBetween = "-";
+
+                    // Check if a match was found
+                    if (match) {
+                      codeValue = match[1];
+                      console.log(codeValue); 
+                    } else {
+                      if (item.attributes.no_jurnal.includes("JM")) {
+                        codeValue = item.attributes.no_jurnal;
+                      } else {
+                        console.log("The string does not contain 'JM'");
+                      }
+                    }
+
+                    // Check if a matchBetween was found
+                    if (matchBetween) {
+                      codeBetween = matchBetween[1];
+                      console.log(codeBetween);
+                    } else {
+                      if (item.attributes.no_jurnal.includes("JM")) {
+                        codeBetween = "jurnal memo";
+                      } else {
+                        console.log("The string does not contain 'JM'");
+                      }
+                    }
+
                     return (
                       <tr>
                         <td className="border-2 text-center">{dateBaru.format('DD/MM/YYYY')}</td>
-                        <td className="border-2 text-center"> {item.attributes.catatan} </td>
+                        <td className="border-2 p-2 text-center"> {codeValue} </td>
+                        <td className="border-2 p-2 text-center"> {codeBetween} </td>
                         <td className="border-2 text-center"> {item.attributes.added_by} </td>
-                        <td className="border-2 p-1 text-left"></td>
+                        <td className="border-2 p-2 text-center"> {item.attributes.catatan} </td>
                         <td className="border-2 p-2 text-right"> {formatter.format(item?.attributes?.debit)} </td>
                         <td className="border-2 p-2 text-right"> {formatter.format(item?.attributes?.kredit)} </td>
                         <td className="border-2 p-2 text-right"> {formatter.format(item?.saldoAwal)} </td>
@@ -456,7 +500,8 @@ function BukuBesar({ props }) {
                     );
                   })}
                   <tr>
-                    <td className="border-2 p-2 text-center"> {startDate.format('DD/MM/YYYY')} - {endDate.format('DD/MM/YYYY')} </td>
+                    <td className="border-2 p-2 text-center"> {endDate.format('DD/MM/YYYY')} </td>
+                    <td className="border-2 text-center"> - </td>
                     <td className="border-2 text-center"> - </td>
                     <td className="border-2 text-center"> - </td>
                     <td className="border-2 p-1 text-left"> Saldo Akhir </td>

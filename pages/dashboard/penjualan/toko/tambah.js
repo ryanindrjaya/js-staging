@@ -176,7 +176,10 @@ async function getStock(productId, unit) {
 }
 
 const fetchStoreAccounts = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?populate=*&filters[type][$eq]=TAMBAHAN LAIN&filters[type][$eq]=ONGKIR&filters[setting][$eq]=true";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?populate=*&filters[type][$eq]=TAMBAHAN LAIN 1"+
+  "&filters[type][$eq]=TAMBAHAN LAIN 2"+
+  "&filters[type][$eq]=TAMBAHAN LAIN 3"+
+  "&filters[type][$eq]=ONGKIR&filters[setting][$eq]=true";
   const options = {
     method: "GET",
     headers: {
@@ -236,6 +239,8 @@ function Toko({ props }) {
   //Akun COA
   const [akunCOAONGKIR, setAkunCOAONGKIR] = useState();
   const [akunCOALAIN, setAkunCOALAIN] = useState();
+  const [akunCOALAIN2, setAkunCOALAIN2] = useState();
+  const [akunCOALAIN3, setAkunCOALAIN3] = useState();
   
   const router = useRouter();
   const { TextArea } = Input;
@@ -560,11 +565,23 @@ function Toko({ props }) {
       });
     } 
     
-    if(akunCOALAIN){
+    if(akunCOALAIN || akunCOALAIN2 || akunCOALAIN3){
       form.setFieldsValue({
         akun: {
           label: `${akunCOALAIN?.attributes?.nama}`,
           value: akunCOALAIN?.id,
+        },
+        lain_coa1: {
+          label: `${akunCOALAIN?.attributes?.nama}`,
+          value: akunCOALAIN?.id,
+        },
+        lain_coa2: {
+          label: `${akunCOALAIN2?.attributes?.nama}`,
+          value: akunCOALAIN2?.id,
+        },
+        lain_coa3: {
+          label: `${akunCOALAIN3?.attributes?.nama}`,
+          value: akunCOALAIN3?.id,
         }
       });
     }
@@ -587,8 +604,14 @@ function Toko({ props }) {
         if (item.attributes.type === "ONGKIR") {
           setAkunCOAONGKIR(item.attributes.chart_of_account.data);
         }
-        else if (item.attributes.type === "TAMBAHAN LAIN"){
+        else if (item.attributes.type === "TAMBAHAN LAIN 1"){
           setAkunCOALAIN(item.attributes.chart_of_account.data);
+        } 
+        else if (item.attributes.type === "TAMBAHAN LAIN 2"){
+          setAkunCOALAIN2(item.attributes.chart_of_account.data);
+        } 
+        else if (item.attributes.type === "TAMBAHAN LAIN 3"){
+          setAkunCOALAIN3(item.attributes.chart_of_account.data);
         } 
       });
     }
@@ -997,14 +1020,29 @@ function Toko({ props }) {
               <div className="w-full flex flex-wrap justify-end mb-3">
                 <div className="w-full md:w-1/3 px-3 mb-2 text-center md:mb-0">
                   <p className="mb-4 font-bold">Akun</p>
-                  <Form.Item name="lain_coa" noStyle>
-                    <Coa onChange={setAkunCOALAIN} selectedAkun={akunCOALAIN} disabled/>
+                  <Form.Item name="lain_coa1">
+                    <Select
+                      disabled
+                      size="large"
+                      style={{ width: "100%" }}
+                    >
+                    </Select>
                   </Form.Item>
-                  <Form.Item name="lain_coa" noStyle>
-                    <Coa onChange={setAkunCOALAIN} selectedAkun={akunCOALAIN} disabled/>
+                  <Form.Item name="lain_coa2">
+                    <Select
+                      disabled
+                      size="large"
+                      style={{ width: "100%" }}
+                    >
+                    </Select>
                   </Form.Item>
-                  <Form.Item name="lain_coa" noStyle>
-                    <Coa onChange={setAkunCOALAIN} selectedAkun={akunCOALAIN} disabled/>
+                  <Form.Item name="lain_coa3">
+                    <Select
+                      disabled
+                      size="large"
+                      style={{ width: "100%" }}
+                    >
+                    </Select>
                   </Form.Item>
                 </div>
                 <div className="w-full md:w-1/3 px-3 mb-2 text-center md:mb-0">
