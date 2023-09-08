@@ -114,7 +114,7 @@ export default function ReactDataTable({
   const columns = [
     {
       name: "No Jurnal Memo",
-      width: "180px",
+      width: "200px",
       selector: (row) => row.attributes?.no_jurnal ?? "-",
     },
     {

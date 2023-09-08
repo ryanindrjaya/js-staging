@@ -83,7 +83,7 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchJurnal = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*&filters[no_jurnal][$contains]=JM";
   const options = {
     method: "GET",
     headers: {
@@ -116,7 +116,7 @@ function Jurnal({ props }) {
   const dataUser = props.dataUser;
   const coa = props.coa;
   const router = useRouter();
-  const [jurnal, setJurnal] = useState(data);
+  const [jurnal, setJurnal] = useState(data); console.log(jurnal);
   const [searchParameters, setSearchParameters] = useState({});
   const dispatch = useDispatch();
 
@@ -191,8 +191,8 @@ function Jurnal({ props }) {
 
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*&pagination[page]=" + page;
-
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*&filters[no_jurnal][$contains]=JM&pagination[page]=" + page;
+    
     const options = {
       method: "GET",
       headers: {
@@ -245,15 +245,15 @@ function Jurnal({ props }) {
           query += "";
         }
 
-        // if (key === "status_pembayaran") {
-        //   if (searchParameters[key] !== undefined) {
-        //     query += `filters[${key}]=${searchParameters[key]}&`;
-        //   } else {
-        //     query += "";
-        //   }
-        // } else {
-        //   query += "";
-        // }
+        if (key === "tipeTransaksi" && searchParameters[key] !== undefined) {
+          if (searchParameters[key] !== undefined) {
+            query += `filters[${searchParameters[key]}][$ne]=0&`;
+          } else {
+            query += "";
+          }
+        } else {
+          query += "";
+        }
 
         if (key == "range" && searchParameters[key] !== null) {
           startDate = searchParameters?.range[0]?.format("YYYY-MM-DD");
@@ -282,7 +282,7 @@ function Jurnal({ props }) {
         // }
       }
 
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=deep&" + query;
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=deep&" + query +"&filters[no_jurnal][$contains]=JM";
 
       const cookies = nookies.get(null, "token");
       const options = {
