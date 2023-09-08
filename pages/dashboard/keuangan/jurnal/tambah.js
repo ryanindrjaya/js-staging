@@ -17,6 +17,7 @@ import nookies from "nookies";
 import moment from "moment";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import confirm from "antd/lib/modal/confirm";
+import getUserCodeName from "../../../../library/functions/getUserCodeName";
 
 Jurnal.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -186,7 +187,6 @@ function Jurnal({ props }) {
 
   // NO Jurnal
   var noJurnal = String(props.jurnal?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`JM/${user.id}/${noJurnal}/${mm}/${yyyy}`);
   var keterangan = "sukses";
 
   var formatter = new Intl.NumberFormat("id-ID", {
@@ -194,6 +194,40 @@ function Jurnal({ props }) {
     currency: "IDR",
     maximumFractionDigits: 2,
   });
+
+  async function fetchLatestNoReferensi() {
+    const codename = await getUserCodeName();
+
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/jurnals?sort[0]=id:desc&pagination[limit]=1&filters[no_jurnal][$contains]=${codename}/JM/`;
+    const headers = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${cookies.token}`,
+      },
+    };
+
+    const response = await fetch(endpoint, headers)
+      .then((res) => {
+        return res.json();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    if (response) {
+      const latestDaata = response.data?.[0];
+      const no = parseInt(latestDaata?.attributes?.no_jurnal?.split("/")?.[2] || 0) + 1;
+      console.log("no", no);
+      const latestNoReferensi = `${codename}/JM/${String(no).padStart(5, "0")}/${moment().format("MM/YYYY")}`;
+      form.setFieldsValue({
+        no_jurnal: latestNoReferensi,
+      });
+      return latestNoReferensi;
+    }
+
+    console.log("response from fetchLatestNoReferensi", response);
+  }
 
   const onFinish = (values, accept) => {
     if (accept) {
@@ -207,9 +241,9 @@ function Jurnal({ props }) {
         totalDebit += values.debitData[index];
         totalKredit += values.kreditData[index];
       }
-  
+
       if (akuns.akun.length === 0 || akuns.akun.length === 1) {
-        if(akuns.akun.length === 0){
+        if (akuns.akun.length === 0) {
           notification["error"]({
             message: "Gagal menambahkan data",
             description: "Data gagal ditambahkan, karena belum ada data yang dimasukkan.",
@@ -222,7 +256,7 @@ function Jurnal({ props }) {
         }
         setInfo("gagal");
       } else console.log("Blum ada data akun.");
-  
+
       if (totalDebit != totalKredit) {
         notification["error"]({
           message: "Gagal menambahkan data",
@@ -230,7 +264,7 @@ function Jurnal({ props }) {
         });
         setInfo("gagal");
       } else console.log("Debit dan kredit sudah sesuai.");
-  
+
       var checkData = 1;
       jurnal.data.forEach((element) => {
         if (values.no_jurnal == element.attributes.no_jurnal && checkData == 1) {
@@ -242,11 +276,10 @@ function Jurnal({ props }) {
           checkData++;
         }
       });
-  
+
       console.log("data values", values, akuns, accept);
       setDataValues(values);
       setLoading(false);
-
     } else {
       confirm({
         title: "Apakah anda yakin?",
@@ -277,27 +310,22 @@ function Jurnal({ props }) {
       values.kredit = values.kreditData[index];
       values.chart_of_account = item.id;
 
-      var saldo = parseFloat(item?.attributes?.saldo); 
+      var saldo = parseFloat(item?.attributes?.saldo);
 
       //default debit
-      if(item.attributes.jenis_akun === true && (saldo + values.debit) > values.kredit){
-        saldo = (saldo + values.debit) - values.kredit;
-
-      } else if (item.attributes.jenis_akun === false && (saldo + values.kredit) > values.debit){
-        saldo = (saldo + values.kredit) - values.debit;
-
+      if (item.attributes.jenis_akun === true && saldo + values.debit > values.kredit) {
+        saldo = saldo + values.debit - values.kredit;
+      } else if (item.attributes.jenis_akun === false && saldo + values.kredit > values.debit) {
+        saldo = saldo + values.kredit - values.debit;
       } else {
         notification["error"]({
           message: "Gagal menambahkan data",
           description: "Saldo akun kurang untuk melakukan pembayaran.",
         });
-        
       }
 
       const req = createData(values);
-      
     });
-
   };
 
   const createData = async (values) => {
@@ -356,7 +384,6 @@ function Jurnal({ props }) {
     if (!isDuplicatedData) {
       setAkunList((list) => [...list, tempList[0]]);
     }
-
   };
 
   const clearData = () => {
@@ -396,6 +423,7 @@ function Jurnal({ props }) {
       tanggal: moment(),
     });
     setCustomer(customerData);
+    fetchLatestNoReferensi();
     setTotalDebitValue(0);
     setTotalKreditValue(0);
   }, []);
@@ -434,7 +462,6 @@ function Jurnal({ props }) {
                 <div className="w-full md:w-1/4 px-3 mb-2 md:mb-0">
                   <Form.Item
                     name="no_jurnal"
-                    initialValue={categorySale}
                     rules={[
                       {
                         required: true,
