@@ -80,7 +80,7 @@ const fetchUser = async (cookies) => {
 };
 
 const fetchJurnal = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*&filters[no_jurnal][$contains]=JM";
   const options = {
     method: "GET",
     headers: {
@@ -185,8 +185,8 @@ function Jurnal({ props }) {
   const [customer, setCustomer] = useState();
 
   // NO Jurnal
-  var noJurnal = String(props.jurnal?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`JM/${user.id}/${noJurnal}/${mm}/${yyyy}`);
+  var noJurnal = String(props.jurnal?.meta?.pagination.total + 1).padStart(5, "0");
+  const [categorySale, setCategorySale] = useState(`${user.codename}/JM/${noJurnal}/${mm}/${yyyy}`);
   var keterangan = "sukses";
 
   var formatter = new Intl.NumberFormat("id-ID", {
@@ -271,7 +271,11 @@ function Jurnal({ props }) {
 
     console.log("data values", values, akuns);
 
-    akuns.akun.forEach((item, index) => {
+    var noJurnalInput = null;
+    akuns.akun.forEach((item, index) => { console.log("data item", item, index, noJurnal);
+      noJurnalInput = String(props.jurnal?.meta?.pagination.total + 1 + index).padStart(5, "0");
+
+      values.no_jurnal = `${user.codename}/JM/${noJurnalInput}/${mm}/${yyyy}`;
       values.catatan = values.catatanData[index];
       values.debit = values.debitData[index];
       values.kredit = values.kreditData[index];
