@@ -11,6 +11,9 @@ import nookies from "nookies";
 import DataTable from "react-data-table-component";
 import { useRouter } from "next/router";
 import getUserCodeName from "../../../../library/functions/getUserCodeName";
+import { addToGudang } from "../../../../library/functions/createInventory";
+import confirm from "antd/lib/modal/confirm";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 
 const requiredRules = [{ required: true, message: "Field ini wajib diisi" }];
 
@@ -25,6 +28,7 @@ export default function tambahPenyesuaian() {
     location: [],
     products: [],
   });
+  const [method, setMethod] = useState(); // ["add", "subtract"]
   const [location, setLocation] = useState("");
   const debouncedLocation = useDebounce(location, 200);
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -193,8 +197,9 @@ export default function tambahPenyesuaian() {
       selector: (row, index) => row.name,
     },
     {
-      name: "Qty Awal",
+      name: "Stok Gudang",
       align: "center",
+      omit: method === "add",
       selector: (row, index) => `${row?.stock?.[row?.unit]?.qty || 1} ${row?.unit || ""}`,
     },
     {
@@ -217,6 +222,8 @@ export default function tambahPenyesuaian() {
           });
         }
 
+        const max = maxQty > 0 ? maxQty : 0;
+
         return (
           <Input.Group compact className="w-full">
             <InputNumber
@@ -236,7 +243,7 @@ export default function tambahPenyesuaian() {
               }}
               defaultValue={row?.qty || 1}
               min={maxQty > 0 ? 1 : 0}
-              max={maxQty > 0 ? maxQty : 0}
+              max={method === "subtract" ? max : undefined}
               className="w-[30%]"
             />
             <Select
@@ -259,6 +266,64 @@ export default function tambahPenyesuaian() {
               options={units}
             />
           </Input.Group>
+        );
+      },
+    },
+    {
+      name: "Nilai Satuan",
+      align: "center",
+      selector: (row, index) => {
+        return (
+          <InputNumber
+            onChange={(value) => {
+              const newProducts = products.map((product, productIdx) => {
+                if (productIdx === index) {
+                  return {
+                    ...product,
+                    buy_price: {
+                      ...product.buy_price,
+                      [product.unit]: value,
+                    },
+                  };
+                }
+
+                return product;
+              });
+
+              setProducts(newProducts);
+            }}
+            value={row?.buy_price?.[row?.unit] || 0}
+            min={0}
+            className="w-full"
+            formatter={(value) =>
+              parseFloat(value)
+                .toFixed(2)
+                .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            }
+            parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+          />
+        );
+      },
+    },
+    {
+      name: "Nilai Subtotal",
+      align: "center",
+      selector: (row, index) => {
+        const qty = row?.qty || 1;
+        const buy_price = row?.buy_price?.[row?.unit] || 0;
+        return (
+          <InputNumber
+            disabled
+            value={qty * buy_price}
+            min={0}
+            className="w-full"
+            formatter={(value) =>
+              parseFloat(value)
+                .toFixed(2)
+                .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            }
+            parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+          />
         );
       },
     },
@@ -300,8 +365,8 @@ export default function tambahPenyesuaian() {
         console.log(err);
       });
 
-    if (response.data) {
-      return response.data.attributes.name;
+    if (response) {
+      return response;
     }
   };
 
@@ -321,6 +386,7 @@ export default function tambahPenyesuaian() {
 
     try {
       const detailIds = [];
+      const dataInventory = [];
 
       // create inventory adjustment details
       for (let i = 0; i < products.length; i++) {
@@ -357,10 +423,31 @@ export default function tambahPenyesuaian() {
         if (res?.id) {
           detailIds.push(res?.id);
         }
+
+        const itemInventory = {
+          location: selectedLocation?.id,
+          product: product.id,
+          unit: product.unit,
+          qty: product.qty,
+          exp_date: product.stock?.[product.unit]?.exp_date,
+          batch: product.stock?.[product.unit]?.batch,
+        };
+
+        dataInventory.push(itemInventory);
       }
 
+      console.log("dataInventory", dataInventory);
+
       if (detailIds.length > 0) {
-        console.log("detail ids", detailIds);
+        const user = await getUserData();
+        const body = {
+          data: dataInventory,
+          no_referensi: values.no_referensi,
+          type: "Penyesuaian Stok",
+          keterangan: `Penyesuaian Stok (${method === "add" ? "Bertambah" : "Berkurang"})`,
+          author: user,
+        };
+
         const endpoint = `${process.env.NEXT_PUBLIC_URL}/inventory-adjustments`;
         const data = {
           data: {
@@ -389,6 +476,7 @@ export default function tambahPenyesuaian() {
         console.log("response create master", response);
 
         if (response?.data?.id) {
+          await addToGudang(body, method);
           notification["success"]({
             message: "Berhasil",
             description: "Berhasil membuat penyesuaian stok, harap cek halaman penyesuaian stok untuk melihat detail",
@@ -461,8 +549,29 @@ export default function tambahPenyesuaian() {
         <LayoutWrapper>
           <TitlePage titleText={"Tambah Penyesuaian Stok"} />
           <LayoutContent>
-            <Form layout="vertical" form={form} onFinish={onFinish} onFinishFailed={onFinishFailed}>
-              <div className="w-full grid grid-cols-4 gap-3 mb-4">
+            <Form
+              layout="vertical"
+              form={form}
+              onFinish={(values) => {
+                confirm({
+                  title: "Apakah anda yakin?",
+                  icon: <ExclamationCircleOutlined />,
+                  content: "Harap periksa kembali data yang telah diinput.",
+                  okText: "Ya",
+                  okType: "danger",
+                  cancelText: "Tidak",
+                  centered: true,
+                  onOk() {
+                    onFinish(values);
+                  },
+                  onCancel() {
+                    console.log("Cancel");
+                  },
+                });
+              }}
+              onFinishFailed={onFinishFailed}
+            >
+              <div className="w-full grid grid-cols-4 gap-3">
                 <Form.Item rules={requiredRules} initialValue={moment()} name="date">
                   <DatePicker size="large" className="w-full" />
                 </Form.Item>
@@ -497,6 +606,28 @@ export default function tambahPenyesuaian() {
                     size="large"
                     loading={loading.location}
                     options={options.location}
+                  />
+                </Form.Item>
+              </div>
+              <div className="w-full grid grid-cols-4 gap-3 mb-4">
+                <div className="col-span-3 w-full"></div>
+                <Form.Item rules={requiredRules} name="adjustment">
+                  <Select
+                    onChange={(value) => {
+                      setMethod(value);
+                    }}
+                    placeholder="Penyesuaian Stok"
+                    size="large"
+                    options={[
+                      {
+                        label: "Stok Bertambah",
+                        value: "add",
+                      },
+                      {
+                        label: "Stok Berkurang",
+                        value: "subtract",
+                      },
+                    ]}
                   />
                 </Form.Item>
               </div>
@@ -544,17 +675,22 @@ export default function tambahPenyesuaian() {
               <div className="w-full mt-5 flex gap-2">
                 <div className="w-full flex flex-col justify-between md:w-1/4">
                   <div>
-                    <p className="m-0 font-bold text-lg">JUMLAH TOTAL DIKEMBALIKAN</p>
+                    <p className="m-0 font-bold text-md">JUMLAH TOTAL NILAI PERSEDIAAN</p>
                     <p className="m-0">Jumlah yang di peroleh dari asuransi atau memo lainnya</p>
                   </div>
 
                   <Form.Item rules={requiredRules} className="m-0" name="total_return">
                     <InputNumber
+                      disabled
                       prefix="Rp. "
                       className="w-full mt-2"
-                      placeholder="Jumlah Total Dikembalikan"
+                      placeholder="Jumlah Total Nilai Persediaan"
                       min={0}
-                      formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                      formatter={(value) =>
+                        parseFloat(value)
+                          .toFixed(2)
+                          .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      }
                       parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                     />
                   </Form.Item>

@@ -488,7 +488,7 @@ export default function permintaanBarang() {
 
   // get data history
   async function fetchDataHistory() {
-    const endpoint = `${process.env.NEXT_PUBLIC_URL}/product-request/data?sort[id]=desc`;
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/product-request/data?sort[id]=desc&filters[mutasi_resep]=false`;
     const headers = {
       method: "GET",
       headers: {

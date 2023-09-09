@@ -304,6 +304,20 @@ export default function permintaanBarang() {
       },
     },
   ];
+
+  const formatter = new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+  });
+
+  const getUnitPirce = (product, unit) => {
+    for (let i = 1; i < 6; i++) {
+      if (product[`unit_${i}`] === unit) {
+        return product[`buy_price_${i}`];
+      }
+    }
+  };
+
   const printColumns = [
     {
       name: "Nama Produk",
@@ -315,6 +329,24 @@ export default function permintaanBarang() {
       align: "center",
       selector: (row) => {
         return `${row?.qty} ${row?.unit}`;
+      },
+    },
+    {
+      name: "Harga Satuan",
+      selector: (row) => {
+        return (
+          <span className="text-right w-full">{formatter.format(row?.price || row?.buy_price[row.unit] || 0)}</span>
+        );
+      },
+    },
+    {
+      name: "Subtotal",
+      selector: (row) => {
+        return (
+          <span className="text-right w-full">
+            {formatter.format((row?.price || row?.buy_price[row.unit] || 0) * row?.qty)}
+          </span>
+        );
       },
     },
   ];
@@ -357,6 +389,7 @@ export default function permintaanBarang() {
     const [no_referensi, no_referensi_recipient, no_referensi_mutasi] = await fetchLatestNoReferensi();
 
     values.no_referensi = no_referensi;
+    values.mutasi_resep = true;
     values.no_referensi_recipient = no_referensi_recipient;
     values.no_referensi_mutasi = no_referensi_mutasi;
     values.date = values?.date?.format("YYYY-MM-DD") || moment().format("YYYY-MM-DD");
@@ -403,8 +436,7 @@ export default function permintaanBarang() {
       if (filteredResponse.length === response.length) {
         notification["success"]({
           message: "Berhasil",
-          description:
-            "Berhasil membuat permintaan produk, harap cek data di 'Daftar Barang Keluar' dan 'Daftar Barang Masuk'",
+          description: "Berhasil membuat mutasi resep, harap cek data di 'Mutasi Barang Keluar'",
         });
 
         form.resetFields();
@@ -452,7 +484,7 @@ export default function permintaanBarang() {
 
     const codename = await getUserCodeName();
 
-    const endpoint = `${process.env.NEXT_PUBLIC_URL}/product-requests?sort[0]=id:desc&pagination[limit]=1&filters[no_referensi_mutasi][$contains]=${codename}/MT/`;
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/product-requests?sort[0]=id:desc&pagination[limit]=1&filters[no_referensi_mutasi][$contains]=${codename}/MR/`;
     const headers = {
       method: "GET",
       headers: {
@@ -471,8 +503,8 @@ export default function permintaanBarang() {
       const no = parseInt(latestDaata?.attributes?.no_referensi_recipient?.split("/")?.[2] || 0) + 1;
       const noRecipient = parseInt(latestDaata?.attributes?.no_referensi_recipient?.split("/")?.[2] || 0) + 1;
 
-      const latestNoReferensiMutasi = `${codename}/MT/${String(no).padStart(5, "0")}/${moment().format("MM/YYYY")}`;
-      const latestNoReferensi = `${codename}/MK/${String(no).padStart(5, "0")}/${moment().format("MM/YYYY")}`;
+      const latestNoReferensiMutasi = `${codename}/MR/${String(no).padStart(5, "0")}/${moment().format("MM/YYYY")}`;
+      const latestNoReferensi = `${codename}/MR/${String(no).padStart(5, "0")}/${moment().format("MM/YYYY")}`;
       const latestNoReferensiRecipient = `${codename}/MM/${String(noRecipient).padStart(5, "0")}/${moment().format(
         "MM/YYYY"
       )}`;
@@ -488,7 +520,7 @@ export default function permintaanBarang() {
 
   // get data history
   async function fetchDataHistory() {
-    const endpoint = `${process.env.NEXT_PUBLIC_URL}/product-request/data?sort[id]=desc`;
+    const endpoint = `${process.env.NEXT_PUBLIC_URL}/product-request/data?sort[id]=desc&filters[mutasi_resep]=true`;
     const headers = {
       method: "GET",
       headers: {
@@ -608,6 +640,15 @@ export default function permintaanBarang() {
     return <DataTable columns={columns} data={historyData} customStyles={customStyles} keyField="no_referensi" />;
   };
 
+  const getTotal = (data) => {
+    let total = 0;
+    data.forEach((item) => {
+      total += item.qty * (item?.price || item?.buy_price[item.unit] || 0);
+    });
+
+    return formatter.format(total);
+  };
+
   return (
     <>
       {printState ? (
@@ -626,7 +667,10 @@ export default function permintaanBarang() {
                   setSelectedData();
                 }}
               />
-              <button onClick={handlePrint} class="print:hidden rounded-full bg-sky-400 px-4 py-2 font-bold text-white">
+              <button
+                onClick={handlePrint}
+                className="print:hidden rounded-full bg-sky-400 px-4 py-2 font-bold text-white"
+              >
                 <span>
                   <PrinterOutlined className="mr-1 text-lg" />
                 </span>{" "}
@@ -635,7 +679,7 @@ export default function permintaanBarang() {
             </div>
 
             <div className="w-2/4 mx-auto">
-              <p className="text-xl font-bold text-center">BUKTI PERMINTAAN TRANSFER STOK</p>
+              <p className="text-xl font-bold text-center">BUKTI MUTASI RESEP</p>
             </div>
 
             <div className="w-full flex justify-between">
@@ -646,7 +690,7 @@ export default function permintaanBarang() {
                   <p className="text-sm mb-0 uppercase">Lokasi Pengirim</p>
                   <p className="text-sm mb-0 uppercase">Lokasi Penerima</p>
                 </div>
-                <div className="text-right">
+                <div className="text-left">
                   <p className="text-sm mb-0 font-bold uppercase">
                     {selectedData
                       ? moment(selectedData?.date)?.format("DD/MM/YYYY")
@@ -676,6 +720,21 @@ export default function permintaanBarang() {
               customStyles={printStyles}
               noDataComponent={`--Harap pilih produk--`}
             />
+
+            <div className="flex flex-col mt-3 items-end">
+              <div className="w-1/4 grid grid-cols-2 gap-5">
+                <p className="m-0 text-sm text-right">Total Item:</p>
+                <p className="m-0 text-sm text-right">
+                  {selectedData ? selectedData?.items?.length ?? 0 : products?.length}
+                </p>
+              </div>
+              <div className="w-1/4 grid grid-cols-2 gap-5">
+                <p className="m-0 text-sm text-right">Total Nilai Persediaan:</p>
+                <p className="m-0 text-sm text-right">
+                  {selectedData ? getTotal(selectedData?.items) ?? 0 : getTotal(products)}
+                </p>
+              </div>
+            </div>
 
             <div className="w-3/4 mt-3 flex gap-x-3">
               <p className="text-sm mb-0 uppercase">Deskripsi : </p>
