@@ -45,13 +45,13 @@ export default function calculatePrice(row, products, productTotalPrice, product
     margin = 0;
   }
 
-  if (disc > 0) {
-    priceUnit = priceUnit - disc;
-  }
-
   margin = (priceUnit * margin) / 100;
 
   priceUnit = priceUnit + margin;
+
+  if (disc > 0) {
+    priceUnit = priceUnit - disc;
+  }
 
   var price1 = calculatePercentage(priceUnit, Dp1);
   var price2 = calculatePercentage(price1, Dp2);
