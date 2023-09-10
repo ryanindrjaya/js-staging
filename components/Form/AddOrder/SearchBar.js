@@ -94,10 +94,16 @@ export default function SearchBar({
 
   useEffect(() => {
     if (debounceQuery) {
-      fetchProduct(debounceQuery, (data) => {
-        setData(data);
+      try {
+        fetchProduct(debounceQuery, (data) => {
+          setData(data);
+          setLoading(false);
+        });
+      } catch (error) {
         setLoading(false);
-      });
+        message.error("Gagal mengambil data produk");
+        console.log(error);
+      }
     }
   }, [debounceQuery]);
 
