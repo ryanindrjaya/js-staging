@@ -14,23 +14,11 @@ import useDebounce from "../../../../hooks/useDebounce";
 
 Retur.getInitialProps = async (ctx) => {
   const api = ctx.query.api;
-  const cookies = nookies.get(ctx);
 
-  const endpoint = `${process.env.NEXT_PUBLIC_URL}/retur-${api}s?sort[0]=id:desc`;
-  const options = {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${cookies.token}`,
-    },
-  };
-
-  const res = await fetch(endpoint, options);
-  const data = await res.json();
-
-  console.log("data", data);
+  const endpoint = `${process.env.NEXT_PUBLIC_URL}/retur-${api}s`;
 
   return {
-    data: data?.data || [],
+    data: [],
     pointer: `no_retur_${api.split("-").join("_")}`,
     api_endpoint: endpoint,
   };
@@ -148,7 +136,8 @@ function Retur({ data = [], pointer = "", api_endpoint = "" }) {
 
   useEffect(() => {
     async function getData(query) {
-      const endpoint = `${api_endpoint}?filters[${pointer}][$containsi]=${query}&sort[0]=id:desc`;
+      const queryParams = query ? `?filters[${pointer}][$containsi]=${query}` : "";
+      const endpoint = `${api_endpoint}${queryParams}`;
       const options = {
         headers: {
           "Content-Type": "application/json",
@@ -162,15 +151,17 @@ function Retur({ data = [], pointer = "", api_endpoint = "" }) {
       return data?.data || [];
     }
 
-    if (debouncedSearchTerm) {
-      setIsSearching(true);
-      getData(debouncedSearchTerm).then((res) => {
+    setIsSearching(true);
+    getData(debouncedSearchTerm)
+      .then((res) => {
         setIsSearching(false);
         setRetur(res);
+      })
+      .catch((err) => {
+        setRetur([]);
+        setIsSearching(false);
+        console.log(err);
       });
-    } else {
-      setRetur(data);
-    }
   }, [debouncedSearchTerm]);
 
   return (
