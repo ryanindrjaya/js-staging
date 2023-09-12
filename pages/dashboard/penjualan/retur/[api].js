@@ -162,7 +162,7 @@ function Retur({ data = [], pointer = "", api_endpoint = "" }) {
         setIsSearching(false);
         console.log(err);
       });
-  }, [debouncedSearchTerm, router.pathname]);
+  }, [debouncedSearchTerm, router.asPath]);
 
   return (
     <>
