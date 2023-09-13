@@ -36,6 +36,7 @@ const Tambah = ({ props }) => {
     setLoading(true);
     values.setting = false;
     values.chart_of_account = values.akun;
+    values.penjualan = "TOKO";
     var data = { data: values};
 
     const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts";
@@ -249,7 +250,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchAkun = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?populate=*";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?populate=*&filters[penjualan]=TOKO";
     const options = {
         method: "GET",
         headers: {
