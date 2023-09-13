@@ -15,6 +15,7 @@ export default function ReactDataTable({
     onChangeStatusPengiriman,
     onChangeStatus,
     onChangeSetting,
+    page,
     user,
 }) {
     const router = useRouter();
@@ -32,7 +33,8 @@ export default function ReactDataTable({
     };
 
     const edit = (row) => {
-      router.push("/dashboard/penjualan/toko/setting/edittambahakun/" + row.id);
+      if (page === "SALES") router.push("/dashboard/penjualan/sales/setting/edittambahakun/" + row.id);
+      else router.push("/dashboard/penjualan/toko/setting/edittambahakun/" + row.id);
     };
 
     const lihat = (row) => {

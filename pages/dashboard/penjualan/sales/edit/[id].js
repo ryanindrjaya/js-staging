@@ -543,8 +543,8 @@ function Toko({ props }) {
   useEffect(() => {
     // set dpp
     if (dppActive == "DPP") {
-      setDPP(grandTotal / 1.11);
-      setPPN(((grandTotal / 1.11) * 11) / 100);
+      setDPP(totalPrice / 1.11);
+      setPPN(((totalPrice / 1.11) * 11) / 100);
       form.setFieldsValue({
         PPN_active: "PPN",
         DPP_active: "DPP",
@@ -1084,7 +1084,7 @@ function Toko({ props }) {
                 </div>
               </div>
 
-              <div className="w-full flex md:w-3/4 justify-end mb-2">
+              {/* <div className="w-full flex md:w-3/4 justify-end mb-2">
                 <p className="mb-4 font-bold text-center">Biaya Tambahan Lain Lain</p>
               </div>
               <div className="w-full flex flex-wrap justify-end mb-3">
@@ -1140,7 +1140,7 @@ function Toko({ props }) {
                     />
                   </Form.Item>
                 </div>
-              </div>
+              </div> */}
 
               <div className="w-full flex justify-between">
                 <Form.Item name="sale_note" className="w-full md:w-1/2 mx-2">

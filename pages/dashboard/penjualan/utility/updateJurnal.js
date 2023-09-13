@@ -63,6 +63,15 @@ const UpdateJurnal = async (data, user, page, insidePage, kode, indexMultiPay, m
         kodeFee3 = akunToko.data[3].attributes.chart_of_account.data.attributes.kode;
         akunCOA.data.push(akunToko.data[3].attributes.chart_of_account.data);
       }
+    } else if (insidePage === "sales"){
+      reqCOA = await fetchAkunCOA(cookies, akunPiutang, "212.01.07", "400.01.00", "500.00.01", "115.10.00");
+      akunCOA = await reqCOA.json();
+      var reqSales = await fetchAkunSales(cookies);
+      var akunSales = await reqSales.json(); console.log("get akunSales", akunSales);
+      if (values.attributes.delivery_fee !== 0){
+        kodeDelivery = akunSales.data[0].attributes.chart_of_account.data.attributes.kode;
+        akunCOA.data.push(akunSales.data[0].attributes.chart_of_account.data);
+      }
     }
     
     if (indexMultiPay > 0) {
@@ -134,13 +143,13 @@ const UpdateJurnal = async (data, user, page, insidePage, kode, indexMultiPay, m
       } else if (item.attributes.kode === "500.00.01" && data3 === 0) {
         //true
         values.debit = values.attributes.total;
-        if (insidePage === "toko") values.debit = values.attributes.dpp + values.attributes.ppn;
+        if (insidePage === "toko" && insidePage === "sales") values.debit = values.attributes.dpp + values.attributes.ppn;
         data3++;
 
       } else if (item.attributes.kode === "115.10.00" && data4 === 0) {
         //true
         values.kredit = values.attributes.total;
-        if (insidePage === "toko") values.kredit = values.attributes.dpp + values.attributes.ppn;
+        if (insidePage === "toko" && insidePage === "sales") values.kredit = values.attributes.dpp + values.attributes.ppn;
         data4++;
 
       } else if (item.attributes.kode === kodeDelivery && values.attributes.delivery_fee !== 0 && feeDelivery === 0) {
@@ -375,6 +384,24 @@ const fetchAkunToko = async (cookies) => {
   "&filters[type][$eq]=TAMBAHAN LAIN 1"+
   "&filters[type][$eq]=TAMBAHAN LAIN 2"+
   "&filters[type][$eq]=TAMBAHAN LAIN 3"+
+  "&filters[penjualan][$eq]=TOKO"+
+  "&filters[setting][$eq]=true";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchAkunSales = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + 
+  "/store-accounts?populate=*&filters[type][$eq]=ONGKIR"+
+  "&filters[penjualan][$eq]=SALES"+
   "&filters[setting][$eq]=true";
   const options = {
     method: "GET",

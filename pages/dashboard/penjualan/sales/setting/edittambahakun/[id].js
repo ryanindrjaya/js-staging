@@ -33,7 +33,7 @@ const Tambah = ({ props }) => {
     setLoading(true);
     values.setting = akun.data.attributes.setting;
     values.chart_of_account = akunCOA?.id;
-    values.penjualan = "TOKO";
+    values.penjualan = "SALES";
     var data = { data: values};
 
     const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts/"+ akun.data.id;
@@ -58,7 +58,7 @@ const Tambah = ({ props }) => {
         "Berhasil mengubah data",
         "Akun piutang telah berhasil diubah. Silahkan cek kembali akun piutang"
       );
-      router.replace("/dashboard/penjualan/toko/setting");
+      router.replace("/dashboard/penjualan/sales/setting");
     } else {
       //res.error?.details.errors.map((error) => {
       //  const ErrorMsg = error.path[0];
