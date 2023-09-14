@@ -157,7 +157,7 @@ export default function penyesuaian() {
         filter += `filters[status][$eq]=${selectedStatus}&`;
       }
 
-      const endpoint = `${process.env.NEXT_PUBLIC_URL}/inventory-adjustments?populate=deep&${filter}sort[0]=date:desc`;
+      const endpoint = `${process.env.NEXT_PUBLIC_URL}/inventory-adjustments?populate=*&${filter}&sort[0]=id:desc`;
       const headers = {
         method: "GET",
         headers: {

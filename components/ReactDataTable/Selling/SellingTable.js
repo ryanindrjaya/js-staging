@@ -280,15 +280,15 @@ export default function ReactDataTable({
               </button>
             </div>
           ) : (
-          <div>
-            <button
-              onClick={() => returPenjualan(row)}
-              className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-            >
-              <UndoOutlined className="mr-2 mt-0.5 float float-left" />
-              Retur Penjualan
-            </button>
-          </div>
+            <div>
+              <button
+                onClick={() => returPenjualan(row)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+              >
+                <UndoOutlined className="mr-2 mt-0.5 float float-left" />
+                Retur Penjualan
+              </button>
+            </div>
           )}
 
           {row.attributes.status_data != "Draft" ? (
@@ -463,8 +463,23 @@ export default function ReactDataTable({
         "-",
     },
     {
+      name: "Status Dokumen",
+      width: "130px",
+      center: true,
+      selector: (row) => {
+        const status = row.attributes?.status_data ?? "";
+
+        if (status !== "Draft") {
+          return <Tag color={tagGreen}>{status}</Tag>;
+        }
+
+        return <Tag color={tagRed}>{status}</Tag>;
+      },
+    },
+    {
       name: <div className="">Status</div>,
       width: "150px",
+      center: true,
       selector: (row) => {
         if (
           row.attributes?.retur_panel_sales?.data?.length > 0 ||

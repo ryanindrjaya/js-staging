@@ -128,7 +128,6 @@ function Toko({ props }) {
   var selectedProduct = products?.productList;
   const locations = props.locations.data;
   const user = props.user;
-  const inven = props.inven.data;
   const nonPanel = props.nonPanel;
   const customerData = props.customer;
 
@@ -163,10 +162,10 @@ function Toko({ props }) {
   const router = useRouter();
   const { TextArea } = Input;
   var today = new Date();
-  var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
-  var yyyy = today.getFullYear();
-  var date = today.getDate() + "/" + mm + "/" + yyyy;
-  var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  // var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
+  // var yyyy = today.getFullYear();
+  // var date = today.getDate() + "/" + mm + "/" + yyyy;
+  // var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 
   const [open, setOpen] = useState(false);
 
@@ -193,7 +192,6 @@ function Toko({ props }) {
 
   // NO Non Panel Sale
   var noNonPanelSale = String(nonPanel?.meta?.pagination.total + 1).padStart(3, "0");
-  const [categorySale, setCategorySale] = useState(`PNP/ET/${user.id}/${noNonPanelSale}/${mm}/${yyyy}`);
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);
@@ -289,7 +287,7 @@ function Toko({ props }) {
     totalBelumDibayar = grandTotal;
 
     nonPanel.data.forEach((element) => {
-      if (customer?.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
+      if (customer?.id == element.attributes.customer?.data?.id) totalBelumDibayar += element.attributes.total;
     });
 
     customerData.data.forEach((element) => {
@@ -325,7 +323,7 @@ function Toko({ props }) {
     let data = null;
 
     nonPanel.data.some((element) => {
-      if (customer.id == element.attributes.customer.data.id && element.attributes.status == "Belum Dibayar") {
+      if (customer.id == element.attributes.customer?.data?.id && element.attributes.status == "Belum Dibayar") {
         //if (element.attributes.sale_date )
         data = element;
         return true;
@@ -533,18 +531,6 @@ function Toko({ props }) {
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
 
   useEffect(() => {
-    if (products.productList.length > 0) {
-      inven.forEach((element) => {
-        products.productList.forEach((data) => {
-          if (data.id == element.attributes.products?.data[0]?.id) {
-            data.stock = element.attributes.total_stock;
-          }
-        });
-      });
-    }
-  }, [products.productList]);
-
-  useEffect(() => {
     sumAdditionalPrice();
   }, [additionalFee]);
 
@@ -581,12 +567,6 @@ function Toko({ props }) {
   }, [grandTotal]);
 
   useEffect(() => {
-    locations.forEach((element) => {
-      if (element.id == location) setLocationData(element.attributes);
-    });
-  }, [location]);
-
-  useEffect(() => {
     // set max value
     if (discType == "Tetap") setDiscMax(totalPrice);
     if (discType == "Persentase") setDiscMax(100);
@@ -597,7 +577,7 @@ function Toko({ props }) {
     totalBelumDibayar = 0;
     if (customer) {
       nonPanel.data.forEach((element) => {
-        if (customer.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
+        if (customer.id == element.attributes.customer?.data?.id) totalBelumDibayar += element.attributes.total;
       });
 
       setLimitCredit(customer?.attributes?.credit_limit - totalBelumDibayar);
@@ -682,9 +662,7 @@ function Toko({ props }) {
           <LayoutContent>
             <div className="w-full flex justify-between mx-2 mt-1">
               <div className="w-full justify-start md:w-1/3">
-                <p>
-                  {date} {time}
-                </p>
+                <p></p>
               </div>
               <div className="w-full flex justify-center md:w-1/3">
                 <button onClick={showModal} className="bg-cyan-700 rounded-md m-1 text-sm">

@@ -17,21 +17,26 @@ export default function Customer({ onChangeCustomer, customer, disabled, fetchin
       : []
   );
   const cookies = nookies.get(null, "token");
-  const order = useSelector((state) => state.Order);
 
   const handleChange = async (id) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + `/customers/${id}?populate=deep`;
-    const options = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-    };
-    const req = await fetch(endpoint, options);
-    const res = await req.json();
+    try {
+      const endpoint = process.env.NEXT_PUBLIC_URL + `/customers/${id}`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+      };
+      const req = await fetch(endpoint, options);
+      const res = await req.json();
 
-    onChangeCustomer(res.data);
+      console.log("select customer ==>", res);
+
+      onChangeCustomer(res.data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleSearch = (newValue) => {
@@ -51,7 +56,7 @@ export default function Customer({ onChangeCustomer, customer, disabled, fetchin
       try {
         const endpoint =
           process.env.NEXT_PUBLIC_URL +
-          `/customers?filters[$or][0][name][$contains]=${query}&filters[$and][1][tipe_penjualan_query][$eq]=${page}`;
+          `/customers?filters[$or][0][name][$contains]=${query}&filters[$and][1][tipe_penjualan_query][$eq]=${page}&pagination[page]=1&pagination[pageSize]=20&sort=name:asc`;
         const options = {
           method: "GET",
           headers: {

@@ -233,13 +233,15 @@ function NonPanelSale({ props }) {
     const req = await fetch(endpoint, options);
     const res = await req.json();
     if (res) {
-      const res = await fetchData(cookies);
+      const res = await fetchNonPanelSales(cookies);
+      const newData = await res.json();
+      console.log("newData", newData);
       openNotificationWithIcon(
         "success",
         "Berhasil menghapus data",
         "Penjualan yang dipilih telah berhasil dihapus. Silahkan cek kembali penjualan non panel"
       );
-      setSell(res);
+      setSell(newData);
     }
 
     setIsFetchingData(false);

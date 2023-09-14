@@ -833,7 +833,7 @@ export async function createInventoryFromReturPenjualan(row, customer, returPage
   }
 }
 
-async function addToGudang(body, operation = "subtract") {
+export async function addToGudang(body, operation = "subtract") {
   const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/inventories/${operation}`, {
     method: "POST",
     headers: {

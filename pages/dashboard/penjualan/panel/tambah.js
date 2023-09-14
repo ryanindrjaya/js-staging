@@ -289,7 +289,7 @@ function Toko({ props }) {
     totalBelumDibayar = grandTotal;
 
     panel.data.forEach((element) => {
-      if (customer?.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
+      if (customer?.id == element.attributes.customer?.data?.id) totalBelumDibayar += element.attributes.total;
     });
 
     customerData.data.forEach((element) => {
@@ -371,7 +371,7 @@ function Toko({ props }) {
           setInfo("gagal");
         }
 
-        if (customer.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
+        if (customer.id == element.attributes.customer?.data?.id) totalBelumDibayar += element.attributes.total;
       });
 
       cekLimit();
@@ -587,7 +587,7 @@ function Toko({ props }) {
     totalBelumDibayar = 0;
     if (customer) {
       panel.data.forEach((element) => {
-        if (customer.id == element.attributes.customer.data.id) totalBelumDibayar += element.attributes.total;
+        if (customer.id == element.attributes.customer?.data?.id) totalBelumDibayar += element.attributes.total;
       });
 
       setLimitCredit(customer?.attributes?.credit_limit - totalBelumDibayar);
