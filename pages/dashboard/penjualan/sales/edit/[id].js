@@ -15,6 +15,7 @@ import Customer from "@iso/components/Form/AddSale/CustomerForm";
 import LoadingAnimations from "@iso/components/Animations/Loading";
 import SalesTable from "@iso/components/ReactDataTable/Selling/SalesTable";
 import SearchOrder from "@iso/components/Form/AddSale/SearchPO";
+import CoaSale from "@iso/components/Form/AddSale/SearchCOA";
 
 Toko.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -45,6 +46,9 @@ Toko.getInitialProps = async (context) => {
   const reqSalesSell = await fetchSalesSell(cookies);
   const salesOrder = await reqSalesSell.json();
 
+  const reqStoreAccounts = await fetchStoreAccounts(cookies);
+  const storeAccounts = await reqStoreAccounts.json();
+
   return {
     props: {
       data: data?.data || {},
@@ -53,6 +57,7 @@ Toko.getInitialProps = async (context) => {
       inven,
       salesSale,
       salesOrder,
+      storeAccounts,
     },
   };
 };
@@ -127,6 +132,22 @@ const fetchSalesSell = async (cookies) => {
   return req;
 };
 
+const fetchStoreAccounts = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?populate=*"+
+  "&filters[type][$eq]=ONGKIR&filters[setting][$eq]=true"+
+  "&filters[penjualan][$eq]=SALES";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
 function Toko({ props }) {
   const products = useSelector((state) => state.Sales);
   const dispatch = useDispatch();
@@ -138,6 +159,7 @@ function Toko({ props }) {
   const inven = props.inven.data;
   const salesSale = props.salesSale;
   const salesOrder = props.salesOrder.data;
+  const storeAccounts = props.storeAccounts;
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -195,6 +217,9 @@ function Toko({ props }) {
   // NO Sales Sale
   var noSalesSale = String(salesSale?.meta?.pagination.total + 1).padStart(3, "0");
   const [categorySale, setCategorySale] = useState(`PS/ET/${user.id}/${noSalesSale}/${mm}/${yyyy}`);
+
+  //Akun COA
+  const [akunCOAONGKIR, setAkunCOAONGKIR] = useState();
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);
@@ -565,6 +590,17 @@ function Toko({ props }) {
     if (discType == "Persentase") setDiscMax(100);
   }, [discType]);
 
+  useEffect(() => {
+    if(akunCOAONGKIR){
+      form.setFieldsValue({
+        akunCOA: {
+          label: `${akunCOAONGKIR?.attributes?.nama}`,
+          value: akunCOAONGKIR?.id,
+        }
+      });
+    }
+  }, [akunCOAONGKIR]);
+
   function getUnitIndex(data, selected) {
     let unit = 0;
 
@@ -692,6 +728,15 @@ function Toko({ props }) {
         description: "Data tidak ditemukan. Silahkan cek kembali",
       });
       router.replace("/dashboard/penjualan/sales");
+    }
+
+    if (storeAccounts.data.length > 0){
+
+      storeAccounts.data.map((item) => {
+        if (item.attributes.type === "ONGKIR") {
+          setAkunCOAONGKIR(item.attributes.chart_of_account.data);
+        }
+      });
     }
 
     // reset redux state when component unmount / ondestroy
@@ -1018,13 +1063,16 @@ function Toko({ props }) {
 
               <div className="w-full flex flex-wrap -mx-3 mb-4">
                 <div className="w-full md:w-1/3 px-3">
+                  <CoaSale onChange={setAkunCOAONGKIR} selectedAkun={akunCOAONGKIR} disabled/>
+                </div>
+                <div className="w-full md:w-1/3 px-3">
                   <Form.Item noStyle>
                     <Input
                       size="large"
                       style={{
                         width: "60%",
                       }}
-                      value="Biaya Pengiriman"
+                      value="Titipan Ongkir"
                       disabled
                     />
                   </Form.Item>
