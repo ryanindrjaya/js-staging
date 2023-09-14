@@ -84,7 +84,7 @@ export default function ReactDataTable({
     const req = await fetch(url, options);
     const res = await req.json();
 
-    console.log("change status", res);
+    console.log("change status", res, res.data);
 
     if (res?.data?.id) {
       if (res.data.attributes.status_data === "Publish" && page === "nonpanel")
