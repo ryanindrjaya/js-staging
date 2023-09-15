@@ -33,6 +33,7 @@ const Tambah = ({ props }) => {
     setLoading(true);
     values.setting = akun.data.attributes.setting;
     values.chart_of_account = akunCOA?.id;
+    values.penjualan = "TOKO";
     var data = { data: values};
 
     const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts/"+ akun.data.id;

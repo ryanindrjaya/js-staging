@@ -4,7 +4,7 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "@iso/containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import router, { useRouter } from "next/router";
-import { Input, notification, Select, DatePicker, Form, Spin } from "antd";
+import { Input, notification, Select, DatePicker, Form, Spin, Pagination, Table } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchCOA from "@iso/components/Form/AddReport/SearchCOA";
 import COATable from "@iso/components/ReactDataTable/Cost/ChartOfAccountTable";
@@ -27,11 +27,15 @@ BukuBesar.getInitialProps = async (context) => {
   const reqJurnal = await fetchJurnal(cookies);
   const jurnal = await reqJurnal.json();
 
+  const reqSaldo = await fetchSaldo(cookies);
+  const saldo = await reqSaldo.json();
+
   return {
     props: {
       //user,
       akun,
-      jurnal
+      jurnal,
+      saldo
     },
   };
 };
@@ -78,6 +82,24 @@ const fetchJurnal = async (cookies) => {
   return req;
 };
 
+const fetchSaldo = async (cookies, coa = null, startDate = moment(), endDate = moment()) => {
+  const endpoint = new URL(process.env.NEXT_PUBLIC_URL + "/neraca-detail");
+  endpoint.searchParams.append("coa", coa ?? null);
+  endpoint.searchParams.append("startDate", startDate);
+  endpoint.searchParams.append("endDate", endDate);
+  endpoint.searchParams.append("periode", startDate);
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
 function BukuBesar({ props }) {
   const user = props.user;
   const akunData = props.akun;
@@ -102,6 +124,18 @@ function BukuBesar({ props }) {
 
   //Data Before
   const [dataBefore, setDataBefore] = useState();
+
+  //Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  // Calculate the start and end indices for the current page
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = jurnal?.meta?.pagination?.total;
+  // Get the data to display for the current page
+  const pageData = jurnal?.data?.slice(startIndex, endIndex);
+
+  //untuk Table
+  const { Column, Summary } = Table;
 
   const [isLoading, setIsLoading] = useState(false);
   var saldoForData = 0;
@@ -173,14 +207,16 @@ function BukuBesar({ props }) {
 
   const handleDateChange = async (date) => {
     setIsLoading(true);
+
+    
     if (date !== null) {
       var startDate = date[0].format('YYYY-MM-DD');
       var endDate = date[1].format('YYYY-MM-DD');
 
       setStartDate(date[0]);
       setEndDate(date[1]);
-  
-      const req = await getJurnal(startDate, endDate);
+      
+      const req = await getJurnal(startDate, endDate, null, currentPage);
       const res = await req.json();
       
       setDefaultDate(date);
@@ -194,23 +230,52 @@ function BukuBesar({ props }) {
       setStartDate(moment());
       setEndDate(moment());
 
-      const req = await getJurnal(startDate, endDate);
+      const req = await getJurnal(startDate, endDate, null, currentPage);
       const res = await req.json();
       
       setDefaultDate([moment(), moment()]);
       if (akunCOA !== undefined) setJurnal(res);
       else setJurnal();
-      console.log(akunCOA, "akunCOA");
     }
 
     setIsLoading(false);
   };
 
+  const handlePage = async (page) => {
+    setIsLoading(true);
+      setCurrentPage(page);
+    setIsLoading(false);
+  };
+
+  // const handlePageChange = async (page) => {
+  //   try {
+  //     setCurrentPage(page);
+
+  //     var startDate = moment(startDate).format('YYYY-MM-DD');
+  //     var endDate = moment(endDate).format('YYYY-MM-DD');
+
+  //     const req = await getJurnal(startDate, endDate, null, page);
+  //     const res = await req.json(); console.log(page, req, res.data);
+  //     if (res) {
+  //       setJurnal(res.data);
+  //       // setJurnal((prevData) => ({
+  //       //   data: filterDuplicateData(prevData.data.concat(res.data)),
+  //       //   meta: prevData.meta,
+  //       // }));
+  //     } else {
+  //       console.log("something is wrong");
+  //     }
+      
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
   const handleClear = async () => {
     console.log("LOL");
   };
   
-  const getJurnal = async (startDate, endDate, data) => {
+  const getJurnal = async (startDate, endDate, data, page) => {
 
     const cookies = nookies.get(null, "token");
     var query = `&filters[tanggal][$gte]=${startDate}&filters[tanggal][$lte]=${endDate}`;
@@ -223,7 +288,14 @@ function BukuBesar({ props }) {
       query += "&filters[chart_of_account][id][$eq]="+ akunCOA.id;
     }
 
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*" + query;
+    //if(page){
+      //query += "&pagination[page]=" + page;
+      // `&filters[tanggal][$gte]=${startDate}&filters[tanggal][$lte]=${endDate}`+
+      // "&filters[chart_of_account][id][$eq]="+ akunCOA.id +
+      
+    //}
+
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*" + query; console.log("query", endpoint);
     const options = {
       method: "GET",
       headers: {
@@ -237,16 +309,44 @@ function BukuBesar({ props }) {
 
   }
 
+  const getSaldoAwal = async (date) => {
+
+    const cookies = nookies.get();
+    //var kodeCOA = akunCOA?.attributes?.chart_of_account?.data?.attributes?.kode;
+    const reqSaldo = await fetchSaldo(cookies, akunCOA?.attributes?.kode, date[0].toISOString(), date[1].toISOString());
+    const response = await reqSaldo.json(); console.log("response saldos", response, akunCOA);
+    var saldo = response?.saldoAwal?.hasil?.saldo;
+    var debit = response?.saldoAwal?.hasil?.debit;
+    var kredit = response?.saldoAwal?.hasil?.kredit;
+    console.log("response saldos", response?.saldoAwal?.hasil?.saldo, debit, kredit);
+
+    setDebitAwal(debit);
+    setKreditAwal(kredit);
+
+    if(akunCOA.attributes.jenis_akun === true){
+      setSaldoAwal(saldo + (debit - kredit));
+    } else if(akunCOA.attributes.jenis_akun === false){
+      setSaldoAwal(saldo + (kredit - debit));
+    } 
+
+    if(saldo === null && debit === null && kredit === null){
+      setDebitAwal(0);
+      setKreditAwal(0);
+      setSaldoAwal(akunCOA?.attributes?.saldo);
+    }
+
+  }
+
   const calculateBefore = async () => {
     const minusOneDay = startDate.clone().subtract(1, 'day');
     const req = await getJurnal(null, minusOneDay.format('YYYY-MM-DD'), true);
     const res = await req.json();
 
-    if (akunCOA) setSaldoAwal(akunCOA.attributes.saldo);
+    //if (akunCOA) setSaldoAwal(akunCOA.attributes.saldo);
     setDataBefore(res);
   };
 
-  useEffect(() => {
+  useEffect(() => { console.log(jurnal, "jurnal data");
     setIsLoading(true);
 
     var saldo = 0;
@@ -258,35 +358,36 @@ function BukuBesar({ props }) {
     if(akunCOA !== undefined && startDate && endDate && akunCOA){
 
       saldo = akunCOA.attributes.saldo;
+      saldo = saldoAwal;
 
-      dataBefore?.data?.map((item) => {
-        const coaData = item.attributes.chart_of_account.data;
-        //saldo = item.attributes.chart_of_account.data.attributes.saldo;
-        if(coaData.attributes.kode === akunCOA.attributes.kode){
-          setSaldoAwal(saldo);
-          //setTempSaldo(saldo);
-          debitawal += parseFloat(item.attributes.debit);
-          kreditawal += parseFloat(item.attributes.kredit);
-        } else setTempSaldo(saldo);
+      // dataBefore?.data?.map((item) => {
+      //   const coaData = item.attributes.chart_of_account.data;
+      //   //saldo = item.attributes.chart_of_account.data.attributes.saldo;
+      //   if(coaData.attributes.kode === akunCOA.attributes.kode){
+      //     //setSaldoAwal(saldo);
+      //     //setTempSaldo(saldo);
+      //     debitawal += parseFloat(item.attributes.debit);
+      //     kreditawal += parseFloat(item.attributes.kredit);
+      //   } else setTempSaldo(saldo);
         
-        saldoForData = saldo;
-      });
+      //   saldoForData = saldo;
+      // });
 
-      if (dataBefore.data.length > 0){
-        setDebitAwal(debitawal);
-        setKreditAwal(kreditawal);
-      } else {
+      // if (dataBefore.data.length > 0){
+      //   setDebitAwal(debitawal);
+      //   setKreditAwal(kreditawal);
+      // } else {
         setDebitAwal(0);
         setKreditAwal(0);
-      }
+      //}
 
       if (akunCOA.attributes.jenis_akun === true) {
         saldo = (saldo + debitawal) - kreditawal;
-        setSaldoAwal(saldo);
+        //setSaldoAwal(saldo);
       }
       else if (akunCOA.attributes.jenis_akun === false) {
         saldo = (saldo + kreditawal) - debitawal;
-        setSaldoAwal(saldo);
+        //setSaldoAwal(saldo);
       }
 
       jurnal?.data?.map((item) => {
@@ -294,7 +395,7 @@ function BukuBesar({ props }) {
         //saldo = item.attributes.chart_of_account.data.attributes.saldo;
 
           if(coaData.attributes.kode === akunCOA.attributes.kode){
-            setSaldoAwal(saldo);
+            //setSaldoAwal(saldo);
             debitakhir += parseFloat(item.attributes.debit);
             kreditakhir += parseFloat(item.attributes.kredit);
           }
@@ -318,23 +419,112 @@ function BukuBesar({ props }) {
       }
 
     } else {
-      setSaldoAwal(0);
+      // setSaldoAwal(0);
+      // setSaldoAkhir(0);
     }
     
     if (akunCOA === undefined){
       setSaldoAwal(0);
       setSaldoAkhir(0);
+      setDebitAwal(0);
+      setKreditAwal(0);
+      setDebitAkhir(0);
+      setKreditAkhir(0);
     }
 
     setIsLoading(false);
-  }, [dataBefore, jurnal]);
+  }, [jurnal]);
+
+  // useEffect(() => {
+  //   setIsLoading(true);
+  //   const handlePageChange = async () => {
+
+  //   const cookies = nookies.get(null, "token");
+  //   const endpoint = process.env.NEXT_PUBLIC_URL + 
+  //   `&filters[tanggal][$gte]=${startDate}&filters[tanggal][$lte]=${endDate}` +
+  //   "&filters[chart_of_account][id][$eq]="+ akunCOA?.id +
+  //   "&pagination[page]=" + page +
+  //   "/jurnals?populate=*&pagination[page]=" + currentPage;
+
+  //   const options = {
+  //     method: "GET",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: "Bearer " + cookies.token,
+  //     },
+  //   };
+
+  //   try {
+  //     const req = await fetch(endpoint, options);
+  //     const res = await req.json(); console.log(currentPage, req, res, "res change");
+  //     if (res && jurnal) {
+  //       setJurnal((prevData) => ({
+  //         data: filterDuplicateData(prevData.data.concat(res.data)),
+  //         meta: prevData.meta,
+  //       }));
+  //     } else {
+  //       console.log("something is wrong");
+  //     }
+      
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+
+  //     // try {
+  
+  //     //   var startDate = moment(startDate).format('YYYY-MM-DD');
+  //     //   var endDate = moment(endDate).format('YYYY-MM-DD');
+  
+  //     //   const req = await getJurnal(startDate, endDate, null, currentPage);
+  //     //   const res = await req.json(); console.log(currentPage, req, res, "res data");
+  //     //   if (res) {
+  //     //     const newData = res.data;
+  //     //     if (jurnal) setJurnal(prevData => [...prevData, ...newData]);
+  //     //     // setJurnal(res.data);
+  //     //     // setJurnal((prevData) => ({
+  //     //     //   data: filterDuplicateData(prevData.data.concat(res.data)),
+  //     //     //   meta: prevData.meta,
+  //     //     // }));
+  //     //   } else {
+  //     //     console.log("something is wrong");
+  //     //   }
+        
+  //     // } catch (error) {
+  //     //   console.log(error);
+  //     // }
+  //   };
+
+  //   handlePageChange();
+
+  //   const filterDuplicateData = (arr) => {
+  //     const seen = new Set();
+  
+  //     const filteredArr = arr.filter((el) => {
+  //       const duplicate = seen.has(el.id);
+  //       seen.add(el.id);
+  //       return !duplicate;
+  //     });
+  
+  //     return filteredArr;
+  //   };
+  //   setIsLoading(false);
+  // }, [currentPage]);
 
   useEffect(() => {
     setIsLoading(true);
     handleDateChange([startDate, endDate]);
-    calculateBefore();
+    if (akunCOA) {
+      //setSaldoAwal(akunCOA.attributes.saldo);
+      getSaldoAwal([startDate, endDate]);
+    } 
+    //calculateBefore();
     setIsLoading(false);
   }, [startDate, endDate, akunCOA]);
+
+  useEffect(() => {
+    if (debitAkhir && kreditAkhir) setSaldoAkhir(akunCOA?.attributes?.saldo + (debitAkhir - kreditAkhir));
+    else setSaldoAkhir(0);
+  }, [debitAkhir, kreditAkhir]);
 
   useEffect(() => {
     handleDateChange(defaultDate);
@@ -346,7 +536,7 @@ function BukuBesar({ props }) {
     currency: "IDR",
     maximumFractionDigits: 2,
   });
-  
+
   return (
     <>
       <Head>
@@ -427,7 +617,7 @@ function BukuBesar({ props }) {
                     <td className="border-2 p-2 text-center"> {startDate.format('DD/MM/YYYY')} </td>
                     <td className="border-2 text-center"> - </td>
                     <td className="border-2 text-center"> - </td>
-                    <td className="border-2 text-center"> - </td>
+                    <td className="border-2 text-center"> - {console.log("saldoAwal", saldoAwal)} </td>
                     <td className="border-2 p-1 text-left"> Saldo Awal </td>
                     <td className="border-2 p-2 text-right"> {formatter.format(debitAwal)} </td>
                     <td className="border-2 p-2 text-right"> {formatter.format(kreditAwal)} </td>
@@ -465,7 +655,7 @@ function BukuBesar({ props }) {
                     // Check if a match was found
                     if (match) {
                       codeValue = match[1];
-                      console.log(codeValue); 
+                      //console.log(codeValue); 
                     } else {
                       if (item.attributes.no_jurnal.includes("JM")) {
                         codeValue = item.attributes.no_jurnal;
@@ -477,7 +667,7 @@ function BukuBesar({ props }) {
                     // Check if a matchBetween was found
                     if (matchBetween) {
                       codeBetween = matchBetween[1];
-                      console.log(codeBetween);
+                      //console.log(codeBetween);
                     } else {
                       if (item.attributes.no_jurnal.includes("JM")) {
                         codeBetween = "jurnal memo";
@@ -514,6 +704,16 @@ function BukuBesar({ props }) {
               
             </div>
             )}
+
+            {/* <div className="flex justify-center items-center w-full h-full mt-2 ">
+              <Pagination
+                defaultCurrent={1}
+                current={currentPage}
+                total={jurnal?.meta?.pagination?.total}
+                pageSize={itemsPerPage}
+                onChange={handlePage}
+              />
+            </div> */}
 
           </LayoutContent>
         </LayoutWrapper>

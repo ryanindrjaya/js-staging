@@ -21,6 +21,7 @@ import createInventory from "../utility/createInventory";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import confirm from "antd/lib/modal/confirm";
 import getUserCodeName from "../../../../library/functions/getUserCodeName";
+import CoaSale from "@iso/components/Form/AddSale/SearchCOA";
 import moment from "moment";
 
 Toko.getInitialProps = async (context) => {
@@ -41,6 +42,9 @@ Toko.getInitialProps = async (context) => {
   const reqCustomer = await fetchCustomer(cookies);
   const customer = await reqCustomer.json();
 
+  const reqStoreAccounts = await fetchStoreAccounts(cookies);
+  const storeAccounts = await reqStoreAccounts.json();
+
   return {
     props: {
       user,
@@ -48,6 +52,7 @@ Toko.getInitialProps = async (context) => {
       inven,
       nonPanel,
       customer,
+      storeAccounts,
     },
   };
 };
@@ -121,6 +126,23 @@ const fetchCustomer = async (cookies) => {
   return req;
 };
 
+const fetchStoreAccounts = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?populate=*&filters[type][$eq]=TAMBAHAN LAIN 1"+
+  "&filters[type][$eq]=TAMBAHAN LAIN 2"+
+  "&filters[type][$eq]=TAMBAHAN LAIN 3"+
+  "&filters[type][$eq]=ONGKIR&filters[setting][$eq]=true"+
+  "&filters[penjualan][$eq]=NON";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
 function Toko({ props }) {
   const products = useSelector((state) => state.Sales);
   const dispatch = useDispatch();
@@ -130,6 +152,7 @@ function Toko({ props }) {
   const user = props.user;
   const nonPanel = props.nonPanel;
   const customerData = props.customer;
+  const storeAccounts = props.storeAccounts;
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -192,6 +215,12 @@ function Toko({ props }) {
 
   // NO Non Panel Sale
   var noNonPanelSale = String(nonPanel?.meta?.pagination.total + 1).padStart(3, "0");
+
+  //Akun COA
+  const [akunCOAONGKIR, setAkunCOAONGKIR] = useState();
+  const [akunCOALAIN, setAkunCOALAIN] = useState();
+  const [akunCOALAIN2, setAkunCOALAIN2] = useState();
+  const [akunCOALAIN3, setAkunCOALAIN3] = useState();
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);
@@ -547,7 +576,7 @@ function Toko({ props }) {
   useEffect(() => {
     // set dpp
     if (dppActive == "DPP") {
-      setDPP(grandTotal / 1.11);
+      setDPP(totalPrice / 1.11);
     } else {
       setDPP(0);
     }
@@ -556,7 +585,7 @@ function Toko({ props }) {
   useEffect(() => {
     // set ppn
     if (ppnActive == "PPN") {
-      setPPN(((grandTotal / 1.11) * 11) / 100);
+      setPPN(((totalPrice / 1.11) * 11) / 100);
     } else {
       setPPN(0);
     }
@@ -633,11 +662,60 @@ function Toko({ props }) {
     clearData();
     fetchLatestNoReferensi();
     setProductSubTotal({});
+
+    if (storeAccounts.data.length > 0){
+      storeAccounts.data.map((item) => {
+        if (item.attributes.type === "ONGKIR") {
+          setAkunCOAONGKIR(item.attributes.chart_of_account.data);
+        }
+        if (item.attributes.type === "TAMBAHAN LAIN 1"){
+          setAkunCOALAIN(item.attributes.chart_of_account.data);
+        } 
+        if (item.attributes.type === "TAMBAHAN LAIN 2"){
+          setAkunCOALAIN2(item.attributes.chart_of_account.data);
+        } 
+        if (item.attributes.type === "TAMBAHAN LAIN 3"){
+          setAkunCOALAIN3(item.attributes.chart_of_account.data);
+        } 
+      });
+    }
+
     //form.setFieldsValue({
     //  customer: customerData?.attributes.name,
     //});
     //setCustomer(customerData);
   }, []);
+
+  useEffect(() => {
+    if(akunCOAONGKIR){
+      form.setFieldsValue({
+        akunCOA: {
+          label: `${akunCOAONGKIR?.attributes?.nama}`,
+          value: akunCOAONGKIR?.id,
+        }
+      });
+    } 
+    if(akunCOALAIN || akunCOALAIN2 || akunCOALAIN3){
+      form.setFieldsValue({
+        akun: {
+          label: `${akunCOALAIN?.attributes?.nama}`,
+          value: akunCOALAIN?.id,
+        },
+        lain_coa1: {
+          label: `${akunCOALAIN?.attributes?.nama}`,
+          value: akunCOALAIN?.id,
+        },
+        lain_coa2: {
+          label: `${akunCOALAIN2?.attributes?.nama}`,
+          value: akunCOALAIN2?.id,
+        },
+        lain_coa3: {
+          label: `${akunCOALAIN3?.attributes?.nama}`,
+          value: akunCOALAIN3?.id,
+        }
+      });
+    }
+  }, [akunCOAONGKIR, akunCOALAIN, akunCOALAIN2, akunCOALAIN3]);
 
   const validateError = () => {
     var listError = form.getFieldsError();
@@ -863,13 +941,20 @@ function Toko({ props }) {
 
               <div className="w-full flex flex-wrap -mx-3 -mt-20 mb-4">
                 <div className="w-full md:w-1/3 px-3">
+                  <div className="w-full md:w-full mb-2 md:mb-0">
+                    <Form.Item name="delivery_coa" noStyle>
+                      <CoaSale onChange={setAkunCOAONGKIR} selectedAkun={akunCOAONGKIR} disabled/>
+                    </Form.Item>
+                  </div>
+                </div>
+                <div className="w-full md:w-1/3 px-3">
                   <Form.Item noStyle>
                     <Input
                       size="large"
                       style={{
                         width: "60%",
                       }}
-                      value="Biaya Pengiriman"
+                      value="Titipan Ongkir"
                       disabled
                     />
                   </Form.Item>
@@ -934,6 +1019,34 @@ function Toko({ props }) {
                 <p className="mb-4 font-bold text-center">Biaya Tambahan Lain Lain</p>
               </div>
               <div className="w-full flex flex-wrap justify-end mb-3">
+                <div className="w-full md:w-1/3 px-3 mb-2 text-center md:mb-0">
+                  <p className="mb-4 font-bold">Akun</p>
+                  <Form.Item name="lain_coa1">
+                    <Select
+                      disabled
+                      size="large"
+                      style={{ width: "100%" }}
+                    >
+                    </Select>
+                  </Form.Item>
+                  <Form.Item name="lain_coa2">
+                    <Select
+                      disabled
+                      size="large"
+                      style={{ width: "100%" }}
+                    >
+                    </Select>
+                  </Form.Item>
+                  <Form.Item name="lain_coa3">
+                    <Select
+                      disabled
+                      size="large"
+                      style={{ width: "100%" }}
+                    >
+                    </Select>
+                  </Form.Item>
+                </div>
+
                 <div className="w-full md:w-1/3 px-3 mb-2 text-center md:mb-0">
                   <p className="mb-4 font-bold">Keterangan</p>
                   <Form.Item name="additional_fee_1_desc">

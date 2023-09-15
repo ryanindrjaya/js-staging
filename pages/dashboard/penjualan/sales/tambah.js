@@ -18,6 +18,7 @@ import SearchOrder from "../../../../components/Form/AddSale/SearchPO";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import confirm from "antd/lib/modal/confirm";
 import getUserCodeName from "../../../../library/functions/getUserCodeName";
+import CoaSale from "@iso/components/Form/AddSale/SearchCOA";
 
 Toko.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -37,6 +38,9 @@ Toko.getInitialProps = async (context) => {
   const reqSalesSell = await fetchSalesSell(cookies);
   const salesOrder = await reqSalesSell.json();
 
+  const reqStoreAccounts = await fetchStoreAccounts(cookies);
+  const storeAccounts = await reqStoreAccounts.json();
+
   return {
     props: {
       user,
@@ -44,6 +48,7 @@ Toko.getInitialProps = async (context) => {
       inven,
       salesSale,
       salesOrder,
+      storeAccounts,
     },
   };
 };
@@ -135,6 +140,21 @@ async function getStock(productId, unit) {
   return res;
 }
 
+const fetchStoreAccounts = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?populate=*"+
+  "&filters[type][$eq]=ONGKIR&filters[setting][$eq]=true"+
+  "&filters[penjualan][$eq]=SALES";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
 function Toko({ props }) {
   const products = useSelector((state) => state.Sales);
   const dispatch = useDispatch();
@@ -145,6 +165,7 @@ function Toko({ props }) {
   const inven = props.inven.data;
   const salesSale = props.salesSale;
   const salesOrder = props.salesOrder.data;
+  const storeAccounts = props.storeAccounts;
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -201,6 +222,9 @@ function Toko({ props }) {
 
   // NO Sales Sale
   var noSalesSale = String(salesSale?.meta?.pagination.total + 1).padStart(3, "0");
+
+  //Akun COA
+  const [akunCOAONGKIR, setAkunCOAONGKIR] = useState();
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values.target.value);
@@ -608,8 +632,8 @@ function Toko({ props }) {
   useEffect(() => {
     // set dpp
     if (dppActive == "DPP") {
-      setDPP(grandTotal / 1.11);
-      setPPN(((grandTotal / 1.11) * 11) / 100);
+      setDPP(totalPrice / 1.11);
+      setPPN(((totalPrice / 1.11) * 11) / 100);
       form.setFieldsValue({
         PPN_active: "PPN",
         DPP_active: "DPP",
@@ -639,6 +663,17 @@ function Toko({ props }) {
       });
     }
   }, [customer]);
+
+  useEffect(() => {
+    if(akunCOAONGKIR){
+      form.setFieldsValue({
+        akunCOA: {
+          label: `${akunCOAONGKIR?.attributes?.nama}`,
+          value: akunCOAONGKIR?.id,
+        }
+      });
+    }
+  }, [akunCOAONGKIR]);
 
   async function fetchLatestNoReferensi() {
     const codename = await getUserCodeName();
@@ -681,6 +716,14 @@ function Toko({ props }) {
     clearData();
     setProductSubTotal({});
     setDPPActive("DPP");
+
+    if (storeAccounts.data.length > 0){
+      storeAccounts.data.map((item) => {
+        if (item.attributes.type === "ONGKIR") {
+          setAkunCOAONGKIR(item.attributes.chart_of_account.data);
+        }
+      });
+    }
   }, []);
 
   const validateError = () => {
@@ -978,13 +1021,16 @@ function Toko({ props }) {
 
               <div className="w-full flex flex-wrap -mx-3 mb-4">
                 <div className="w-full md:w-1/3 px-3">
+                  <CoaSale onChange={setAkunCOAONGKIR} selectedAkun={akunCOAONGKIR} disabled/>
+                </div>
+                <div className="w-full md:w-1/3 px-3">
                   <Form.Item noStyle>
                     <Input
                       size="large"
                       style={{
                         width: "60%",
                       }}
-                      value="Biaya Pengiriman"
+                      value="Titipan Ongkir"
                       disabled
                     />
                   </Form.Item>
@@ -1044,7 +1090,7 @@ function Toko({ props }) {
                 </div>
               </div>
 
-              <div className="w-full flex md:w-3/4 justify-end mb-2">
+              {/* <div className="w-full flex md:w-3/4 justify-end mb-2">
                 <p className="mb-4 font-bold text-center">Biaya Tambahan Lain Lain</p>
               </div>
               <div className="w-full flex flex-wrap justify-end mb-3">
@@ -1100,7 +1146,7 @@ function Toko({ props }) {
                     />
                   </Form.Item>
                 </div>
-              </div>
+              </div> */}
 
               <div className="w-full flex justify-between">
                 <Form.Item name="sale_note" className="w-full md:w-1/2 mx-2">

@@ -179,7 +179,8 @@ const fetchStoreAccounts = async (cookies) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?populate=*&filters[type][$eq]=TAMBAHAN LAIN 1"+
   "&filters[type][$eq]=TAMBAHAN LAIN 2"+
   "&filters[type][$eq]=TAMBAHAN LAIN 3"+
-  "&filters[type][$eq]=ONGKIR&filters[setting][$eq]=true";
+  "&filters[type][$eq]=ONGKIR&filters[setting][$eq]=true"+
+  "&filters[penjualan][$eq]=TOKO";
   const options = {
     method: "GET",
     headers: {
@@ -604,13 +605,13 @@ function Toko({ props }) {
         if (item.attributes.type === "ONGKIR") {
           setAkunCOAONGKIR(item.attributes.chart_of_account.data);
         }
-        else if (item.attributes.type === "TAMBAHAN LAIN 1"){
+        if (item.attributes.type === "TAMBAHAN LAIN 1"){
           setAkunCOALAIN(item.attributes.chart_of_account.data);
         } 
-        else if (item.attributes.type === "TAMBAHAN LAIN 2"){
+        if (item.attributes.type === "TAMBAHAN LAIN 2"){
           setAkunCOALAIN2(item.attributes.chart_of_account.data);
         } 
-        else if (item.attributes.type === "TAMBAHAN LAIN 3"){
+        if (item.attributes.type === "TAMBAHAN LAIN 3"){
           setAkunCOALAIN3(item.attributes.chart_of_account.data);
         } 
       });

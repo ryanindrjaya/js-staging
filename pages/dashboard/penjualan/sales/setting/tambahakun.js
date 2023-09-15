@@ -26,7 +26,7 @@ const Tambah = ({ props }) => {
   var yyyy = today.getFullYear();
   // NO Akun
   var noAkun = String(props.akun?.meta?.pagination.total + 1).padStart(3, "0");
-  const [kodeAkun, setKodeAkun] = useState(`AT/${user.id}/${noAkun}/${mm}/${yyyy}`);
+  const [kodeAkun, setKodeAkun] = useState(`AS/${user.id}/${noAkun}/${mm}/${yyyy}`);
   //Akun COA
   const [akunCOA, setAkunCOA] = useState();
 
@@ -36,7 +36,7 @@ const Tambah = ({ props }) => {
     setLoading(true);
     values.setting = false;
     values.chart_of_account = values.akun;
-    values.penjualan = "TOKO";
+    values.penjualan = "SALES";
     var data = { data: values};
 
     const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts";
@@ -61,7 +61,7 @@ const Tambah = ({ props }) => {
         "Berhasil menambah data",
         "Akun piutang telah berhasil ditambahkan. Silahkan cek kembali akun piutang"
       );
-      router.replace("/dashboard/penjualan/toko/setting");
+      router.replace("/dashboard/penjualan/sales/setting");
     } else {
         toast.error("Tidak dapat menambahkan Akun Piutang", {
           position: toast.POSITION.TOP_RIGHT,
@@ -151,41 +151,8 @@ const Tambah = ({ props }) => {
               <div className="flex flex-wrap -mx-3 mb-2">
                 <Form.Item name="type" className="w-1/4 mb-5 ml-1">
                   <Select size="large" placeholder="Type" onChange={setSelectedType}>
-                    <Select.Option value="TUNAI" key="TUNAI">
-                      Tunai
-                    </Select.Option>
-                    <Select.Option value="TRANSFER" key="TRANSFER">
-                      Transfer
-                    </Select.Option>
-                    <Select.Option value="BANK BCA" key="BANK BCA">
-                      Bank BCA
-                    </Select.Option>
-                    <Select.Option value="DEBIT BCA" key="DEBIT BCA">
-                      Debit BCA
-                    </Select.Option>
-                    <Select.Option value="CASH" key="CASH">
-                      Cash
-                    </Select.Option>
-                    <Select.Option value="LAINNYA" key="LAINNYA">
-                      Lainnya
-                    </Select.Option>
-                    <Select.Option value="TRANSFER BANK" key="TRANSFER BANK">
-                      Transfer Bank
-                    </Select.Option>
-                    <Select.Option value="KARTU KREDIT" key="KARTU KREDIT">
-                      Kartu Kredit
-                    </Select.Option>
                     <Select.Option value="ONGKIR" key="ONGKIR">
                       Ongkir
-                    </Select.Option>
-                    <Select.Option value="TAMBAHAN LAIN 1" key="TAMBAHAN LAIN 1">
-                      Tambahan Lain - Lain 1
-                    </Select.Option>
-                    <Select.Option value="TAMBAHAN LAIN 2" key="TAMBAHAN LAIN 2">
-                      Tambahan Lain - Lain 2
-                    </Select.Option>
-                    <Select.Option value="TAMBAHAN LAIN 3" key="TAMBAHAN LAIN 3">
-                      Tambahan Lain - Lain 3
                     </Select.Option>
                   </Select>
                 </Form.Item>
@@ -250,7 +217,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchAkun = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?populate=*&filters[penjualan]=TOKO";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?populate=*&filters[penjualan]=SALES";
     const options = {
         method: "GET",
         headers: {

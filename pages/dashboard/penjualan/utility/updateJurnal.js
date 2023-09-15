@@ -43,8 +43,8 @@ const UpdateJurnal = async (data, user, page, insidePage, kode, indexMultiPay, m
     var kodeFee3 = null;
 
     if (insidePage === "toko"){
-      reqCOA = await fetchAkunCOA(cookies, akunPiutang, "212.01.07", "400.01.00", "500.00.01", "115.10.00");
-      akunCOA = await reqCOA.json();
+      // reqCOA = await fetchAkunCOA(cookies, akunPiutang, "212.01.07", "400.01.00", "500.00.01", "115.10.00");
+      // akunCOA = await reqCOA.json();
       var reqToko = await fetchAkunToko(cookies);
       var akunToko = await reqToko.json(); console.log("get akunToko", akunToko);
       if (values.attributes.delivery_fee !== 0){
@@ -62,6 +62,45 @@ const UpdateJurnal = async (data, user, page, insidePage, kode, indexMultiPay, m
       if (values.attributes.additional_fee_3_sub !== 0) {
         kodeFee3 = akunToko.data[3].attributes.chart_of_account.data.attributes.kode;
         akunCOA.data.push(akunToko.data[3].attributes.chart_of_account.data);
+      }
+    } else if (insidePage === "non panel"){
+      // reqCOA = await fetchAkunCOA(cookies, akunPiutang, "212.01.07", "400.01.00", "500.00.01", "115.10.00");
+      // akunCOA = await reqCOA.json();
+      var req = await fetchAkunToko(cookies);
+      var akun = await req.json(); console.log("get non panel akun", akun);
+      if (values.attributes.delivery_fee !== 0){
+        kodeDelivery = akun.data[0].attributes.chart_of_account.data.attributes.kode;
+        akunCOA.data.push(akun.data[0].attributes.chart_of_account.data);
+      }
+      if (values.attributes.additional_fee_1_sub !== 0) {
+        kodeFee1 = akun.data[1].attributes.chart_of_account.data.attributes.kode;
+        akunCOA.data.push(akun.data[1].attributes.chart_of_account.data);
+      }
+      if (values.attributes.additional_fee_2_sub !== 0) {
+        kodeFee2 = akun.data[2].attributes.chart_of_account.data.attributes.kode;
+        akunCOA.data.push(akun.data[2].attributes.chart_of_account.data);
+      }
+      if (values.attributes.additional_fee_3_sub !== 0) {
+        kodeFee3 = akun.data[3].attributes.chart_of_account.data.attributes.kode;
+        akunCOA.data.push(akun.data[3].attributes.chart_of_account.data);
+      }
+    } else if (insidePage === "sales"){
+      // reqCOA = await fetchAkunCOA(cookies, akunPiutang, "212.01.07", "400.01.00", "500.00.01", "115.10.00");
+      // akunCOA = await reqCOA.json();
+      var reqSales = await fetchAkunSales(cookies);
+      var akunSales = await reqSales.json(); console.log("get akunSales", akunSales);
+      if (values.attributes.delivery_fee !== 0){
+        kodeDelivery = akunSales.data[0].attributes.chart_of_account.data.attributes.kode;
+        akunCOA.data.push(akunSales.data[0].attributes.chart_of_account.data);
+      }
+    } else if (insidePage === "panel"){
+      // reqCOA = await fetchAkunCOA(cookies, akunPiutang, "212.01.07", "400.01.00", "500.00.01", "115.10.00");
+      // akunCOA = await reqCOA.json();
+      var req = await fetchAkunPanel(cookies);
+      var akun = await req.json(); console.log("get akunPanel", akun);
+      if (values.attributes.delivery_fee !== 0){
+        kodeDelivery = akun.data[0].attributes.chart_of_account.data.attributes.kode;
+        akunCOA.data.push(akun.data[0].attributes.chart_of_account.data);
       }
     }
     
@@ -134,13 +173,13 @@ const UpdateJurnal = async (data, user, page, insidePage, kode, indexMultiPay, m
       } else if (item.attributes.kode === "500.00.01" && data3 === 0) {
         //true
         values.debit = values.attributes.total;
-        if (insidePage === "toko") values.debit = values.attributes.dpp + values.attributes.ppn;
+        if (insidePage === "toko" && insidePage === "sales") values.debit = values.attributes.dpp + values.attributes.ppn;
         data3++;
 
       } else if (item.attributes.kode === "115.10.00" && data4 === 0) {
         //true
         values.kredit = values.attributes.total;
-        if (insidePage === "toko") values.kredit = values.attributes.dpp + values.attributes.ppn;
+        if (insidePage === "toko" && insidePage === "sales") values.kredit = values.attributes.dpp + values.attributes.ppn;
         data4++;
 
       } else if (item.attributes.kode === kodeDelivery && values.attributes.delivery_fee !== 0 && feeDelivery === 0) {
@@ -375,6 +414,41 @@ const fetchAkunToko = async (cookies) => {
   "&filters[type][$eq]=TAMBAHAN LAIN 1"+
   "&filters[type][$eq]=TAMBAHAN LAIN 2"+
   "&filters[type][$eq]=TAMBAHAN LAIN 3"+
+  "&filters[penjualan][$eq]=TOKO"+
+  "&filters[setting][$eq]=true";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchAkunSales = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + 
+  "/store-accounts?populate=*&filters[type][$eq]=ONGKIR"+
+  "&filters[penjualan][$eq]=SALES"+
+  "&filters[setting][$eq]=true";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchAkunPanel = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + 
+  "/store-accounts?populate=*&filters[type][$eq]=ONGKIR"+
+  "&filters[penjualan][$eq]=PANEL"+
   "&filters[setting][$eq]=true";
   const options = {
     method: "GET",

@@ -42,7 +42,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchAkun = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?sort[0]=setting%3Adesc&sort[0]=type%3Aasc&filters[penjualan]=TOKO&populate=chart_of_account";
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?sort[0]=setting%3Adesc&sort[0]=type%3Aasc&filters[penjualan]=SALES&populate=chart_of_account";
     const options = {
         method: "GET",
         headers: {
@@ -78,7 +78,7 @@ function Setting({ props }) {
     //};
 
     const handleUpdate = (id) => {
-       router.push("/dashboard/penjualan/toko/setting/edittambahakun" + id);
+       router.push("/dashboard/penjualan/sales/setting/edittambahakun" + id);
     };
 
     const handleDelete = async (id) => {
@@ -100,7 +100,7 @@ function Setting({ props }) {
             openNotificationWithIcon(
                 "success",
                 "Berhasil menghapus data",
-                "Akun toko yang dipilih telah berhasil dihapus. Silahkan cek kembali penjualan toko"
+                "Akun sales yang dipilih telah berhasil dihapus. Silahkan cek kembali penjualan sales"
             );
             setAkun(res);
         }
@@ -135,7 +135,7 @@ function Setting({ props }) {
     };
 
     const handleTambahAkun = () => {
-        router.push("/dashboard/penjualan/toko/setting/tambahakun");
+        router.push("/dashboard/penjualan/sales/setting/tambahakun");
     };
 
     const onFinish = (values) => {
@@ -163,7 +163,7 @@ function Setting({ props }) {
             handleChangeSetting(row, row.id);
         } else {
             openNotificationWithIcon("error", "Setting gagal dirubah", "Karena tipe transaksi " + row.attributes.type + " memiliki lebih dari 1 akun aktif");
-            router.push("/dashboard/penjualan/toko/setting");
+            router.push("/dashboard/penjualan/sales/setting");
         }
     };
 
@@ -207,7 +207,7 @@ function Setting({ props }) {
             const response = await fetchData(cookies);
             setAkun(response);
 
-            openNotificationWithIcon("success", "Setting berhasil dirubah", "Setting berhasil dirubah. Silahkan cek setting toko");
+            openNotificationWithIcon("success", "Setting berhasil dirubah", "Setting berhasil dirubah. Silahkan cek setting sales");
         } else {
             openNotificationWithIcon("error", "Setting gagal dirubah", "Tedapat kesalahan yang menyebabkan setting tidak dapat dirubah");
         }
@@ -233,7 +233,7 @@ function Setting({ props }) {
     };
 
     const fetchData = async (cookies) => {
-        const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?sort[0]=setting%3Adesc&sort[0]=type%3Aasc&filters[penjualan]=TOKO&populate=chart_of_account";
+        const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?sort[0]=setting%3Adesc&sort[0]=type%3Aasc";
         const options = {
             method: "GET",
             headers: {
@@ -251,11 +251,11 @@ function Setting({ props }) {
     return (
         <>
             <Head>
-                <title>AKUN TOKO</title>
+                <title>AKUN SALES</title>
             </Head>
             <DashboardLayout>
                 <LayoutWrapper style={{}}>
-                    <TitlePage titleText={"AKUN TOKO"} />
+                    <TitlePage titleText={"AKUN SALES"} />
                     <LayoutContent>
 
                         <div className="w-full flex justify-end mb-3">
@@ -283,6 +283,7 @@ function Setting({ props }) {
                                 onPageChange={handlePageChange}
                                 //onChangeStatus={onChangeStatus}
                                 onChangeSetting={onChangeSetting}
+                                page={"SALES"}
                                 //user={user}
                             />
 
