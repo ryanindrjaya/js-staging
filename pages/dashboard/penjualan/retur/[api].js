@@ -121,7 +121,7 @@ function Retur({ data = [], pointer = "", api_endpoint = "" }) {
     {
       name: "Status",
       selector: ({ attributes }) => (
-        <Tag color={attributes?.status === "Dibayar" ? "green" : "orange"}>{attributes?.status}</Tag>
+        <Tag color={attributes?.status === "Dibayar" ? "green" : "orange"}>{attributes?.status || "Diretur"}</Tag>
       ),
     },
     {
