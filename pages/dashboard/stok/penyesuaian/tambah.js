@@ -448,7 +448,7 @@ export default function tambahPenyesuaian() {
         const body = {
           data: dataInventory,
           no_referensi: values.no_referensi,
-          type: "Penyesuaian Stok",
+          type: method === "add" ? "Penyesuaian Masuk" : "Penyesuaian Stok",
           keterangan: `Penyesuaian Stok (${method === "add" ? "Bertambah" : "Berkurang"})`,
           author: user,
         };
