@@ -21,6 +21,7 @@ import createInventory from "../../utility/createInventory";
 import updateJurnal from "../../utility/updateJurnal";
 import moment from "moment";
 import { InventoryOutFromPanel } from "../../../../../library/functions/createInventory";
+import CoaSale from "@iso/components/Form/AddSale/SearchCOA";
 
 Edit.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -56,6 +57,9 @@ Edit.getInitialProps = async (context) => {
   const reqCredit = await fetchCredit(cookies);
   const credit = await reqCredit.json();
 
+  const reqStoreAccounts = await fetchStoreAccounts(cookies);
+  const storeAccounts = await reqStoreAccounts.json();
+
   return {
     props: {
       user,
@@ -65,6 +69,7 @@ Edit.getInitialProps = async (context) => {
       customer,
       editData,
       credit,
+      storeAccounts,
     },
   };
 };
@@ -151,6 +156,21 @@ const fetchCredit = async (cookies) => {
   return req;
 };
 
+const fetchStoreAccounts = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?populate=*"+
+  "&filters[type][$eq]=ONGKIR&filters[setting][$eq]=true"+
+  "&filters[penjualan][$eq]=PANEL";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
 function Edit({ props }) {
   const products = useSelector((state) => state.Sales);
   const dispatch = useDispatch();
@@ -163,6 +183,7 @@ function Edit({ props }) {
   const customerData = props.customer;
   const editData = props.editData.data;
   const creditData = props.credit.data;
+  const storeAccounts = props.storeAccounts;
 
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -226,6 +247,9 @@ function Edit({ props }) {
   // NO Panel Sale
   var noPanelSale = String(panel?.meta?.pagination.total + 1).padStart(3, "0");
   const [categorySale, setCategorySale] = useState(`PNP/ET/${user.id}/${noPanelSale}/${mm}/${yyyy}`);
+
+  //Akun COA
+  const [akunCOAONGKIR, setAkunCOAONGKIR] = useState();
 
   const handleBiayaPengiriman = (values) => {
     setBiayaPengiriman(values);
@@ -692,7 +716,7 @@ function Edit({ props }) {
   useEffect(() => {
     // set dpp
     if (dppActive == "DPP") {
-      setDPP(grandTotal / 1.11);
+      setDPP(totalPrice / 1.11);
     } else {
       setDPP(0);
     }
@@ -701,7 +725,7 @@ function Edit({ props }) {
   useEffect(() => {
     // set ppn
     if (ppnActive == "PPN") {
-      setPPN(((grandTotal / 1.11) * 11) / 100);
+      setPPN(((totalPrice / 1.11) * 11) / 100);
     } else {
       setPPN(0);
     }
@@ -753,6 +777,17 @@ function Edit({ props }) {
       }
     }
   }, [customer, simpanData]);
+
+  useEffect(() => {
+    if(akunCOAONGKIR){
+      form.setFieldsValue({
+        akunCOA: {
+          label: `${akunCOAONGKIR?.attributes?.nama}`,
+          value: akunCOAONGKIR?.id,
+        }
+      });
+    }
+  }, [akunCOAONGKIR]);
 
   useEffect(() => {
     // used to reset redux from value before
@@ -889,6 +924,14 @@ function Edit({ props }) {
 
       id++;
     });
+
+    if (storeAccounts.data.length > 0){
+      storeAccounts.data.map((item) => {
+        if (item.attributes.type === "ONGKIR") {
+          setAkunCOAONGKIR(item.attributes.chart_of_account.data);
+        }
+      });
+    }
 
     setTimeout(() => {
       setIsFetchingData(false);
@@ -1121,13 +1164,16 @@ function Edit({ props }) {
 
               <div className="w-full flex flex-wrap -mx-3 -mt-20 mb-4">
                 <div className="w-full md:w-1/3 px-3">
+                  <CoaSale onChange={setAkunCOAONGKIR} selectedAkun={akunCOAONGKIR} disabled/>
+                </div>
+                <div className="w-full md:w-1/3 px-3">
                   <Form.Item noStyle>
                     <Input
                       size="large"
                       style={{
                         width: "60%",
                       }}
-                      value="Biaya Pengiriman"
+                      value="Titipan Ongkir"
                       disabled
                     />
                   </Form.Item>

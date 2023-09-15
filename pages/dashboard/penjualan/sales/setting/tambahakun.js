@@ -26,7 +26,7 @@ const Tambah = ({ props }) => {
   var yyyy = today.getFullYear();
   // NO Akun
   var noAkun = String(props.akun?.meta?.pagination.total + 1).padStart(3, "0");
-  const [kodeAkun, setKodeAkun] = useState(`AT/ET/${user.id}/${noAkun}/${mm}/${yyyy}`);
+  const [kodeAkun, setKodeAkun] = useState(`AS/${user.id}/${noAkun}/${mm}/${yyyy}`);
   //Akun COA
   const [akunCOA, setAkunCOA] = useState();
 
