@@ -189,13 +189,13 @@ const Print = ({ selling }) => {
             <p className="m-0">: {formatter.format(data?.dpp || 0)}</p>
             <p className="m-0">PPN</p>
             <p className="m-0">: {formatter.format(data?.ppn || 0)}</p>
-            <p className="m-0">Biaya Pengiriman</p>
+            <p className="m-0">Titipan Ongkir</p>
             <p className="m-0">: {formatter.format(data?.delivery_fee || 0)}</p>
             {[1, 2, 3].map((item) => {
               if (data?.[`additional_fee_${item}_sub`] && data?.[`additional_fee_${item}_desc`]) {
                 return (
                   <>
-                    <p className="m-0">{`Biaya Tambahan ${item}`}</p>
+                    <p className="m-0">{data?.[`additional_fee_${item}_desc`]}</p>
                     <p className="m-0">: {formatter.format(data?.[`additional_fee_${item}_sub`] || 0)}</p>
                   </>
                 );

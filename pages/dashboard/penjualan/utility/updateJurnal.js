@@ -63,6 +63,27 @@ const UpdateJurnal = async (data, user, page, insidePage, kode, indexMultiPay, m
         kodeFee3 = akunToko.data[3].attributes.chart_of_account.data.attributes.kode;
         akunCOA.data.push(akunToko.data[3].attributes.chart_of_account.data);
       }
+    } else if (insidePage === "non panel"){
+      // reqCOA = await fetchAkunCOA(cookies, akunPiutang, "212.01.07", "400.01.00", "500.00.01", "115.10.00");
+      // akunCOA = await reqCOA.json();
+      var req = await fetchAkunToko(cookies);
+      var akun = await req.json(); console.log("get non panel akun", akun);
+      if (values.attributes.delivery_fee !== 0){
+        kodeDelivery = akun.data[0].attributes.chart_of_account.data.attributes.kode;
+        akunCOA.data.push(akun.data[0].attributes.chart_of_account.data);
+      }
+      if (values.attributes.additional_fee_1_sub !== 0) {
+        kodeFee1 = akun.data[1].attributes.chart_of_account.data.attributes.kode;
+        akunCOA.data.push(akun.data[1].attributes.chart_of_account.data);
+      }
+      if (values.attributes.additional_fee_2_sub !== 0) {
+        kodeFee2 = akun.data[2].attributes.chart_of_account.data.attributes.kode;
+        akunCOA.data.push(akun.data[2].attributes.chart_of_account.data);
+      }
+      if (values.attributes.additional_fee_3_sub !== 0) {
+        kodeFee3 = akun.data[3].attributes.chart_of_account.data.attributes.kode;
+        akunCOA.data.push(akun.data[3].attributes.chart_of_account.data);
+      }
     } else if (insidePage === "sales"){
       // reqCOA = await fetchAkunCOA(cookies, akunPiutang, "212.01.07", "400.01.00", "500.00.01", "115.10.00");
       // akunCOA = await reqCOA.json();

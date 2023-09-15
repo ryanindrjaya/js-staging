@@ -35,6 +35,7 @@ export default function ReactDataTable({
     const edit = (row) => {
       if (page === "SALES") router.push("/dashboard/penjualan/sales/setting/edittambahakun/" + row.id);
       else if (page === "PANEL") router.push("/dashboard/penjualan/panel/setting/edittambahakun/" + row.id);
+      else if (page === "NON") router.push("/dashboard/penjualan/non_panel/setting/edittambahakun/" + row.id);
       else router.push("/dashboard/penjualan/toko/setting/edittambahakun/" + row.id);
     };
 

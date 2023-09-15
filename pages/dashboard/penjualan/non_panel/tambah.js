@@ -547,7 +547,7 @@ function Toko({ props }) {
   useEffect(() => {
     // set dpp
     if (dppActive == "DPP") {
-      setDPP(grandTotal / 1.11);
+      setDPP(totalPrice / 1.11);
     } else {
       setDPP(0);
     }
@@ -556,7 +556,7 @@ function Toko({ props }) {
   useEffect(() => {
     // set ppn
     if (ppnActive == "PPN") {
-      setPPN(((grandTotal / 1.11) * 11) / 100);
+      setPPN(((totalPrice / 1.11) * 11) / 100);
     } else {
       setPPN(0);
     }
