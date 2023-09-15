@@ -463,6 +463,18 @@ export default function Riwayat({ defaultOptions }) {
                             })}
                           </div>
                         </div>
+                        <div className="w-full flex flex-col gap-1 mb-3">
+                          <p className="text-sm font-bold mb-0">STOK PENYESUAIAN MASUK</p>
+                          <div className="flex gap-y-1 flex-wrap">
+                            {data.penyesuaian_masuk?.split(", ").map((item) => {
+                              return (
+                                <Tag className="text-sm" color="blue" key={item}>
+                                  {item}
+                                </Tag>
+                              );
+                            })}
+                          </div>
+                        </div>
                       </div>
                       <div className="w-full">
                         <p className="font-bold text-[#036b82] text-xl mb-1">PRODUK KELUAR</p>

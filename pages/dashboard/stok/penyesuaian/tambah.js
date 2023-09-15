@@ -403,7 +403,7 @@ export default function tambahPenyesuaian() {
           unit: product.unit,
           exp_date: product.stock?.[product.unit]?.exp_date || null,
           batch: product.stock?.[product.unit]?.batch || null,
-          type: "Penyesuaian Stok",
+          type: method === "add" ? "Penyesuaian Masuk" : "Penyesuaian Stok",
           no_referensi: values.no_referensi,
           location: selectedLocation?.id,
         };
