@@ -216,7 +216,7 @@ const Print = ({ props }) => {
           <div className="font-bold  text-sm uppercase mt-3 flex justify-start">CATATAN :</div>
           <div className=" text-sm mt-1 flex flex-col justify-start">{catatan}</div>
         </div>
-        <div className="flex flex-col justify-center">
+        <div className="flex flex-col justify-center mt-3">
           <div className="font-bold  text-sm uppercase flex justify-end">TOTAL HARGA : {getTotalProduct()}</div>
           <div className="grid grid-cols-2 mt-3 gap-7">
             <div className="w-full flex justify-between">
@@ -234,18 +234,10 @@ const Print = ({ props }) => {
             </div>
             <span className="text-sm font-semibold text-gray-600 text-right">{formatter.format(getPPN())}</span>
           </div>
-          <div className="grid grid-cols-2 gap-7">
-            <div className="w-full flex justify-between">
-              <span className="text-sm font-semibold text-gray-600">BIAYA PENGIRIMAN</span>
-
-              <span className="text-sm font-semibold ml-5 text-gray-600 text-right">:</span>
-            </div>
-            <span className="text-sm font-semibold text-gray-600 text-right">{formatter.format(deliveryFee)}</span>
-          </div>
         </div>
       </div>
       <div className="font-bold justify-end text-sm uppercase mt-4 flex">
-        TOTAL PESANAN : {formatter.format(TotalHarga)}
+        TOTAL PEMBELIAN : {formatter.format(TotalHarga)}
       </div>
 
       <div className="font-bold justify-end  text-sm uppercase mt-10 flex">HORMAT KAMI</div>

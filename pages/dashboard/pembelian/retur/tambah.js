@@ -131,6 +131,7 @@ function Retur({ props }) {
 
   const ReachableContext = createContext(null);
   const UnreachableContext = createContext(null);
+  const round = (num) => Math.ceil(num * 100) / 100;
 
   //temp
   const tempList = [];
@@ -538,6 +539,10 @@ function Retur({ props }) {
     var total = 0;
 
     if (isDPPActive) total = totalPrice / 1.11;
+
+    if (!Math.round((total + total * 0.11) * 100) / 100 !== Math.round(totalPrice * 100) / 100) {
+      total = round(total);
+    }
 
     return total;
   };

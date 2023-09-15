@@ -146,6 +146,8 @@ function EditLPB({ props }) {
 
   const initialItems = initialValues?.attributes?.purchase?.data?.attributes?.purchase_details?.data;
 
+  const round = (num) => Math.ceil(num * 100) / 100;
+
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [supplier, setSupplier] = useState(initialValues.attributes.supplier?.data);
@@ -640,7 +642,7 @@ function EditLPB({ props }) {
     if (isDPPActive) {
       dppValue = totalPrice / 1.11;
       ppnValue = (dppValue * 11) / 100;
-      setdppPrice(dppValue);
+      setdppPrice(round(dppValue));
       setppnPrice(ppnValue);
     }
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
@@ -654,7 +656,7 @@ function EditLPB({ props }) {
       ppnValue = 0;
     }
 
-    setdppPrice(dppValue);
+    setdppPrice(round(dppValue));
     setppnPrice(ppnValue);
   }, [isDPPActive]);
 
@@ -1064,8 +1066,7 @@ function EditLPB({ props }) {
                   </Form.Item>
                 </div>
               </div>
-              
-                {/* <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
+              {/* <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item name="delivery_fee" noStyle>
                     <InputNumber
                       onChange={(e) => setBiayaPengiriman(e)}

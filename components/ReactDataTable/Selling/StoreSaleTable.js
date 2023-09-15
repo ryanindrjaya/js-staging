@@ -440,21 +440,23 @@ export default function ReactDataTable({
         // }
 
         return (
-          <div className="disabled:bg-white">
-            <InputNumber
-              controls={false}
-              formatter={(value) => `${value}%`}
-              max={100}
-              onFocus={(e) => e.target.select()}
-              min={0}
-              defaultValue={defaultDp2}
-              name={["disc_rp2", `${idx}`]}
-              onChange={(e) => onChangeD1D2D3(e, row, "d2", idx)}
-              style={{
-                width: "60px",
-              }}
-            />
-          </div>
+          <Form.Item name={["dp2", `${idx}`]} noStyle>
+            <div className="disabled:bg-white">
+              <InputNumber
+                controls={false}
+                formatter={(value) => `${value}%`}
+                max={100}
+                onFocus={(e) => e.target.select()}
+                min={0}
+                defaultValue={defaultDp2}
+                name={["disc_rp2", `${idx}`]}
+                onChange={(e) => onChangeD1D2D3(e, row, "d2", idx)}
+                style={{
+                  width: "60px",
+                }}
+              />
+            </div>
+          </Form.Item>
         );
       },
     },

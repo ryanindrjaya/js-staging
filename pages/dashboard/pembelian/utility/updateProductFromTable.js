@@ -24,8 +24,8 @@ const updateProductFromTable = async (data) => {
       await updateAPI(element);
     });
 
-    await Promise.all(promises);
-    console.log("Data updated successfully");
+    const res = await Promise.all(promises);
+    console.log("Product updated successfully", res);
     openNotificationWithIcon("success");
   } catch (error) {
     console.error("Error updating data:", error);

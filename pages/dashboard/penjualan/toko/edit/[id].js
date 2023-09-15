@@ -158,10 +158,12 @@ async function getStock(productId, unit) {
 }
 
 const fetchStoreAccounts = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?populate=*&filters[type][$eq]=TAMBAHAN LAIN 1"+
-  "&filters[type][$eq]=TAMBAHAN LAIN 2"+
-  "&filters[type][$eq]=TAMBAHAN LAIN 3"+
-  "&filters[type][$eq]=ONGKIR&filters[setting][$eq]=true";
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL +
+    "/store-accounts?populate=*&filters[type][$eq]=TAMBAHAN LAIN 1" +
+    "&filters[type][$eq]=TAMBAHAN LAIN 2" +
+    "&filters[type][$eq]=TAMBAHAN LAIN 3" +
+    "&filters[type][$eq]=ONGKIR&filters[setting][$eq]=true";
   const options = {
     method: "GET",
     headers: {
@@ -187,7 +189,8 @@ function EditToko({ props }) {
 
   const userLastDocNumber = props.userLastDocNumber;
 
-  const initialValues = props.initialData?.data; console.log(initialValues, "initialValues");
+  const initialValues = props.initialData?.data;
+  console.log(initialValues, "initialValues");
   const storeAccounts = props.storeAccounts;
 
   const [form] = Form.useForm();
@@ -810,6 +813,9 @@ function EditToko({ props }) {
             margin: {
               [index]: element.attributes?.margin,
             },
+            dp2: {
+              [index]: element.attributes?.disc2,
+            },
             jumlah_qty: {
               [index]: element.attributes?.qty,
             },
@@ -848,21 +854,17 @@ function EditToko({ props }) {
       router.replace("/dashboard/penjualan/sales");
     }
 
-    if (storeAccounts.data.length > 0){
-
+    if (storeAccounts.data.length > 0) {
       storeAccounts.data.map((item) => {
         if (item.attributes.type === "ONGKIR") {
           setAkunCOAONGKIR(item.attributes.chart_of_account.data);
-        }
-        else if (item.attributes.type === "TAMBAHAN LAIN 1"){
+        } else if (item.attributes.type === "TAMBAHAN LAIN 1") {
           setAkunCOALAIN(item.attributes.chart_of_account.data);
-        } 
-        else if (item.attributes.type === "TAMBAHAN LAIN 2"){
+        } else if (item.attributes.type === "TAMBAHAN LAIN 2") {
           setAkunCOALAIN2(item.attributes.chart_of_account.data);
-        } 
-        else if (item.attributes.type === "TAMBAHAN LAIN 3"){
+        } else if (item.attributes.type === "TAMBAHAN LAIN 3") {
           setAkunCOALAIN3(item.attributes.chart_of_account.data);
-        } 
+        }
       });
     }
 
@@ -873,16 +875,16 @@ function EditToko({ props }) {
   }, []);
 
   useEffect(() => {
-    if(akunCOAONGKIR){
+    if (akunCOAONGKIR) {
       form.setFieldsValue({
         akunCOA: {
           label: `${akunCOAONGKIR?.attributes?.nama}`,
           value: akunCOAONGKIR?.id,
-        }
+        },
       });
-    } 
-    
-    if(akunCOALAIN || akunCOALAIN2 || akunCOALAIN3){
+    }
+
+    if (akunCOALAIN || akunCOALAIN2 || akunCOALAIN3) {
       form.setFieldsValue({
         akun: {
           label: `${akunCOALAIN?.attributes?.nama}`,
@@ -899,10 +901,9 @@ function EditToko({ props }) {
         lain_coa3: {
           label: `${akunCOALAIN3?.attributes?.nama}`,
           value: akunCOALAIN3?.id,
-        }
+        },
       });
     }
-
   }, [akunCOAONGKIR, akunCOALAIN]);
 
   const validateError = () => {
@@ -1229,7 +1230,7 @@ function EditToko({ props }) {
                 <div className="w-full md:w-1/3 px-3">
                   <div className="w-full md:w-full mb-2 md:mb-0">
                     <Form.Item name="delivery_coa" noStyle>
-                      <CoaSale onChange={setAkunCOAONGKIR} selectedAkun={akunCOAONGKIR} disabled/>
+                      <CoaSale onChange={setAkunCOAONGKIR} selectedAkun={akunCOAONGKIR} disabled />
                     </Form.Item>
                   </div>
                 </div>
@@ -1253,31 +1254,16 @@ function EditToko({ props }) {
                 <div className="w-full md:w-1/3 px-3 mb-2 text-center md:mb-0">
                   <p className="mb-4 font-bold">Akun</p>
                   <Form.Item name="lain_coa1">
-                    <Select
-                      disabled
-                      size="large"
-                      style={{ width: "100%" }}
-                    >
-                    </Select>
+                    <Select disabled size="large" style={{ width: "100%" }}></Select>
                   </Form.Item>
                   <Form.Item name="lain_coa2">
-                    <Select
-                      disabled
-                      size="large"
-                      style={{ width: "100%" }}
-                    >
-                    </Select>
+                    <Select disabled size="large" style={{ width: "100%" }}></Select>
                   </Form.Item>
                   <Form.Item name="lain_coa3">
-                    <Select
-                      disabled
-                      size="large"
-                      style={{ width: "100%" }}
-                    >
-                    </Select>
+                    <Select disabled size="large" style={{ width: "100%" }}></Select>
                   </Form.Item>
                 </div>
-                
+
                 <div className="w-full md:w-1/3 px-3 mb-2 text-center md:mb-0">
                   <p className="mb-4 font-bold">Keterangan</p>
                   <Form.Item name="additional_fee_1_desc">

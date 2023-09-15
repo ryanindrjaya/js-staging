@@ -195,9 +195,9 @@ const Print = ({ props }) => {
         </div> */}
         <div className="mt-2 flex flex-col gap-y-3">
           <div className="font-bold  text-sm uppercase flex justify-end">TOTAL HARGA : {getTotalProduct()}</div>
-          <div className="font-bold  text-sm uppercase flex justify-end">
+          {/* <div className="font-bold  text-sm uppercase flex justify-end">
             BIAYA PENGIRIMAN : {formatter.format(deliveryFee)}
-          </div>
+          </div> */}
           <div className="font-bold  text-sm uppercase flex justify-end">TOTAL PESANAN : {getTotalPesanan()}</div>
         </div>
       </div>

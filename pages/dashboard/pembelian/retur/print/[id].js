@@ -18,6 +18,8 @@ const Print = ({ props }) => {
   // Create a new Date object with the returDate string
   const dateObj = new Date(returDate);
 
+  const isPajakActive = returData.DPP_PPN_active;
+
   // Get the day, month, and year values from the date object
   const day = dateObj.getDate();
   const month = dateObj.getMonth() + 1; // Add 1 to the month value because it's zero-indexed
@@ -50,6 +52,29 @@ const Print = ({ props }) => {
   const print = () => {
     window.print();
     return false;
+  };
+
+  const round = (num) => Math.ceil(num * 100) / 100;
+
+  const getDPP = () => {
+    const totalPrice = totalReturn;
+    var total = 0;
+
+    if (isPajakActive) total = totalPrice / 1.11;
+
+    if (!Math.round((total + total * 0.11) * 100) / 100 !== Math.round(totalPrice * 100) / 100) {
+      total = round(total);
+    }
+
+    return total;
+  };
+
+  const getPPN = () => {
+    var total = 0;
+    let dpp = getDPP();
+    total = dpp * 0.11;
+
+    return total;
   };
 
   return (
@@ -129,8 +154,14 @@ const Print = ({ props }) => {
           })}
         </table>
       </div>
-      <div className="font-bold  text-sm uppercase mt-3 mb-10 flex justify-end">
-        TOTAL HARGA : {formatter.format(totalReturn)}
+      <div className="flex flex-col justify-center mt-3">
+        <div className="font-bold  text-sm  flex justify-end">TOTAL HARGA : {formatter.format(totalReturn)}</div>
+        {isPajakActive && (
+          <>
+            <div className="font-bold  text-sm  flex justify-end">DPP : {formatter.format(getDPP())}</div>
+            <div className="font-bold  text-sm  flex justify-end">PPN : {formatter.format(getPPN())}</div>
+          </>
+        )}
       </div>
 
       <div className="h-3.5"></div>

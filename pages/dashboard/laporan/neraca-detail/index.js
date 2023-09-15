@@ -25,7 +25,10 @@ NeracaDetail.getInitialProps = async (context) => {
 
 const fetchNeracaDetail = async (cookies, periode = moment().toISOString()) => {
   const endpoint = new URL(process.env.NEXT_PUBLIC_URL + "/neraca-detail");
-  endpoint.searchParams.append("periode", periode);
+  endpoint.searchParams.append("coa", null);
+  endpoint.searchParams.append("startDate", null);
+  endpoint.searchParams.append("endDate", null);
+  endpoint.searchParams.append("periode", startDate);
 
   const options = {
     method: "GET",
@@ -56,6 +59,8 @@ function NeracaDetail({ props }) {
     setIsLoading(false);
   };
 
+  console.log(data);
+
   return (
     <DashboardLayout>
       <LayoutWrapper style={{}}>
@@ -78,7 +83,7 @@ function NeracaDetail({ props }) {
             </div>
           ) : (
             <div>
-              <DownloadButton data={data} currentTime={currentTime}/>
+              <DownloadButton data={data} currentTime={currentTime} />
               <NeracaDetailTableView data={data} time={currentTime} />
             </div>
           )}

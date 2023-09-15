@@ -200,7 +200,12 @@ export default function tambahPenyesuaian() {
       name: "Stok Gudang",
       align: "center",
       omit: method === "add",
-      selector: (row, index) => `${row?.stock?.[row?.unit]?.qty || 1} ${row?.unit || ""}`,
+
+      selector: (row, index) => (
+        <span className={row?.stock?.[row?.unit]?.qty > 0 ? "" : "text-red-500"}>
+          {row?.stock?.[row?.unit]?.qty || 0} {row?.unit || ""}
+        </span>
+      ),
     },
     {
       name: "Qty Penyesuaian",
@@ -642,15 +647,8 @@ export default function tambahPenyesuaian() {
                 onSelect={(value) => {
                   const selectedProduct = JSON.parse(value);
 
-                  if (selectedProduct.available_units.length > 0) {
-                    selectedProduct.unique_id = generateRandomId();
-                    setProducts([...products, selectedProduct]);
-                  } else {
-                    notification["error"]({
-                      message: "Produk kosong",
-                      description: "Stok produk kosong di gudang pengirim",
-                    });
-                  }
+                  selectedProduct.unique_id = generateRandomId();
+                  setProducts([...products, selectedProduct]);
                 }}
                 value={null}
                 size="large"

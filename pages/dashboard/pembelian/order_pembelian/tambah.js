@@ -260,9 +260,6 @@ function Tambah({ props }) {
     dispatch({ type: "CLEAR_DATA" });
   }, []);
 
-  useEffect(() => {
-    console.log("products", products);
-  }, [products]);
   const openNotificationWithIcon = (type) => {
     if (type === "error") {
       notification[type]({
@@ -303,11 +300,12 @@ function Tambah({ props }) {
   };
 
   useEffect(() => {
-    console.log("supplier", supplier);
-    form.setFieldsValue({
-      tempo_days: supplier?.attributes?.credit_limit_duration ?? 0,
-      tempo_time: supplier?.attributes?.credit_limit_duration_type ?? "Hari",
-    });
+    if (supplier) {
+      form.setFieldsValue({
+        tempo_days: supplier?.attributes?.credit_limit_duration ?? 0,
+        tempo_time: supplier?.attributes?.credit_limit_duration_type ?? "Hari",
+      });
+    }
   }, [supplier]);
 
   const handleEnterSubmit = (e) => {
@@ -484,7 +482,7 @@ function Tambah({ props }) {
                   </Form.Item>
                 </div>
               </div>
-                {/* <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
+              {/* <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item name="delivery_fee">
                     <InputNumber
                       onChange={sumDeliveryPrice}

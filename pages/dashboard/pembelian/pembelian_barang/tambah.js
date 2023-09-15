@@ -162,6 +162,8 @@ function Tambah({ props }) {
   const cookies = nookies.get(null, "token");
   const tempList = [];
 
+  const round = (num) => Math.ceil(num * 100) / 100;
+
   // NO PO
   var totalPurchases = String(props.purchases?.meta?.pagination.total + 1).padStart(3, "0");
 
@@ -249,6 +251,15 @@ function Tambah({ props }) {
 
     return isDataExist;
   };
+
+  useEffect(() => {
+    if (supplier) {
+      form.setFieldsValue({
+        tempo_days: supplier?.attributes?.credit_limit_duration ?? 0,
+        tempo_time: supplier?.attributes?.credit_limit_duration_type ?? "Hari",
+      });
+    }
+  }, [supplier]);
 
   const POValidation = async (id) => {
     console.log("validation PO", id);
@@ -673,7 +684,11 @@ function Tambah({ props }) {
     if (isDPPActive) {
       dppValue = totalPrice / 1.11;
       ppnValue = (dppValue * 11) / 100;
-      setdppPrice(dppValue);
+      setdppPrice(
+        !Math.round((dppValue + ppnValue) * 100) / 100 !== Math.round(totalPrice * 100) / 100
+          ? round(dppValue)
+          : dppValue
+      );
       setppnPrice(ppnValue);
     }
   }, [biayaPengiriman, biayaTambahan, totalPrice, discPrice]);
@@ -687,11 +702,13 @@ function Tambah({ props }) {
       ppnValue = 0;
     }
 
-    setdppPrice(dppValue);
+    setdppPrice(
+      !Math.round((dppValue + ppnValue) * 100) / 100 !== Math.round(totalPrice * 100) / 100 ? round(dppValue) : dppValue
+    );
     setppnPrice(ppnValue);
 
-    console.log("dpp ", dppPrice);
-    console.log("ppn ", ppnPrice);
+    console.log("dpp ", round(dppValue));
+    console.log("ppn ", ppnValue);
   }, [isDPPActive]);
 
   useEffect(() => {
@@ -1002,7 +1019,7 @@ function Tambah({ props }) {
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item name="disc_type">
                     <Select
-                      disabled={products.productList.length === 0}
+                      disabled
                       onChange={setDiscType}
                       placeholder="Pilih Jenis Diskon"
                       size="large"
@@ -1022,7 +1039,7 @@ function Tambah({ props }) {
                 <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item name="disc_value" noStyle>
                     <InputNumber
-                      disabled={products.productList.length === 0}
+                      disabled
                       onChange={setTotalWithDisc}
                       size="large"
                       min={0}
@@ -1032,7 +1049,7 @@ function Tambah({ props }) {
                   </Form.Item>
                 </div>
               </div>
-                {/* <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
+              {/* <div className="w-full md:w-1/3 px-3 mt-5 md:mb-0">
                   <Form.Item name="delivery_fee" noStyle>
                     <InputNumber
                       onChange={(e) => setBiayaPengiriman(e)}
