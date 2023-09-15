@@ -214,7 +214,7 @@ export default function permintaanBarang() {
       name: "Kuantitas Transfer",
       align: "center",
       selector: (row, index) => {
-        let maxQty = row?.stock?.[row?.unit]?.qty || 1;
+        let maxQty = row?.stock?.[row?.unit]?.qty || 0;
         const units = row.available_units.map((unit) => ({
           label: unit,
           value: unit,
@@ -247,7 +247,7 @@ export default function permintaanBarang() {
 
                 setProducts(newProducts);
               }}
-              defaultValue={row?.qty || 1}
+              defaultValue={row?.qty || 0}
               min={maxQty > 0 ? 1 : 0}
               max={maxQty > 0 ? maxQty : 0}
               className="w-[30%]"
@@ -890,7 +890,7 @@ export default function permintaanBarang() {
                         onSelect={(value) => {
                           const selectedProduct = JSON.parse(value);
 
-                          if (selectedProduct.available_units.length > 0) {
+                          if (selectedProduct.stok_gudang?.[selectedProduct.unit] > 0) {
                             selectedProduct.unique_id = generateRandomId();
                             setProducts([...products, selectedProduct]);
                           } else {

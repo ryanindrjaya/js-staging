@@ -212,7 +212,7 @@ export default function tambahPenyesuaian() {
       name: "Qty Penyesuaian",
       align: "center",
       selector: (row, index) => {
-        let maxQty = row?.stock?.[row?.unit]?.qty || 1;
+        let maxQty = row?.stock?.[row?.unit]?.qty;
         const units = row.available_units.map((unit) => ({
           label: unit,
           value: unit,
