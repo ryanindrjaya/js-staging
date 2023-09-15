@@ -744,6 +744,7 @@ export default function permintaanBarang() {
                             className="m-0"
                           >
                             <Select
+                              disabled
                               size="large"
                               placeholder="Status"
                               options={[

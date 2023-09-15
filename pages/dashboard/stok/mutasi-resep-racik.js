@@ -804,6 +804,7 @@ export default function permintaanBarang() {
                           >
                             <Select
                               size="large"
+                              disabled
                               placeholder="Status"
                               options={[
                                 { label: "Proses", value: "Proses" },
