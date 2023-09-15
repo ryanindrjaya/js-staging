@@ -904,7 +904,7 @@ function EditToko({ props }) {
       });
     }
 
-  }, [akunCOAONGKIR, akunCOALAIN]);
+  }, [akunCOAONGKIR, akunCOALAIN, akunCOALAIN2,akunCOALAIN3]);
 
   const validateError = () => {
     var listError = form.getFieldsError();
