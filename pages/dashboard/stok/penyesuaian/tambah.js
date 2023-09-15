@@ -194,6 +194,7 @@ export default function tambahPenyesuaian() {
     {
       name: "Nama Produk",
       align: "center",
+      wrap: true,
       selector: (row, index) => row.name,
     },
     {
