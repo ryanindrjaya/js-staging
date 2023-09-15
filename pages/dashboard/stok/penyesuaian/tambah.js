@@ -33,7 +33,7 @@ export default function tambahPenyesuaian() {
   const debouncedLocation = useDebounce(location, 200);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [searchProduct, setSearchProduct] = useState("");
-  const debounceProducts = useDebounce(searchProduct, 200);
+  const debounceProducts = useDebounce(searchProduct, 500);
   const [products, setProducts] = useState([]);
   const router = useRouter();
 
@@ -162,7 +162,7 @@ export default function tambahPenyesuaian() {
       console.log("response from fetchProducts", response);
     }
 
-    if (selectedLocation) {
+    if (selectedLocation && debounceProducts) {
       fetchProducts();
     }
   }, [debounceProducts]);
