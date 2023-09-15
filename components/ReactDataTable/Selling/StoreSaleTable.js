@@ -18,6 +18,7 @@ export default function ReactDataTable({
   getProduct,
   editPriceDisc = false,
   noMaxInput = false,
+  isEdit = false,
 }) {
   const dispatch = useDispatch();
   var defaultDp1 = 0;
@@ -173,6 +174,8 @@ export default function ReactDataTable({
       setTotalPrice(0);
     }
   };
+
+  console.log("products", products);
 
   const onCancel = () => {
     console.log("onCancel");
@@ -428,10 +431,9 @@ export default function ReactDataTable({
       width: "100px",
       selector: (row, idx) => {
         //defaultDp2 = row.attributes?.unit_1_dp2 || 0;
-        defaultDp2 = 0;
-        // if (products.productInfo[idx]?.d2) {
-        //   defaultDp2 = products.productInfo[idx].d2;
-        // }
+        defaultDp2 = products.productInfo?.[idx]?.d2 || 0;
+
+        console.log("defaultDp2", defaultDp2);
 
         // if (products.productInfo[idx]) {
         //   if (products.productInfo[idx].unit) {
@@ -448,8 +450,7 @@ export default function ReactDataTable({
                 max={100}
                 onFocus={(e) => e.target.select()}
                 min={0}
-                defaultValue={defaultDp2}
-                name={["disc_rp2", `${idx}`]}
+                value={defaultDp2}
                 onChange={(e) => onChangeD1D2D3(e, row, "d2", idx)}
                 style={{
                   width: "60px",

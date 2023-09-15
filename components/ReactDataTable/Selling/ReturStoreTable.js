@@ -395,7 +395,7 @@ export default function ReactDataTable({
         return (
           <div className="disabled:bg-white">
             <InputNumber
-              // disabled
+              disabled
               controls={false}
               formatter={(value) => `${value}%`}
               max={100}
@@ -415,21 +415,13 @@ export default function ReactDataTable({
       name: "D2",
       width: "100px",
       selector: (row, idx) => {
-        defaultDp2 = row.attributes?.unit_1_dp2 || 0;
-        if (products.productInfo[idx]?.d2) {
-          defaultDp2 = products.productInfo[idx].d2;
-        }
-
-        if (products.productInfo[idx]) {
-          if (products.productInfo[idx].unit) {
-            defaultDp2 = products.productInfo[idx].d2;
-          }
-        }
+        defaultDp2 = products.productInfo?.[idx]?.d2 || 0;
 
         return (
           <div className="disabled:bg-white">
             <InputNumber
               controls={false}
+              value={defaultDp2}
               formatter={(value) => `${value}%`}
               max={100}
               min={0}

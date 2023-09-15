@@ -518,6 +518,7 @@ function ReturToko({ props }) {
       var dateString = element.attributes.expired_date;
       var momentObj = moment(dateString, "YYYY-MM-DD");
       var momentString = momentObj.format("MM-DD-YYYY");
+      const expDate = element?.attributes?.expired_date ? moment(element?.attributes?.expired_date) : moment();
 
       form.setFieldsValue({
         jumlah_option: {
@@ -536,24 +537,26 @@ function ReturToko({ props }) {
           [index]: element.attributes.margin,
         },
         expired_date: {
-          [index]: moment(momentString),
+          [index]: expDate,
         },
         DPP_active: true,
         PPN_active: true,
       });
 
+      console.log("element", element);
+
       //SET INITIAL PRODUCT
       dispatch({
         type: "SET_SALE_INITIAL_PRODUCT",
         product: element.attributes.product.data,
-        qty: 1,
+        qty: element.attributes.qty,
         unit: element.attributes.unit,
         unitIndex: indexUnit,
         disc: element.attributes.disc,
         margin: element.attributes.margin,
         d1: element.attributes.disc1,
         d2: element.attributes.disc2,
-        expired_date: moment(element?.attributes?.expired_date),
+        expired_date: expDate,
         //priceAfterDisc,
         //subTotal,
         //unit: element.attributes.unit_order,
@@ -760,7 +763,7 @@ function ReturToko({ props }) {
                   />
                 </div>
               )}
-              <div className="w-full flex flex-wrap -mx-3 mb-1">
+              <div className="w-full pointer-events-none opacity-0 flex flex-wrap -mx-3 mb-1">
                 <div className="w-full md:w-1/3 px-3 mt-5 ">
                   <Form.Item name="disc_type">
                     <Select
@@ -791,7 +794,7 @@ function ReturToko({ props }) {
                     />
                   </Form.Item>
                 </div>
-                <div className="w-full md:w-1/6 px-3 mt-5 ">
+                <div className="w-full opacity-0 pointer-events-none md:w-1/6 px-3 mt-5 ">
                   {btnDisc === "Uninclude" ? (
                     <button
                       type="button"
@@ -869,16 +872,13 @@ function ReturToko({ props }) {
                   <Form.Item name="grandtotal" value={totalPrice} className="w-full h-2 md:w-1/2 mx-2">
                     <span> Total </span> <span>: {formatter.format(totalPrice)}</span>
                   </Form.Item>
-                  <Form.Item name="biayaTambahan" value={biayaTambahan} className="w-full h-2 md:w-1/2 mx-2">
-                    <span> Biaya Tambahan </span> <span>: {formatter.format(biayaTambahan)}</span>
-                  </Form.Item>
 
                   <Form.Item name="grandTotal" value={grandTotal} className="w-full h-2 md:w-1/2 mx-2 mt-3 text-lg">
                     <span> Total </span> <span>: {formatter.format(grandTotal)}</span>
                   </Form.Item>
                 </div>
               </div>
-              <div className="w-full flex md:w-3/4 justify-end mb-2">
+              {/* <div className="w-full flex md:w-3/4 justify-end mb-2">
                 <p className="mb-4 font-bold text-center">Biaya Tambahan Lain Lain</p>
               </div>
               <div className="w-full flex flex-wrap justify-end mb-3">
@@ -1029,7 +1029,7 @@ function ReturToko({ props }) {
                     )}
                   </Form.Item>
                 </div>
-              </div>
+              </div> */}
               <div className="w-full flex justify-center">
                 <Form.Item>
                   {loading ? (

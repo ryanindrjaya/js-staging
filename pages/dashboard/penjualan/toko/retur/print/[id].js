@@ -130,7 +130,7 @@ export default function PrintRetur({ id, data }) {
         <p className="font-bold">ITEM : {details?.length}</p>
 
         <div className="grid font-bold gap-x-6 grid-cols-2">
-          <p className="m-0">TOTAL PEMBELIAN</p>
+          <p className="m-0">TOTAL RETUR PENJUALAN</p>
           <p className="m-0">: {numberFormat.format(attributes?.total)}</p>
           <p className="m-0">DPP</p>
           <p className="m-0">: {numberFormat.format(attributes?.total / 1.11)}</p>

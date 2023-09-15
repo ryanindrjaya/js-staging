@@ -178,7 +178,6 @@ const fetchStoreAccounts = async (cookies) => {
 };
 
 function EditToko({ props }) {
-  console.log("props", props);
   const cookies = nookies.get(null, "token");
   const products = useSelector((state) => state.Sales);
   const dispatch = useDispatch();
@@ -191,7 +190,6 @@ function EditToko({ props }) {
   const userLastDocNumber = props.userLastDocNumber;
 
   const initialValues = props.initialData?.data;
-  console.log(initialValues, "initialValues");
   const storeAccounts = props.storeAccounts;
 
   const [form] = Form.useForm();
@@ -266,7 +264,6 @@ function EditToko({ props }) {
     const promises = products.productList.map(async (product, idx) => {
       if (idx === changedIdx) {
         const stock = await getStockAtLocation(product.id, unit, idx);
-        console.log("stock ", product.id, stock);
 
         tempData = {
           ...tempData,
@@ -290,7 +287,6 @@ function EditToko({ props }) {
   const getStockAtLocation = async (productId, unit, idx) => {
     try {
       const response = await getStock(productId, unit);
-      console.log("response", response);
 
       if (response?.data) {
         // sort based on qty desc
@@ -300,8 +296,6 @@ function EditToko({ props }) {
           [idx]: sortedBasedOnQty,
         });
       }
-
-      console.log(`response ${unit}`, response?.stock?.[unit]);
 
       const stringArr = [];
 
@@ -358,7 +352,6 @@ function EditToko({ props }) {
 
         const req = await fetch(endpoint, options);
         const res = await req.json();
-        console.log("repsonse", res, JSON.stringify(returData));
         if (!res?.available) {
           cannotBeReturnedProducts.push(product.attributes.name);
         }
@@ -451,7 +444,6 @@ function EditToko({ props }) {
   };
 
   const checkStokGudang = () => {
-    console.log("dataLocationStock", dataLocationStock);
     const availableStock = Object.values(dataLocationStock).every((stock) => stock);
 
     return availableStock;
@@ -625,7 +617,8 @@ function EditToko({ props }) {
       newTotal = newTotal + additionalFee[key];
     }
 
-    var test = totalPrice + newTotal;
+    console.log("new total", newTotal);
+
     setBiayaTambahan(newTotal);
   };
 
@@ -758,17 +751,19 @@ function EditToko({ props }) {
         }
       }
 
-      [1, 2, 3].forEach((i) => {
-        if (initialValues.attributes?.[`additional_fee_${i}_sub`]) {
-          setAdditionalFee({
-            ...additionalFee,
-            [`additional_fee_${i}_sub`]: initialValues.attributes?.[`additional_fee_${i}_sub`],
-          });
+      const biayaTambahan = {};
+
+      for (let j = 1; j <= 3; j++) {
+        if (initialValues.attributes?.[`additional_fee_${j}_sub`]) {
+          biayaTambahan[`additional_fee_${j}_sub`] = initialValues.attributes?.[`additional_fee_${j}_sub`];
           form.setFieldsValue({
-            [`additional_fee_${i}_desc`]: initialValues.attributes?.[`additional_fee_${i}_desc`],
+            [`additional_fee_${j}_desc`]: initialValues.attributes?.[`additional_fee_${j}_desc`],
+            [`additional_fee_${j}_sub`]: initialValues.attributes?.[`additional_fee_${j}_sub`],
           });
         }
-      });
+      }
+
+      setAdditionalFee(biayaTambahan);
 
       setSelectedLocationId(initialValues.attributes?.location?.data?.id);
       setCustomer(initialValues.attributes?.customer?.data);
@@ -814,6 +809,9 @@ function EditToko({ props }) {
             margin: {
               [index]: element.attributes?.margin,
             },
+            disc_rp: {
+              [index]: element.attributes?.disc,
+            },
             dp2: {
               [index]: element.attributes?.disc2,
             },
@@ -828,7 +826,7 @@ function EditToko({ props }) {
           console.log("element ==>", element);
 
           dispatch({
-            type: "SET_INITIAL_PRODUCT",
+            type: "SET_SALE_INITIAL_PRODUCT",
             product,
             index,
             qty: parseInt(element.attributes?.qty || 0),
@@ -1071,6 +1069,7 @@ function EditToko({ props }) {
               ) : (
                 <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
                   <StoreSaleTable
+                    isEdit
                     products={products}
                     productTotalPrice={productTotalPrice}
                     setTotalPrice={setTotalPrice}
