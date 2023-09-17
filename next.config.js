@@ -10,8 +10,8 @@ const nextConfig = {
   reactStrictMode: true,
   env: {
     BASE_URL: process.env.BASE_URL,
-    NEXT_PUBLIC_URL: "http://node38357-strapi-js.user.cloudjkt01.com:11021/api",
-    IMAGE_URL: "http://node38357-strapi-js.user.cloudjkt01.com:11021/",
+    NEXT_PUBLIC_URL: "https://lobster-app-l3nuu.ondigitalocean.app/api",
+    IMAGE_URL: "https://lobster-app-l3nuu.ondigitalocean.app/",
     // NEXT_PUBLIC_URL: "https://js-strapi.keelola.net/api",
     // NEXT_PUBLIC_URL: "http://localhost:1337/api",
     BACKEND_URL: "https://lobster-app-l3nuu.ondigitalocean.app/api",
