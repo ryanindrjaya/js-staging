@@ -13,7 +13,8 @@ export const CreateStorePayment = async (
   returTrxId,
   paymentType,
   reloadPage,
-  oth = 0
+  oth = 0,
+  author
 ) => {
   //   create payment
   try {
@@ -25,8 +26,11 @@ export const CreateStorePayment = async (
         payment_method: paymentMethod,
         type: paymentType,
         oth: String(oth),
+        added_by: author,
       },
     };
+
+    console.log("cookies", cookies);
 
     const endpoint = `${process.env.NEXT_PUBLIC_URL}/store-payments`;
     const options = {
@@ -50,14 +54,21 @@ export const CreateStorePayment = async (
       const dataUpdate = await updateReturTransaction(storeTrxId, returTrxId, result.data.id, reloadPage);
       return dataUpdate;
     }
-
   } catch (error) {
     console.log("create payment error", error);
     message.error("Pembayaran Gagal", 2);
   }
 };
 
-export const CreateStorePaymenWithoutUpdate = async (nominal, charge, payment, paymentMethod, paymentType, oth) => {
+export const CreateStorePaymenWithoutUpdate = async (
+  nominal,
+  charge,
+  payment,
+  paymentMethod,
+  paymentType,
+  oth,
+  author
+) => {
   //   create payment
   try {
     const data = {
@@ -68,6 +79,7 @@ export const CreateStorePaymenWithoutUpdate = async (nominal, charge, payment, p
         payment_method: paymentMethod,
         type: paymentType,
         oth: String(oth),
+        added_by: author,
       },
     };
 

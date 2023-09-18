@@ -133,7 +133,7 @@ const getStoreAccount = async (cookies) => {
   };
 
   const req = await fetch(endpoint, options);
-  
+
   return req;
 };
 
@@ -186,36 +186,43 @@ function PembayaranToko({ props }) {
         kembali = 0;
       }
 
-      if (paymentValue[returTrxId] >= totalHarga) {
-        const createStoreData = await CreateStorePayment(
-          totalHarga,
-          kembali,
-          paymentValue[returTrxId],
-          selectedPaymentMethod?.[record.id],
-          storeTrxId,
-          returTrxId,
-          "Retur",
-          reloadPage
-        );
+      const createStoreData = await CreateStorePayment(
+        totalHarga,
+        kembali,
+        paymentValue[returTrxId],
+        selectedPaymentMethod?.[record.id],
+        storeTrxId,
+        returTrxId,
+        "Retur",
+        reloadPage,
+        othValue?.[returTrxId] ?? 0,
+        user.name
+      );
 
-        console.log(createStoreData,"createStoreData");
-        if(createStoreData.data?.id){
-          // action to update pembayaran jurnal
-          storeAccount.data.map((item) => { console.log("masuk", item);
-            if (item.attributes.type === createStoreData.data.attributes.store_payments.data[0].attributes.payment_method){
-              updateJurnal(createStoreData.data, userMe, "penjualan", "toko", item.attributes.chart_of_account.data.attributes.kode);
-            }
-          });
-        }
-
-        const customerName = record.attributes?.customer_name;
-
-        await createInventoryFromReturPenjualan(record, customerName, "retur store sale", user);
-
-        reloadPage();
-      } else {
-        message.error("Pembayaran tidak mencukupi", 2);
+      console.log(createStoreData, "createStoreData");
+      if (createStoreData.data?.id) {
+        // action to update pembayaran jurnal
+        storeAccount.data.map((item) => {
+          console.log("masuk", item);
+          if (
+            item.attributes.type === createStoreData.data.attributes.store_payments.data[0].attributes.payment_method
+          ) {
+            updateJurnal(
+              createStoreData.data,
+              userMe,
+              "penjualan",
+              "toko",
+              item.attributes.chart_of_account.data.attributes.kode
+            );
+          }
+        });
       }
+
+      const customerName = record.attributes?.customer_name;
+
+      await createInventoryFromReturPenjualan(record, customerName, "retur store sale", user);
+
+      reloadPage();
     } catch (error) {
       console.log("errror", error);
       message.error("Pembayaran error", 2);
@@ -302,48 +309,19 @@ function PembayaranToko({ props }) {
     if (paymentValue && othValue) {
       for (const [key, value] of Object.entries(paymentValue)) {
         const totalHarga = dataRetur.find((data) => data.id === parseInt(key))?.attributes?.total ?? 0;
-        const oth = othValue[key] ?? 0;
         const bayar = value ?? 0;
 
-        const totalKembalian = bayar - totalHarga - oth;
+        const totalKembalian = bayar - totalHarga;
 
-        setKembalianOtomatis({
-          ...kembalianOtomatis,
-          [key]: totalKembalian < 0 ? 0 : parseFloat(totalKembalian).toFixed(2),
-        });
-        setKembalian({
-          ...kembalian,
-          [key]: null,
-        });
+        console.log("total kembalian", totalKembalian);
+
         setOthValue({
           ...othValue,
-          [key]: 0,
+          [key]: totalKembalian,
         });
       }
     }
   }, [paymentValue]);
-
-  useEffect(() => {
-    // calculate diff between kembalian and kembalianOtomatis then set OTH
-    if (kembalian && kembalianOtomatis) {
-      for (const [key, value] of Object.entries(kembalian)) {
-        if (value === null || value === undefined) {
-          continue;
-        }
-        const kembalianOtomatisValue = kembalianOtomatis?.[key] ?? 0;
-        const kembalianValue = value ?? 0;
-
-        const totalOTH = kembalianValue - kembalianOtomatisValue;
-
-        console.log("oth nya", totalOTH);
-
-        setOthValue({
-          ...othValue,
-          [key]: parseFloat(totalOTH).toFixed(2),
-        });
-      }
-    }
-  }, [kembalianOtomatis, kembalian]);
 
   return (
     <>
@@ -483,8 +461,7 @@ function PembayaranToko({ props }) {
                         >
                           <Select.Option value="TUNAI">TUNAI</Select.Option>
                           <Select.Option value="TRANSFER">TRANSFER</Select.Option>
-                          <Select.Option value="BANK BCA">BANK BCA</Select.Option>
-                          <Select.Option value="DEBIT BCA">DEBIT BCA</Select.Option>
+                          <Select.Option value="BANK BCA">KARTU KREDIT</Select.Option>
                           <Select.Option value="LAINNYA">LAINNYA</Select.Option>
                         </Select>
                       );
@@ -531,48 +508,10 @@ function PembayaranToko({ props }) {
                   />
 
                   <Column
-                    title="Kembali"
-                    key="kembali"
-                    render={(record) => {
-                      const totalHarga = record.attributes?.total ?? 0;
-                      const dataPayment = record?.attributes?.store_payments?.data ?? [];
-
-                      if (record.attributes.status === "Dibayar") {
-                        const dataPaymentValue = dataPayment.reduce(
-                          (acc, curr) => parseFloat(acc) + parseFloat(curr.attributes.payment),
-                          0
-                        );
-                        const kembali = dataPaymentValue - totalHarga < 0 ? 0 : dataPaymentValue - totalHarga;
-                        return formatter.format(kembali);
-                      }
-
-                      return (
-                        <InputNumber
-                          onFocus={(e) => e.target.select()}
-                          aria-readonly={
-                            record.attributes.status === "Dibayar" || record.attributes.status === "Diretur"
-                          }
-                          placeholder="Masukan Nominal"
-                          value={kembalian?.[record.id] ?? kembalianOtomatis?.[record.id] ?? 0}
-                          onChange={(v) => {
-                            setKembalian({
-                              ...othValue,
-                              [record.id]: v,
-                            });
-                          }}
-                          formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                          parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
-                          style={{ width: 150 }}
-                        />
-                      );
-                    }}
-                  />
-
-                  <Column
                     title="OTH"
                     key="oth"
                     render={(record) => {
-                      let initialValue = othValue?.[record.id];
+                      let initialValue = othValue?.[record.id] ?? 0;
                       const dataPayment = record?.attributes?.store_payments?.data ?? [];
 
                       if (record.attributes.status === "Dibayar" || record.attributes.status === "Diretur") {
@@ -586,10 +525,8 @@ function PembayaranToko({ props }) {
 
                       return (
                         <InputNumber
+                          readOnly
                           onFocus={(e) => e.target.select()}
-                          aria-readonly={
-                            record.attributes.status === "Dibayar" || record.attributes.status === "Diretur"
-                          }
                           placeholder="Masukan Nominal"
                           value={initialValue ?? 0}
                           onChange={(v) => {
@@ -598,14 +535,14 @@ function PembayaranToko({ props }) {
                               [record.id]: v,
                             });
                           }}
-                          formatter={(value) => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                          formatter={(value) => formatter.format(value)}
                           parser={(value) => value.replace(/Rp\s?|(,*)/g, "")}
                           className={
                             record.attributes.status === "Dibayar" || record.attributes.status === "Diretur"
                               ? `pointer-events-none ${initialValue < 0 ? "text-red-600" : ""}`
                               : othValue?.[record.id] < 0
-                              ? "text-red-600"
-                              : ""
+                              ? "text-red-600 pointer-events-none"
+                              : "pointer-events-none"
                           }
                           style={{ width: 150 }}
                         />

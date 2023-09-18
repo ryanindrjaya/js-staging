@@ -28,7 +28,8 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage, store
             nominal,
             option,
             "Pembayaran",
-            oth
+            oth,
+            userMe.name
           );
           console.log("response api", id);
           listPaymentId.push(id);
@@ -38,20 +39,36 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage, store
 
     // update transaction
     const createStoreData = await updateTransaction(id, listPaymentId);
-    console.log(createStoreData,"createStoreData");
-    if(createStoreData.data?.id){
+    console.log(createStoreData, "createStoreData");
+    if (createStoreData.data?.id) {
       // action to update pembayaran jurnal
       if (createStoreData.data.attributes.store_payments.data.length === 1) {
         storeAccount.data.map((item) => {
-          if (item.attributes.type === createStoreData.data.attributes.store_payments.data[0].attributes.payment_method){
-            updateJurnal(createStoreData.data, userMe, "penjualan", "toko", item.attributes.chart_of_account.data.attributes.kode);
+          if (
+            item.attributes.type === createStoreData.data.attributes.store_payments.data[0].attributes.payment_method
+          ) {
+            updateJurnal(
+              createStoreData.data,
+              userMe,
+              "penjualan",
+              "toko",
+              item.attributes.chart_of_account.data.attributes.kode
+            );
           }
         });
       } else if (createStoreData.data.attributes.store_payments.data.length > 1) {
         createStoreData.data.attributes.store_payments.data.map((data, index) => {
           storeAccount.data.map((item) => {
-            if (item.attributes.type === data.attributes.payment_method){
-              updateJurnal(createStoreData.data, userMe, "penjualan", "toko", item.attributes.chart_of_account.data.attributes.kode, index, "Multi");
+            if (item.attributes.type === data.attributes.payment_method) {
+              updateJurnal(
+                createStoreData.data,
+                userMe,
+                "penjualan",
+                "toko",
+                item.attributes.chart_of_account.data.attributes.kode,
+                index,
+                "Multi"
+              );
             }
           });
         });
@@ -75,15 +92,19 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage, store
 
   const [values, setValues] = useState([
     {
-      option: "CASH",
+      option: "TUNAI",
       nominal: 0,
     },
     {
-      option: "TRANSFER BANK",
+      option: "TRANSFER",
       nominal: 0,
     },
     {
       option: "KARTU KREDIT",
+      nominal: 0,
+    },
+    {
+      option: "LAINNYA",
       nominal: 0,
     },
   ]);
@@ -144,12 +165,6 @@ function PembayaranDrawer({ openDrawer, onCloseDrawer, record, reloadPage, store
       setOth(parseFloat(totalCharge - totalChargeAuto ?? 0).toFixed(2));
     }
   }, [totalCharge, totalChargeAuto]);
-
-  console.log({
-    totalCharge,
-    totalChargeAuto,
-    oth,
-  });
 
   return (
     <Drawer title={`Pembayaran Lainnya`} placement="right" size="default" onClose={handleDrawerClose} open={openDrawer}>

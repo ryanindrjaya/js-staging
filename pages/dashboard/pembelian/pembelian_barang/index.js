@@ -12,6 +12,8 @@ import { PrinterOutlined } from "@ant-design/icons";
 import createInventory from "../utility/createInventory";
 import updateProductFromTable from "../utility/updateProductFromTable";
 import updateJurnal from "../utility/updateJurnal";
+import DataTable from "react-data-table-component";
+import moment from "moment";
 
 Pembelian.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -322,7 +324,7 @@ function Pembelian({ props }) {
   // search query
   useEffect(() => {
     async function getLPBById(id) {
-      const endpoint = process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=*`;
+      const endpoint = process.env.NEXT_PUBLIC_URL + `/purchasings/${id}?populate=deep,3`;
       const options = {
         method: "GET",
         headers: {
@@ -380,6 +382,71 @@ function Pembelian({ props }) {
     );
     router.push("pembelian_barang/print/" + selectedLPB.id);
   };
+
+  const customStyles = {
+    headerStyle: { textAlign: "center" },
+    headCells: {
+      style: {
+        color: "white",
+        background: "#036B82",
+      },
+    },
+  };
+
+  const detailColumns = [
+    {
+      name: "Nama Produk",
+      wrap: true,
+      width: "120px",
+      selector: ({ attributes }) => (
+        <a target="_blank" href={`/dashboard/produk?id=${attributes?.product?.data?.id}`}>
+          <span className="text-blue-500 cursor-pointer hover:text-blue-700">
+            {attributes?.product?.data?.attributes?.name || ""}
+          </span>
+        </a>
+      ),
+    },
+    {
+      name: "EXP Date",
+      width: "120px",
+      selector: ({ attributes }) => moment(attributes?.expired_date).format("DD/MM/YYYY"),
+    },
+    {
+      name: "Batch",
+      width: "120px",
+      selector: ({ attributes }) => attributes?.batch || "",
+    },
+    {
+      name: "Jumlah",
+      selector: ({ attributes }) => `${attributes?.total_order} ${attributes?.unit_order}`,
+    },
+    {
+      name: "Harga Beli",
+      width: "150px",
+      selector: ({ attributes }) => formatter.format(attributes?.unit_price || 0) || "-",
+    },
+    {
+      name: "Diskon",
+      selector: ({ attributes }) => formatter.format(attributes?.disc || 0) || "-",
+    },
+    {
+      name: "D1",
+      selector: ({ attributes }) => (attributes?.dp1 ? `${attributes?.dp1}%` : "0%"),
+    },
+    {
+      name: "D2",
+      selector: ({ attributes }) => (attributes?.dp2 ? `${attributes?.dp2}%` : "0%"),
+    },
+    {
+      name: "D3",
+      selector: ({ attributes }) => (attributes?.dp3 ? `${attributes?.dp3}%` : "0%"),
+    },
+    {
+      name: "Sub Total",
+      width: "150px",
+      selector: ({ attributes }) => formatter.format(attributes?.sub_total || 0) || "-",
+    },
+  ];
 
   return (
     <>
@@ -455,6 +522,15 @@ function Pembelian({ props }) {
                       {formatter.format(selectedLPB?.attributes?.total_purchasing)}
                     </Descriptions.Item>
                   </Descriptions>
+
+                  <div className="mt-2">
+                    <p className="mb-2 text-base font-semibold uppercase">Detail Item</p>
+                    <DataTable
+                      customStyles={customStyles}
+                      columns={detailColumns}
+                      data={selectedLPB?.attributes?.purchasing_details?.data || []}
+                    />
+                  </div>
                 </>
               )}
             </Modal>

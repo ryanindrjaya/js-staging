@@ -45,6 +45,7 @@ export default function PembayaranToko() {
     moment().endOf("day").hour(23).minute(59).second(59),
   ]);
   const [selectedAdmin, setSelectedAdmin] = useState();
+  const [selectedAccount, setSelectedAccount] = useState();
   const router = useRouter();
 
   function handlePrint() {
@@ -233,7 +234,25 @@ export default function PembayaranToko() {
                   redirectQuery({}, ["author"]);
                 }}
               />
-              <Select size="large" placeholder="Akun Pembayaran" disabled />
+              <Select
+                value={selectedAccount}
+                allowClear
+                onClear={() => {
+                  setSelectedAccount();
+                  redirectQuery({}, ["account"]);
+                }}
+                onSelect={(value) => {
+                  setSelectedAccount(value);
+                  redirectQuery({ account: value });
+                }}
+                size="large"
+                placeholder="Akun Pembayaran"
+              >
+                <Select.Option value="TUNAI">TUNAI</Select.Option>
+                <Select.Option value="TRANSFER">TRANSFER</Select.Option>
+                <Select.Option value="BANK BCA">BANK BCA</Select.Option>
+                <Select.Option value="DEBIT BCA">DEBIT BCA</Select.Option>
+              </Select>
               <DatePicker.RangePicker
                 value={date}
                 onChange={(_, value) => {

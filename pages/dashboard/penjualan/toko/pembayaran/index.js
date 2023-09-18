@@ -222,7 +222,8 @@ function PembayaranToko({ props }) {
             returTrxId,
             "Pembayaran",
             reloadPage,
-            othValue[storeTrxId]
+            othValue[storeTrxId],
+            userMe?.name
           );
 
           console.log(createStoreData, "createStoreData");
@@ -278,6 +279,7 @@ function PembayaranToko({ props }) {
 
       const resCheckIn = await getCheckInUser(cookies, user);
       const resCheckOut = await getCheckOutUser(cookies, user);
+
       if (resCheckIn?.data?.length === 0 || resCheckOut?.data?.length > 0) {
         router.replace("/dashboard/penjualan/toko/kasir");
       }
@@ -589,8 +591,7 @@ function PembayaranToko({ props }) {
                           >
                             <Select.Option value="TUNAI">TUNAI</Select.Option>
                             <Select.Option value="TRANSFER">TRANSFER</Select.Option>
-                            <Select.Option value="BANK BCA">BANK BCA</Select.Option>
-                            <Select.Option value="DEBIT BCA">DEBIT BCA</Select.Option>
+                            <Select.Option value="BANK BCA">KARTU KREDIT</Select.Option>
                             <Select.Option value="LAINNYA">LAINNYA</Select.Option>
                           </Select>
                         );
