@@ -830,7 +830,7 @@ export default function permintaanBarang() {
                         }}
                         onSelect={(value) => {
                           const selectedProduct = JSON.parse(value);
-
+                          console.log("selected", selectedProduct.stock_gudang);
                           if (
                             Object.keys(selectedProduct.stok_gudang).some(
                               (unit) => selectedProduct.stok_gudang?.[unit] > 0

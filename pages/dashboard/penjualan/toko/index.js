@@ -79,6 +79,7 @@ const fetchStore = async (cookies) => {
 
 function Toko({ props }) {
   const user = props.user;
+  const role = nookies.get(null)?.role || false;
   const locations = props.locations.data;
   const data = props.store;
   const router = useRouter();
@@ -680,30 +681,38 @@ function Toko({ props }) {
             <div className="w-full flex justify-between mt-0 mb-2">
               <span className="text-black text-md font-bold ml-1 mt-5">Semua Penjualan</span>
               <div className="mt-5">
-                <button
-                  onClick={handleAdd}
-                  type="button"
-                  className="bg-cyan-700 mx-2 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
-                >
-                  <div className="text-white text-center text-sm font-bold">
-                    <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
-                  </div>
-                </button>
+                {role === "PENJUALAN TOKO" ? (
+                  <button
+                    onClick={handleAdd}
+                    type="button"
+                    className="bg-cyan-700 mx-2 rounded px-5 py-2 hover:bg-cyan-800  shadow-sm flex float-right mb-5"
+                  >
+                    <div className="text-white text-center text-sm font-bold">
+                      <a className="text-white no-underline text-xs sm:text-xs">+ Tambah</a>
+                    </div>
+                  </button>
+                ) : (
+                  ""
+                )}
 
-                <button
-                  onClick={handleNavigateToPembayaran}
-                  type="button"
-                  className="bg-orange-300 mx-2 rounded px-5 py-2 hover:bg-orange-500  shadow-sm flex float-right mb-5"
-                >
-                  <div className="text-white text-center text-sm font-bold">
-                    <a className="text-white no-underline text-xs sm:text-xs flex items-center">
-                      <span className="mr-2">
-                        <BarcodeOutlined />
-                      </span>
-                      Pembayaran
-                    </a>
-                  </div>
-                </button>
+                {role === "KASIR" ? (
+                  <button
+                    onClick={handleNavigateToPembayaran}
+                    type="button"
+                    className="bg-orange-300 mx-2 rounded px-5 py-2 hover:bg-orange-500  shadow-sm flex float-right mb-5"
+                  >
+                    <div className="text-white text-center text-sm font-bold">
+                      <a className="text-white no-underline text-xs sm:text-xs flex items-center">
+                        <span className="mr-2">
+                          <BarcodeOutlined />
+                        </span>
+                        Pembayaran
+                      </a>
+                    </div>
+                  </button>
+                ) : (
+                  ""
+                )}
 
                 <button
                   onClick={handleSetting}
