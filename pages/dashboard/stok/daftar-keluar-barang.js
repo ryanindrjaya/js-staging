@@ -387,10 +387,9 @@ export default function daftarKeluarBarang({ companyOptions }) {
       omit: statusFilter === "Dibatalkan",
       width: "260px",
       selector: (row, index) => {
-        console.log("row", row);
         const stockIndex = row?.stock?.findIndex((item) => item.id === row?.product.id);
 
-        let maxQty = row?.stock?.[stockIndex]?.stock?.[row?.send_unit]?.qty || 1;
+        let maxQty = row?.stock?.qty || undefined;
         const units =
           row?.stock?.[stockIndex]?.available_units.map((unit) => ({
             label: unit,
