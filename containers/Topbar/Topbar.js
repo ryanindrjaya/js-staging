@@ -10,7 +10,7 @@ import TopbarAddtoCart from "./TopbarAddToCart";
 import TopbarWrapper from "./Topbar.styles";
 import { TopbarMenuIcon } from "@iso/config/icon.config";
 import TagWrapper from "../UIElements/Tag/Tag.styles";
-import nookies from 'nookies'
+import nookies from "nookies";
 
 import Tags from "@iso/components/uielements/tag";
 
@@ -28,7 +28,8 @@ class Topbar extends Component {
     const { toggleCollapsed, url, customizedTheme, locale } = this.props;
     const collapsed = this.props.collapsed && !this.props.openDrawer;
     const cookies = nookies.get(null);
-    const role = cookies?.role || 'guest';
+    const role = cookies?.role || "guest";
+    const name = cookies?.name || "user";
     const styling = {
       background: customizedTheme.backgroundColor,
       position: "fixed",
@@ -51,6 +52,9 @@ class Topbar extends Component {
           <ul className="isoRight">
             <li>
               <Tag color={process.env.MAIN_COLOR}>{role}</Tag>
+            </li>
+            <li>
+              <Tag color={process.env.MAIN_COLOR}>{name}</Tag>
             </li>
 
             <li onClick={() => this.setState({ selectedItem: "user" })} className="isoUser">

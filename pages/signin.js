@@ -69,6 +69,14 @@ export default function SignInPage(props) {
           sameSite: "strict",
         });
 
+        // set name
+        nookies.set(null, "name", user.name, {
+          maxAge: 30 * 24 * 60 * 60,
+          path: "/",
+          secure: process.env.NEXT_PUBLIC_URL !== "development",
+          sameSite: "strict",
+        });
+
         saveState("_mod", moduls);
 
         // redirect
