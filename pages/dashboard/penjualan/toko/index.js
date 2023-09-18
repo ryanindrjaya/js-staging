@@ -4,7 +4,7 @@ import LayoutContent from "@iso/components/utility/layoutContent";
 import DashboardLayout from "../../../../containers/DashboardLayout/DashboardLayout";
 import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import router, { useRouter } from "next/router";
-import { Input, notification, Select, DatePicker, Modal, Descriptions, message, Button, Tag } from "antd";
+import { Input, notification, Select, DatePicker, Modal, Descriptions, message, Button, Tag, Spin } from "antd";
 import { BarcodeOutlined, PrinterOutlined } from "@ant-design/icons";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
 import SellingTable from "../../../../components/ReactDataTable/Selling/SellingTable";
@@ -13,6 +13,8 @@ import DataTable from "react-data-table-component";
 import moment from "moment";
 import Link from "next/link";
 import SellingTokoTable from "../../../../components/ReactDataTable/Selling/SellingTokoTable";
+import { writeExcel } from "../../../../library/functions/writeExcel";
+import PrintPDF from "../../../../library/functions/writePdf";
 
 Toko.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -107,13 +109,32 @@ function Toko({ props }) {
     router.push("/dashboard/penjualan/toko/pembayaran");
   };
 
-  const handleUpdate = (id) => {
-    // router.push("/dashboard/pembelian/order_pembelian/edit/" + id);
-    openNotificationWithIcon(
-      "info",
-      "Work In Progress",
-      "Hai, Fitur ini sedang dikerjakan. Silahkan tunggu pembaruan selanjutnya"
-    );
+  const handleDownloadExcel = async () => {
+    message.loading({ content: "Mengunduh data...", duration: 8000, key: "fetch" });
+    await writeExcel({
+      api: "store-sale",
+      schema: {
+        "No. Penjualan": "no_store_sale",
+        "Kategori Penjualan": "category",
+        "Tanggal Penjualan": "sale_date",
+        "Nama Pelanggan": "customer_name",
+        "Alamat Pelanggan": "address",
+        "No. Telepon": "phone",
+        "Total Penjualan": "total",
+        DPP: "dpp",
+        PPN: "ppn",
+        "Status Pembayaran": "status",
+        "Biaya Pengiriman": "delivery_fee",
+        "Biaya Tambahan 1": "additional_fee_1_sub",
+        "Biaya Tambahan 2": "additional_fee_2_sub",
+        "Biaya Tambahan 3": "additional_fee_3_sub",
+        "Catatan Staff": "sale_staff",
+        "Ditambahkan Oleh": "added_by",
+      },
+      outputPath: "Export Penjualan Toko.xlsx",
+    });
+
+    message.destroy("fetch");
   };
 
   const handleDelete = async (id) => {
@@ -756,48 +777,21 @@ function Toko({ props }) {
               </div>
             </div>
 
-            <div className="w-full flex justify-between">
+            <div className="w-full flex gap-x-5">
+              <PrintPDF data={sell?.data || []} />
               <button
-                onClick={handleUpdate}
+                onClick={handleDownloadExcel}
                 type="button"
-                className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
-              >
-                <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">Print PDF</a>
-                </div>
-              </button>
-              <button
-                onClick={handleUpdate}
-                type="button"
-                className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
-              >
-                <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">Print CSV</a>
-                </div>
-              </button>
-              <button
-                onClick={handleUpdate}
-                type="button"
-                className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
+                className="w-full md:w-1/4 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
               >
                 <div className="text-white text-center text-sm font-bold">
                   <a className="text-white no-underline text-xs sm:text-xs">Print XLS</a>
-                </div>
-              </button>
-              <button
-                onClick={handleUpdate}
-                type="button"
-                className="w-full md:w-1/4 mx-3 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right mb-5"
-              >
-                <div className="text-white text-center text-sm font-bold">
-                  <a className="text-white no-underline text-xs sm:text-xs">Kolom Tampak</a>
                 </div>
               </button>
             </div>
 
             <SellingTokoTable
               data={sell}
-              onUpdate={handleUpdate}
               onDelete={handleDelete}
               onPageChange={handlePageChange}
               onChangeStatus={onChangeStatus}

@@ -1,4 +1,4 @@
-const borderStyle = {
+export const borderStyle = {
   leftBorderStyle: "thin",
   leftBorderColor: "#000000",
   rightBorderStyle: "thin",
@@ -9,7 +9,7 @@ const borderStyle = {
   bottomBorderColor: "#000000",
 };
 
-const headerStylesNonUnit = {
+export const headerStylesNonUnit = {
   fontWeight: "bold",
   fontSize: 11,
   backgroundColor: "#036B82",
