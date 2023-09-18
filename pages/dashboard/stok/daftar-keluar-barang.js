@@ -389,7 +389,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
       selector: (row, index) => {
         const stockIndex = row?.stock?.findIndex((item) => item.id === row?.product.id);
 
-        let maxQty = row?.stock?.qty || undefined;
+        let maxQty = row?.qty || undefined;
         const units =
           row?.stock?.[stockIndex]?.available_units.map((unit) => ({
             label: unit,
