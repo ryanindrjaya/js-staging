@@ -37,7 +37,8 @@ const formatter = new Intl.NumberFormat("id-ID", {
 function CetakPenjualan({ props }) {
   const { sales } = props;
 
-  const data = sales.data.attributes; console.log("data true", data);
+  const data = sales.data.attributes;
+  console.log("data true", data);
 
   // stakeholder info
   const name = "APOTEK SEJATI";
@@ -82,16 +83,16 @@ function CetakPenjualan({ props }) {
   const deliveryFee = data?.delivery_fee ?? 0;
   var addFee = [];
   if (data.additional_fee_1_desc !== null && data.additional_fee_1_sub !== 0) {
-    addFee.push({ket: data.additional_fee_1_desc, saldo: data.additional_fee_1_sub});
-  } else addFee[0] = {ket: null, saldo: 0};
+    addFee.push({ ket: data.additional_fee_1_desc, saldo: data.additional_fee_1_sub });
+  } else addFee[0] = { ket: null, saldo: 0 };
 
   if (data.additional_fee_2_desc !== null && data.additional_fee_2_sub !== 0) {
-    addFee.push({ket: data.additional_fee_2_desc, saldo: data.additional_fee_2_sub});
-  } else addFee[1] = {ket: null, saldo: 0};
+    addFee.push({ ket: data.additional_fee_2_desc, saldo: data.additional_fee_2_sub });
+  } else addFee[1] = { ket: null, saldo: 0 };
 
   if (data.additional_fee_3_desc !== null && data.additional_fee_3_sub !== 0) {
-    addFee.push({ket: data.additional_fee_3_desc, saldo: data.additional_fee_3_sub});
-  } else addFee[2] = {ket: null, saldo: 0};
+    addFee.push({ ket: data.additional_fee_3_desc, saldo: data.additional_fee_3_sub });
+  } else addFee[2] = { ket: null, saldo: 0 };
 
   const print = () => {
     window.print();
@@ -158,7 +159,7 @@ function CetakPenjualan({ props }) {
         <div>
           <p className="font-bold text-lg">Catatan</p>
           <p>
-            Barang yang sudah dibeli melebihi 1, hari tidak dapat <br />
+            Barang yang sudah dibeli melebihi 1 hari tidak dapat <br />
             ditukar/dikembalikan kecuali ada kesepakatan
           </p>
           <p className="m-0">DIBUAT OLEH {maker}</p>
@@ -173,19 +174,25 @@ function CetakPenjualan({ props }) {
           <p className="font-bold text-sm m-1">TITIPAN ONGKIR : {formatter.format(deliveryFee)}</p>
           {/* <p className="font-bold text-sm m-1">BIAYA TAMBAHAN : {formatter.format(biayaTambahan)}</p> */}
           {addFee[0].ket === null && addFee[0].saldo === 0 ? (
-            <div hidden/>
+            <div hidden />
           ) : (
-            <p className="font-bold text-sm m-1">{addFee[0].ket} : {formatter.format(addFee[0].saldo)}</p>
+            <p className="font-bold text-sm m-1">
+              {addFee[0].ket} : {formatter.format(addFee[0].saldo)}
+            </p>
           )}
           {addFee[1].ket === null && addFee[1].saldo === 0 ? (
-            <div hidden/>
+            <div hidden />
           ) : (
-            <p className="font-bold text-sm m-1">{addFee[1].ket} : {formatter.format(addFee[1].saldo)}</p>
+            <p className="font-bold text-sm m-1">
+              {addFee[1].ket} : {formatter.format(addFee[1].saldo)}
+            </p>
           )}
           {addFee[2].ket === null && addFee[2].saldo === 0 ? (
-            <div hidden/>
+            <div hidden />
           ) : (
-            <p className="font-bold text-sm m-1">{addFee[2].ket} : {formatter.format(addFee[2].saldo)}</p>
+            <p className="font-bold text-sm m-1">
+              {addFee[2].ket} : {formatter.format(addFee[2].saldo)}
+            </p>
           )}
           <p className="font-bold text-sm m-1">TOTAL BAYAR : {formatter.format(totalBayar)}</p>
         </div>
