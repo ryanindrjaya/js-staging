@@ -387,9 +387,10 @@ export default function daftarKeluarBarang({ companyOptions }) {
       omit: statusFilter === "Dibatalkan",
       width: "260px",
       selector: (row, index) => {
+        console.log("row", row);
         const stockIndex = row?.stock?.findIndex((item) => item.id === row?.product.id);
 
-        let maxQty = row?.stock?.[stockIndex]?.stock?.[row?.send_unit]?.qty || 1;
+        let maxQty = row?.stock?.qty || undefined;
         const units =
           row?.stock?.[stockIndex]?.available_units.map((unit) => ({
             label: unit,
@@ -431,7 +432,7 @@ export default function daftarKeluarBarang({ companyOptions }) {
               }}
               defaultValue={row.status === "Selesai" ? row.sended : row.qty}
               min={0}
-              max={maxQty > 0 ? maxQty : 0}
+              max={maxQty}
               className="w-[30%]"
             />
             {row.status !== "Selesai" ? (

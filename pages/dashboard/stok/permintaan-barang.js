@@ -831,7 +831,11 @@ export default function permintaanBarang() {
                         onSelect={(value) => {
                           const selectedProduct = JSON.parse(value);
 
-                          if (selectedProduct.stok_gudang?.[selectedProduct.unit] > 0) {
+                          if (
+                            Object.keys(selectedProduct.stok_gudang).some(
+                              (unit) => selectedProduct.stok_gudang?.[unit] > 0
+                            )
+                          ) {
                             selectedProduct.unique_id = generateRandomId();
                             setProducts([...products, selectedProduct]);
                           } else {
