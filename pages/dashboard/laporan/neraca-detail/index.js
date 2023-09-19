@@ -28,7 +28,7 @@ const fetchNeracaDetail = async (cookies, periode = moment().toISOString()) => {
   endpoint.searchParams.append("coa", null);
   endpoint.searchParams.append("startDate", null);
   endpoint.searchParams.append("endDate", null);
-  endpoint.searchParams.append("periode", startDate);
+  endpoint.searchParams.append("periode", periode);
 
   const options = {
     method: "GET",
