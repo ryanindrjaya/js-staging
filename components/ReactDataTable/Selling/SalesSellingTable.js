@@ -202,7 +202,7 @@ export default function SalesSellingTable({
         />
       )}
 
-      <div>
+      {/* <div>
         <button
           onClick={() => pembayaran(row)}
           className=" hover:text-cyan-700 transition-colors mt-3 text-xs font-normal py-2 px-2 rounded-md "
@@ -210,7 +210,7 @@ export default function SalesSellingTable({
           <CalculatorOutlined className="mr-2 mt-0.5 float float-left" />
           Pembayaran
         </button>
-      </div>
+      </div> */}
     </div>
   );
 

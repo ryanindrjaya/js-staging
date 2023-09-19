@@ -177,7 +177,7 @@ const Product = ({ props }) => {
 
   const handlePageChange = async (page) => {
     const cookies = nookies.get(null, "token");
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/products?pagination[page]=" + page;
+    const endpoint = process.env.NEXT_PUBLIC_URL + "/products?pagination[pageSize]=10&pagination[page]=" + page;
 
     const options = {
       method: "GET",
@@ -251,7 +251,7 @@ const Product = ({ props }) => {
       setIsLoading(true);
       message.loading({ content: "Mengambil data", duration: 8000, key: "fetch" });
       const cookies = nookies.get();
-      const endpoint = process.env.NEXT_PUBLIC_URL + `/products/${id}`;
+      const endpoint = process.env.NEXT_PUBLIC_URL + `/products/${id}?populate=manufacture,category,group`;
       const options = {
         method: "GET",
         headers: {

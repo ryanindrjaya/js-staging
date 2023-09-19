@@ -116,6 +116,7 @@ export default function ReactDataTable({
         }
 
         if (out && changeStatus) {
+          setLoadingPiutang(false);
           openNotificationWithIcon(
             "success",
             "Dijadikan Piutang",
@@ -251,7 +252,7 @@ export default function ReactDataTable({
               Jadikan Piutang
             </button>
           </div>
-          <div>
+          {/* <div>
             <button
               onClick={() => lihat(row)}
               className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
@@ -259,7 +260,7 @@ export default function ReactDataTable({
               <BankOutlined className="mr-2 mt-0.5 float float-left" />
               Pembayaran
             </button>
-          </div>
+          </div> */}
           <div>
             <button
               onClick={() => lihat(row)}

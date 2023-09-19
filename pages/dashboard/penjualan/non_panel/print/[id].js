@@ -42,9 +42,9 @@ const Print = ({ selling }) => {
   };
 
   const getHargaNet = (data) => {
-    const price = data.unit_price - (data?.disc || 0);
-    const priceWithMargin = price + (price * data.margin) / 100;
-    const price1 = calculatePercentage(priceWithMargin, data?.disc1 || 0);
+    const priceWithMargin = data.unit_price + (data.unit_price * data.margin) / 100;
+    const price = priceWithMargin - (data?.disc || 0);
+    const price1 = calculatePercentage(price, data?.disc1 || 0);
     const hargaNet = calculatePercentage(price1, data?.disc2 || 0);
 
     return formatter.format(hargaNet ?? 0);
