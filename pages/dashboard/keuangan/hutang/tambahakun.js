@@ -179,11 +179,7 @@ const Tambah = ({ props }) => {
                 </Form.Item>
 
                 <Form.Item name="chart_of_account" className="w-1/4 mb-5 ml-5">
-                  {selectedType === "Master" ? (
-                    <Coa page="piutang" onChange={setAkunCOA} selectedAkun={akunCOA} />
-                  ) : (
-                    <Coa onChange={setAkunCOA} selectedAkun={akunCOA} />
-                  )}
+                  <Coa onChange={setAkunCOA} selectedAkun={akunCOA} />
                 </Form.Item>
               </div>
 
