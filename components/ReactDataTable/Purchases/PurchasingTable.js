@@ -133,13 +133,13 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange,
       {/*  </button>*/}
       {/*)}*/}
 
-      <AlertDialog
+      {/* <AlertDialog
         onCancel={onCancel}
         onConfirm={(e) => onConfirm(e, row)}
         title="Batalkan Transaksi"
         message="Transaksi yang dibatalkan tidak dapat dikembalikan lagi. Lanjutkan?"
         id={row.id}
-      />
+      /> */}
 
       {/* <div className="mt-4">
         <button
