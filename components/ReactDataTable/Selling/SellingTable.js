@@ -122,11 +122,7 @@ export default function ReactDataTable({
             "Dijadikan Piutang",
             "Data berhasil dijadikan Piutang, dan stok inventory telah dikurangi"
           );
-          if (page == "nonpanel") {
-            router.push("/dashboard/penjualan/non_panel");
-          } else {
-            router.push("/dashboard/penjualan/" + page);
-          }
+          router.reload();
         } else {
           openNotificationWithIcon("error", "Error", "Data gagal dijadikan Piutang");
           setLoadingPiutang(false);
