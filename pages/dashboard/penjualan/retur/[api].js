@@ -8,9 +8,10 @@ import { useRouter } from "next/router";
 import TitlePage from "../../../../components/TitlePage/TitlePage";
 import Search from "antd/lib/input/Search";
 import DataTable from "react-data-table-component";
-import { Button, Tag } from "antd";
+import { Button, Spin, Tag, message } from "antd";
 import moment from "moment";
 import useDebounce from "../../../../hooks/useDebounce";
+import { writeExcel } from "../../../../library/functions/writeExcel";
 
 Retur.getInitialProps = async (ctx) => {
   const api = ctx.query.api;
@@ -164,6 +165,28 @@ function Retur({ data = [], pointer = "", api_endpoint = "" }) {
       });
   }, [debouncedSearchTerm, router.asPath]);
 
+  const handleDownloadExcel = async () => {
+    message.loading({ content: "Mengunduh data...", duration: 8000, key: "fetch" });
+    await writeExcel({
+      api: `retur-${api}`,
+      schema: {
+        "No. Retur Penjualan": `no_retur_${api?.split("-").join("_")}`,
+        "Tanggal Retur": "retur_date",
+        "Nama Pelanggan": api === "store-sale" ? "customer_name" : "customer.name",
+        ...(api !== "store-sale" && { "Alamat Pelanggan": "customer.address", "No. Telepon": "customer.phone" }),
+        "Total Penjualan": "total",
+        DPP: "dpp",
+        PPN: "ppn",
+        "Status Pembayaran": "status_pembayaran",
+        "Ditambahkan Oleh": "added_by",
+      },
+      outputPath: `Export Retur ${parseTitle(api)}.xlsx`,
+      retur: api === "store-sale" ? false : true,
+    });
+
+    message.destroy("fetch");
+  };
+
   return (
     <>
       <Head>
@@ -173,19 +196,43 @@ function Retur({ data = [], pointer = "", api_endpoint = "" }) {
         <LayoutWrapper style={{}}>
           <TitlePage titleText={`Daftar ${parseTitle(api)}`} />
           <LayoutContent>
-            <div className="w-full flex justify-between mb-4">
-              <Search
-                className=""
-                loading={isSearching}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Cari No Retur"
-                style={{
-                  width: 200,
-                }}
-              />
-            </div>
+            {isSearching ? (
+              <div className="w-full flex justify-center items-center">
+                <Spin size="large" />
+              </div>
+            ) : (
+              <>
+                <div className="w-full flex justify-between items-center mb-4">
+                  <Search
+                    className=""
+                    loading={isSearching}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Cari No Retur"
+                    style={{
+                      width: 200,
+                    }}
+                  />
 
-            <DataTable columns={columns} data={retur} customStyles={customStyles} pagination paginationPerPage={10} />
+                  <button
+                    onClick={handleDownloadExcel}
+                    type="button"
+                    className="w-full md:w-1/4 bg-cyan-700 rounded px-20 py-2 hover:bg-cyan-800  shadow-sm float-right"
+                  >
+                    <div className="text-white text-center text-sm font-bold">
+                      <a className="text-white no-underline text-xs sm:text-xs">Print XLS</a>
+                    </div>
+                  </button>
+                </div>
+
+                <DataTable
+                  columns={columns}
+                  data={retur}
+                  customStyles={customStyles}
+                  pagination
+                  paginationPerPage={10}
+                />
+              </>
+            )}
           </LayoutContent>
         </LayoutWrapper>
       </DashboardLayout>

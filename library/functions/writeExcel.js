@@ -1,7 +1,7 @@
 import { message } from "antd";
 import nookies from "nookies";
 import writeXlsxFile from "write-excel-file";
-import { DETAIL_HEADER, createDetailHeader, createHeader } from "../../components/Form/utils/ExcelStylePenjualan";
+import { createDetailHeader, createHeader } from "../../components/Form/utils/ExcelStylePenjualan";
 
 function getDescendantProp(obj, desc) {
   const arr = desc.split(".");
@@ -10,7 +10,7 @@ function getDescendantProp(obj, desc) {
     return obj[desc];
   }
 
-  return desc.split(".").reduce((a, b) => a[b], obj);
+  return desc.split(".").reduce((a, b) => a?.[b], obj);
 }
 
 function getDetailItemsKey(data) {
@@ -19,11 +19,19 @@ function getDetailItemsKey(data) {
   return detailItemsKey;
 }
 
-async function getData(api, data = [], page = 1, limit = 100) {
+async function getData(api, retur, data = [], page = 1, limit = 100) {
   const cookies = nookies.get();
   const detailKey = api.split("-").join("_") + "_details";
 
-  const endpoint = `${process.env.NEXT_PUBLIC_URL}/${api}s?populate=${detailKey}.product,customer&pagination[page]=${page}&pagination[pageSize]=${limit}`;
+  // apiMaster = "retur-store-sale" -> "store-sale"
+  const apiMaster = api
+    .split("-")
+    .filter((item) => item !== "retur")
+    .join("-");
+
+  const endpoint = `${process.env.NEXT_PUBLIC_URL}/${api}s?populate=${detailKey}.product,${
+    retur ? `${apiMaster}.customer` : "customer"
+  }&pagination[page]=${page}&pagination[pageSize]=${limit}`;
   const options = {
     method: "GET",
     headers: {
@@ -40,7 +48,7 @@ async function getData(api, data = [], page = 1, limit = 100) {
     if (response.data) {
       const newData = [...data, ...response.data];
       if (response.meta.pagination.pageCount > page) {
-        return getData(api, newData, page + 1, limit);
+        return getData(api, retur, newData, page + 1, limit);
       } else {
         return newData;
       }
@@ -64,17 +72,24 @@ const detailSchema = {
   "EXP Date": "expired_date",
 };
 
-export const writeExcel = async ({ api, schema, outputPath = "Export Penjualan.xlsx" }) => {
+export const writeExcel = async ({ api, schema, outputPath = "Export Penjualan.xlsx", retur = false }) => {
   try {
-    const _res = await getData(api);
+    const _res = await getData(api, retur);
 
     console.log(_res);
+
+    const apiMaster = api
+      .split("-")
+      .filter((item) => item !== "retur")
+      .join("-");
 
     const _data = _res.map(({ attributes }) => {
       const detailItemsKey = getDetailItemsKey(attributes);
       return {
         ...attributes,
-        customer: attributes?.customer?.data?.attributes,
+        customer: retur
+          ? attributes?.[apiMaster]?.data?.attributes?.customer?.data?.attributes
+          : attributes?.customer?.data?.attributes,
         details: attributes[detailItemsKey].data?.map((item) => {
           return {
             ...item.attributes,
@@ -102,7 +117,7 @@ export const writeExcel = async ({ api, schema, outputPath = "Export Penjualan.x
         };
       });
 
-      const details = item.details.map((detail, idx) => {
+      item.details.forEach((detail, idx) => {
         const row = [];
         Object.keys(detailSchema).forEach((key) => {
           const value = getDescendantProp(detail, detailSchema[key]);
