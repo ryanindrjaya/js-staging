@@ -140,11 +140,13 @@ const fetchCustomer = async (cookies) => {
 };
 
 const fetchStoreAccounts = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?populate=*&filters[type][$eq]=TAMBAHAN LAIN 1"+
-  "&filters[type][$eq]=TAMBAHAN LAIN 2"+
-  "&filters[type][$eq]=TAMBAHAN LAIN 3"+
-  "&filters[type][$eq]=ONGKIR&filters[setting][$eq]=true"+
-  "&filters[penjualan][$eq]=NON";
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL +
+    "/store-accounts?populate=*&filters[type][$eq]=TAMBAHAN LAIN 1" +
+    "&filters[type][$eq]=TAMBAHAN LAIN 2" +
+    "&filters[type][$eq]=TAMBAHAN LAIN 3" +
+    "&filters[type][$eq]=ONGKIR&filters[setting][$eq]=true" +
+    "&filters[penjualan][$eq]=NON";
   const options = {
     method: "GET",
     headers: {
@@ -865,21 +867,20 @@ function Edit({ props }) {
       id++;
     });
 
-    if (storeAccounts.data.length > 0){
-
+    if (storeAccounts.data.length > 0) {
       storeAccounts.data.map((item) => {
         if (item.attributes.type === "ONGKIR") {
           setAkunCOAONGKIR(item.attributes.chart_of_account.data);
         }
-        if (item.attributes.type === "TAMBAHAN LAIN 1"){
+        if (item.attributes.type === "TAMBAHAN LAIN 1") {
           setAkunCOALAIN(item.attributes.chart_of_account.data);
-        } 
-        if (item.attributes.type === "TAMBAHAN LAIN 2"){
+        }
+        if (item.attributes.type === "TAMBAHAN LAIN 2") {
           setAkunCOALAIN2(item.attributes.chart_of_account.data);
-        } 
-        if (item.attributes.type === "TAMBAHAN LAIN 3"){
+        }
+        if (item.attributes.type === "TAMBAHAN LAIN 3") {
           setAkunCOALAIN3(item.attributes.chart_of_account.data);
-        } 
+        }
       });
     }
 
@@ -889,16 +890,16 @@ function Edit({ props }) {
   }, []);
 
   useEffect(() => {
-    if(akunCOAONGKIR){
+    if (akunCOAONGKIR) {
       form.setFieldsValue({
         akunCOA: {
           label: `${akunCOAONGKIR?.attributes?.nama}`,
           value: akunCOAONGKIR?.id,
-        }
+        },
       });
-    } 
+    }
 
-    if(akunCOALAIN || akunCOALAIN2 || akunCOALAIN3){
+    if (akunCOALAIN || akunCOALAIN2 || akunCOALAIN3) {
       form.setFieldsValue({
         akun: {
           label: `${akunCOALAIN?.attributes?.nama}`,
@@ -915,10 +916,9 @@ function Edit({ props }) {
         lain_coa3: {
           label: `${akunCOALAIN3?.attributes?.nama}`,
           value: akunCOALAIN3?.id,
-        }
+        },
       });
     }
-
   }, [akunCOAONGKIR, akunCOALAIN, akunCOALAIN2, akunCOALAIN3]);
 
   const validateError = () => {
@@ -1148,7 +1148,7 @@ function Edit({ props }) {
                 <div className="w-full md:w-1/3 px-3">
                   <div className="w-full md:w-full mb-2 md:mb-0">
                     <Form.Item name="delivery_coa" noStyle>
-                      <CoaSale onChange={setAkunCOAONGKIR} selectedAkun={akunCOAONGKIR} disabled/>
+                      <CoaSale onChange={setAkunCOAONGKIR} selectedAkun={akunCOAONGKIR} disabled />
                     </Form.Item>
                   </div>
                 </div>
@@ -1225,28 +1225,13 @@ function Edit({ props }) {
                 <div className="w-full md:w-1/3 px-3 mb-2 text-center md:mb-0">
                   <p className="mb-4 font-bold">Akun</p>
                   <Form.Item name="lain_coa1">
-                    <Select
-                      disabled
-                      size="large"
-                      style={{ width: "100%" }}
-                    >
-                    </Select>
+                    <Select disabled size="large" style={{ width: "100%" }}></Select>
                   </Form.Item>
                   <Form.Item name="lain_coa2">
-                    <Select
-                      disabled
-                      size="large"
-                      style={{ width: "100%" }}
-                    >
-                    </Select>
+                    <Select disabled size="large" style={{ width: "100%" }}></Select>
                   </Form.Item>
                   <Form.Item name="lain_coa3">
-                    <Select
-                      disabled
-                      size="large"
-                      style={{ width: "100%" }}
-                    >
-                    </Select>
+                    <Select disabled size="large" style={{ width: "100%" }}></Select>
                   </Form.Item>
                 </div>
 

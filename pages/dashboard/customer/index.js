@@ -12,6 +12,7 @@ import ExportProduk from "../../../components/Form/ExportProduk";
 import { Badge, Button, Descriptions, Input, Modal, Select, Tag } from "antd";
 import UploadCustomer from "../../../components/Form/UploadCustomer";
 import ExportCustomer from "../../../components/Form/ExportCustomer";
+import useDebounce from "../../../hooks/useDebounce";
 
 Customer.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -54,6 +55,7 @@ function Customer({ props }) {
   const [searchParameters, setSearchParameters] = useState({});
   const [selectedCustomer, setSelectedCustomer] = useState();
   const [openModal, setOpenModal] = useState(false);
+  const debounced = useDebounce(searchParameters, 1000);
   const router = useRouter();
   const cookies = nookies.get(null, "token");
 
@@ -135,7 +137,7 @@ function Customer({ props }) {
     };
 
     searchQuery();
-  }, [searchParameters]);
+  }, [debounced]);
 
   useEffect(() => {
     async function getCustomerById(id) {

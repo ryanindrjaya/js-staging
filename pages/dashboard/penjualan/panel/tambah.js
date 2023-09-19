@@ -128,9 +128,11 @@ const fetchCustomer = async (cookies) => {
 };
 
 const fetchStoreAccounts = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?populate=*"+
-  "&filters[type][$eq]=ONGKIR&filters[setting][$eq]=true"+
-  "&filters[penjualan][$eq]=PANEL";
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL +
+    "/store-accounts?populate=*" +
+    "&filters[type][$eq]=ONGKIR&filters[setting][$eq]=true" +
+    "&filters[penjualan][$eq]=PANEL";
   const options = {
     method: "GET",
     headers: {
@@ -373,6 +375,15 @@ function Toko({ props }) {
   const onFinish = (values, accept) => {
     if (accept) {
       const stokAda = Object.values(dataLocationStock).every((stock) => stock);
+      const creditEnough = limitCredit >= grandTotal;
+
+      if (!creditEnough) {
+        notification["error"]({
+          message: "Limit Kredit tidak cukup",
+          description: "Limit Kredit customer tidak mencukupi untuk melakukan penjualan",
+        });
+        return;
+      }
 
       if (!stokAda) {
         notification["error"]({
@@ -628,12 +639,12 @@ function Toko({ props }) {
   }, [customer]);
 
   useEffect(() => {
-    if(akunCOAONGKIR){
+    if (akunCOAONGKIR) {
       form.setFieldsValue({
         akunCOA: {
           label: `${akunCOAONGKIR?.attributes?.nama}`,
           value: akunCOAONGKIR?.id,
-        }
+        },
       });
     }
   }, [akunCOAONGKIR]);
@@ -683,7 +694,7 @@ function Toko({ props }) {
     //});
     //setCustomer(customerData);
 
-    if (storeAccounts.data.length > 0){
+    if (storeAccounts.data.length > 0) {
       storeAccounts.data.map((item) => {
         if (item.attributes.type === "ONGKIR") {
           setAkunCOAONGKIR(item.attributes.chart_of_account.data);
@@ -917,7 +928,7 @@ function Toko({ props }) {
 
               <div className="w-full flex flex-wrap -mx-3 -mt-20 mb-4">
                 <div className="w-full md:w-1/3 px-3">
-                  <CoaSale onChange={setAkunCOAONGKIR} selectedAkun={akunCOAONGKIR} disabled/>
+                  <CoaSale onChange={setAkunCOAONGKIR} selectedAkun={akunCOAONGKIR} disabled />
                 </div>
                 <div className="w-full md:w-1/3 px-3">
                   <Form.Item noStyle>

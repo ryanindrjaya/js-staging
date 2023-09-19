@@ -382,6 +382,16 @@ function Toko({ props }) {
     console.log("finish", customerData, customer.id, totalBelumDibayar);
 
     if (accept) {
+      const creditEnough = limitCredit >= grandTotal;
+
+      if (!creditEnough) {
+        notification["error"]({
+          message: "Limit Kredit tidak cukup",
+          description: "Limit Kredit customer tidak mencukupi untuk melakukan penjualan",
+        });
+        return;
+      }
+
       setLoading(true);
       values.status_data = simpanData;
       setInfo("sukses");
