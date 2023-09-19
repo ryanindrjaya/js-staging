@@ -15,6 +15,7 @@ import Manufactures from "../../../components/Form/AddProduct/Manufactures";
 import DownloadTemplate from "../../../components/Form/DownloadTemplate";
 import ExportProduk from "../../../components/Form/ExportProduk";
 import UploadProduk from "../../../components/Form/UploadProduk";
+import useDebounce from "../../../hooks/useDebounce";
 
 const Product = ({ props }) => {
   const data = props?.data;
@@ -39,6 +40,9 @@ const Product = ({ props }) => {
     categories: categories,
     locations: locations,
   });
+
+  const debounced = useDebounce(searchParameters, 1000);
+
   const { Search } = Input;
 
   const handleSearch = (newValue, category) => {
@@ -112,7 +116,7 @@ const Product = ({ props }) => {
         locationQuery = "";
       }
 
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/products?populate=*&" + query + locationQuery;
+      const endpoint = process.env.NEXT_PUBLIC_URL + "/products?pagination[limit]=10&" + query + locationQuery;
 
       console.log("endpoint", endpoint);
 
@@ -133,7 +137,7 @@ const Product = ({ props }) => {
     };
 
     searchQuery();
-  }, [searchParameters]);
+  }, [debounced]);
 
   const handleAdd = () => {
     console.log("");
@@ -247,7 +251,7 @@ const Product = ({ props }) => {
       setIsLoading(true);
       message.loading({ content: "Mengambil data", duration: 8000, key: "fetch" });
       const cookies = nookies.get();
-      const endpoint = process.env.NEXT_PUBLIC_URL + `/products/${id}?populate=deep`;
+      const endpoint = process.env.NEXT_PUBLIC_URL + `/products/${id}`;
       const options = {
         method: "GET",
         headers: {
@@ -330,12 +334,14 @@ const Product = ({ props }) => {
                 <Search
                   className=""
                   loading={isSearching}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    setIsSearching(true);
+
                     setSearchParameters({
                       ...searchParameters,
                       namaSKU: e.target.value,
-                    })
-                  }
+                    });
+                  }}
                   placeholder="Nama Produk / SKU"
                   size="middle"
                 />
@@ -457,7 +463,7 @@ const formatData = (data) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/products?sort=createdAt:desc&populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/products?sort=createdAt:desc&pagination[limit]=10";
   const options = {
     method: "GET",
     headers: {
