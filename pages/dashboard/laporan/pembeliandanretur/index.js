@@ -12,7 +12,7 @@ import SearchSupplier from "@iso/components/Form/AddReport/SearchSupplier";
 import SearchLocations from "@iso/components/Form/AddReport/SearchLocations";
 import nookies from "nookies";
 import tokenVerify from "../../../../authentication/tokenVerify";
-import * as XLSX from 'xlsx';
+import * as XLSX from "xlsx";
 
 Laporan.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -82,8 +82,9 @@ const fetchLocation = async (cookies) => {
 };
 
 const fetchPurchasing = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + 
-  "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products";
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL +
+    "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&filters[status]=Diterima";
   const options = {
     method: "GET",
     headers: {
@@ -97,14 +98,17 @@ const fetchPurchasing = async (cookies) => {
 };
 
 function Laporan({ props }) {
-  const laporan = useSelector((state) => state.Report); console.log("data laporan", laporan);
+  const laporan = useSelector((state) => state.Report);
+  console.log("data laporan", laporan);
   const user = props.user;
   const dataUser = props?.dataUser;
   const locations = props.locations;
   const purchasing = props.purchasing;
   const [data, setData] = useState(purchasing);
   const router = useRouter();
-  const [queryPrint, setQueryPrint] = useState("/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products");
+  const [queryPrint, setQueryPrint] = useState(
+    "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products"
+  );
   const [searchParameters, setSearchParameters] = useState({});
   const dispatch = useDispatch();
   var index = 0;
@@ -119,29 +123,29 @@ function Laporan({ props }) {
       exportTableToXLSX(tableRef.current);
     }
   };
-  
+
   // Function to export the table to XLSX
   const exportTableToXLSX = (tableData) => {
     const data = [];
     const headers = [];
 
     // Extract headers from the first row of the table
-    const headerRow = tableData.querySelector('thead tr');
-    headerRow.querySelectorAll('th').forEach((th) => {
+    const headerRow = tableData.querySelector("thead tr");
+    headerRow.querySelectorAll("th").forEach((th) => {
       headers.push(th.innerText);
     });
 
     // Extract data from the table rows
-    const bodyRows = tableData.querySelectorAll('tbody tr');
+    const bodyRows = tableData.querySelectorAll("tbody tr");
     bodyRows.forEach((row) => {
       const rowData = [];
-      row.querySelectorAll('td').forEach((td) => {
+      row.querySelectorAll("td").forEach((td) => {
         rowData.push(td.innerText);
       });
       if (rowData.length !== 0) data.push(rowData);
       if (rowData[1] === "Subtotal :") {
         const space = "";
-      
+
         // Insert the three values before index 1 in the rowData array
         rowData.splice(1, 0, space, space, space);
       }
@@ -150,10 +154,10 @@ function Laporan({ props }) {
     // Create the Excel workbook and worksheet
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
 
     // Generate the Excel file
-    XLSX.writeFile(workbook, 'Laporan Pembelian dan Retur.xlsx');
+    XLSX.writeFile(workbook, "Laporan Pembelian dan Retur.xlsx");
   };
 
   const handlePrint = () => {
@@ -165,7 +169,7 @@ function Laporan({ props }) {
     // });
     const table = tableRef.current;
     if (table) {
-      const printWindow = window.open('', '_blank');
+      const printWindow = window.open("", "_blank");
       const printDocument = printWindow.document;
 
       // Write the table content to the print window
@@ -236,20 +240,22 @@ function Laporan({ props }) {
       let query = "";
       let startDate = "";
       let endDate = "";
-      let queryTransaksi = "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&";
+      let queryTransaksi =
+        "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&";
 
       for (const key in searchParameters) {
-
         if (key === "tipeTransaksi" && searchParameters[key] !== undefined) {
           if (searchParameters[key] == "Pembelian") {
             queryTransaksi = "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&";
           } else if (searchParameters[key] == "Retur") {
             queryTransaksi = "/purchasings?populate[0]=supplier&populate[1]=returs.retur_details.products&";
           } else {
-            queryTransaksi = "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&";
+            queryTransaksi =
+              "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&";
           }
         } else {
-          queryTransaksi = "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&";
+          queryTransaksi =
+            "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&";
         }
 
         if (key === "status_pembayaran") {
@@ -280,12 +286,9 @@ function Laporan({ props }) {
         } else {
           query += "";
         }
-
       }
 
-      const endpoint = process.env.NEXT_PUBLIC_URL + 
-      queryTransaksi + 
-      query;
+      const endpoint = process.env.NEXT_PUBLIC_URL + queryTransaksi + query;
 
       const cookies = nookies.get(null, "token");
       const options = {
@@ -299,19 +302,19 @@ function Laporan({ props }) {
       const req = await fetch(endpoint, options);
       const res = await req.json();
 
-      var allQuery = queryTransaksi + query; 
+      var allQuery = queryTransaksi + query;
       setQueryPrint(allQuery);
       setData(res);
     };
 
-    if(searchParameters.tipeTransaksi == undefined){
+    if (searchParameters.tipeTransaksi == undefined) {
       searchParameters.tipeTransaksi = "undefined";
     }
     searchQuery();
   }, [searchParameters]);
 
   useEffect(() => {
-    setSearchParameters({tipeTransaksi : "undefined"});
+    setSearchParameters({ tipeTransaksi: "undefined" });
   }, []);
 
   return (
@@ -325,18 +328,10 @@ function Laporan({ props }) {
           <LayoutContent>
             <div className="w-full flex justify-start">
               <div className="w-full md:w-1/4 px-3 mb-2">
-                 <SearchLocations
-                   onChangeLocations={(e) =>
-                    setSearchParameters({ ...searchParameters, location: e })
-                  }
-                 />
+                <SearchLocations onChangeLocations={(e) => setSearchParameters({ ...searchParameters, location: e })} />
               </div>
               <div className="w-full md:w-1/4 px-3">
-                 <SearchSupplier 
-                   onChangeSupplier={(e) =>
-                    setSearchParameters({ ...searchParameters, supplier: e })
-                  }
-                 />
+                <SearchSupplier onChangeSupplier={(e) => setSearchParameters({ ...searchParameters, supplier: e })} />
               </div>
               <div className="w-full md:w-1/4 px-3">
                 <Select
@@ -347,9 +342,7 @@ function Laporan({ props }) {
                     marginRight: "10px",
                   }}
                   allowClear
-                  onChange={(e) =>
-                    setSearchParameters({ ...searchParameters, tipeTransaksi: e })
-                  }
+                  onChange={(e) => setSearchParameters({ ...searchParameters, tipeTransaksi: e })}
                 >
                   <Select.Option value="Pembelian">Pembelian</Select.Option>
                   <Select.Option value="Retur">Retur</Select.Option>
@@ -364,9 +357,7 @@ function Laporan({ props }) {
                     marginRight: "10px",
                   }}
                   allowClear
-                  onChange={(e) =>
-                    setSearchParameters({ ...searchParameters, status_pembayaran: e })
-                  }
+                  onChange={(e) => setSearchParameters({ ...searchParameters, status_pembayaran: e })}
                 >
                   <Select.Option value="Lunas">Lunas</Select.Option>
                   <Select.Option value="Dibayar Sebagian">Dibayar Sebagian</Select.Option>
@@ -377,12 +368,7 @@ function Laporan({ props }) {
 
             <div className="w-full flex justify-end -mt-4">
               <div className="w-full md:w-1/4 px-3">
-                <RangePicker
-                  size="large"
-                  onChange={(e) =>
-                    setSearchParameters({ ...searchParameters, range: e })
-                  }
-                />
+                <RangePicker size="large" onChange={(e) => setSearchParameters({ ...searchParameters, range: e })} />
               </div>
             </div>
 
@@ -424,129 +410,136 @@ function Laporan({ props }) {
                 </div>
               </button>
             </div>
-            
+
             {searchParameters.tipeTransaksi === "Pembelian" ? (
-            <div className="justify-between mt-10" ref={tableRef}>
-              <div>
-                <h5 className="-mt-10">Laporan Pembelian</h5>
-                <table name="pembelian" className="w-full text-xs">
-                  <thead>
-                  <tr className="p-2">
-                    <th className="border-2 p-1">NO</th>
-                    <th className="border-2 p-1">NAMA PRODUK</th>
-                    <th className="border-2 p-1">JUMLAH</th>
-                    <th className="border-2 p-1">HARGA SATUAN</th>
-                    <th className="border-2 p-1">DISC</th>
-                    <th className="border-2 p-1">HARGA SATUAN STLH DISKON</th>
-                    <th className="border-2 p-1">SUBTOTAL</th>
-                  </tr>
-                  </thead>
-                  {data.data.map((row) => {
-                    index++;
-                    return(
-                    <tbody>
-                      <tr>
-                        <td className="border-2 p-1 w-fit align-text-top">{index}</td>
-                        <td className="border-2 p-1 w-fit">
-                          Supplier : {row?.attributes?.supplier?.data?.attributes?.name}
-                        </td>
-                        <td className="border-2 p-1 w-fit">
-                          Tanggal : {formatMyDate(row?.attributes?.date_purchasing)}
-                        </td>
-                        <td className="border-2 p-1 w-fit">
-                          No : {row?.attributes?.no_purchasing}
-                        </td>
-                        <td className="border-2 p-1 w-fit">
-                          No Supplier : {row?.attributes?.no_nota_suppplier}
-                        </td>
-                        <td className="border-2 p-1 w-fit">
-                          Tempo : {row?.attributes?.tempo_days} {row?.attributes?.tempo_time}
-                        </td>
-                        <td className="border-2 p-1 w-fit"></td>
+              <div className="justify-between mt-10" ref={tableRef}>
+                <div>
+                  <h5 className="-mt-10">Laporan Pembelian</h5>
+                  <table name="pembelian" className="w-full text-xs">
+                    <thead>
+                      <tr className="p-2">
+                        <th className="border-2 p-1">NO</th>
+                        <th className="border-2 p-1">NAMA PRODUK</th>
+                        <th className="border-2 p-1">JUMLAH</th>
+                        <th className="border-2 p-1">HARGA SATUAN</th>
+                        <th className="border-2 p-1">DISC</th>
+                        <th className="border-2 p-1">HARGA SATUAN STLH DISKON</th>
+                        <th className="border-2 p-1">SUBTOTAL</th>
                       </tr>
-                      {row.attributes?.purchasing_details?.data?.map((element, index) => (
-                      <tr>
-                          <td key={index} className="border-2 p-1 w-fit"></td>
-                          <td key={index} className="border-2 p-1 w-fit">
-                            {element?.attributes?.product?.data?.attributes?.name}
-                          </td>
-                          <td key={index} className="border-2 p-1 w-fit">
-                            {element?.attributes?.total_order} {element?.attributes?.unit_order}
-                          </td>
-                          <td key={index} className="border-2 p-1 w-fit">
-                            {formatter.format(element?.attributes?.unit_price)} 
-                          </td>
-                          <td key={index} className="border-2 p-1 w-fit">
-                            {formatter.format(element?.attributes?.disc ?? 0)}
-                            {element?.attributes?.dp1 ?? 0}%
-                            {element?.attributes?.dp2 ?? 0}%
-                            {element?.attributes?.dp3 ?? 0}%
-                          </td>
-                          <td key={index} className="border-2 p-1 w-fit">
-                            {formatter.format(element?.attributes?.unit_price_after_disc)}
-                          </td>
-                          <td key={index} className="border-2 p-1 w-fit">
-                            {formatter.format(element?.attributes?.sub_total)}
-                          </td>
-                      </tr>
-                      ))}
-                      <tr>
-                        <td hidden></td>
-                        <td hidden></td>
-                        <td hidden></td>
-                        <td hidden></td>
-                        <td hidden></td>
-                        <td className="border-2 p-1 text-right mr-2" colspan="6" >Subtotal : </td>
-                        <td className="border-2 p-1">
-                          {formatter.format(row.attributes?.purchasing_details?.data?.reduce((total, row) => total += row.attributes.sub_total, 0))}
-                        </td>
-                      </tr>
-                    </tbody>
-                    );
-                  })}
-                </table>
+                    </thead>
+                    {data.data.map((row) => {
+                      index++;
+                      return (
+                        <tbody>
+                          <tr>
+                            <td className="border-2 p-1 w-fit align-text-top">{index}</td>
+                            <td className="border-2 p-1 w-fit">
+                              Supplier : {row?.attributes?.supplier?.data?.attributes?.name}
+                            </td>
+                            <td className="border-2 p-1 w-fit">
+                              Tanggal : {formatMyDate(row?.attributes?.date_purchasing)}
+                            </td>
+                            <td className="border-2 p-1 w-fit">No : {row?.attributes?.no_purchasing}</td>
+                            <td className="border-2 p-1 w-fit">No Supplier : {row?.attributes?.no_nota_suppplier}</td>
+                            <td className="border-2 p-1 w-fit">
+                              Tempo : {row?.attributes?.tempo_days} {row?.attributes?.tempo_time}
+                            </td>
+                            <td className="border-2 p-1 w-fit"></td>
+                          </tr>
+                          {row.attributes?.purchasing_details?.data?.map((element, index) => (
+                            <tr>
+                              <td key={index} className="border-2 p-1 w-fit"></td>
+                              <td key={index} className="border-2 p-1 w-fit">
+                                {element?.attributes?.product?.data?.attributes?.name}
+                              </td>
+                              <td key={index} className="border-2 p-1 w-fit">
+                                {element?.attributes?.total_order} {element?.attributes?.unit_order}
+                              </td>
+                              <td key={index} className="border-2 p-1 w-fit">
+                                {formatter.format(element?.attributes?.unit_price)}
+                              </td>
+                              <td key={index} className="border-2 p-1 w-fit">
+                                {formatter.format(element?.attributes?.disc ?? 0)}
+                                {element?.attributes?.dp1 ?? 0}%{element?.attributes?.dp2 ?? 0}%
+                                {element?.attributes?.dp3 ?? 0}%
+                              </td>
+                              <td key={index} className="border-2 p-1 w-fit">
+                                {formatter.format(element?.attributes?.unit_price_after_disc)}
+                              </td>
+                              <td key={index} className="border-2 p-1 w-fit">
+                                {formatter.format(element?.attributes?.sub_total)}
+                              </td>
+                            </tr>
+                          ))}
+                          <tr>
+                            <td hidden></td>
+                            <td hidden></td>
+                            <td hidden></td>
+                            <td hidden></td>
+                            <td hidden></td>
+                            <td className="border-2 p-1 text-right mr-2" colspan="6">
+                              Subtotal :{" "}
+                            </td>
+                            <td className="border-2 p-1">
+                              {formatter.format(
+                                row.attributes?.purchasing_details?.data?.reduce(
+                                  (total, row) => (total += row.attributes.sub_total),
+                                  0
+                                )
+                              )}
+                            </td>
+                          </tr>
+                        </tbody>
+                      );
+                    })}
+                  </table>
+                </div>
               </div>
-            </div>
             ) : (
               <div hidden></div>
             )}
 
             {searchParameters.tipeTransaksi === "Retur" ? (
-            <div className="justify-between -mt-3" ref={tableRef}>
-              <div>
-                <h5 className="mt-3">Laporan Return</h5>
+              <div className="justify-between -mt-3" ref={tableRef}>
+                <div>
+                  <h5 className="mt-3">Laporan Return</h5>
                   <table name="retur" className="w-full text-xs">
                     <thead>
-                    <tr className="p-2">
-                      <th className="border-2 p-1">NO</th>
-                      <th className="border-2 p-1">NAMA PRODUK</th>
-                      <th className="border-2 p-1">JUMLAH</th>
-                      <th className="border-2 p-1">HARGA SATUAN</th>
-                      <th className="border-2 p-1">DISC</th>
-                      <th className="border-2 p-1">HARGA SATUAN STLH DISKON</th>
-                      <th className="border-2 p-1">SUBTOTAL</th>
-                    </tr>
+                      <tr className="p-2">
+                        <th className="border-2 p-1">NO</th>
+                        <th className="border-2 p-1">NAMA PRODUK</th>
+                        <th className="border-2 p-1">JUMLAH</th>
+                        <th className="border-2 p-1">HARGA SATUAN</th>
+                        <th className="border-2 p-1">DISC</th>
+                        <th className="border-2 p-1">HARGA SATUAN STLH DISKON</th>
+                        <th className="border-2 p-1">SUBTOTAL</th>
+                      </tr>
                     </thead>
                     {data.data.map((row) => {
-                      return(
-                        row.attributes?.returs?.data?.length != 0 ? (
-                            row.attributes?.returs?.data?.map((element, index) => {
-                              index++;
-                              return(
-                              <tbody>
-                                <tr>
-                                  <td className="border-2 p-1 align-text-top w-fit">{index}</td>
-                                  <td className="border-2 p-1 w-fit">Supplier : {row.attributes.supplier.data.attributes.name}</td>
-                                  <td className="border-2 p-1 w-fit">Tanggal : {formatMyDate(row.attributes.date_purchasing)}</td>
-                                  <td className="border-2 p-1 w-fit">No : {element.attributes.no_retur}</td>
-                                  <td className="border-2 p-1 w-fit">Nota Supp : {element.attributes.no_nota_suppplier ?? "tidak ada"}</td>
-                                  <td className="border-2 p-1 w-fit">
-                                    Tempo : {row?.attributes?.tempo_days} {row?.attributes?.tempo_time} | 
-                                    No Pembelian : {row.attributes.no_purchasing}
-                                  </td>
-                                  <td className="border-2 p-1 w-fit"></td>
-                                </tr>
-                                {element.attributes.retur_details.data.map((item, idx) => (
+                      return row.attributes?.returs?.data?.length != 0 ? (
+                        row.attributes?.returs?.data?.map((element, index) => {
+                          index++;
+                          return (
+                            <tbody>
+                              <tr>
+                                <td className="border-2 p-1 align-text-top w-fit">{index}</td>
+                                <td className="border-2 p-1 w-fit">
+                                  Supplier : {row.attributes.supplier.data.attributes.name}
+                                </td>
+                                <td className="border-2 p-1 w-fit">
+                                  Tanggal : {formatMyDate(row.attributes.date_purchasing)}
+                                </td>
+                                <td className="border-2 p-1 w-fit">No : {element.attributes.no_retur}</td>
+                                <td className="border-2 p-1 w-fit">
+                                  Nota Supp : {element.attributes.no_nota_suppplier ?? "tidak ada"}
+                                </td>
+                                <td className="border-2 p-1 w-fit">
+                                  Tempo : {row?.attributes?.tempo_days} {row?.attributes?.tempo_time} | No Pembelian :{" "}
+                                  {row.attributes.no_purchasing}
+                                </td>
+                                <td className="border-2 p-1 w-fit"></td>
+                              </tr>
+                              {element.attributes.retur_details.data.map((item, idx) => (
                                 <tr>
                                   <td className="border-2 p-1 w-fit" key={idx}></td>
                                   <td className="border-2 p-1 w-fit" key={idx}>
@@ -560,186 +553,199 @@ function Laporan({ props }) {
                                   </td>
                                   <td className="border-2 p-1 w-fit" colSpan={2}></td>
                                   <td hidden></td>
-                                  <td className="border-2 p-1 w-fit">
-                                    {formatter.format(item.attributes.sub_total)}
-                                  </td>
+                                  <td className="border-2 p-1 w-fit">{formatter.format(item.attributes.sub_total)}</td>
                                 </tr>
-                                ))}
-                                <tr>
-                                  <td hidden></td>
-                                  <td hidden></td>
-                                  <td hidden></td>
-                                  <td hidden></td>
-                                  <td hidden></td>
-                                  <td className="border-2 p-1 text-right mr-2 w-fit" colspan="6">Subtotal : </td>
-                                  <td className="border-2 p-1 w-fit">
-                                    {formatter.format(element.attributes.retur_details.data.reduce((total, row) => total += row.attributes.sub_total, 0))}
-                                  </td>
-                                </tr>
-                              </tbody>
-                              );
-                            })
-                          ) : (
-                          <tr hidden></tr>
-                        )
+                              ))}
+                              <tr>
+                                <td hidden></td>
+                                <td hidden></td>
+                                <td hidden></td>
+                                <td hidden></td>
+                                <td hidden></td>
+                                <td className="border-2 p-1 text-right mr-2 w-fit" colspan="6">
+                                  Subtotal :{" "}
+                                </td>
+                                <td className="border-2 p-1 w-fit">
+                                  {formatter.format(
+                                    element.attributes.retur_details.data.reduce(
+                                      (total, row) => (total += row.attributes.sub_total),
+                                      0
+                                    )
+                                  )}
+                                </td>
+                              </tr>
+                            </tbody>
+                          );
+                        })
+                      ) : (
+                        <tr hidden></tr>
                       );
                     })}
                   </table>
                 </div>
               </div>
             ) : (
-              <div hidden></div>     
+              <div hidden></div>
             )}
 
-            {searchParameters.tipeTransaksi === "undefined"  ? (
-            <div className="mt-10" ref={tableRef}>
-            <h5 className="-mt-10">Laporan Pembelian</h5>
-            <table name="pembelian" className="w-full text-xs">
-              <thead>
-              <tr className="p-2">
-                <th className="border-2 p-1">NO</th>
-                <th className="border-2 p-1">NAMA PRODUK</th>
-                <th className="border-2 p-1">JUMLAH</th>
-                <th className="border-2 p-1">HARGA SATUAN</th>
-                <th className="border-2 p-1">DISC</th>
-                <th className="border-2 p-1">HARGA SATUAN STLH DISKON</th>
-                <th className="border-2 p-1">SUBTOTAL</th>
-              </tr>
-              </thead>
-              {data.data.map((row) => {
-                index++;
-                return(
-                <tbody>
-                  <tr>
-                    <td className="border-2 p-1 w-fit align-text-top">{index}</td>
-                    <td className="border-2 p-1 w-fit">
-                      Supplier : {row?.attributes?.supplier?.data?.attributes?.name}
-                    </td>
-                    <td className="border-2 p-1 w-fit">
-                      Tanggal : {formatMyDate(row?.attributes?.date_purchasing)}
-                    </td>
-                    <td className="border-2 p-1 w-fit">
-                      No : {row?.attributes?.no_purchasing}
-                    </td>
-                    <td className="border-2 p-1 w-fit">
-                      No Supplier : {row?.attributes?.no_nota_suppplier}
-                    </td>
-                    <td className="border-2 p-1 w-fit">
-                      Tempo : {row?.attributes?.tempo_days} {row?.attributes?.tempo_time}
-                    </td>
-                    <td className="border-2 p-1 w-fit"></td>
-                  </tr>
-
-                  {row.attributes?.purchasing_details?.data?.map((element, index) => (
-                  <tr>
-                      <td key={index} className="border-2 p-1 w-fit"></td>
-                      <td key={index} className="border-2 p-1 w-fit">
-                        {element?.attributes?.product?.data?.attributes?.name}
-                      </td>
-                      <td key={index} className="border-2 p-1 w-fit">
-                        {element?.attributes?.total_order} {element?.attributes?.unit_order}
-                      </td>
-                      <td key={index} className="border-2 p-1 w-fit">
-                        {formatter.format(element?.attributes?.unit_price)} 
-                      </td>
-                      <td key={index} className="border-2 p-1 w-fit">
-                        {formatter.format(element?.attributes?.disc ?? 0)}
-                        {element?.attributes?.dp1 ?? 0}%
-                        {element?.attributes?.dp2 ?? 0}%
-                        {element?.attributes?.dp3 ?? 0}%
-                      </td>
-                      <td key={index} className="border-2 p-1 w-fit">
-                        {formatter.format(element?.attributes?.unit_price_after_disc)}
-                      </td>
-                      <td key={index} className="border-2 p-1 w-fit">
-                        {formatter.format(element?.attributes?.sub_total)}
-                      </td>
-                  </tr>
-                  ))}
-                  <tr>
-                    <td hidden></td>
-                    <td hidden></td>
-                    <td hidden></td>
-                    <td hidden></td>
-                    <td hidden></td>
-                    <td className="border-2 p-1 text-right mr-2" colspan="6" >Subtotal : </td>
-                    <td className="border-2 p-1">
-                      {formatter.format(row.attributes?.purchasing_details?.data?.reduce((total, row) => total += row.attributes.sub_total, 0))}
-                    </td>
-                  </tr>
-                </tbody>
-                );
-              })}
-            </table>
-    
-            <h5 className="mt-3">Laporan Return</h5>
-            <table name="retur" className="w-full text-xs">
-              <thead>
-              <tr className="p-2">
-                <th className="border-2 p-1">NO</th>
-                <th className="border-2 p-1">NAMA PRODUK</th>
-                <th className="border-2 p-1">JUMLAH</th>
-                <th className="border-2 p-1">HARGA SATUAN</th>
-                <th className="border-2 p-1">DISC</th>
-                <th className="border-2 p-1">HARGA SATUAN STLH DISKON</th>
-                <th className="border-2 p-1">SUBTOTAL</th>
-              </tr>
-              </thead>
-              {data.data.map((row) => {
-                return(
-                  row.attributes?.returs?.data?.map((element, index) => {
+            {searchParameters.tipeTransaksi === "undefined" ? (
+              <div className="mt-10" ref={tableRef}>
+                <h5 className="-mt-10">Laporan Pembelian</h5>
+                <table name="pembelian" className="w-full text-xs">
+                  <thead>
+                    <tr className="p-2">
+                      <th className="border-2 p-1">NO</th>
+                      <th className="border-2 p-1">NAMA PRODUK</th>
+                      <th className="border-2 p-1">JUMLAH</th>
+                      <th className="border-2 p-1">HARGA SATUAN</th>
+                      <th className="border-2 p-1">DISC</th>
+                      <th className="border-2 p-1">HARGA SATUAN STLH DISKON</th>
+                      <th className="border-2 p-1">SUBTOTAL</th>
+                    </tr>
+                  </thead>
+                  {data.data.map((row) => {
                     index++;
-                    return(
-                    <tbody>
-                      <tr>
-                        <td className="border-2 p-1 align-text-top w-fit">{index}</td>
-                        <td className="border-2 p-1 w-fit">Supplier : {row.attributes.supplier.data.attributes.name}</td>
-                        <td className="border-2 p-1 w-fit">Tanggal : {formatMyDate(row.attributes.date_purchasing)}</td>
-                        <td className="border-2 p-1 w-fit">No : {element.attributes.no_retur}</td>
-                        <td className="border-2 p-1 w-fit">Nota Supp : {element.attributes.no_nota_suppplier ?? "tidak ada"}</td>
-                        <td className="border-2 p-1 w-fit">
-                          Tempo : {row?.attributes?.tempo_days} {row?.attributes?.tempo_time} | 
-                          No Pembelian : {row.attributes.no_purchasing}
-                        </td>
-                        <td className="border-2 p-1 w-fit"></td>
-                      </tr>
-                      {element.attributes.retur_details.data.map((item, idx) => (
-                      <tr>
-                        <td className="border-2 p-1 w-fit" key={idx}></td>
-                        <td className="border-2 p-1 w-fit" key={idx}>
-                          {item.attributes.products.data[0].attributes.name}
-                        </td>
-                        <td className="border-2 p-1 w-fit">
-                          {item.attributes.qty} {item.attributes.unit}
-                        </td>
-                        <td className="border-2 p-1 w-fit">
-                          {formatter.format(item.attributes.harga_satuan)}
-                        </td>
-                        <td className="border-2 p-1 w-fit" colSpan={2}></td>
-                        <td hidden></td>
-                        <td className="border-2 p-1 w-fit">
-                          {formatter.format(item.attributes.sub_total)}
-                        </td>
-                      </tr>
-                      ))}
-                      <tr>
-                        <td hidden></td>
-                        <td hidden></td>
-                        <td hidden></td>
-                        <td hidden></td>
-                        <td hidden></td>
-                        <td className="border-2 p-1 text-right mr-2 w-fit" colspan="6">Subtotal : </td>
-                        <td className="border-2 p-1 w-fit">
-                          {formatter.format(element.attributes.retur_details.data.reduce((total, row) => total += row.attributes.sub_total, 0))}
-                        </td>
-                      </tr>
-                    </tbody>
+                    return (
+                      <tbody>
+                        <tr>
+                          <td className="border-2 p-1 w-fit align-text-top">{index}</td>
+                          <td className="border-2 p-1 w-fit">
+                            Supplier : {row?.attributes?.supplier?.data?.attributes?.name}
+                          </td>
+                          <td className="border-2 p-1 w-fit">
+                            Tanggal : {formatMyDate(row?.attributes?.date_purchasing)}
+                          </td>
+                          <td className="border-2 p-1 w-fit">No : {row?.attributes?.no_purchasing}</td>
+                          <td className="border-2 p-1 w-fit">No Supplier : {row?.attributes?.no_nota_suppplier}</td>
+                          <td className="border-2 p-1 w-fit">
+                            Tempo : {row?.attributes?.tempo_days} {row?.attributes?.tempo_time}
+                          </td>
+                          <td className="border-2 p-1 w-fit"></td>
+                        </tr>
+
+                        {row.attributes?.purchasing_details?.data?.map((element, index) => (
+                          <tr>
+                            <td key={index} className="border-2 p-1 w-fit"></td>
+                            <td key={index} className="border-2 p-1 w-fit">
+                              {element?.attributes?.product?.data?.attributes?.name}
+                            </td>
+                            <td key={index} className="border-2 p-1 w-fit">
+                              {element?.attributes?.total_order} {element?.attributes?.unit_order}
+                            </td>
+                            <td key={index} className="border-2 p-1 w-fit">
+                              {formatter.format(element?.attributes?.unit_price)}
+                            </td>
+                            <td key={index} className="border-2 p-1 w-fit">
+                              {formatter.format(element?.attributes?.disc ?? 0)}
+                              {element?.attributes?.dp1 ?? 0}%{element?.attributes?.dp2 ?? 0}%
+                              {element?.attributes?.dp3 ?? 0}%
+                            </td>
+                            <td key={index} className="border-2 p-1 w-fit">
+                              {formatter.format(element?.attributes?.unit_price_after_disc)}
+                            </td>
+                            <td key={index} className="border-2 p-1 w-fit">
+                              {formatter.format(element?.attributes?.sub_total)}
+                            </td>
+                          </tr>
+                        ))}
+                        <tr>
+                          <td hidden></td>
+                          <td hidden></td>
+                          <td hidden></td>
+                          <td hidden></td>
+                          <td hidden></td>
+                          <td className="border-2 p-1 text-right mr-2" colspan="6">
+                            Subtotal :{" "}
+                          </td>
+                          <td className="border-2 p-1">
+                            {formatter.format(
+                              row.attributes?.purchasing_details?.data?.reduce(
+                                (total, row) => (total += row.attributes.sub_total),
+                                0
+                              )
+                            )}
+                          </td>
+                        </tr>
+                      </tbody>
                     );
-                  })
-                );
-              })}
-            </table>
-            </div>
+                  })}
+                </table>
+
+                <h5 className="mt-3">Laporan Return</h5>
+                <table name="retur" className="w-full text-xs">
+                  <thead>
+                    <tr className="p-2">
+                      <th className="border-2 p-1">NO</th>
+                      <th className="border-2 p-1">NAMA PRODUK</th>
+                      <th className="border-2 p-1">JUMLAH</th>
+                      <th className="border-2 p-1">HARGA SATUAN</th>
+                      <th className="border-2 p-1">DISC</th>
+                      <th className="border-2 p-1">HARGA SATUAN STLH DISKON</th>
+                      <th className="border-2 p-1">SUBTOTAL</th>
+                    </tr>
+                  </thead>
+                  {data.data.map((row) => {
+                    return row.attributes?.returs?.data?.map((element, index) => {
+                      index++;
+                      return (
+                        <tbody>
+                          <tr>
+                            <td className="border-2 p-1 align-text-top w-fit">{index}</td>
+                            <td className="border-2 p-1 w-fit">
+                              Supplier : {row.attributes.supplier.data.attributes.name}
+                            </td>
+                            <td className="border-2 p-1 w-fit">
+                              Tanggal : {formatMyDate(row.attributes.date_purchasing)}
+                            </td>
+                            <td className="border-2 p-1 w-fit">No : {element.attributes.no_retur}</td>
+                            <td className="border-2 p-1 w-fit">
+                              Nota Supp : {element.attributes.no_nota_suppplier ?? "tidak ada"}
+                            </td>
+                            <td className="border-2 p-1 w-fit">
+                              Tempo : {row?.attributes?.tempo_days} {row?.attributes?.tempo_time} | No Pembelian :{" "}
+                              {row.attributes.no_purchasing}
+                            </td>
+                            <td className="border-2 p-1 w-fit"></td>
+                          </tr>
+                          {element.attributes.retur_details.data.map((item, idx) => (
+                            <tr>
+                              <td className="border-2 p-1 w-fit" key={idx}></td>
+                              <td className="border-2 p-1 w-fit" key={idx}>
+                                {item.attributes.products.data[0].attributes.name}
+                              </td>
+                              <td className="border-2 p-1 w-fit">
+                                {item.attributes.qty} {item.attributes.unit}
+                              </td>
+                              <td className="border-2 p-1 w-fit">{formatter.format(item.attributes.harga_satuan)}</td>
+                              <td className="border-2 p-1 w-fit" colSpan={2}></td>
+                              <td hidden></td>
+                              <td className="border-2 p-1 w-fit">{formatter.format(item.attributes.sub_total)}</td>
+                            </tr>
+                          ))}
+                          <tr>
+                            <td hidden></td>
+                            <td hidden></td>
+                            <td hidden></td>
+                            <td hidden></td>
+                            <td hidden></td>
+                            <td className="border-2 p-1 text-right mr-2 w-fit" colspan="6">
+                              Subtotal :{" "}
+                            </td>
+                            <td className="border-2 p-1 w-fit">
+                              {formatter.format(
+                                element.attributes.retur_details.data.reduce(
+                                  (total, row) => (total += row.attributes.sub_total),
+                                  0
+                                )
+                              )}
+                            </td>
+                          </tr>
+                        </tbody>
+                      );
+                    });
+                  })}
+                </table>
+              </div>
             ) : (
               <div hidden></div>
             )}
