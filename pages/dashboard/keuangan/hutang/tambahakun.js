@@ -16,7 +16,8 @@ import { useRouter } from "next/router";
 const Tambah = ({ props }) => {
   const [form] = Form.useForm();
   const user = props.user;
-  const coa = props.coa?.data; console.log(coa, "coa");
+  const coa = props.coa?.data;
+  console.log(coa, "coa");
   const [loading, setLoading] = useState(false);
   const [selectLocations, setSelectLocation] = useState({});
   const { TextArea } = Input;
@@ -38,7 +39,7 @@ const Tambah = ({ props }) => {
     setLoading(true);
     values.setting = false;
     values.chart_of_account = values.akun;
-    var data = { data: values};
+    var data = { data: values };
 
     const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts";
     const JSONdata = JSON.stringify(data);
@@ -66,16 +67,15 @@ const Tambah = ({ props }) => {
     } else {
       //res.error?.details.errors.map((error) => {
       //  const ErrorMsg = error.path[0];
-        toast.error("Tidak dapat menambahkan Akun Hutang", {
-          position: toast.POSITION.TOP_RIGHT,
-        });
-        openNotificationWithIcon(
-            "error",
-            "Tidak dapat menambah data",
-            "Akun hutang tidak berhasil ditambahkan. Silahkan cek kembali akun hutang"
-        );
+      toast.error("Tidak dapat menambahkan Akun Hutang", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
+      openNotificationWithIcon(
+        "error",
+        "Tidak dapat menambah data",
+        "Akun hutang tidak berhasil ditambahkan. Silahkan cek kembali akun hutang"
+      );
       //});
-
     }
 
     setLoading(false);
@@ -83,8 +83,8 @@ const Tambah = ({ props }) => {
 
   const openNotificationWithIcon = (type, title, message) => {
     notification[type]({
-        message: title,
-        description: message,
+      message: title,
+      description: message,
     });
   };
 
@@ -136,12 +136,7 @@ const Tambah = ({ props }) => {
                   >
                     <Input
                       style={{ height: "50px" }}
-                      prefix={
-                        <ShopOutlined
-                          style={{ fontSize: "150%" }}
-                          className="site-form-item-icon mr-5"
-                        />
-                      }
+                      prefix={<ShopOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
                       placeholder="Kode Akun"
                     />
                   </Form.Item>
@@ -158,17 +153,11 @@ const Tambah = ({ props }) => {
                   >
                     <Input
                       style={{ height: "50px" }}
-                      prefix={
-                        <UserOutlined
-                          style={{ fontSize: "150%" }}
-                          className="site-form-item-icon mr-5"
-                        />
-                      }
+                      prefix={<UserOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
                       placeholder="Nama Akun"
                     />
                   </Form.Item>
                 </div>
-
               </div>
 
               <div className="flex flex-wrap -mx-3 mb-2">
@@ -191,9 +180,9 @@ const Tambah = ({ props }) => {
 
                 <Form.Item name="chart_of_account" className="w-1/4 mb-5 ml-5">
                   {selectedType === "Master" ? (
-                    <Coa page="piutang" onChange={setAkunCOA} selectedAkun={akunCOA}/>
+                    <Coa page="piutang" onChange={setAkunCOA} selectedAkun={akunCOA} />
                   ) : (
-                    <Coa page="hutang" onChange={setAkunCOA} selectedAkun={akunCOA}/>
+                    <Coa onChange={setAkunCOA} selectedAkun={akunCOA} />
                   )}
                 </Form.Item>
               </div>
@@ -210,10 +199,7 @@ const Tambah = ({ props }) => {
                     <Spin />
                   </div>
                 ) : (
-                  <Button
-                    htmlType="submit"
-                    className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1"
-                  >
+                  <Button htmlType="submit" className=" hover:text-white hover:bg-cyan-700 border border-cyan-700 ml-1">
                     Submit
                   </Button>
                 )}
@@ -244,38 +230,38 @@ Tambah.getInitialProps = async (context) => {
       data,
       user,
       akun,
-      coa
+      coa,
       //locations: resLocations,
     },
   };
 };
 
 const fetchData = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=*";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/users/me?populate=*";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
 
-    const req = await fetch(endpoint, options);
-    return req;
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
 const fetchAkun = async (cookies) => {
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=*";
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + cookies.token,
-        },
-    };
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/debt-accounts?populate=*";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
 
-    const req = await fetch(endpoint, options);
-    return req;
+  const req = await fetch(endpoint, options);
+  return req;
 };
 
 const fetchCOA = async (cookies) => {
