@@ -215,7 +215,7 @@ Print.getInitialProps = async (context) => {
   const id = context.query.id;
 
   const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/non-panel-sales/" + id + "?populate=*,non_panel_sale_details.product";
+    process.env.NEXT_PUBLIC_URL + "/non-panel-sales/" + id + "?populate=*,non_panel_sale_details.product,customer";
   const options = {
     method: "GET",
     headers: {

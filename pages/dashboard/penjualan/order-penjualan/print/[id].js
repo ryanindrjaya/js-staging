@@ -7,7 +7,8 @@ CetakPesananSales.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sells/" + id + "?populate=*,sales_sell_details.product";
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL + "/sales-sells/" + id + "?populate=*,sales_sell_details.product,customer";
   const options = {
     method: "GET",
     headers: {
