@@ -466,6 +466,11 @@ function EditPesananSales({ props }) {
             relation_id: element?.id,
           });
 
+          setLokasiGudang((prev) => ({
+            ...prev,
+            [index]: element.attributes?.inventory,
+          }));
+
           getStockData(product?.id, unit, index);
 
           if (index === details.length - 1) {

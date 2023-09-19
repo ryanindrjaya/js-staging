@@ -749,6 +749,11 @@ function Toko({ props }) {
             },
           });
 
+          setLokasiGudang((prev) => ({
+            ...prev,
+            [index]: element.attributes?.inventory,
+          }));
+
           getStockData(product?.id, unitIndex, index);
 
           dispatch({
