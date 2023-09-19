@@ -99,7 +99,7 @@ const fetchUser = async (cookies) => {
 };
 
 function ReturSales({ props }) {
-  const products = useSelector((state) => state.Order);
+  const products = useSelector((state) => state.Sales);
   const dispatch = useDispatch();
 
   var selectedProduct = products?.productList;
