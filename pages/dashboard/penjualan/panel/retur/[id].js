@@ -758,6 +758,7 @@ function ReturPanel({ props }) {
                 <div className="w-full md:w-1/3 px-3 mt-5 ">
                   <Form.Item name="disc_type">
                     <Select
+                      disabled
                       onChange={setDiscType}
                       placeholder="Pilih Jenis Diskon"
                       size="large"
@@ -777,6 +778,7 @@ function ReturPanel({ props }) {
                 <div className="w-full md:w-1/6 px-3 mt-5 ">
                   <Form.Item name="disc_value" noStyle>
                     <InputNumber
+                      disabled
                       onChange={setTotalWithDisc}
                       size="large"
                       min={0}
@@ -784,32 +786,6 @@ function ReturPanel({ props }) {
                       style={{ width: "100%" }}
                     />
                   </Form.Item>
-                </div>
-                <div className="w-full md:w-1/6 px-3 mt-5 ">
-                  {btnDisc === "Uninclude" ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTotalWithDisc();
-                        setBtnDisc("Include");
-                      }}
-                      className="bg-cyan-700 rounded-md m-1 text-sm"
-                    >
-                      <p className="px-4 py-2 m-0 text-white">INC. RETUR</p>
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTotalWithDisc();
-                        setBtnDisc("Uninclude");
-                        Uninclude();
-                      }}
-                      className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm"
-                    >
-                      <p className="px-4 py-2 m-0 text-cyan">INC. RETUR</p>
-                    </button>
-                  )}
                 </div>
               </div>
 
@@ -862,9 +838,6 @@ function ReturPanel({ props }) {
                   <Form.Item name="grandtotal" value={totalPrice} className="w-full h-2 md:w-1/2 mx-2">
                     <span> Total </span> <span>: {formatter.format(totalPrice)}</span>
                   </Form.Item>
-                  <Form.Item name="biayaTambahan" value={biayaTambahan} className="w-full h-2 md:w-1/2 mx-2">
-                    <span> Biaya Tambahan </span> <span>: {formatter.format(biayaTambahan)}</span>
-                  </Form.Item>
                   <Form.Item name="grandTotal" value={grandTotal} className="w-full h-2 md:w-1/2 mx-2 mt-3 text-lg">
                     <span> Total </span> <span>: {formatter.format(grandTotal)}</span>
                   </Form.Item>
@@ -882,159 +855,6 @@ function ReturPanel({ props }) {
                     <span> Sisa </span>{" "}
                     <span>: {formatter.format(returPaymentRemains)}</span>
                   </Form.Item> */}
-                </div>
-              </div>
-
-              <div className="w-full flex md:w-3/4 justify-end mb-2">
-                <p className="mb-4 font-bold text-center">Biaya Tambahan Lain Lain</p>
-              </div>
-              <div className="w-full flex flex-wrap justify-end mb-3">
-                <div className="w-full md:w-1/3 px-3 mb-2 text-end md:mb-0 mt-2">
-                  <p className="mb-4 font-bold ">Keterangan</p>
-                  <Form.Item>
-                    <p>{addFee1Desc}</p>
-                  </Form.Item>
-                  <Form.Item>
-                    <p>{addFee2Desc}</p>
-                  </Form.Item>
-                  <Form.Item>
-                    <p>{addFee3Desc}</p>
-                  </Form.Item>
-                </div>
-
-                <div className="w-full md:w-1/3 px-3 mb-2 text-center md:mb-0">
-                  <p className="mb-4 font-bold">Jumlah</p>
-                  <Form.Item name="additional_fee_1_sub">
-                    <InputNumber
-                      size="large"
-                      style={{ width: "100%" }}
-                      onChange={(e) =>
-                        setAdditionalFee({
-                          ...additionalFee,
-                          additional_fee_1_sub: e,
-                        })
-                      }
-                    />
-                  </Form.Item>
-                  <Form.Item name="additional_fee_2_sub">
-                    <InputNumber
-                      size="large"
-                      style={{ width: "100%" }}
-                      onChange={(e) =>
-                        setAdditionalFee({
-                          ...additionalFee,
-                          additional_fee_2_sub: e,
-                        })
-                      }
-                    />
-                  </Form.Item>
-                  <Form.Item name="additional_fee_3_sub">
-                    <InputNumber
-                      size="large"
-                      style={{ width: "100%" }}
-                      onChange={(e) =>
-                        setAdditionalFee({
-                          ...additionalFee,
-                          additional_fee_3_sub: e,
-                        })
-                      }
-                    />
-                  </Form.Item>
-                </div>
-                <div className="w-full md:w-1/6 px-1 mb-2 text-center md:mb-0 mt-10">
-                  <Form.Item>
-                    {btnAddFee1 === "Uninclude" ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setBtnAddFee1("Include");
-                          setAdditionalFee({
-                            ...additionalFee,
-                            additional_fee_1_sub: panel.data.attributes?.additional_fee_1_sub,
-                          });
-                        }}
-                        className="bg-cyan-700 rounded-md m-1 text-sm"
-                      >
-                        <p className="px-4 py-2 m-0 text-white">INC. RETUR</p>
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setBtnAddFee1("Uninclude");
-                          setAdditionalFee({
-                            ...additionalFee,
-                            additional_fee_1_sub: 0,
-                          });
-                        }}
-                        className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm"
-                      >
-                        <p className="px-4 py-2 m-0 text-cyan">INC. RETUR</p>
-                      </button>
-                    )}
-                  </Form.Item>
-                  <Form.Item>
-                    {btnAddFee2 === "Uninclude" ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setBtnAddFee2("Include");
-                          setAdditionalFee({
-                            ...additionalFee,
-                            additional_fee_2_sub: panel.data.attributes?.additional_fee_2_sub,
-                          });
-                        }}
-                        className="bg-cyan-700 rounded-md m-1 text-sm"
-                      >
-                        <p className="px-4 py-2 m-0 text-white">INC. RETUR</p>
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setBtnAddFee2("Uninclude");
-                          setAdditionalFee({
-                            ...additionalFee,
-                            additional_fee_2_sub: 0,
-                          });
-                        }}
-                        className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm"
-                      >
-                        <p className="px-4 py-2 m-0 text-cyan">INC. RETUR</p>
-                      </button>
-                    )}
-                  </Form.Item>
-                  <Form.Item>
-                    {btnAddFee3 === "Uninclude" ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setBtnAddFee3("Include");
-                          setAdditionalFee({
-                            ...additionalFee,
-                            additional_fee_3_sub: panel.data.attributes?.additional_fee_3_sub,
-                          });
-                        }}
-                        className="bg-cyan-700 rounded-md m-1 text-sm"
-                      >
-                        <p className="px-4 py-2 m-0 text-white">INC. RETUR</p>
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setBtnAddFee3("Uninclude");
-                          setAdditionalFee({
-                            ...additionalFee,
-                            additional_fee_3_sub: 0,
-                          });
-                        }}
-                        className="bg-white-700 rounded-md border border-cyan-700 m-1 text-sm"
-                      >
-                        <p className="px-4 py-2 m-0 text-cyan">INC. RETUR</p>
-                      </button>
-                    )}
-                  </Form.Item>
                 </div>
               </div>
 

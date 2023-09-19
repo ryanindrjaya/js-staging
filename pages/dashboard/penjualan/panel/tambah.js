@@ -874,7 +874,7 @@ function Toko({ props }) {
                 <div className="w-full md:w-1/3 px-3 mt-5 ">
                   <Form.Item name="disc_type">
                     <Select
-                      //disabled={products.productList.length === 0}
+                      disabled
                       onChange={setDiscType}
                       placeholder="Pilih Jenis Diskon"
                       size="large"
@@ -894,7 +894,7 @@ function Toko({ props }) {
                 <div className="w-full md:w-1/3 px-3 mt-5 ">
                   <Form.Item name="disc_value" noStyle>
                     <InputNumber
-                      //disabled={products.productList.length === 0}
+                      disabled
                       onChange={setTotalWithDisc}
                       size="large"
                       min={0}

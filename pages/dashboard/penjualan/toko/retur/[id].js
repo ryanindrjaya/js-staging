@@ -1046,7 +1046,7 @@ function ReturToko({ props }) {
                     </button>
                   )}
                 </Form.Item>
-                <Form.Item>
+                {/* <Form.Item>
                   {loading ? (
                     <div className=" flex float-left ml-3 ">
                       <Spin />
@@ -1060,7 +1060,7 @@ function ReturToko({ props }) {
                       <p className="px-4 py-2 m-0 text-white">SIMPAN JADIKAN HUTANG</p>
                     </button>
                   )}
-                </Form.Item>
+                </Form.Item> */}
               </div>
             </Form>
           </LayoutContent>

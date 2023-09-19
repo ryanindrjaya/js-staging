@@ -1014,7 +1014,7 @@ function Toko({ props }) {
                   <span> Total </span> <span className="text-end">: {formatter.format(totalPrice)}</span>
                   <span> Biaya Pengiriman </span>{" "}
                   <span className="text-end">: {formatter.format(biayaPengiriman)}</span>
-                  <span> Biaya Tambahan </span> <span className="text-end">: {formatter.format(biayaTambahan)}</span>
+                  {/* <span> Biaya Tambahan </span> <span className="text-end">: {formatter.format(biayaTambahan)}</span> */}
                   <span className="text-lg font-bold"> Total </span>{" "}
                   <span className="text-end text-lg font-bold">{formatter.format(grandTotal)}</span>
                 </div>
@@ -1024,7 +1024,7 @@ function Toko({ props }) {
                 <div className="w-full md:w-1/3 px-3 mt-5 ">
                   <Form.Item name="disc_type">
                     <Select
-                      //disabled={products.productList.length === 0}
+                      disabled
                       onChange={setDiscType}
                       placeholder="Pilih Jenis Diskon"
                       size="large"
@@ -1044,7 +1044,7 @@ function Toko({ props }) {
                 <div className="w-full md:w-1/3 px-3 mt-5 ">
                   <Form.Item name="disc_value" noStyle>
                     <InputNumber
-                      //disabled={products.productList.length === 0}
+                      disabled
                       onChange={setTotalWithDisc}
                       size="large"
                       min={0}
