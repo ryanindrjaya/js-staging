@@ -406,7 +406,7 @@ export default function SalesTable({
       name: "D2",
       width: "100px",
       selector: (row, idx) => {
-        defaultDp2 = 0;
+        defaultDp2 = products?.productInfo?.[idx]?.d2 || 0;
 
         return (
           <div className="disabled:bg-white">
@@ -415,7 +415,7 @@ export default function SalesTable({
               formatter={(value) => `${value}%`}
               max={100}
               min={0}
-              value={defaultDp2}
+              defaultValue={defaultDp2}
               name={["disc_rp2", `${idx}`]}
               onChange={(e) => onChangeD1D2D3(e, row, "d2", idx)}
               style={{

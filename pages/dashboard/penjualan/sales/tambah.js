@@ -141,9 +141,11 @@ async function getStock(productId, unit) {
 }
 
 const fetchStoreAccounts = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?populate=*"+
-  "&filters[type][$eq]=ONGKIR&filters[setting][$eq]=true"+
-  "&filters[penjualan][$eq]=SALES";
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL +
+    "/store-accounts?populate=*" +
+    "&filters[type][$eq]=ONGKIR&filters[setting][$eq]=true" +
+    "&filters[penjualan][$eq]=SALES";
   const options = {
     method: "GET",
     headers: {
@@ -310,10 +312,10 @@ function Toko({ props }) {
         return;
       } else {
         /* 
-      TODO:
-      * 1. Create Detail Penjualan Sales
-      * 2. Create Penjualan Sales
-      */
+        TODO:
+        * 1. Create Detail Penjualan Sales
+        * 2. Create Penjualan Sales
+        */
 
         console.log("data values", values);
 
@@ -665,12 +667,12 @@ function Toko({ props }) {
   }, [customer]);
 
   useEffect(() => {
-    if(akunCOAONGKIR){
+    if (akunCOAONGKIR) {
       form.setFieldsValue({
         akunCOA: {
           label: `${akunCOAONGKIR?.attributes?.nama}`,
           value: akunCOAONGKIR?.id,
-        }
+        },
       });
     }
   }, [akunCOAONGKIR]);
@@ -717,7 +719,7 @@ function Toko({ props }) {
     setProductSubTotal({});
     setDPPActive("DPP");
 
-    if (storeAccounts.data.length > 0){
+    if (storeAccounts.data.length > 0) {
       storeAccounts.data.map((item) => {
         if (item.attributes.type === "ONGKIR") {
           setAkunCOAONGKIR(item.attributes.chart_of_account.data);
@@ -1021,7 +1023,7 @@ function Toko({ props }) {
 
               <div className="w-full flex flex-wrap -mx-3 mb-4">
                 <div className="w-full md:w-1/3 px-3">
-                  <CoaSale onChange={setAkunCOAONGKIR} selectedAkun={akunCOAONGKIR} disabled/>
+                  <CoaSale onChange={setAkunCOAONGKIR} selectedAkun={akunCOAONGKIR} disabled />
                 </div>
                 <div className="w-full md:w-1/3 px-3">
                   <Form.Item noStyle>

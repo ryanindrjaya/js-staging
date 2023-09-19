@@ -5,6 +5,8 @@ import LayoutWrapper from "@iso/components/utility/layoutWrapper.js";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
+
 import { Form, Input, InputNumber, Select, Spin, notification, message } from "antd";
 import TitlePage from "@iso/components/TitlePage/TitlePage";
 import SearchBar from "@iso/components/Form/AddOrder/SearchBar";
@@ -16,6 +18,7 @@ import LoadingAnimations from "@iso/components/Animations/Loading";
 import SalesTable from "@iso/components/ReactDataTable/Selling/SalesTable";
 import SearchOrder from "@iso/components/Form/AddSale/SearchPO";
 import CoaSale from "@iso/components/Form/AddSale/SearchCOA";
+import confirm from "antd/lib/modal/confirm";
 
 Toko.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
@@ -133,9 +136,11 @@ const fetchSalesSell = async (cookies) => {
 };
 
 const fetchStoreAccounts = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/store-accounts?populate=*"+
-  "&filters[type][$eq]=ONGKIR&filters[setting][$eq]=true"+
-  "&filters[penjualan][$eq]=SALES";
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL +
+    "/store-accounts?populate=*" +
+    "&filters[type][$eq]=ONGKIR&filters[setting][$eq]=true" +
+    "&filters[penjualan][$eq]=SALES";
   const options = {
     method: "GET",
     headers: {
@@ -291,90 +296,117 @@ function Toko({ props }) {
 
   console.log("product redux", products);
 
-  const onFinish = async (values) => {
-    setLoading(true);
-    try {
-      /* 
+  const onFinish = async (values, accept) => {
+    if (accept) {
+      const stokAda = Object.values(dataLocationStock).every((stock) => stock);
+
+      if (!stokAda) {
+        notification["error"]({
+          message: "Stok tidak cukup",
+          description: "Stok di gudang tidak mencukupi untuk melakukan penjualan",
+        });
+        return;
+      }
+      setLoading(true);
+      try {
+        /* 
       TODO:
       * 1. Update Detail Penjualan Sales
       * 2. Update Penjualan Sales
       */
 
-      console.log("data values", values);
+        console.log("data values", values);
 
-      // master Penjualan Sales
-      values.customer = customer.id;
-      values.customer_name = customer.attributes?.name;
-      values.sales_sell = preorderData?.id;
-      values.dpp = dpp;
-      values.ppn = ppn;
-      values.total = grandTotal;
+        // master Penjualan Sales
+        values.customer = customer.id;
+        values.customer_name = customer.attributes?.name;
+        values.sales_sell = preorderData?.id;
+        values.dpp = dpp;
+        values.ppn = ppn;
+        values.total = grandTotal;
 
-      const sanitizedValues = cleanData(values);
+        const sanitizedValues = cleanData(values);
 
-      const editedProduct = products.productInfo;
-      const details = products.productList?.map(({ attributes, id }, idx) => ({
-        qty: editedProduct?.[idx]?.qty || 1,
-        unit: editedProduct?.[idx]?.unit || attributes?.unit_1,
-        unit_price: editedProduct?.[idx]?.priceUnit || attributes?.sold_price_1,
-        disc: editedProduct?.[idx]?.disc || 0,
-        disc1: editedProduct?.[idx]?.d1 || attributes?.disc_1_1,
-        disc2: editedProduct?.[idx]?.d2 || 0,
-        expired_date: values?.expired_date?.[idx]?.format("YYYY-MM-DD") || null,
-        product: id,
-        relation_id: editedProduct?.[idx]?.relation_id,
-        margin: editedProduct?.[idx]?.margin || 0,
-        sub_total: productSubTotal?.[idx],
-        inventory: lokasiGudang?.[idx],
-      }));
+        const editedProduct = products.productInfo;
+        const details = products.productList?.map(({ attributes, id }, idx) => ({
+          qty: editedProduct?.[idx]?.qty || 1,
+          unit: editedProduct?.[idx]?.unit || attributes?.unit_1,
+          unit_price: editedProduct?.[idx]?.priceUnit || attributes?.sold_price_1,
+          disc: editedProduct?.[idx]?.disc || 0,
+          disc1: editedProduct?.[idx]?.d1 || attributes?.disc_1_1,
+          disc2: editedProduct?.[idx]?.d2 || 0,
+          expired_date: values?.expired_date?.[idx]?.format("YYYY-MM-DD") || null,
+          product: id,
+          relation_id: editedProduct?.[idx]?.relation_id,
+          margin: editedProduct?.[idx]?.margin || 0,
+          sub_total: productSubTotal?.[idx],
+          inventory: lokasiGudang?.[idx],
+        }));
 
-      console.log("details", details);
+        console.log("details", details);
 
-      let detailsId = [];
+        let detailsId = [];
 
-      for (let item in details) {
-        const detail = details[item];
-        const id = detail.relation_id;
-        const postDetail = cleanData(detail);
-        console.log("post detail", postDetail);
-        if (id) {
-          const res = await updateDetailData(postDetail, id);
-          console.log("response update detail ==>", res);
-          detailsId.push(res?.data?.id);
-        } else {
-          const res = await createDetailData(postDetail);
-          console.log("response create detail ==>", res);
-          detailsId.push(res?.data?.id);
+        for (let item in details) {
+          const detail = details[item];
+          const id = detail.relation_id;
+          const postDetail = cleanData(detail);
+          console.log("post detail", postDetail);
+          if (id) {
+            const res = await updateDetailData(postDetail, id);
+            console.log("response update detail ==>", res);
+            detailsId.push(res?.data?.id);
+          } else {
+            const res = await createDetailData(postDetail);
+            console.log("response create detail ==>", res);
+            detailsId.push(res?.data?.id);
+          }
         }
-      }
 
-      sanitizedValues.sales_sale_details = detailsId;
+        sanitizedValues.sales_sale_details = detailsId;
 
-      // update master PO
-      const res = await createMasterData(sanitizedValues);
-      console.log("response create master ==>", res);
+        // update master PO
+        const res = await createMasterData(sanitizedValues);
+        console.log("response create master ==>", res);
 
-      if (res?.data?.id) {
-        notification.success({
-          message: "Berhasil mengubah data",
-          description: "Data Penjualan Sales berhasil diubah. Silahkan cek pada halaman Penjualan Sales",
-        });
-        router.replace("/dashboard/penjualan/sales");
-      } else {
+        if (res?.data?.id) {
+          notification.success({
+            message: "Berhasil mengubah data",
+            description: "Data Penjualan Sales berhasil diubah. Silahkan cek pada halaman Penjualan Sales",
+          });
+          router.replace("/dashboard/penjualan/sales");
+        } else {
+          notification.error({
+            message: "Gagal mengubah data",
+            description: "Data Penjualan Sales gagal diubah. Silahkan cek data anda dan coba lagi",
+          });
+        }
+
+        setLoading(false);
+      } catch (error) {
+        console.log(error);
         notification.error({
-          message: "Gagal mengubah data",
-          description: "Data Penjualan Sales gagal diubah. Silahkan cek data anda dan coba lagi",
+          message: "Gagal menambahkan data",
+          description: "Data Penjualan Sales gagal dibuat. Silahkan cek data anda dan coba lagi",
         });
+        setLoading(false);
       }
-
-      setLoading(false);
-    } catch (error) {
-      console.log(error);
-      notification.error({
-        message: "Gagal menambahkan data",
-        description: "Data Penjualan Sales gagal dibuat. Silahkan cek data anda dan coba lagi",
+    } else {
+      confirm({
+        title: "Apakah anda yakin?",
+        icon: <ExclamationCircleOutlined />,
+        content: "Harap periksa kembali data yang telah diinput.",
+        okText: "Ya",
+        okType: "danger",
+        cancelText: "Tidak",
+        centered: true,
+        onOk() {
+          onFinish(values, true);
+        },
+        onCancel() {
+          console.log("Cancel");
+        },
       });
-      setLoading(false);
     }
   };
 
@@ -591,12 +623,12 @@ function Toko({ props }) {
   }, [discType]);
 
   useEffect(() => {
-    if(akunCOAONGKIR){
+    if (akunCOAONGKIR) {
       form.setFieldsValue({
         akunCOA: {
           label: `${akunCOAONGKIR?.attributes?.nama}`,
           value: akunCOAONGKIR?.id,
-        }
+        },
       });
     }
   }, [akunCOAONGKIR]);
@@ -692,6 +724,12 @@ function Toko({ props }) {
             margin: {
               [index]: element.attributes?.margin,
             },
+            disc_rp: {
+              [index]: element.attributes?.disc,
+            },
+            disc_rp2: {
+              [index]: element.attributes?.disc2,
+            },
             jumlah_qty: {
               [index]: element.attributes?.qty,
             },
@@ -730,8 +768,7 @@ function Toko({ props }) {
       router.replace("/dashboard/penjualan/sales");
     }
 
-    if (storeAccounts.data.length > 0){
-
+    if (storeAccounts.data.length > 0) {
       storeAccounts.data.map((item) => {
         if (item.attributes.type === "ONGKIR") {
           setAkunCOAONGKIR(item.attributes.chart_of_account.data);
@@ -903,7 +940,7 @@ function Toko({ props }) {
               initialValues={{
                 remember: true,
               }}
-              onFinish={onFinish}
+              onFinish={(values) => onFinish(values, false)}
               onFinishFailed={validateError}
             >
               <div className="w-full flex flex-wrap justify-start -mx-3 mb-6 mt-5">
@@ -1063,7 +1100,7 @@ function Toko({ props }) {
 
               <div className="w-full flex flex-wrap -mx-3 mb-4">
                 <div className="w-full md:w-1/3 px-3">
-                  <CoaSale onChange={setAkunCOAONGKIR} selectedAkun={akunCOAONGKIR} disabled/>
+                  <CoaSale onChange={setAkunCOAONGKIR} selectedAkun={akunCOAONGKIR} disabled />
                 </div>
                 <div className="w-full md:w-1/3 px-3">
                   <Form.Item noStyle>

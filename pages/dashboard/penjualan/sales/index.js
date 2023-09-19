@@ -323,11 +323,6 @@ function SalesSale({ props }) {
       ),
     },
     {
-      name: "EXP Date",
-      width: "120px",
-      selector: ({ attributes }) => moment(attributes?.expired_date).format("DD/MM/YYYY"),
-    },
-    {
       name: "Jumlah",
       selector: ({ attributes }) => attributes?.qty || "",
     },

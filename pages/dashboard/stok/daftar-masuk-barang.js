@@ -913,6 +913,14 @@ export default function daftarKeluarBarang({ companyOptions }) {
                       noDataComponent={`--Tidak ada data--`}
                     />
 
+                    <p className="font-bold mt-4 mb-0 mx-0">Catatan: </p>
+                    <Input.TextArea
+                      readOnly
+                      value={master?.data?.[0]?.description}
+                      className="w-full mt-2 mb-3"
+                      placeholder="Catatan"
+                    />
+
                     {statusFilter !== "Selesai" && statusFilter !== "Dibatalkan" ? (
                       <div className="mt-4 flex gap-x-4">
                         <Popconfirm
