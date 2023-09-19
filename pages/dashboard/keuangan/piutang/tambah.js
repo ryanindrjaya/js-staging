@@ -258,6 +258,8 @@ function Piutang({ props }) {
   const [sisaHutang, setSisaHutang] = useState([]);
   const [sisaHutangTotal, setSisaHutangTotal] = useState({});
 
+  const [tempDataTabel, setTempDataTabel] = useState(dataTabel);
+
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   //const [additionalFee, setAdditionalFee] = useState();
@@ -742,7 +744,7 @@ function Piutang({ props }) {
       }
     });
 
-    dataTabel.forEach((element, index) => {
+    dataTabel.forEach((element, index) => { console.log("element", element);
       element.subtotal = 0;
       element.sisaHutang = 0;
       element.dibayar = 0;
@@ -817,6 +819,19 @@ function Piutang({ props }) {
           element.sisaHutang = parseInt(element.attributes.total) - parseInt(element.subtotal);
         }
       });
+
+      const handleDelete = (index) => {
+        setTempDataTabel((prevArray) => {
+          const newArray = prevArray.splice(index, 1);
+          return newArray;
+        });
+      };
+
+      dataTabel.forEach((element, index) => { 
+        if(element.subtotal === element.sisaPiutang) handleDelete(index);
+      });
+      console.log("tempDataTabel", tempDataTabel);
+      console.log("tempDataTabel2", dataTabel);
 
       dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: element, index: index });
       dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
