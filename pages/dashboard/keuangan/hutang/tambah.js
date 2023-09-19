@@ -309,7 +309,7 @@ function Hutang({ props }) {
     values.supplier = supplier;
     values.document = document;
     values.tanggal_pembayaran = tanggal;
-    values.status_pembayaran = "Dibayar";
+    values.status_pembayaran = "Belum Dibayar";
     await createData(
       sisaHutang,
       values,
