@@ -31,6 +31,9 @@ PesananSales.getInitialProps = async (context) => {
   const reqSale = await fetchSale(cookies);
   const sale = await reqSale.json();
 
+  const reqSales = await fetchSalesSale(cookies);
+  const sales = await reqSales.json();
+
   const reqCustomer = await fetchCustomer(cookies);
   const customer = await reqCustomer.json();
 
@@ -40,6 +43,7 @@ PesananSales.getInitialProps = async (context) => {
       inven,
       sale,
       customer,
+      sales_sale: sales,
     },
   };
 };
@@ -60,6 +64,20 @@ const fetchData = async (cookies) => {
 
 const fetchSale = async (cookies) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sells?populate=*";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchSalesSale = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?populate=customer";
   const options = {
     method: "GET",
     headers: {
@@ -108,6 +126,7 @@ function PesananSales({ props }) {
   const user = props.user;
   const inven = props.inven.data;
   const sale = props.sale;
+  const penjualanSales = props.sales_sale;
   const customerData = props.customer.data[0];
 
   const [form] = Form.useForm();
@@ -115,6 +134,7 @@ function PesananSales({ props }) {
   const [productList, setProductList] = useState([]);
   //const [additionalFee, setAdditionalFee] = useState();
   const [isFetchinData, setIsFetchingData] = useState(false);
+  const [limitCredit, setLimitCredit] = useState(0);
 
   const [dataValues, setDataValues] = useState();
   //const [selectedCategory, setSelectedCategory] = useState("BEBAS");
@@ -169,6 +189,16 @@ function PesananSales({ props }) {
 
   const onFinish = (values, accept) => {
     if (accept) {
+      const creditEnough = limitCredit >= totalPrice;
+
+      if (!creditEnough) {
+        notification["error"]({
+          message: "Limit kredit tidak cukup",
+          description: "Limit kredit tidak cukup untuk melakukan transaksi ini",
+        });
+        return;
+      }
+
       setLoading(true);
       setInfo("sukses");
       sale.data.forEach((element) => {
@@ -297,7 +327,20 @@ function PesananSales({ props }) {
   }, [dataValues]);
 
   useEffect(() => {
+    // set limit credit value
     if (customer) {
+      let totalBelumDibayar = 0;
+      penjualanSales.data.forEach((element) => {
+        if (customer.id == element.attributes.customer?.data?.id && element.attributes.status_pembayaran !== "Lunas") {
+          totalBelumDibayar += element.attributes.total;
+        }
+      });
+
+      setLimitCredit(customer?.attributes?.credit_limit - totalBelumDibayar);
+      form.setFieldsValue({
+        limitCredit: formatter.format(customer?.attributes?.credit_limit - totalBelumDibayar),
+      });
+
       var tempoDays = customer?.attributes?.credit_limit_duration;
       form.setFieldsValue({
         tempo_days: tempoDays.toString(),
@@ -518,6 +561,19 @@ function PesananSales({ props }) {
                         Bulan
                       </Select.Option>
                     </Select>
+                  </Form.Item>
+                </div>
+                <div className="w-full md:w-1/4 px-3 mb-2">
+                  <Form.Item name="limitCredit" noStyle>
+                    <Input
+                      size="large"
+                      style={{
+                        width: "100%",
+                      }}
+                      suffix="Limit Kredit"
+                      disabled
+                      defaultValue={formatter.format(limitCredit)}
+                    />
                   </Form.Item>
                 </div>
               </div>

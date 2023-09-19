@@ -68,7 +68,7 @@ const fetchData = async (cookies) => {
 };
 
 const fetchSalesSale = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?populate=*";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?populate=customer";
   const options = {
     method: "GET",
     headers: {
@@ -174,6 +174,7 @@ function Toko({ props }) {
   const [productList, setProductList] = useState([]);
   const [additionalFee, setAdditionalFee] = useState();
   const [isFetchinData, setIsFetchingData] = useState(false);
+  const [limitCredit, setLimitCredit] = useState(0);
 
   const [dataValues, setDataValues] = useState();
   const [selectedCategory, setSelectedCategory] = useState("BEBAS");
@@ -223,8 +224,6 @@ function Toko({ props }) {
   const [customer, setCustomer] = useState();
 
   // NO Sales Sale
-  var noSalesSale = String(salesSale?.meta?.pagination.total + 1).padStart(3, "0");
-
   //Akun COA
   const [akunCOAONGKIR, setAkunCOAONGKIR] = useState();
 
@@ -291,11 +290,20 @@ function Toko({ props }) {
   const onFinish = async (values, accept) => {
     if (accept) {
       const stokAda = Object.values(dataLocationStock).every((stock) => stock);
+      const creditEnough = limitCredit >= grandTotal;
 
       if (!stokAda) {
         notification["error"]({
           message: "Stok tidak cukup",
           description: "Stok di gudang tidak mencukupi untuk melakukan penjualan",
+        });
+        return;
+      }
+
+      if (!creditEnough) {
+        notification["error"]({
+          message: "Limit Kredit tidak cukup",
+          description: "Limit Kredit customer tidak mencukupi untuk melakukan penjualan",
         });
         return;
       }
@@ -658,6 +666,19 @@ function Toko({ props }) {
 
   useEffect(() => {
     if (customer) {
+      // set limit credit value
+      let totalBelumDibayar = 0;
+      salesSale.data.forEach((element) => {
+        if (customer.id == element.attributes.customer?.data?.id && element.attributes.status_pembayaran !== "Lunas") {
+          totalBelumDibayar += element.attributes.total;
+        }
+      });
+
+      setLimitCredit(customer?.attributes?.credit_limit - totalBelumDibayar);
+      form.setFieldsValue({
+        limitCredit: formatter.format(customer?.attributes?.credit_limit - totalBelumDibayar),
+      });
+
       var tempoDays = customer?.attributes?.credit_limit_duration;
       form.setFieldsValue({
         tempo_days: tempoDays.toString(),
@@ -925,6 +946,20 @@ function Toko({ props }) {
                         Bulan
                       </Select.Option>
                     </Select>
+                  </Form.Item>
+                </div>
+
+                <div className="w-full md:w-1/4 px-3 mb-2">
+                  <Form.Item name="limitCredit" noStyle>
+                    <Input
+                      size="large"
+                      style={{
+                        width: "100%",
+                      }}
+                      suffix="Limit Kredit"
+                      disabled
+                      defaultValue={formatter.format(limitCredit)}
+                    />
                   </Form.Item>
                 </div>
               </div>

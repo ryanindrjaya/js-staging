@@ -37,6 +37,9 @@ EditPesananSales.getInitialProps = async (context) => {
   const reqSale = await fetchSale(cookies);
   const sale = await reqSale.json();
 
+  const reqSales = await fetchSales(cookies);
+  const sales = await reqSales.json();
+
   const reqCustomer = await fetchCustomer(cookies);
   const customer = await reqCustomer.json();
 
@@ -47,6 +50,7 @@ EditPesananSales.getInitialProps = async (context) => {
       sale,
       customer,
       data: response?.data || {},
+      sales,
     },
   };
 };
@@ -67,6 +71,20 @@ const fetchData = async (cookies) => {
 
 const fetchSale = async (cookies) => {
   const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sells?populate=*";
+  const options = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + cookies.token,
+    },
+  };
+
+  const req = await fetch(endpoint, options);
+  return req;
+};
+
+const fetchSales = async (cookies) => {
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?populate[0]=customer&populate[1]=sales-sell";
   const options = {
     method: "GET",
     headers: {
@@ -115,6 +133,7 @@ function EditPesananSales({ props }) {
   const user = props.user;
   const inven = props.inven.data;
   const sale = props.sale;
+  const penjualanSales = props.sales;
   const initialValues = {
     ...props.data?.attributes,
   };
@@ -128,6 +147,7 @@ function EditPesananSales({ props }) {
   const [productList, setProductList] = useState([]);
   //const [additionalFee, setAdditionalFee] = useState();
   const [isFetchinData, setIsFetchingData] = useState(true);
+  const [limitCredit, setLimitCredit] = useState(0);
 
   const [dataValues, setDataValues] = useState();
   //const [selectedCategory, setSelectedCategory] = useState("BEBAS");
@@ -176,6 +196,35 @@ function EditPesananSales({ props }) {
     currency: "IDR",
     maximumFractionDigits: 2,
   });
+
+  useEffect(() => {
+    // set limit credit value
+    let totalBelumDibayar = 0;
+    const noPenjualan = form.getFieldValue("no_sales_sell");
+    if (customer) {
+      console.log("peenjualan sales", penjualanSales);
+      penjualanSales.data.forEach((element) => {
+        if (
+          customer.id == element.attributes.customer?.data?.id &&
+          element.attributes.status_pembayaran !== "Lunas" &&
+          element.attributes.sales_sell?.data?.attributes?.no_sales_sell !== noPenjualan
+        ) {
+          totalBelumDibayar += element.attributes.total;
+        }
+      });
+
+      setLimitCredit(customer?.attributes?.credit_limit - totalBelumDibayar);
+      form.setFieldsValue({
+        limitCredit: formatter.format(customer?.attributes?.credit_limit - totalBelumDibayar),
+      });
+
+      var tempoDays = customer?.attributes?.credit_limit_duration;
+      form.setFieldsValue({
+        tempo_days: tempoDays.toString(),
+        tempo_time: customer?.attributes?.credit_limit_duration_type,
+      });
+    }
+  }, [customer]);
 
   const updateDetailData = async (data, id) => {
     const endpoint = `${process.env.NEXT_PUBLIC_URL}/sales-sell-details/${id}`;
@@ -268,11 +317,8 @@ function EditPesananSales({ props }) {
     // assign detail id to master PO and assign new totalPrice
     sanitizedValues.sales_sell_details = detailsId;
 
-    console.log("sanitizedValues", sanitizedValues);
-
     // update master PO
     const res = await updateMasterData(sanitizedValues, masterId);
-    console.log("response update master ==>", res);
 
     if (res?.data?.id) {
       notification.success({
@@ -604,6 +650,19 @@ function EditPesananSales({ props }) {
                         Bulan
                       </Select.Option>
                     </Select>
+                  </Form.Item>
+                </div>
+                <div className="w-full md:w-1/4 px-3 mb-2">
+                  <Form.Item name="limitCredit" noStyle>
+                    <Input
+                      size="large"
+                      style={{
+                        width: "100%",
+                      }}
+                      suffix="Limit Kredit"
+                      disabled
+                      defaultValue={formatter.format(limitCredit)}
+                    />
                   </Form.Item>
                 </div>
               </div>

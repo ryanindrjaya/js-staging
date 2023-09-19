@@ -174,22 +174,23 @@ function Pembelian({ props }) {
 
   const onChangeStatus = async (status, row, id) => {
     row.attributes.status = status;
-    // const dataStatus = row;
-
-    if (status === "Diterima") {
-      // invetory handle
-      await createInventory(row, user);
-
-      await updateProductFromTable(row);
-
-      //jurnal handle and coa
-      updateJurnal(row, user, "lpb");
-    }
 
     const poData = row?.attributes?.purchase?.data;
-    const res = await changeStatusPO(poData?.id, status);
-    if (res.data) {
-      const editLPB = await changeStatusLPB(status, id);
+    // const dataStatus = row;
+
+    const poSukses = await changeStatusPO(poData?.id, status);
+    if (poSukses) {
+      const lpbSukses = await changeStatusLPB(status, id);
+
+      if (status === "Diterima" && lpbSukses) {
+        // invetory handle
+        createInventory(row, user);
+
+        updateProductFromTable(row);
+
+        //jurnal handle and coa
+        updateJurnal(row, user, "lpb");
+      }
     }
   };
 
@@ -214,22 +215,21 @@ function Pembelian({ props }) {
       };
 
       const req = await fetch(endpoint, options);
-      const res = await req.json();
-      if (req.status === 200) {
+      if (req.ok) {
         openNotificationWithIcon(
           "success",
           "Status PO berhasil dirubah",
           "Status PO berhasil dirubah. Silahkan cek tabel PO"
         );
+        return true;
       } else {
         openNotificationWithIcon(
           "error",
           "Status PO gagal dirubah",
           "Status PO gagal dirubah. Silahkan cek log untuk error detail"
         );
+        return false;
       }
-
-      return res;
     } catch (error) {
       console.log(error);
       openNotificationWithIcon(
@@ -264,29 +264,21 @@ function Pembelian({ props }) {
       };
 
       const req = await fetch(endpoint, options);
-      const res = await req.json();
 
-      if (req.status === 200) {
-        const response = await fetchData(cookies);
-
-        if (res.data.attributes.status === "Dibatalkan") {
-          router.reload();
-        } else {
-          setPurchase(response);
-        }
-
+      if (req.ok) {
         openNotificationWithIcon(
           "success",
           "Status LPB berhasil dirubah",
           "Status LPB berhasil dirubah. Silahkan cek LPB"
         );
+        return true;
       } else {
-        console.log("error", res);
         openNotificationWithIcon(
           "error",
           "Status LPB gagal dirubah",
           "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah"
         );
+        return false;
       }
     } catch (error) {
       console.log("error", error);
@@ -295,6 +287,7 @@ function Pembelian({ props }) {
         "Status LPB gagal dirubah",
         "Tedapat kesalahan yang menyebabkan status tidak dapat dirubah"
       );
+      return null;
     }
   };
 

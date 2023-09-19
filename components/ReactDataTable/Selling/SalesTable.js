@@ -324,6 +324,7 @@ export default function SalesTable({
           <Row align="bottom" justify="center">
             <Form.Item name={["margin", `${idx}`]} noStyle>
               <InputNumber
+                onFocus={(e) => e.target.select()}
                 defaultValue={defaultMargin}
                 formatter={(value) => `${value}%`}
                 min={0}
@@ -352,6 +353,7 @@ export default function SalesTable({
           <Row align="bottom" justify="center">
             <Form.Item name={["disc_rp", `${idx}`]} noStyle>
               <InputNumber
+                onFocus={(e) => e.target.select()}
                 defaultValue={defaultDisc}
                 min={0}
                 onChange={(e) => onChangeDisc(e, row, idx)}
@@ -411,11 +413,12 @@ export default function SalesTable({
         return (
           <div className="disabled:bg-white">
             <InputNumber
+              onFocus={(e) => e.target.select()}
               controls={false}
               formatter={(value) => `${value}%`}
               max={100}
               min={0}
-              defaultValue={defaultDp2}
+              value={defaultDp2}
               name={["disc_rp2", `${idx}`]}
               onChange={(e) => onChangeD1D2D3(e, row, "d2", idx)}
               style={{

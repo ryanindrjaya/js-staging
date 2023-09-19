@@ -196,7 +196,6 @@ const postJurnal = async (data) => {
 
   if (req.status === 200) {
     console.log("suksess jurnal");
-    openNotificationWithIcon("success");
   } else {
     openNotificationWithIcon("error", req);
   }
