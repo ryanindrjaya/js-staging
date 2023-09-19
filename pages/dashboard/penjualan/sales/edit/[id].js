@@ -741,7 +741,7 @@ function Toko({ props }) {
           getStockData(product?.id, unitIndex, index);
 
           dispatch({
-            type: "SET_INITIAL_PRODUCT",
+            type: "SET_SALE_INITIAL_PRODUCT",
             product,
             index,
             qty: parseInt(element.attributes?.qty || 0),
