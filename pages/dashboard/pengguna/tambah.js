@@ -193,9 +193,9 @@ const Tambah = ({ props }) => {
                         message: "Kode Pengguna tidak boleh kosong!",
                       },
                     ]}
-                    help={code?.message}
-                    validateStatus={code ? code?.available : null}
-                    hasFeedback
+                    // help={code?.message}
+                    // validateStatus={code ? code?.available : null}
+                    // hasFeedback
                   >
                     <Input
                       // capitalize
@@ -203,7 +203,7 @@ const Tambah = ({ props }) => {
                         e.target.value = e.target.value.toUpperCase();
                       }}
                       maxLength={3}
-                      onChange={checkCode}
+                      // onChange={checkCode}
                       style={{ height: "50px" }}
                       prefix={<UserOutlined style={{ fontSize: "150%" }} className="site-form-item-icon mr-5" />}
                       placeholder="Kode Pengguna"
