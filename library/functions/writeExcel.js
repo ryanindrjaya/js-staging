@@ -102,9 +102,7 @@ export const writeExcel = async ({ api, schema, outputPath = "Export Penjualan.x
         };
       });
 
-      result.push(master);
-
-      const details = item.details.map((detail) => {
+      const details = item.details.map((detail, idx) => {
         const row = [];
         Object.keys(detailSchema).forEach((key) => {
           const value = getDescendantProp(detail, detailSchema[key]);
@@ -113,16 +111,18 @@ export const writeExcel = async ({ api, schema, outputPath = "Export Penjualan.x
             fontSize: 11,
           });
         });
-        return row;
+        if (idx === 0) {
+          result.push([...master, ...row]);
+        } else {
+          result.push([...Object.keys(schema).map(() => null), ...row]);
+        }
       });
-
-      result.push(...details);
     });
 
     console.log("columns", MASTER_HEADER);
     console.log("data master", result);
 
-    const excelData = [MASTER_HEADER, DETAIL_HEADER, ...result];
+    const excelData = [[...MASTER_HEADER, ...DETAIL_HEADER], ...result];
 
     await writeXlsxFile(excelData, {
       fileName: outputPath,

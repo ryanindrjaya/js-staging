@@ -115,7 +115,6 @@ function Toko({ props }) {
       api: "store-sale",
       schema: {
         "No. Penjualan": "no_store_sale",
-        "Kategori Penjualan": "category",
         "Tanggal Penjualan": "sale_date",
         "Nama Pelanggan": "customer_name",
         "Alamat Pelanggan": "address",
