@@ -702,7 +702,7 @@ function Toko({ props }) {
             <div className="w-full flex justify-between mt-0 mb-2">
               <span className="text-black text-md font-bold ml-1 mt-5">Semua Penjualan</span>
               <div className="mt-5">
-                {role === "PENJUALAN TOKO" ? (
+                {role === "PENJUALAN TOKO" || role === "PENJUALAN RESEP" ? (
                   <button
                     onClick={handleAdd}
                     type="button"
