@@ -241,21 +241,23 @@ function Laporan({ props }) {
       let startDate = "";
       let endDate = "";
       let queryTransaksi =
-        "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&";
+        "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&filters[status]=Diterima&";
 
       for (const key in searchParameters) {
         if (key === "tipeTransaksi" && searchParameters[key] !== undefined) {
           if (searchParameters[key] == "Pembelian") {
-            queryTransaksi = "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&";
+            queryTransaksi =
+              "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&filters[status]=Diterima&";
           } else if (searchParameters[key] == "Retur") {
-            queryTransaksi = "/purchasings?populate[0]=supplier&populate[1]=returs.retur_details.products&";
+            queryTransaksi =
+              "/purchasings?populate[0]=supplier&populate[1]=returs.retur_details.products&filters[status]=Diterima&";
           } else {
             queryTransaksi =
-              "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&";
+              "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&filters[status]=Diterima&";
           }
         } else {
           queryTransaksi =
-            "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&";
+            "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&filters[status]=Diterima&";
         }
 
         if (key === "status_pembayaran") {
