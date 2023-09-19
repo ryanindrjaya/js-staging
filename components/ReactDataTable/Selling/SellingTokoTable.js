@@ -292,8 +292,9 @@ export default function SellingTokoTable({
             <AlertDialog
               onCancel={onCancel}
               onConfirm={onConfirm}
-              title="Hapus Kategori"
-              message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
+              title="Batalkan Penjualan"
+              message="Penjualan yang dibatalkan tidak dapat dikembalikan lagi. Lanjutkan?"
+              buttonText="Batalkan"
               id={row}
             />
           )}
@@ -312,7 +313,7 @@ export default function SellingTokoTable({
             </button>
           </div>
 
-          {row.attributes.status === "Dibayar" ? (
+          {row.attributes.status === "Dibayar" || row.attributes.status === "Dibatalkan" ? (
             <></>
           ) : row?.attributes?.retur_store_sale?.data?.id ? (
             <></>
@@ -338,6 +339,8 @@ export default function SellingTokoTable({
                 Cetak Retur Penjualan
               </button>
             </div>
+          ) : row.attributes.status === "Dibatalkan" ? (
+            ""
           ) : (
             <div>
               <button
@@ -350,13 +353,18 @@ export default function SellingTokoTable({
             </div>
           )}
 
-          <AlertDialog
-            onCancel={onCancel}
-            onConfirm={onConfirm}
-            title="Hapus Kategori"
-            message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
-            id={row.id}
-          />
+          {row.attributes.status === "Dibayar" || row.attributes.status === "Dibatalkan" ? (
+            ""
+          ) : (
+            <AlertDialog
+              onCancel={onCancel}
+              onConfirm={(id) => onConfirm(id, row.attributes)}
+              title="Batalkan Penjualan"
+              message="Penjualan yang dibatalkan tidak dapat dikembalikan lagi. Lanjutkan?"
+              buttonText="Batalkan"
+              id={row.id}
+            />
+          )}
         </div>
       );
     } else {
@@ -385,8 +393,9 @@ export default function SellingTokoTable({
           <AlertDialog
             onCancel={onCancel}
             onConfirm={onConfirm}
-            title="Hapus Kategori"
-            message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
+            title="Batalkan Penjualan"
+            message="Penjualan yang dibatalkan tidak dapat dikembalikan lagi. Lanjutkan?"
+            buttonText="Batalkan"
             id={row.id}
           />
         </div>
@@ -475,6 +484,9 @@ export default function SellingTokoTable({
           return <Tag color="orange">{row.attributes?.status}</Tag>;
         } else if (row.attributes?.status == "Dibayar Sebagian") {
           return <Tag>{row.attributes?.status}</Tag>;
+        } else if (row.attributes?.retur_store_sale?.data?.id) {
+        } else if (row.attributes?.status == "Dibatalkan") {
+          return <Tag color="#F44336">{row.attributes?.status}</Tag>;
         } else if (row.attributes?.retur_store_sale?.data?.id) {
           return <Tag color="orange">Diretur</Tag>;
         } else {

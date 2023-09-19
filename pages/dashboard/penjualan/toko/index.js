@@ -136,16 +136,23 @@ function Toko({ props }) {
     message.destroy("fetch");
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id, ref) => {
     const endpoint = process.env.NEXT_PUBLIC_URL + "/store-sales/" + id;
     const cookies = nookies.get(null, "token");
 
+    const body = {
+      data: {
+        status: "Dibatalkan",
+      },
+    };
+
     const options = {
-      method: "DELETE",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: "Bearer " + cookies.token,
       },
+      body: JSON.stringify(body),
     };
 
     const req = await fetch(endpoint, options);
@@ -155,8 +162,8 @@ function Toko({ props }) {
       const newData = await res.json();
       openNotificationWithIcon(
         "success",
-        "Berhasil menghapus data",
-        "Penjualan Toko dan Resep yang dipilih telah berhasil dihapus. Silahkan cek kembali Penjualan Toko dan Resep"
+        "Berhasil membatalkan data",
+        "Penjualan Toko dan Resep yang dipilih telah berhasil dibatalkan. Silahkan cek kembali Penjualan Toko dan Resep"
       );
       setSell(newData);
     }
@@ -420,6 +427,8 @@ function Toko({ props }) {
         return "GREEN";
       case "Belum Dibayar":
         return "red";
+      case "Dibatalkan":
+        return "RED";
       case "Diretur":
         return "orange";
       case "Diproses":

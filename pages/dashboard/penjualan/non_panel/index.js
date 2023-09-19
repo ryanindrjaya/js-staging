@@ -222,17 +222,23 @@ function NonPanelSale({ props }) {
   };
 
   const handleDelete = async (data) => {
-    handleDeleteRelation(data);
-
     const endpoint = process.env.NEXT_PUBLIC_URL + "/non-panel-sales/" + data.id;
     const cookies = nookies.get(null, "token");
 
+    const body = {
+      data: {
+        status: "Dibatalkan",
+        status_data: "Dibatalkan",
+      },
+    };
+
     const options = {
-      method: "DELETE",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: "Bearer " + cookies.token,
       },
+      body: JSON.stringify(body),
     };
 
     const req = await fetch(endpoint, options);
@@ -250,32 +256,6 @@ function NonPanelSale({ props }) {
     }
 
     setIsFetchingData(false);
-  };
-
-  const handleDeleteRelation = async (data) => {
-    setIsFetchingData(true);
-
-    var id = 0;
-    data.attributes.non_panel_sale_details.data.forEach((element) => {
-      id = element.id;
-
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/non-panel-sale-details/" + id;
-      const cookies = nookies.get(null, "token");
-
-      const options = {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + cookies.token,
-        },
-      };
-
-      const req = fetch(endpoint, options);
-      //const res = req.json();
-      if (req) {
-        console.log("relation deleted");
-      }
-    });
   };
 
   const onChangeStatus = (status, row) => {
@@ -853,7 +833,7 @@ function NonPanelSale({ props }) {
                 </div>
               </div>
             ) : (
-              <div className="w-full md:w-4/4 px-3 mb-2 mt-5 md:mb-0">
+              <div className="w-full md:w-4/4 px-3 mb-2 md:mb-0">
                 <SellingTable
                   data={sell}
                   onUpdate={handleUpdate}

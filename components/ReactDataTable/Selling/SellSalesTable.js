@@ -76,7 +76,7 @@ export default function ReactDataTable({
           className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
         >
           <UnorderedListOutlined className="mr-2 mt-0.5 float float-left" />
-          Melihat
+          Lihat
         </button>
       </div>
       <div>
@@ -88,7 +88,7 @@ export default function ReactDataTable({
           Cetak
         </button>
       </div>
-      {row.attributes.status === "Diterima" || row.attributes.status === "Diretur" ? (
+      {row.attributes.status !== "Diproses" ? (
         ""
       ) : (
         <>
@@ -105,9 +105,9 @@ export default function ReactDataTable({
           <AlertDialog
             onCancel={onCancel}
             onConfirm={onConfirm}
-            title="Batalkan pesanan?"
             id={row.id}
-            label="Batal"
+            title="Batalkan Pesanan"
+            message="Pesanan yang dibatalkan tidak dapat dikembalikan lagi. Lanjutkan?"
             buttonText="Batalkan"
           />
         </>
@@ -155,38 +155,23 @@ export default function ReactDataTable({
       width: "200px",
       selector: (row) => row.attributes?.no_sales_sell ?? "-",
     },
-    // {
-    //   name: "Status",
-    //   width: "200px",
-    //   selector: (row) => {
-    //     return (
-    //       <>
-    //         <Select
-    //           defaultValue={row.attributes.status}
-    //           disabled={row.attributes.status === "Diterima"}
-    //           bordered={false}
-    //           onChange={(e) => onChangeStatus(e, row.id)}
-    //           style={{
-    //             width: "150px",
-    //           }}
-    //         >
-    //           <Option value="Diproses" key="Diproses" className="text-black">
-    //             <Tag color="default">Diproses</Tag>
-    //           </Option>
-    //           <Option value="Dibatalkan" key="Dibatalkan" className="text-black">
-    //             <Tag color="error">Dibatalkan</Tag>
-    //           </Option>
-    //           <Option value="Diretur" key="Diretur" className="text-black">
-    //             <Tag color="blue">Diretur</Tag>
-    //           </Option>
-    //           <Option value="Diterima" key="Diterima" className="text-black">
-    //             <Tag color="success">Diterima</Tag>
-    //           </Option>
-    //         </Select>
-    //       </>
-    //     );
-    //   },
-    // },
+    {
+      name: <div className="">Status</div>,
+      width: "150px",
+      selector: (row) => {
+        if (row.attributes?.status == "Belum Dibayar") {
+          return <Tag color="red">{row.attributes?.status}</Tag>;
+        } else if (row.attributes?.status == "Diretur") {
+          return <Tag color="orange">{row.attributes?.status}</Tag>;
+        } else if (row.attributes?.status == "Diproses") {
+          return <Tag>{row.attributes?.status}</Tag>;
+        } else if (row.attributes?.status == "Dibatalkan") {
+          return <Tag color="#F44336">{row.attributes?.status}</Tag>;
+        } else {
+          return <Tag color="green">{row.attributes?.status}</Tag>;
+        }
+      },
+    },
     {
       name: "Sales",
       width: "150px",

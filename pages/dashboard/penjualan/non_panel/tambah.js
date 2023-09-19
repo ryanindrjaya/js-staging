@@ -618,7 +618,9 @@ function Toko({ props }) {
     totalBelumDibayar = 0;
     if (customer) {
       nonPanel.data.forEach((element) => {
-        if (customer.id == element.attributes.customer?.data?.id) totalBelumDibayar += element.attributes.total;
+        if (customer.id == element.attributes.customer?.data?.id && element.attributes.status == "Belum Dibayar") {
+          totalBelumDibayar += element.attributes.total;
+        }
       });
 
       setLimitCredit(customer?.attributes?.credit_limit - totalBelumDibayar);

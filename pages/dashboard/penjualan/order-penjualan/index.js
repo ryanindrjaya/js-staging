@@ -156,7 +156,7 @@ function Sales({ props }) {
     async function fetchOne(id) {
       message.loading({ content: "Mengambil data", duration: 8000, key: "fetch" });
       const cookies = nookies.get();
-      const endpoint = process.env.NEXT_PUBLIC_URL + `/sales-sells/${id}?populate=deep`;
+      const endpoint = process.env.NEXT_PUBLIC_URL + `/sales-sells/${id}?populate=sales_sell_details.product,customer`;
       const options = {
         method: "GET",
         headers: {
@@ -197,7 +197,7 @@ function Sales({ props }) {
       case "Diterima":
         return "GREEN";
       case "Dibatalkan":
-        return "red";
+        return "RED";
       case "Sebagian Diterima":
         return "orange";
       case "Diproses":

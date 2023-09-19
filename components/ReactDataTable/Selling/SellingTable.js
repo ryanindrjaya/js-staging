@@ -235,19 +235,23 @@ export default function ReactDataTable({
             </div>
           )}
 
-          <div>
-            <button
-              onClick={() => handlePiutang(row, page)}
-              className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
-            >
-              {loadingPiutang ? (
-                <LoadingOutlined className="mr-2 mt-0.5 float float-left animate-spin" />
-              ) : (
-                <CalculatorOutlined className="mr-2 mt-0.5 float float-left" />
-              )}
-              Jadikan Piutang
-            </button>
-          </div>
+          {row.attributes.status_data === "Draft" ? (
+            <div>
+              <button
+                onClick={() => handlePiutang(row, page)}
+                className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
+              >
+                {loadingPiutang ? (
+                  <LoadingOutlined className="mr-2 mt-0.5 float float-left animate-spin" />
+                ) : (
+                  <CalculatorOutlined className="mr-2 mt-0.5 float float-left" />
+                )}
+                Jadikan Piutang
+              </button>
+            </div>
+          ) : (
+            ""
+          )}
           {/* <div>
             <button
               onClick={() => lihat(row)}
@@ -257,7 +261,7 @@ export default function ReactDataTable({
               Pembayaran
             </button>
           </div> */}
-          <div>
+          {/* <div>
             <button
               onClick={() => lihat(row)}
               className=" hover:text-cyan-700 transition-colors  text-xs font-normal py-2 px-2 rounded-md "
@@ -265,7 +269,7 @@ export default function ReactDataTable({
               <UnorderedListOutlined className="mr-2 mt-0.5 float float-left" />
               Melihat Pembayaran
             </button>
-          </div>
+          </div> */}
           {row?.attributes?.retur_non_panel_sales?.data[0]?.id || row?.attributes?.retur_panel_sales?.data[0]?.id ? (
             <div>
               <button
@@ -276,6 +280,8 @@ export default function ReactDataTable({
                 Cetak Retur Penjualan
               </button>
             </div>
+          ) : row.attributes.status_data === "Dibatalkan" ? (
+            ""
           ) : (
             <div>
               <button
@@ -294,9 +300,10 @@ export default function ReactDataTable({
             <AlertDialog
               onCancel={onCancel}
               onConfirm={onConfirm}
-              title="Hapus Kategori"
-              message="Kategori yang dihapus tidak dapat dikembalikan lagi. Lanjutkan?"
               id={row}
+              title="Batalkan Penjualan"
+              message="Penjualan yang dibatalkan tidak dapat dikembalikan lagi. Lanjutkan?"
+              buttonText="Batalkan"
             />
           )}
         </div>
@@ -466,11 +473,15 @@ export default function ReactDataTable({
       selector: (row) => {
         const status = row.attributes?.status_data ?? "";
 
-        if (status !== "Draft") {
-          return <Tag color={tagGreen}>{status}</Tag>;
+        if (status === "Draft") {
+          return <Tag color={tagRed}>{status}</Tag>;
         }
 
-        return <Tag color={tagRed}>{status}</Tag>;
+        if (status === "Dibatalkan") {
+          return <Tag color={tagRed}>{status}</Tag>;
+        }
+
+        return <Tag color={tagGreen}>{status}</Tag>;
       },
     },
     {
@@ -488,6 +499,8 @@ export default function ReactDataTable({
 
         if (row.attributes?.status == "Belum Dibayar") {
           return <Tag color="red">{row.attributes?.status}</Tag>;
+        } else if (row.attributes?.status == "Dibatalkan") {
+          return <Tag color={tagRed}>{row.attributes?.status}</Tag>;
         } else if (row.attributes?.status == "Diretur") {
           return <Tag color="orange">{row.attributes?.status}</Tag>;
         } else if (row.attributes?.status == "Dibayar Sebagian") {
