@@ -214,7 +214,8 @@ Print.getInitialProps = async (context) => {
   const cookies = nookies.get(context);
   const id = context.query.id;
 
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/non-panel-sales/" + id + "?populate=*";
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL + "/non-panel-sales/" + id + "?populate=*,non_panel_sale_details.product";
   const options = {
     method: "GET",
     headers: {
