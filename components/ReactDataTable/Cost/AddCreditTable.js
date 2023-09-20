@@ -55,13 +55,13 @@ export default function ReactDataTable({
     retur?.forEach((row) => {
       if (element?.attributes?.no_sales_sale == row?.id) {
         returSubtotal += row.subtotal;
-      }
+      } else returSubtotal = 0;
       if (element?.attributes?.no_panel_sale == row?.id) {
         returSubtotal += row.subtotal;
-      }
+      } else returSubtotal = 0;
       if (element?.attributes?.no_non_panel_sale == row?.id) {
         returSubtotal += row.subtotal;
-      }
+      } else returSubtotal = 0;
     });
 
     element.subtotal = returSubtotal;
