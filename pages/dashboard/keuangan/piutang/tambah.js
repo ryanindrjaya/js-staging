@@ -258,6 +258,8 @@ function Piutang({ props }) {
   const [sisaHutang, setSisaHutang] = useState([]);
   const [sisaHutangTotal, setSisaHutangTotal] = useState({});
 
+  const [tempDataTabel, setTempDataTabel] = useState(false);
+
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   //const [additionalFee, setAdditionalFee] = useState();
@@ -266,7 +268,6 @@ function Piutang({ props }) {
 
   const [dataValues, setDataValues] = useState();
   const [createId, setCreateId] = useState();
-  console.log(createId, "createId");
 
   const [listId, setListId] = useState([]);
 
@@ -350,8 +351,6 @@ function Piutang({ props }) {
         }
       });
 
-      console.log("total tunai, tranfer, giro", totalTunai, totalTransfer, totalGiro);
-      console.log(values, "values", document);
       if (document === "Publish") {
         if (values.bayar1 <= 0 && values.bayar2 <= 0 && values.bayar3 <= 0 && values.total_pembayaran === undefined) {
           notification["error"]({
@@ -410,7 +409,6 @@ function Piutang({ props }) {
       setCreateId,
       akunPiutang
     );
-    //console.log("Create master data", createId);
     //editPenjualan(createId);
   };
 
@@ -436,7 +434,7 @@ function Piutang({ props }) {
       const saleTypes = ["non_panel_sale", "panel_sale", "sales_sale"];
       for (const saleType of saleTypes) {
         const sale = item.attributes[saleType].data;
-        console.log(sale, "sale nih", item, saleType);
+        //console.log(sale, "sale nih", item, saleType);
         // var saleStatus = null;
         // if (saleType === "sales_sale") saleStatus = data.attributes.status_pembayaran;
 
@@ -527,7 +525,7 @@ function Piutang({ props }) {
 
   const calculatePriceTotal = (row, index) => {
     const total = calculatePrice(row, biaya, sisaHutangTotal, index);
-    sisaHutang[index] = total;
+    //sisaHutang[index] = total;
     row.sisaPiutang = total;
     var priceTotal = total;
     return formatter.format(priceTotal);
@@ -652,7 +650,6 @@ function Piutang({ props }) {
 
     // sales data
     sales.forEach((row) => {
-      console.log(row, "sales buosss");
 
       if (row.attributes.status === "Diterima") {
         row.status = row.attributes.status_pembayaran;
@@ -670,7 +667,7 @@ function Piutang({ props }) {
           dataTabel[0] = row;
         }
         //biaya.list.push(row);
-        dispatch({ type: "ADD_LIST", list: row });
+        //dispatch({ type: "ADD_LIST", list: row });
       }
 
       row.keterangan = "sales";
@@ -685,11 +682,11 @@ function Piutang({ props }) {
       }
 
       if (row.attributes.status_data == "Publish") {
-        if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian") {
+        if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian" || row.status == "Diretur") {
           if (dataTabel.length > 0) dataTabel[dataTabel.length] = row;
           else dataTabel[0] = row;
           //biaya.list.push(row);
-          dispatch({ type: "ADD_LIST", list: row });
+          //dispatch({ type: "ADD_LIST", list: row });
         }
       }
 
@@ -705,11 +702,11 @@ function Piutang({ props }) {
       }
 
       if (row.attributes.status_data == "Publish") {
-        if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian") {
+        if (row.status == "Belum Dibayar" || row.status == "Dibayar Sebagian" || row.status == "Diretur") {
           if (dataTabel.length > 0) dataTabel[dataTabel.length] = row;
           else dataTabel[0] = row;
           //biaya.list.push(row);
-          dispatch({ type: "ADD_LIST", list: row });
+          //dispatch({ type: "ADD_LIST", list: row });
         }
       }
 
@@ -770,7 +767,8 @@ function Piutang({ props }) {
               subtotal: row.attributes.total,
             };
 
-          element.sisaHutang = element.attributes.total - element.subtotal;
+          element.sisaHutang = parseFloat(element.attributes.total) - parseFloat(element.subtotal);
+          calculatePriceTotal(element, index);
         }
       });
 
@@ -791,7 +789,8 @@ function Piutang({ props }) {
               subtotal: row.attributes.total,
             };
 
-          element.sisaHutang = parseInt(element.attributes.total) - parseInt(element.subtotal);
+          element.sisaHutang = parseFloat(element.attributes.total) - parseFloat(element.subtotal);
+          calculatePriceTotal(element, index);
         }
       });
 
@@ -814,10 +813,95 @@ function Piutang({ props }) {
               subtotal: row.attributes.total,
             };
 
-          element.sisaHutang = parseInt(element.attributes.total) - parseInt(element.subtotal);
+          element.sisaHutang = parseFloat(element.attributes.total) - parseFloat(element.subtotal);
+          calculatePriceTotal(element, index);
         }
       });
+      
+    });
 
+    //remove when retur total value = sisa piutang
+    dataTabel?.forEach((element, index) => { 
+      const hutang = parseFloat(element.sisaHutang);
+      const piutang = parseFloat(element.sisaPiutang);
+      const dibayar = parseFloat(element.dibayar);
+      console.log(element, "element datatabel", dibayar, hutang);
+      // if(hutang !== piutang){
+      //   handleDelete(index);
+      // } else if (hutang === dibayar) {
+      //   handleDelete(index);
+      // }
+      // Create a new array and push the element to the new array if it is valid
+      // const newArray = [];
+      // if (hutang !== piutang && hutang !== dibayar) {
+      //   newArray.push(element);
+      // }
+
+    });
+
+    // const newArrayRetur = dataTabel.filter((element) => {
+    //   const subtotal = parseFloat(element.subtotal);
+    //   const total = parseFloat(element.attributes.total);
+    
+    //   // Return the element if it is valid
+    //   return subtotal !== total;
+    // });
+    
+    // // Replace the original array with the new array
+    // setDataTabel(newArrayRetur);
+
+    const newArray = dataTabel.filter((element) => {
+      const hutang = parseFloat(element.sisaHutang);
+      const dibayar = parseFloat(element.dibayar);
+    
+      // Return the element if it is valid
+      return hutang !== dibayar;
+    });
+    
+    // Replace the original array with the new array
+    setDataTabel(newArray);
+
+    // if (dataTable.length > 0) {
+    //   dataTable.forEach((item, index) => {
+    //     dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: item, index: index });
+    //   });
+    // }
+  }, []);
+
+
+  useEffect(() => {
+    clearData();
+
+    //add to usestate biaya
+    dataTabel?.forEach((element, index) => {
+
+      if(element.sisaPiutang === 0){
+        const newArrayRetur = dataTabel.filter((element) => {
+          const subtotal = parseFloat(element.subtotal);
+          const total = parseFloat(element.attributes.total);
+        
+          // Return the element if it is valid
+          return subtotal !== total;
+        });
+        
+        // Replace the original array with the new array
+        setDataTabel(newArrayRetur);
+      }
+
+      if(element.sisaHutang === element.dibayar){
+        const newArrayRetur = dataTabel.filter((element) => {
+          const hutang = parseFloat(element.sisaHutang);
+          const dibayar = parseFloat(element.dibayar);
+        
+          // Return the element if it is valid
+          return hutang !== dibayar;
+        });
+        
+        // Replace the original array with the new array
+        setDataTabel(newArrayRetur);
+      }
+
+      dispatch({ type: "ADD_LIST", list: element });
       dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: element, index: index });
       dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
       dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: 0, listData: element, index: index });
@@ -829,19 +913,19 @@ function Piutang({ props }) {
         index: index,
       });
     });
-
-    //console.log("datatable", dataTabel.length);
-    // if (dataTable.length > 0) {
-    //   dataTable.forEach((item, index) => {
-    //     dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: item, index: index });
-    //   });
-    // }
-  }, []);
+    
+  }, [dataTabel]);
 
   // useEffect(() => {
-  //   //if(dataTabel)
+    
+  //   biaya.list?.forEach((element, index) => {
+  //     if( element.id != dataTabel[index].id ){
+        
+  //     }
+  //   });
+  // }, [biaya.list]);
 
-  // }, [dataTabel]);
+
 
   const validateError = () => {
     var listError = form.getFieldsError();

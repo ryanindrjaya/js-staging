@@ -17,7 +17,9 @@ export default function calculatePrice(
     // var cn = 0;
     // var oth = 0;
 
-    if (row.sisaHutang) sisaHutang = row?.sisaHutang - row?.dibayar;
+    //if (row.sisaHutang) sisaHutang = row?.sisaHutang - row?.dibayar;
+    sisaHutang = sisaHutang - row?.dibayar;
+    sisaHutang = sisaHutang - row?.subtotal;
 
     if (biaya.info[index]?.tunai) {
       tunai = biaya.info[index].tunai;
@@ -58,7 +60,7 @@ export default function calculatePrice(
     // } else {
     //   oth = 0;
     // }
-
+    
     sisaHutang = sisaHutang - (tunai + transfer + giro);
     sisaHutangTotal[index] = sisaHutang;
 
