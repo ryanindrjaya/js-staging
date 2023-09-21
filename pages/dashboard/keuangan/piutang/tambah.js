@@ -150,7 +150,7 @@ const fetchReturSales = async (cookies) => {
 };
 
 const fetchSales = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?populate=*, customer.area, customer.wilayah";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/sales-sales?populate=*, customer.area, customer.wilayah, retur_sales_sale.retur_sales_sale_details";
   const options = {
     method: "GET",
     headers: {
@@ -178,7 +178,7 @@ const fetchReturPanel = async (cookies) => {
 };
 
 const fetchPanel = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/panel-sales?populate=*, customer.area, customer.wilayah";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/panel-sales?populate=*, customer.area, customer.wilayah, retur_panel_sales.retur_panel_sale_details";
   const options = {
     method: "GET",
     headers: {
@@ -206,7 +206,7 @@ const fetchReturNonPanel = async (cookies) => {
 };
 
 const fetchNonPanel = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/non-panel-sales?populate=*, customer.area, customer.wilayah";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/non-panel-sales?populate=*, customer.area, customer.wilayah, retur_non_panel_sales.retur_non_panel_sale_details";
   const options = {
     method: "GET",
     headers: {
@@ -253,7 +253,7 @@ function Piutang({ props }) {
   const akunPiutang = props.akunPiutang.data;
   //const customerData = props.customer.data[0];
   const [supplier, setSupplier] = useState();
-  const [dataTabel, setDataTabel] = useState([]); console.log(dataTabel, "datatable tes data");
+  const [dataTabel, setDataTabel] = useState([]); console.log(dataTabel, "datatable tes data", returSales, returNonPanel, returSales);
   const [dataRetur, setDataRetur] = useState([]);
   const [sisaHutang, setSisaHutang] = useState([]);
   const [sisaHutangTotal, setSisaHutangTotal] = useState({});
@@ -750,156 +750,162 @@ function Piutang({ props }) {
         if (item.id === element.id && item.keterangan === element.keterangan) element.dibayar += item.total;
       });
 
-      returSales.forEach((row) => {
-        row.subtotal = 0;
+      // returSales.forEach((row) => {
+      //   row.subtotal = 0;
 
-        if (element?.attributes?.no_sales_sale == row.attributes?.sales_sale?.data?.attributes.no_sales_sale) {
-          element.subtotal += row.attributes.total;
+      //   if (element?.attributes?.no_sales_sale == row.attributes?.sales_sale?.data?.attributes.no_sales_sale) {
+      //     element.subtotal += row.attributes.total;
 
-          if (dataRetur.length > 0)
-            dataRetur[dataRetur.length] = {
-              id: element.attributes.no_sales_sale,
-              subtotal: row.attributes.total,
-            };
-          else
-            dataRetur[0] = {
-              id: element.attributes.no_sales_sale,
-              subtotal: row.attributes.total,
-            };
+      //     if (dataRetur.length > 0)
+      //       dataRetur[dataRetur.length] = {
+      //         id: element.attributes.no_sales_sale,
+      //         subtotal: row.attributes.total,
+      //       };
+      //     else
+      //       dataRetur[0] = {
+      //         id: element.attributes.no_sales_sale,
+      //         subtotal: row.attributes.total,
+      //       };
 
-          element.sisaHutang = parseFloat(element.attributes.total) - parseFloat(element.subtotal);
-          calculatePriceTotal(element, index);
-        }
-      });
-
-      returPanel.forEach((row) => {
-        row.subtotal = 0;
-
-        if (element.attributes?.no_panel_sale == row.attributes?.panel_sale?.data?.attributes.no_panel_sale) {
-          element.subtotal += row.attributes.total;
-
-          if (dataRetur.length > 0)
-            dataRetur[dataRetur.length] = {
-              id: element.attributes.no_panel_sale,
-              subtotal: row.attributes.total,
-            };
-          else
-            dataRetur[0] = {
-              id: element.attributes.no_panel_sale,
-              subtotal: row.attributes.total,
-            };
-
-          element.sisaHutang = parseFloat(element.attributes.total) - parseFloat(element.subtotal);
-          calculatePriceTotal(element, index);
-        }
-      });
-
-      returNonPanel.forEach((row) => {
-        row.subtotal = 0;
-
-        if (
-          element.attributes?.no_non_panel_sale == row.attributes?.non_panel_sale?.data?.attributes.no_non_panel_sale
-        ) {
-          element.subtotal += row.attributes.total;
-
-          if (dataRetur.length > 0)
-            dataRetur[dataRetur.length] = {
-              id: element.attributes.no_non_panel_sale,
-              subtotal: row.attributes.total,
-            };
-          else
-            dataRetur[0] = {
-              id: element.attributes.no_non_panel_sale,
-              subtotal: row.attributes.total,
-            };
-
-          element.sisaHutang = parseFloat(element.attributes.total) - parseFloat(element.subtotal);
-          calculatePriceTotal(element, index);
-        }
-      });
+      //     element.sisaHutang = parseFloat(element.attributes.total) - parseFloat(element.subtotal);
+      //     calculatePriceTotal(element, index);
+      //   }
+      // });
       
-    });
-
-    //remove when retur total value = sisa piutang
-    dataTabel?.forEach((element, index) => { 
-      const hutang = parseFloat(element.sisaHutang);
-      const piutang = parseFloat(element.sisaPiutang);
-      const dibayar = parseFloat(element.dibayar);
-      console.log(element, "element datatabel", dibayar, hutang);
-      // if(hutang !== piutang){
-      //   handleDelete(index);
-      // } else if (hutang === dibayar) {
-      //   handleDelete(index);
-      // }
-      // Create a new array and push the element to the new array if it is valid
-      // const newArray = [];
-      // if (hutang !== piutang && hutang !== dibayar) {
-      //   newArray.push(element);
-      // }
-
-    });
-
-    // const newArrayRetur = dataTabel.filter((element) => {
-    //   const subtotal = parseFloat(element.subtotal);
-    //   const total = parseFloat(element.attributes.total);
-    
-    //   // Return the element if it is valid
-    //   return subtotal !== total;
-    // });
-    
-    // // Replace the original array with the new array
-    // setDataTabel(newArrayRetur);
-
-    const newArray = dataTabel.filter((element) => {
-      const hutang = parseFloat(element.sisaHutang);
-      const dibayar = parseFloat(element.dibayar);
-    
-      // Return the element if it is valid
-      return hutang !== dibayar;
-    });
-    
-    // Replace the original array with the new array
-    setDataTabel(newArray);
-
-    // if (dataTable.length > 0) {
-    //   dataTable.forEach((item, index) => {
-    //     dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: item, index: index });
-    //   });
-    // }
-  }, []);
-
-
-  useEffect(() => {
-    clearData();
-
-    //add to usestate biaya
-    dataTabel?.forEach((element, index) => {
-
-      if(element.sisaPiutang === 0){
-        const newArrayRetur = dataTabel.filter((element) => {
-          const subtotal = parseFloat(element.subtotal);
-          const total = parseFloat(element.attributes.total);
+      if(element.keterangan === "sales"){
+        var row = element.attributes.retur_sales_sale.data;
+            element.subtotal += row.attributes.total;
+  
+            if (dataRetur.length > 0)
+              dataRetur[dataRetur.length] = {
+                id: element.attributes.no_sales_sale,
+                subtotal: row.attributes.total,
+              };
+            else
+              dataRetur[0] = {
+                id: element.attributes.no_sales_sale,
+                subtotal: row.attributes.total,
+              };
+              
+              element.sisaHutang = parseFloat(element.attributes.total) - parseFloat(element.subtotal);
+              calculatePriceTotal(element, index);
+              
+        console.log("retur sales sale", element.subtotal, row.attributes.total);
         
-          // Return the element if it is valid
-          return subtotal !== total;
+      } else if(element.keterangan === "panel") {
+        element.attributes.retur_panel_sales.data.forEach((row) => {
+            element.subtotal += row.attributes.total;
+
+            if (dataRetur.length > 0)
+              dataRetur[dataRetur.length] = {
+                id: element.attributes.no_panel_sale,
+                subtotal: row.attributes.total,
+              };
+            else
+              dataRetur[0] = {
+                id: element.attributes.no_panel_sale,
+                subtotal: row.attributes.total,
+              };
+
+            element.sisaHutang = parseFloat(element.attributes.total) - parseFloat(element.subtotal);
+            calculatePriceTotal(element, index);
+          
+          console.log("retur panel sale", element.subtotal, row.attributes.total);
         });
-        
-        // Replace the original array with the new array
-        setDataTabel(newArrayRetur);
+      
+      } else if(element.keterangan === "non panel") {
+        element.attributes.retur_panel_sales.data.forEach((row) => {
+            element.subtotal += row.attributes.total;
+  
+            if (dataRetur.length > 0)
+              dataRetur[dataRetur.length] = {
+                id: element.attributes.no_non_panel_sale,
+                subtotal: row.attributes.total,
+              };
+            else
+              dataRetur[0] = {
+                id: element.attributes.no_non_panel_sale,
+                subtotal: row.attributes.total,
+              };
+  
+            element.sisaHutang = parseFloat(element.attributes.total) - parseFloat(element.subtotal);
+            calculatePriceTotal(element, index);
+            console.log("retur non panel sale", element.subtotal, row.attributes.total);
+        });
       }
 
-      if(element.sisaHutang === element.dibayar){
-        const newArrayRetur = dataTabel.filter((element) => {
-          const hutang = parseFloat(element.sisaHutang);
-          const dibayar = parseFloat(element.dibayar);
-        
-          // Return the element if it is valid
-          return hutang !== dibayar;
-        });
-        
-        // Replace the original array with the new array
-        setDataTabel(newArrayRetur);
-      }
+
+      // returPanel.forEach((row) => {
+      //   row.subtotal = 0;
+
+      //   if (element.attributes?.no_panel_sale == row.attributes?.panel_sale?.data?.attributes.no_panel_sale) {
+      //     element.subtotal += row.attributes.total;
+
+      //     if (dataRetur.length > 0)
+      //       dataRetur[dataRetur.length] = {
+      //         id: element.attributes.no_panel_sale,
+      //         subtotal: row.attributes.total,
+      //       };
+      //     else
+      //       dataRetur[0] = {
+      //         id: element.attributes.no_panel_sale,
+      //         subtotal: row.attributes.total,
+      //       };
+
+      //     element.sisaHutang = parseFloat(element.attributes.total) - parseFloat(element.subtotal);
+      //     calculatePriceTotal(element, index);
+      //   }
+      // });
+      
+      console.log("retur panel sale", element?.attributes?.retur_panel_sales);
+      // // element.attributes.retur_panel_sales.data.forEach((row) => {
+      // //   row.subtotal = 0;
+
+      // //   if (element.attributes?.no_panel_sale == row.attributes?.panel_sale?.data?.attributes.no_panel_sale) {
+      // //     element.subtotal += row.attributes.total;
+
+      // //     if (dataRetur.length > 0)
+      // //       dataRetur[dataRetur.length] = {
+      // //         id: element.attributes.no_panel_sale,
+      // //         subtotal: row.attributes.total,
+      // //       };
+      // //     else
+      // //       dataRetur[0] = {
+      // //         id: element.attributes.no_panel_sale,
+      // //         subtotal: row.attributes.total,
+      // //       };
+
+      // //     element.sisaHutang = parseFloat(element.attributes.total) - parseFloat(element.subtotal);
+      // //     calculatePriceTotal(element, index);
+      // //   }
+      // // });
+      
+      //element.subtotal = 0;
+
+      console.log("retur non panel sale", element?.attributes?.retur_non_panel_sales);
+      // returNonPanel.forEach((row) => {
+      //   row.subtotal = 0;
+
+      //   if (
+      //     element.attributes?.no_non_panel_sale == row.attributes?.non_panel_sale?.data?.attributes.no_non_panel_sale
+      //   ) {
+      //     element.subtotal += row.attributes.total;
+
+      //     if (dataRetur.length > 0)
+      //       dataRetur[dataRetur.length] = {
+      //         id: element.attributes.no_non_panel_sale,
+      //         subtotal: row.attributes.total,
+      //       };
+      //     else
+      //       dataRetur[0] = {
+      //         id: element.attributes.no_non_panel_sale,
+      //         subtotal: row.attributes.total,
+      //       };
+
+      //     element.sisaHutang = parseFloat(element.attributes.total) - parseFloat(element.subtotal);
+      //     calculatePriceTotal(element, index);
+      //   }
+      // });
 
       dispatch({ type: "ADD_LIST", list: element });
       dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: element, index: index });
@@ -912,9 +918,105 @@ function Piutang({ props }) {
         listData: element,
         index: index,
       });
+      
+      console.log(element, "element data nih");
     });
+
+    // //remove when retur total value = sisa piutang
+    // dataTabel?.forEach((element, index) => { 
+    //   const hutang = parseFloat(element.sisaHutang);
+    //   const piutang = parseFloat(element.sisaPiutang);
+    //   const dibayar = parseFloat(element.dibayar);
+    //   console.log(element, "element datatabel", dibayar, hutang);
+    //   // if(hutang !== piutang){
+    //   //   handleDelete(index);
+    //   // } else if (hutang === dibayar) {
+    //   //   handleDelete(index);
+    //   // }
+    //   // Create a new array and push the element to the new array if it is valid
+    //   // const newArray = [];
+    //   // if (hutang !== piutang && hutang !== dibayar) {
+    //   //   newArray.push(element);
+    //   // }
+
+    // });
+
+    // // const newArrayRetur = dataTabel.filter((element) => {
+    // //   const subtotal = parseFloat(element.subtotal);
+    // //   const total = parseFloat(element.attributes.total);
     
-  }, [dataTabel]);
+    // //   // Return the element if it is valid
+    // //   return subtotal !== total;
+    // // });
+    
+    // // // Replace the original array with the new array
+    // // setDataTabel(newArrayRetur);
+
+    // const newArray = dataTabel.filter((element) => {
+    //   const hutang = parseFloat(element.sisaHutang);
+    //   const dibayar = parseFloat(element.dibayar);
+    
+    //   // Return the element if it is valid
+    //   return hutang !== dibayar;
+    // });
+    
+    // // Replace the original array with the new array
+    // setDataTabel(newArray);
+
+    // // if (dataTable.length > 0) {
+    // //   dataTable.forEach((item, index) => {
+    // //     dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: item, index: index });
+    // //   });
+    // // }
+  }, []);
+
+
+  // useEffect(() => {
+  //   clearData();
+
+  //   //add to usestate biaya
+  //   dataTabel?.forEach((element, index) => {
+
+  //     if(element.sisaPiutang === 0){
+  //       const newArrayRetur = dataTabel.filter((element) => {
+  //         const subtotal = parseFloat(element.subtotal);
+  //         const total = parseFloat(element.attributes.total);
+        
+  //         // Return the element if it is valid
+  //         return subtotal !== total;
+  //       });
+        
+  //       // Replace the original array with the new array
+  //       setDataTabel(newArrayRetur);
+  //     }
+
+  //     if(element.sisaHutang === element.dibayar){
+  //       const newArrayRetur = dataTabel.filter((element) => {
+  //         const hutang = parseFloat(element.sisaHutang);
+  //         const dibayar = parseFloat(element.dibayar);
+        
+  //         // Return the element if it is valid
+  //         return hutang !== dibayar;
+  //       });
+        
+  //       // Replace the original array with the new array
+  //       setDataTabel(newArrayRetur);
+  //     }
+
+  //     dispatch({ type: "ADD_LIST", list: element });
+  //     dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: element, index: index });
+  //     dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
+  //     dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: 0, listData: element, index: index });
+  //     dispatch({ type: "CHANGE_DATA_GIRO", giro: 0, listData: element, index: index });
+  //     dispatch({
+  //       type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO",
+  //       totalHutangJatuhTempo: element.sisaHutang,
+  //       listData: element,
+  //       index: index,
+  //     });
+  //   });
+    
+  // }, [dataTabel]);
 
   // useEffect(() => {
     
