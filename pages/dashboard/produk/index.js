@@ -116,7 +116,11 @@ const Product = ({ props }) => {
         locationQuery = "";
       }
 
-      const endpoint = process.env.NEXT_PUBLIC_URL + "/products?pagination[limit]=10&" + query + locationQuery;
+      const endpoint =
+        process.env.NEXT_PUBLIC_URL +
+        "/products?populate=category,manufacture&pagination[limit]=10&" +
+        query +
+        locationQuery;
 
       console.log("endpoint", endpoint);
 
@@ -176,8 +180,13 @@ const Product = ({ props }) => {
   };
 
   const handlePageChange = async (page) => {
+    console.log("page", page);
     const cookies = nookies.get(null, "token");
-    const endpoint = process.env.NEXT_PUBLIC_URL + "/products?pagination[pageSize]=10&pagination[page]=" + page;
+    const endpoint =
+      process.env.NEXT_PUBLIC_URL +
+      "/products?populate=category,manufacture&pagination[pageSize]=10&pagination[page]=" +
+      page +
+      1;
 
     const options = {
       method: "GET",
@@ -463,7 +472,8 @@ const formatData = (data) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint = process.env.NEXT_PUBLIC_URL + "/products?sort=createdAt:desc&pagination[limit]=10";
+  const endpoint =
+    process.env.NEXT_PUBLIC_URL + "/products?populate=category,manufacture&sort=createdAt:desc&pagination[limit]=10";
   const options = {
     method: "GET",
     headers: {

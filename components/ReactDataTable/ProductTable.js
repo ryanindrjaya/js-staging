@@ -32,7 +32,7 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange 
     onUpdate(id);
   };
 
-  const reverseData = data.data.map((val, index, array) => array[array.length - 1 - index]);
+  // const reverseData = data.data.map((val, index, array) => array[array.length - 1 - index]);
 
   const content = (row) => (
     <div>
@@ -76,7 +76,7 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange 
       name: "Tindakan",
       selector: (row) => (
         <>
-          <Popover content={content(row)} placement="bottom">
+          <Popover content={content(row)} trigger="click" placement="bottom">
             <button className=" text-cyan-700  transition-colors  text-xs font-normal py-2 rounded-md ">
               Tindakan
             </button>
@@ -92,6 +92,7 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange 
     {
       name: "Nama Produk",
       sortable: true,
+      wrap: true,
       selector: (row) => row.attributes?.name,
     },
     {
@@ -118,7 +119,7 @@ export default function ReactDataTable({ data, onDelete, onUpdate, onPageChange 
       paginationRowsPerPageOptions={[10]}
       paginationTotalRows={data?.meta?.pagination.total}
       columns={columns}
-      data={reverseData}
+      data={data?.data || []}
       defaultSortAsc={false}
       pagination
       pointerOnHover
