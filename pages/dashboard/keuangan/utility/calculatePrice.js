@@ -17,9 +17,9 @@ export default function calculatePrice(
     // var cn = 0;
     // var oth = 0;
 
-    //if (row.sisaHutang) sisaHutang = row?.sisaHutang - row?.dibayar;
-    sisaHutang = sisaHutang - row?.dibayar;
-    sisaHutang = sisaHutang - row?.subtotal;
+    if (row.sisaHutang) sisaHutang = row?.sisaHutang - row?.dibayar;
+    // sisaHutang = sisaHutang - row?.dibayar;
+    // sisaHutang = sisaHutang - row?.subtotal;
 
     if (biaya.info[index]?.tunai) {
       tunai = biaya.info[index].tunai;
