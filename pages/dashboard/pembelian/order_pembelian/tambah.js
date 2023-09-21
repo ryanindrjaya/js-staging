@@ -143,7 +143,6 @@ function Tambah({ props }) {
   const onFinish = async (values) => {
     setLoading(true);
     setDataValues(values);
-    setLoading(false);
   };
 
   const createDetailOrder = async () => {
@@ -152,7 +151,8 @@ function Tambah({ props }) {
   };
 
   const createOrder = async (values) => {
-    createOrderFunc(grandTotal, totalPrice, values, listId, form, router);
+    await createOrderFunc(grandTotal, totalPrice, values, listId, form, router);
+    setLoading(false);
   };
 
   const onChange = async () => {

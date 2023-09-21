@@ -223,7 +223,6 @@ function Tambah({ props }) {
     values.ppn_value = ppnPrice - discValue;
 
     setDataValues(values);
-    setLoading(false);
   };
 
   const dataValidation = async () => {
@@ -321,6 +320,7 @@ function Tambah({ props }) {
       router,
       updateOrderData
     );
+    setLoading(false);
   };
 
   const updateOrderData = async () => {};

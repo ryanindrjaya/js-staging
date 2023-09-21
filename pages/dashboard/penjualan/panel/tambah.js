@@ -413,7 +413,6 @@ function Toko({ props }) {
       cekTermin();
 
       setDataValues(values);
-      setLoading(false);
     } else {
       confirm({
         title: "Apakah anda yakin?",
@@ -468,6 +467,7 @@ function Toko({ props }) {
       null,
       simpanData
     );
+    setLoading(false);
   };
 
   const onChangeProduct = async () => {

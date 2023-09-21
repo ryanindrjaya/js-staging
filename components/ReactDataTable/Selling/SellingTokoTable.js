@@ -484,7 +484,6 @@ export default function SellingTokoTable({
           return <Tag color="orange">{row.attributes?.status}</Tag>;
         } else if (row.attributes?.status == "Dibayar Sebagian") {
           return <Tag>{row.attributes?.status}</Tag>;
-        } else if (row.attributes?.retur_store_sale?.data?.id) {
         } else if (row.attributes?.status == "Dibatalkan") {
           return <Tag color="#F44336">{row.attributes?.status}</Tag>;
         } else if (row.attributes?.retur_store_sale?.data?.id) {

@@ -128,7 +128,6 @@ function ReturLPB({ props }) {
   const onFinish = async (values) => {
     setLoading(true);
     setDataValues(values);
-    setLoading(false);
   };
 
   const createDetailRetur = async () => {
@@ -146,7 +145,8 @@ function ReturLPB({ props }) {
     values.supplier = data.attributes.supplier.data;
     values.location = data.attributes.location.data;
     values.status = "Draft";
-    createReturLPBFunc(grandTotal, totalPrice, values, listId, form, router, data);
+    await createReturLPBFunc(grandTotal, totalPrice, values, listId, form, router, data);
+    setLoading(false);
   };
 
   const onChangeProduct = async () => {
