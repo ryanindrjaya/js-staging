@@ -472,8 +472,7 @@ const formatData = (data) => {
 };
 
 const fetchData = async (cookies) => {
-  const endpoint =
-    process.env.NEXT_PUBLIC_URL + "/products?populate=category,manufacture&sort=createdAt:desc&pagination[limit]=10";
+  const endpoint = process.env.NEXT_PUBLIC_URL + "/products?populate=category,manufacture&pagination[limit]=10";
   const options = {
     method: "GET",
     headers: {
