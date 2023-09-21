@@ -84,7 +84,7 @@ const fetchLocation = async (cookies) => {
 const fetchPurchasing = async (cookies) => {
   const endpoint =
     process.env.NEXT_PUBLIC_URL +
-    "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&filters[status]=Diterima";
+    "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&filters[$or][0][status]=Diterima&filters[$or][1][status]=Diretur";
   const options = {
     method: "GET",
     headers: {
@@ -241,23 +241,23 @@ function Laporan({ props }) {
       let startDate = "";
       let endDate = "";
       let queryTransaksi =
-        "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&filters[status]=Diterima&";
+        "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&filters[$or][0][status]=Diterima&filters[$or][1][status]=Diretur&";
 
       for (const key in searchParameters) {
         if (key === "tipeTransaksi" && searchParameters[key] !== undefined) {
           if (searchParameters[key] == "Pembelian") {
             queryTransaksi =
-              "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&filters[status]=Diterima&";
+              "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&filters[$or][0][status]=Diterima&filters[$or][1][status]=Diretur&";
           } else if (searchParameters[key] == "Retur") {
             queryTransaksi =
-              "/purchasings?populate[0]=supplier&populate[1]=returs.retur_details.products&filters[status]=Diterima&";
+              "/purchasings?populate[0]=supplier&populate[1]=returs.retur_details.products&filters[$or][0][status]=Diterima&filters[$or][1][status]=Diretur&";
           } else {
             queryTransaksi =
-              "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&filters[status]=Diterima&";
+              "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&filters[$or][0][status]=Diterima&filters[$or][1][status]=Diretur&";
           }
         } else {
           queryTransaksi =
-            "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&filters[status]=Diterima&";
+            "/purchasings?populate[0]=supplier&populate[1]=purchasing_details.product&populate[2]=returs.retur_details.products&filters[$or][0][status]=Diterima&filters[$or][1][status]=Diretur&";
         }
 
         if (key === "status_pembayaran") {
