@@ -697,7 +697,7 @@ export default function ReactDataTable({
     {
       name: "Total Retur Jual",
       width: "150px",
-      selector: (row) => formatter.format(row?.subtotal ?? 0),
+      selector: (row) => formatter.format(row.subtotal ?? 0),
     },
     {
       name: "Total Pembayaran",
