@@ -253,7 +253,7 @@ function Piutang({ props }) {
   const akunPiutang = props.akunPiutang.data;
   //const customerData = props.customer.data[0];
   const [supplier, setSupplier] = useState();
-  const [dataTabel, setDataTabel] = useState([]);
+  const [dataTabel, setDataTabel] = useState([]); console.log(dataTabel, "datatable tes data");
   const [dataRetur, setDataRetur] = useState([]);
   const [sisaHutang, setSisaHutang] = useState([]);
   const [sisaHutangTotal, setSisaHutangTotal] = useState({});
@@ -525,7 +525,7 @@ function Piutang({ props }) {
 
   const calculatePriceTotal = (row, index) => {
     const total = calculatePrice(row, biaya, sisaHutangTotal, index);
-    //sisaHutang[index] = total;
+    sisaHutang[index] = total;
     row.sisaPiutang = total;
     var priceTotal = total;
     return formatter.format(priceTotal);
