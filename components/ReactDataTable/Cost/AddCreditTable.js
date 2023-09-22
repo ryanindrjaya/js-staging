@@ -186,7 +186,7 @@ export default function ReactDataTable({
     //if (metode == "oth") { setOth(value); tempOth = value; }
 
     // cek pembayaran
-    if (row.attributes.total - row.subtotal >= tempTunai + tempTransfer + tempGiro)
+    if (row.attributes.total - row.retur >= tempTunai + tempTransfer + tempGiro)
       setModalSisa(tunai + transfer + giro);
     else handleCek("info");
     //}
@@ -215,7 +215,7 @@ export default function ReactDataTable({
     onChangeCn(cn, row, idx);
     onChangeOth(oth, row, idx);
 
-    if (row.attributes.total - row.subtotal >= tunai + transfer + giro) setModalSisa(tunai + transfer + giro);
+    if (row.attributes.total - row.retur >= tunai + transfer + giro) setModalSisa(tunai + transfer + giro);
     else {
       handleCek("error");
       setTunai(0);
@@ -341,7 +341,7 @@ export default function ReactDataTable({
 
             <div className="w-full flex justify-start mb-4">
               <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0 text-center">
-                <span className="font-bold">{formatter.format(row.attributes?.total - row.subtotal)}</span>
+                <span className="font-bold">{formatter.format(row.attributes?.total - row.retur)}</span>
               </div>
             </div>
 
@@ -606,7 +606,7 @@ export default function ReactDataTable({
             <div className="w-full flex justify-start mb-4">
               <div className="w-full md:w-1/2 px-3 mb-2 md:mb-0 text-center">
                 <span className="font-bold">
-                  {formatter.format(row.attributes?.total - (tunai + transfer + giro + row.subtotal + row.dibayar))}
+                  {formatter.format(row.attributes?.total - (tunai + transfer + giro + row.retur + row.dibayar))}
                 </span>
               </div>
             </div>
@@ -697,7 +697,7 @@ export default function ReactDataTable({
     {
       name: "Total Retur Jual",
       width: "150px",
-      selector: (row) => formatter.format(row.subtotal ?? 0),
+      selector: (row) => formatter.format(row?.retur ?? 0),
     },
     {
       name: "Total Pembayaran",

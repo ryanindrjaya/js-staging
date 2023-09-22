@@ -538,7 +538,7 @@ function Piutang({ props }) {
 
       for (let row in biaya.info) {
         if (biaya.info[row].pilihData == "pilih") {
-          total = total + (biaya.list[row].attributes.total - biaya.list[row].subtotal) - biaya.list[row].dibayar;
+          total = total + (biaya.list[row].attributes.total - biaya.list[row].retur) - biaya.list[row].dibayar;
         }
         if (biaya.info[row].totalHutangJatuhTempo == undefined) total = 0;
       }
@@ -740,7 +740,8 @@ function Piutang({ props }) {
     });
 
     dataTabel.forEach((element, index) => {
-      element.subtotal = 0;
+      element.retur = 0; // utk tampilan retur
+      element.subtotal = 0; // utk penghitungan retur
       element.sisaHutang = 0;
       element.dibayar = 0;
 
@@ -776,16 +777,17 @@ function Piutang({ props }) {
         var row = element.attributes.retur_sales_sale.data;
             element.subtotal += row.attributes.total;
   
-            if (dataRetur.length > 0)
+            if (dataRetur.length > 0) {
               dataRetur[dataRetur.length] = {
                 id: element.attributes.no_sales_sale,
                 subtotal: row.attributes.total,
               };
-            else
+            } else {
               dataRetur[0] = {
                 id: element.attributes.no_sales_sale,
                 subtotal: row.attributes.total,
               };
+            }
               
               element.sisaHutang = parseFloat(element.attributes.total) - parseFloat(element.subtotal);
               calculatePriceTotal(element, index);
@@ -796,16 +798,17 @@ function Piutang({ props }) {
         element.attributes.retur_panel_sales.data.forEach((row) => {
             element.subtotal += row.attributes.total;
 
-            if (dataRetur.length > 0)
+            if (dataRetur.length > 0){
               dataRetur[dataRetur.length] = {
                 id: element.attributes.no_panel_sale,
                 subtotal: row.attributes.total,
               };
-            else
+            } else {
               dataRetur[0] = {
                 id: element.attributes.no_panel_sale,
                 subtotal: row.attributes.total,
               };
+            }
 
             element.sisaHutang = parseFloat(element.attributes.total) - parseFloat(element.subtotal);
             calculatePriceTotal(element, index);
@@ -813,20 +816,22 @@ function Piutang({ props }) {
           console.log("retur panel sale", element.subtotal, row.attributes.total);
         });
       
-      } else if(element.keterangan === "non panel") {
-        element.attributes.retur_panel_sales.data.forEach((row) => {
+      } else if(element.keterangan === "nonpanel") {
+        element.attributes.retur_non_panel_sales.data.forEach((row) => {
             element.subtotal += row.attributes.total;
   
-            if (dataRetur.length > 0)
+            console.log("NP data retur", dataRetur);
+            if (dataRetur.length > 0){
               dataRetur[dataRetur.length] = {
                 id: element.attributes.no_non_panel_sale,
                 subtotal: row.attributes.total,
               };
-            else
+            } else {
               dataRetur[0] = {
                 id: element.attributes.no_non_panel_sale,
                 subtotal: row.attributes.total,
               };
+            }
   
             element.sisaHutang = parseFloat(element.attributes.total) - parseFloat(element.subtotal);
             calculatePriceTotal(element, index);
@@ -857,7 +862,7 @@ function Piutang({ props }) {
       //   }
       // });
       
-      console.log("retur panel sale", element?.attributes?.retur_panel_sales);
+      //console.log("retur panel sale", element?.attributes?.retur_panel_sales);
       // // element.attributes.retur_panel_sales.data.forEach((row) => {
       // //   row.subtotal = 0;
 
@@ -882,7 +887,7 @@ function Piutang({ props }) {
       
       //element.subtotal = 0;
 
-      console.log("retur non panel sale", element?.attributes?.retur_non_panel_sales);
+      //console.log("retur non panel sale", element?.attributes?.retur_non_panel_sales);
       // returNonPanel.forEach((row) => {
       //   row.subtotal = 0;
 
@@ -907,21 +912,22 @@ function Piutang({ props }) {
       //   }
       // });
 
-      dispatch({ type: "ADD_LIST", list: element });
-      dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: element, index: index });
-      dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
-      dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: 0, listData: element, index: index });
-      dispatch({ type: "CHANGE_DATA_GIRO", giro: 0, listData: element, index: index });
-      dispatch({
-        type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO",
-        totalHutangJatuhTempo: element.sisaHutang,
-        listData: element,
-        index: index,
-      });
+      // dispatch({ type: "ADD_LIST", list: element });
+      // dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: element, index: index });
+      // dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
+      // dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: 0, listData: element, index: index });
+      // dispatch({ type: "CHANGE_DATA_GIRO", giro: 0, listData: element, index: index });
+      // dispatch({
+      //   type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO",
+      //   totalHutangJatuhTempo: element.sisaHutang,
+      //   listData: element,
+      //   index: index,
+      // });
       
       console.log(element, "element data nih");
     });
-
+    
+    console.log(dataTabel, "element data nih data tabel", dataRetur);
     // //remove when retur total value = sisa piutang
     // dataTabel?.forEach((element, index) => { 
     //   const hutang = parseFloat(element.sisaHutang);
@@ -1026,6 +1032,69 @@ function Piutang({ props }) {
   //     }
   //   });
   // }, [biaya.list]);
+
+  useEffect(() => {
+    clearData();
+
+    dataRetur.forEach((item, index) => { // data retur di ganti kayak data tabel
+
+      //if(dataTabel[index].keterangan === "sales"){
+        if(dataTabel[index]?.attributes?.no_sales_sale === item.id) dataTabel[index].retur = item.subtotal;
+
+      //} else if (dataTabel[index].keterangan === "panel"){
+        else if(dataTabel[index]?.attributes?.no_panel_sale === item.id) dataTabel[index].retur = item.subtotal;
+      
+      //} else if (dataTabel[index].keterangan === "nonpanel"){
+        else if(dataTabel[index]?.attributes?.no_non_panel_sale === item.id) dataTabel[index].retur = item.subtotal;
+      
+      //}
+
+      //dataTabel[index].retur = item.subtotal; 
+
+      console.log(dataTabel[index], "dataTabel[index].subtotal", index, dataRetur[index]);
+    });
+
+    dataTabel?.forEach((element, index) => {
+      if(element.sisaHutang === 0){
+        const newArrayRetur = dataTabel.filter((element) => {
+          const hutang = parseFloat(element.sisaHutang);
+          
+          // Return the element if it is valid
+          return hutang !== 0;
+        });
+        
+        // Replace the original array with the new array
+        setDataTabel(newArrayRetur);
+      }
+
+      if(element.sisaPiutang === 0){
+        const newArrayRetur = dataTabel.filter((element) => {
+          const piutang = parseFloat(element.sisaPiutang);
+          
+          // Return the element if it is valid
+          return piutang !== 0;
+        });
+        
+        // Replace the original array with the new array
+        setDataTabel(newArrayRetur);
+      }
+
+      dispatch({ type: "ADD_LIST", list: element });
+      dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: element, index: index });
+      dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
+      dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: 0, listData: element, index: index });
+      dispatch({ type: "CHANGE_DATA_GIRO", giro: 0, listData: element, index: index });
+      dispatch({
+        type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO",
+        totalHutangJatuhTempo: element.sisaHutang,
+        listData: element,
+        index: index,
+      });
+
+    });
+
+
+  }, [dataTabel]);
 
 
 
