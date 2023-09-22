@@ -288,13 +288,6 @@ function BukuBesar({ props }) {
       query += "&filters[chart_of_account][id][$eq]="+ akunCOA.id;
     }
 
-    //if(page){
-      //query += "&pagination[page]=" + page;
-      // `&filters[tanggal][$gte]=${startDate}&filters[tanggal][$lte]=${endDate}`+
-      // "&filters[chart_of_account][id][$eq]="+ akunCOA.id +
-      
-    //}
-
     const endpoint = process.env.NEXT_PUBLIC_URL + "/jurnals?populate=*" + query; console.log("query", endpoint);
     const options = {
       method: "GET",
@@ -312,35 +305,42 @@ function BukuBesar({ props }) {
   const getSaldoAwal = async (date) => { console.log("getSaldoAwal");
 
     const cookies = nookies.get();
-    //var kodeCOA = akunCOA?.attributes?.chart_of_account?.data?.attributes?.kode;
-    const reqSaldo = await fetchSaldo(cookies, akunCOA?.attributes?.kode, date[0].toISOString(), date[1].toISOString());
+    const reqSaldo = await fetchSaldo(cookies, akunCOA?.attributes?.kode, moment(date[0]), moment(date[1]));
     const response = await reqSaldo.json(); console.log("response saldos", response, akunCOA);
 
     var saldo = 0;
     var debit = 0;
     var kredit = 0;
 
-    if (response) {
-      saldo = response?.saldoAwal?.hasil?.saldo;
-      debit = response?.saldoAwal?.hasil?.debit;
-      kredit = response?.saldoAwal?.hasil?.kredit;
-      console.log("response saldos", response?.saldoAwal?.hasil?.saldo, debit, kredit);
-    }
+    
+    saldo = response?.saldoAwal?.hasil?.saldo;
+    debit = response?.saldoAwal?.hasil?.debit;
+    kredit = response?.saldoAwal?.hasil?.kredit;
+    console.log("response saldos", saldo, debit, kredit);
+    
 
     setDebitAwal(debit);
     setKreditAwal(kredit);
-
+    
+    console.log("responses", saldo, debit, kredit);
     if(akunCOA.attributes.jenis_akun === true){
       setSaldoAwal(saldo + (debit - kredit));
     } else if(akunCOA.attributes.jenis_akun === false){
       setSaldoAwal(saldo + (kredit - debit));
     } 
-
+    
     if(saldo === null && debit === null && kredit === null){
       setDebitAwal(0);
       setKreditAwal(0);
       setSaldoAwal(akunCOA?.attributes?.saldo);
     }
+  
+    if(saldo === undefined && debit === undefined && kredit === undefined){
+    setDebitAwal(0);
+    setKreditAwal(0);
+    setSaldoAwal(akunCOA?.attributes?.saldo);
+    }
+
 
   }
 
@@ -366,27 +366,6 @@ function BukuBesar({ props }) {
 
       saldo = akunCOA.attributes.saldo;
       saldo = saldoAwal;
-
-      // dataBefore?.data?.map((item) => {
-      //   const coaData = item.attributes.chart_of_account.data;
-      //   //saldo = item.attributes.chart_of_account.data.attributes.saldo;
-      //   if(coaData.attributes.kode === akunCOA.attributes.kode){
-      //     //setSaldoAwal(saldo);
-      //     //setTempSaldo(saldo);
-      //     debitawal += parseFloat(item.attributes.debit);
-      //     kreditawal += parseFloat(item.attributes.kredit);
-      //   } else setTempSaldo(saldo);
-        
-      //   saldoForData = saldo;
-      // });
-
-      // if (dataBefore.data.length > 0){
-      //   setDebitAwal(debitawal);
-      //   setKreditAwal(kreditawal);
-      // } else {
-        setDebitAwal(0);
-        setKreditAwal(0);
-      //}
 
       if (akunCOA.attributes.jenis_akun === true) {
         saldo = (saldo + debitawal) - kreditawal;
@@ -630,6 +609,7 @@ function BukuBesar({ props }) {
                     <td className="border-2 p-2 text-right"> {formatter.format(kreditAwal)} </td>
                     <td className="border-2 p-2 text-right"> {formatter.format(saldoAwal)} </td>
                   </tr>
+
                   {jurnal?.data?.map((item, index) => {
                     var dateBaru = moment(item.attributes.publishedAt);
                     if (index === 0) item.saldoAwal = saldoAwal;
@@ -696,6 +676,7 @@ function BukuBesar({ props }) {
                       </tr>
                     );
                   })}
+
                   <tr>
                     <td className="border-2 p-2 text-center"> {endDate.format('DD/MM/YYYY')} </td>
                     <td className="border-2 text-center"> - </td>
