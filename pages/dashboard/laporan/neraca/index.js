@@ -23,7 +23,7 @@ NeracaDetail.getInitialProps = async (context) => {
   };
 };
 
-const fetchNeracaDetail = async (cookies, periode = moment().toISOString()) => {
+const fetchNeracaDetail = async (cookies, periode = moment()) => {
   const endpoint = new URL(process.env.NEXT_PUBLIC_URL + "/neraca-detail");
   endpoint.searchParams.append("periode", periode);
 
