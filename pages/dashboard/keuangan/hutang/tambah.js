@@ -213,6 +213,8 @@ function Hutang({ props }) {
       var totalTransfer = 0;
       var totalGiro = 0;
 
+      values.sisa_hutang_jatuh_tempo = sisaHutangJatuhTempo();
+
       setLoading(true);
       setInfo("sukses");
 
@@ -258,7 +260,8 @@ function Hutang({ props }) {
       var totalBayaran = totalPembayaran();
 
       if (document === "Publish") {
-        if (values.sisa_hutang_jatuh_tempo <= 0 || values.sisa_hutang_jatuh_tempo === undefined) {
+        
+        if (values.sisa_hutang_jatuh_tempo < 0 || values.sisa_hutang_jatuh_tempo === undefined) {
           notification["error"]({
             message: "Gagal menambahkan data",
             description: "Data gagal ditambahkan, karena total pembayaran melebihi total hutang jatuh tempo.",
@@ -346,7 +349,7 @@ function Hutang({ props }) {
     if (res.data.attributes.document == "Publish") {
       res.data.attributes.debt_details.data.forEach((item) => {
         const sisa_hutang = item.attributes.sisa_hutang;
-        console.log("detail", item);
+        //console.log("detail", item);
         if (sisa_hutang == 0) editPenjualanDB("Lunas", item.attributes.purchasing.data.id);
         else editPenjualanDB("Dibayar Sebagian", item.attributes.purchasing.data.id);
       });
@@ -391,7 +394,7 @@ function Hutang({ props }) {
 
   const calculatePriceTotal = (row, index) => {
     var total = calculatePrice(row, biaya, sisaHutangTotal, index);
-    console.log("row", row, total, sisaHutangTotal, hutang.data);
+    
     if (total < 0) total = 0;
 
     sisaHutang[index] = total;
@@ -582,8 +585,6 @@ function Hutang({ props }) {
         if (row.attributes.status === "Dibatalkan") status = "Batal";
       }
 
-      console.log(row, "row");
-
       if (status == "Tempo" || statusPembayaran == "Dibayar Sebagian") {
         row.hidden = false;
         dataTabel[lpbId] = row;
@@ -598,7 +599,7 @@ function Hutang({ props }) {
     var total = 0;
     var idDetail = null;
     hutang.data.forEach((element) => {
-      console.log(element, "element, hutang");
+      
       if (element.attributes.document === "Publish") {
         element.attributes.debt_details.data.forEach((details) => {
           total = details.attributes.giro + details.attributes.transfer + details.attributes.tunai;

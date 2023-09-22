@@ -91,7 +91,7 @@ export default function SearchBar({
       callback([]);
     } else {
       try {
-        var url = `/chart-of-accounts?populate=*&filters[nama][$contains]=${query}`;
+        var url = `/chart-of-accounts?populate=*&filters[kode][$contains]=${query}`;
         if(page == "hutang"){
           url += "&filters[jenis_akun][$eq]=true";
         } else if (page == "piutang"){
@@ -120,7 +120,7 @@ export default function SearchBar({
           const dataAkun = res.data.filter((item) => item);
           const akun = dataAkun.map((item) =>
           ({
-            label: `${item.attributes.nama}`,
+            label: `${item.attributes.kode} - ${item.attributes.nama}`,
             value: item.id,
           }));
 
