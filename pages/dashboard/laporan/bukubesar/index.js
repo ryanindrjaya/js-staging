@@ -309,16 +309,23 @@ function BukuBesar({ props }) {
 
   }
 
-  const getSaldoAwal = async (date) => {
+  const getSaldoAwal = async (date) => { console.log("getSaldoAwal");
 
     const cookies = nookies.get();
     //var kodeCOA = akunCOA?.attributes?.chart_of_account?.data?.attributes?.kode;
     const reqSaldo = await fetchSaldo(cookies, akunCOA?.attributes?.kode, date[0].toISOString(), date[1].toISOString());
     const response = await reqSaldo.json(); console.log("response saldos", response, akunCOA);
-    var saldo = response?.saldoAwal?.hasil?.saldo;
-    var debit = response?.saldoAwal?.hasil?.debit;
-    var kredit = response?.saldoAwal?.hasil?.kredit;
-    console.log("response saldos", response?.saldoAwal?.hasil?.saldo, debit, kredit);
+
+    var saldo = 0;
+    var debit = 0;
+    var kredit = 0;
+
+    if (response) {
+      saldo = response?.saldoAwal?.hasil?.saldo;
+      debit = response?.saldoAwal?.hasil?.debit;
+      kredit = response?.saldoAwal?.hasil?.kredit;
+      console.log("response saldos", response?.saldoAwal?.hasil?.saldo, debit, kredit);
+    }
 
     setDebitAwal(debit);
     setKreditAwal(kredit);
@@ -617,7 +624,7 @@ function BukuBesar({ props }) {
                     <td className="border-2 p-2 text-center"> {startDate.format('DD/MM/YYYY')} </td>
                     <td className="border-2 text-center"> - </td>
                     <td className="border-2 text-center"> - </td>
-                    <td className="border-2 text-center"> - {console.log("saldoAwal", saldoAwal)} </td>
+                    <td className="border-2 text-center"> - </td>
                     <td className="border-2 p-1 text-left"> Saldo Awal </td>
                     <td className="border-2 p-2 text-right"> {formatter.format(debitAwal)} </td>
                     <td className="border-2 p-2 text-right"> {formatter.format(kreditAwal)} </td>
