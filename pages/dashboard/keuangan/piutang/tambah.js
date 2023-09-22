@@ -538,7 +538,7 @@ function Piutang({ props }) {
 
       for (let row in biaya.info) {
         if (biaya.info[row].pilihData == "pilih") {
-          total = total + (biaya.list[row].attributes.total - biaya.list[row].subtotal) - biaya.list[row].dibayar;
+          total = total + (biaya.list[row].attributes.total - biaya.list[row].retur) - biaya.list[row].dibayar;
         }
         if (biaya.info[row].totalHutangJatuhTempo == undefined) total = 0;
       }
@@ -912,17 +912,17 @@ function Piutang({ props }) {
       //   }
       // });
 
-      dispatch({ type: "ADD_LIST", list: element });
-      dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: element, index: index });
-      dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
-      dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: 0, listData: element, index: index });
-      dispatch({ type: "CHANGE_DATA_GIRO", giro: 0, listData: element, index: index });
-      dispatch({
-        type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO",
-        totalHutangJatuhTempo: element.sisaHutang,
-        listData: element,
-        index: index,
-      });
+      // dispatch({ type: "ADD_LIST", list: element });
+      // dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: element, index: index });
+      // dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
+      // dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: 0, listData: element, index: index });
+      // dispatch({ type: "CHANGE_DATA_GIRO", giro: 0, listData: element, index: index });
+      // dispatch({
+      //   type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO",
+      //   totalHutangJatuhTempo: element.sisaHutang,
+      //   listData: element,
+      //   index: index,
+      // });
       
       console.log(element, "element data nih");
     });
@@ -1034,6 +1034,8 @@ function Piutang({ props }) {
   // }, [biaya.list]);
 
   useEffect(() => {
+    clearData();
+
     dataRetur.forEach((item, index) => { // data retur di ganti kayak data tabel
 
       //if(dataTabel[index].keterangan === "sales"){
@@ -1056,8 +1058,7 @@ function Piutang({ props }) {
       if(element.sisaHutang === 0){
         const newArrayRetur = dataTabel.filter((element) => {
           const hutang = parseFloat(element.sisaHutang);
-          //const dibayar = parseFloat(element.dibayar);
-        
+          
           // Return the element if it is valid
           return hutang !== 0;
         });
@@ -1065,7 +1066,33 @@ function Piutang({ props }) {
         // Replace the original array with the new array
         setDataTabel(newArrayRetur);
       }
+
+      if(element.sisaPiutang === 0){
+        const newArrayRetur = dataTabel.filter((element) => {
+          const piutang = parseFloat(element.sisaPiutang);
+          
+          // Return the element if it is valid
+          return piutang !== 0;
+        });
+        
+        // Replace the original array with the new array
+        setDataTabel(newArrayRetur);
+      }
+
+      dispatch({ type: "ADD_LIST", list: element });
+      dispatch({ type: "CHANGE_PILIH_DATA", pilihData: "tidak", listData: element, index: index });
+      dispatch({ type: "CHANGE_DATA_TUNAI", tunai: 0, listData: element, index: index });
+      dispatch({ type: "CHANGE_DATA_TRANSFER", transfer: 0, listData: element, index: index });
+      dispatch({ type: "CHANGE_DATA_GIRO", giro: 0, listData: element, index: index });
+      dispatch({
+        type: "CHANGE_TOTAL_HUTANG_JATUH_TEMPO",
+        totalHutangJatuhTempo: element.sisaHutang,
+        listData: element,
+        index: index,
+      });
+
     });
+
 
   }, [dataTabel]);
 
