@@ -1,10 +1,20 @@
 import nookies from "nookies";
 import { notification } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
 
 const cookies = nookies.get(null, "token");
 
+const key = "katalog_produk";
+
 const updateProductFromTable = async (data) => {
   try {
+    notification.info({
+      key,
+      message: "Memperbarui katalog produk...",
+      description: "Mohon tunggu sebentar dan jangan tutup halaman ini",
+      icon: <LoadingOutlined className="text-blue-400" />,
+    });
+
     const dataDetails = await fetch(`${process.env.NEXT_PUBLIC_URL}/purchasings/${data.id}?populate=deep`, {
       method: "GET",
       headers: {
@@ -201,11 +211,13 @@ const updateAtProductUnit5 = (productData, unit, unitPrice, disc) => {
 const openNotificationWithIcon = (type) => {
   if (type === "error") {
     notification[type]({
+      key,
       message: "Gagal Memperbarui Katalog",
       description: "Katalog produk gagal diperbarui. Silahkan cek log untuk detail lebih lanjut",
     });
   } else if (type === "success") {
     notification[type]({
+      key,
       message: "Katalog Produk diperbarui!",
       description: "Katalog berhasil diperbarui. Silahkan cek pada halaman Produk",
     });

@@ -2,6 +2,7 @@ import React from "react";
 import nookies from "nookies";
 import * as moment from "moment";
 import { notification } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
 
 // In this scenario, we will look up for data in inventory details with params exp.date, productId, and LocationId
 // if data is already exist, then we should update the stock inventory details with the exp.date
@@ -14,13 +15,23 @@ const cookies = nookies.get(null, "token");
 async function createInventory(row, user) {
   const data = [];
 
-  const dataDetails = await fetch(`${process.env.NEXT_PUBLIC_URL}/purchasings/${row.id}?populate=deep`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${cookies.token}`,
-    },
-  })
+  notification.info({
+    key: "loading",
+    message: "Menambahkan produk ke gudang...",
+    description: "Mohon tunggu sebentar dan jangan tutup halaman ini",
+    icon: <LoadingOutlined className="text-blue-400" />,
+  });
+
+  const dataDetails = await fetch(
+    `${process.env.NEXT_PUBLIC_URL}/purchasings/${row.id}?populate=*,purchasing_details.product,purchasing_details.location`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${cookies.token}`,
+      },
+    }
+  )
     .then((res) => res.json())
     .then((res) => res.data?.attributes?.purchasing_details?.data)
     .catch((err) => {
@@ -64,7 +75,9 @@ async function createInventory(row, user) {
       author: user,
     };
 
-    await addToGudang(body);
+    const success = await addToGudang(body);
+
+    return success;
   }
 }
 
@@ -84,14 +97,18 @@ async function addToGudang(body) {
 
   if (data?.status === "success") {
     notification.success({
+      key: "loading",
       message: "Produk berhasil ditambahkan",
       description: "Produk berhasil ditambahkan ke gudang tujuan",
     });
+    return true;
   } else {
     notification.error({
+      key: "loading",
       message: "Error",
       description: data?.message,
     });
+    return false;
   }
 }
 

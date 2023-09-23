@@ -173,8 +173,6 @@ function Pembelian({ props }) {
   };
 
   const onChangeStatus = async (status, row, id) => {
-    row.attributes.status = status;
-
     const poData = row?.attributes?.purchase?.data;
     // const dataStatus = row;
 
@@ -184,12 +182,14 @@ function Pembelian({ props }) {
 
       if (status === "Diterima" && lpbSukses) {
         // invetory handle
-        createInventory(row, user);
+        const inventorySukses = await createInventory(row, user);
 
-        updateProductFromTable(row);
+        if (inventorySukses) {
+          updateProductFromTable(row);
 
-        //jurnal handle and coa
-        updateJurnal(row, user, "lpb");
+          //jurnal handle and coa
+          updateJurnal(row, user, "lpb");
+        }
       }
     }
   };
