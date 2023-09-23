@@ -5,7 +5,7 @@ import ReactToPrint from "react-to-print";
 
 const Print = ({ props }) => {
   console.log("props", props);
-  const name = "APOTEK SEJATI";
+  const name = "KEELOLA";
   const noPO = props.purchases.data.attributes.no_po;
   const date = new Date(props.purchases.data.attributes.order_date).toLocaleDateString("id-ID");
   const supplierName = props.purchases.data.attributes.supplier?.data?.attributes?.name;

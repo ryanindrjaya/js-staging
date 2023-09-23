@@ -15,7 +15,7 @@ const nextConfig = {
     // NEXT_PUBLIC_URL: "https://js-strapi.keelola.net/api",
     // NEXT_PUBLIC_URL: "http://localhost:1337/api",
     BACKEND_URL: "https://starfish-app-aj9iq.ondigitalocean.app/api",
-    STAKEHOLDER_NAME: "APOTEK JAYA SEHAT",
+    STAKEHOLDER_NAME: "APOTEK KEELOLA",
     MAIN_COLOR: "#056A81",
     TAG_RED: "#F50",
     TAG_ORANGE: "#F4B042",

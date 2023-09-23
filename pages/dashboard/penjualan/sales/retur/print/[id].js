@@ -6,7 +6,7 @@ import { PrinterOutlined } from "@ant-design/icons";
 export default function PrintRetur({ id, data }) {
   console.log(data);
   // stakeholder info
-  const stakeholderName = "APOTEK SEJATI";
+  const stakeholderName = "KEELOLA";
   const stakeholderAddress = "Jl. Merdeka Timur No.2-10, Sukoharjo, Kec. Klojen, Kota Malang, Jawa Timur 65119";
   const stakeholderPhone = "(0341) 325837/369339/322208";
   const stakeholderWA = "089523886198";

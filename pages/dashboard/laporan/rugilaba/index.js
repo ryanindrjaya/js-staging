@@ -507,7 +507,7 @@ function RugiLaba({ props }) {
             {/* Content */}
             <div name="content" ref={tableRef}>
               <div name="title">
-                <div className="text-center">APOTEK Jaya Sehat</div>
+                <div className="text-center">KEELOLA</div>
                 <div className="text-center">Laporan Rugi Laba</div>
                 <div className="text-center">Untuk Periode Yang Berakhir {titleDate}</div>
               </div>
