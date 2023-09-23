@@ -4,6 +4,7 @@ import siteConfig from "@iso/config/site.config";
 import { IoIosFlash } from "react-icons/io";
 import Image from "next/image";
 import logo from "../../public/images/logopanjang.jpeg";
+import logoKeelola from "../../public/images/keelola_logo.png";
 
 export default function LogoNext({ collapsed }) {
   return (
@@ -21,17 +22,12 @@ export default function LogoNext({ collapsed }) {
           </h3>
         </div>
       ) : (
-        <h3>
-          <Image
-            src={logo}
-            alt="logo"
-            width="150px"
-            height="75px"
-          />
+        <div className="w-full h-full flex justify-center items-center">
+          <img src={logoKeelola} alt="logo" width="full" />
           {/*<Link href="/dashboard">*/}
-          {/*  <a  className="text-black"> JAYA SEHAT </a>*/}
+          {/*  <a  className="text-black"> KEELOLA </a>*/}
           {/*</Link>*/}
-        </h3>
+        </div>
       )}
     </div>
   );

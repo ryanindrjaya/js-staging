@@ -20,7 +20,7 @@ const Print = ({ selling }) => {
   console.log("data", selling);
 
   // stakeholder info
-  const stakeholder = "APOTEK SEJATI";
+  const stakeholder = "KEELOLA";
   const stakeholderAddress = "Jl. Merdeka Timur No.2-10, Sukoharjo, Kec. Klojen, Kota Malang, Jawa Timur 65119";
   const stakeholderPhone = "(0341) 325837/369339/322208";
   const stakeholderWa = "089523886198";

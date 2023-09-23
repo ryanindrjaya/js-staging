@@ -41,24 +41,15 @@ const formatCurrency = (value) => {
 };
 
 function renderTableRows(data, coaKey, previousPeriodeKey, currentPeriodeKey) {
-  if (
-    !data ||
-    !data[coaKey] ||
-    !data[previousPeriodeKey] ||
-    !data[currentPeriodeKey]
-  ) {
+  if (!data || !data[coaKey] || !data[previousPeriodeKey] || !data[currentPeriodeKey]) {
     return null; // Return null or a placeholder if the data is not available
   }
 
   return Object.entries(data[coaKey]).map(([key, value]) => (
     <tr className="hover:bg-gray-50" key={key}>
       <td className="p-2 border">{camelCaseToNormal(key)}</td>
-      <td className="p-2 border">
-        {formatCurrency(data[previousPeriodeKey][key])}
-      </td>
-      <td className="p-2 border">
-        {formatCurrency(data[currentPeriodeKey][key])}
-      </td>
+      <td className="p-2 border">{formatCurrency(data[previousPeriodeKey][key])}</td>
+      <td className="p-2 border">{formatCurrency(data[currentPeriodeKey][key])}</td>
       <td className="p-2 border">{value}</td>
     </tr>
   ));
@@ -74,100 +65,80 @@ function NeracaDetailTableView({ data, time }) {
     <div className="mt-10">
       <div className="grid justify-center w-full font-bold text-center text-sm">
         <div>
-          <p>APOTEK SEJATI</p>
+          <p>KEELOLA</p>
         </div>
         <div>
           <p>NERACA</p>
         </div>
         <div className="uppercase">
-          <p>PER {indonesianMonth} {year}</p>
+          <p>
+            PER {indonesianMonth} {year}
+          </p>
         </div>
       </div>
 
       <table name="table" className="w-full text-xs">
         <thead>
           <tr className="p-2">
-            <th className="border-2 p-1 w-1/3 text-center" colSpan={2}>Keterangan</th>
+            <th className="border-2 p-1 w-1/3 text-center" colSpan={2}>
+              Keterangan
+            </th>
             <th className="border-2 p-1 w-1/3 text-center">Periode Sebelumnya</th>
             <th className="border-2 p-1 w-1/3 text-center">Periode Sekarang</th>
           </tr>
         </thead>
         <tbody>
           <tr className="p-2">
-            <th className="border-2 p-1" colSpan={4}>Aktiva</th>
+            <th className="border-2 p-1" colSpan={4}>
+              Aktiva
+            </th>
           </tr>
           <tr className="p-2">
-            <th className="border-2 p-1" colSpan={4}>Aktiva Lancar</th>
+            <th className="border-2 p-1" colSpan={4}>
+              Aktiva Lancar
+            </th>
           </tr>
           <tr className="p-2">
             <td className="border-2 p-1"></td>
             <td className="border-2 p-1">Kas dan Setara Kas</td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.kas.previousPeriode.total)}
-            </td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.kas.currentPeriode.total)}
-            </td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.kas.previousPeriode.total)}</td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.kas.currentPeriode.total)}</td>
           </tr>
           <tr className="p-2">
             <td className="border-2 p-1"></td>
             <td className="border-2 p-1">Piutang Usaha</td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.piutang.previousPeriode.total)}
-            </td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.piutang.currentPeriode.total)}
-            </td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.piutang.previousPeriode.total)}</td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.piutang.currentPeriode.total)}</td>
           </tr>
           <tr className="p-2">
             <td className="border-2 p-1"></td>
             <td className="border-2 p-1">Piutang Lain-lain</td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.piutangLainnya.previousPeriode.total)}
-            </td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.piutangLainnya.currentPeriode.total)}
-            </td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.piutangLainnya.previousPeriode.total)}</td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.piutangLainnya.currentPeriode.total)}</td>
           </tr>
           <tr className="p-2">
             <td className="border-2 p-1"></td>
             <td className="border-2 p-1">Persediaan</td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.persediaan.previousPeriode.total)}
-            </td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.persediaan.currentPeriode.total)}
-            </td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.persediaan.previousPeriode.total)}</td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.persediaan.currentPeriode.total)}</td>
           </tr>
           <tr className="p-2">
             <td className="border-2 p-1"></td>
             <td className="border-2 p-1">Uang Muka Pajak</td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.pajak.previousPeriode.total)}
-            </td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.pajak.currentPeriode.total)}
-            </td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.pajak.previousPeriode.total)}</td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.pajak.currentPeriode.total)}</td>
           </tr>
           <tr className="p-2">
             <td className="border-2 p-1"></td>
             <td className="border-2 p-1">Biaya Dibayar Dimuka</td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.biayaBayardiMuka.previousPeriode.total)}
-            </td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.biayaBayardiMuka.currentPeriode.total)}
-            </td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.biayaBayardiMuka.previousPeriode.total)}</td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.biayaBayardiMuka.currentPeriode.total)}</td>
           </tr>
           <tr className="p-2">
             <td className="border-2 p-1"></td>
             <td className="border-2 p-1">Uang Muka</td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.uangMuka.previousPeriode.total)}
-            </td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.uangMuka.currentPeriode.total)}
-            </td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.uangMuka.previousPeriode.total)}</td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.uangMuka.currentPeriode.total)}</td>
           </tr>
           <tr className="p-2">
             <th className="border-2 p-1"></th>
@@ -175,32 +146,36 @@ function NeracaDetailTableView({ data, time }) {
             <th className="border-2 p-1 text-right">
               {formatCurrency(
                 data.kas.previousPeriode.total +
-                data.piutang.previousPeriode.total + 
-                data.piutangLainnya.previousPeriode.total +
-                data.persediaan.previousPeriode.total +
-                data.pajak.previousPeriode.total +
-                data.biayaBayardiMuka.previousPeriode.total +
-                data.uangMuka.previousPeriode.total
+                  data.piutang.previousPeriode.total +
+                  data.piutangLainnya.previousPeriode.total +
+                  data.persediaan.previousPeriode.total +
+                  data.pajak.previousPeriode.total +
+                  data.biayaBayardiMuka.previousPeriode.total +
+                  data.uangMuka.previousPeriode.total
               )}
             </th>
             <th className="border-2 p-1 text-right">
               {formatCurrency(
                 data.kas.currentPeriode.total +
-                data.piutang.currentPeriode.total + 
-                data.piutangLainnya.currentPeriode.total +
-                data.persediaan.currentPeriode.total +
-                data.pajak.currentPeriode.total +
-                data.biayaBayardiMuka.currentPeriode.total +
-                data.uangMuka.currentPeriode.total
+                  data.piutang.currentPeriode.total +
+                  data.piutangLainnya.currentPeriode.total +
+                  data.persediaan.currentPeriode.total +
+                  data.pajak.currentPeriode.total +
+                  data.biayaBayardiMuka.currentPeriode.total +
+                  data.uangMuka.currentPeriode.total
               )}
             </th>
           </tr>
 
           <tr className="p-2">
-            <th className="border-2 p-1" colSpan={4}> </th>
+            <th className="border-2 p-1" colSpan={4}>
+              {" "}
+            </th>
           </tr>
           <tr className="p-2">
-            <th className="border-2 p-1" colSpan={4}>Aktiva Tetap</th>
+            <th className="border-2 p-1" colSpan={4}>
+              Aktiva Tetap
+            </th>
           </tr>
           <tr className="p-2">
             <td className="border-2 p-1"></td>
@@ -225,19 +200,19 @@ function NeracaDetailTableView({ data, time }) {
           <tr className="p-2">
             <th className="border-2 p-1"></th>
             <th className="border-2 p-1">Nilai Buku</th>
-            <th className="border-2 p-1 text-right">
-              {formatCurrency(data.aktivaTetap.nilaiBuku.previousPeriode)}
-            </th>
-            <th className="border-2 p-1 text-right">
-              {formatCurrency(data.aktivaTetap.nilaiBuku.currentPeriode)}
-            </th>
+            <th className="border-2 p-1 text-right">{formatCurrency(data.aktivaTetap.nilaiBuku.previousPeriode)}</th>
+            <th className="border-2 p-1 text-right">{formatCurrency(data.aktivaTetap.nilaiBuku.currentPeriode)}</th>
           </tr>
 
           <tr className="p-2">
-            <th className="border-2 p-1" colSpan={4}> </th>
+            <th className="border-2 p-1" colSpan={4}>
+              {" "}
+            </th>
           </tr>
           <tr className="p-2">
-            <th className="border-2 p-1" colSpan={4}>Aktiva Lain-Lain</th>
+            <th className="border-2 p-1" colSpan={4}>
+              Aktiva Lain-Lain
+            </th>
           </tr>
           <tr className="p-2">
             <td className="border-2 p-1"></td>
@@ -261,60 +236,62 @@ function NeracaDetailTableView({ data, time }) {
           </tr>
 
           <tr className="p-2">
-            <th className="border-2 p-1" colSpan={4}> </th>
+            <th className="border-2 p-1" colSpan={4}>
+              {" "}
+            </th>
           </tr>
           <tr className="p-2">
-            <th className="border-2 p-1" colSpan={2}>Jumlah Aktiva</th>
+            <th className="border-2 p-1" colSpan={2}>
+              Jumlah Aktiva
+            </th>
             <th className="border-2 p-1 text-right">
               {formatCurrency(
                 data.kas.previousPeriode.total +
-                data.piutang.previousPeriode.total + 
-                data.piutangLainnya.previousPeriode.total +
-                data.persediaan.previousPeriode.total +
-                data.pajak.previousPeriode.total +
-                data.biayaBayardiMuka.previousPeriode.total +
-                data.uangMuka.previousPeriode.total +
-
-                data.aktivaTetap.nilaiBuku.previousPeriode +
-
-                data.aktivaLainLain.aktivaLainLain.previousPeriode.total
+                  data.piutang.previousPeriode.total +
+                  data.piutangLainnya.previousPeriode.total +
+                  data.persediaan.previousPeriode.total +
+                  data.pajak.previousPeriode.total +
+                  data.biayaBayardiMuka.previousPeriode.total +
+                  data.uangMuka.previousPeriode.total +
+                  data.aktivaTetap.nilaiBuku.previousPeriode +
+                  data.aktivaLainLain.aktivaLainLain.previousPeriode.total
               )}
             </th>
             <th className="border-2 p-1 text-right">
               {formatCurrency(
                 data.kas.currentPeriode.total +
-                data.piutang.currentPeriode.total + 
-                data.piutangLainnya.currentPeriode.total +
-                data.persediaan.currentPeriode.total +
-                data.pajak.currentPeriode.total +
-                data.biayaBayardiMuka.currentPeriode.total +
-                data.uangMuka.currentPeriode.total +
-
-                data.aktivaTetap.nilaiBuku.currentPeriode +
-
-                data.aktivaLainLain.aktivaLainLain.currentPeriode.total
+                  data.piutang.currentPeriode.total +
+                  data.piutangLainnya.currentPeriode.total +
+                  data.persediaan.currentPeriode.total +
+                  data.pajak.currentPeriode.total +
+                  data.biayaBayardiMuka.currentPeriode.total +
+                  data.uangMuka.currentPeriode.total +
+                  data.aktivaTetap.nilaiBuku.currentPeriode +
+                  data.aktivaLainLain.aktivaLainLain.currentPeriode.total
               )}
             </th>
           </tr>
           <tr className="p-2">
-            <th className="border-2 p-1" colSpan={4}> </th>
+            <th className="border-2 p-1" colSpan={4}>
+              {" "}
+            </th>
           </tr>
 
           <tr className="p-2">
-            <th className="border-2 p-1" colSpan={4}>Kewajiban dan Ekuitas</th>
+            <th className="border-2 p-1" colSpan={4}>
+              Kewajiban dan Ekuitas
+            </th>
           </tr>
           <tr className="p-2">
-            <th className="border-2 p-1" colSpan={4}>Kewajiban Jangka Pendek</th>
+            <th className="border-2 p-1" colSpan={4}>
+              Kewajiban Jangka Pendek
+            </th>
           </tr>
           <tr className="p-2">
             <td className="border-2 p-1"></td>
             <td className="border-2 p-1">Hutang Usaha</td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.hutangUsaha.previousPeriode.total)}
-            </td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.hutangUsaha.currentPeriode.total)}
-            </td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.hutangUsaha.previousPeriode.total)}</td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.hutangUsaha.currentPeriode.total)}</td>
           </tr>
           <tr className="p-2">
             <td className="border-2 p-1"></td>
@@ -329,32 +306,20 @@ function NeracaDetailTableView({ data, time }) {
           <tr className="p-2">
             <td className="border-2 p-1"></td>
             <td className="border-2 p-1">Hutang Bank</td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.hutangBank.previousPeriode.total)}
-            </td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.hutangBank.currentPeriode.total)}
-            </td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.hutangBank.previousPeriode.total)}</td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.hutangBank.currentPeriode.total)}</td>
           </tr>
           <tr className="p-2">
             <td className="border-2 p-1"></td>
             <td className="border-2 p-1">Hutang Pajak</td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.hutangPajak.previousPeriode.total)}
-            </td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.hutangPajak.currentPeriode.total)}
-            </td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.hutangPajak.previousPeriode.total)}</td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.hutangPajak.currentPeriode.total)}</td>
           </tr>
           <tr className="p-2">
             <td className="border-2 p-1"></td>
             <td className="border-2 p-1">Hutang Lain-lain</td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.hutangLain.previousPeriode.total)}
-            </td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.hutangLain.currentPeriode.total)}
-            </td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.hutangLain.previousPeriode.total)}</td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.hutangLain.currentPeriode.total)}</td>
           </tr>
           <tr className="p-2">
             <th className="border-2 p-1"></th>
@@ -367,10 +332,14 @@ function NeracaDetailTableView({ data, time }) {
             </th>
           </tr>
           <tr className="p-2">
-            <th className="border-2 p-1" colSpan={4}> </th>
+            <th className="border-2 p-1" colSpan={4}>
+              {" "}
+            </th>
           </tr>
           <tr className="p-2">
-            <th className="border-2 p-1" colSpan={4}>Kewajiban Jangka Panjang</th>
+            <th className="border-2 p-1" colSpan={4}>
+              Kewajiban Jangka Panjang
+            </th>
           </tr>
           <tr className="p-2">
             <td className="border-2 p-1"></td>
@@ -403,31 +372,27 @@ function NeracaDetailTableView({ data, time }) {
             </th>
           </tr>
           <tr className="p-2">
-            <th className="border-2 p-1" colSpan={4}> </th>
+            <th className="border-2 p-1" colSpan={4}>
+              {" "}
+            </th>
           </tr>
 
           <tr className="p-2">
-            <th className="border-2 p-1" colSpan={4}>Ekuitas</th>
+            <th className="border-2 p-1" colSpan={4}>
+              Ekuitas
+            </th>
           </tr>
           <tr className="p-2">
             <td className="border-2 p-1"></td>
             <td className="border-2 p-1">Modal</td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.modal.previousPeriode.total)}
-            </td>
-            <td className="border-2 p-1 text-right">
-              {formatCurrency(data.modal.currentPeriode.total)}
-            </td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.modal.previousPeriode.total)}</td>
+            <td className="border-2 p-1 text-right">{formatCurrency(data.modal.currentPeriode.total)}</td>
           </tr>
           <tr className="p-2">
             <td className="border-2 p-1"></td>
             <td className="border-2 p-1">Laba (Rugi) Ditahan</td>
-            <td className="border-2 p-1 text-right">
-              -
-            </td>
-            <td className="border-2 p-1 text-right">
-              -
-            </td>
+            <td className="border-2 p-1 text-right">-</td>
+            <td className="border-2 p-1 text-right">-</td>
           </tr>
           <tr className="p-2">
             <td className="border-2 p-1"></td>
@@ -436,45 +401,41 @@ function NeracaDetailTableView({ data, time }) {
               {formatCurrency(data.retainedEarning.previousPeriode.rugiLabaTahunBerjalan)}
             </td>
             <td className="border-2 p-1 text-right">
-              {formatCurrency(data.retainedEarning.currentPeriode.rugiLabaTahunBerjalan,)}
+              {formatCurrency(data.retainedEarning.currentPeriode.rugiLabaTahunBerjalan)}
             </td>
           </tr>
           <tr className="p-2">
             <th className="border-2 p-1"></th>
             <th className="border-2 p-1">Jumlah Ekuitas</th>
-            <th className="border-2 p-1 text-right">
-              {formatCurrency(data.jumlahEkuitas.previousPeriode.total)}
-            </th>
-            <th className="border-2 p-1 text-right">
-              {formatCurrency(data.jumlahEkuitas.currentPeriode.total)}
-            </th>
+            <th className="border-2 p-1 text-right">{formatCurrency(data.jumlahEkuitas.previousPeriode.total)}</th>
+            <th className="border-2 p-1 text-right">{formatCurrency(data.jumlahEkuitas.currentPeriode.total)}</th>
           </tr>
 
           <tr className="p-2">
-            <th className="border-2 p-1" colSpan={4}> </th>
+            <th className="border-2 p-1" colSpan={4}>
+              {" "}
+            </th>
           </tr>
           <tr className="p-2">
-            <th className="border-2 p-1" colSpan={2}> Jumlah Kewajiban dan Ekuitas</th>
+            <th className="border-2 p-1" colSpan={2}>
+              {" "}
+              Jumlah Kewajiban dan Ekuitas
+            </th>
             <th className="border-2 p-1 text-right">
               {formatCurrency(
                 data.jumlahKewajibanJangkaPendek.previousPeriode.total +
-
-                data.jumlahKewajibanJangkaPanjang.previousPeriode.total +
-
-                data.jumlahEkuitas.previousPeriode.total
+                  data.jumlahKewajibanJangkaPanjang.previousPeriode.total +
+                  data.jumlahEkuitas.previousPeriode.total
               )}
             </th>
             <th className="border-2 p-1 text-right">
               {formatCurrency(
                 data.jumlahKewajibanJangkaPendek.currentPeriode.total +
-
-                data.jumlahKewajibanJangkaPanjang.currentPeriode.total +
-
-                data.jumlahEkuitas.currentPeriode.total
+                  data.jumlahKewajibanJangkaPanjang.currentPeriode.total +
+                  data.jumlahEkuitas.currentPeriode.total
               )}
             </th>
           </tr>
-
         </tbody>
       </table>
     </div>

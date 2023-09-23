@@ -181,12 +181,12 @@ export default function SignInPage(props) {
   return (
     <>
       <Head>
-        <title>Jaya Sehat | Login</title>
+        <title>KEELOLA | Login</title>
       </Head>
       <SignInStyleWrapper className="isoSignInPage">
         <div className="isoLoginContentWrapper">
           <div className="isoLoginContent">
-            <div className="isoLogoWrapper">JAYA SEHAT</div>
+            <div className="isoLogoWrapper">KEELOLA</div>
 
             <div className="isoSignInForm">
               <div className="isoInputWrapper">

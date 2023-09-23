@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 
-const stakeholderName = "APOTEK SEJATI";
+const stakeholderName = "KEELOLA";
 const stakeholderAddress = "Jl. Merdeka Timur No.2-10, Sukoharjo, Kec. Klojen, Kota Malang, Jawa Timur 65119";
 const stakeholderPhone = "(0341) 325837/369339/322208";
 const stakeholderWA = "089523886198";
